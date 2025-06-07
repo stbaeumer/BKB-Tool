@@ -104,7 +104,7 @@ public class Menue : List<Menüeintrag>
                 configuration["Auswahl"] = "-1";
                 return configuration;
             case "x":
-                configuration = Global.EinstellungenDurchlaufen(Global.Modus.Update);
+                configuration = Global.EinstellungenDurchlaufen(Global.Modus.Update, configuration);
                 configuration["Auswahl"] = "-1";
                 return configuration;
             default:

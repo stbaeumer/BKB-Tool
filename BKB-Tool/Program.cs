@@ -8,11 +8,10 @@ Global.User = Environment.UserName;
 IConfiguration? configuration = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile($"{Global.User}.json", optional: true, reloadOnChange: true).Build();
 
 configuration["AppName"] = "BKB-Tool";
-configuration["AppVersion"] = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0.0"; // Major.Minor.Build.Revision
+Global.AppVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0.0"; // Major.Minor.Build.Revision
 configuration["AppDescription"] = "BKB-Tool - Ein Werkzeug an der Schnittstelle zwischen SchILD und Untis.";
 
 Global.DisplayHeader(configuration);
-
 CheckForUpdate(configuration);
 
 Global.PrivilegierteSchulnummern = new List<string>
@@ -24,12 +23,12 @@ do
 {
     if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), Global.User + ".json")))
     {
-        configuration = Global.EinstellungenDurchlaufen(Global.Modus.Create);
+        configuration = Global.EinstellungenDurchlaufen(Global.Modus.Create, configuration);
         Global.DisplayHeader(configuration);
     }
     else
     {
-        configuration = Global.EinstellungenDurchlaufen(Global.Modus.Read);
+        configuration = Global.EinstellungenDurchlaufen(Global.Modus.Read, configuration);
     }
 
     var table = new Table().Centered();
@@ -80,7 +79,7 @@ void CheckForUpdate(IConfiguration configuration)
     try
     {
         // Lokale Version (z.B. aus AssemblyInfo)
-        string lokaleVersion = configuration["AppVersion"] ?? "0.1";
+        string lokaleVersion = Global.AppVersion ?? "0.1";
 
         // GitHub API abfragen
         string apiUrl = "https://api.github.com/repos/stbaeumer/BKB-Tool/releases/latest";

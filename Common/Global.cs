@@ -86,7 +86,8 @@ public static class Global
     public static string? ZipKennwort { get; set; }  
     public static string? PfadSchilddatenaustausch { get; private set; }
     public static List<string>? PrivilegierteSchulnummern { get; set; }
-    
+    public static string AppVersion { get; set; }
+
     public static string? SafeGetString(SqlDataReader reader, int colIndex)
     {
         if (!reader.IsDBNull(colIndex))
@@ -141,7 +142,7 @@ public static class Global
     {
         Console.Clear();
         AnsiConsole.Write(new FigletText(configuration["AppName"] ?? "AppName").Centered().Color(Color.Aquamarine1_1));
-        AnsiConsole.Write(new Rule($"[aquamarine1_1] v{configuration["AppVersion"]} | [link=https://github.com/stbaeumer/BKB-Tool]https://github.com/stbaeumer/BKB-Tool[/] | GPLv3 [/]").RuleStyle("seagreen1_1").Centered());
+        AnsiConsole.Write(new Rule($"[aquamarine1_1] {AppVersion} | [link=https://github.com/stbaeumer/BKB-Tool]https://github.com/stbaeumer/BKB-Tool[/] | GPLv3 [/]").RuleStyle("seagreen1_1").Centered());
     }
 
     public static string InsertLineBreaks(string text, int maxLineLength)
@@ -310,17 +311,12 @@ public static class Global
     {
         object userInput = "";
 
-        if (hinweise != "" && modus != Modus.Read)
-        {
-            var panel = new Panel(hinweise)
-                //.Header("[bold blue]  Hinweis:  [/]")
-                .HeaderAlignment(Justify.Left)
-                .SquareBorder()
-                .Expand()
-                .BorderColor(Color.Green);
-
-            AnsiConsole.Write(panel);
-        }
+        var panel = new Panel(hinweise)
+            //.Header("[bold blue]  Hinweis:  [/]")
+            .HeaderAlignment(Justify.Left)
+            .SquareBorder()
+            .Expand()
+            .BorderColor(Color.Green);
 
         // Der Wert aus der JSON hat Vorrang vor dem defaultwert. Nur wenn die JSON keinen Wert enthält, wird der defaultwert verwendet.
         defaultValue = !string.IsNullOrEmpty(configuration[parameter])
@@ -335,6 +331,9 @@ public static class Global
                 configuration[parameter] = defaultValue;
                 return configuration;
             }
+
+            // Wenn der Wert abgefragt wird, dann wird ein Panel mit dem Hinweis angezeigt
+            AnsiConsole.Write(panel);
 
             userInput = AnsiConsole.Prompt(
             new TextPrompt<string>(aufforderung)
@@ -360,6 +359,9 @@ public static class Global
                 return configuration;
             }
 
+            // Wenn der Wert abgefragt wird, dann wird ein Panel mit dem Hinweis angezeigt
+            AnsiConsole.Write(panel);
+
             var größteAuswahlZahl = GetMaxNumberFromList(zulässigeAuswahlOptionen.Split(','));
 
             userInput = AnsiConsole.Prompt(
@@ -383,6 +385,9 @@ public static class Global
                 return configuration;
             }
 
+            // Wenn der Wert abgefragt wird, dann wird ein Panel mit dem Hinweis angezeigt
+            AnsiConsole.Write(panel);
+
             userInput = AnsiConsole.Prompt(
                 new TextPrompt<string>(aufforderung)
                     .ShowDefaultValue(true)
@@ -405,6 +410,9 @@ public static class Global
                 return configuration;
             }
 
+            // Wenn der Wert abgefragt wird, dann wird ein Panel mit dem Hinweis angezeigt
+            AnsiConsole.Write(panel);
+
             userInput = AnsiConsole.Prompt(
                 new TextPrompt<string>(aufforderung)
                     .ShowDefaultValue(true)
@@ -422,6 +430,9 @@ public static class Global
         {
             var verschiedeneKlassen = students.Select(s => s.Klasse).Distinct().ToList();
             var interessierendeKlassen = new List<string>();
+
+            // Wenn der Wert abgefragt wird, dann wird ein Panel mit dem Hinweis angezeigt
+            AnsiConsole.Write(panel);
 
             userInput = AnsiConsole.Prompt(
                 new TextPrompt<string>(aufforderung)
@@ -467,6 +478,9 @@ public static class Global
                 return configuration;
             }
 
+            // Wenn der Wert abgefragt wird, dann wird ein Panel mit dem Hinweis angezeigt
+            AnsiConsole.Write(panel);
+
             userInput = AnsiConsole.Prompt(
                 new TextPrompt<string>(aufforderung)
                     .ShowDefaultValue(true)
@@ -486,6 +500,9 @@ public static class Global
                 configuration[parameter] = defaultValue;
                 return configuration;
             }
+
+            // Wenn der Wert abgefragt wird, dann wird ein Panel mit dem Hinweis angezeigt
+            AnsiConsole.Write(panel);
 
             userInput = AnsiConsole.Prompt(
                 new TextPrompt<string>(aufforderung)
@@ -508,6 +525,8 @@ public static class Global
                 configuration[parameter] = defaultValue;
                 return configuration;
             }
+            // Wenn der Wert abgefragt wird, dann wird ein Panel mit dem Hinweis angezeigt
+            AnsiConsole.Write(panel);
 
             userInput = AnsiConsole.Prompt(
                 new TextPrompt<string>(aufforderung)
@@ -528,6 +547,9 @@ public static class Global
                 configuration[parameter] = defaultValue;
                 return configuration;
             }
+
+            // Wenn der Wert abgefragt wird, dann wird ein Panel mit dem Hinweis angezeigt
+            AnsiConsole.Write(panel);
 
             userInput = AnsiConsole.Prompt(
                 new TextPrompt<string>(aufforderung)
@@ -556,6 +578,9 @@ public static class Global
                 return configuration;
             }
 
+            // Wenn der Wert abgefragt wird, dann wird ein Panel mit dem Hinweis angezeigt
+            AnsiConsole.Write(panel);
+
             userInput = AnsiConsole.Prompt(
                 new TextPrompt<string>(aufforderung)
                     .ShowDefaultValue(true)
@@ -575,6 +600,9 @@ public static class Global
                 configuration[parameter] = defaultValue;
                 return configuration;
             }
+
+            // Wenn der Wert abgefragt wird, dann wird ein Panel mit dem Hinweis angezeigt
+            AnsiConsole.Write(panel);
 
             userInput = AnsiConsole.Prompt(
                 new TextPrompt<string>(aufforderung)
@@ -596,6 +624,9 @@ public static class Global
                 configuration[parameter] = defaultValue;
                 return configuration;
             }
+
+            // Wenn der Wert abgefragt wird, dann wird ein Panel mit dem Hinweis angezeigt
+            AnsiConsole.Write(panel);
 
             userInput = AnsiConsole.Prompt(
                 new TextPrompt<string>(aufforderung)
@@ -624,6 +655,9 @@ public static class Global
                 configuration[parameter] = defaultValue;
                 return configuration;
             }
+
+            // Wenn der Wert abgefragt wird, dann wird ein Panel mit dem Hinweis angezeigt
+            AnsiConsole.Write(panel);
 
             userInput = AnsiConsole.Prompt(
                 new TextPrompt<string>(aufforderung)
@@ -673,7 +707,7 @@ public static class Global
         }
     }
     
-    public static IConfiguration EinstellungenDurchlaufen(Modus modus)
+    public static IConfiguration EinstellungenDurchlaufen(Modus modus, IConfiguration configuration)
     {
         // Wenn User.json noch nicht existiert, dann erstellen
         if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), Global.User + ".json")))
@@ -685,7 +719,7 @@ public static class Global
         }
 
         // Konfiguration aus User.json laden
-        IConfiguration configuration = new ConfigurationBuilder()
+        configuration = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
             .AddJsonFile(Global.User + ".json", optional: false, reloadOnChange: false)
             .Build();
@@ -699,19 +733,19 @@ public static class Global
             }
         }
 
-        if (modus == Modus.Update)
-            DisplayHeader(configuration);
-            
-        while (!string.IsNullOrEmpty(configuration["ZustimmungLizenz"]) && 
+        while (string.IsNullOrEmpty(configuration["ZustimmungLizenz"]) || 
                (configuration["ZustimmungLizenz"]?.ToLower() != "ja" && configuration["ZustimmungLizenz"]?.ToLower() != "j"))
         {
-            configuration = Global.Konfig("ZustimmungLizenz", modus, configuration, "Ich stimme den Lizenzbedingungen der GPLv3 zu. (Ja/Nein)", "Sie müssen den Lizenzbedingungen der GPLv3 zustimmen.", Global.Datentyp.JaNein, "", null, "Ja");
-        } 
+            configuration = Global.Konfig("ZustimmungLizenz", Global.Modus.Update, configuration, "Ich stimme den Lizenzbedingungen der GPLv3 zu. (Ja/Nein)", "Sie müssen den Lizenzbedingungen der GPLv3 zustimmen.", Global.Datentyp.JaNein, "", null, "Ja");
+        }
 
+        if (modus == Modus.Update)
+            DisplayHeader(configuration);
+        
         if (modus == Modus.Create)
             DisplayHeader(configuration);
         var panel = new Panel("Ihre Einstellungen werden verschlüsselt in der Datei [blue]" + Path.Combine(Directory.GetCurrentDirectory(), Global.User + ".json[/]") + " gespeichert." +
-        $"\nDateien (aus Webuntis etc.), die {configuration["AppName"]} importieren soll, werden im Ordner [blue]" + configuration["PfadDownloads"] + "[/] erwartet.")
+        $"\nDateien (aus Webuntis etc.), die {configuration["AppName"]} importieren soll, werden aus [blue]" + configuration["PfadDownloads"] + "[/] eingelesen.")
                         .Header($" [bold blue]  Einstellungen  [/]")
                         .HeaderAlignment(Justify.Left)
                         .SquareBorder()
@@ -727,7 +761,7 @@ public static class Global
         configuration = Konfig("MaxDateiAlter", modus, configuration, "Wie viele Tage dürfen Dateien höchstens alt sein?", $"Geben Sie im Folgenden an, wie viele Tage Dateien höchstens alt sein dürfen, um vom {configuration["AppName"]} für das Einlesen akzeptiert zu werden. Die Angabe einer (möglichst niedrigen) Zahl soll sicherstellen, dass nicht versehntlich veraltete Dateien eingelesen werden.", Datentyp.Int);
         configuration = Konfig("AppName", modus, configuration, "Wie soll die App heißen?", $"Sie können die App [bold green]{configuration["AppName"]}[/] umbennen.", Datentyp.String);
 
-        if (modus == Modus.Update && configuration["Schulnummer"] == "177659")
+        if (modus == Modus.Update && PrivilegierteSchulnummern.Contains(configuration["Schulnummer"]))
         {
             configuration = Konfig("MailDomain", modus, configuration, "Mail-Domain für Schüler*innen", "Geben Sie im Folgenden die Mail-Domain für Ihre Schüler*innen an. Ihre Eingabe muss mit [green bold]@[/] beginnen und einen [green bold]Punkt[/] enthalten. Beispiel: [green bold]@students.meine-schule.de[/]", Datentyp.Mail);
             configuration = Konfig("ConnectionStringUntis", modus, configuration, "ConnectionStringUntis (optional)");
@@ -764,8 +798,10 @@ public static class Global
             Kalenderfilter = Verschluesseln(""),
             Auswahl = "x",
             OnlineHilfeURL = Verschluesseln("https://github.com/stbaeumer/BKB-Tool/wiki"),
-            ZustimmungLizenz = "",
+            ZustimmungLizenz = "nein",
             AppName = Verschluesseln("BKB-Tool"),
+            AppVersion = Verschluesseln("1.0.0"),
+            AppDescription = Verschluesseln("BKB-Tool - Ein Werkzeug an der Schnittstelle zwischen SchILD und Untis."),
             Klassen = Verschluesseln("HBG"),
             Vergleich = Verschluesseln("n"),
             Kennwort = Verschluesseln(""),
@@ -871,7 +907,7 @@ public static class Global
 
         if (weiter.Key == ConsoleKey.Y)
         {
-            EinstellungenDurchlaufen(Modus.Update);
+            configuration = EinstellungenDurchlaufen(Modus.Update, configuration);
             return;
         }
 
