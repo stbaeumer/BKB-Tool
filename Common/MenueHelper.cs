@@ -43,9 +43,11 @@ public static class MenueHelper
             if (students.Count == 0 || lehrers.Count == 0)
             {
                 return new Menue(quelldateien, klassen, lehrers, students, []);
-            }       
+            }
 
             #pragma warning disable CS8601 // Mögliche Nullverweiszuweisung
+
+            AnsiConsole.Write(new Rule("[bold springgreen2] Auswahl treffen:    [/]").RuleStyle("springgreen2").LeftJustified());
 
             return new Menue(
                 quelldateien,
@@ -346,14 +348,14 @@ public static class MenueHelper
                         },
                         Global.Rubrik.Allgemein,
                         Global.NurBeiDiesenSchulnummern.NurPrivilegiert
-                    ),                    
+                    ),
                     new Menüeintrag(
                         "Atlantis-Fotos: Fotos der Schüler*innen aus Atlantis in die SchILD2-Datenbank (und in die Schild-Dokumentenverwaltung) hochladen",
                         anrechnungen,
                         quelldateien.Notwendige(configuration,["schuelerbasisdaten,dat"]),
                         students,
                         klassen,
-                        [   
+                        [
                             "Ablauf in 5 Schritten:",
                             "#1 Vorbereitung: Atlantis-Fotos nach " + Path.Combine(pfadDownloads, "Fotos") + " kopieren.",
                             "#2 Klasse auswählen.",
@@ -363,11 +365,11 @@ public static class MenueHelper
                         ],
                         m =>
                         {
-                            m.FilterInteressierendeStudentsUndKlassen(configuration);                            
+                            m.FilterInteressierendeStudentsUndKlassen(configuration);
                             m.IStudents.GetPfadAtlantisFotos(configuration);
                             m.IStudents.GetPfadDokumentenverwaltung(configuration);
                             m.IStudents.ErstellenPfadDokumentenverwaltung(configuration);
-                            m.IStudents.BilderNachPfadDokumentenverwaltungKopieren(configuration);                            
+                            m.IStudents.BilderNachPfadDokumentenverwaltungKopieren(configuration);
                             m.IStudents.Pfad2FotoStream();
                             //m.IStudents.FotosNachSchild2Schreiben(m.Klassen, configuration);
                         }

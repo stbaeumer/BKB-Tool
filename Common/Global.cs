@@ -141,8 +141,8 @@ public static class Global
     public static void DisplayHeader(IConfiguration configuration)
     {
         Console.Clear();
-        AnsiConsole.Write(new FigletText(configuration["AppName"] ?? "AppName").Centered().Color(Color.Aquamarine1_1));
-        AnsiConsole.Write(new Rule($"[aquamarine1_1] {AppVersion} | [link=https://github.com/stbaeumer/BKB-Tool]https://github.com/stbaeumer/BKB-Tool[/] | GPLv3 [/]").RuleStyle("seagreen1_1").Centered());
+        AnsiConsole.Write(new FigletText(configuration["AppName"] ?? "AppName").Centered().Color(Color.Green1));
+        AnsiConsole.Write(new Rule($"[lime] BKB-Tool[/] | [lime][link=https://github.com/stbaeumer/BKB-Tool]https://github.com/stbaeumer/BKB-Tool[/][/] | [lime]GPLv3[/] | [lime]Version {AppVersion} [/]").RuleStyle("green1").LeftJustified());
     }
 
     public static string InsertLineBreaks(string text, int maxLineLength)
@@ -312,7 +312,7 @@ public static class Global
         object userInput = "";
 
         var panel = new Panel(hinweise)
-            //.Header("[bold blue]  Hinweis:  [/]")
+            //.Header($"[bold]  {parameter}  [/]")
             .HeaderAlignment(Justify.Left)
             .SquareBorder()
             .Expand()
@@ -712,6 +712,23 @@ public static class Global
         // Wenn User.json noch nicht existiert, dann erstellen
         if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), Global.User + ".json")))
         {
+            var existiertnichtOderNichtBeschreibbar = true;
+
+            do
+            {
+                if (!Directory.Exists(Directory.GetCurrentDirectory()) || !IsDirectoryWritable(Directory.GetCurrentDirectory()))
+                {
+                    AnsiConsole.MarkupLine("[red]Das Verzeichnis [bold blue]" + Directory.GetCurrentDirectory() + "[/] existiert nicht oder ist nicht beschreibbar. Das muss korrigiert werden.[/]");
+                    AnsiConsole.MarkupLine("[red]Drücken Sie eine beliebige Taste, um fortzufahren...[/]");
+                    Console.ReadKey();
+                    return configuration;
+                }
+                else
+                {
+                    existiertnichtOderNichtBeschreibbar = false;
+                }
+            }while (existiertnichtOderNichtBeschreibbar);
+
             // User.json mit Standardinhalten füllen
             var bkbJsonContent = CreateBkbJsonContent();
             var json = JsonSerializer.Serialize(bkbJsonContent, new JsonSerializerOptions { WriteIndented = true });
@@ -736,7 +753,19 @@ public static class Global
         while (string.IsNullOrEmpty(configuration["ZustimmungLizenz"]) || 
                (configuration["ZustimmungLizenz"]?.ToLower() != "ja" && configuration["ZustimmungLizenz"]?.ToLower() != "j"))
         {
-            configuration = Global.Konfig("ZustimmungLizenz", Global.Modus.Update, configuration, "Ich stimme den Lizenzbedingungen der GPLv3 zu. (Ja/Nein)", "Sie müssen den Lizenzbedingungen der GPLv3 zustimmen.", Global.Datentyp.JaNein, "", null, "Ja");
+
+            DisplayHeader(configuration);
+            configuration = Global.Konfig("ZustimmungLizenz", Global.Modus.Update, configuration, "Ich stimme den Lizenzbedingungen der GPLv3 zu. (Ja/Nein)",
+            $"BKB-Tool steht unter der GNU General Public License Version 3 (GPLv3). " +
+            "Die GPLv3 ist eine freie Softwarelizenz, die es Ihnen erlaubt, die Software zu verwenden, zu modifizieren und weiterzugeben, solange Sie die Bedingungen der Lizenz einhalten. " +
+            "Die wichtigsten Bedingungen dieser Lizenz sind:\n" +            
+            "[blue bold]Freiheit zur Nutzung, Änderung und Weiterverbreitung:[/] Sie dürfen diese Software frei verwenden, anpassen und weitergeben, solange alle abgeleiteten Werke ebenfalls unter der GPLv3 stehen.\n" +            
+            "[blue bold]Keine Garantie:[/] Diese Software wird \"wie sie ist\" bereitgestellt, ohne jede ausdrückliche oder stillschweigende Gewährleistung, insbesondere ohne Garantie auf Fehlerfreiheit, Markttauglichkeit oder Eignung für einen bestimmten Zweck.\n" +            
+            "[blue bold]Keine Haftung:[/] Der Entwickler haftet nicht für direkte oder indirekte Schäden, Datenverluste oder andere Konsequenzen, die durch die Nutzung oder Fehlfunktion dieser Software entstehen.\n" +            
+            "[blue bold]Verwendung auf eigene Gefahr:[/] Die Nutzung erfolgt ausschließlich auf eigenes Risiko.\n" +            
+            "[blue bold]Vollständige Lizenz:[/] Die vollständigen Lizenzbedingungen finden Sie unter [link=https://www.gnu.org/licenses/gpl-3.0.de.html]https://www.gnu.org/licenses/gpl-3.0.de.html[/]." 
+                          
+            , Global.Datentyp.JaNein, "", null, "Ja");
         }
 
         if (modus == Modus.Update)
@@ -753,17 +782,48 @@ public static class Global
                         .BorderColor(Color.Blue);
 
         if (modus != Modus.Read)
+        {
+            DisplayHeader(configuration);
             AnsiConsole.Write(panel);
+        }  
 
-        configuration = Konfig("PfadDownloads", modus, configuration, @"Downloads-Verzeichnis", "Geben Sie im Folgenden den Pfad des Downloads-Verzeichnisses an. In der Regel wird das Verzeichnis bereits richtig vorgeschlagen. Dann einfach [bold green]ENTER[/] drücken:", Datentyp.Pfad, Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"));
-        configuration = Konfig("Schulnummer", modus, configuration, @"Schulnummer", "Geben Sie Im Folgenden Ihre Schulnummer an. Je nach Schulnummer werden evtl. unterschiedliche Funktionen angeboten.", Datentyp.Int);
-        configuration = Konfig("PfadSchilddatenaustausch", modus, configuration, @"SchILD-Datenaustausch-Ausgabeverzeichnis", "Geben Sie im Folgenden das Verzeichnis an, das in SchILD unter [green bold]Datenaustausch > Schnittstelle SchILD-NRW > Export[/] als [green bold]Ausgabeverzeichnis[/] eingetragen ist. Wenn dort kein Verzeichnis steht, tragen Sie dort das selbe Verzeichnis ein, das Sie auch im Folgenden angeben:", Datentyp.Pfad, "/home/stefan/Windows/SchILD-NRW/Datenaustausch");
-        configuration = Konfig("MaxDateiAlter", modus, configuration, "Wie viele Tage dürfen Dateien höchstens alt sein?", $"Geben Sie im Folgenden an, wie viele Tage Dateien höchstens alt sein dürfen, um vom {configuration["AppName"]} für das Einlesen akzeptiert zu werden. Die Angabe einer (möglichst niedrigen) Zahl soll sicherstellen, dass nicht versehntlich veraltete Dateien eingelesen werden.", Datentyp.Int);
-        configuration = Konfig("AppName", modus, configuration, "Wie soll die App heißen?", $"Sie können die App [bold green]{configuration["AppName"]}[/] umbennen.", Datentyp.String);
+        configuration = Konfig("PfadDownloads", modus, configuration, @"Downloads-Verzeichnis", "Geben Sie den Pfad des Downloads-Verzeichnisses an. In der Regel wird das Verzeichnis bereits richtig vorgeschlagen. Dann einfach [bold green]ENTER[/] drücken:", Datentyp.Pfad, Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"));
+
+        if (modus != Modus.Read)
+        {
+            DisplayHeader(configuration);
+            AnsiConsole.Write(panel);
+        }
+
+        configuration = Konfig("Schulnummer", modus, configuration, @"Schulnummer", "Geben Sie Ihre Schulnummer an. Je nach Schulnummer werden evtl. unterschiedliche Funktionen angeboten.", Datentyp.Int);
+
+        if (modus != Modus.Read)
+        {
+            DisplayHeader(configuration);
+            AnsiConsole.Write(panel);
+        }
+
+        configuration = Konfig("PfadSchilddatenaustausch", modus, configuration, @"SchILD-Datenaustausch-Ausgabeverzeichnis", "Geben Sie das Verzeichnis an, das in SchILD unter [green bold]Datenaustausch > Schnittstelle SchILD-NRW > Export[/] als [green bold]Ausgabeverzeichnis[/] eingetragen ist. Wenn dort kein Verzeichnis steht, tragen Sie dort das selbe Verzeichnis ein, das Sie auch hier angeben:", Datentyp.Pfad, "/home/stefan/Windows/SchILD-NRW/Datenaustausch");
+
+        if (modus != Modus.Read)
+        {
+            DisplayHeader(configuration);
+            AnsiConsole.Write(panel);
+        }
+
+        configuration = Konfig("MaxDateiAlter", modus, configuration, "Wie viele Tage dürfen Dateien höchstens alt sein?", $"Geben Sie an, wie viele Tage Dateien höchstens alt sein dürfen, um vom {configuration["AppName"]} für das Einlesen akzeptiert zu werden. Die Angabe einer (möglichst niedrigen) Zahl soll sicherstellen, dass nicht versehntlich veraltete Dateien eingelesen werden.", Datentyp.Int);
+
+        if (modus != Modus.Read)
+        {
+            DisplayHeader(configuration);
+            AnsiConsole.Write(panel);
+        }
+
+        configuration = Konfig("AppName", Modus.Read, configuration, "Wie soll die App heißen?", $"Sie können die App [bold green]{configuration["AppName"]}[/] umbennen.", Datentyp.String);
 
         if (modus == Modus.Update && PrivilegierteSchulnummern.Contains(configuration["Schulnummer"]))
         {
-            configuration = Konfig("MailDomain", modus, configuration, "Mail-Domain für Schüler*innen", "Geben Sie im Folgenden die Mail-Domain für Ihre Schüler*innen an. Ihre Eingabe muss mit [green bold]@[/] beginnen und einen [green bold]Punkt[/] enthalten. Beispiel: [green bold]@students.meine-schule.de[/]", Datentyp.Mail);
+            configuration = Konfig("MailDomain", modus, configuration, "Mail-Domain für Schüler*innen", "Geben Sie die Mail-Domain für Ihre Schüler*innen an. Ihre Eingabe muss mit [green bold]@[/] beginnen und einen [green bold]Punkt[/] enthalten. Beispiel: [green bold]@students.meine-schule.de[/]", Datentyp.Mail);
             configuration = Konfig("ConnectionStringUntis", modus, configuration, "ConnectionStringUntis (optional)");
             configuration = Konfig("ZipKennwort", modus, configuration, "Kennwort zum Verschlüsseln von Zip-Dateien");
             configuration = Konfig("SmtpUser", modus, configuration, "Mail-Benutzer");
@@ -1007,4 +1067,19 @@ public static class Global
         }
         return max == int.MinValue ? 0 : max; // 0, falls keine Zahl gefunden wurde
     }    
+
+    // Hilfsmethode: Prüft, ob ein Verzeichnis beschreibbar ist
+    private static bool IsDirectoryWritable(string dirPath)
+    {
+        try
+        {
+            string testFile = Path.Combine(dirPath, Path.GetRandomFileName());
+            using (FileStream fs = File.Create(testFile, 1, FileOptions.DeleteOnClose)) { }
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
 }    

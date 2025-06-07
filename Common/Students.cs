@@ -67,9 +67,8 @@ public class Students : List<Student>
             Add(student);
         }
 
-        var statusstring = "";
-        var table = new Table().Expand().Centered();
-        table.AddColumn("SchuelerBasisdaten.dat");
+        var statusstring = "[bold] " + this.Count().ToString() + " Schüler*innen: [/]";
+        
         var i = 0;
         var zeile = new List<string>();
         zeile.Add(this.Count().ToString());
@@ -81,35 +80,31 @@ public class Students : List<Student>
 
         foreach (var status in this.Select(x => x.Status).Distinct().OrderBy(x => x).ToList())
         {
-            int anzahl = this.Count(x => x.Status == status);
+            statusstring += " " + this.Count(x => x.Status == status);
 
-            statusstring = status;
             switch (status)
             {
                 case "2":
-                    statusstring += "[green]/aktiv[/]";
+                    statusstring += "[dodgerblue1] (aktiv)[/],";
+                    break;
+                case "5":
+                    statusstring += "[dodgerblue1] (...)[/],";
                     break;
                 case "6":
-                    statusstring += "[green]/extern[/]";
+                    statusstring += "[dodgerblue1] (extern)[/],";
                     break;
                 case "8":
-                    statusstring += "[green]/Abschluss[/]";
+                    statusstring += "[dodgerblue1] (Abschluss)[/],";
                     break;
                 case "9":
-                    statusstring += "[green]/Abgang[/]";
+                    statusstring += "[dodgerblue1] (Abgang)[/],";
                     break;
                 default:
                     break;
             }
-
-            if (i == 0)
-                table.AddColumn(statusstring);
-
-            zeile.Add(anzahl.ToString());
         }
 
-        table.AddRow(zeile.ToArray());
-        AnsiConsole.Write(table);
+        AnsiConsole.Write(new Rule(statusstring.TrimEnd(',')).RuleStyle("lightslateblue").LeftJustified());
 
         if (this.Select(x => x.Status).Distinct().Count() == 1)
         {

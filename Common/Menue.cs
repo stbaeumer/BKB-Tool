@@ -62,7 +62,7 @@ public class Menue : List<Menüeintrag>
 
             grid.AddRow(new Text[]{
                 new Text((i + 1).ToString(), new Style(Color.Turquoise2, Color.Black)).RightJustified(),
-                new Text(links, new Style(Color.SpringGreen1, Color.Black)).LeftJustified(),
+                new Text(links, new Style(Color.SpringGreen2, Color.Black)).LeftJustified(),
                 new Text(rechts, new Style(Color.Turquoise2 , Color.Black)).LeftJustified()
             });
         }

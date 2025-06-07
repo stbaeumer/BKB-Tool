@@ -216,7 +216,7 @@ public class Menüeintrag
     {
         var interessierendeStudents = new Students();
 
-        Global.Konfig("Klassen", Global.Modus.Update, configuration, "Interessierende Klasse(n)", $"Im Folgenden geben Sie die interessierenden Klassen an. Meistens gibt man an besten eine einzelne Klasse an. Mehrere Klassen sind mit Komma zu trennen. Es können auch Namensteile von Klassen angegeben werden, wordurch alle Klassen gewählt werden, deren Klassenname den Namensteil enthält. Alle Klassen werden mit dem Wort [bold green]alle[/] gewählt.", Global.Datentyp.Klassen, "", this.Students);
+        Global.Konfig("Klassen", Global.Modus.Update, configuration, "Interessierende Klasse(n)", $"Geben Sie die interessierenden Klassen an. Meistens gibt man an besten eine einzelne Klasse an. Mehrere Klassen sind mit Komma zu trennen. Es können auch Namensteile von Klassen angegeben werden, wordurch alle Klassen gewählt werden, deren Klassenname den Namensteil enthält. Alle Klassen werden mit dem Wort [bold green]alle[/] gewählt.", Global.Datentyp.Klassen, "", this.Students);
 
         var interessierendeKlassen = configuration["Klassen"].ToString().Split(",").ToList();
 
@@ -387,7 +387,7 @@ public class Menüeintrag
             absencePerStud = Quelldateien.GetMatchingList(configuration, "absenceperstudent", IStudents, Klassen);
             if (absencePerStud == null || !absencePerStud.Any()) return [];
 
-            configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration, "Abschnitt", $"Im Folgenden geben Sie den Lernabschnitt an. Das Schuljahr beginnt immer mit Abschnitt [bold blue]1[/]. I.d.R. wechselt der Abschnitt im Halbjahr auf Abschnitt [bold blue]2[/]", Global.Datentyp.Abschnitt);
+            configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration, "Abschnitt", $"Geben Sie den Lernabschnitt an. Das Schuljahr beginnt immer mit Abschnitt [bold blue]1[/]. I.d.R. wechselt der Abschnitt im Halbjahr auf Abschnitt [bold blue]2[/]", Global.Datentyp.Abschnitt);
 
             var konferenzart = "";
             switch (configuration["Abschnitt"])
@@ -402,12 +402,12 @@ public class Menüeintrag
                     throw new Exception("Ungültiger Abschnitt. Bitte geben Sie 1 oder 2 ein.");
             }
             
-            configuration = Global.Konfig($"{konferenzart}konferenzdatum", Global.Modus.Update, configuration, $"{konferenzart}konferenzdatum", $"Im Folgenden geben Sie das {konferenzart}konferenzdatum an. Das kann später in SchILD (mit einem Gruppenprozess) erneut geändert werden.", Global.Datentyp.DateTime);
+            configuration = Global.Konfig($"{konferenzart}konferenzdatum", Global.Modus.Update, configuration, $"{konferenzart}konferenzdatum", $"Geben Sie das {konferenzart}konferenzdatum an. Das kann später in SchILD (mit einem Gruppenprozess) erneut geändert werden.", Global.Datentyp.DateTime);
             konferenzdatum = DateTime.Parse(configuration[$"{konferenzart}konferenzdatum"]);
-            configuration = Global.Konfig($"{konferenzart}zeugnisdatum", Global.Modus.Update, configuration, $"{konferenzart}zeugnisdatum", $"Im Folgenden geben Sie das {konferenzart}zeugnisdatum an. Das kann später in SchILD (mit einem Gruppenprozess) erneut geändert werden.", Global.Datentyp.DateTime);
+            configuration = Global.Konfig($"{konferenzart}zeugnisdatum", Global.Modus.Update, configuration, $"{konferenzart}zeugnisdatum", $"Geben Sie das {konferenzart}zeugnisdatum an. Das kann später in SchILD (mit einem Gruppenprozess) erneut geändert werden.", Global.Datentyp.DateTime);
             zeugnisdatum = DateTime.Parse(configuration[$"{konferenzart}zeugnisdatum"]);
             
-            configuration = Global.Konfig("MaximaleAnzahlFehlstundenProTag", Global.Modus.Update, configuration, "Maximale Anzahl Fehlstunden pro Tag", "Im Folgenden geben Sie die maximale Anzahl zählender Fehlstunden pro Tag an. Wenn der Unterricht spätestens nach 8 Stunden endet, ist 8 ein guter Wert. Sollte die Anzahl der Fehlstunden in Webuntis diesen Wert übersteigen, dann deutet das auf Fehlzeiten im Praktikum oder ein Fehlen bei einer ganztägigen Veranstaltung hin. Es werden keine Fehlstunden an diesem Tag auf dem Zeugnis berücksichtigt.", Global.Datentyp.Int);
+            configuration = Global.Konfig("MaximaleAnzahlFehlstundenProTag", Global.Modus.Update, configuration, "Maximale Anzahl Fehlstunden pro Tag", "Geben Sie die maximale Anzahl zählender Fehlstunden pro Tag an. Wenn der Unterricht spätestens nach 8 Stunden endet, ist 8 ein guter Wert. Sollte die Anzahl der Fehlstunden in Webuntis diesen Wert übersteigen, dann deutet das auf Fehlzeiten im Praktikum oder ein Fehlen bei einer ganztägigen Veranstaltung hin. Es werden keine Fehlstunden an diesem Tag auf dem Zeugnis berücksichtigt.", Global.Datentyp.Int);
             configuration = Global.Konfig("FehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt", Global.Modus.Update, configuration, "Unberücksichtigte Fehltage", "Geben Sie die Anzahl Tage vor der Zeugniskonferenz an, an denen Fehlzeiten unberücksichtigt bleiben. Wenn dieser Wert z.B. auf [bold green]3[/] gesetzt wird, wird verhindert, dass Schüler*innen eine Entschuldigung zwar unverzüglich, aber gleichzeitig erst nach der Zeugniskonferenz einreichen. Alternativ kann man den Wert auf 0 setzen und den Zeitraum des Exports der [bold green]AbsencePerStudent[/] entsprechend einschränken.", Global.Datentyp.Int);
         }
 
