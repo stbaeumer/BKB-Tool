@@ -59,11 +59,7 @@ public class Menüeintrag
         if (students == null) throw new ArgumentNullException(nameof(students));
         if (klassen == null) throw new ArgumentNullException(nameof(klassen));
         if (beschreibung == null) throw new ArgumentNullException(nameof(beschreibung));
-        {
-            if (titel.StartsWith("PDF-Zeugnisse"))
-            {
-                string a = "";
-            }
+        {            
             Titel = titel;
             Anrechnungen = anrechnungen;
             Quelldateien = quelldateien;
@@ -387,7 +383,7 @@ public class Menüeintrag
             absencePerStud = Quelldateien.GetMatchingList(configuration, "absenceperstudent", IStudents, Klassen);
             if (absencePerStud == null || !absencePerStud.Any()) return [];
 
-            configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration, "Abschnitt", $"Geben Sie den Lernabschnitt an. Das Schuljahr beginnt immer mit Abschnitt [bold blue]1[/]. I.d.R. wechselt der Abschnitt im Halbjahr auf Abschnitt [bold blue]2[/]", Global.Datentyp.Abschnitt);
+            configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration, "Abschnitt", $"Geben Sie den Lernabschnitt an. Das Schuljahr beginnt immer mit Abschnitt [bold aqua]1[/]. I.d.R. wechselt der Abschnitt im Halbjahr auf Abschnitt [bold aqua]2[/]", Global.Datentyp.Abschnitt);
 
             var konferenzart = "";
             switch (configuration["Abschnitt"])
@@ -1119,7 +1115,7 @@ public class Menüeintrag
         lehrers.GetTeamsUrl(mitgliederMail.Split(';'), String.Join(';', IKlassen));
     }
 
-    public Datei? WebuntisOderNetmanCsv(IConfiguration configuration, string zieldateiname)
+    public Datei? WebuntisOderNetmanOderLitteraCsv(IConfiguration configuration, string zieldateiname)
     {
         try
         {
@@ -1316,7 +1312,7 @@ public class Menüeintrag
                             new Text(id).LeftJustified(),
                             new Text(student.Klasse).LeftJustified(),
                                         new Text(student.Status).LeftJustified(),
-                                        new Text("Neu" + student.Klasse)});
+                                        new Text("Neu in: " + student.Klasse)});
                         i++;
                     }
                 }
@@ -2542,9 +2538,9 @@ public class Menüeintrag
         if (nurDieseGründe != "200")
             configuration["LehrkraefteSonderzeiten"] = "200";
 
-            var panel = new Panel($"Die Anrechnungen aus der Untis-Datei [blue]GPU020.txt[/] werden mit der SchILD-Datei [blue]LehrkraefteSonderzeiten.dat[/] abgeglichen." +
-                            $"\nDie Datei [blue]{zieldateiname}[/] wird neu erstellt und kann nach ScHILD importiert werden." +
-                            $"\nAnrechnungsgründe [blue]...........................[/] werden ignoriert und auf 0 gesetzt.")
+            var panel = new Panel($"Die Anrechnungen aus der Untis-Datei [aqua]GPU020.txt[/] werden mit der SchILD-Datei [aqua]LehrkraefteSonderzeiten.dat[/] abgeglichen." +
+                            $"\nDie Datei [aqua]{zieldateiname}[/] wird neu erstellt und kann nach ScHILD importiert werden." +
+                            $"\nAnrechnungsgründe [aqua]...........................[/] werden ignoriert und auf 0 gesetzt.")
                             .Header($" [bold green] Anrechnungen [/]")
                             .HeaderAlignment(Justify.Left)
                             .SquareBorder()
@@ -2555,7 +2551,7 @@ public class Menüeintrag
             panel = new Panel($"Im Folgenden werden alle Lehrkräfte mit Altersermäßigung und alle mit fehlendem Deputat bzw. fehlendem Geburtsdatum angezeigt. " +
                                 "Ohne Angabe des Deputats und Geburtsdatums in SchILD, findet keine Berechnung statt. " +
                                 "Sch/Unt zeigt (möglicherweise) abweichende Werte in SchILD und in Untis. " +                                
-                                $"Die Datei [blue]{zieldateiname}[/] wird neu erstellt und kann nach ScHILD importiert werden. " +
+                                $"Die Datei [aqua]{zieldateiname}[/] wird neu erstellt und kann nach ScHILD importiert werden. " +
                                 "Auch wenn der Wert eines Anrechnungsgrunds bei einer Lehrkraft 0 ist, wird er in die Datei übernommen, um möglicherweise veraltete Werte zu überschreiben. " +
                                 $"Da die Datei nur zusammen mit einer (leeren) lehrkraefte.dat importiert werden kann, wird eine leere lehrkraefte.dat ebenfalls erzeugt. " +
                                 $"Wenn in der Spalte [bold green]Alter am 31.7. {akt + 1}[/] die Zahl 55 oder 60 steht, dann ändern sich die Werte im kommenden Jahr. ")

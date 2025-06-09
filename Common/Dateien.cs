@@ -1,4 +1,5 @@
 ﻿using System.Configuration;
+using System.Text.Json;
 using Common;
 using Microsoft.Extensions.Configuration;
 using Spectre.Console;
@@ -20,8 +21,47 @@ using Spectre.Console;
 
 public class Dateien : List<Datei>
 {
+    public List<string> Meldung { get; private set; }
+
     public Dateien()
     {
+        Meldung = new List<string>();
+    }
+
+    public Dateien(IConfiguration configuration)
+    {
+        Meldung = new List<string>();        
+        DisplayHeader(configuration);
+    }
+
+    public void DisplayHeader(IConfiguration configuration, List<string> content = null)
+    {
+        Console.Clear();
+        AnsiConsole.Write(new FigletText(configuration["AppName"] ?? "AppName").Centered().Color(Color.SpringGreen2));
+
+        var contentString = ""; //configuration["AppDescription"] ?? "BKB-Tool - Ein Werkzeug für die Arbeit mit dem BKB-Schilddatenaustausch";
+        var header = $"[wheat1] BKB-Tool[/] | [wheat1 link=https://github.com/stbaeumer/BKB-Tool]https://github.com/stbaeumer/BKB-Tool[/] | [wheat1]GPLv3[/] | [wheat1]Version {Global.AppVersion} [/]";
+
+        if (content != null && content.Count > 0)
+        {
+            contentString = string.Join(Environment.NewLine, content);
+        }
+                
+        if (contentString == " ")
+        {
+            AnsiConsole.Write(new Rule("").RuleStyle("springGreen2").Centered());
+        }
+        else
+        {
+            var panel = new Panel(contentString)
+                    .Header(header)
+                    .HeaderAlignment(Justify.Center)
+                    .RoundedBorder()//.SquareBorder()
+                    .Expand()
+                    .BorderColor(Color.SpringGreen2);
+
+            AnsiConsole.Write(panel);
+        }        
     }
 
     public void GetInteressierendeDateienMitAllenEigenschaften(IConfiguration configuration)
@@ -29,18 +69,18 @@ public class Dateien : List<Datei>
         var schildhinweise = new string[]
         {
             "Exportieren Sie alle *.dat-Dateien aus SchILD, indem Sie den Pfad gehen:",
-            "1. [bold green]Datenaustausch > Schnittstelle SchILD NRW > Export[/]",
-            $"2. [bold green]Arbeitsverzeichnis[/]: [bold blue]{configuration["PfadSchilddatenaustausch"]}[/]",
-            "3. [bold green]Export starten[/]"            
+            "1. [bold silver]Datenaustausch > Schnittstelle SchILD NRW > Export[/]",
+            $"2. [bold silver]Ausgabeverzeichnis[/]: [bold aqua]{configuration["PfadSchilddatenaustausch"]}[/]",
+            "3. [bold green]Export starten[/]"
         };
 
         var untishinweise = new string[]
         {
             "Exportieren Sie die Datei aus Untis, indem Sie den Pfad gehen:",
-            "1. [bold green]Datei > Import/Export > Export TXT Datei[/]",
+            "1. [bold silver]Datei > Import/Export > Export TXT Datei[/]",
             "2. Als Delimiter muss '|' ausgewählt werden.",
             "3. Die Datei auswählen.",
-            $"4. Die Datei in [bold blue]{configuration["PfadDownloads"]}[/] speichern."
+            $"4. Die Datei in [bold aqua]{configuration["PfadDownloads"]}[/] speichern."
         };
 
         Add(new Datei(
@@ -48,7 +88,7 @@ public class Dateien : List<Datei>
             "Beschreibung",
             schildhinweise,
             [""],
-            true,           
+            true,
             d => d.FilternDatDatei()
         ));
         Add(new Datei(
@@ -56,12 +96,12 @@ public class Dateien : List<Datei>
             "Beschreibung",
             [
                 "Exportieren Sie die Datei aus SchILD, indem Sie den Pfad gehen:",
-                "[bold green]Datenaustausch > Export in Text-/Exceldateien > Exportieren[/]",
-                "Die Vorlage 'SchildSchuelerExport' laden.",
-                "Export starten.",
-                "GGfs. muss die Vorlage erst erstellt werden. Es müssen folgende Felder enthalten sein:",
-                "Geburtsdatum, Interne ID-Nummer, Nachname, Vorname, Klasse, Externe ID-Nummer, Status",
-                "Delimiter: '|'; Dateiendung: *.dat"
+                "1. [bold yellow]Datenaustausch > Export in Text-/Exceldateien > Exportieren[/]",
+                "2. Dann [bold yellow]SchildSchuelerExport[/] laden.",
+                "3. [bold green]Export starten[/]",
+                "Ggf. muss die Vorlage erst erstellt werden. Es müssen folgende Felder enthalten sein:",
+                "[bold deeppink1_1]Geburtsdatum, Interne ID-Nummer, Nachname, Vorname, Klasse, Externe ID-Nummer, Status[/]",
+                "Feld-Trennzeichen: '|'"
             ],
             [""],
             true,
@@ -71,28 +111,28 @@ public class Dateien : List<Datei>
         Add(new Datei(
             "OpenPeriod",
             "Beschreibung",
-            ["Exportieren Sie die Datei aus Webuntis, indem Sie den Pfad gehen:", 
-            "[bold green]Klassenbuch > Offene Stunden > Bericht[/]", 
-            $"Die PDF-Datei in [bold blue]{configuration["PfadDownloads"]}[/] speichern."],
+            ["Exportieren Sie die Datei aus Webuntis, indem Sie den Pfad gehen:",
+            "[bold green]Klassenbuch > Offene Stunden > Bericht[/]",
+            $"Die PDF-Datei in [bold aqua]{configuration["PfadDownloads"]}[/] speichern."],
             [""],
             true,
             d => d.FilterOpenPeriod(),
             "*.pdf"
-        ));        
+        ));
         Add(new Datei(
             "Student_",
             "Beschreibung",
             [
                 "Exportieren Sie die Datei aus Webuntis, indem Sie als Administrator den Pfad gehen:",
-                " [bold green]Stammdaten > Schüler*innen > Berichte > Schüler > CSV-Ausgabe[/]",
-                $" Die Datei in [bold blue]{configuration["PfadDownloads"]}[/] speichern."
+                "1. [bold yellow]Stammdaten > Schüler*innen > Berichte > Schüler > CSV-Ausgabe[/]",
+                $"2. Die Datei in [bold aqua]{configuration["PfadDownloads"]}[/] speichern."
             ],
             [""],
             true,
             d => d.FilternWebuntisStudent(),
             "*.csv",
             "\t"
-        ));        
+        ));
         Add(new Datei(
             "GPU003",
             "Beschreibung",
@@ -162,7 +202,7 @@ public class Dateien : List<Datei>
             d => d.FilterExportLessons(),
             "*.csv",
             "\t"
-        ));        
+        ));
         Add(new Datei(
             "Kurse.",
             "Beschreibung",
@@ -310,7 +350,7 @@ public class Dateien : List<Datei>
             [""],
             true,
             d => d.FilternSchildKlassen()
-        ));        
+        ));
         Add(new Datei(
             "SchuelerZusatzdaten",
             "Beschreibung",
@@ -396,22 +436,19 @@ public class Dateien : List<Datei>
         var datei = this.FirstOrDefault(datei => !string.IsNullOrEmpty(datei.Dateiname) && datei.Dateiname.ToLower().Contains(pattern, StringComparison.CurrentCultureIgnoreCase));
 
         // Mögliche Meldungen werden ausgegeben, wenn die Datei nicht gefunden wurde oder veraltet ist.
-
-        var meldung = "";
-        // if (datei.IstVeraltet(configuration))
-
+        
         if (string.IsNullOrEmpty(datei.AbsoluterPfad) && datei.Endung.ToLower().Contains("dat"))
-            meldung += $"Die Datei [bold blue]SchuelerBasisdaten.dat[/] wurde weder in [bold blue]{configuration["pfadDownloads"]}[/] noch in [bold blue]{configuration["pfadSchilddatenaustausch"]}[/] gefunden. Am besten gehen Sie jetzt in SchILD zu [bold green]Datenaustausch > Schnittstelle SchILD NRW > Export[/] und klicken [bold green]Export starten[/], um alle Dateien nach [bold blue]{configuration["pfadSchilddatenaustausch"]}[/] zu exportieren. Anschließend kehren Sie hierher zurück.";
+            datei.Fehlermeldung += $"Die Datei [bold aqua]SchuelerBasisdaten.dat[/] wurde weder in [bold aqua]{configuration["pfadDownloads"]}[/] noch in [bold aqua]{configuration["pfadSchilddatenaustausch"]}[/] gefunden. Am besten gehen Sie jetzt in SchILD zu [bold green]Datenaustausch > Schnittstelle SchILD NRW > Export[/] und klicken [bold green]Export starten[/], um alle Dateien nach [bold aqua]{configuration["pfadSchilddatenaustausch"]}[/] zu exportieren. Anschließend kehren Sie hierher zurück.";
         else if (datei.AbsoluterPfad == null)
-            meldung += $"Die Datei [bold blue]{pattern}[/] wurde nicht gefunden. Bitte prüfen Sie, ob sie im Ordner {configuration["PfadDownloads"]} vorhanden ist.";
+            datei.Fehlermeldung += $"Die Datei [bold aqua]{pattern}[/] wurde nicht gefunden. Bitte prüfen Sie, ob sie im Ordner [bold aqua]{configuration["PfadDownloads"]}[/] vorhanden ist.";
         else if (datei.IstOptional && datei.Count == 0)
-            meldung = $"Die Datei [bold blue]{pattern}[/] ist optional und wurde nicht gefunden. Sie wird nicht benötigt.";
+            datei.Fehlermeldung = $"Die Datei [bold aqua]{pattern}[/] ist optional und wurde nicht gefunden. Sie wird nicht benötigt.";
         else if (datei.IstOptional && datei.Count > 0)
             return datei.ToList();
         else if (datei.AbsoluterPfad == null || datei.AbsoluterPfad.Length == 0 && !datei.IstOptional)
-            meldung = $"Die Datei [bold red]{pattern}[/] existiert nicht. Bitte prüfen Sie, ob sie im Ordner {configuration["PfadDownloads"]} vorhanden ist.";        
+            datei.Fehlermeldung = $"Die Datei [bold red]{pattern}[/] existiert nicht. Bitte prüfen Sie, ob sie im Ordner {configuration["PfadDownloads"]} vorhanden ist.";        
 
-        datei.FehlermeldungRendern(meldung, configuration);
+        datei.FehlermeldungRendern(configuration);
 
         // Rückgabe der Datei, wenn sie gefunden wurde und die Bedingungen erfüllt sind.
 
@@ -431,7 +468,7 @@ public class Dateien : List<Datei>
         return [];
     }
     
-    public Dateien Notwendige(IConfiguration configuration, List<string> dateinamenNotwendigeDateien)
+    public Dateien Notwendige(IConfiguration configuration, List<string> dateinamenNotwendigeDateien, bool meldungAnzeigen = false)
     {
         var pfadDownloads = configuration["PfadDownloads"];
         int maxDateiAlter = int.TryParse(configuration["MaxDateiAlter"], out var parsedMaxDateiAlter) ? parsedMaxDateiAlter : 0;
@@ -471,21 +508,30 @@ public class Dateien : List<Datei>
                         {
                             if (datei.Erstelldatum.Date.AddDays(maxDateiAlter) < DateTime.Now)
                             {
-                                datei.FehlermeldungRendern($"Die Datei {absoluterPfad} existiert, ist aber veraltet.", configuration);
+                                datei.Fehlermeldung = $"Die Datei [bold aqua]{absoluterPfad}[/] existiert, ist aber veraltet.";
+                                if(meldungAnzeigen)
+                                    datei.FehlermeldungRendern(configuration);                                
                             }
                         }
                         else
                         {
                             if (!datei.DarfLeerSein)
                             {
-                                datei.FehlermeldungRendern($"Die Datei {absoluterPfad} existiert, ist aber leer. Ist die Datei evtl. vorher in Excel o.ä. geöffnet worden? Oder stimmt der Delimiter nicht? Der korrekte Delimiter ist: '[bold blue]{datei.Delimiter}[/]'", configuration);
+                                datei.Fehlermeldung = $"Die Datei [bold aqua]{absoluterPfad}[/] existiert, ist aber leer. Ist die Datei evtl. vorher in Excel o.ä. geöffnet worden? Oder stimmt der Delimiter nicht? Der korrekte Delimiter ist: '[bold aqua]{datei.Delimiter}[/]'";
+                                if (meldungAnzeigen)
+                                    datei.FehlermeldungRendern(configuration);
                             }
                         }
                     }
                     else
                     {
                         if (((IDictionary<string, object>)datei[0]).Count == 1)
-                            datei.FehlermeldungRendern($"Die Datei {absoluterPfad} hat nur eine einzige Spalte. Das korrekte Trennzeichen ist: {datei.Delimiter}'.", configuration);
+                        {
+                            datei.Fehlermeldung = $"Die Datei [bold aqua]{absoluterPfad}[/] hat nur eine einzige Spalte. Das korrekte Trennzeichen ist: '{datei.Delimiter}'.";
+                            if (meldungAnzeigen)
+                                datei.FehlermeldungRendern(configuration);
+                        }
+                            
 
                         if (datei.Erstelldatum.Date.AddDays(maxDateiAlter) < DateTime.Now.Date)
                         {
@@ -494,7 +540,9 @@ public class Dateien : List<Datei>
                                 veraltet = "darf aber nicht älter als von gestern sein.";
                             if (configuration["MaxDateiAlter"] == "0")
                                 veraltet = "muss aber von heute sein.";
-                            datei.FehlermeldungRendern($"Die Datei [bold red]{datei.AbsoluterPfad}[/] ist veraltet. Sie wurde am [bold red]{datei.Erstelldatum:dd.MM.yyyy}[/] erstellt, {veraltet}", configuration);
+                            datei.Fehlermeldung = $"Die Datei [bold aqua]{datei.AbsoluterPfad}[/] ist veraltet. Sie wurde am [bold red]{datei.Erstelldatum:dd.MM.yyyy}[/] erstellt, {veraltet}";
+                            if (meldungAnzeigen)
+                                datei.FehlermeldungRendern(configuration);
                         }
                     }
                 }
@@ -511,7 +559,9 @@ public class Dateien : List<Datei>
                         opt = " und ist nicht optional";
                     }
                     
-                    datei.FehlermeldungRendern($"Die Datei [bold red]{Path.Combine(pfadDownloads, dateiname)}***[/] existiert nicht{opt}.",configuration);
+                    datei.Fehlermeldung = $"Die Datei [bold aqua]{Path.Combine(pfadDownloads, dateiname)}[/] existiert nicht{opt}.";
+                    if (meldungAnzeigen)
+                        datei.FehlermeldungRendern(configuration);
                 }
                 notwendige.Add(datei);
             }
@@ -569,60 +619,20 @@ public class Dateien : List<Datei>
                 }
             }
         }
+
         if (anzahlDateienMitZeilen == 0)
         {
-            Global.ZeileSchreiben($"Keine Dateien mit Zeilen in [bold red]{configuration["pfadDownloads"]}[/] gefunden.", "0", ConsoleColor.Red, ConsoleColor.White);
+            Meldung.Add($"Keine Dateien mit auswertbaren Zeilen in [bold aqua]{configuration["pfadDownloads"]}[/] gefunden.");
+        }
+        else if (anzahlDateienMitZeilen == 1)
+        {
+            Meldung.Add($"Nur eine Datei mit auswertbaren Zeilen in [bold aqua]{configuration["pfadDownloads"]}[/] gefunden.");
         }
         else
         {
-            AnsiConsole.Write(new Rule($"[bold fuchsia] {anzahlDateienMitZeilen} Dateien eingelesen aus {configuration["PfadDownloads"]} [/] ").RuleStyle("fuchsia").LeftJustified());
+            Meldung.Add($"Es wurden {anzahlDateienMitZeilen} Dateien mit auswertbaren Zeilen in [bold aqua]{configuration["pfadDownloads"]}[/] gefunden.");
         }
-    }
-
-    public List<string> GetKlassen()
-    {
-        var klassenSet = new HashSet<string>(); // HashSet für einzigartige Werte
-
-        foreach (var datei in this.Where(x => x.Count > 0))
-        {
-            foreach (var record in datei) // Direkt durch die bereits geladenen Records iterieren
-            {
-                var dict = (IDictionary<string, object>)record; // FastDynamicObject als Dictionary behandeln
-
-                // Suche nach einer passenden Spalte
-                var key = dict.Keys.FirstOrDefault(k =>
-                    k.Equals("Klasse", StringComparison.OrdinalIgnoreCase) ||
-                    k.Equals("klasse", StringComparison.OrdinalIgnoreCase) ||
-                    k.Equals("Klassen", StringComparison.OrdinalIgnoreCase) ||
-                    k.Equals("klassen", StringComparison.OrdinalIgnoreCase) ||
-                    k.Equals("Class", StringComparison.OrdinalIgnoreCase));
-
-                if (key != null && dict[key] != null)
-                {
-                    var value = dict[key].ToString().Trim();
-
-                    if (!string.IsNullOrWhiteSpace(value))
-                    {
-                        // Falls mehrere Klassen mit "~" getrennt sind, aufsplitten
-                        var klassenArray = value.Split('~', StringSplitOptions.RemoveEmptyEntries);
-
-                        foreach (var klasse in klassenArray)
-                        {
-                            klassenSet.Add(klasse.Trim()); // Trim, um unnötige Leerzeichen zu entfernen
-                        }
-                    }
-                }
-            }
-        }
-
-        // Sortierte Liste erstellen und "alle" an den Anfang setzen
-        var klassenListe = klassenSet.Where(x => !string.IsNullOrWhiteSpace(x))
-            .OrderBy(x => x)
-            .ToList();
-
-        klassenListe.Insert(0, "Für alle Klassen oder "); // "alle" an erster Stelle einfügen
-
-        return klassenListe;
+        DisplayHeader(configuration, Meldung);
     }
 
     /// <summary>
@@ -701,20 +711,20 @@ public class Dateien : List<Datei>
                     : Array.Empty<string>();
 
                 // Panel: Wenn keine .dat-Dateien vorhanden sind, wird eine Warnung ausgegeben.
-    
-        var panel = new Panel(
-            $"SchILD verwendet für den Export und den (Re-)Import denselben Ordner. Deswegen verschiebt {configuration["AppName"]} jetzt " +
-            $"[bold fuchsia]{datFiles.Count} aus SchILD exportierte *.dat-Dateien[/] direkt von [bold fuchsia]{pfadSchilddatenaustausch}[/] nach [bold fuchsia]{pfadDownloads}[/]. " +
-            $"Die aufbereiteten Dateien stellt {configuration["AppName"]} wiederum in [bold fuchsia]{pfadSchilddatenaustausch}[/] bereit. " +
-            "So bleiben die Import-Dateien und Export-Dateien stets getrennt voneinander."
-            )
-            .Header("[bold fuchsia]  Hinweis  [/]")
-            .HeaderAlignment(Justify.Left)
-            .SquareBorder()
-            .Expand()
-            .BorderColor(Color.Fuchsia);
 
-        AnsiConsole.Write(panel);
+                var panel = new Panel(
+                    $"SchILD verwendet für den Export und den (Re-)Import denselben Ordner. Deswegen verschiebt {configuration["AppName"]} jetzt " +
+                    $"[bold fuchsia]{datFiles.Count} aus SchILD exportierte *.dat-Dateien[/] direkt von [bold aqua]{pfadSchilddatenaustausch}[/] nach [bold aqua]{pfadDownloads}[/]. " +
+                    $"Die aufbereiteten Dateien stellt {configuration["AppName"]} wiederum in [bold aqua]{pfadSchilddatenaustausch}[/] bereit. " +
+                    "So bleiben die Import-Dateien und Export-Dateien stets getrennt voneinander."
+                    )
+                    .Header("[bold fuchsia]  Hinweis  [/]")
+                    .HeaderAlignment(Justify.Left)
+                    .SquareBorder()
+                    .Expand()
+                    .BorderColor(Color.Fuchsia);
+
+                AnsiConsole.Write(panel);
 
                 // Lösche die vorhandenen .dat-Dateien im Zielordner
                 foreach (var file in existingDatFiles)
@@ -728,11 +738,12 @@ public class Dateien : List<Datei>
 #pragma warning disable CS8604 // Possible null reference argument.
                     var destinationPath = Path.Combine(pfadDownloads, Path.GetFileName(file));
 #pragma warning restore CS8604 // Possible null reference argument.
-                    
+
                     File.Move(file, destinationPath);
                 }
 
-                AnsiConsole.Write(new Rule($"[bold fuchsia] {datFiles.Count} Dateien verschoben von {configuration["PfadSchilddatenaustausch"]} nach {configuration["PfadDownloads"]}[/] ").RuleStyle("fuchsia").LeftJustified());
+                //AnsiConsole.Write(new Rule($"[bold fuchsia] {datFiles.Count} Dateien verschoben von [bold aqua]{configuration["PfadSchilddatenaustausch"]}[/] nach [bold aqua]{configuration["PfadDownloads"]}[/][/] ").RuleStyle("fuchsia").LeftJustified());
+                this.Meldung.Add($"[bold fuchsia] {datFiles.Count} Dateien verschoben von [bold aqua]{configuration["PfadSchilddatenaustausch"]}[/] nach [bold aqua]{configuration["PfadDownloads"]}[/][/] ");
             }
             else
             {
@@ -751,8 +762,22 @@ public class Dateien : List<Datei>
     public void FehlermeldungRendern(IConfiguration configuration)
     {
         foreach (var datei in this.Where(q => !string.IsNullOrEmpty(q.Fehlermeldung)))
+        {            
+            datei.FehlermeldungRendern(configuration);
+        }
+    }
+
+    private bool IsDirectoryWritable(string dirPath)
+    {
+        try
         {
-            datei.FehlermeldungRendern("",configuration);
+            string testFile = Path.Combine(dirPath, Path.GetRandomFileName());
+            using (FileStream fs = File.Create(testFile, 1, FileOptions.DeleteOnClose)) { }
+            return true;
+        }
+        catch
+        {
+            return false;
         }
     }
 }

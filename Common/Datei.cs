@@ -398,7 +398,7 @@ public class Datei : List<dynamic>
         return liste;
     }
 
-    public void Erstellen(string delimiter, char quote, Encoding encoding, bool shouldAllQuote)
+    public void Erstellen(string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
         /*
         new UTF8Encoding(true), // UTF-8 mit BOM
@@ -513,11 +513,8 @@ public class Datei : List<dynamic>
             }
             finally
             {
-                //Global.ZeileSchreiben(AbsoluterPfad, this.Count().ToString(), ConsoleColor.DarkMagenta, ConsoleColor.White);
-
-                //var rechteSeite = "neu erstellt, bereit für den Import";
-
-                Global.ZeileSchreiben(AbsoluterPfad, "", ConsoleColor.White, ConsoleColor.Blue);
+                var rechteSeite = importhinweise != null && importhinweise.Any() ? string.Join("\n", importhinweise) : "";                
+                Global.ZeileSchreiben(AbsoluterPfad, rechteSeite, ConsoleColor.White, ConsoleColor.Blue);
             }
         }
     }
@@ -996,27 +993,24 @@ public class Datei : List<dynamic>
         return false; // Datei ist nicht veraltet
     }
 
-    internal void FehlermeldungRendern(string ersterSatz, IConfiguration configuration)
+    internal void FehlermeldungRendern(IConfiguration configuration)
     {
         if (!string.IsNullOrEmpty(Fehlermeldung))
         {
-            if (ersterSatz == "")
-                ersterSatz = ersterSatz.TrimEnd('.') + ". " + "\n";
-
             if (IstOptional)
             {
-                var panel2 = new Panel($"[bold blue]{ersterSatz}{Fehlermeldung}[/]\n[gray]{string.Join("\n", Hinweise)}[/]")
-                .Header("[bold blue]  Optionale Datei  [/]")
+                var panel2 = new Panel($"{Fehlermeldung}\n[gray]{string.Join("\n", Hinweise)}[/]")
+                .Header("[bold aqua]  Optionale Datei  [/]")
                 .HeaderAlignment(Justify.Left)
                 .SquareBorder()
                 .Expand()
-                .BorderColor(Color.Blue);
+                .BorderColor(Color.DodgerBlue1);
 
                 AnsiConsole.Write(panel2);
             }
             else
             {
-                var panel2 = new Panel($"[bold red]{ersterSatz}{Fehlermeldung}[/]\n[gray]{string.Join("\n", Hinweise)}[/]")
+                var panel2 = new Panel($"[bold red]{Fehlermeldung}[/]\n[gray]{string.Join("\n", Hinweise)}[/]")
                 .Header("[bold red]  !?  [/]")
                 .HeaderAlignment(Justify.Left)
                 .SquareBorder()

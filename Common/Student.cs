@@ -1371,7 +1371,7 @@ public partial class Student
         {
             // Ask the user to confirm
             var confirmation = AnsiConsole.Prompt(
-                new TextPrompt<bool>("Der Pfad existiert nicht: [bold blue]" + pfadDokumentenverwaltung + "[/] Anlegen? (j/n)")
+                new TextPrompt<bool>("Der Pfad existiert nicht: [bold aqua]" + pfadDokumentenverwaltung + "[/] Anlegen? (j/n)")
                     .AddChoice(true)
                     .AddChoice(false)
                     .DefaultValue(true)

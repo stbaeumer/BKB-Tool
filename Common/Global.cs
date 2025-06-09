@@ -41,7 +41,9 @@ public static class Global
     public enum NurBeiDiesenSchulnummern
     {
         Alle,
-        NurPrivilegiert
+        NurPrivilegiert,
+        Nur177659,
+        AlleBisAufGesperrte
     }
 
     public enum Rubrik
@@ -85,8 +87,9 @@ public static class Global
     public static string? ConnectionStringUntis { get; set; }
     public static string? ZipKennwort { get; set; }  
     public static string? PfadSchilddatenaustausch { get; private set; }
-    public static List<string>? PrivilegierteSchulnummern { get; set; }
+    public static List<string>? SchulnummernPrivilegiert { get; set; }
     public static string AppVersion { get; set; }
+    public static List<string> SchulnummernGesperrt { get; set; }
 
     public static string? SafeGetString(SqlDataReader reader, int colIndex)
     {
@@ -95,54 +98,26 @@ public static class Global
         return string.Empty;
     }
 
-    internal static void Dateischreiben(IConfiguration configuration, string name)
-    {
-        string tempPfadUndDatei = Path.Combine(Path.GetTempPath(), Path.GetFileName(name));
-        string pfadDownloads = configuration["pfadDownloads"] ?? throw new ArgumentNullException(nameof(configuration), "pfadDownloads cannot be null");
-        string pfadUndDatei = Path.Combine(pfadDownloads, name);
-        UTF8Encoding utf8NoBom = new UTF8Encoding(false);
-
-        if (File.Exists(pfadUndDatei) && File.Exists(tempPfadUndDatei))
-        {
-            string contentNeu = File.ReadAllText(tempPfadUndDatei, utf8NoBom);
-
-            // Lese den Inhalt der Dateien
-            string contentAlt = File.ReadAllText(pfadUndDatei, utf8NoBom);
-
-            // Vergleiche die Inhalte der Dateien
-            if (contentAlt != contentNeu)
-            {
-                // Überschreibe alt mit dem Inhalt von neu
-                File.WriteAllText(pfadUndDatei, contentNeu, utf8NoBom);
-                ZeileSchreiben(name, "überschrieben", ConsoleColor.Yellow, ConsoleColor.Gray);
-            }
-            else
-            {
-                ZeileSchreiben(name, "Identisch. Keine Änderungen", ConsoleColor.White, ConsoleColor.Black);
-            }
-        }
-
-        if (!File.Exists(pfadUndDatei))
-        {
-            string directoryPath = Path.GetDirectoryName(pfadUndDatei) ?? string.Empty;
-
-            if (directoryPath != null)
-            {
-                // Fehlende Verzeichnisse anlegen
-                Directory.CreateDirectory(directoryPath);
-            }
-
-            string contentNeu = File.ReadAllText(tempPfadUndDatei, utf8NoBom);
-            File.WriteAllText(pfadUndDatei, contentNeu, utf8NoBom);
-            ZeileSchreiben(name, ": Datei neu erstellt.", ConsoleColor.Green, ConsoleColor.Gray);
-        }
-    }
-
-    public static void DisplayHeader(IConfiguration configuration)
+    public static void DisplayHeader(IConfiguration configuration, List<string> content = null)
     {
         Console.Clear();
-        AnsiConsole.Write(new FigletText(configuration["AppName"] ?? "AppName").Centered().Color(Color.Green1));
-        AnsiConsole.Write(new Rule($"[lime] BKB-Tool[/] | [lime][link=https://github.com/stbaeumer/BKB-Tool]https://github.com/stbaeumer/BKB-Tool[/][/] | [lime]GPLv3[/] | [lime]Version {AppVersion} [/]").RuleStyle("green1").LeftJustified());
+        AnsiConsole.Write(new FigletText(configuration["AppName"] ?? "AppName").Centered().Color(Color.SpringGreen2));
+
+        var contentString = configuration["AppDescription"] ?? "BKB-Tool - Ein Werkzeug für die Arbeit mit dem BKB-Schilddatenaustausch";
+
+        if (content != null && content.Count > 0)
+        {
+            contentString = string.Join(Environment.NewLine, content);
+        }
+        
+        var panel = new Panel(contentString)
+                .Header($"[wheat1] BKB-Tool[/] | [wheat1 link=https://github.com/stbaeumer/BKB-Tool]https://github.com/stbaeumer/BKB-Tool[/] | [wheat1]GPLv3[/] | [wheat1]Version {AppVersion} [/]")
+                .HeaderAlignment(Justify.Center)
+                .RoundedBorder()//.SquareBorder()
+                .Expand()
+                .BorderColor(Color.SpringGreen2);
+
+        AnsiConsole.Write(panel);
     }
 
     public static string InsertLineBreaks(string text, int maxLineLength)
@@ -192,23 +167,35 @@ public static class Global
         {
             var path = new TextPath(linkeSeite);
 
-            path.RootStyle = new Style(foreground: Color.Red);
-            path.SeparatorStyle = new Style(foreground: Color.Green);
-            path.StemStyle = new Style(foreground: Color.Blue);
-            path.LeafStyle = new Style(foreground: Color.Yellow);
+            path.RootStyle = new Style(foreground: Color.White, background: Color.Black);
+            path.SeparatorStyle = new Style(foreground: Color.White, background: Color.Black);
+            path.StemStyle = new Style(foreground: Color.White, background: Color.Black);
+            path.LeafStyle = new Style(foreground: Color.Aqua, background: Color.Black);
 
             var panel = new Panel(path)
-                .Header("[bold blue]  Neu:  [/]")
+                .Header("[bold aqua]  Bereit für den Import:  [/]")
                 .HeaderAlignment(Justify.Left)
                 .SquareBorder()
                 .Expand()
-                .BorderColor(Color.Aquamarine1_1);
+                .BorderColor(Color.White);
 
-            AnsiConsole.Write(panel);
+                AnsiConsole.Write(panel);
+
+            if(rechteSeite != "")
+            {
+                var panel2 = new Panel(rechteSeite)
+                .Header("[bold aqua]  Importhinweise:  [/]")
+                .HeaderAlignment(Justify.Left)
+                .SquareBorder()
+                .Expand()
+                .BorderColor(Color.White);
+
+                AnsiConsole.Write(panel2);
+            }
         }
         else
         {
-            AnsiConsole.MarkupLine("[blue]" + linkeSeite + "[/]" + "[blue]" + mitte + "[/]" + "[blue]" + rechteSeite + "[/]");
+            AnsiConsole.MarkupLine("[aqua]" + linkeSeite + "[/]" + "[aqua]" + mitte + "[/]" + "[aqua]" + rechteSeite + "[/]");
         }
     }
 
@@ -318,6 +305,9 @@ public static class Global
             .Expand()
             .BorderColor(Color.Green);
 
+        //
+        aufforderung = " " + aufforderung;
+
         // Der Wert aus der JSON hat Vorrang vor dem defaultwert. Nur wenn die JSON keinen Wert enthält, wird der defaultwert verwendet.
         defaultValue = !string.IsNullOrEmpty(configuration[parameter])
             ? configuration[parameter] ?? defaultValue
@@ -372,7 +362,7 @@ public static class Global
                 .Validate(n =>
                 {
                     if (!zulässigeAuswahlOptionen.Split(",").Contains(n))
-                        return ValidationResult.Error($"Zulässige Auswahl: [bold blue]{zulässigeAuswahlOptionen}[/]");
+                        return ValidationResult.Error($"Zulässige Auswahl: [bold aqua]{zulässigeAuswahlOptionen}[/]");
                     return ValidationResult.Success();
                 }));
         }
@@ -718,7 +708,7 @@ public static class Global
             {
                 if (!Directory.Exists(Directory.GetCurrentDirectory()) || !IsDirectoryWritable(Directory.GetCurrentDirectory()))
                 {
-                    AnsiConsole.MarkupLine("[red]Das Verzeichnis [bold blue]" + Directory.GetCurrentDirectory() + "[/] existiert nicht oder ist nicht beschreibbar. Das muss korrigiert werden.[/]");
+                    AnsiConsole.MarkupLine("[red]Das Verzeichnis [bold aqua]" + Directory.GetCurrentDirectory() + "[/] existiert nicht oder ist nicht beschreibbar. Das muss korrigiert werden.[/]");
                     AnsiConsole.MarkupLine("[red]Drücken Sie eine beliebige Taste, um fortzufahren...[/]");
                     Console.ReadKey();
                     return configuration;
@@ -759,11 +749,11 @@ public static class Global
             $"BKB-Tool steht unter der GNU General Public License Version 3 (GPLv3). " +
             "Die GPLv3 ist eine freie Softwarelizenz, die es Ihnen erlaubt, die Software zu verwenden, zu modifizieren und weiterzugeben, solange Sie die Bedingungen der Lizenz einhalten. " +
             "Die wichtigsten Bedingungen dieser Lizenz sind:\n" +            
-            "[blue bold]Freiheit zur Nutzung, Änderung und Weiterverbreitung:[/] Sie dürfen diese Software frei verwenden, anpassen und weitergeben, solange alle abgeleiteten Werke ebenfalls unter der GPLv3 stehen.\n" +            
-            "[blue bold]Keine Garantie:[/] Diese Software wird \"wie sie ist\" bereitgestellt, ohne jede ausdrückliche oder stillschweigende Gewährleistung, insbesondere ohne Garantie auf Fehlerfreiheit, Markttauglichkeit oder Eignung für einen bestimmten Zweck.\n" +            
-            "[blue bold]Keine Haftung:[/] Der Entwickler haftet nicht für direkte oder indirekte Schäden, Datenverluste oder andere Konsequenzen, die durch die Nutzung oder Fehlfunktion dieser Software entstehen.\n" +            
-            "[blue bold]Verwendung auf eigene Gefahr:[/] Die Nutzung erfolgt ausschließlich auf eigenes Risiko.\n" +            
-            "[blue bold]Vollständige Lizenz:[/] Die vollständigen Lizenzbedingungen finden Sie unter [link=https://www.gnu.org/licenses/gpl-3.0.de.html]https://www.gnu.org/licenses/gpl-3.0.de.html[/]." 
+            "[dodgerBlue1 bold]Freiheit zur Nutzung, Änderung und Weiterverbreitung:[/] Sie dürfen diese Software frei verwenden, anpassen und weitergeben, solange alle abgeleiteten Werke ebenfalls unter der GPLv3 stehen.\n" +            
+            "[dodgerBlue1 bold]Keine Garantie:[/] Diese Software wird \"wie sie ist\" bereitgestellt, ohne jede ausdrückliche oder stillschweigende Gewährleistung, insbesondere ohne Garantie auf Fehlerfreiheit oder Eignung für einen bestimmten Zweck.\n" +            
+            "[dodgerBlue1 bold]Keine Haftung:[/] Der Entwickler haftet nicht für direkte oder indirekte Schäden, Datenverluste oder andere Konsequenzen, die durch die Nutzung oder Fehlfunktion dieser Software entstehen.\n" +            
+            "[dodgerBlue1 bold]Verwendung auf eigene Gefahr:[/] Die Nutzung erfolgt ausschließlich auf eigenes Risiko.\n" +            
+            "[dodgerBlue1 bold]Vollständige Lizenz:[/] Vollständige Lizenzbedingungen unter [lightskyblue3_1 link=https://www.gnu.org/licenses/gpl-3.0.de.html]https://www.gnu.org/licenses/gpl-3.0.de.html[/]." 
                           
             , Global.Datentyp.JaNein, "", null, "Ja");
         }
@@ -773,13 +763,13 @@ public static class Global
         
         if (modus == Modus.Create)
             DisplayHeader(configuration);
-        var panel = new Panel("Ihre Einstellungen werden verschlüsselt in der Datei [blue]" + Path.Combine(Directory.GetCurrentDirectory(), Global.User + ".json[/]") + " gespeichert." +
-        $"\nDateien (aus Webuntis etc.), die {configuration["AppName"]} importieren soll, werden aus [blue]" + configuration["PfadDownloads"] + "[/] eingelesen.")
-                        .Header($" [bold blue]  Einstellungen  [/]")
+        var panel = new Panel("Ihre Einstellungen werden verschlüsselt in der Datei [aqua]" + Path.Combine(Directory.GetCurrentDirectory(), Global.User + ".json[/]") + " gespeichert." +
+        $"\nDateien (aus Webuntis etc.), die {configuration["AppName"]} importieren soll, werden aus [aqua]" + configuration["PfadDownloads"] + "[/] eingelesen.")
+                        .Header($" [bold dodgerBlue1]  Einstellungen  [/]")
                         .HeaderAlignment(Justify.Left)
                         .SquareBorder()
                         .Expand()
-                        .BorderColor(Color.Blue);
+                        .BorderColor(Color.DodgerBlue1);
 
         if (modus != Modus.Read)
         {
@@ -803,7 +793,7 @@ public static class Global
             AnsiConsole.Write(panel);
         }
 
-        configuration = Konfig("PfadSchilddatenaustausch", modus, configuration, @"SchILD-Datenaustausch-Ausgabeverzeichnis", "Geben Sie das Verzeichnis an, das in SchILD unter [green bold]Datenaustausch > Schnittstelle SchILD-NRW > Export[/] als [green bold]Ausgabeverzeichnis[/] eingetragen ist. Wenn dort kein Verzeichnis steht, tragen Sie dort das selbe Verzeichnis ein, das Sie auch hier angeben:", Datentyp.Pfad, "/home/stefan/Windows/SchILD-NRW/Datenaustausch");
+        configuration = Konfig("PfadSchilddatenaustausch", modus, configuration, @"SchILD-Ausgabeverzeichnis", "Geben Sie das Verzeichnis an, das in SchILD unter [yellow bold]Datenaustausch > Schnittstelle SchILD-NRW > Export[/] als [yellow bold]Ausgabeverzeichnis[/] eingetragen ist. Wenn dort kein Verzeichnis steht, tragen Sie dort das selbe Verzeichnis ein, das Sie auch hier angeben:", Datentyp.Pfad, "/home/stefan/Windows/SchILD-NRW/Datenaustausch");
 
         if (modus != Modus.Read)
         {
@@ -821,7 +811,7 @@ public static class Global
 
         configuration = Konfig("AppName", Modus.Read, configuration, "Wie soll die App heißen?", $"Sie können die App [bold green]{configuration["AppName"]}[/] umbennen.", Datentyp.String);
 
-        if (modus == Modus.Update && PrivilegierteSchulnummern.Contains(configuration["Schulnummer"]))
+        if (modus == Modus.Update && SchulnummernPrivilegiert.Contains(configuration["Schulnummer"]))
         {
             configuration = Konfig("MailDomain", modus, configuration, "Mail-Domain für Schüler*innen", "Geben Sie die Mail-Domain für Ihre Schüler*innen an. Ihre Eingabe muss mit [green bold]@[/] beginnen und einen [green bold]Punkt[/] enthalten. Beispiel: [green bold]@students.meine-schule.de[/]", Datentyp.Mail);
             configuration = Konfig("ConnectionStringUntis", modus, configuration, "ConnectionStringUntis (optional)");
@@ -955,7 +945,7 @@ public static class Global
             }
         }
 
-        var panel = new Panel($"Weiter mit [bold green]Anykey[/] oder mit [bold blue]x[/] Einstellungen durchlaufen oder mit [bold blue]y[/] Onlinehilfe öffnen.")
+        var panel = new Panel($"Weiter mit [bold green]Anykey[/] oder mit [bold green]x[/] Einstellungen durchlaufen oder mit [bold green]y[/] Onlinehilfe öffnen.")
                         .HeaderAlignment(Justify.Left)
                         .SquareBorder()
                         .Expand()
@@ -977,7 +967,7 @@ public static class Global
             return;
         }
 
-        DisplayHeader(configuration);
+        DisplayHeader(configuration, [" "]);
     }
     public static string Entschluesseln(string encryptedValue)
     {
@@ -1080,6 +1070,49 @@ public static class Global
         catch
         {
             return false;
+        }
+    }
+
+    internal static void Dateischreiben(IConfiguration configuration, string name)
+    {
+        string tempPfadUndDatei = Path.Combine(Path.GetTempPath(), Path.GetFileName(name));
+        string pfadDownloads = configuration["pfadDownloads"] ?? throw new ArgumentNullException(nameof(configuration), "pfadDownloads cannot be null");
+        string pfadUndDatei = Path.Combine(pfadDownloads, name);
+        UTF8Encoding utf8NoBom = new UTF8Encoding(false);
+
+        if (File.Exists(pfadUndDatei) && File.Exists(tempPfadUndDatei))
+        {
+            string contentNeu = File.ReadAllText(tempPfadUndDatei, utf8NoBom);
+
+            // Lese den Inhalt der Dateien
+            string contentAlt = File.ReadAllText(pfadUndDatei, utf8NoBom);
+
+            // Vergleiche die Inhalte der Dateien
+            if (contentAlt != contentNeu)
+            {
+                // Überschreibe alt mit dem Inhalt von neu
+                File.WriteAllText(pfadUndDatei, contentNeu, utf8NoBom);
+                ZeileSchreiben(name, "überschrieben", ConsoleColor.Yellow, ConsoleColor.Gray);
+            }
+            else
+            {
+                ZeileSchreiben(name, "Identisch. Keine Änderungen", ConsoleColor.White, ConsoleColor.Black);
+            }
+        }
+
+        if (!File.Exists(pfadUndDatei))
+        {
+            string directoryPath = Path.GetDirectoryName(pfadUndDatei) ?? string.Empty;
+
+            if (directoryPath != null)
+            {
+                // Fehlende Verzeichnisse anlegen
+                Directory.CreateDirectory(directoryPath);
+            }
+
+            string contentNeu = File.ReadAllText(tempPfadUndDatei, utf8NoBom);
+            File.WriteAllText(pfadUndDatei, contentNeu, utf8NoBom);
+            ZeileSchreiben(name, ": Datei neu erstellt.", ConsoleColor.Green, ConsoleColor.Gray);
         }
     }
 }    

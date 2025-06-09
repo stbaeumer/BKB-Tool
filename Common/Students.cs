@@ -66,50 +66,6 @@ public class Students : List<Student>
             student.Straße = dict["Straße"].ToString();
             Add(student);
         }
-
-        var statusstring = "[bold] " + this.Count().ToString() + " Schüler*innen: [/]";
-        
-        var i = 0;
-        var zeile = new List<string>();
-        zeile.Add(this.Count().ToString());
-
-        if (this == null || this.Count == 0)
-        {
-            throw new Exception("Keine Schülerdaten gefunden.");
-        }
-
-        foreach (var status in this.Select(x => x.Status).Distinct().OrderBy(x => x).ToList())
-        {
-            statusstring += " " + this.Count(x => x.Status == status);
-
-            switch (status)
-            {
-                case "2":
-                    statusstring += "[dodgerblue1] (aktiv)[/],";
-                    break;
-                case "5":
-                    statusstring += "[dodgerblue1] (...)[/],";
-                    break;
-                case "6":
-                    statusstring += "[dodgerblue1] (extern)[/],";
-                    break;
-                case "8":
-                    statusstring += "[dodgerblue1] (Abschluss)[/],";
-                    break;
-                case "9":
-                    statusstring += "[dodgerblue1] (Abgang)[/],";
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        AnsiConsole.Write(new Rule(statusstring.TrimEnd(',')).RuleStyle("lightslateblue").LeftJustified());
-
-        if (this.Select(x => x.Status).Distinct().Count() == 1)
-        {
-            Global.ZeileSchreiben("Es scheinen nur aktive Schüler exportiert worden zu sein. Bitte auch exportieren:", "Externe, Abgänger, Abgeschlossene");
-        }
     }
 
     public Students(IConfiguration configuration, string dateiName, string dateiendung, string delimiter = "|")
@@ -170,7 +126,7 @@ public class Students : List<Student>
 
             path.RootStyle = new Style(foreground: Spectre.Console.Color.Red);
             path.SeparatorStyle = new Style(foreground: Spectre.Console.Color.Green);
-            path.StemStyle = new Style(foreground: Spectre.Console.Color.Blue);
+            path.StemStyle = new Style(foreground: Spectre.Console.Color.DodgerBlue1);
             path.LeafStyle = new Style(foreground: Spectre.Console.Color.Yellow);
 
             var panel = new Panel(path)
@@ -1342,7 +1298,7 @@ public class Students : List<Student>
             "\nWenn ein Schüler fehlt, fotographieren Sie die weiße Wand, damit die Anzahl stimmt." + 
             "\nWenn ein Foto nicht gut geworden ist, dann direkt noch einmal fotographieren und das erste Bild löschen oder aufschreiben und später löschen. Die Reihenfolge darf nicht verändert werden." + 
             "\nNotieren Sie die exakte Uhrzeit des ersten Fotos pro Klassse, falls mehrere Klassen direkt hintereinander fotographiert werden." + 
-            "\nAm Ende müssen Sie die Fotos händisch in den Ordner [blue]" + Path.Combine(pfadDownloads, "Fotos", klasse) + "[/] verschieben.")
+            "\nAm Ende müssen Sie die Fotos händisch in den Ordner [aqua]" + Path.Combine(pfadDownloads, "Fotos", klasse) + "[/] verschieben.")
                             .Header($" [bold green] {klasse} [/]")
                             .HeaderAlignment(Justify.Left)
                             .SquareBorder()
@@ -1366,12 +1322,12 @@ public class Students : List<Student>
             }
             AnsiConsole.Write(table);
 
-            AnsiConsole.Write(new Panel($"Verschieben Sie die Fotos jetzt (oder später) nach [bold blue1]" + Path.Combine(pfadDownloads, "Fotos", klasse) + "[/].")
-                            .Header($" [bold blue1] Alle Fotos gemacht? [/]")
+            AnsiConsole.Write(new Panel($"Verschieben Sie die Fotos jetzt (oder später) nach [bold dodgerBlue11]" + Path.Combine(pfadDownloads, "Fotos", klasse) + "[/].")
+                            .Header($" [bold dodgerBlue11] Alle Fotos gemacht? [/]")
                             .HeaderAlignment(Justify.Left)
                             .SquareBorder()
                             .Expand()
-                            .BorderColor(Spectre.Console.Color.Blue1));
+                            .BorderColor(Spectre.Console.Color.DodgerBlue1));
         }
     }
 
@@ -1600,5 +1556,50 @@ public class Students : List<Student>
         {
             Console.WriteLine("Fehler beim Zippen: " + ex.Message);
         }
+    }
+
+    internal string GetArtUndZahlen()
+    {
+        var statusstring = "[tan]" + this.Count().ToString() + "[/][white] Schüler*innen: ([/]";
+
+        var i = 0;
+        var zeile = new List<string>();
+        zeile.Add(this.Count().ToString());
+
+        if (this == null || this.Count == 0)
+        {
+            throw new Exception("Keine Schülerdaten gefunden.");
+        }
+
+        foreach (var status in this.Select(x => x.Status).Distinct().OrderBy(x => x).ToList())
+        {
+            statusstring += "[tan]" + this.Count(x => x.Status == status) + "[/]";
+
+            switch (status)
+            {
+                case "2":
+                    statusstring += " Aktive, ";
+                    break;
+                case "6":
+                    statusstring += " Externe, ";
+                    break;
+                case "8":
+                    statusstring += " mit Abschluss, ";
+                    break;
+                case "9":
+                    statusstring += " Abgänger, ";
+                    break;
+                default:
+                    statusstring += " Sonstige, ";
+                    break;
+            }
+        }
+
+        if (this.Select(x => x.Status).Distinct().Count() == 1)
+        {
+            return "[tan] " + this.Count().ToString() + "[/] Schüler*innen: [springGreen2]nur aktive Schüler exportiert[/]";
+        }
+        
+        return statusstring.TrimEnd(' ').TrimEnd(',').TrimEnd(' ').TrimEnd(',') +  ")";
     }
 }

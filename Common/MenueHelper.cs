@@ -37,17 +37,19 @@ public static class MenueHelper
 
         try
         {
-            var students = new Students(configuration, quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "schildschuelerexport,txt,optional"]));
-            lehrers = new Lehrers(configuration, quelldateien.Notwendige(configuration, ["lehrkraefte,dat"]));
+            var students = new Students(configuration, quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "schildschuelerexport,txt,optional"], true));
+            quelldateien.Meldung.Add(students.GetArtUndZahlen());
 
+            lehrers = new Lehrers(configuration, quelldateien.Notwendige(configuration, ["lehrkraefte,dat"], true));
+            
             if (students.Count == 0 || lehrers.Count == 0)
             {
                 return new Menue(quelldateien, klassen, lehrers, students, []);
             }
 
-            #pragma warning disable CS8601 // Mögliche Nullverweiszuweisung
-
-            AnsiConsole.Write(new Rule("[bold springgreen2] Auswahl treffen:    [/]").RuleStyle("springgreen2").LeftJustified());
+#pragma warning disable CS8601 // Mögliche Nullverweiszuweisung
+            //Console.WriteLine("");
+            //AnsiConsole.Write(new Rule("").RuleStyle("springgreen2").Centered());
 
             return new Menue(
                 quelldateien,
@@ -56,45 +58,94 @@ public static class MenueHelper
                 students,
                 [
                     new Menüeintrag(
+                        "Webuntis: Schüler*innen-Importdatei ***-ImportNachWebuntis.csv für Webuntis erstellen",
+                        anrechnungen,
+                        quelldateien.Notwendige(configuration, ["student_,csv","schuelerlernabschnittsdaten,dat", "schuelerzusatzdaten,dat", "schuelererzieher,dat", "schuelerAdressen,dat", "lehrkraefte,dat", "klassen,dat"]),
+                        students,
+                        klassen,
+                        [
+                            $"Es wird jetzt die Datei [bold aqua] {Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd") + "-ImportNachWebuntis.csv")}[/] erstellt.",                            
+                            "[pink3]Hinweis:[/] Das Zeugnisdatum des letzten Zeugnisses in einer Klasse wird zum Webuntis-Austrittsdatum bei Schüler*innen, deren Status weder aktiv noch extern ist."
+                        ],
+                        m =>
+                        {
+                            var zeitstempel = DateTime.Now.ToString("yyyyMMdd-HHmm");
+                            m.Zieldatei = m.WebuntisOderNetmanOderLitteraCsv(configuration, Path.Combine(pfadDownloads ?? "", zeitstempel +  @"-ImportNachWebuntis.csv"));
+                            m.Zieldatei?.Erstellen(";", '\'', new UTF8Encoding(false), false,
+                            [
+                                "1. In Webuntis als Webuntis-Admin:  [bold yellow]Stammdaten > Schüler*innen > Import[/]",
+                                "2. Datei auswählen, UTF8",
+                                "3. Profil: Schuelerimport, dann Vorschau",
+                                "Mehr zum Profil Schuelerimport: [lightskyblue3_1][link=https://github.com/stbaeumer/BKB-Tool/wiki]https://github.com/stbaeumer/BKB-Tool/wiki[/][/]"
+                            ]
+                            );
+                        },
+                        Global.Rubrik.WöchtentlicheArbeiten,
+                        Global.NurBeiDiesenSchulnummern.Alle
+                    ),
+                    new Menüeintrag(
+                        "Webuntis: Importdateien (+Fotos) für Webuntis erstellen",
+                        anrechnungen,
+                        quelldateien.Notwendige(configuration, ["student_,csv","schuelerlernabschnittsdaten,dat", "schuelerzusatzdaten,dat", "schuelererzieher,dat", "schuelerAdressen,dat", "lehrkraefte,dat", "klassen,dat"]),
+                        students,
+                        klassen,
+                        [
+                            "Es werden jetzt die Dateien [bold aqua]" + Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-") + "****" +  @"-ImportNachWebuntis.csv") + "[/] und [bold aqua]***-ImportNachWebuntis.zip[/] erstellt. Der Webuntis-Admin muss im Anschluss die Dateien wie folgt importieren:",
+                            "1. [bold yellow]Stammdaten > Schüler*innen > Import[/]",
+                            "2. Datei auswählen, UTF8",
+                            "3. Profil: Schuelerimport, dann Vorschau",
+                            "[pink3]Hinweis:[/] Das Zeugnisdatum des letzten Zeugnisses in einer Klasse wird zum Webuntis-Austrittsdatum bei Schüler*innen, deren Status weder aktiv noch extern ist."                            
+                        ],
+                        m =>
+                        {
+                            var zeitstempel = DateTime.Now.ToString("yyyyMMdd-HHmm");
+                            m.Zieldatei = m.WebuntisOderNetmanOderLitteraCsv(configuration, Path.Combine(pfadDownloads ?? "", zeitstempel +  @"-ImportNachWebuntis.csv"));
+                            m.Zieldatei?.Erstellen(";", '\'', new UTF8Encoding(false), false);
+                            m.IStudents = m.Students.OhneWebuntisFoto(configuration, Path.Combine(Directory.GetCurrentDirectory(), "fotos.txt"));
+                            m.IStudents.FotosFürWebuntisZippen(configuration, Path.Combine(pfadDownloads ?? "", zeitstempel +  @"-ImportNachWebuntis.zip"), Path.Combine(Directory.GetCurrentDirectory(), "fotos.txt"));
+                        },
+                        Global.Rubrik.WöchtentlicheArbeiten,
+                        Global.NurBeiDiesenSchulnummern.Alle
+                    ),
+                    new Menüeintrag(
                         "Webuntis & Co.: Importdateien (+Fotos) für Webuntis, Littera, Netman erstellen",
                         anrechnungen,
                         quelldateien.Notwendige(configuration, ["student_,csv","schuelerlernabschnittsdaten,dat", "schuelerzusatzdaten,dat", "schuelererzieher,dat", "schuelerAdressen,dat", "lehrkraefte,dat", "klassen,dat"]),
                         students,
                         klassen,
                         [
-                            "Es werden jetzt die Dateien [bold green]" + Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-") + "****" +  @"-ImportNachWebuntis.csv") + "[/] und [bold green]***-ImportNachWebuntis.zip[/] erstellt.",
-                            "Der Webuntis-Admin muss im Anschluss die Dateien wie folgt importieren:",
-                            "1. Stammdaten > Schüler*innen > Import",
+                            "Es werden jetzt die Dateien [bold aqua]" + Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-") + "****" +  @"-ImportNachWebuntis.csv") + "[/] und [bold aqua]***-ImportNachWebuntis.zip[/] erstellt. Der Webuntis-Admin muss im Anschluss die Dateien wie folgt importieren:",
+                            "1. [bold yellow]Stammdaten > Schüler*innen > Import[/]",
                             "2. Datei auswählen, UTF8",
                             "3. Profil: Schuelerimport, dann Vorschau",
-                            "[blue]Hinweise:[/] Das Zeugnisdatum des letzten Zeugnisses in einer Klasse wird zum Webuntis-Austrittsdatum bei Schüler*innen, deren Status weder aktiv noch extern ist.",
-                            "Es wird jetzt die Datei [bold green]" + Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-") + "****" +  @"-ImportNachNetman.csv") + "[/] erstellt:",
-                            "1. Die Datei Student_***.csv muss als admin aus Webuntis nach " + pfadDownloads + " heruntergeladen werden: Stammdaten->Schüler-> Export als csv.",
+                            "[pink3]Hinweis:[/] Das Zeugnisdatum des letzten Zeugnisses in einer Klasse wird zum Webuntis-Austrittsdatum bei Schüler*innen, deren Status weder aktiv noch extern ist.",
+                            "Es wird jetzt die Datei [bold aqua]" + Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-") + "****" +  @"-ImportNachNetman.csv") + "[/] erstellt:",
+                            "1. Die Datei Student_***.csv muss als admin aus Webuntis nach [bold aqua]" + pfadDownloads + "[/] heruntergeladen werden: [bold yellow]Stammdaten > Schüler > Export als csv[/].",
                             "2. Nach dem Einlesen werden alle Schülerinnen und Schüler angezeigt, die in Untis zu löschen sind. Es wird bei diesen Schülerinnen und Schülern ein Austrittsdatum gesetzt.",
                             "3. Die Importdatei für Netman und Littera werden geschrieben.",
                             "4. Die Netman-Datei wird gezippt verschickt.",
-                            "Es wird jetzt die Datei [bold green]" + Path.Combine(@"\\fs01\Littera\Atlantis Import Daten" ?? "", DateTime.Now.ToString("yyyyMMdd-") + "****" +  @"-ImportNachLittera.csv") + "[/] erstellt.",
+                            "Es wird jetzt die Datei [bold aqua]" + Path.Combine(@"\\fs01\Littera\Atlantis Import Daten" ?? "", DateTime.Now.ToString("yyyyMMdd-") + "****" +  @"-ImportNachLittera.csv") + "[/] erstellt.",
                         ],
                         m =>
                         {
                             var zeitstempel = DateTime.Now.ToString("yyyyMMdd-HHmm");
 
-                            m.Zieldatei = m.WebuntisOderNetmanCsv(configuration, Path.Combine(pfadDownloads ?? "", zeitstempel +  @"-ImportNachWebuntis.csv"));
+                            m.Zieldatei = m.WebuntisOderNetmanOderLitteraCsv(configuration, Path.Combine(pfadDownloads ?? "", zeitstempel +  @"-ImportNachWebuntis.csv"));
                             m.Zieldatei?.Erstellen(";", '\'', new UTF8Encoding(false), false);
                             m.IStudents = m.Students.OhneWebuntisFoto(configuration, Path.Combine(Directory.GetCurrentDirectory(), "fotos.txt"));
                             m.IStudents.FotosFürWebuntisZippen(configuration, Path.Combine(pfadDownloads ?? "", zeitstempel +  @"-ImportNachWebuntis.zip"), Path.Combine(Directory.GetCurrentDirectory(), "fotos.txt"));
 
-                            m.Zieldatei = m.WebuntisOderNetmanCsv(configuration, Path.Combine(pfadDownloads ?? "", DateTime.Now.AddHours(1).ToString("yyyyMMdd-HHmm") + @"-ImportNachNetman.csv"));
+                            m.Zieldatei = m.WebuntisOderNetmanOderLitteraCsv(configuration, Path.Combine(pfadDownloads ?? "", DateTime.Now.AddHours(1).ToString("yyyyMMdd-HHmm") + @"-ImportNachNetman.csv"));
                             m.Zieldatei?.Erstellen(",", '\'', new UTF8Encoding(false), false);
                             m.Zieldatei?.Zippen(m.Zieldatei?.GetAbsoluterPfad(), configuration);
                             m.Zieldatei?.Mailen(Path.GetFileName(m.Zieldatei.AbsoluterPfad) ?? "", "Verwaltung", Path.GetFileName(m.Zieldatei.AbsoluterPfad) ?? "", configuration);
 
-                            m.Zieldatei = m.WebuntisOderNetmanCsv(configuration, Path.Combine(pfadDownloads ?? "", DateTime.Now.AddHours(1).ToString("yyyyMMdd-HHmm") + @"-ImportNachLittera.xml"));
+                            m.Zieldatei = m.WebuntisOderNetmanOderLitteraCsv(configuration, Path.Combine(pfadDownloads ?? "", DateTime.Now.AddHours(1).ToString("yyyyMMdd-HHmm") + @"-ImportNachLittera.xml"));
                             m.Zieldatei?.Erstellen(";", '\"', new UTF8Encoding(false), false);
                             m.Zieldatei?.Verschieben(@"\\fs01\Littera\Atlantis Import Daten");
                         },
                         Global.Rubrik.WöchtentlicheArbeiten,
-                        Global.NurBeiDiesenSchulnummern.Alle
+                        Global.NurBeiDiesenSchulnummern.NurPrivilegiert
                     ),
                     new Menüeintrag(
                         "Statistik: Unterrichtsverteilung für UVD und Anrechnungen nach SchILD importieren",
@@ -146,7 +197,7 @@ public static class MenueHelper
                         students,
                         klassen,
                         [
-                            $"Die Unterrichte (mit Noten) werden in der [blue]{Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat")}[/] vorbereitet. Hinzu kommen [blue]{Path.Combine(pfadSchilddatenaustausch ?? "", "Kurse.dat")}[/] und [blue]{Path.Combine(pfadSchilddatenaustausch ?? "", "Faecher.dat")}[/] und [blue]{Path.Combine(pfadSchilddatenaustausch ?? "", "Lernabschnittsdaten.dat")}[/].",
+                            $"Die Unterrichte (mit Noten) werden in der [aqua]{Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat")}[/] vorbereitet. Hinzu kommen [aqua]{Path.Combine(pfadSchilddatenaustausch ?? "", "Kurse.dat")}[/] und [aqua]{Path.Combine(pfadSchilddatenaustausch ?? "", "Faecher.dat")}[/] und [aqua]{Path.Combine(pfadSchilddatenaustausch ?? "", "Lernabschnittsdaten.dat")}[/].",
                             $"Es empfiehlt sich die Lernabschnitte zuerst in SchILD anzulegen und zu exportieren. {configuration["AppName"]} ergänzt dann die Fehlzeiten passend.",
                             "Falls mehrere Kollegen dasselbe Fach zeitgleich unterrichten, dann muss ein Zähler an das Fach angehangen werden. Bsp: Zwei LuL unterrichten Mathe. Dann M und M1.",
                             "Damit M1 in den Leistungsdaten erscheint, aber nicht auf dem Zeugnis gedruckt wird, muss die Eigenschaft 'Nicht auf Zeugnis drucken' in SchILD gesetzt werden."
@@ -317,9 +368,9 @@ public static class MenueHelper
                         klassen,
                         [
                             "Erstellen Sie jetzt Fotos aller Schüler (z.B. mit dem Handy). Dabei ist die [bold red]Reihenfolge[/] und die [bold red]Anzahl[/] der Schüler laut SchILD exakt einzuhalten. ",
-                            "   [bold blue]Hinweis #1:[/] Wenn ein Schüler fehlt, dann die weiße Wand fotografieren, damit Reihenfolge und Anzahl stimmen.",
-                            "   [bold blue]Hinweis #2:[/] Wenn ein Foto nicht gelungen ist, dann löschen und neu erstellen.",
-                            "   [bold blue]Hinweis #3:[/] Wenn mehr als eine Klasse ausgewählt wird, wird nur die erste Klasse berücksichtigt",
+                            "   [bold aqua]Hinweis #1:[/] Wenn ein Schüler fehlt, dann die weiße Wand fotografieren, damit Reihenfolge und Anzahl stimmen.",
+                            "   [bold aqua]Hinweis #2:[/] Wenn ein Foto nicht gelungen ist, dann löschen und neu erstellen.",
+                            "   [bold aqua]Hinweis #3:[/] Wenn mehr als eine Klasse ausgewählt wird, wird nur die erste Klasse berücksichtigt",
                         ],
                         m =>
                         {
@@ -337,7 +388,7 @@ public static class MenueHelper
                         students,
                         klassen,
                         [
-                            "Vorarbeiten: Fotos aller Schüler wurden bereits erstellt und liegen nun in der richtigen [bold blue]Reihenfolge[/] und [bold blue]Anzahl[/] im Ordner " + Path.Combine(configuration["PfadDownloads"], "Fotos") +  ".",
+                            "Vorarbeiten: Fotos aller Schüler wurden bereits erstellt und liegen nun in der richtigen [bold aqua]Reihenfolge[/] und [bold aqua]Anzahl[/] im Ordner " + Path.Combine(configuration["PfadDownloads"], "Fotos") +  ".",
                             "Beachten Sie die Hinweise.",
                             "Starten Sie am Ende den Importprozess."
                         ],
@@ -413,7 +464,7 @@ public static class MenueHelper
                         students,
                         klassen,
                         [
-                            $"Die Altersermäßigung wird aus der Datei [blue]{Path.Combine(configuration["PfadDownloads"] ?? "", "Lehrkraefte.dat")}[/] berechnet und mit der [blue]{Path.Combine(configuration["PfadDownloads"] ?? "", "LehrkraefteSonderzeiten.dat")}[/] und optional [blue]{Path.Combine(configuration["PfadDownloads"] ?? "", "GPU020.TXT")}[/] abgeglichen.",
+                            $"Die Altersermäßigung wird aus der Datei [aqua]{Path.Combine(configuration["PfadDownloads"] ?? "", "Lehrkraefte.dat")}[/] berechnet und mit der [aqua]{Path.Combine(configuration["PfadDownloads"] ?? "", "LehrkraefteSonderzeiten.dat")}[/] und optional [aqua]{Path.Combine(configuration["PfadDownloads"] ?? "", "GPU020.TXT")}[/] abgeglichen.",
                             "Alle Lehrkräfte (angestellt, verbeamtet und auch Werkstattlehrer) erhalten die erste Altersermäßigung ab dem Schuljahr, das auf die Vollendung des 55. Lebensjahres folgt. Pech hat also, wer z.B. am 1. August 55 Jahre alt wird. Dann gibt es die Altersermäßigung erst ab dem kommenden Schuljahr.",
                             "Ab dem 55. Lebensjahr erhalten Vollzeitbeschäftigte 1 Stunde Altersermäßigung, Teilzeitbeschäftigte (mindestens 50%) erhalten 0,5 Stunden.",
                             "Lehrkräfte, die ihre Stundenzahl nur um 1 Stunde verringert haben, erhalten ebenfalls die komplette Altersermäßigung.",

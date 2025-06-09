@@ -61,9 +61,9 @@ public class Menue : List<Menüeintrag>
             }
 
             grid.AddRow(new Text[]{
-                new Text((i + 1).ToString(), new Style(Color.Turquoise2, Color.Black)).RightJustified(),
+                new Text((i + 1).ToString(), new Style(Color.White, Color.Black)).RightJustified(),
                 new Text(links, new Style(Color.SpringGreen2, Color.Black)).LeftJustified(),
-                new Text(rechts, new Style(Color.Turquoise2 , Color.Black)).LeftJustified()
+                new Text(rechts, new Style(Color.White , Color.Black)).LeftJustified()
             });
         }
 
@@ -99,7 +99,7 @@ public class Menue : List<Menüeintrag>
 
         switch (configuration["Auswahl"])
         {
-            case "ö":
+            case "y":
                 Global.OpenWebseite(configuration["OnlineHilfeURL"]);
                 configuration["Auswahl"] = "-1";
                 return configuration;

@@ -56,7 +56,7 @@ public class Gruppen : List<Gruppe>
             gruppen.Add(gruppe);
         }
 
-        var panel = new Panel("Die Bildungsgänge werden aus den Anrechnungen ermittelt. Zwei Dinge sind wichtig:\n1. Das Wort 'Bildungsgangleitung' muss im [bold blue]Text[/] in Untis enthalten sein\n2. einen Link 'bildungsgaenge: ...' in der [bold blue]Beschr[/].")
+        var panel = new Panel("Die Bildungsgänge werden aus den Anrechnungen ermittelt. Zwei Dinge sind wichtig:\n1. Das Wort 'Bildungsgangleitung' muss im [bold aqua]Text[/] in Untis enthalten sein\n2. einen Link 'bildungsgaenge: ...' in der [bold aqua]Beschr[/].")
                         .HeaderAlignment(Justify.Left)
                         .SquareBorder()
                         .Expand()

@@ -4,35 +4,44 @@ using Common;
 using Microsoft.Extensions.Configuration;
 using Spectre.Console;
 
+// Pfad in Programmen: yellow
+// Pfad in Dateien: aqua
+// Action in Menüs: springGreen2
+// Einstellungen Rahmen: dodgerBlue1
+// Hinweise: pink3
+// Kopfzeile in CSV: deeppink1_1
+// Hyperlink: lightskyblue3_1
+// Zahlen: tan
+// Überschrift: springGreen2
+
+
 Global.User = Environment.UserName;
 IConfiguration? configuration = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile($"{Global.User}.json", optional: true, reloadOnChange: true).Build();
 
 configuration["AppName"] = "BKB-Tool";
 Global.AppVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0.0"; // Major.Minor.Build.Revision
+Global.SchulnummernPrivilegiert = new List<string>{"177659"};
+Global.SchulnummernGesperrt = new List<string>{"999999"};
+
 configuration["AppDescription"] = "BKB-Tool - Ein Werkzeug an der Schnittstelle zwischen SchILD und Untis.";
 
-Global.DisplayHeader(configuration);
-
-Global.PrivilegierteSchulnummern = new List<string>
-{
-    "177659" // BK Borken
-};
+var dateien = new Dateien(configuration);
 
 do
 {
+    dateien = new Dateien();
     if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), Global.User + ".json")))
     {
-        configuration = Global.EinstellungenDurchlaufen(Global.Modus.Create, configuration);        
+        configuration = Global.EinstellungenDurchlaufen(Global.Modus.Create, configuration);
     }
     else
     {
         configuration = Global.EinstellungenDurchlaufen(Global.Modus.Read, configuration);
     }
-    Global.DisplayHeader(configuration);
+
     CheckForUpdate(configuration);
     var table = new Table().Centered();
 
-    var dateien = new Dateien();
     dateien.ExportAusSchildVerschieben(configuration);
     dateien.GetInteressierendeDateienMitAllenEigenschaften(configuration);
     dateien.GetZeilen(configuration);
@@ -40,14 +49,16 @@ do
     var menu = MenueHelper.Einlesen(dateien, configuration);
     if (menu == null) continue;
 
+    //dateien.DisplayHeader(configuration, dateien.Meldung);
+
     var menuGefiltert = new Menue();
-    menuGefiltert.AddRange(menu.Where(m => m.BeiDiesenSchulnummernAnzeigen == Global.NurBeiDiesenSchulnummern.Alle || Global.PrivilegierteSchulnummern.Contains(configuration["Schulnummer"])));
+    menuGefiltert.AddRange(menu.Where(m => m.BeiDiesenSchulnummernAnzeigen == Global.NurBeiDiesenSchulnummern.Alle || Global.SchulnummernPrivilegiert.Contains(configuration["Schulnummer"])));
     menuGefiltert.AuswahlGridRendern();
 
     configuration = menuGefiltert.GetAusgewaehlterMenueintrag(configuration, ["x", "y"]);
     var i = Convert.ToInt32(configuration["Auswahl"]);
 
-    Global.DisplayHeader(configuration);
+    dateien.DisplayHeader(configuration);
     if (i >= 0)
     {
         menuGefiltert[i].RenderAuswahlÜberschrift(configuration);
@@ -112,17 +123,13 @@ void CheckForUpdate(IConfiguration configuration)
         {
             if (githubVer > lokalVer)
             {
-                Global.DisplayHeader(configuration);
-
-                var panel = new Panel($"Das Update wird jetzt heruntergeladen und der Autoupdater wird gestartet.\nUpdate von Version v{lokaleVersion} -> {githubVersion}\nMit [green bold]beliebiger Taste[/] startet das Update.")
-                    .Header("[bold lightPink1]  Update verfügbar  [/]")
-                    .HeaderAlignment(Justify.Left)
-                    .SquareBorder()
-                    .Expand()
-                    .BorderColor(Color.LightPink1);
-
-                AnsiConsole.Write(panel);
-
+                dateien.DisplayHeader(configuration,
+                [
+                    $"Ein Update auf Version [tan]{githubVersion}[/] ist verfügbar.",                    
+                    $"Drücken Sie eine [green bold]beliebige Taste[/], um das Update zu starten."
+                ]
+                );
+                
                 Console.ReadKey(); // Warten auf Benutzereingabe, bevor das Update gestartet wird
 
                 // Die Autoupdater-Batch-Datei wird erzeugt und neben die exe gespeichert. Danach wird sie ausgeführt.
