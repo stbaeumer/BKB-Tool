@@ -132,7 +132,48 @@ void CheckForUpdate(IConfiguration configuration)
                 
                 Console.ReadKey(); // Warten auf Benutzereingabe, bevor das Update gestartet wird
 
-                // Die Autoupdater-Batch-Datei wird erzeugt und neben die exe gespeichert. Danach wird sie ausgeführt.
+                // Lade die Datei nach bkb-neu.exe herunter und führe den Autoupdater aus.
+
+                // Download-URL aus dem Release-Asset holen (wie zuvor empfohlen)
+                string downloadUrl = null;
+                foreach (var asset in releases
+                    .First(r => !r.GetProperty("draft").GetBoolean() && (allowPrerelease || !r.GetProperty("prerelease").GetBoolean()))
+                    .GetProperty("assets").EnumerateArray())
+                {
+                    var name = asset.GetProperty("name").GetString();
+                    if (name != null && name.Equals("BKB-Tool.exe", StringComparison.OrdinalIgnoreCase))
+                    {
+                        downloadUrl = asset.GetProperty("browser_download_url").GetString();
+                        break;
+                    }
+                }
+
+                // Zielpfad für die neue Datei
+                string zielDatei = Path.Combine(Directory.GetCurrentDirectory(), "BKB-Tool_neu.exe");
+
+                using (var webClient = new System.Net.WebClient())
+                {
+                    webClient.Headers.Add("User-Agent", "request");
+
+                    AnsiConsole.Progress()
+                        .Start(ctx =>
+                        {
+                            var task = ctx.AddTask("Lade Update herunter ...");
+                            webClient.DownloadProgressChanged += (s, e) =>
+                            {
+                                task.Value = e.ProgressPercentage;
+                            };
+                            var downloadCompleted = new System.Threading.ManualResetEvent(false);
+                            webClient.DownloadFileCompleted += (s, e) =>
+                            {
+                                task.Value = 100;
+                                downloadCompleted.Set();
+                            };
+                            webClient.DownloadFileAsync(new Uri(downloadUrl), zielDatei);
+                            downloadCompleted.WaitOne();
+                        });
+                }
+
                 string updaterPath = Path.Combine(Directory.GetCurrentDirectory(), "BKB-Tool-autoupdater.bat");
 
                 // wenn die Datei schon existiert, dann löschen
@@ -142,48 +183,42 @@ void CheckForUpdate(IConfiguration configuration)
                     File.Delete(updaterPath);
                 }
 
-                var downloadUrl = "https://github.com/stbaeumer/BKB-Tool/releases/latest/download/BKB-Tool.exe";
-
+                // Batch-Datei erzeugen (wie gehabt, aber OHNE curl!)
                 File.WriteAllText(updaterPath,
-        "@echo off\n" +
-        "echo.\n" +
-        "echo BKB-Tool\n" +
-        "echo =========\n" +
-        "echo Update wird heruntergeladen...\n" +
-        $"curl -L -# -o BKB-Tool_neu.exe {downloadUrl}\n" +
-        "echo Warte auf Beenden von BKB-Tool.exe ...\n" +
-        ":waitforend\n" +
-        "tasklist | find /I \"BKB-Tool.exe\" >nul\n" +
-        "if not errorlevel 1 (\n" +
-        "    timeout /t 1 >nul\n" +
-        "    goto waitforend\n" +
-        ")\n" +
-        "echo Ersetze alte Version ...\n" +
-        "del /F /Q BKB-Tool.exe\n" +
-        "rename BKB-Tool_neu.exe BKB-Tool.exe\n" +
-        "echo Starte neue Version ...\n" +
-        "start \"\" BKB-Tool.exe\n" +
-        "exit\n"
-    );
+                    "@echo off\n" +
+                    "echo.\n" +
+                    "echo BKB-Tool\n" +
+                    "echo =========\n" +
+                    "echo Warte auf Beenden von BKB-Tool.exe ...\n" +
+                    ":waitforend\n" +
+                    "tasklist | find /I \"BKB-Tool.exe\" >nul\n" +
+                    "if not errorlevel 1 (\n" +
+                    "    timeout /t 1 >nul\n" +
+                    "    goto waitforend\n" +
+                    ")\n" +
+                    "echo Ersetze alte Version ...\n" +
+                    "del /F /Q BKB-Tool.exe\n" +
+                    "rename BKB-Tool_neu.exe BKB-Tool.exe\n" +
+                    "echo Starte neue Version ...\n" +
+                    "start \"\" BKB-Tool.exe\n" +
+                    "exit\n"
+                );
 
-                // Autoupdater ausführen
-                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                {
-                    FileName = updaterPath,
-                    UseShellExecute = true,
-                    CreateNoWindow = true
-                });
-                Environment.Exit(0); // Beendet das aktuelle Programm sofort, damit das Update funktioniert
-
-                // Autoupdater ausführen
-                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                {
-                    FileName = updaterPath,
-                    UseShellExecute = true,
-                    CreateNoWindow = true
-                });
-
+                dateien.DisplayHeader(configuration,
+                [
+                    $"Die neue Datei wurde heruntergeladen und gespeichert als [aqua]{zielDatei}[/].",                    
+                    $"Mit [green bold]Enter[/] wird jetzt in die Version {githubVer} neugestartet."
+                ]);
                 Console.ReadKey();
+
+                // Autoupdater ausführen
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = updaterPath,
+                    UseShellExecute = true,
+                    CreateNoWindow = true
+                });
+                Environment.Exit(0); // Beendet das aktuelle Programm sofort, damit das Update funktioniert                
             }
         }
         else

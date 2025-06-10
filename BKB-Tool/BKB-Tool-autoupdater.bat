@@ -2,8 +2,6 @@
 echo.
 echo BKB-Tool
 echo =========
-echo Update wird heruntergeladen...
-curl -L -# -o BKB-Tool_neu.exe https://github.com/stbaeumer/BKB-Tool/releases/latest/download/BKB-Tool.exe
 echo Warte auf Beenden von BKB-Tool.exe ...
 :waitforend
 tasklist | find /I "BKB-Tool.exe" >nul
