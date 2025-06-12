@@ -41,9 +41,10 @@ public static class Global
     public enum NurBeiDiesenSchulnummern
     {
         Alle,
+        AlleBisAufGesperrte,
         NurPrivilegiert,
-        Nur177659,
-        AlleBisAufGesperrte
+        Nur177659,        
+        Nur000000
     }
 
     public enum Rubrik
@@ -90,6 +91,9 @@ public static class Global
     public static List<string>? SchulnummernPrivilegiert { get; set; }
     public static string AppVersion { get; set; }
     public static List<string> SchulnummernGesperrt { get; set; }
+    public static List<string> SchulnummernJedermann { get; set; }
+    public static List<string> SchulnummernDebug { get; set; }
+    public static List<string> Schulnummer177659 { get; set; }
 
     public static string? SafeGetString(SqlDataReader reader, int colIndex)
     {
@@ -101,7 +105,7 @@ public static class Global
     public static void DisplayHeader(IConfiguration configuration, List<string> content = null)
     {
         Console.Clear();
-        AnsiConsole.Write(new FigletText(configuration["AppName"] ?? "AppName").Centered().Color(Color.SpringGreen2));
+        AnsiConsole.Write(new FigletText("BKB-Tool").Centered().Color(Color.SpringGreen2));
 
         var contentString = configuration["AppDescription"] ?? "BKB-Tool - Ein Werkzeug für die Arbeit mit dem BKB-Schilddatenaustausch";
 
@@ -303,7 +307,7 @@ public static class Global
             .HeaderAlignment(Justify.Left)
             .SquareBorder()
             .Expand()
-            .BorderColor(Color.Green);
+            .BorderColor(Color.SpringGreen2);
 
         //
         aufforderung = " " + aufforderung;
@@ -327,12 +331,12 @@ public static class Global
 
             userInput = AnsiConsole.Prompt(
             new TextPrompt<string>(aufforderung)
-                .PromptStyle("green")
+                .PromptStyle("springGreen2")
                 .ShowDefaultValue(true)
                 .Validate(n =>
                 {
                     if (zulässigeAuswahlOptionen.ToLower() != "ja")
-                        return ValidationResult.Error($"Sie müssen [bold green]Ja[/] eintippen, um {configuration["AppName"]} nutzen zu können.");
+                        return ValidationResult.Error($"Sie müssen [bold springGreen2]Ja[/] eintippen, um [bold springGreen2]BKB-Tool[/] nutzen zu können.");
                     return ValidationResult.Success();
                 }));
 
@@ -356,7 +360,7 @@ public static class Global
 
             userInput = AnsiConsole.Prompt(
             new TextPrompt<string>(aufforderung)
-                .PromptStyle("green")
+                .PromptStyle("springGreen2")
                 .DefaultValue(defaultValue.ToLower() == "x" ? "x" : defaultValue.ToString())
                 .ShowDefaultValue(true)
                 .Validate(n =>
@@ -746,7 +750,7 @@ public static class Global
 
             DisplayHeader(configuration);
             configuration = Global.Konfig("ZustimmungLizenz", Global.Modus.Update, configuration, "Ich stimme den Lizenzbedingungen der GPLv3 zu. (Ja/Nein)",
-            $"BKB-Tool steht unter der GNU General Public License Version 3 (GPLv3). " +
+            $"[bold springGreen2]BKB-Tool[/] steht unter der GNU General Public License Version 3 (GPLv3). " +
             "Die GPLv3 ist eine freie Softwarelizenz, die es Ihnen erlaubt, die Software zu verwenden, zu modifizieren und weiterzugeben, solange Sie die Bedingungen der Lizenz einhalten. " +
             "Die wichtigsten Bedingungen dieser Lizenz sind:\n" +            
             "[dodgerBlue1 bold]Freiheit zur Nutzung, Änderung und Weiterverbreitung:[/] Sie dürfen diese Software frei verwenden, anpassen und weitergeben, solange alle abgeleiteten Werke ebenfalls unter der GPLv3 stehen.\n" +            
@@ -764,7 +768,7 @@ public static class Global
         if (modus == Modus.Create)
             DisplayHeader(configuration);
         var panel = new Panel("Ihre Einstellungen werden verschlüsselt in der Datei [aqua]" + Path.Combine(Directory.GetCurrentDirectory(), Global.User + ".json[/]") + " gespeichert." +
-        $"\nDateien (aus Webuntis etc.), die {configuration["AppName"]} importieren soll, werden aus [aqua]" + configuration["PfadDownloads"] + "[/] eingelesen.")
+        $"\nDateien (aus Webuntis etc.), die [bold springGreen2]BKB-Tool[/] importieren soll, werden aus [aqua]" + configuration["PfadDownloads"] + "[/] eingelesen.")
                         .Header($" [bold dodgerBlue1]  Einstellungen  [/]")
                         .HeaderAlignment(Justify.Left)
                         .SquareBorder()
@@ -777,7 +781,7 @@ public static class Global
             AnsiConsole.Write(panel);
         }  
 
-        configuration = Konfig("PfadDownloads", modus, configuration, @"Downloads-Verzeichnis", "Geben Sie den Pfad des Downloads-Verzeichnisses an. In der Regel wird das Verzeichnis bereits richtig vorgeschlagen. Dann einfach [bold green]ENTER[/] drücken:", Datentyp.Pfad, Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"));
+        configuration = Konfig("PfadDownloads", modus, configuration, @"Downloads-Verzeichnis", "Geben Sie den Pfad des Downloads-Verzeichnisses an. In der Regel wird das Verzeichnis bereits richtig vorgeschlagen. Dann einfach [bold springGreen2]ENTER[/] drücken:", Datentyp.Pfad, Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"));
 
         if (modus != Modus.Read)
         {
@@ -801,7 +805,7 @@ public static class Global
             AnsiConsole.Write(panel);
         }
 
-        configuration = Konfig("MaxDateiAlter", modus, configuration, "Wie viele Tage dürfen Dateien höchstens alt sein?", $"Geben Sie an, wie viele Tage Dateien höchstens alt sein dürfen, um vom {configuration["AppName"]} für das Einlesen akzeptiert zu werden. Die Angabe einer (möglichst niedrigen) Zahl soll sicherstellen, dass nicht versehntlich veraltete Dateien eingelesen werden.", Datentyp.Int);
+        configuration = Konfig("PfadDokumentenverwaltung", modus, configuration, "Pfad zur Dokumentenverwaltung", $"Geben Sie das Verzeichnis an, das in SchILD unter [yellow bold]Extras > Programmeinstellungen > Globale Einstellungen > Dokumentenverwaltung[/] als [yellow bold]Dokumentenverzeichnis[/] eingetragen ist. Die Dokumentenverwaltung muss eingeschaltet sein. Wenn dort kein Verzeichnis steht, tragen Sie dort das selbe Verzeichnis ein, das Sie auch hier angeben:", Datentyp.Pfad, "/home/stefan/Windows/SchILD-NRW/Datenaustausch");
 
         if (modus != Modus.Read)
         {
@@ -809,11 +813,19 @@ public static class Global
             AnsiConsole.Write(panel);
         }
 
-        configuration = Konfig("AppName", Modus.Read, configuration, "Wie soll die App heißen?", $"Sie können die App [bold green]{configuration["AppName"]}[/] umbennen.", Datentyp.String);
+        configuration = Konfig("MaxDateiAlter", modus, configuration, "Wie viele Tage dürfen Dateien höchstens alt sein?", $"Geben Sie an, wie viele Tage Dateien höchstens alt sein dürfen, um vom [bold springGreen2]BKB-Tool[/] für das Einlesen akzeptiert zu werden. Die Angabe einer (möglichst niedrigen) Zahl soll sicherstellen, dass nicht versehntlich veraltete Dateien eingelesen werden.", Datentyp.Int);
+
+        if (modus != Modus.Read)
+        {
+            DisplayHeader(configuration);
+            AnsiConsole.Write(panel);
+        }
+
+        configuration = Konfig("AppName", Modus.Read, configuration, "Wie soll die App heißen?", $"Sie können die App [bold springGreen2]BKB-Tool[/] umbennen.", Datentyp.String);
 
         if (modus == Modus.Update && SchulnummernPrivilegiert.Contains(configuration["Schulnummer"]))
         {
-            configuration = Konfig("MailDomain", modus, configuration, "Mail-Domain für Schüler*innen", "Geben Sie die Mail-Domain für Ihre Schüler*innen an. Ihre Eingabe muss mit [green bold]@[/] beginnen und einen [green bold]Punkt[/] enthalten. Beispiel: [green bold]@students.meine-schule.de[/]", Datentyp.Mail);
+            configuration = Konfig("MailDomain", modus, configuration, "Mail-Domain für Schüler*innen", "Geben Sie die Mail-Domain für Ihre Schüler*innen an. Ihre Eingabe muss mit [springGreen2 bold]@[/] beginnen und einen [springGreen2 bold]Punkt[/] enthalten. Beispiel: [springGreen2 bold]@students.meine-schule.de[/]", Datentyp.Mail);
             configuration = Konfig("ConnectionStringUntis", modus, configuration, "ConnectionStringUntis (optional)");
             configuration = Konfig("ZipKennwort", modus, configuration, "Kennwort zum Verschlüsseln von Zip-Dateien");
             configuration = Konfig("SmtpUser", modus, configuration, "Mail-Benutzer");
@@ -945,7 +957,7 @@ public static class Global
             }
         }
 
-        var panel = new Panel($"Weiter mit [bold green]Anykey[/] oder mit [bold green]x[/] Einstellungen durchlaufen oder mit [bold green]y[/] Onlinehilfe öffnen.")
+        var panel = new Panel($"Weiter mit [bold springGreen2]Anykey[/] oder mit [bold springGreen2]x[/] Einstellungen durchlaufen oder mit [bold springGreen2]y[/] Onlinehilfe öffnen.")
                         .HeaderAlignment(Justify.Left)
                         .SquareBorder()
                         .Expand()

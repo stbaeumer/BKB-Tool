@@ -1,5 +1,21 @@
 chcp 65001
 cd BKB-Tool
+
+REM BKB-Tool.exe beenden, falls offen
+echo Prüfe, ob BKB-Tool.exe läuft ...
+tasklist | find /I "BKB-Tool.exe" >nul
+if not errorlevel 1 (
+    echo Beende BKB-Tool.exe ...
+    taskkill /IM "BKB-Tool.exe" /F
+    REM Warten, bis Prozess wirklich beendet ist
+    :waitforend
+    tasklist | find /I "BKB-Tool.exe" >nul
+    if not errorlevel 1 (
+        timeout /t 1 >nul
+        goto waitforend
+    )
+)
+
 dotnet publish -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true /p:IncludeAllContentForSelfExtract=true
 
 REM Zielverzeichnis definieren

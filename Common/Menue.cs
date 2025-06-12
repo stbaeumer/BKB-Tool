@@ -92,10 +92,10 @@ public class Menue : List<Menüeintrag>
 
         if(this.Count > 0)
         {
-            menuEintraege = $"[bold green] 1 ... " + this.Count() + "[/] oder";
+            menuEintraege = $"[bold springGreen2] 1 ... " + this.Count() + "[/] oder";
         }
 
-        configuration = Global.Konfig("Auswahl", Global.Modus.Update, configuration, "Auswahl", $"Wählen Sie{menuEintraege} [bold green]x[/] für Einstellungen oder [bold green]y[/] für Onlinehilfe", Global.Datentyp.Auswahl, null, null, zulässigeAuswahlOptionen);
+        configuration = Global.Konfig("Auswahl", Global.Modus.Update, configuration, "Auswahl", $"Wählen Sie{menuEintraege} [bold springGreen2]x[/] für Einstellungen oder [bold springGreen2]y[/] für Onlinehilfe", Global.Datentyp.Auswahl, null, null, zulässigeAuswahlOptionen);
 
         switch (configuration["Auswahl"])
         {

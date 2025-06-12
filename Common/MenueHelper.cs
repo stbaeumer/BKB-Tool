@@ -47,7 +47,7 @@ public static class MenueHelper
                 return new Menue(quelldateien, klassen, lehrers, students, []);
             }
 
-#pragma warning disable CS8601 // Mögliche Nullverweiszuweisung
+            #pragma warning disable CS8601 // Mögliche Nullverweiszuweisung
             //Console.WriteLine("");
             //AnsiConsole.Write(new Rule("").RuleStyle("springgreen2").Centered());
 
@@ -58,7 +58,7 @@ public static class MenueHelper
                 students,
                 [
                     new Menüeintrag(
-                        "Webuntis: Schüler*innen-Importdatei ***-ImportNachWebuntis.csv für Webuntis erstellen",
+                        "Webuntis: Schüler*innen-Importdatei für Webuntis erstellen",
                         anrechnungen,
                         quelldateien.Notwendige(configuration, ["student_,csv","schuelerlernabschnittsdaten,dat", "schuelerzusatzdaten,dat", "schuelererzieher,dat", "schuelerAdressen,dat", "lehrkraefte,dat", "klassen,dat"]),
                         students,
@@ -84,31 +84,31 @@ public static class MenueHelper
                         Global.NurBeiDiesenSchulnummern.Alle
                     ),
                     new Menüeintrag(
-                        "Webuntis: Importdateien (+Fotos) für Webuntis erstellen",
+                        "Webuntis-Fotos : Zipdatei mit Fotos für Webuntis erstellen",
                         anrechnungen,
                         quelldateien.Notwendige(configuration, ["student_,csv","schuelerlernabschnittsdaten,dat", "schuelerzusatzdaten,dat", "schuelererzieher,dat", "schuelerAdressen,dat", "lehrkraefte,dat", "klassen,dat"]),
                         students,
                         klassen,
                         [
-                            "Es werden jetzt die Dateien [bold aqua]" + Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-") + "****" +  @"-ImportNachWebuntis.csv") + "[/] und [bold aqua]***-ImportNachWebuntis.zip[/] erstellt. Der Webuntis-Admin muss im Anschluss die Dateien wie folgt importieren:",
-                            "1. [bold yellow]Stammdaten > Schüler*innen > Import[/]",
-                            "2. Datei auswählen, UTF8",
-                            "3. Profil: Schuelerimport, dann Vorschau",
-                            "[pink3]Hinweis:[/] Das Zeugnisdatum des letzten Zeugnisses in einer Klasse wird zum Webuntis-Austrittsdatum bei Schüler*innen, deren Status weder aktiv noch extern ist."                            
+                            $"Es wird jetzt die Datei [aqua] {Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd") + "-ImportNachWebuntis.zip")}[/] erstellt.",
+                            "[pink3]Hinweis:[/] Schüler*innen, deren Foto hochgeladen wurden, werden in der Datei [aqua]fotos.txt[/] gespeichert, um ein erneutes Hochladen zu vermeiden."
                         ],
                         m =>
                         {
-                            var zeitstempel = DateTime.Now.ToString("yyyyMMdd-HHmm");
-                            m.Zieldatei = m.WebuntisOderNetmanOderLitteraCsv(configuration, Path.Combine(pfadDownloads ?? "", zeitstempel +  @"-ImportNachWebuntis.csv"));
-                            m.Zieldatei?.Erstellen(";", '\'', new UTF8Encoding(false), false);
+                            var zeitstempel = DateTime.Now.ToString("yyyyMMdd-HHmm");                            
                             m.IStudents = m.Students.OhneWebuntisFoto(configuration, Path.Combine(Directory.GetCurrentDirectory(), "fotos.txt"));
-                            m.IStudents.FotosFürWebuntisZippen(configuration, Path.Combine(pfadDownloads ?? "", zeitstempel +  @"-ImportNachWebuntis.zip"), Path.Combine(Directory.GetCurrentDirectory(), "fotos.txt"));
+                            m.IStudents.FotosFürWebuntisZippen(configuration, Path.Combine(pfadDownloads ?? "", zeitstempel +  @"-ImportNachWebuntis.zip"), Path.Combine(Directory.GetCurrentDirectory(), "fotos.txt"),
+                            [
+                                "1. [bold yellow]Stammdaten > Schüler*innen > Bildimport[/]",
+                                "2. Identifizierung Fremdschlüssel",
+                                "3. [springGreen2]Datei auswählen[/]"
+                            ]);
                         },
                         Global.Rubrik.WöchtentlicheArbeiten,
-                        Global.NurBeiDiesenSchulnummern.Alle
+                        Global.NurBeiDiesenSchulnummern.Nur000000
                     ),
                     new Menüeintrag(
-                        "Webuntis & Co.: Importdateien (+Fotos) für Webuntis, Littera, Netman erstellen",
+                        "Littera: Schüler*innen-Importdatei für Littera erstellen",
                         anrechnungen,
                         quelldateien.Notwendige(configuration, ["student_,csv","schuelerlernabschnittsdaten,dat", "schuelerzusatzdaten,dat", "schuelererzieher,dat", "schuelerAdressen,dat", "lehrkraefte,dat", "klassen,dat"]),
                         students,
@@ -129,24 +129,34 @@ public static class MenueHelper
                         m =>
                         {
                             var zeitstempel = DateTime.Now.ToString("yyyyMMdd-HHmm");
-
-                            m.Zieldatei = m.WebuntisOderNetmanOderLitteraCsv(configuration, Path.Combine(pfadDownloads ?? "", zeitstempel +  @"-ImportNachWebuntis.csv"));
-                            m.Zieldatei?.Erstellen(";", '\'', new UTF8Encoding(false), false);
-                            m.IStudents = m.Students.OhneWebuntisFoto(configuration, Path.Combine(Directory.GetCurrentDirectory(), "fotos.txt"));
-                            m.IStudents.FotosFürWebuntisZippen(configuration, Path.Combine(pfadDownloads ?? "", zeitstempel +  @"-ImportNachWebuntis.zip"), Path.Combine(Directory.GetCurrentDirectory(), "fotos.txt"));
-
-                            m.Zieldatei = m.WebuntisOderNetmanOderLitteraCsv(configuration, Path.Combine(pfadDownloads ?? "", DateTime.Now.AddHours(1).ToString("yyyyMMdd-HHmm") + @"-ImportNachNetman.csv"));
-                            m.Zieldatei?.Erstellen(",", '\'', new UTF8Encoding(false), false);
-                            m.Zieldatei?.Zippen(m.Zieldatei?.GetAbsoluterPfad(), configuration);
-                            m.Zieldatei?.Mailen(Path.GetFileName(m.Zieldatei.AbsoluterPfad) ?? "", "Verwaltung", Path.GetFileName(m.Zieldatei.AbsoluterPfad) ?? "", configuration);
-
                             m.Zieldatei = m.WebuntisOderNetmanOderLitteraCsv(configuration, Path.Combine(pfadDownloads ?? "", DateTime.Now.AddHours(1).ToString("yyyyMMdd-HHmm") + @"-ImportNachLittera.xml"));
                             m.Zieldatei?.Erstellen(";", '\"', new UTF8Encoding(false), false);
                             m.Zieldatei?.Verschieben(@"\\fs01\Littera\Atlantis Import Daten");
                         },
                         Global.Rubrik.WöchtentlicheArbeiten,
-                        Global.NurBeiDiesenSchulnummern.NurPrivilegiert
-                    ),
+                        Global.NurBeiDiesenSchulnummern.Nur177659
+                    ),                    
+                    new Menüeintrag(
+                        "Netman: Schüler*innen-Importdatei für Netman erstellen",
+                        anrechnungen,
+                        quelldateien.Notwendige(configuration, ["student_,csv","schuelerlernabschnittsdaten,dat", "schuelerzusatzdaten,dat", "schuelererzieher,dat", "schuelerAdressen,dat", "lehrkraefte,dat", "klassen,dat"]),
+                        students,
+                        klassen,
+                        [
+                            $"Es wird jetzt die Datei [aqua] {Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd") + "-ImportNachNetman.csv")}[/] erstellt.",
+                            "[pink3]Hinweis:[/] Schüler*innen, die bereits abgegangen sind oder einen Abschluss erworben haben, werden erst sechs Wochen später ausgebucht, um den Zugriff auf Teams nicht direkt zu verlieren."
+                        ],
+                        m =>
+                        {
+                            var zeitstempel = DateTime.Now.ToString("yyyyMMdd-HHmm");
+                            m.Zieldatei = m.WebuntisOderNetmanOderLitteraCsv(configuration, Path.Combine(pfadDownloads ?? "", DateTime.Now.AddHours(1).ToString("yyyyMMdd-HHmm") + @"-ImportNachNetman.csv"));
+                            m.Zieldatei?.Erstellen(",", '\'', new UTF8Encoding(false), false);
+                            m.Zieldatei?.Zippen(m.Zieldatei?.GetAbsoluterPfad(), configuration);
+                            m.Zieldatei?.Mailen(Path.GetFileName(m.Zieldatei.AbsoluterPfad) ?? "", "Verwaltung", Path.GetFileName(m.Zieldatei.AbsoluterPfad) ?? "", configuration);
+                        },
+                        Global.Rubrik.WöchtentlicheArbeiten,
+                        Global.NurBeiDiesenSchulnummern.Nur177659
+                    ),                   
                     new Menüeintrag(
                         "Statistik: Unterrichtsverteilung für UVD und Anrechnungen nach SchILD importieren",
                         anrechnungen,
@@ -154,7 +164,7 @@ public static class MenueHelper
                         students,
                         klassen,
                         [
-                            "Es werden jetzt die Dateien [bold green]" + Path.Combine(pfadSchilddatenaustausch ?? "", "Lernabschnitte.dat") + "[/], [bold green]" + Path.Combine(pfadSchilddatenaustausch ?? "", "Leistungsdaten.dat") + "[/] und [bold green]" + Path.Combine(pfadSchilddatenaustausch ?? "", "LehrkraefteSonderzeiten.dat") + "[/] erstellt.",
+                            "Es werden jetzt die Dateien [bold springGreen2]" + Path.Combine(pfadSchilddatenaustausch ?? "", "Lernabschnitte.dat") + "[/], [bold springGreen2]" + Path.Combine(pfadSchilddatenaustausch ?? "", "Leistungsdaten.dat") + "[/] und [bold springGreen2]" + Path.Combine(pfadSchilddatenaustausch ?? "", "LehrkraefteSonderzeiten.dat") + "[/] erstellt.",
                             "Unterrichte in Blockklassen werden mit dem Faktor 3 multipliziert.",
                             "Da SchILD bei Unterrichten nur Ganzzahlen entgegennehmen kann werden die Werte aus Webuntis gerundet.",
                             "Die Datei LehrkraefteSonderzeiten.dat muss zuerst aus SchILD exportiert werden. Die exportierte Datei wird dann für den ReImport aufbereitet.",
@@ -198,7 +208,7 @@ public static class MenueHelper
                         klassen,
                         [
                             $"Die Unterrichte (mit Noten) werden in der [aqua]{Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat")}[/] vorbereitet. Hinzu kommen [aqua]{Path.Combine(pfadSchilddatenaustausch ?? "", "Kurse.dat")}[/] und [aqua]{Path.Combine(pfadSchilddatenaustausch ?? "", "Faecher.dat")}[/] und [aqua]{Path.Combine(pfadSchilddatenaustausch ?? "", "Lernabschnittsdaten.dat")}[/].",
-                            $"Es empfiehlt sich die Lernabschnitte zuerst in SchILD anzulegen und zu exportieren. {configuration["AppName"]} ergänzt dann die Fehlzeiten passend.",
+                            $"Es empfiehlt sich die Lernabschnitte zuerst in SchILD anzulegen und zu exportieren. [bold springGreen2]BKB-Tool[/] ergänzt dann die Fehlzeiten passend.",
                             "Falls mehrere Kollegen dasselbe Fach zeitgleich unterrichten, dann muss ein Zähler an das Fach angehangen werden. Bsp: Zwei LuL unterrichten Mathe. Dann M und M1.",
                             "Damit M1 in den Leistungsdaten erscheint, aber nicht auf dem Zeugnis gedruckt wird, muss die Eigenschaft 'Nicht auf Zeugnis drucken' in SchILD gesetzt werden."
                             ,
@@ -271,7 +281,7 @@ public static class MenueHelper
                             m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
                         },
                         Global.Rubrik.Allgemein,
-                        Global.NurBeiDiesenSchulnummern.Alle
+                        Global.NurBeiDiesenSchulnummern.Nur000000
                     ),
                     new Menüeintrag(
                         "Mahnungen: Gem. §50(4) SchulG erstellen",
@@ -290,7 +300,7 @@ public static class MenueHelper
                             m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
                         },
                         Global.Rubrik.Leistungsdaten,
-                        Global.NurBeiDiesenSchulnummern.Alle
+                        Global.NurBeiDiesenSchulnummern.Nur000000
                     ),
                     new Menüeintrag(
                         "Teams-Chat: Teams-Chat mit gewünschter Gruppe von Lehrkräften beginnen",
@@ -340,7 +350,7 @@ public static class MenueHelper
                             }
                         },
                         Global.Rubrik.Allgemein,
-                        Global.NurBeiDiesenSchulnummern.Alle
+                        Global.NurBeiDiesenSchulnummern.Nur000000
                     ),
                     new Menüeintrag(
                         "Kursbelegung: Vorbereiten",
@@ -358,7 +368,7 @@ public static class MenueHelper
                             //dateien.Kursbelegung(dateien.Benötigte([]));
                         },
                         Global.Rubrik.Allgemein,
-                        Global.NurBeiDiesenSchulnummern.Alle
+                        Global.NurBeiDiesenSchulnummern.Nur000000
                     ),
                     new Menüeintrag(
                         "Fotos #1: Anweisungen zum Fotografieren der Schüler*innen zeigen",
@@ -379,7 +389,7 @@ public static class MenueHelper
                             m.IStudents.KlassenListenAnzeigen(configuration);
                         },
                         Global.Rubrik.Allgemein,
-                        Global.NurBeiDiesenSchulnummern.NurPrivilegiert
+                        Global.NurBeiDiesenSchulnummern.Nur000000
                     ),
                     new Menüeintrag(
                         "Fotos #2: Erstellte Schüler*innenfotos hochladen",
@@ -398,7 +408,7 @@ public static class MenueHelper
                             m.Students.FotosVerarbeiten(configuration, m.IKlassen);
                         },
                         Global.Rubrik.Allgemein,
-                        Global.NurBeiDiesenSchulnummern.NurPrivilegiert
+                        Global.NurBeiDiesenSchulnummern.Nur000000
                     ),
                     new Menüeintrag(
                         "Atlantis-Fotos: Fotos der Schüler*innen aus Atlantis in die SchILD2-Datenbank (und in die Schild-Dokumentenverwaltung) hochladen",
@@ -423,7 +433,9 @@ public static class MenueHelper
                             m.IStudents.BilderNachPfadDokumentenverwaltungKopieren(configuration);
                             m.IStudents.Pfad2FotoStream();
                             //m.IStudents.FotosNachSchild2Schreiben(m.Klassen, configuration);
-                        }
+                        },
+                        Global.Rubrik.Allgemein,
+                        Global.NurBeiDiesenSchulnummern.Nur000000
                     ),
                     new Menüeintrag(
                         "Teilleistungen: SchuelerTeilleistungen nach Schild importieren",
@@ -432,7 +444,7 @@ public static class MenueHelper
                         students,
                         klassen,
                         [
-                            "Es wird jetzt die Datei [bold green]" + Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-") + @"SchuelerTeilleistungen.dat") + "[/] erstellt.",
+                            "Es wird jetzt die Datei [bold springGreen2]" + Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-") + @"SchuelerTeilleistungen.dat") + "[/] erstellt.",
                             "Damit der Import nach SchILD rebuungslos funktioniert muss Folgendes gewährleistet sein:",
                             "Die Teilleistungsarten in SchILD unter Schulverwaltung > Teilleistungsarten müssen gleichlautend mit dem Langnamen in Webuntis (Stammdaten > Prüfungsarten) angelegt sein.",
                             "Es empfiehlt sich, dass die Lernabschnitssdaten und Leistungsdaten zuerst in SchILD importiert bzw. angelegt werden."
@@ -443,7 +455,9 @@ public static class MenueHelper
                             m.Zieldatei = m.Teilleistungen(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerTeilleistungen.dat"));
                             //m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, configuration, ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt"], []);
                             m.Zieldatei.Erstellen("|", '\0', new UTF8Encoding(true), false);
-                        }
+                        },
+                        Global.Rubrik.Allgemein,
+                        Global.NurBeiDiesenSchulnummern.Nur000000
                     ),
                     new Menüeintrag(
                         "Schnellmeldung: Relationsgruppen im September aufbereiten",
@@ -455,7 +469,9 @@ public static class MenueHelper
                             "Dokumentation siehe Schips.webuntis2schildGui.nrw.de",
                             "Realtionen gemäß §93 SchulG"
                         ],
-                        _ => { new Relationsgruppen(klassen, students); }
+                        _ => { new Relationsgruppen(klassen, students); },
+                        Global.Rubrik.Allgemein,
+                        Global.NurBeiDiesenSchulnummern.Nur000000                        
                     ),
                     new Menüeintrag(
                         $"Altersermäßigung: berechnen für {int.Parse(Global.AktSj[0])}/{int.Parse(Global.AktSj[0]) + 1} und {int.Parse(Global.AktSj[0]) + 1}/{int.Parse(Global.AktSj[0]) + 2}",
@@ -477,7 +493,9 @@ public static class MenueHelper
 
                             m.Zieldatei = m.Lehrkraefte(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Lehrkraefte.dat"));
                             m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
-                        }
+                        },
+                        Global.Rubrik.Allgemein,
+                        Global.NurBeiDiesenSchulnummern.Alle
                     ),
                     new Menüeintrag(
                         "Lernabschnittsdaten: Lernabschnitts- & Leistungsdaten alter Abschnitte",
@@ -495,7 +513,9 @@ public static class MenueHelper
 
                             m.Zieldatei = m.LeistungsdatenAlt(configuration, @"DatenaustauschSchild/SchuelerLeistungsdaten.dat");
                             m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
-                        }
+                        },
+                        Global.Rubrik.Allgemein,
+                        Global.NurBeiDiesenSchulnummern.Nur000000
                     ),
                     new Menüeintrag(
                         "Klassenbucheinträge: Säumige Lehrer*innen erinnern",
@@ -513,7 +533,9 @@ public static class MenueHelper
                         {
                             lehrers = new Lehrers(configuration, m.Quelldateien);
                             lehrers.OffeneKlassenbuchEinträgeMahnen(m.Quelldateien, configuration);
-                        }
+                        },
+                        Global.Rubrik.Allgemein,
+                        Global.NurBeiDiesenSchulnummern.Nur177659
                     ),
                     new Menüeintrag(
                         $"PDF-Dateien #1: Von {configuration["PfadDownloads"]}\\*.pdf verschlüsselte Kopien erstellen",
@@ -527,7 +549,9 @@ public static class MenueHelper
                         {
                             var pdfDateien = new PdfDateien();
                             pdfDateien.KennwortSetzen(configuration);
-                        }
+                        },
+                        Global.Rubrik.Allgemein,
+                        Global.NurBeiDiesenSchulnummern.Nur177659
                     ),
                     new Menüeintrag(
                         "PDF-Dateien #2: PDF-Seiten an darauf enthaltene E-Mail-Adressen mailen",
@@ -555,7 +579,9 @@ public static class MenueHelper
                                 seite?.PdfDocumentEncrypt(pdfKennwort);
                                 seite?.Mailen(betreff, body, configuration);
                             }
-                        }
+                        },
+                        Global.Rubrik.Allgemein,
+                        Global.NurBeiDiesenSchulnummern.Nur000000
                     ),
                     new Menüeintrag(
                         "PDF-Zeugnisse: Von Atlantis in die SchILD-Dokumentenverwaltung kopieren",
@@ -579,7 +605,9 @@ public static class MenueHelper
 
                             m.IStudents.GetStudentsVonAtlantisCsv(configuration);
                             m.IStudents.PdfDateienVerarbeiten(configuration);
-                        }
+                        },
+                        Global.Rubrik.Allgemein,
+                        Global.NurBeiDiesenSchulnummern.Nur000000
                     ),
                     new Menüeintrag(
                         "Outlook: CSV-Terminexporte für Wiki aufbereiten",
@@ -603,7 +631,7 @@ public static class MenueHelper
                             }
                         },
                         Global.Rubrik.Wiki,
-                        Global.NurBeiDiesenSchulnummern.NurPrivilegiert
+                        Global.NurBeiDiesenSchulnummern.Nur000000
                     ),
                     new Menüeintrag(
                         "Sprechtag: Lehrerübersichtsseite im Wiki veröffentlichen",
@@ -621,7 +649,7 @@ public static class MenueHelper
                                 "Zum jährlichen Sprechtag laden wir sehr herzlich am Mittwoch nach der Zeugnisausgabe in der Zeit von 13:30 bis 17:30 Uhr ein. Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
                         },
                         Global.Rubrik.Wiki,
-                        Global.NurBeiDiesenSchulnummern.NurPrivilegiert
+                        Global.NurBeiDiesenSchulnummern.Nur000000
                     ),
                     new Menüeintrag(
                         "Wiki: Diverse SQLite-Dateien (Organigramm, Praktikum etc.) erstellen",
@@ -662,7 +690,7 @@ public static class MenueHelper
                             m.Zieldatei?.Erstellen(",", '\'', new UTF8Encoding(false), false);
                         },
                         Global.Rubrik.Wiki,
-                        Global.NurBeiDiesenSchulnummern.NurPrivilegiert
+                        Global.NurBeiDiesenSchulnummern.Nur000000
                     ),
                     new Menüeintrag(
                         "Massen-Mail: Senden",
@@ -698,7 +726,7 @@ public static class MenueHelper
                             }
                         },
                         Global.Rubrik.Allgemein,
-                        Global.NurBeiDiesenSchulnummern.NurPrivilegiert
+                        Global.NurBeiDiesenSchulnummern.Nur000000
                     )
                 ]
             );

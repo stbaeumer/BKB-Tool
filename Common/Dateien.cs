@@ -37,7 +37,7 @@ public class Dateien : List<Datei>
     public void DisplayHeader(IConfiguration configuration, List<string> content = null)
     {
         Console.Clear();
-        AnsiConsole.Write(new FigletText(configuration["AppName"] ?? "AppName").Centered().Color(Color.SpringGreen2));
+        AnsiConsole.Write(new FigletText("BKB-Tool").Centered().Color(Color.SpringGreen2));
 
         var contentString = ""; //configuration["AppDescription"] ?? "BKB-Tool - Ein Werkzeug für die Arbeit mit dem BKB-Schilddatenaustausch";
         var header = $"[wheat1] BKB-Tool[/] | [wheat1 link=https://github.com/stbaeumer/BKB-Tool]https://github.com/stbaeumer/BKB-Tool[/] | [wheat1]GPLv3[/] | [wheat1]Version {Global.AppVersion} [/]";
@@ -71,7 +71,7 @@ public class Dateien : List<Datei>
             "Exportieren Sie alle *.dat-Dateien aus SchILD, indem Sie den Pfad gehen:",
             "1. [bold silver]Datenaustausch > Schnittstelle SchILD NRW > Export[/]",
             $"2. [bold silver]Ausgabeverzeichnis[/]: [bold aqua]{configuration["PfadSchilddatenaustausch"]}[/]",
-            "3. [bold green]Export starten[/]"
+            "3. [bold springGreen2]Export starten[/]"
         };
 
         var untishinweise = new string[]
@@ -98,7 +98,7 @@ public class Dateien : List<Datei>
                 "Exportieren Sie die Datei aus SchILD, indem Sie den Pfad gehen:",
                 "1. [bold yellow]Datenaustausch > Export in Text-/Exceldateien > Exportieren[/]",
                 "2. Dann [bold yellow]SchildSchuelerExport[/] laden.",
-                "3. [bold green]Export starten[/]",
+                "3. [bold springGreen2]Export starten[/]",
                 "Ggf. muss die Vorlage erst erstellt werden. Es müssen folgende Felder enthalten sein:",
                 "[bold deeppink1_1]Geburtsdatum, Interne ID-Nummer, Nachname, Vorname, Klasse, Externe ID-Nummer, Status[/]",
                 "Feld-Trennzeichen: '|'"
@@ -112,7 +112,7 @@ public class Dateien : List<Datei>
             "OpenPeriod",
             "Beschreibung",
             ["Exportieren Sie die Datei aus Webuntis, indem Sie den Pfad gehen:",
-            "[bold green]Klassenbuch > Offene Stunden > Bericht[/]",
+            "[bold springGreen2]Klassenbuch > Offene Stunden > Bericht[/]",
             $"Die PDF-Datei in [bold aqua]{configuration["PfadDownloads"]}[/] speichern."],
             [""],
             true,
@@ -438,7 +438,7 @@ public class Dateien : List<Datei>
         // Mögliche Meldungen werden ausgegeben, wenn die Datei nicht gefunden wurde oder veraltet ist.
         
         if (string.IsNullOrEmpty(datei.AbsoluterPfad) && datei.Endung.ToLower().Contains("dat"))
-            datei.Fehlermeldung += $"Die Datei [bold aqua]SchuelerBasisdaten.dat[/] wurde weder in [bold aqua]{configuration["pfadDownloads"]}[/] noch in [bold aqua]{configuration["pfadSchilddatenaustausch"]}[/] gefunden. Am besten gehen Sie jetzt in SchILD zu [bold green]Datenaustausch > Schnittstelle SchILD NRW > Export[/] und klicken [bold green]Export starten[/], um alle Dateien nach [bold aqua]{configuration["pfadSchilddatenaustausch"]}[/] zu exportieren. Anschließend kehren Sie hierher zurück.";
+            datei.Fehlermeldung += $"Die Datei [bold aqua]SchuelerBasisdaten.dat[/] wurde weder in [bold aqua]{configuration["pfadDownloads"]}[/] noch in [bold aqua]{configuration["pfadSchilddatenaustausch"]}[/] gefunden. Am besten gehen Sie jetzt in SchILD zu [bold springGreen2]Datenaustausch > Schnittstelle SchILD NRW > Export[/] und klicken [bold springGreen2]Export starten[/], um alle Dateien nach [bold aqua]{configuration["pfadSchilddatenaustausch"]}[/] zu exportieren. Anschließend kehren Sie hierher zurück.";
         else if (datei.AbsoluterPfad == null)
             datei.Fehlermeldung += $"Die Datei [bold aqua]{pattern}[/] wurde nicht gefunden. Bitte prüfen Sie, ob sie im Ordner [bold aqua]{configuration["PfadDownloads"]}[/] vorhanden ist.";
         else if (datei.IstOptional && datei.Count == 0)
@@ -630,7 +630,7 @@ public class Dateien : List<Datei>
         }
         else
         {
-            Meldung.Add($"Es wurden {anzahlDateienMitZeilen} Dateien mit auswertbaren Zeilen in [bold aqua]{configuration["pfadDownloads"]}[/] gefunden.");
+            Meldung.Add($"[bold fuchsia]{anzahlDateienMitZeilen}[/] Dateien aus [bold aqua]{configuration["pfadDownloads"]}[/] eingelesen.");
         }
         DisplayHeader(configuration, Meldung);
     }
@@ -713,10 +713,11 @@ public class Dateien : List<Datei>
                 // Panel: Wenn keine .dat-Dateien vorhanden sind, wird eine Warnung ausgegeben.
 
                 var panel = new Panel(
-                    $"SchILD verwendet für den Export und den (Re-)Import denselben Ordner. Deswegen verschiebt {configuration["AppName"]} jetzt " +
+                    $"SchILD verwendet für den Export und den (Re-)Import denselben Ordner. Deswegen verschiebt [bold springGreen2]BKB-Tool[/] jetzt " +
                     $"[bold fuchsia]{datFiles.Count} aus SchILD exportierte *.dat-Dateien[/] direkt von [bold aqua]{pfadSchilddatenaustausch}[/] nach [bold aqua]{pfadDownloads}[/]. " +
-                    $"Die aufbereiteten Dateien stellt {configuration["AppName"]} wiederum in [bold aqua]{pfadSchilddatenaustausch}[/] bereit. " +
-                    "So bleiben die Import-Dateien und Export-Dateien stets getrennt voneinander."
+                    $"Die aufbereiteten Dateien stellt [bold springGreen2]BKB-Tool[/] wiederum in [bold aqua]{pfadSchilddatenaustausch}[/] bereit. " +
+                    "So bleiben die Import-Dateien und Export-Dateien stets getrennt voneinander." +
+                    $"\nWeiter mit [bold grspringGreen2een]ENTER[/]."
                     )
                     .Header("[bold fuchsia]  Hinweis  [/]")
                     .HeaderAlignment(Justify.Left)
@@ -725,6 +726,7 @@ public class Dateien : List<Datei>
                     .BorderColor(Color.Fuchsia);
 
                 AnsiConsole.Write(panel);
+                Console.ReadKey();
 
                 // Lösche die vorhandenen .dat-Dateien im Zielordner
                 foreach (var file in existingDatFiles)
@@ -743,7 +745,7 @@ public class Dateien : List<Datei>
                 }
 
                 //AnsiConsole.Write(new Rule($"[bold fuchsia] {datFiles.Count} Dateien verschoben von [bold aqua]{configuration["PfadSchilddatenaustausch"]}[/] nach [bold aqua]{configuration["PfadDownloads"]}[/][/] ").RuleStyle("fuchsia").LeftJustified());
-                this.Meldung.Add($"[bold fuchsia] {datFiles.Count} Dateien verschoben von [bold aqua]{configuration["PfadSchilddatenaustausch"]}[/] nach [bold aqua]{configuration["PfadDownloads"]}[/][/] ");
+                this.Meldung.Add($"[bold fuchsia]{datFiles.Count} Dateien verschoben von [bold aqua]{configuration["PfadSchilddatenaustausch"]}[/] nach [bold aqua]{configuration["PfadDownloads"]}[/][/] ");
             }
             else
             {

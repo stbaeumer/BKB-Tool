@@ -125,7 +125,7 @@ public class Students : List<Student>
             var path = new TextPath(inputFolder);
 
             path.RootStyle = new Style(foreground: Spectre.Console.Color.Red);
-            path.SeparatorStyle = new Style(foreground: Spectre.Console.Color.Green);
+            path.SeparatorStyle = new Style(foreground: Spectre.Console.Color.SpringGreen2);
             path.StemStyle = new Style(foreground: Spectre.Console.Color.DodgerBlue1);
             path.LeafStyle = new Style(foreground: Spectre.Console.Color.Yellow);
 
@@ -134,7 +134,7 @@ public class Students : List<Student>
                 .HeaderAlignment(Justify.Left)
                 .SquareBorder()
                 .Expand()
-                .BorderColor(Spectre.Console.Color.GreenYellow);
+                .BorderColor(Spectre.Console.Color.SpringGreen2);
 
             AnsiConsole.Write(panel);
         }
@@ -181,7 +181,7 @@ public class Students : List<Student>
                 else
                 {
                     AnsiConsole.Write(new Panel("Die Datei 'atlantisschueler.csv' wurde nicht gefunden. Bitte erstellen Sie die Datei im UTF8-Format.")
-                        .Header($" [bold green] Hinweis [/]")
+                        .Header($" [bold springGreen2] Hinweis [/]")
                         .HeaderAlignment(Justify.Left)
                         .SquareBorder()
                         .Expand()
@@ -208,11 +208,11 @@ public class Students : List<Student>
             
             }
             AnsiConsole.Write(new Panel("Lösen Sie das Problem, dann ENTER.")
-                        .Header($" [bold green3_1] Hinweis [/]")
+                        .Header($" [bold springGreen2] Hinweis [/]")
                         .HeaderAlignment(Justify.Left)
                         .SquareBorder()
                         .Expand()
-                        .BorderColor(Spectre.Console.Color.Green3_1));
+                        .BorderColor(Spectre.Console.Color.SpringGreen2));
             Console.ReadKey();
         }
         while (this.Count == 0);
@@ -1299,11 +1299,11 @@ public class Students : List<Student>
             "\nWenn ein Foto nicht gut geworden ist, dann direkt noch einmal fotographieren und das erste Bild löschen oder aufschreiben und später löschen. Die Reihenfolge darf nicht verändert werden." + 
             "\nNotieren Sie die exakte Uhrzeit des ersten Fotos pro Klassse, falls mehrere Klassen direkt hintereinander fotographiert werden." + 
             "\nAm Ende müssen Sie die Fotos händisch in den Ordner [aqua]" + Path.Combine(pfadDownloads, "Fotos", klasse) + "[/] verschieben.")
-                            .Header($" [bold green] {klasse} [/]")
+                            .Header($" [bold springGreen2] {klasse} [/]")
                             .HeaderAlignment(Justify.Left)
                             .SquareBorder()
                             .Expand()
-                            .BorderColor(Spectre.Console.Color.Green);
+                            .BorderColor(Spectre.Console.Color.SpringGreen2);
                 
             AnsiConsole.Write(panel);
 
@@ -1341,7 +1341,7 @@ public class Students : List<Student>
         var tableFoto = new Spectre.Console.Table();
         tableFoto.Expand();
         tableFoto.Border(TableBorder.Rounded);
-        tableFoto.BorderColor(Spectre.Console.Color.Green);
+        tableFoto.BorderColor(Spectre.Console.Color.SpringGreen2);
         tableFoto.Centered();
         tableFoto.AddColumn("Nr.");
         tableFoto.AddColumn("Klasse");
@@ -1416,11 +1416,11 @@ public class Students : List<Student>
         else
         {
             var panel = new Panel($"Es sind keine Fotos bereit für den Import nach SchILD2.")
-                            .Header($" [bold green] Keine Fotos [/]")
+                            .Header($" [bold springGreen2] Keine Fotos [/]")
                             .HeaderAlignment(Justify.Left)
                             .SquareBorder()
                             .Expand()
-                            .BorderColor(Spectre.Console.Color.Green);
+                            .BorderColor(Spectre.Console.Color.SpringGreen2);
                 
             AnsiConsole.Write(panel);
         }
@@ -1436,7 +1436,7 @@ public class Students : List<Student>
         var tableFoto = new Spectre.Console.Table();
         tableFoto.Expand();
         tableFoto.Border(TableBorder.Rounded);
-        tableFoto.BorderColor(Spectre.Console.Color.Green);
+        tableFoto.BorderColor(Spectre.Console.Color.SpringGreen2);
         tableFoto.Centered();
         tableFoto.AddColumn("Klasse");
         tableFoto.AddColumn("Name");        
@@ -1499,7 +1499,7 @@ public class Students : List<Student>
         return students;
     }
 
-    internal void FotosFürWebuntisZippen(IConfiguration configuration, string zipPfad, string fotosTxt)
+    internal void FotosFürWebuntisZippen(IConfiguration configuration, string zipPfad, string fotosTxt, List<string> importhinweise = null)
     {
         try
         {
@@ -1507,29 +1507,29 @@ public class Students : List<Student>
             using (ZipOutputStream zip = new ZipOutputStream(zipStream))
             {
                 zip.SetLevel(0); // Keine Komprimierung
-    
+
                 byte[] buffer = new byte[4096];
-    
+
                 foreach (var student in this)
                 {
                     var pfadDokumentenverwaltung = student.GetPfadDokumentenverwaltung(configuration);
-    
+
                     var absoluterPfadZumBild = Path.Combine(pfadDokumentenverwaltung, student.IdSchild + ".jpg");
-    
+
                     if (File.Exists(absoluterPfadZumBild))
                     {
                         // Name der Datei im ZIP-Archiv
                         string dateiNameImZip = student.IdSchild + ".jpg";
-    
+
                         // Zip-Eintrag erstellen
                         ZipEntry entry = new ZipEntry(dateiNameImZip)
                         {
                             DateTime = DateTime.Now,
                             CompressionMethod = CompressionMethod.Stored // Keine Komprimierung
                         };
-    
+
                         zip.PutNextEntry(entry);
-    
+
                         // Datei in das ZIP-Archiv schreiben
                         using (FileStream dateiStream = File.OpenRead(absoluterPfadZumBild))
                         {
@@ -1539,22 +1539,25 @@ public class Students : List<Student>
                                 zip.Write(buffer, 0, bytesRead);
                             }
                         }
-    
+
                         zip.CloseEntry();
-    
+
                         // Bild in fotos.txt schreiben
                         File.AppendAllText(fotosTxt, student.IdSchild + Environment.NewLine);
                     }
                 }
-    
+
                 zip.IsStreamOwner = true;
             }
-    
-            Global.ZeileSchreiben(zipPfad, "erfolgreich erstellt", ConsoleColor.Green, ConsoleColor.White);
         }
         catch (Exception ex)
         {
             Console.WriteLine("Fehler beim Zippen: " + ex.Message);
+        }
+        finally
+        {
+            var rechteSeite = importhinweise != null && importhinweise.Any() ? string.Join("\n", importhinweise) : "";                
+            Global.ZeileSchreiben(zipPfad, rechteSeite, ConsoleColor.White, ConsoleColor.Blue);
         }
     }
 

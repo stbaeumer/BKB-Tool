@@ -48,10 +48,10 @@ public class Menüeintrag
     /// </summary>
     public Students IStudents { get; set; }
     public Global.Rubrik Rubrik { get; private set; }
-    public Global.NurBeiDiesenSchulnummern BeiDiesenSchulnummernAnzeigen { get; }
+    public Global.NurBeiDiesenSchulnummern NurBeiDiesenSchulnummern { get; }
     public Datei Zieldatei { get; set; }
 
-    public Menüeintrag(string titel, Anrechnungen anrechnungen, Dateien quelldateien, Students students, Klassen klassen, List<string> beschreibung, Action<Menüeintrag> funktion, Global.Rubrik rubrik = Global.Rubrik.Allgemein, Global.NurBeiDiesenSchulnummern beiDiesenSchulnummernAnzeigen = Global.NurBeiDiesenSchulnummern.Alle)
+    public Menüeintrag(string titel, Anrechnungen anrechnungen, Dateien quelldateien, Students students, Klassen klassen, List<string> beschreibung, Action<Menüeintrag> funktion, Global.Rubrik rubrik = Global.Rubrik.Allgemein, Global.NurBeiDiesenSchulnummern nurbeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Alle)
     {
         if (titel == null) throw new ArgumentNullException(nameof(titel));
         if (anrechnungen == null) throw new ArgumentNullException(nameof(anrechnungen));
@@ -72,7 +72,7 @@ public class Menüeintrag
             IKlassen = new List<string>();
             IStudents = new Students();
             Rubrik = rubrik;
-            BeiDiesenSchulnummernAnzeigen = beiDiesenSchulnummernAnzeigen;
+            NurBeiDiesenSchulnummern = nurbeiDiesenSchulnummern;
         }
     }
 
@@ -212,7 +212,7 @@ public class Menüeintrag
     {
         var interessierendeStudents = new Students();
 
-        Global.Konfig("Klassen", Global.Modus.Update, configuration, "Interessierende Klasse(n)", $"Geben Sie die interessierenden Klassen an. Meistens gibt man an besten eine einzelne Klasse an. Mehrere Klassen sind mit Komma zu trennen. Es können auch Namensteile von Klassen angegeben werden, wordurch alle Klassen gewählt werden, deren Klassenname den Namensteil enthält. Alle Klassen werden mit dem Wort [bold green]alle[/] gewählt.", Global.Datentyp.Klassen, "", this.Students);
+        Global.Konfig("Klassen", Global.Modus.Update, configuration, "Interessierende Klasse(n)", $"Geben Sie die interessierenden Klassen an. Meistens gibt man an besten eine einzelne Klasse an. Mehrere Klassen sind mit Komma zu trennen. Es können auch Namensteile von Klassen angegeben werden, wordurch alle Klassen gewählt werden, deren Klassenname den Namensteil enthält. Alle Klassen werden mit dem Wort [bold springGreen2]alle[/] gewählt.", Global.Datentyp.Klassen, "", this.Students);
 
         var interessierendeKlassen = configuration["Klassen"].ToString().Split(",").ToList();
 
@@ -404,7 +404,7 @@ public class Menüeintrag
             zeugnisdatum = DateTime.Parse(configuration[$"{konferenzart}zeugnisdatum"]);
             
             configuration = Global.Konfig("MaximaleAnzahlFehlstundenProTag", Global.Modus.Update, configuration, "Maximale Anzahl Fehlstunden pro Tag", "Geben Sie die maximale Anzahl zählender Fehlstunden pro Tag an. Wenn der Unterricht spätestens nach 8 Stunden endet, ist 8 ein guter Wert. Sollte die Anzahl der Fehlstunden in Webuntis diesen Wert übersteigen, dann deutet das auf Fehlzeiten im Praktikum oder ein Fehlen bei einer ganztägigen Veranstaltung hin. Es werden keine Fehlstunden an diesem Tag auf dem Zeugnis berücksichtigt.", Global.Datentyp.Int);
-            configuration = Global.Konfig("FehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt", Global.Modus.Update, configuration, "Unberücksichtigte Fehltage", "Geben Sie die Anzahl Tage vor der Zeugniskonferenz an, an denen Fehlzeiten unberücksichtigt bleiben. Wenn dieser Wert z.B. auf [bold green]3[/] gesetzt wird, wird verhindert, dass Schüler*innen eine Entschuldigung zwar unverzüglich, aber gleichzeitig erst nach der Zeugniskonferenz einreichen. Alternativ kann man den Wert auf 0 setzen und den Zeitraum des Exports der [bold green]AbsencePerStudent[/] entsprechend einschränken.", Global.Datentyp.Int);
+            configuration = Global.Konfig("FehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt", Global.Modus.Update, configuration, "Unberücksichtigte Fehltage", "Geben Sie die Anzahl Tage vor der Zeugniskonferenz an, an denen Fehlzeiten unberücksichtigt bleiben. Wenn dieser Wert z.B. auf [bold springGreen2]3[/] gesetzt wird, wird verhindert, dass Schüler*innen eine Entschuldigung zwar unverzüglich, aber gleichzeitig erst nach der Zeugniskonferenz einreichen. Alternativ kann man den Wert auf 0 setzen und den Zeitraum des Exports der [bold springGreen2]AbsencePerStudent[/] entsprechend einschränken.", Global.Datentyp.Int);
         }
 
         var records = new List<dynamic>();
@@ -1174,11 +1174,10 @@ public class Menüeintrag
 
                 schildStudent.GetLetztesZeugnisdatumInDerKlasse(schuelerLernabschnittsdaten);
 
-                if (schildStudent.Nachname == "Bart" && schildStudent.Vorname.StartsWith("Daniel"))
-                    if (schildStudent.Nachname == "Boland" && schildStudent.Vorname.StartsWith("Gero"))
-                    {
-                        string a = "a";
-                    }
+                if (schildStudent.Nachname == "Hermann" && schildStudent.Vorname.StartsWith("Rebecca"))
+                {
+                    string a = "a";
+                }
                 if (schildStudent == null) continue;
 
                 var id = string.IsNullOrEmpty(schildStudent.ExterneIdNummer)
@@ -1280,7 +1279,7 @@ public class Menüeintrag
 
             foreach (var studen in uniqueStudents)
             {
-                if (studen.Nachname == "Boland" && studen.Vorname.StartsWith("G"))
+                if (studen.Nachname == "Hermann" && studen.Vorname.StartsWith("R"))
                 {
                     string a = "a";
                 }
@@ -1300,7 +1299,7 @@ public class Menüeintrag
                     }))
                 {
                     // ... und der Schüler in Schild aktiv der Gast ist, wird er angelegt
-                    if (new List<string>() { "2", "6" }.Contains(student.Status))
+                    if (student.Status is "2" or "6")
                     {
                         var id = string.IsNullOrEmpty(student.ExterneIdNummer) ? student.IdSchild : student.ExterneIdNummer;
                         susMitÄnderung.Add(((i + ". ").PadRight(5) + student.Nachname + ", " + student.Vorname + ", " + id + " (" + student.Klasse + ")").PadRight(51) + student.Status + "      Neu: " + student.Klasse);
@@ -1395,7 +1394,7 @@ public class Menüeintrag
                         ? student.IdSchild
                         : student.ExterneIdNummer.ToString().PadLeft(6, '0');
 
-                    if (studen.Nachname == "Boland" && studen.Vorname.StartsWith("G"))
+                    if (studen.Nachname == "Hermann" && studen.Vorname.StartsWith("R"))
                     {
                         string a = "a";
                     }
@@ -1454,8 +1453,8 @@ public class Menüeintrag
 
                     student.GetLetztesZeugnisdatumInDerKlasse(schuelerLernabschnittsdaten);
 
-                    // Aktive SuS oder Schüler mit Abschluss, deren letztes Zeugnis noch keine 42 Tage zurückliegt.
-                    if (new List<string>() { "2", "6" }.Contains(student.Status) || (student.Status == "8" && student.ZeugnisdatumLetztesZeugnisInDieserKlasse.AddDays(42) >= DateTime.Now))
+                    // Aktive SuS oder Schüler mit Abschluss/Abgang, deren letztes Zeugnis noch keine 42 Tage zurückliegt.
+                    if (new List<string>() { "2", "6" }.Contains(student.Status) || (new List<string>(){"8", "9"}.Contains(student.Status) && student.ZeugnisdatumLetztesZeugnisInDieserKlasse.AddDays(42) >= DateTime.Now))
                     {
                         zieldatei.Add(record);
                     }
@@ -1479,9 +1478,8 @@ public class Menüeintrag
                     record.ZusatzInfo = "";
                     record.Bemerkung = "";
                     record.Geschlecht = student.Geschlecht.ToString().ToUpper();
-                    
-                    
-                    if (new List<string>() { "2", "6" }.Contains(student.Status))
+                                        
+                    if (student.Status is "2" or "6")
                     {
                         zieldatei.Add(record);
                     }
@@ -2541,11 +2539,11 @@ public class Menüeintrag
             var panel = new Panel($"Die Anrechnungen aus der Untis-Datei [aqua]GPU020.txt[/] werden mit der SchILD-Datei [aqua]LehrkraefteSonderzeiten.dat[/] abgeglichen." +
                             $"\nDie Datei [aqua]{zieldateiname}[/] wird neu erstellt und kann nach ScHILD importiert werden." +
                             $"\nAnrechnungsgründe [aqua]...........................[/] werden ignoriert und auf 0 gesetzt.")
-                            .Header($" [bold green] Anrechnungen [/]")
+                            .Header($" [bold springGreen2] Anrechnungen [/]")
                             .HeaderAlignment(Justify.Left)
                             .SquareBorder()
                             .Expand()
-                            .BorderColor(Spectre.Console.Color.Green);
+                            .BorderColor(Spectre.Console.Color.SpringGreen2);
 
         if (nurDieseGründe == "200")
             panel = new Panel($"Im Folgenden werden alle Lehrkräfte mit Altersermäßigung und alle mit fehlendem Deputat bzw. fehlendem Geburtsdatum angezeigt. " +
@@ -2554,7 +2552,7 @@ public class Menüeintrag
                                 $"Die Datei [aqua]{zieldateiname}[/] wird neu erstellt und kann nach ScHILD importiert werden. " +
                                 "Auch wenn der Wert eines Anrechnungsgrunds bei einer Lehrkraft 0 ist, wird er in die Datei übernommen, um möglicherweise veraltete Werte zu überschreiben. " +
                                 $"Da die Datei nur zusammen mit einer (leeren) lehrkraefte.dat importiert werden kann, wird eine leere lehrkraefte.dat ebenfalls erzeugt. " +
-                                $"Wenn in der Spalte [bold green]Alter am 31.7. {akt + 1}[/] die Zahl 55 oder 60 steht, dann ändern sich die Werte im kommenden Jahr. ")
+                                $"Wenn in der Spalte [bold springGreen2]Alter am 31.7. {akt + 1}[/] die Zahl 55 oder 60 steht, dann ändern sich die Werte im kommenden Jahr. ")
                     .HeaderAlignment(Justify.Left)
                     .SquareBorder()
                     .Expand()

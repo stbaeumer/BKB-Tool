@@ -4,6 +4,8 @@ using Common;
 using Microsoft.Extensions.Configuration;
 using Spectre.Console;
 
+try{ Console.WindowHeight = 33;} catch { }
+
 // Pfad in Programmen: yellow
 // Pfad in Dateien: aqua
 // Action in Menüs: springGreen2
@@ -18,12 +20,14 @@ using Spectre.Console;
 Global.User = Environment.UserName;
 IConfiguration? configuration = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile($"{Global.User}.json", optional: true, reloadOnChange: true).Build();
 
-configuration["AppName"] = "BKB-Tool";
 Global.AppVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0.0"; // Major.Minor.Build.Revision
-Global.SchulnummernPrivilegiert = new List<string>{"177659"};
-Global.SchulnummernGesperrt = new List<string>{"999999"};
 
-configuration["AppDescription"] = "BKB-Tool - Ein Werkzeug an der Schnittstelle zwischen SchILD und Untis.";
+Global.SchulnummernGesperrt = new List<string> { "999999" }; // Diese Schulnummer können das Programm nicht verwenden.
+Global.SchulnummernPrivilegiert = new List<string>{ "177659" }; // Diese Schulnummern bekommen alle Jedermann-Punkte plus weitere Menüpunkte angezeigt.
+Global.Schulnummer177659 = new List<string> { "177659" }; // Diese Schulnummer bekommen alle Privilegierten plus weitere Menüpunkte angezeigt.
+Global.SchulnummernDebug = new List<string>{ "000000" }; // alles
+
+configuration["AppDescription"] = "[bold springGreen2]BKB-Tool[/] - Ein Werkzeug an der Schnittstelle zwischen SchILD und Untis.";
 
 var dateien = new Dateien(configuration);
 
@@ -48,11 +52,13 @@ do
 
     var menu = MenueHelper.Einlesen(dateien, configuration);
     if (menu == null) continue;
-
-    //dateien.DisplayHeader(configuration, dateien.Meldung);
-
     var menuGefiltert = new Menue();
-    menuGefiltert.AddRange(menu.Where(m => m.BeiDiesenSchulnummernAnzeigen == Global.NurBeiDiesenSchulnummern.Alle || Global.SchulnummernPrivilegiert.Contains(configuration["Schulnummer"])));
+    menuGefiltert.AddRange(menu.Where(m =>
+             m.NurBeiDiesenSchulnummern == Global.NurBeiDiesenSchulnummern.Alle ||
+            (m.NurBeiDiesenSchulnummern == Global.NurBeiDiesenSchulnummern.Nur000000 && configuration["Schulnummer"] == "000000") ||
+            (m.NurBeiDiesenSchulnummern == Global.NurBeiDiesenSchulnummern.Nur177659 && configuration["Schulnummer"] == "177659") ||
+            (m.NurBeiDiesenSchulnummern == Global.NurBeiDiesenSchulnummern.NurPrivilegiert && Global.SchulnummernPrivilegiert.Contains(configuration["Schulnummer"])) ||
+            (m.NurBeiDiesenSchulnummern == Global.NurBeiDiesenSchulnummern.AlleBisAufGesperrte && !Global.SchulnummernGesperrt.Contains(configuration["Schulnummer"]))));
     menuGefiltert.AuswahlGridRendern();
 
     configuration = menuGefiltert.GetAusgewaehlterMenueintrag(configuration, ["x", "y"]);
@@ -78,12 +84,12 @@ do
 
 } while (true);
 
-void CheckForUpdate(IConfiguration configuration)
+IConfiguration CheckForUpdate(IConfiguration configuration)
 {
     if (Global.RunningInCodeSpace())
     {
         AnsiConsole.MarkupLine("[bold yellow]Running in Codespace, skipping update check.[/]");
-        return;
+        return configuration;
     }
 
     try
@@ -126,7 +132,7 @@ void CheckForUpdate(IConfiguration configuration)
                 dateien.DisplayHeader(configuration,
                 [
                     $"Ein Update auf Version [tan]{githubVersion}[/] ist verfügbar.",                    
-                    $"Drücken Sie eine [green bold]beliebige Taste[/], um das Update zu starten."
+                    $"Drücken Sie eine [springGreen2 bold]beliebige Taste[/], um das Update zu starten."
                 ]
                 );
                 
@@ -183,7 +189,6 @@ void CheckForUpdate(IConfiguration configuration)
                     File.Delete(updaterPath);
                 }
 
-                // Batch-Datei erzeugen (wie gehabt, aber OHNE curl!)
                 File.WriteAllText(updaterPath,
                     "@echo off\n" +
                     "echo.\n" +
@@ -207,23 +212,26 @@ void CheckForUpdate(IConfiguration configuration)
                 dateien.DisplayHeader(configuration,
                 [
                     $"Die neue Datei wurde heruntergeladen und gespeichert als [aqua]{zielDatei}[/].",                    
-                    $"Mit [green bold]Enter[/] wird jetzt in die Version {githubVer} neugestartet."
+                    $"Mit [springGreen2 bold]Enter[/] wird jetzt in die Version {githubVer} neugestartet."
                 ]);
                 Console.ReadKey();
 
-                // Autoupdater ausführen
                 System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                 {
                     FileName = updaterPath,
                     UseShellExecute = true,
                     CreateNoWindow = true
                 });
+
+                // Bei einem Update wird die Auswahl auf "x" gesetzt, damit der Anwender bei einer möglicherweise veränderten Reihenfolge der Menüpunkte nicht durcheinander kommt.
+                configuration = Global.Konfig("Auswahl", Global.Modus.Update, configuration, "", "", Global.Datentyp.String, "x");
+
                 Environment.Exit(0); // Beendet das aktuelle Programm sofort, damit das Update funktioniert                
             }
         }
         else
         {
-            //AnsiConsole.MarkupLine("[bold green]Keine Updates verfügbar.[/]");
+            //AnsiConsole.MarkupLine("[bold springGreen2]Keine Updates verfügbar.[/]");
             // Auto-Updater-Batch-Datei löschen, wenn sie existiert
             string updaterPath = Path.Combine(Directory.GetCurrentDirectory(), "BKB-Tool-autoupdater.bat");
             if (File.Exists(updaterPath))
@@ -236,4 +244,7 @@ void CheckForUpdate(IConfiguration configuration)
     {
         AnsiConsole.MarkupLine($"[bold red]Error starting updater: {ex.Message}[/]");
     }
+
+    // Sicherstellen, dass die Konfiguration zurückgegeben wird, auch wenn ein Fehler auftritt
+    return configuration;    
 }
