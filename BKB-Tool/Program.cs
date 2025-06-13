@@ -6,19 +6,21 @@ using Spectre.Console;
 
 try{ Console.WindowHeight = 33;} catch { }
 
-// Pfad in Programmen: yellow
-// Pfad in Dateien: aqua
-// Action in Menüs: springGreen2
-// Einstellungen Rahmen: dodgerBlue1
-// Hinweise: pink3
-// Kopfzeile in CSV: deeppink1_1
-// Hyperlink: lightskyblue3_1
-// Zahlen: tan
-// Überschrift: springGreen2
-
-
 Global.User = Environment.UserName;
 IConfiguration? configuration = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile($"{Global.User}.json", optional: true, reloadOnChange: true).Build();
+
+Global.Überschrift = Color.Aqua; // Überschrift
+Global.Unterschrift = Color.Aqua; // Überschrift
+Global.Beschreibung = Color.SpringGreen2; // Beschreibung
+Global.PfadInProgrammen = Color.Yellow; 
+Global.PfadInDateien = Color.Aqua; // Pfad in Dateien
+Global.ActionInMenüs = Color.SpringGreen2; // Action in Menüs
+Global.EinstellungenRahmen = Color.DodgerBlue1; // Einstellungen Rahmen
+Global.Hinweise = Color.Pink3; // Hinweise
+Global.KopfzeileInCSV = Color.DeepPink1_1; // Kopfzeile in CSV
+Global.Hyperlink = Color.LightSkyBlue1; // Hyperlink
+Global.Zahlen = Color.Tan; // Zahlen
+
 
 Global.AppVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0.0"; // Major.Minor.Build.Revision
 
@@ -27,7 +29,7 @@ Global.SchulnummernPrivilegiert = new List<string>{ "177659" }; // Diese Schulnu
 Global.Schulnummer177659 = new List<string> { "177659" }; // Diese Schulnummer bekommen alle Privilegierten plus weitere Menüpunkte angezeigt.
 Global.SchulnummernDebug = new List<string>{ "000000" }; // alles
 
-configuration["AppDescription"] = "[bold springGreen2]BKB-Tool[/] - Ein Werkzeug an der Schnittstelle zwischen SchILD und Untis.";
+configuration["AppDescription"] = $"[bold {Global.GetColor(Global.Beschreibung)}]BKB-Tool[/] - Ein Werkzeug an der Schnittstelle zwischen SchILD und Untis.";
 
 var dateien = new Dateien(configuration);
 

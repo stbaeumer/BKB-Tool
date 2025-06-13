@@ -212,7 +212,7 @@ public class Menüeintrag
     {
         var interessierendeStudents = new Students();
 
-        Global.Konfig("Klassen", Global.Modus.Update, configuration, "Interessierende Klasse(n)", $"Geben Sie die interessierenden Klassen an. Meistens gibt man an besten eine einzelne Klasse an. Mehrere Klassen sind mit Komma zu trennen. Es können auch Namensteile von Klassen angegeben werden, wordurch alle Klassen gewählt werden, deren Klassenname den Namensteil enthält. Alle Klassen werden mit dem Wort [bold springGreen2]alle[/] gewählt.", Global.Datentyp.Klassen, "", this.Students);
+        Global.Konfig("Klassen", Global.Modus.Update, configuration, "Interessierende Klasse(n)", $"Geben Sie die interessierende(n) Klasse(n) an. Mehrere Klassen sind mit Komma zu trennen. Es können auch Namensteile von Klassen angegeben werden, wordurch alle Klassen gewählt werden, deren Klassenname den Namensteil enthält. Alle Klassen werden mit dem Wort [bold springGreen2]alle[/] gewählt.", Global.Datentyp.Klassen, "", this.Students);
 
         var interessierendeKlassen = configuration["Klassen"].ToString().Split(",").ToList();
 
@@ -2382,8 +2382,8 @@ public class Menüeintrag
 
     public Datei Teilleistungen(IConfiguration configuration, string zieldateiname)
     {
-        configuration = Global.Konfig("Teilleistungsarten", Global.Modus.Update, configuration, "Welche Teilleistungsarten (kommagetrennt) sollen gezogen werden?", "", Global.Datentyp.String, "Vornote");
-        configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration, "Abschnitt angeben", "", Global.Datentyp.String, "");
+        configuration = Global.Konfig("Teilleistungsarten", Global.Modus.Update, configuration, "Welche Teilleistungsarten (kommagetrennt) sollen gezogen werden?", "Wenn die von Ihnen eingegeben Teilleistungsart(en) ... \nin Webuntis anders heißen, werden keine Teilleistungen exportiert.\nin SchILD anders heißen, werden keine Teilleistungen nach SchILD importiert. Wenn die  Schauen Sie am besten zuerst in SchILD und Webuntis, welche Teilleistungsarten es in beiden Programmen gibt. Die können Sie dann hier angeben.", Global.Datentyp.String, "Vornote,Abschluss-Schriftl.,Abschluss-Mündl.");
+        configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration, "Abschnitt angeben", "Für welchen Abschnitt sollen die Teilleistungen ausgegeben werden?\nGeben die Ziffer [tan]1[/] (1. Halbjahr) oder [tan]2[/] (2. Halbjahr) an. ", Global.Datentyp.String, "");
 
         var zieldatei = new Datei(zieldateiname);
         var records = new List<dynamic>();
@@ -2418,7 +2418,7 @@ public class Menüeintrag
 
             if (zieldatei.Count == 0)
             {
-                var panel = new Panel($"Keine Teilleistungen gefunden.")
+                var panel = new Panel($"Keine Teilleistungen gefunden. Haben Sie die Teilleistungsart(en) exakt so eingegeben, wie sie in Webuntis mit Langname heißt?")
                         .HeaderAlignment(Justify.Left)
                         .SquareBorder()
                         .Expand()

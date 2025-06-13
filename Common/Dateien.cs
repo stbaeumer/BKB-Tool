@@ -37,10 +37,12 @@ public class Dateien : List<Datei>
     public void DisplayHeader(IConfiguration configuration, List<string> content = null)
     {
         Console.Clear();
-        AnsiConsole.Write(new FigletText("BKB-Tool").Centered().Color(Color.SpringGreen2));
+        AnsiConsole.Write(new FigletText("BKB-Tool").Centered().Color(Global.Überschrift));
+
+        var unterschrift = Global.GetColor(Global.Unterschrift);
 
         var contentString = ""; //configuration["AppDescription"] ?? "BKB-Tool - Ein Werkzeug für die Arbeit mit dem BKB-Schilddatenaustausch";
-        var header = $"[wheat1] BKB-Tool[/] | [wheat1 link=https://github.com/stbaeumer/BKB-Tool]https://github.com/stbaeumer/BKB-Tool[/] | [wheat1]GPLv3[/] | [wheat1]Version {Global.AppVersion} [/]";
+        var header = $"[{unterschrift}] BKB-Tool[/] | [{unterschrift} link=https://github.com/stbaeumer/BKB-Tool]https://github.com/stbaeumer/BKB-Tool[/] | [{unterschrift}]GPLv3[/] | [{unterschrift}]Version {Global.AppVersion} [/]";
 
         if (content != null && content.Count > 0)
         {
@@ -49,7 +51,7 @@ public class Dateien : List<Datei>
                 
         if (contentString == " ")
         {
-            AnsiConsole.Write(new Rule("").RuleStyle("springGreen2").Centered());
+            AnsiConsole.Write(new Rule("").RuleStyle(Global.GetColor(Global.Beschreibung)).Centered());
         }
         else
         {
@@ -58,7 +60,7 @@ public class Dateien : List<Datei>
                     .HeaderAlignment(Justify.Center)
                     .RoundedBorder()//.SquareBorder()
                     .Expand()
-                    .BorderColor(Color.SpringGreen2);
+                    .BorderColor(Global.Überschrift);
 
             AnsiConsole.Write(panel);
         }        

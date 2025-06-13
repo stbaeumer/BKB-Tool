@@ -438,16 +438,15 @@ public static class MenueHelper
                         Global.NurBeiDiesenSchulnummern.Nur000000
                     ),
                     new Menüeintrag(
-                        "Teilleistungen: SchuelerTeilleistungen nach Schild importieren",
+                        "Teilleistungen: SchuelerTeilleistungen.dat für SchILD erstellen",
                         anrechnungen,
                         quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "exportlessons,csv", "marksperlesson,csv"]),
                         students,
                         klassen,
                         [
-                            "Es wird jetzt die Datei [bold springGreen2]" + Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-") + @"SchuelerTeilleistungen.dat") + "[/] erstellt.",
-                            "Damit der Import nach SchILD rebuungslos funktioniert muss Folgendes gewährleistet sein:",
-                            "Die Teilleistungsarten in SchILD unter Schulverwaltung > Teilleistungsarten müssen gleichlautend mit dem Langnamen in Webuntis (Stammdaten > Prüfungsarten) angelegt sein.",
-                            "Es empfiehlt sich, dass die Lernabschnitssdaten und Leistungsdaten zuerst in SchILD importiert bzw. angelegt werden."
+                            "Es wird jetzt die Datei [bold aqua]" + Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerTeilleistungen.dat") + "[/] erstellt.",
+                            "[pink3]Hinweis:[/] Damit der Import nach SchILD reibungslos funktioniert, müssen zuvor die Teilleistungsarten in SchILD ([yellow]Schulverwaltung > Teilleistungsarten[/]) gleichlautend mit dem Langnamen in Webuntis ([yellow]Stammdaten > Prüfungsarten[/]) angelegt werden.",
+                            "[pink3]Hinweis:[/] Es empfiehlt sich, dass die Lernabschnitssdaten und Leistungsdaten zuerst in SchILD importiert bzw. angelegt werden."
                         ],
                         m =>
                         {
@@ -457,7 +456,7 @@ public static class MenueHelper
                             m.Zieldatei.Erstellen("|", '\0', new UTF8Encoding(true), false);
                         },
                         Global.Rubrik.Allgemein,
-                        Global.NurBeiDiesenSchulnummern.Nur000000
+                        Global.NurBeiDiesenSchulnummern.Alle
                     ),
                     new Menüeintrag(
                         "Schnellmeldung: Relationsgruppen im September aufbereiten",

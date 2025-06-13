@@ -94,6 +94,17 @@ public static class Global
     public static List<string> SchulnummernJedermann { get; set; }
     public static List<string> SchulnummernDebug { get; set; }
     public static List<string> Schulnummer177659 { get; set; }
+    public static Color PfadInProgrammen { get; set; }
+    public static Color PfadInDateien { get; set; }
+    public static Color ActionInMenüs { get; set; }
+    public static Color EinstellungenRahmen { get; set; }
+    public static Color Hinweise { get; set; }
+    public static Color KopfzeileInCSV { get; set; }
+    public static Color Hyperlink { get; set; }
+    public static Color Zahlen { get; set; }
+    public static Color Überschrift { get; set; }
+    public static Color Beschreibung { get; set; }
+    public static Color Unterschrift { get; set; }
 
     public static string? SafeGetString(SqlDataReader reader, int colIndex)
     {
@@ -107,7 +118,9 @@ public static class Global
         Console.Clear();
         AnsiConsole.Write(new FigletText("BKB-Tool").Centered().Color(Color.SpringGreen2));
 
+        var unterschrift = Global.GetColor(Global.Unterschrift);
         var contentString = configuration["AppDescription"] ?? "BKB-Tool - Ein Werkzeug für die Arbeit mit dem BKB-Schilddatenaustausch";
+        var header = $"[{unterschrift}] BKB-Tool[/] | [{unterschrift} link=https://github.com/stbaeumer/BKB-Tool]https://github.com/stbaeumer/BKB-Tool[/] | [{unterschrift}]GPLv3[/] | [{unterschrift}]Version {Global.AppVersion} [/]";
 
         if (content != null && content.Count > 0)
         {
@@ -115,7 +128,7 @@ public static class Global
         }
         
         var panel = new Panel(contentString)
-                .Header($"[wheat1] BKB-Tool[/] | [wheat1 link=https://github.com/stbaeumer/BKB-Tool]https://github.com/stbaeumer/BKB-Tool[/] | [wheat1]GPLv3[/] | [wheat1]Version {AppVersion} [/]")
+                .Header(header)
                 .HeaderAlignment(Justify.Center)
                 .RoundedBorder()//.SquareBorder()
                 .Expand()
@@ -1126,5 +1139,13 @@ public static class Global
             File.WriteAllText(pfadUndDatei, contentNeu, utf8NoBom);
             ZeileSchreiben(name, ": Datei neu erstellt.", ConsoleColor.Green, ConsoleColor.Gray);
         }
+    }
+
+    public static string GetColor(Color farbe)
+    {
+        // Wandel den ersten Buchtaben in einen Kleinbchstaben um:        
+        var s = farbe.ToString();
+        if (string.IsNullOrEmpty(s)) return s;
+        return char.ToLowerInvariant(s[0]) + s.Substring(1);
     }
 }    
