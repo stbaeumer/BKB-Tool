@@ -37,9 +37,9 @@ public class Dateien : List<Datei>
     public void DisplayHeader(IConfiguration configuration, List<string> content = null)
     {
         Console.Clear();
-        AnsiConsole.Write(new FigletText("BKB-Tool").Centered().Color(Global.Überschrift));
+        AnsiConsole.Write(new FigletText("BKB-Tool").Centered().Color(Global.ColorÜberschrift));
 
-        var unterschrift = Global.GetColor(Global.Unterschrift);
+        var unterschrift = Global.GetColor(Global.ColorUnterschrift);
 
         var contentString = ""; //configuration["AppDescription"] ?? "BKB-Tool - Ein Werkzeug für die Arbeit mit dem BKB-Schilddatenaustausch";
         var header = $"[{unterschrift}] BKB-Tool[/] | [{unterschrift} link=https://github.com/stbaeumer/BKB-Tool]https://github.com/stbaeumer/BKB-Tool[/] | [{unterschrift}]GPLv3[/] | [{unterschrift}]Version {Global.AppVersion} [/]";
@@ -51,7 +51,7 @@ public class Dateien : List<Datei>
                 
         if (contentString == " ")
         {
-            AnsiConsole.Write(new Rule("").RuleStyle(Global.GetColor(Global.Beschreibung)).Centered());
+            AnsiConsole.Write(new Rule("").RuleStyle(Global.GetColor(Global.ColorBeschreibung)).Centered());
         }
         else
         {
@@ -60,7 +60,7 @@ public class Dateien : List<Datei>
                     .HeaderAlignment(Justify.Center)
                     .RoundedBorder()//.SquareBorder()
                     .Expand()
-                    .BorderColor(Global.Überschrift);
+                    .BorderColor(Global.ColorÜberschrift);
 
             AnsiConsole.Write(panel);
         }        
@@ -71,18 +71,18 @@ public class Dateien : List<Datei>
         var schildhinweise = new string[]
         {
             "Exportieren Sie alle *.dat-Dateien aus SchILD, indem Sie den Pfad gehen:",
-            "1. [bold silver]Datenaustausch > Schnittstelle SchILD NRW > Export[/]",
-            $"2. [bold silver]Ausgabeverzeichnis[/]: [bold aqua]{configuration["PfadSchilddatenaustausch"]}[/]",
-            "3. [bold springGreen2]Export starten[/]"
+            $"1. [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Datenaustausch > Schnittstelle SchILD NRW > Export[/]",
+            $"2. [bold silver]Ausgabeverzeichnis[/]: [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadSchilddatenaustausch"]}[/]",
+            $"3. [bold {Global.GetColor(Global.ColorActionInMenüs)}]Export starten[/]"
         };
 
         var untishinweise = new string[]
         {
             "Exportieren Sie die Datei aus Untis, indem Sie den Pfad gehen:",
-            "1. [bold silver]Datei > Import/Export > Export TXT Datei[/]",
-            "2. Als Delimiter muss '|' ausgewählt werden.",
-            "3. Die Datei auswählen.",
-            $"4. Die Datei in [bold aqua]{configuration["PfadDownloads"]}[/] speichern."
+            $"1. [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Datei > Import/Export > Export TXT Datei[/]",
+            $"2. Als Delimiter muss '|' ausgewählt werden.",
+            $"3. Die Datei auswählen.",
+            $"4. Die Datei in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/] speichern."
         };
 
         Add(new Datei(
@@ -98,12 +98,12 @@ public class Dateien : List<Datei>
             "Beschreibung",
             [
                 "Exportieren Sie die Datei aus SchILD, indem Sie den Pfad gehen:",
-                "1. [bold yellow]Datenaustausch > Export in Text-/Exceldateien > Exportieren[/]",
-                "2. Dann [bold yellow]SchildSchuelerExport[/] laden.",
-                "3. [bold springGreen2]Export starten[/]",
-                "Ggf. muss die Vorlage erst erstellt werden. Es müssen folgende Felder enthalten sein:",
-                "[bold deeppink1_1]Geburtsdatum, Interne ID-Nummer, Nachname, Vorname, Klasse, Externe ID-Nummer, Status[/]",
-                "Feld-Trennzeichen: '|'"
+                $"1. [bold {Global.GetColor(Global.ColorPfadInDateien)}]Datenaustausch > Export in Text-/Exceldateien > Exportieren[/]",
+                $"2. Dann [bold {Global.GetColor(Global.ColorPfadInDateien)}]SchildSchuelerExport[/] laden.",
+                $"3. [bold {Global.GetColor(Global.ColorActionInMenüs)}]Export starten[/]",
+                $"Ggf. muss die Vorlage erst erstellt werden. Es müssen folgende Felder enthalten sein:",
+                $"[bold {Global.GetColor(Global.ColorKopfzeileInCSV)}]Geburtsdatum, Interne ID-Nummer, Nachname, Vorname, Klasse, Externe ID-Nummer, Status[/]",
+                $"Feld-Trennzeichen: '|'"
             ],
             [""],
             true,
@@ -114,8 +114,8 @@ public class Dateien : List<Datei>
             "OpenPeriod",
             "Beschreibung",
             ["Exportieren Sie die Datei aus Webuntis, indem Sie den Pfad gehen:",
-            "[bold springGreen2]Klassenbuch > Offene Stunden > Bericht[/]",
-            $"Die PDF-Datei in [bold aqua]{configuration["PfadDownloads"]}[/] speichern."],
+            $"[bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Klassenbuch > Offene Stunden > Bericht[/]",
+            $"Die PDF-Datei in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/] speichern."],
             [""],
             true,
             d => d.FilterOpenPeriod(),
@@ -126,8 +126,8 @@ public class Dateien : List<Datei>
             "Beschreibung",
             [
                 "Exportieren Sie die Datei aus Webuntis, indem Sie als Administrator den Pfad gehen:",
-                "1. [bold yellow]Stammdaten > Schüler*innen > Berichte > Schüler > CSV-Ausgabe[/]",
-                $"2. Die Datei in [bold aqua]{configuration["PfadDownloads"]}[/] speichern."
+                $"1. [bold {Global.GetColor(Global.ColorKopfzeileInCSV)}]Stammdaten > Schüler*innen > Berichte > Schüler > CSV-Ausgabe[/]",
+                $"2. Die Datei in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/] speichern."
             ],
             [""],
             true,
@@ -247,7 +247,7 @@ public class Dateien : List<Datei>
                 "den Kalender in Listenansicht anzeigen",
                 "Mit Strg+A alles markieren",
                 "Mit Strg+C kopieren",
-                "Die Datei " + Path.Combine(configuration["PfadDownloads"],"termine_kollegium.csv") + " überschreiben oder neu anlegen."
+                $"Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]" + Path.Combine(configuration["PfadDownloads"],"termine_kollegium.csv") + "[/] überschreiben oder neu anlegen."
             ],
             [""],
             true,
@@ -263,7 +263,7 @@ public class Dateien : List<Datei>
                 "den Kalender in Listenansicht anzeigen",
                 "Mit Strg+A alles markieren",
                 "Mit Strg+C kopieren",
-                "Die Datei " + Path.Combine(configuration["PfadDownloads"],"termine_fhr.csv") + " überschreiben oder neu anlegen."
+                $"Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]" + Path.Combine(configuration["PfadDownloads"],"termine_fhr.csv") + "[/] überschreiben oder neu anlegen."
             ],
             [""],
             true,
@@ -279,7 +279,7 @@ public class Dateien : List<Datei>
                 "den Kalender in Listenansicht anzeigen",
                 "Mit Strg+A alles markieren",
                 "Mit Strg+C kopieren",
-                "Die Datei " + Path.Combine(configuration["PfadDownloads"],"termine_verwaltung.csv") + " überschreiben oder neu anlegen."
+                $"Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]" + Path.Combine(configuration["PfadDownloads"],"termine_verwaltung.csv") + "[/] überschreiben oder neu anlegen."
             ],
             [""],
             true,
@@ -295,7 +295,7 @@ public class Dateien : List<Datei>
                 "den Kalender in Listenansicht anzeigen",
                 "Mit Strg+A alles markieren",
                 "Mit Strg+C kopieren",
-                "Die Datei " + Path.Combine(configuration["PfadDownloads"],"termine_berufliches_gymnasium.csv") + " überschreiben oder neu anlegen."
+                $"Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]" + Path.Combine(configuration["PfadDownloads"],"termine_berufliches_gymnasium.csv") + "[/] überschreiben oder neu anlegen."
             ],
             [""],
             true,
@@ -529,7 +529,7 @@ public class Dateien : List<Datei>
                     {
                         if (((IDictionary<string, object>)datei[0]).Count == 1)
                         {
-                            datei.Fehlermeldung = $"Die Datei [bold aqua]{absoluterPfad}[/] hat nur eine einzige Spalte. Das korrekte Trennzeichen ist: '{datei.Delimiter}'.";
+                            datei.Fehlermeldung = $"Die Datei [bold {Global.GetColor(Global.ColorPfadInDateien)}]{absoluterPfad}[/] hat nur eine einzige Spalte. Das korrekte Trennzeichen ist: [{Global.GetColor(Global.ColorZahlen)}]'{datei.Delimiter}'[/].";
                             if (meldungAnzeigen)
                                 datei.FehlermeldungRendern(configuration);
                         }
@@ -537,12 +537,12 @@ public class Dateien : List<Datei>
 
                         if (datei.Erstelldatum.Date.AddDays(maxDateiAlter) < DateTime.Now.Date)
                         {
-                            var veraltet = $"darf aber nicht älter als [bold red]{configuration["MaxDateiAlter"]}[/] Tage sein.";
+                            var veraltet = $"darf aber nicht älter als [bold {Global.GetColor(Global.ColorHinweise)}]{configuration["MaxDateiAlter"]}[/] Tage sein.";
                             if (configuration["MaxDateiAlter"] == "1")
                                 veraltet = "darf aber nicht älter als von gestern sein.";
                             if (configuration["MaxDateiAlter"] == "0")
                                 veraltet = "muss aber von heute sein.";
-                            datei.Fehlermeldung = $"Die Datei [bold aqua]{datei.AbsoluterPfad}[/] ist veraltet. Sie wurde am [bold red]{datei.Erstelldatum:dd.MM.yyyy}[/] erstellt, {veraltet}";
+                            datei.Fehlermeldung = $"Die Datei [bold {Global.GetColor(Global.ColorPfadInDateien)}]{datei.AbsoluterPfad}[/] ist veraltet. Sie wurde am [bold {Global.GetColor(Global.ColorHinweise)}]{datei.Erstelldatum:dd.MM.yyyy}[/] erstellt, {veraltet}";
                             if (meldungAnzeigen)
                                 datei.FehlermeldungRendern(configuration);
                         }
@@ -624,15 +624,15 @@ public class Dateien : List<Datei>
 
         if (anzahlDateienMitZeilen == 0)
         {
-            Meldung.Add($"Keine Dateien mit auswertbaren Zeilen in [bold aqua]{configuration["pfadDownloads"]}[/] gefunden.");
+            Meldung.Add($"Keine Dateien mit auswertbaren Zeilen in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["pfadDownloads"]}[/] gefunden.");
         }
         else if (anzahlDateienMitZeilen == 1)
         {
-            Meldung.Add($"Nur eine Datei mit auswertbaren Zeilen in [bold aqua]{configuration["pfadDownloads"]}[/] gefunden.");
+            Meldung.Add($"Nur eine Datei mit auswertbaren Zeilen in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["pfadDownloads"]}[/] gefunden.");
         }
         else
         {
-            Meldung.Add($"[bold fuchsia]{anzahlDateienMitZeilen}[/] Dateien aus [bold aqua]{configuration["pfadDownloads"]}[/] eingelesen.");
+            Meldung.Add($"[bold fuchsia]{anzahlDateienMitZeilen}[/] Dateien aus [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["pfadDownloads"]}[/] eingelesen.");
         }
         DisplayHeader(configuration, Meldung);
     }
@@ -715,17 +715,17 @@ public class Dateien : List<Datei>
                 // Panel: Wenn keine .dat-Dateien vorhanden sind, wird eine Warnung ausgegeben.
 
                 var panel = new Panel(
-                    $"SchILD verwendet für den Export und den (Re-)Import denselben Ordner. Deswegen verschiebt [bold springGreen2]BKB-Tool[/] jetzt " +
-                    $"[bold fuchsia]{datFiles.Count} aus SchILD exportierte *.dat-Dateien[/] direkt von [bold aqua]{pfadSchilddatenaustausch}[/] nach [bold aqua]{pfadDownloads}[/]. " +
-                    $"Die aufbereiteten Dateien stellt [bold springGreen2]BKB-Tool[/] wiederum in [bold aqua]{pfadSchilddatenaustausch}[/] bereit. " +
+                    $"SchILD verwendet für den Export und den (Re-)Import denselben Ordner. Deswegen verschiebt [bold {Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] jetzt " +
+                    $"[bold {Global.GetColor(Global.ColorZahlen)}]{datFiles.Count} aus SchILD exportierte *.dat-Dateien[/] direkt von [bold {Global.GetColor(Global.ColorPfadInDateien)}]{pfadSchilddatenaustausch}[/] nach [bold {Global.GetColor(Global.ColorPfadInDateien)}]{pfadDownloads}[/]. " +
+                    $"Die aufbereiteten Dateien stellt [bold {Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] wiederum in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{pfadSchilddatenaustausch}[/] bereit. " +
                     "So bleiben die Import-Dateien und Export-Dateien stets getrennt voneinander." +
-                    $"\nWeiter mit [bold grspringGreen2een]ENTER[/]."
+                    $"\nWeiter mit [bold {Global.GetColor(Global.ColorActionInMenüs)}]ENTER[/]."
                     )
-                    .Header("[bold fuchsia]  Hinweis  [/]")
+                    .Header($"[bold {Global.GetColor(Global.ColorInfoBox)}] Hinweis [/]")
                     .HeaderAlignment(Justify.Left)
                     .SquareBorder()
                     .Expand()
-                    .BorderColor(Color.Fuchsia);
+                    .BorderColor(Global.ColorInfoBox);
 
                 AnsiConsole.Write(panel);
                 Console.ReadKey();
@@ -747,7 +747,7 @@ public class Dateien : List<Datei>
                 }
 
                 //AnsiConsole.Write(new Rule($"[bold fuchsia] {datFiles.Count} Dateien verschoben von [bold aqua]{configuration["PfadSchilddatenaustausch"]}[/] nach [bold aqua]{configuration["PfadDownloads"]}[/][/] ").RuleStyle("fuchsia").LeftJustified());
-                this.Meldung.Add($"[bold fuchsia]{datFiles.Count} Dateien verschoben von [bold aqua]{configuration["PfadSchilddatenaustausch"]}[/] nach [bold aqua]{configuration["PfadDownloads"]}[/][/] ");
+                this.Meldung.Add($"[bold {Global.GetColor(Global.ColorZahlen)}]{datFiles.Count}[/] Dateien verschoben von [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadSchilddatenaustausch"]}[/] nach [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/]");
             }
             else
             {

@@ -173,10 +173,10 @@ private bool IstMailadresseGültig(string email)
                 smtpClient.Disconnect(true);
             }
 
-            Global.ZeileSchreiben(receiverEmail, "gesendet", ConsoleColor.Green, ConsoleColor.White);        
+            Global.ZeileSchreiben(attachment, $"Mail gesendet an: {receiverEmail}", ConsoleColor.Green, ConsoleColor.White);        
         }
         catch(Exception ex){
-            Global.ZeileSchreiben(receiverEmail, "Versand gescheitert.", ConsoleColor.Red,ConsoleColor.Gray);        
+            Global.ZeileSchreiben(attachment, $"Versand gescheitert: {receiverEmail}", ConsoleColor.Red,ConsoleColor.Gray);        
             Console.WriteLine("Fehler beim Versand der E-Mail an " + receiverEmail + ": " + ex.Message);
         }
     }

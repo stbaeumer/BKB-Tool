@@ -1136,7 +1136,7 @@ public class Menüeintrag
             var klassen = Quelldateien.GetMatchingList(configuration, "klassen", Students, Klassen);
             if (klassen == null || klassen.Count == 0) return [];
             
-            AnsiConsole.Write(new Rule("[aqua]Anstehende Änderungen/Neuanlagen:[/]").RuleStyle("aqua").LeftJustified());
+            AnsiConsole.Write(new Rule($"[{Global.GetColor(Global.ColorInfoBox)}]Anstehende Änderungen/Neuanlagen:[/]").RuleStyle(Global.GetColor(Global.ColorInfoBox)).LeftJustified());
 
             var table = new Spectre.Console.Table();
             table.Border(TableBorder.Rounded);
@@ -2382,8 +2382,8 @@ public class Menüeintrag
 
     public Datei Teilleistungen(IConfiguration configuration, string zieldateiname)
     {
-        configuration = Global.Konfig("Teilleistungsarten", Global.Modus.Update, configuration, "Welche Teilleistungsarten (kommagetrennt) sollen gezogen werden?", "Wenn die von Ihnen eingegeben Teilleistungsart(en) ... \nin Webuntis anders heißen, werden keine Teilleistungen exportiert.\nin SchILD anders heißen, werden keine Teilleistungen nach SchILD importiert. Wenn die  Schauen Sie am besten zuerst in SchILD und Webuntis, welche Teilleistungsarten es in beiden Programmen gibt. Die können Sie dann hier angeben.", Global.Datentyp.String, "Vornote,Abschluss-Schriftl.,Abschluss-Mündl.");
-        configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration, "Abschnitt angeben", "Für welchen Abschnitt sollen die Teilleistungen ausgegeben werden?\nGeben die Ziffer [tan]1[/] (1. Halbjahr) oder [tan]2[/] (2. Halbjahr) an. ", Global.Datentyp.String, "");
+        configuration = Global.Konfig("Teilleistungsarten", Global.Modus.Update, configuration, "Welche Teilleistungsarten (kommagetrennt) sollen gezogen werden?", "Die Teilleistungsart(en) in Webuntis und in SchILD müssen identisch heißen. Ansonsten werden keine Teilleistungen nach SchILD importiert.", Global.Datentyp.String, "Vornote,Abschluss-Schriftl.,Abschluss-Mündl.");
+        configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration, "Abschnitt angeben", $"Für welchen Abschnitt sollen die Teilleistungen ausgegeben werden?\nGeben die Ziffer [{Global.GetColor(Global.ColorZahlen)}]1[/] (1. Halbjahr) oder [{Global.GetColor(Global.ColorZahlen)}]2[/] (2. Halbjahr) an. ", Global.Datentyp.String, "");
 
         var zieldatei = new Datei(zieldateiname);
         var records = new List<dynamic>();
@@ -2399,7 +2399,7 @@ public class Menüeintrag
                 {
                     var dictMar = (IDictionary<string, object>)recMar;
                     if (!(dictMar["Name"].ToString() == student.Nachname + " " + student.Vorname && dictMar["Klasse"].ToString() == student.Klasse)) continue;
-                    if (!(string.IsNullOrEmpty(configuration["Teilleistungsarten"].ToString()) || configuration["Teilleistungsarten"].ToString().Trim().Split(',').Contains(dictMar["Prüfungsart"].ToString()))) continue;
+                    if (!(string.IsNullOrEmpty(configuration["Teilleistungsarten"].ToString()) || configuration["Teilleistungsarten"].ToString().ToLower().Trim().Split(',').Contains(dictMar["Prüfungsart"].ToString().ToLower()))) continue;
                     dynamic record = new ExpandoObject();
                     record.Nachname = student.Nachname;
                     record.Vorname = student.Vorname;
@@ -2418,7 +2418,7 @@ public class Menüeintrag
 
             if (zieldatei.Count == 0)
             {
-                var panel = new Panel($"Keine Teilleistungen gefunden. Haben Sie die Teilleistungsart(en) exakt so eingegeben, wie sie in Webuntis mit Langname heißt?")
+                var panel = new Panel($"Keine Teilleistungen gefunden. Haben Sie die Teilleistungsart(en) exakt so eingegeben, wie sie in SchILD bzw. Webuntis mit Langname heißt?")
                         .HeaderAlignment(Justify.Left)
                         .SquareBorder()
                         .Expand()
@@ -2539,7 +2539,7 @@ public class Menüeintrag
             var panel = new Panel($"Die Anrechnungen aus der Untis-Datei [aqua]GPU020.txt[/] werden mit der SchILD-Datei [aqua]LehrkraefteSonderzeiten.dat[/] abgeglichen." +
                             $"\nDie Datei [aqua]{zieldateiname}[/] wird neu erstellt und kann nach ScHILD importiert werden." +
                             $"\nAnrechnungsgründe [aqua]...........................[/] werden ignoriert und auf 0 gesetzt.")
-                            .Header($" [bold springGreen2] Anrechnungen [/]")
+                            .Header($"[bold springGreen2] Anrechnungen [/]")
                             .HeaderAlignment(Justify.Left)
                             .SquareBorder()
                             .Expand()
@@ -2716,7 +2716,7 @@ public class Menüeintrag
     public void RenderAuswahlÜberschrift(IConfiguration configuration)
     {
         var panel3 = new Panel($"[grey85]{string.Join("\n", Beschreibung)}[/]")
-            .Header($" [bold yellow3_1]  {Titel}  [/]")
+            .Header($"[bold yellow3_1] {Titel} [/]")
             .HeaderAlignment(Justify.Left)
             .SquareBorder()
             .Expand()

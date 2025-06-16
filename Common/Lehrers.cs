@@ -272,7 +272,7 @@ WHERE (((SCHOOLYEAR_ID)= " + Global.AktSj[0] + Global.AktSj[1] + ") AND  ((TERM_
                       .Take(10)
                       .Select(g => new { Name = g.Key, Count = g.Count() });
 
-        Global.ZeileSchreiben("TOP10 Offene Klassenbuch-Einträge", "Häufigkeit", ConsoleColor.Black, ConsoleColor.Blue);
+        //Global.ZeileSchreiben("TOP10 Offene Klassenbuch-Einträge", "Häufigkeit", ConsoleColor.Black, ConsoleColor.Blue);
                 
         foreach (var item in topLehrer)
         {
@@ -290,7 +290,7 @@ WHERE (((SCHOOLYEAR_ID)= " + Global.AktSj[0] + Global.AktSj[1] + ") AND  ((TERM_
             Global.ZeileSchreiben($"{item.Name}", nachricht, ConsoleColor.Blue, ConsoleColor.Black);        
         }   
         
-        Console.WriteLine("  Jetzt die TOP10 per Mail anschreiben? [J/n]");
+        Console.WriteLine("Jetzt die TOP10 per Mail anschreiben? [J/n]");
         var x = Console.ReadKey().Key;
         if (x == ConsoleKey.J || x == ConsoleKey.Enter)
         {

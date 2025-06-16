@@ -130,7 +130,7 @@ public class Students : List<Student>
             path.LeafStyle = new Style(foreground: Spectre.Console.Color.Yellow);
 
             var panel = new Panel(path)
-                .Header("[bold greenYellow]  Neu:  [/]")
+                .Header("[bold greenYellow] Neu: [/]")
                 .HeaderAlignment(Justify.Left)
                 .SquareBorder()
                 .Expand()
@@ -181,7 +181,7 @@ public class Students : List<Student>
                 else
                 {
                     AnsiConsole.Write(new Panel("Die Datei 'atlantisschueler.csv' wurde nicht gefunden. Bitte erstellen Sie die Datei im UTF8-Format.")
-                        .Header($" [bold springGreen2] Hinweis [/]")
+                        .Header($"[bold springGreen2] Hinweis [/]")
                         .HeaderAlignment(Justify.Left)
                         .SquareBorder()
                         .Expand()
@@ -191,7 +191,7 @@ public class Students : List<Student>
             else if (Directory.GetFiles(inputFolder, "*.csv").Length == 0)
             {
                 AnsiConsole.Write(new Panel($"{Path.Combine(inputFolder, "atlantisschueler.csv")} existiert nicht. Bitte erstellen Sie die Datei im UTF8-Format.")
-                        .Header($" [bold hotpink3_1] Hinweis [/]")
+                        .Header($"[bold hotpink3_1] Hinweis [/]")
                         .HeaderAlignment(Justify.Left)
                         .SquareBorder()
                         .Expand()
@@ -1323,7 +1323,7 @@ public class Students : List<Student>
             AnsiConsole.Write(table);
 
             AnsiConsole.Write(new Panel($"Verschieben Sie die Fotos jetzt (oder später) nach [bold dodgerBlue11]" + Path.Combine(pfadDownloads, "Fotos", klasse) + "[/].")
-                            .Header($" [bold dodgerBlue11] Alle Fotos gemacht? [/]")
+                            .Header($"[bold dodgerBlue11] Alle Fotos gemacht? [/]")
                             .HeaderAlignment(Justify.Left)
                             .SquareBorder()
                             .Expand()
@@ -1416,7 +1416,7 @@ public class Students : List<Student>
         else
         {
             var panel = new Panel($"Es sind keine Fotos bereit für den Import nach SchILD2.")
-                            .Header($" [bold springGreen2] Keine Fotos [/]")
+                            .Header($"[bold springGreen2] Keine Fotos [/]")
                             .HeaderAlignment(Justify.Left)
                             .SquareBorder()
                             .Expand()
@@ -1563,7 +1563,7 @@ public class Students : List<Student>
 
     internal string GetArtUndZahlen()
     {
-        var statusstring = "[tan]" + this.Count().ToString() + "[/][white] Schüler*innen: ([/]";
+        var statusstring = $"[{Global.GetColor(Global.ColorZahlen)}]" + this.Count().ToString() + "[/] Schüler*innen: (";
 
         var i = 0;
         var zeile = new List<string>();
@@ -1576,7 +1576,7 @@ public class Students : List<Student>
 
         foreach (var status in this.Select(x => x.Status).Distinct().OrderBy(x => x).ToList())
         {
-            statusstring += "[tan]" + this.Count(x => x.Status == status) + "[/]";
+            statusstring += $"[{Global.GetColor(Global.ColorZahlen)}]{this.Count(x => x.Status == status)}[/]";
 
             switch (status)
             {
@@ -1600,7 +1600,7 @@ public class Students : List<Student>
 
         if (this.Select(x => x.Status).Distinct().Count() == 1)
         {
-            return "[tan] " + this.Count().ToString() + "[/] Schüler*innen: [springGreen2]nur aktive Schüler exportiert[/]";
+            return $"[{Global.GetColor(Global.ColorZahlen)}] {this.Count().ToString()} [/] Schüler*innen: [springGreen2]nur aktive Schüler exportiert[/]";
         }
         
         return statusstring.TrimEnd(' ').TrimEnd(',').TrimEnd(' ').TrimEnd(',') +  ")";

@@ -40,6 +40,8 @@ public static class MenueHelper
             var students = new Students(configuration, quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "schildschuelerexport,txt,optional"], true));
             quelldateien.Meldung.Add(students.GetArtUndZahlen());
 
+            Global.DisplayHeader(configuration, quelldateien.Meldung);
+
             lehrers = new Lehrers(configuration, quelldateien.Notwendige(configuration, ["lehrkraefte,dat"], true));
             
             if (students.Count == 0 || lehrers.Count == 0)
@@ -64,8 +66,8 @@ public static class MenueHelper
                         students,
                         klassen,
                         [
-                            $"Es wird jetzt die Datei [bold aqua] {Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd") + "-ImportNachWebuntis.csv")}[/] erstellt.",                            
-                            "[pink3]Hinweis:[/] Das Zeugnisdatum des letzten Zeugnisses in einer Klasse wird zum Webuntis-Austrittsdatum bei Schüler*innen, deren Status weder aktiv noch extern ist."
+                            $"Es wird jetzt die Datei [bold {Global.GetColor(Global.ColorPfadInDateien)}] {Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd") + "-ImportNachWebuntis.csv")}[/] erstellt.",                            
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis:[/] Das Zeugnisdatum des letzten Zeugnisses in einer Klasse wird zum Webuntis-Austrittsdatum bei Schüler*innen, deren Status weder aktiv noch extern ist."
                         ],
                         m =>
                         {
@@ -73,10 +75,10 @@ public static class MenueHelper
                             m.Zieldatei = m.WebuntisOderNetmanOderLitteraCsv(configuration, Path.Combine(pfadDownloads ?? "", zeitstempel +  @"-ImportNachWebuntis.csv"));
                             m.Zieldatei?.Erstellen(";", '\'', new UTF8Encoding(false), false,
                             [
-                                "1. In Webuntis als Webuntis-Admin:  [bold yellow]Stammdaten > Schüler*innen > Import[/]",
-                                "2. Datei auswählen, UTF8",
-                                "3. Profil: Schuelerimport, dann Vorschau",
-                                "Mehr zum Profil Schuelerimport: [lightskyblue3_1][link=https://github.com/stbaeumer/BKB-Tool/wiki]https://github.com/stbaeumer/BKB-Tool/wiki[/][/]"
+                                $"1. In Webuntis als Webuntis-Admin:  [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Stammdaten > Schüler*innen > Import[/]",
+                                $"2. Datei auswählen, UTF8",
+                                $"3. Profil: Schuelerimport, dann Vorschau",
+                                $"Mehr zum Profil Schuelerimport: [{Global.GetColor(Global.ColorHyperlink)}][link=https://github.com/stbaeumer/BKB-Tool/wiki]https://github.com/stbaeumer/BKB-Tool/wiki[/][/]"
                             ]
                             );
                         },
@@ -114,24 +116,18 @@ public static class MenueHelper
                         students,
                         klassen,
                         [
-                            "Es werden jetzt die Dateien [bold aqua]" + Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-") + "****" +  @"-ImportNachWebuntis.csv") + "[/] und [bold aqua]***-ImportNachWebuntis.zip[/] erstellt. Der Webuntis-Admin muss im Anschluss die Dateien wie folgt importieren:",
-                            "1. [bold yellow]Stammdaten > Schüler*innen > Import[/]",
-                            "2. Datei auswählen, UTF8",
-                            "3. Profil: Schuelerimport, dann Vorschau",
-                            "[pink3]Hinweis:[/] Das Zeugnisdatum des letzten Zeugnisses in einer Klasse wird zum Webuntis-Austrittsdatum bei Schüler*innen, deren Status weder aktiv noch extern ist.",
-                            "Es wird jetzt die Datei [bold aqua]" + Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-") + "****" +  @"-ImportNachNetman.csv") + "[/] erstellt:",
-                            "1. Die Datei Student_***.csv muss als admin aus Webuntis nach [bold aqua]" + pfadDownloads + "[/] heruntergeladen werden: [bold yellow]Stammdaten > Schüler > Export als csv[/].",
-                            "2. Nach dem Einlesen werden alle Schülerinnen und Schüler angezeigt, die in Untis zu löschen sind. Es wird bei diesen Schülerinnen und Schülern ein Austrittsdatum gesetzt.",
-                            "3. Die Importdatei für Netman und Littera werden geschrieben.",
-                            "4. Die Netman-Datei wird gezippt verschickt.",
-                            "Es wird jetzt die Datei [bold aqua]" + Path.Combine(@"\\fs01\Littera\Atlantis Import Daten" ?? "", DateTime.Now.ToString("yyyyMMdd-") + "****" +  @"-ImportNachLittera.csv") + "[/] erstellt.",
+                            $"Es wird jetzt die Datei [bold {Global.GetColor(Global.ColorPfadInDateien)}]" + Path.Combine(configuration["PfadDownloads"] ?? "", DateTime.Now.ToString("yyyyMMdd-") + "****" +  @"-ImportNachLittera.csv") + "[/] erstellt.",
                         ],
                         m =>
                         {
-                            var zeitstempel = DateTime.Now.ToString("yyyyMMdd-HHmm");
-                            m.Zieldatei = m.WebuntisOderNetmanOderLitteraCsv(configuration, Path.Combine(pfadDownloads ?? "", DateTime.Now.AddHours(1).ToString("yyyyMMdd-HHmm") + @"-ImportNachLittera.xml"));
+                            var zeitstempel = DateTime.Now.ToString("yyyyMMdd-HHmm");                            
+                            m.Zieldatei = m.WebuntisOderNetmanOderLitteraCsv(configuration, Path.Combine(configuration["PfadDownloads"] ?? "", DateTime.Now.AddHours(1).ToString("yyyyMMdd-HHmm") + @"-ImportNachLittera.xml"));
                             m.Zieldatei?.Erstellen(";", '\"', new UTF8Encoding(false), false);
-                            m.Zieldatei?.Verschieben(@"\\fs01\Littera\Atlantis Import Daten");
+                            if(configuration["Schulnummer"] != null && configuration["Schulnummer"] == "177659")
+                            {
+                                configuration = Global.Konfig("PfadLitteraImport", Global.Modus.Update, configuration, "Littera-Import-Pfad", $"Wohin soll die neue Datei nach dem Erstellen verschoben werden?", Global.Datentyp.Pfad, @"\\fs01\Littera\Atlantis Import Daten", null, null);
+                                m.Zieldatei?.Verschieben(configuration["PfadLitteraImport"]);
+                            }
                         },
                         Global.Rubrik.WöchtentlicheArbeiten,
                         Global.NurBeiDiesenSchulnummern.Nur177659
@@ -143,16 +139,19 @@ public static class MenueHelper
                         students,
                         klassen,
                         [
-                            $"Es wird jetzt die Datei [aqua] {Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd") + "-ImportNachNetman.csv")}[/] erstellt.",
-                            "[pink3]Hinweis:[/] Schüler*innen, die bereits abgegangen sind oder einen Abschluss erworben haben, werden erst sechs Wochen später ausgebucht, um den Zugriff auf Teams nicht direkt zu verlieren."
+                            $"Es wird jetzt die Datei [{Global.GetColor(Global.ColorPfadInDateien)}] {Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd") + "-ImportNachNetman.csv")}[/] erstellt.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis:[/] Schüler*innen, die bereits abgegangen sind oder einen Abschluss erworben haben, werden erst sechs Wochen später ausgebucht, um den Zugriff auf Teams nicht direkt zu verlieren."
                         ],
                         m =>
                         {
                             var zeitstempel = DateTime.Now.ToString("yyyyMMdd-HHmm");
                             m.Zieldatei = m.WebuntisOderNetmanOderLitteraCsv(configuration, Path.Combine(pfadDownloads ?? "", DateTime.Now.AddHours(1).ToString("yyyyMMdd-HHmm") + @"-ImportNachNetman.csv"));
                             m.Zieldatei?.Erstellen(",", '\'', new UTF8Encoding(false), false);
-                            m.Zieldatei?.Zippen(m.Zieldatei?.GetAbsoluterPfad(), configuration);
-                            m.Zieldatei?.Mailen(Path.GetFileName(m.Zieldatei.AbsoluterPfad) ?? "", "Verwaltung", Path.GetFileName(m.Zieldatei.AbsoluterPfad) ?? "", configuration);
+                            if(configuration["Schulnummer"] != null && configuration["Schulnummer"] == "177659")
+                            {
+                                m.Zieldatei?.Zippen(m.Zieldatei?.GetAbsoluterPfad(), configuration);
+                                m.Zieldatei?.Mailen(Path.GetFileName(m.Zieldatei.AbsoluterPfad) ?? "", "Verwaltung", Path.GetFileName(m.Zieldatei.AbsoluterPfad) ?? "", configuration);
+                            }                            
                         },
                         Global.Rubrik.WöchtentlicheArbeiten,
                         Global.NurBeiDiesenSchulnummern.Nur177659
@@ -444,9 +443,9 @@ public static class MenueHelper
                         students,
                         klassen,
                         [
-                            "Es wird jetzt die Datei [bold aqua]" + Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerTeilleistungen.dat") + "[/] erstellt.",
-                            "[pink3]Hinweis:[/] Damit der Import nach SchILD reibungslos funktioniert, müssen zuvor die Teilleistungsarten in SchILD ([yellow]Schulverwaltung > Teilleistungsarten[/]) gleichlautend mit dem Langnamen in Webuntis ([yellow]Stammdaten > Prüfungsarten[/]) angelegt werden.",
-                            "[pink3]Hinweis:[/] Es empfiehlt sich, dass die Lernabschnitssdaten und Leistungsdaten zuerst in SchILD importiert bzw. angelegt werden."
+                            $"Es wird jetzt die Datei [bold {Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerTeilleistungen.dat")}[/] erstellt.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis:[/] Damit der Import nach SchILD reibungslos funktioniert, müssen zuvor die Teilleistungsarten in SchILD ([{Global.GetColor(Global.ColorPfadInProgrammen)}]Schulverwaltung > Teilleistungsarten[/]) gleichlautend mit dem Langnamen in Webuntis ([{Global.GetColor(Global.ColorPfadInProgrammen)}]Stammdaten > Prüfungsarten[/]) angelegt werden.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis:[/] Es empfiehlt sich, dass die Lernabschnitssdaten und Leistungsdaten zuerst in SchILD importiert bzw. angelegt werden."
                         ],
                         m =>
                         {
@@ -524,7 +523,7 @@ public static class MenueHelper
                         klassen,
                         [
                             "Die 10% der KuK mit den meisten offenen Klassenbucheinträgen werden angemahnt.",
-                            "Unter 10 fehlenden wird nicht gemahnt. Ab 20 oder mehr Stunden wird die Schulleitung in CC informiert.",
+                            "Mit weniger als 10 offenen Eintragungen wird nicht gemahnt. Ab 20 oder mehr Stunden wird die Schulleitung in CC informiert.",
                             "Die Anzahl der offenen Klassenbucheinträge wird aus der Datei 'OpenPeriods' ausgelesen.",
                             "Die KuK werden zuerst angezeigt. Vor dem Mailversand wird nochmal explizit gefragt."
                         ],
@@ -733,11 +732,11 @@ public static class MenueHelper
         catch (Exception ex)
         {
             var panel3 = new Panel(ex.Message)
-            .Header($" [bold red]  Es ist zu einem Fehler gekommen  [/]")
+            .Header($" [bold {Global.GetColor(Global.ColorFehler)}] Es ist zu einem Fehler gekommen [/]")
             .HeaderAlignment(Justify.Left)
             .SquareBorder()
             .Expand()
-            .BorderColor(Color.Red);
+            .BorderColor(Global.ColorFehler);
         
             AnsiConsole.Write(panel3);
             Global.WeiterMitAnykey(configuration);

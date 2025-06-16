@@ -69,7 +69,8 @@ public static class Global
         Abschnitt,
         ListInt,
         Float,
-        Auswahl
+        Auswahl,
+        Maildomain
     }
 
     public enum Modus
@@ -94,17 +95,20 @@ public static class Global
     public static List<string> SchulnummernJedermann { get; set; }
     public static List<string> SchulnummernDebug { get; set; }
     public static List<string> Schulnummer177659 { get; set; }
-    public static Color PfadInProgrammen { get; set; }
-    public static Color PfadInDateien { get; set; }
-    public static Color ActionInMenüs { get; set; }
-    public static Color EinstellungenRahmen { get; set; }
-    public static Color Hinweise { get; set; }
-    public static Color KopfzeileInCSV { get; set; }
-    public static Color Hyperlink { get; set; }
-    public static Color Zahlen { get; set; }
-    public static Color Überschrift { get; set; }
-    public static Color Beschreibung { get; set; }
-    public static Color Unterschrift { get; set; }
+    public static Color ColorPfadInProgrammen { get; set; }
+    public static Color ColorPfadInDateien { get; set; }
+    public static Color ColorActionInMenüs { get; set; }
+    public static Color ColorEinstellungenRahmen { get; set; }
+    public static Color ColorHinweise { get; set; }
+    public static Color ColorKopfzeileInCSV { get; set; }
+    public static Color ColorHyperlink { get; set; }
+    public static Color ColorZahlen { get; set; }
+    public static Color ColorÜberschrift { get; set; }
+    public static Color ColorBeschreibung { get; set; }
+    public static Color ColorUnterschrift { get; set; }
+    public static Color ColorTextHervorheben { get; set; }
+    public static Color ColorFehler { get; set; }
+    public static Color ColorInfoBox { get; set; }
 
     public static string? SafeGetString(SqlDataReader reader, int colIndex)
     {
@@ -116,9 +120,9 @@ public static class Global
     public static void DisplayHeader(IConfiguration configuration, List<string> content = null)
     {
         Console.Clear();
-        AnsiConsole.Write(new FigletText("BKB-Tool").Centered().Color(Color.SpringGreen2));
+        AnsiConsole.Write(new FigletText("BKB-Tool").Centered().Color(ColorÜberschrift));
 
-        var unterschrift = Global.GetColor(Global.Unterschrift);
+        var unterschrift = GetColor(ColorUnterschrift);
         var contentString = configuration["AppDescription"] ?? "BKB-Tool - Ein Werkzeug für die Arbeit mit dem BKB-Schilddatenaustausch";
         var header = $"[{unterschrift}] BKB-Tool[/] | [{unterschrift} link=https://github.com/stbaeumer/BKB-Tool]https://github.com/stbaeumer/BKB-Tool[/] | [{unterschrift}]GPLv3[/] | [{unterschrift}]Version {Global.AppVersion} [/]";
 
@@ -132,7 +136,7 @@ public static class Global
                 .HeaderAlignment(Justify.Center)
                 .RoundedBorder()//.SquareBorder()
                 .Expand()
-                .BorderColor(Color.SpringGreen2);
+                .BorderColor(Global.ColorÜberschrift);
 
         AnsiConsole.Write(panel);
     }
@@ -187,28 +191,24 @@ public static class Global
             path.RootStyle = new Style(foreground: Color.White, background: Color.Black);
             path.SeparatorStyle = new Style(foreground: Color.White, background: Color.Black);
             path.StemStyle = new Style(foreground: Color.White, background: Color.Black);
-            path.LeafStyle = new Style(foreground: Color.Aqua, background: Color.Black);
+            path.LeafStyle = new Style(foreground: Color.SpringGreen2, background: Color.Black);
 
-            var panel = new Panel(path)
-                .Header("[bold aqua]  Bereit für den Import:  [/]")
+            var s = linkeSeite;
+
+            if (rechteSeite != "")
+            {
+                s = $"[{Global.GetColor(Global.ColorPfadInDateien)}]{s}[/]\n\n[{Global.GetColor(Global.ColorHinweise)}]Importhinweise:  [/]\n" + rechteSeite;
+            }
+
+            var panel = new Panel(s)
+                .Header($"[bold {Global.GetColor(ColorInfoBox)}] Bereit für den Import: [/]")
                 .HeaderAlignment(Justify.Left)
                 .SquareBorder()
                 .Expand()
-                .BorderColor(Color.White);
+                .BorderColor(Global.ColorInfoBox);
 
                 AnsiConsole.Write(panel);
-
-            if(rechteSeite != "")
-            {
-                var panel2 = new Panel(rechteSeite)
-                .Header("[bold aqua]  Importhinweise:  [/]")
-                .HeaderAlignment(Justify.Left)
-                .SquareBorder()
-                .Expand()
-                .BorderColor(Color.White);
-
-                AnsiConsole.Write(panel2);
-            }
+            
         }
         else
         {
@@ -319,12 +319,17 @@ public static class Global
             //.Header($"[bold]  {parameter}  [/]")
             .HeaderAlignment(Justify.Left)
             .SquareBorder()
-            .Expand()
-            .BorderColor(Color.SpringGreen2);
+            .Expand();
 
-        //
-        aufforderung = " " + aufforderung;
-
+        if (parameter == "Auswahl")
+        {
+            panel.BorderColor(Global.ColorÜberschrift);
+        }
+        else
+        {
+            panel.BorderColor(Global.ColorActionInMenüs);
+        }
+        
         // Der Wert aus der JSON hat Vorrang vor dem defaultwert. Nur wenn die JSON keinen Wert enthält, wird der defaultwert verwendet.
         defaultValue = !string.IsNullOrEmpty(configuration[parameter])
             ? configuration[parameter] ?? defaultValue
@@ -344,7 +349,7 @@ public static class Global
 
             userInput = AnsiConsole.Prompt(
             new TextPrompt<string>(aufforderung)
-                .PromptStyle("springGreen2")
+                .PromptStyle(Global.GetColor(Global.ColorActionInMenüs))
                 .ShowDefaultValue(true)
                 .Validate(n =>
                 {
@@ -372,9 +377,9 @@ public static class Global
             var größteAuswahlZahl = GetMaxNumberFromList(zulässigeAuswahlOptionen.Split(','));
 
             userInput = AnsiConsole.Prompt(
-            new TextPrompt<string>(aufforderung)
-                .PromptStyle("springGreen2")
-                .DefaultValue(defaultValue.ToLower() == "x" ? "x" : defaultValue.ToString())
+            new TextPrompt<string>($"[] {aufforderung}[/]")
+                .PromptStyle(Global.GetColor(Global.ColorActionInMenüs))
+                .DefaultValue(defaultValue.ToLower() == "e" ? "e" : defaultValue.ToString())
                 .ShowDefaultValue(true)
                 .Validate(n =>
                 {
@@ -396,7 +401,8 @@ public static class Global
             AnsiConsole.Write(panel);
 
             userInput = AnsiConsole.Prompt(
-                new TextPrompt<string>(aufforderung)
+                new TextPrompt<string>($"[] {aufforderung}[/]")
+                .PromptStyle(Global.GetColor(Global.ColorActionInMenüs))
                     .ShowDefaultValue(true)
                     .Validate(n =>
                     {
@@ -421,8 +427,9 @@ public static class Global
             AnsiConsole.Write(panel);
 
             userInput = AnsiConsole.Prompt(
-                new TextPrompt<string>(aufforderung)
+                new TextPrompt<string>($"[] {aufforderung}[/]")
                     .ShowDefaultValue(true)
+                    .PromptStyle(Global.GetColor(Global.ColorActionInMenüs))
                     .Validate(n =>
                     {
                         if (string.IsNullOrEmpty(n))
@@ -442,7 +449,8 @@ public static class Global
             AnsiConsole.Write(panel);
 
             userInput = AnsiConsole.Prompt(
-                new TextPrompt<string>(aufforderung)
+                new TextPrompt<string>($"[] {aufforderung}[/]")
+                .PromptStyle(Global.GetColor(Global.ColorActionInMenüs))
                     .ShowDefaultValue(true)
                     .Validate(n =>
                     {
@@ -489,8 +497,9 @@ public static class Global
             AnsiConsole.Write(panel);
 
             userInput = AnsiConsole.Prompt(
-                new TextPrompt<string>(aufforderung)
+                new TextPrompt<string>($"[] {aufforderung}[/]")
                     .ShowDefaultValue(true)
+                    .PromptStyle(Global.GetColor(Global.ColorActionInMenüs))
                     .Validate(n =>
                     {
                         if (!n.StartsWith("https://") && !string.IsNullOrEmpty(n))
@@ -512,8 +521,35 @@ public static class Global
             AnsiConsole.Write(panel);
 
             userInput = AnsiConsole.Prompt(
-                new TextPrompt<string>(aufforderung)
+                new TextPrompt<string>($"[] {aufforderung}[/]")
                     .ShowDefaultValue(true)
+                    .PromptStyle(Global.GetColor(Global.ColorActionInMenüs))
+                    .Validate(n =>
+                    {
+                        if (!n.Contains("@") && !string.IsNullOrEmpty(n))
+                            return ValidationResult.Error("Eingabe muss mit @ beginnen und einen Punkt enthalten.");
+                        if (!n.Contains(".") && !string.IsNullOrEmpty(n))
+                            return ValidationResult.Error("Eingabe muss mit @ beginnen und einen Punkt enthalten.");
+                        return ValidationResult.Success();
+                    })
+                .DefaultValue<string>(defaultValue));
+        }
+        if (datentyp == Datentyp.Maildomain)
+        {
+            // Wenn im READ-Modus der Wert plausibel ist, dann wird er nicht erneut abgefragt
+            if (modus == Modus.Read && (!string.IsNullOrEmpty(defaultValue) && defaultValue.StartsWith("@") && defaultValue.Contains(".")))
+            {
+                configuration[parameter] = defaultValue;
+                return configuration;
+            }
+
+            // Wenn der Wert abgefragt wird, dann wird ein Panel mit dem Hinweis angezeigt
+            AnsiConsole.Write(panel);
+
+            userInput = AnsiConsole.Prompt(
+                new TextPrompt<string>($"[] {aufforderung}[/]")
+                    .ShowDefaultValue(true)
+                    .PromptStyle(Global.GetColor(Global.ColorActionInMenüs))
                     .Validate(n =>
                     {
                         if (!n.StartsWith("@") && !string.IsNullOrEmpty(n))
@@ -536,8 +572,9 @@ public static class Global
             AnsiConsole.Write(panel);
 
             userInput = AnsiConsole.Prompt(
-                new TextPrompt<string>(aufforderung)
+                new TextPrompt<string>($"[] {aufforderung}[/]")
                     .ShowDefaultValue(true)
+                    .PromptStyle(Global.GetColor(Global.ColorActionInMenüs))
                     .Validate(n =>
                     {
                         if (!Path.Exists(n))
@@ -559,8 +596,9 @@ public static class Global
             AnsiConsole.Write(panel);
 
             userInput = AnsiConsole.Prompt(
-                new TextPrompt<string>(aufforderung)
+                new TextPrompt<string>($"[] {aufforderung}[/]")
                     .ShowDefaultValue(true)
+                    .PromptStyle(Global.GetColor(Global.ColorActionInMenüs))
                     .Validate(n =>
                     {
                         if (!int.TryParse(n.ToString(), out _))
@@ -589,7 +627,8 @@ public static class Global
             AnsiConsole.Write(panel);
 
             userInput = AnsiConsole.Prompt(
-                new TextPrompt<string>(aufforderung)
+                new TextPrompt<string>($"[] {aufforderung}[/]")
+                .PromptStyle(Global.GetColor(Global.ColorActionInMenüs))
                     .ShowDefaultValue(true)
                     .Validate(n =>
                     {
@@ -612,7 +651,8 @@ public static class Global
             AnsiConsole.Write(panel);
 
             userInput = AnsiConsole.Prompt(
-                new TextPrompt<string>(aufforderung)
+                new TextPrompt<string>($"[] {aufforderung}[/]")
+                .PromptStyle(Global.GetColor(Global.ColorActionInMenüs))
                     .ShowDefaultValue(true)
                     .Validate(n =>
                     {
@@ -636,7 +676,8 @@ public static class Global
             AnsiConsole.Write(panel);
 
             userInput = AnsiConsole.Prompt(
-                new TextPrompt<string>(aufforderung)
+                new TextPrompt<string>($"[] {aufforderung}[/]")
+                .PromptStyle(Global.GetColor(Global.ColorActionInMenüs))
                     .ShowDefaultValue(true)
                     .Validate(n =>
                     {
@@ -667,7 +708,8 @@ public static class Global
             AnsiConsole.Write(panel);
 
             userInput = AnsiConsole.Prompt(
-                new TextPrompt<string>(aufforderung)
+                new TextPrompt<string>($"[] {aufforderung}[/]")
+                .PromptStyle(Global.GetColor(Global.ColorActionInMenüs))
                     .ShowDefaultValue(true)
                     .Validate(n =>
                     {
@@ -725,8 +767,8 @@ public static class Global
             {
                 if (!Directory.Exists(Directory.GetCurrentDirectory()) || !IsDirectoryWritable(Directory.GetCurrentDirectory()))
                 {
-                    AnsiConsole.MarkupLine("[red]Das Verzeichnis [bold aqua]" + Directory.GetCurrentDirectory() + "[/] existiert nicht oder ist nicht beschreibbar. Das muss korrigiert werden.[/]");
-                    AnsiConsole.MarkupLine("[red]Drücken Sie eine beliebige Taste, um fortzufahren...[/]");
+                    AnsiConsole.MarkupLine($"[red]Das Verzeichnis [bold {Global.GetColor(Global.ColorPfadInDateien)}]" + Directory.GetCurrentDirectory() + "[/] existiert nicht oder ist nicht beschreibbar. Das muss korrigiert werden.[/]");
+                    AnsiConsole.MarkupLine($"[red]Drücken Sie eine beliebige Taste, um fortzufahren...[/]");
                     Console.ReadKey();
                     return configuration;
                 }
@@ -763,14 +805,14 @@ public static class Global
 
             DisplayHeader(configuration);
             configuration = Global.Konfig("ZustimmungLizenz", Global.Modus.Update, configuration, "Ich stimme den Lizenzbedingungen der GPLv3 zu. (Ja/Nein)",
-            $"[bold springGreen2]BKB-Tool[/] steht unter der GNU General Public License Version 3 (GPLv3). " +
+            $"[bold {Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] steht unter der GNU General Public License Version 3 (GPLv3). " +
             "Die GPLv3 ist eine freie Softwarelizenz, die es Ihnen erlaubt, die Software zu verwenden, zu modifizieren und weiterzugeben, solange Sie die Bedingungen der Lizenz einhalten. " +
             "Die wichtigsten Bedingungen dieser Lizenz sind:\n" +            
-            "[dodgerBlue1 bold]Freiheit zur Nutzung, Änderung und Weiterverbreitung:[/] Sie dürfen diese Software frei verwenden, anpassen und weitergeben, solange alle abgeleiteten Werke ebenfalls unter der GPLv3 stehen.\n" +            
-            "[dodgerBlue1 bold]Keine Garantie:[/] Diese Software wird \"wie sie ist\" bereitgestellt, ohne jede ausdrückliche oder stillschweigende Gewährleistung, insbesondere ohne Garantie auf Fehlerfreiheit oder Eignung für einen bestimmten Zweck.\n" +            
-            "[dodgerBlue1 bold]Keine Haftung:[/] Der Entwickler haftet nicht für direkte oder indirekte Schäden, Datenverluste oder andere Konsequenzen, die durch die Nutzung oder Fehlfunktion dieser Software entstehen.\n" +            
-            "[dodgerBlue1 bold]Verwendung auf eigene Gefahr:[/] Die Nutzung erfolgt ausschließlich auf eigenes Risiko.\n" +            
-            "[dodgerBlue1 bold]Vollständige Lizenz:[/] Vollständige Lizenzbedingungen unter [lightskyblue3_1 link=https://www.gnu.org/licenses/gpl-3.0.de.html]https://www.gnu.org/licenses/gpl-3.0.de.html[/]." 
+            $"[{Global.GetColor(Global.ColorHinweise)}]Freiheit zur Nutzung, Änderung und Weiterverbreitung:[/] Sie dürfen diese Software frei verwenden, anpassen und weitergeben, solange alle abgeleiteten Werke ebenfalls unter der GPLv3 stehen.\n" +            
+            $"[{Global.GetColor(Global.ColorHinweise)}]Keine Garantie:[/] Diese Software wird \"wie sie ist\" bereitgestellt, ohne jede ausdrückliche oder stillschweigende Gewährleistung, insbesondere ohne Garantie auf Fehlerfreiheit oder Eignung für einen bestimmten Zweck.\n" +            
+            $"[{Global.GetColor(Global.ColorHinweise)}]Keine Haftung:[/] Der Entwickler haftet nicht für direkte oder indirekte Schäden, Datenverluste oder andere Konsequenzen, die durch die Nutzung oder Fehlfunktion dieser Software entstehen.\n" +            
+            $"[{Global.GetColor(Global.ColorHinweise)}]Verwendung auf eigene Gefahr:[/] Die Nutzung erfolgt ausschließlich auf eigenes Risiko.\n" +            
+            $"[{Global.GetColor(Global.ColorHinweise)}]Vollständige Lizenz:[/] Vollständige Lizenzbedingungen unter [lightskyblue3_1 link=https://www.gnu.org/licenses/gpl-3.0.de.html]https://www.gnu.org/licenses/gpl-3.0.de.html[/]." 
                           
             , Global.Datentyp.JaNein, "", null, "Ja");
         }
@@ -780,58 +822,51 @@ public static class Global
         
         if (modus == Modus.Create)
             DisplayHeader(configuration);
-        var panel = new Panel("Ihre Einstellungen werden verschlüsselt in der Datei [aqua]" + Path.Combine(Directory.GetCurrentDirectory(), Global.User + ".json[/]") + " gespeichert." +
-        $"\nDateien (aus Webuntis etc.), die [bold springGreen2]BKB-Tool[/] importieren soll, werden aus [aqua]" + configuration["PfadDownloads"] + "[/] eingelesen.")
-                        .Header($" [bold dodgerBlue1]  Einstellungen  [/]")
-                        .HeaderAlignment(Justify.Left)
-                        .SquareBorder()
-                        .Expand()
-                        .BorderColor(Color.DodgerBlue1);
+
+        var panel = new List<string>()
+        {
+            $"Es werden jetzt verschiedene Einstellungen durchlaufen. Ihre Einstellungen werden verschlüsselt in der Datei [{Global.GetColor(Global.ColorPfadInDateien)}]" + Path.Combine(Directory.GetCurrentDirectory(), Global.User + ".json[/]") + " gespeichert. " +
+            $"Dateien (aus Webuntis etc.), die [bold {Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] importieren soll, werden aus [{Global.GetColor(Global.ColorPfadInDateien)}]" + configuration["PfadDownloads"] + "[/] eingelesen."
+        };
 
         if (modus != Modus.Read)
         {
-            DisplayHeader(configuration);
-            AnsiConsole.Write(panel);
+            DisplayHeader(configuration, panel);
         }  
 
         configuration = Konfig("PfadDownloads", modus, configuration, @"Downloads-Verzeichnis", "Geben Sie den Pfad des Downloads-Verzeichnisses an. In der Regel wird das Verzeichnis bereits richtig vorgeschlagen. Dann einfach [bold springGreen2]ENTER[/] drücken:", Datentyp.Pfad, Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"));
 
         if (modus != Modus.Read)
         {
-            DisplayHeader(configuration);
-            AnsiConsole.Write(panel);
+            DisplayHeader(configuration, panel);
         }
 
         configuration = Konfig("Schulnummer", modus, configuration, @"Schulnummer", "Geben Sie Ihre Schulnummer an. Je nach Schulnummer werden evtl. unterschiedliche Funktionen angeboten.", Datentyp.Int);
 
         if (modus != Modus.Read)
         {
-            DisplayHeader(configuration);
-            AnsiConsole.Write(panel);
+            DisplayHeader(configuration, panel);
         }
 
-        configuration = Konfig("PfadSchilddatenaustausch", modus, configuration, @"SchILD-Ausgabeverzeichnis", "Geben Sie das Verzeichnis an, das in SchILD unter [yellow bold]Datenaustausch > Schnittstelle SchILD-NRW > Export[/] als [yellow bold]Ausgabeverzeichnis[/] eingetragen ist. Wenn dort kein Verzeichnis steht, tragen Sie dort das selbe Verzeichnis ein, das Sie auch hier angeben:", Datentyp.Pfad, "/home/stefan/Windows/SchILD-NRW/Datenaustausch");
+        configuration = Konfig("PfadSchilddatenaustausch", modus, configuration, @"SchILD-Ausgabeverzeichnis", "Geben Sie das Verzeichnis an, das in SchILD unter [yellow bold]Datenaustausch > Schnittstelle SchILD-NRW > Export[/] als [yellow bold]Ausgabeverzeichnis[/] eingetragen ist. Wenn dort kein Verzeichnis steht, tragen Sie dort das selbe Verzeichnis ein, das Sie auch hier angeben:", Datentyp.Pfad, @"\\fs01\SchILD-NRW\Ausgabeverzeichnis");
 
         if (modus != Modus.Read)
         {
-            DisplayHeader(configuration);
-            AnsiConsole.Write(panel);
+            DisplayHeader(configuration, panel);
         }
 
-        configuration = Konfig("PfadDokumentenverwaltung", modus, configuration, "Pfad zur Dokumentenverwaltung", $"Geben Sie das Verzeichnis an, das in SchILD unter [yellow bold]Extras > Programmeinstellungen > Globale Einstellungen > Dokumentenverwaltung[/] als [yellow bold]Dokumentenverzeichnis[/] eingetragen ist. Die Dokumentenverwaltung muss eingeschaltet sein. Wenn dort kein Verzeichnis steht, tragen Sie dort das selbe Verzeichnis ein, das Sie auch hier angeben:", Datentyp.Pfad, "/home/stefan/Windows/SchILD-NRW/Datenaustausch");
+        configuration = Konfig("PfadDokumentenverwaltung", modus, configuration, "Pfad zur Dokumentenverwaltung", $"Geben Sie das Verzeichnis an, das in SchILD unter [yellow bold]Extras > Programmeinstellungen > Globale Einstellungen > Dokumentenverwaltung[/] als [yellow bold]Dokumentenverzeichnis[/] eingetragen ist. Die Dokumentenverwaltung muss eingeschaltet sein. Wenn dort kein Verzeichnis steht, tragen Sie dort das selbe Verzeichnis ein, das Sie auch hier angeben:", Datentyp.Pfad, @"\\fs01\SchILD-NRW\Dokumentenverwaltung");
 
         if (modus != Modus.Read)
         {
-            DisplayHeader(configuration);
-            AnsiConsole.Write(panel);
+            DisplayHeader(configuration, panel);
         }
 
         configuration = Konfig("MaxDateiAlter", modus, configuration, "Wie viele Tage dürfen Dateien höchstens alt sein?", $"Geben Sie an, wie viele Tage Dateien höchstens alt sein dürfen, um vom [bold springGreen2]BKB-Tool[/] für das Einlesen akzeptiert zu werden. Die Angabe einer (möglichst niedrigen) Zahl soll sicherstellen, dass nicht versehntlich veraltete Dateien eingelesen werden.", Datentyp.Int);
 
         if (modus != Modus.Read)
         {
-            DisplayHeader(configuration);
-            AnsiConsole.Write(panel);
+            DisplayHeader(configuration, panel);
         }
 
         configuration = Konfig("AppName", Modus.Read, configuration, "Wie soll die App heißen?", $"Sie können die App [bold springGreen2]BKB-Tool[/] umbennen.", Datentyp.String);
@@ -839,8 +874,7 @@ public static class Global
         if (modus == Modus.Update && SchulnummernPrivilegiert.Contains(configuration["Schulnummer"]))
         {
             configuration = Konfig("MailDomain", modus, configuration, "Mail-Domain für Schüler*innen", "Geben Sie die Mail-Domain für Ihre Schüler*innen an. Ihre Eingabe muss mit [springGreen2 bold]@[/] beginnen und einen [springGreen2 bold]Punkt[/] enthalten. Beispiel: [springGreen2 bold]@students.meine-schule.de[/]", Datentyp.Mail);
-            configuration = Konfig("ConnectionStringUntis", modus, configuration, "ConnectionStringUntis (optional)");
-            configuration = Konfig("ZipKennwort", modus, configuration, "Kennwort zum Verschlüsseln von Zip-Dateien");
+            configuration = Konfig("ConnectionStringUntis", modus, configuration, "ConnectionStringUntis (optional)");            
             configuration = Konfig("SmtpUser", modus, configuration, "Mail-Benutzer");
             configuration = Konfig("SmtpPassword", modus, configuration, "Mail-Kennwort");
             configuration = Konfig("SmtpPort", modus, configuration, "SMTP-Port");
@@ -858,7 +892,8 @@ public static class Global
         return new
         {
             ConnectionStringUntis = Verschluesseln(Environment.GetEnvironmentVariable("UNTIS_CONNECTION_STRING") ?? ""),
-            Schulnummer = Verschluesseln("000000" ?? ""),
+            Dokumentenverwaltung = Verschluesseln(@"\\fs01\SchILD-NRW\Dokumentenverwaltung"),
+            Schulnummer = Verschluesseln("177659" ?? ""),
             SchipsPasswort = Verschluesseln(Environment.GetEnvironmentVariable("SCHIPS_PASSWORD") ?? ""),
             ZeugnisPasswort = Verschluesseln(Environment.GetEnvironmentVariable("ZEUGNIS_PASSWORD") ?? ""),
             SmtpPassword = Verschluesseln(Environment.GetEnvironmentVariable("SMTP_PASSWORD") ?? ""),
@@ -871,7 +906,7 @@ public static class Global
             PfadDownloads = Verschluesseln(Environment.GetEnvironmentVariable("DOWNLOADS_PATH") ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads")),
             PfadSchilddatenaustausch,
             Kalenderfilter = Verschluesseln(""),
-            Auswahl = "x",
+            Auswahl = "e",
             OnlineHilfeURL = Verschluesseln("https://github.com/stbaeumer/BKB-Tool/wiki"),
             ZustimmungLizenz = "nein",
             AppName = Verschluesseln("BKB-Tool"),
@@ -919,14 +954,14 @@ public static class Global
             AccessPfad = Verschluesseln(@"\\fs01\SchILD-NRW\DB\Test.mdb"),
             PdfInputFolder = Verschluesseln(@"PDF-Input"),
             PdfOutputFolder = Verschluesseln(@"PDF-Output"),
-            PfadDokumentenverwaltung = Verschluesseln(@"/home/stefan/Windows/Dokumentenverwaltung"),
+            PfadDokumentenverwaltung = Verschluesseln(@"\\fs01\SchILD-NRW\Dokumentenverwaltung"),
             BodyMassenmail = Verschluesseln("Guten Morgen [Lehrer],\n\nbitte beachten Sie den Anhang.\n\nErläuterungen dazu finden Sie hier: https://bkb.wiki/konzepte:stundenplanungskonzept#information_aller_lehrkraefte_per_mail \n\nViele Grüße aus der Schulverwaltung"),
             Verbose = Verschluesseln("false"),
             SmtpUserMassenmail = Verschluesseln("campusfest@berufskolleg-borken.de"),
             SmtpServerMassenmail = Verschluesseln("smtp-hve.office365.com"),
             BetreffMassenmail = Verschluesseln("Save the date: Campusfest am Berufskolleg Borken"),
             Schlüsselwörter = Verschluesseln("Jahreszeugnis, Abschlusszeugnis, Abgangszeugnis, Zeugnis"),
-            Teilleistungsarten = Verschluesseln("Vornote"),
+            Teilleistungsarten = Verschluesseln("Vornote,Abschluss-Schriftl."),
             LehrkraefteSonderzeiten = Verschluesseln(""),
             VolleStelle = Verschluesseln("25,5")
         };
@@ -970,17 +1005,17 @@ public static class Global
             }
         }
 
-        var panel = new Panel($"Weiter mit [bold springGreen2]Anykey[/] oder mit [bold springGreen2]x[/] Einstellungen durchlaufen oder mit [bold springGreen2]y[/] Onlinehilfe öffnen.")
+        var panel = new Panel($"Weiter mit [bold {Global.GetColor(Global.ColorActionInMenüs)}]Anykey[/] oder mit [bold {Global.GetColor(Global.ColorActionInMenüs)}]e[/] Einstellungen durchlaufen oder mit [bold {Global.GetColor(Global.ColorActionInMenüs)}]h[/] Onlinehilfe öffnen.")
                         .HeaderAlignment(Justify.Left)
                         .SquareBorder()
                         .Expand()
-                        .BorderColor(Color.Grey);
+                        .BorderColor(Global.ColorUnterschrift);
 
         AnsiConsole.Write(panel);
 
         var weiter = Console.ReadKey(true); // true unterdrückt die Ausgabe des Zeichens im Terminal
 
-        if (weiter.Key == ConsoleKey.Y)
+        if (weiter.Key == ConsoleKey.E)
         {
             configuration = EinstellungenDurchlaufen(Modus.Update, configuration);
             return;
@@ -1147,5 +1182,10 @@ public static class Global
         var s = farbe.ToString();
         if (string.IsNullOrEmpty(s)) return s;
         return char.ToLowerInvariant(s[0]) + s.Substring(1);
+    }
+
+    internal static object GetColor(object fehler)
+    {
+        throw new NotImplementedException();
     }
 }    

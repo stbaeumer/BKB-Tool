@@ -880,9 +880,11 @@ public class Datei : List<dynamic>
             {
                 zip.SetLevel(9); // Kompressionslevel (0-9, 9 = beste Kompression)
 
-                if (!string.IsNullOrEmpty(Global.ZipKennwort))
+                configuration = Global.Konfig("ZipKennwort", Global.Modus.Update, configuration, "Zip-Kennwort", "Die Datei wird nun gezippt.\nGeben Sie das Kennwort ein, mit dem Sie den Zip-Datei verschlüsseln wollen. Geben Sie ein Leerzeichen ein, wenn kein Kennwort gesetzt werden soll.", Global.Datentyp.String, "");
+
+                if (!string.IsNullOrEmpty(configuration["ZipKennwort"]) || configuration["ZipKennwort"].ToString() != " ")
                 {
-                    zip.Password = Global.ZipKennwort; // Passwort setzen
+                    zip.Password = configuration["ZipKennwort"]; // Passwort setzen
                 }
 
                 byte[] buffer = new byte[4096];
@@ -909,7 +911,7 @@ public class Datei : List<dynamic>
                 zip.IsStreamOwner = true;
             }
 
-            Global.ZeileSchreiben(zipPfad,"erfolgreich erstellt",ConsoleColor.Green, ConsoleColor.White);            
+            Global.ZeileSchreiben(zipPfad,"",ConsoleColor.Green, ConsoleColor.White);            
             ZipPfad = zipPfad;
         }
         catch (Exception ex)
@@ -925,12 +927,12 @@ public class Datei : List<dynamic>
             return;
         }
 
-        configuration = Global.Konfig("SmtpUser", Global.Modus.Update, configuration, "Mail-Benutzer angeben");
-        configuration = Global.Konfig("SmtpPassword", Global.Modus.Update, configuration, "Mail-Kennwort eingeben");
-        configuration = Global.Konfig("SmtpPort", Global.Modus.Update, configuration, "SMTP-Port eingeben");
-        configuration = Global.Konfig("SmtpServer", Global.Modus.Update, configuration, "SMTP-Server angeben");
-        configuration = Global.Konfig("NetmanMailReceiver", Global.Modus.Update, configuration, "Wem soll die Netman-Mail geschickt werden?");
-        configuration = Global.Konfig("NetmanMailBccReceiver", Global.Modus.Update, configuration, "Wem soll die Netman-Mail in BCC geschickt werden?","",Global.Datentyp.Mail,"");
+        configuration = Global.Konfig("SmtpUser", Global.Modus.Update, configuration, "Mail-Benutzername", "Geben Sie den Benutzernamen für den SMTP-Server an, z.B. Ihre E-Mail-Adresse.");
+        configuration = Global.Konfig("SmtpPassword", Global.Modus.Update, configuration, "Mail-Kennwort", "Geben Sie das Kennwort für den SMTP-Server an, z.B. das Passwort Ihrer E-Mail-Adresse.", Global.Datentyp.String, "");
+        configuration = Global.Konfig("SmtpPort", Global.Modus.Update, configuration, "SMTP-Port", "Geben Sie den Port für den SMTP-Server an, z.B. 587 für TLS oder 465 für SSL.", Global.Datentyp.Int, "587");
+        configuration = Global.Konfig("SmtpServer", Global.Modus.Update, configuration, "SMTP-Server", "Geben Sie den SMTP-Server an, z.B. smtp.office365.com.", Global.Datentyp.String, "smtp.office365.com");
+        configuration = Global.Konfig("NetmanMailReceiver", Global.Modus.Update, configuration, "Empfänger-Adresse", "Wem soll die Netman-Mail geschickt werden?");
+        configuration = Global.Konfig("NetmanMailBccReceiver", Global.Modus.Update, configuration, "BCC-Adresse", "Wem soll die Netman-Mail in BCC geschickt werden?",Global.Datentyp.Mail,"");
         
         var mail = new Mail();
         mail.Senden(subject,configuration,body,ZipPfad, configuration["NetmanMailReceiver"], "", configuration["NetmanMailBccReceiver"]);
@@ -960,7 +962,7 @@ public class Datei : List<dynamic>
             
             // Verschiebe die Datei
             File.Move(AbsoluterPfad, zielPfad);                        
-            Global.ZeileSchreiben(zielPfad, "verschoben", ConsoleColor.Green, ConsoleColor.White);
+            Global.ZeileSchreiben(zielPfad, "", ConsoleColor.Green, ConsoleColor.White);
         }
         catch (Exception ex)
         {
@@ -1000,7 +1002,7 @@ public class Datei : List<dynamic>
             if (IstOptional)
             {
                 var panel2 = new Panel($"{Fehlermeldung}\n[gray]{string.Join("\n", Hinweise)}[/]")
-                .Header("[bold aqua]  Optionale Datei  [/]")
+                .Header("[bold aqua] Optionale Datei [/]")
                 .HeaderAlignment(Justify.Left)
                 .SquareBorder()
                 .Expand()
@@ -1010,12 +1012,12 @@ public class Datei : List<dynamic>
             }
             else
             {
-                var panel2 = new Panel($"[bold red]{Fehlermeldung}[/]\n[gray]{string.Join("\n", Hinweise)}[/]")
-                .Header("[bold red]  !?  [/]")
+                var panel2 = new Panel($"[bold {Global.GetColor(Global.ColorHinweise)}]{Fehlermeldung}[/]\n[gray]{string.Join("\n", Hinweise)}[/]")
+                .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] !? [/]")
                 .HeaderAlignment(Justify.Left)
                 .SquareBorder()
                 .Expand()
-                .BorderColor(Color.Red);
+                .BorderColor(Global.ColorHinweise);
 
                 AnsiConsole.Write(panel2);
             }

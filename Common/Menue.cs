@@ -92,18 +92,18 @@ public class Menue : List<Menüeintrag>
 
         if(this.Count > 0)
         {
-            menuEintraege = $"[bold springGreen2] 1 ... " + this.Count() + "[/] oder";
+            menuEintraege = $"[bold {Global.GetColor(Global.ColorActionInMenüs)}] 1 ... " + this.Count() + "[/] oder";
         }
 
-        configuration = Global.Konfig("Auswahl", Global.Modus.Update, configuration, "Auswahl", $"Wählen Sie{menuEintraege} [bold springGreen2]x[/] für Einstellungen oder [bold springGreen2]y[/] für Onlinehilfe", Global.Datentyp.Auswahl, null, null, zulässigeAuswahlOptionen);
+        configuration = Global.Konfig("Auswahl", Global.Modus.Update, configuration, "Auswahl", $"Wählen Sie{menuEintraege} [bold {Global.GetColor(Global.ColorTextHervorheben)}]e[/] für Einstellungen oder [bold {Global.GetColor(Global.ColorTextHervorheben)}]h[/] für Onlinehilfe", Global.Datentyp.Auswahl, null, null, zulässigeAuswahlOptionen);
 
         switch (configuration["Auswahl"])
         {
-            case "y":
+            case "h":
                 Global.OpenWebseite(configuration["OnlineHilfeURL"]);
                 configuration["Auswahl"] = "-1";
                 return configuration;
-            case "x":
+            case "e":
                 configuration = Global.EinstellungenDurchlaufen(Global.Modus.Update, configuration);
                 configuration["Auswahl"] = "-1";
                 return configuration;

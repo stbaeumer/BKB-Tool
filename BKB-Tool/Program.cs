@@ -3,24 +3,27 @@ using System.Reflection;
 using Common;
 using Microsoft.Extensions.Configuration;
 using Spectre.Console;
+#pragma warning disable CS8600 // Möglicher Null-Verweis-Argument
 
 try{ Console.WindowHeight = 33;} catch { }
 
 Global.User = Environment.UserName;
 IConfiguration? configuration = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile($"{Global.User}.json", optional: true, reloadOnChange: true).Build();
 
-Global.Überschrift = Color.Aqua; // Überschrift
-Global.Unterschrift = Color.Aqua; // Überschrift
-Global.Beschreibung = Color.SpringGreen2; // Beschreibung
-Global.PfadInProgrammen = Color.Yellow; 
-Global.PfadInDateien = Color.Aqua; // Pfad in Dateien
-Global.ActionInMenüs = Color.SpringGreen2; // Action in Menüs
-Global.EinstellungenRahmen = Color.DodgerBlue1; // Einstellungen Rahmen
-Global.Hinweise = Color.Pink3; // Hinweise
-Global.KopfzeileInCSV = Color.DeepPink1_1; // Kopfzeile in CSV
-Global.Hyperlink = Color.LightSkyBlue1; // Hyperlink
-Global.Zahlen = Color.Tan; // Zahlen
-
+Global.ColorÜberschrift = Color.Aqua; // Überschrift
+Global.ColorUnterschrift = Color.Aqua; // Überschrift
+Global.ColorBeschreibung = Color.SpringGreen2; // Beschreibung
+Global.ColorPfadInProgrammen = Color.Yellow; 
+Global.ColorPfadInDateien = Color.SpringGreen2; // Pfad in Dateien
+Global.ColorActionInMenüs = Color.SpringGreen2; // Action in Menüs
+Global.ColorEinstellungenRahmen = Color.DodgerBlue1; // Einstellungen Rahmen
+Global.ColorHinweise = Color.Pink3; // Hinweise
+Global.ColorKopfzeileInCSV = Color.DeepPink1_1; // Kopfzeile in CSV
+Global.ColorHyperlink = Color.LightSkyBlue1; // Hyperlink
+Global.ColorZahlen = Color.Tan; // Zahlen
+Global.ColorTextHervorheben = Color.SpringGreen2; // Zahlen
+Global.ColorFehler = Color.Red; // Zahlen
+Global.ColorInfoBox = Color.Orange1; // Zahlen
 
 Global.AppVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0.0"; // Major.Minor.Build.Revision
 
@@ -29,7 +32,7 @@ Global.SchulnummernPrivilegiert = new List<string>{ "177659" }; // Diese Schulnu
 Global.Schulnummer177659 = new List<string> { "177659" }; // Diese Schulnummer bekommen alle Privilegierten plus weitere Menüpunkte angezeigt.
 Global.SchulnummernDebug = new List<string>{ "000000" }; // alles
 
-configuration["AppDescription"] = $"[bold {Global.GetColor(Global.Beschreibung)}]BKB-Tool[/] - Ein Werkzeug an der Schnittstelle zwischen SchILD und Untis.";
+configuration["AppDescription"] = $"[bold {Global.GetColor(Global.ColorBeschreibung)}]BKB-Tool[/] - Ein Werkzeug an der Schnittstelle zwischen SchILD und Untis.";
 
 var dateien = new Dateien(configuration);
 
@@ -63,7 +66,7 @@ do
             (m.NurBeiDiesenSchulnummern == Global.NurBeiDiesenSchulnummern.AlleBisAufGesperrte && !Global.SchulnummernGesperrt.Contains(configuration["Schulnummer"]))));
     menuGefiltert.AuswahlGridRendern();
 
-    configuration = menuGefiltert.GetAusgewaehlterMenueintrag(configuration, ["x", "y"]);
+    configuration = menuGefiltert.GetAusgewaehlterMenueintrag(configuration, ["e", "h"]);
     var i = Convert.ToInt32(configuration["Auswahl"]);
 
     dateien.DisplayHeader(configuration);
@@ -108,7 +111,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
         using var doc = System.Text.Json.JsonDocument.Parse(json);
         var releases = doc.RootElement.EnumerateArray();
         string githubVersion = null;
-        bool allowPrerelease = configuration["Schulnummer"] == "177659";
+        bool allowPrerelease = configuration["Schulnummer"] == "000000";
 
         foreach (var release in releases)
         {
@@ -133,8 +136,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
             {
                 dateien.DisplayHeader(configuration,
                 [
-                    $"Ein Update auf Version [tan]{githubVersion}[/] ist verfügbar.",                    
-                    $"Drücken Sie eine [springGreen2 bold]beliebige Taste[/], um das Update zu starten."
+                    $"Ein Update auf Version [tan]{githubVersion}[/] ist verfügbar. Drücken Sie eine [{Global.GetColor(Global.ColorActionInMenüs)} bold]beliebige Taste[/], um das Update zu starten."
                 ]
                 );
                 
@@ -166,7 +168,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                     AnsiConsole.Progress()
                         .Start(ctx =>
                         {
-                            var task = ctx.AddTask("Lade Update herunter ...");
+                            var task = ctx.AddTask("Lade Update herunter ");
                             webClient.DownloadProgressChanged += (s, e) =>
                             {
                                 task.Value = e.ProgressPercentage;
@@ -213,8 +215,8 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
 
                 dateien.DisplayHeader(configuration,
                 [
-                    $"Die neue Datei wurde heruntergeladen und gespeichert als [aqua]{zielDatei}[/].",                    
-                    $"Mit [springGreen2 bold]Enter[/] wird jetzt in die Version {githubVer} neugestartet."
+                    $"Die neue Datei wurde heruntergeladen und gespeichert als [{Global.GetColor(Global.ColorPfadInDateien)}]{zielDatei}[/].",                    
+                    $"Mit [{Global.GetColor(Global.ColorActionInMenüs)} bold]ENTER[/] wird jetzt in die Version {githubVer} neugestartet."
                 ]);
                 Console.ReadKey();
 
@@ -224,10 +226,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                     UseShellExecute = true,
                     CreateNoWindow = true
                 });
-
-                // Bei einem Update wird die Auswahl auf "x" gesetzt, damit der Anwender bei einer möglicherweise veränderten Reihenfolge der Menüpunkte nicht durcheinander kommt.
-                configuration = Global.Konfig("Auswahl", Global.Modus.Update, configuration, "", "", Global.Datentyp.String, "x");
-
+                
                 Environment.Exit(0); // Beendet das aktuelle Programm sofort, damit das Update funktioniert                
             }
         }
