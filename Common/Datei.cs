@@ -45,6 +45,7 @@ public class Datei : List<dynamic>
     public string Fehlermeldung { get; set; }
     public string Ordner { get; internal set; }
     public bool IstOptional { get; internal set; }
+    public bool Nur177659 { get; internal set; }
 
     public Datei(string name, bool vorhanden)
     {
@@ -997,7 +998,13 @@ public class Datei : List<dynamic>
 
     internal void FehlermeldungRendern(IConfiguration configuration)
     {
-        if (!string.IsNullOrEmpty(Fehlermeldung))
+        // Wenn die Schulnummer 177659 ist und der Dateiname "schildschuelerexport" enthält, wird keine Fehlermeldung angezeigt.
+        if (configuration["Schulnummer"] == "177659" && this.Dateiname.ToLower().Contains("schildschuelerexport"))
+        {
+            return; // Keine Fehlermeldung anzeigen, wenn die Schulnummer nicht gesetzt ist
+        }
+
+        if (!string.IsNullOrEmpty(Fehlermeldung) && !IstOptional)
         {
             if (IstOptional)
             {

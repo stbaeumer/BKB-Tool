@@ -354,7 +354,7 @@ public static class Global
                 .Validate(n =>
                 {
                     if (zulässigeAuswahlOptionen.ToLower() != "ja")
-                        return ValidationResult.Error($"Sie müssen [bold springGreen2]Ja[/] eintippen, um [bold springGreen2]BKB-Tool[/] nutzen zu können.");
+                        return ValidationResult.Error($"[]  Sie müssen [bold springGreen2]Ja[/] eintippen, um [bold springGreen2]BKB-Tool[/] nutzen zu können.[/]");
                     return ValidationResult.Success();
                 }));
 
@@ -384,7 +384,7 @@ public static class Global
                 .Validate(n =>
                 {
                     if (!zulässigeAuswahlOptionen.Split(",").Contains(n))
-                        return ValidationResult.Error($"Zulässige Auswahl: [bold aqua]{zulässigeAuswahlOptionen}[/]");
+                        return ValidationResult.Error($"[]  Zulässige Auswahl: [bold aqua]{zulässigeAuswahlOptionen}[/][/]");
                     return ValidationResult.Success();
                 }));
         }
@@ -407,7 +407,7 @@ public static class Global
                     .Validate(n =>
                     {
                         if (string.IsNullOrEmpty(n))
-                            return ValidationResult.Error("Eingabe darf nicht leer sein.");
+                            return ValidationResult.Error("[]  Eingabe darf nicht leer sein.[/]");
                         return ValidationResult.Success();
                     })
                 .DefaultValue<string>(defaultValue));
@@ -433,9 +433,9 @@ public static class Global
                     .Validate(n =>
                     {
                         if (string.IsNullOrEmpty(n))
-                            return ValidationResult.Error("Eingabe darf nicht leer sein.");
+                            return ValidationResult.Error("[]  Eingabe darf nicht leer sein.[/]");
                         if (!File.Exists(n))
-                            return ValidationResult.Error($"Die Datei [bold red]{n}[/] existiert nicht.");
+                            return ValidationResult.Error($"[]  Die Datei [bold red]{n}[/] existiert nicht.[/]");
                         return ValidationResult.Success();
                     })
                     .DefaultValue<string>(defaultValue));
@@ -460,7 +460,7 @@ public static class Global
                             return ValidationResult.Success();
                         if (verschiedeneKlassen.Any(s => s.ToLower().StartsWith(n.ToLower())))
                             return ValidationResult.Success();
-                        return ValidationResult.Error("Eingabe ist ungültig. Geben Sie eine Klasse an oder 'alle'.");
+                        return ValidationResult.Error("$[]  Eingabe ist ungültig oder die eingegebene Klasse muss erst noch aus SchILD exportiert werden.\n Geben Sie eine Klasse an oder 'alle'.[/]");
                     })
                 .DefaultValue<string>(defaultValue));
 
@@ -503,7 +503,7 @@ public static class Global
                     .Validate(n =>
                     {
                         if (!n.StartsWith("https://") && !string.IsNullOrEmpty(n))
-                            return ValidationResult.Error("Eingabe muss mit https:// beginnen.");
+                            return ValidationResult.Error("[]  Eingabe muss mit https:// beginnen.[/]");
                         return ValidationResult.Success();
                     })
                 .DefaultValue<string>(defaultValue));
@@ -527,9 +527,9 @@ public static class Global
                     .Validate(n =>
                     {
                         if (!n.Contains("@") && !string.IsNullOrEmpty(n))
-                            return ValidationResult.Error("Eingabe muss mit @ beginnen und einen Punkt enthalten.");
+                            return ValidationResult.Error("[]  Eingabe muss mit @ beginnen und einen Punkt enthalten.[/]");
                         if (!n.Contains(".") && !string.IsNullOrEmpty(n))
-                            return ValidationResult.Error("Eingabe muss mit @ beginnen und einen Punkt enthalten.");
+                            return ValidationResult.Error("[]  Eingabe muss mit @ beginnen und einen Punkt enthalten.[/]");
                         return ValidationResult.Success();
                     })
                 .DefaultValue<string>(defaultValue));
@@ -553,9 +553,9 @@ public static class Global
                     .Validate(n =>
                     {
                         if (!n.StartsWith("@") && !string.IsNullOrEmpty(n))
-                            return ValidationResult.Error("Eingabe muss mit @ beginnen und einen Punkt enthalten.");
+                            return ValidationResult.Error("[]  Eingabe muss mit @ beginnen und einen Punkt enthalten.[/]");
                         if (!n.Contains(".") && !string.IsNullOrEmpty(n))
-                            return ValidationResult.Error("Eingabe muss mit @ beginnen und einen Punkt enthalten.");
+                            return ValidationResult.Error("[]  Eingabe muss mit @ beginnen und einen Punkt enthalten.[/]");
                         return ValidationResult.Success();
                     })
                 .DefaultValue<string>(defaultValue));
@@ -578,7 +578,7 @@ public static class Global
                     .Validate(n =>
                     {
                         if (!Path.Exists(n))
-                            return ValidationResult.Error($"Der Pfad {n} existiert nicht.");
+                            return ValidationResult.Error($"[]  Der Pfad {n} existiert nicht.[/]");
                         return ValidationResult.Success();
                     })
                 .DefaultValue<string>(string.IsNullOrEmpty(defaultValue) || !Path.Exists(defaultValue) ? Environment.CurrentDirectory : defaultValue));
@@ -603,11 +603,11 @@ public static class Global
                     {
                         if (!int.TryParse(n.ToString(), out _))
                         {
-                            return ValidationResult.Error($"{n} ist keine Zahl");
+                            return ValidationResult.Error($"[]  {n} ist keine Zahl[/]");
                         }
                         if (zulässigeAuswahlOptionen != "" && !zulässigeAuswahlOptionen.Contains(n.ToString()))
                         {
-                            return ValidationResult.Error($"Die Zahl {n} außerhalb des zulässigen Bereichs. Zulässige Werte: {zulässigeAuswahlOptionen}");
+                            return ValidationResult.Error($"[]  Die Zahl {n} außerhalb des zulässigen Bereichs. Zulässige Werte: {zulässigeAuswahlOptionen}[/]");
                         }
                                 
                         return ValidationResult.Success();
@@ -633,7 +633,7 @@ public static class Global
                     .Validate(n =>
                     {
                         if (!float.TryParse(n.ToString(), out _))
-                            return ValidationResult.Error($"{n} ist keine Zahl");
+                            return ValidationResult.Error($"[]  {n} ist keine Zahl[/]");
                         return ValidationResult.Success();
                     })
                 .DefaultValue<string>(defaultValue.ToString()));
@@ -658,7 +658,7 @@ public static class Global
                     {
                         var teile = n.ToString().Split(',');
                         if (!teile.All(t => int.TryParse(t.Trim(), out _)))
-                            return ValidationResult.Error($"{n} ist keine Liste aus Zahlen");
+                            return ValidationResult.Error($"[]  {n} ist keine Liste aus Zahlen[/]");
                         return ValidationResult.Success();
                     })
                 .DefaultValue<string>(defaultValue.ToString()));
@@ -683,12 +683,12 @@ public static class Global
                     {
                         if (!int.TryParse(n.ToString(), out _))
                         {
-                            return ValidationResult.Error($"{n} ist keine Zahl");
+                            return ValidationResult.Error($"[]  {n} ist keine Zahl[/]");
                         }
                         else
                         {
                             if (n != "1" && n != "2")
-                                return ValidationResult.Error($"{n} ist ungültig. Erlaubt sind 1 und 2.");
+                                return ValidationResult.Error($"[]  {n} ist ungültig. Erlaubt sind 1 und 2.[/]");
                         }
 
                         return ValidationResult.Success();
@@ -715,7 +715,7 @@ public static class Global
                     {
                         if (!DateTime.TryParse(n.ToString(), out _))
                         {
-                            return ValidationResult.Error($"{n} ist kein Datum (TT.MM.JJJJ)");
+                            return ValidationResult.Error($"[]  {n} ist kein Datum (TT.MM.JJJJ)[/]");
                         }
 
                         return ValidationResult.Success();

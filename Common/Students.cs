@@ -33,38 +33,30 @@ public class Students : List<Student>
         var schuelerBasisdaten = quelldateien.GetMatchingList(configuration, "schuelerbasisdaten", new Students(), null);
         if (schuelerBasisdaten == null || schuelerBasisdaten.Count == 0) return;        
 
-        // Die Datei "schildschuelerexport" ist optional, aber wenn sie vorhanden ist, wird sie verwendet.
-        var schildschuelerexport = quelldateien.GetMatchingList(configuration, "schildschuelerexport", null, null);
-        
         for(int j = 0; j < schuelerBasisdaten.Count; j++)
-        {            
-            var dict = (IDictionary<string, object>)schuelerBasisdaten[j];
+        {
             var student = new Student();
-
-            student.Vorname = dict["Vorname"].ToString();
-            student.Nachname = dict["Nachname"].ToString();
-            student.Geburtsdatum = dict["Geburtsdatum"].ToString();
-
-            // Wenn schildschuelerexport vorhanden ist, wird die interne ID-Nummer verwendet, um die Mail zu generieren.
-            if (schildschuelerexport != null && schildschuelerexport.Count > 0)
+            try
             {
-                var dictEx = (IDictionary<string, object>)schildschuelerexport[j];
-                student.IdSchild = dictEx["Interne ID-Nummer"].ToString();
-                student.ExterneIdNummer = dictEx["Externe ID-Nummer"].ToString();
-                student.MailSchulisch = student.GenerateMailMitSchildId(configuration);
-            }
-            else
-            {
+                var dict = (IDictionary<string, object>)schuelerBasisdaten[j];
+
+                student.Vorname = dict["Vorname"].ToString();
+                student.Nachname = dict["Nachname"].ToString();
+                student.Geburtsdatum = dict["Geburtsdatum"].ToString();
                 student.MailSchulisch = student.GenerateMailAusGebdat(configuration);
+                student.Klasse = dict["Klasse"].ToString();
+                student.Status = dict["Status"].ToString();
+                student.Geschlecht = dict["Geschlecht"].ToString();
+                student.Ort = dict["Ort"].ToString();
+                student.Postleitzahl = dict["PLZ"].ToString();
+                student.Straße = dict["Straße"].ToString();
+                Add(student);
             }
-
-            student.Klasse = dict["Klasse"].ToString();            
-            student.Status = dict["Status"].ToString();
-            student.Geschlecht = dict["Geschlecht"].ToString();
-            student.Ort = dict["Ort"].ToString();            
-            student.Postleitzahl = dict["PLZ"].ToString();
-            student.Straße = dict["Straße"].ToString();
-            Add(student);
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Fehler beim Verarbeiten von {student.Vorname} {student.Nachname}, Zeile {j + 2}: {ex.Message}");
+                continue; // Weiter mit dem nächsten Schüler
+            }            
         }
     }
 
@@ -533,7 +525,7 @@ public class Students : List<Student>
                         if (fehlstd > 0)
                         {
                             dynamic record = new ExpandoObject();
-                            record.Nachname = student.Nachname;
+                            record.Nachname = $"{student.Nachname}#{student.Klasse}";
                             record.Vorname = student.Vorname;
                             record.Geburtsdatum = student.Geburtsdatum;
                             record.Klasse = student.Klasse;
@@ -875,7 +867,7 @@ public class Students : List<Student>
                         // ... wird ein Erzieher namens Eltern erzeugt, der als einziger angeschrieben wird.
 
                         dynamic record = new ExpandoObject();
-                        record.Nachname = student.Nachname;
+                        record.Nachname = $"{student.Nachname}#{student.Klasse}";
                         record.Vorname = student.Vorname;
                         record.Geburtsdatum = student.Geburtsdatum;
                         record.Erzieherart = "Eltern";
@@ -908,7 +900,7 @@ public class Students : List<Student>
             {
                 var dict = (IDictionary<string, object>)rec;
                 dynamic record = new ExpandoObject();
-                record.Nachname = student.Nachname;
+                record.Nachname = $"{student.Nachname}#{student.Klasse}";
                 record.Vorname = student.Vorname;
                 record.Geburtsdatum = student.Geburtsdatum;
                 record.Erzieherart = student.GetErzieherart(dict["Adresse: Typ Adresse"].ToString(),

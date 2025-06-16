@@ -38,53 +38,61 @@ var dateien = new Dateien(configuration);
 
 do
 {
-    dateien = new Dateien();
-    if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), Global.User + ".json")))
+    try
     {
-        configuration = Global.EinstellungenDurchlaufen(Global.Modus.Create, configuration);
-    }
-    else
-    {
-        configuration = Global.EinstellungenDurchlaufen(Global.Modus.Read, configuration);
-    }
-
-    CheckForUpdate(configuration);
-    var table = new Table().Centered();
-
-    dateien.ExportAusSchildVerschieben(configuration);
-    dateien.GetInteressierendeDateienMitAllenEigenschaften(configuration);
-    dateien.GetZeilen(configuration);
-
-    var menu = MenueHelper.Einlesen(dateien, configuration);
-    if (menu == null) continue;
-    var menuGefiltert = new Menue();
-    menuGefiltert.AddRange(menu.Where(m =>
-             m.NurBeiDiesenSchulnummern == Global.NurBeiDiesenSchulnummern.Alle ||
-            (m.NurBeiDiesenSchulnummern == Global.NurBeiDiesenSchulnummern.Nur000000 && configuration["Schulnummer"] == "000000") ||
-            (m.NurBeiDiesenSchulnummern == Global.NurBeiDiesenSchulnummern.Nur177659 && configuration["Schulnummer"] == "177659") ||
-            (m.NurBeiDiesenSchulnummern == Global.NurBeiDiesenSchulnummern.NurPrivilegiert && Global.SchulnummernPrivilegiert.Contains(configuration["Schulnummer"])) ||
-            (m.NurBeiDiesenSchulnummern == Global.NurBeiDiesenSchulnummern.AlleBisAufGesperrte && !Global.SchulnummernGesperrt.Contains(configuration["Schulnummer"]))));
-    menuGefiltert.AuswahlGridRendern();
-
-    configuration = menuGefiltert.GetAusgewaehlterMenueintrag(configuration, ["e", "h"]);
-    var i = Convert.ToInt32(configuration["Auswahl"]);
-
-    dateien.DisplayHeader(configuration);
-    if (i >= 0)
-    {
-        menuGefiltert[i].RenderAuswahlÜberschrift(configuration);
-        menuGefiltert[i].Quelldateien.FehlermeldungRendern(configuration);
-
-        if (menuGefiltert[i].Quelldateien.Where(q => !string.IsNullOrEmpty(q.Fehlermeldung) && !q.IstOptional).Any())
+        dateien = new Dateien();
+        if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), Global.User + ".json")))
         {
-            AnsiConsole.MarkupLine($"[grey]Zuerst die Hinweise [/][bold red]!?[/][grey] bearbeiten, dann hierher zurückkehren.[/]");
+            configuration = Global.EinstellungenDurchlaufen(Global.Modus.Create, configuration);
         }
         else
         {
-            Datei zieldatei = menuGefiltert[i].Ausführen();
+            configuration = Global.EinstellungenDurchlaufen(Global.Modus.Read, configuration);
         }
 
-        Global.WeiterMitAnykey(configuration, menuGefiltert[i]);
+        CheckForUpdate(configuration);
+        var table = new Table().Centered();
+
+        dateien.ExportAusSchildVerschieben(configuration);
+        dateien.GetInteressierendeDateienMitAllenEigenschaften(configuration);
+        dateien.GetZeilen(configuration);
+
+        var menu = MenueHelper.Einlesen(dateien, configuration);
+        if (menu == null) continue;
+        var menuGefiltert = new Menue();
+        menuGefiltert.AddRange(menu.Where(m =>
+                m.NurBeiDiesenSchulnummern == Global.NurBeiDiesenSchulnummern.Alle ||
+                (m.NurBeiDiesenSchulnummern == Global.NurBeiDiesenSchulnummern.Nur000000 && configuration["Schulnummer"] == "000000") ||
+                (m.NurBeiDiesenSchulnummern == Global.NurBeiDiesenSchulnummern.Nur177659 && configuration["Schulnummer"] == "177659") ||
+                (m.NurBeiDiesenSchulnummern == Global.NurBeiDiesenSchulnummern.NurPrivilegiert && Global.SchulnummernPrivilegiert.Contains(configuration["Schulnummer"])) ||
+                (m.NurBeiDiesenSchulnummern == Global.NurBeiDiesenSchulnummern.AlleBisAufGesperrte && !Global.SchulnummernGesperrt.Contains(configuration["Schulnummer"]))));
+        menuGefiltert.AuswahlGridRendern();
+
+        configuration = menuGefiltert.GetAusgewaehlterMenueintrag(configuration, ["e", "h"]);
+        var i = Convert.ToInt32(configuration["Auswahl"]);
+
+        dateien.DisplayHeader(configuration);
+        if (i >= 0)
+        {
+            menuGefiltert[i].RenderAuswahlÜberschrift(configuration);
+            menuGefiltert[i].Quelldateien.FehlermeldungRendern(configuration);
+
+            if (menuGefiltert[i].Quelldateien.Where(q => !string.IsNullOrEmpty(q.Fehlermeldung) && !q.IstOptional && !q.Nur177659).Any())
+            {
+                AnsiConsole.MarkupLine($"[grey]Zuerst die Hinweise [/][bold red]!?[/][grey] bearbeiten, dann hierher zurückkehren.[/]");
+            }
+            else
+            {
+                Datei zieldatei = menuGefiltert[i].Ausführen();
+            }
+
+            Global.WeiterMitAnykey(configuration, menuGefiltert[i]);
+        }
+    }
+    catch (Exception ex)
+    {
+        AnsiConsole.WriteException(ex, ExceptionFormats.Default);
+        Console.ReadKey();
     }
 
 } while (true);

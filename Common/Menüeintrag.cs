@@ -313,7 +313,7 @@ public class Menüeintrag
                     var noteOderPunkte = dict["Field13"].ToString();
 
                     dynamic record = new ExpandoObject();
-                    record.Nachname = student.Nachname;
+                    record.Nachname = $"{student.Nachname}#{student.Klasse}";
                     record.Vorname = student.Vorname;
                     record.Geburtsdatum = student.Geburtsdatum;
                     record.Jahr = jahr;
@@ -536,7 +536,7 @@ public class Menüeintrag
                     }
 
                     dynamic record = new ExpandoObject();
-                    record.Nachname = student.Nachname;
+                    record.Nachname = $"{student.Nachname}#{student.Klasse}";
                     record.Vorname = student.Vorname;
                     record.Geburtsdatum = student.Geburtsdatum;
                     record.Jahr = Global.AktSj[0];
@@ -735,7 +735,7 @@ public class Menüeintrag
                         if (dictExp["studentgroup"].ToString() == "" || new List<string>() { "rel", "kr", "er", "reli", "religion", "rel1" }.Contains(fach.ToLower()))
                         {
                             dynamic record = new ExpandoObject();
-                            record.Nachname = student.Nachname;
+                            record.Nachname = $"{student.Nachname}#{klasse}";
                             record.Vorname = student.Vorname;
                             record.Geburtsdatum = student.Geburtsdatum;
                             record.Jahr = Global.AktSj[0];
@@ -786,7 +786,7 @@ public class Menüeintrag
                                 if (!student.UnterrichtIstRelevantFürZeugnisInDiesemAbschnitt(dictStudentgroup, configuration))
                                     continue;
                                 dynamic record = new ExpandoObject();
-                                record.Nachname = student.Nachname;
+                                record.Nachname = $"{student.Nachname}#{klasse}";
                                 record.Vorname = student.Vorname;
                                 record.Geburtsdatum = student.Geburtsdatum;
                                 record.Jahr = Global.AktSj[0];
@@ -1135,7 +1135,48 @@ public class Menüeintrag
             if (lehrkraefte == null || lehrkraefte.Count == 0) return [];
             var klassen = Quelldateien.GetMatchingList(configuration, "klassen", Students, Klassen);
             if (klassen == null || klassen.Count == 0) return [];
+            var schildschuelerexport = Quelldateien.GetMatchingList(configuration, "SchildSchuelerExport", Students, Klassen);
+
+            // Nur wenn die Schulnummer 177659 ist, wird die SchildSchuelerExport-Datei benötigt.
+            if (configuration["Schulnummer"] == "177659")
+            {
+                var datei = Quelldateien.FirstOrDefault(d => d.Dateiname.ToLower().Contains("schildschuelerexport"));
+
+                if (schildschuelerexport == null || schildschuelerexport.Count == 0)
+                {
+                    datei.Fehlermeldung = $"Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]SchildSchuelerExport[/] wurde nicht gefunden.";
+                    var panel2 = new Panel($"[bold {Global.GetColor(Global.ColorHinweise)}]{datei.Fehlermeldung}[/]\n[gray]{string.Join("\n", datei.Hinweise)}[/]")
+                        .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] !? [/]")
+                        .HeaderAlignment(Justify.Left)
+                        .SquareBorder()
+                        .Expand()
+                        .BorderColor(Global.ColorHinweise);
+
+                    AnsiConsole.Write(panel2);
+                    return null;
+                }
+                else
+                {
+                    if (schildschuelerexport.Count != Students.Count)
+                    {
+                        var x = ($"Die Anzahl der Schüler in der Datei {datei.AbsoluterPfad} ({datei.Count}) stimmt nicht überein mit der Anzahl der Schüler ({Students.Count}).\nBeide Dateien müssen identisch viele Elemente haben.");
+
+                        var panel2 = new Panel($"[bold {Global.GetColor(Global.ColorHinweise)}]{datei.Fehlermeldung}[/]\n[gray]{string.Join("\n", datei.Hinweise)}[/]")
+                            .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] !? [/]")
+                            .HeaderAlignment(Justify.Left)
+                            .SquareBorder()
+                            .Expand()
+                            .BorderColor(Global.ColorHinweise);
+
+                        AnsiConsole.Write(panel2);
+                        return [];
+                    }
+                }
+            }
+                
             
+                
+           
             AnsiConsole.Write(new Rule($"[{Global.GetColor(Global.ColorInfoBox)}]Anstehende Änderungen/Neuanlagen:[/]").RuleStyle(Global.GetColor(Global.ColorInfoBox)).LeftJustified());
 
             var table = new Spectre.Console.Table();
@@ -1269,7 +1310,6 @@ public class Menüeintrag
             }
 
             // Ab hier die Neuanlagen
-            // Damit Schüler nicht doppelt angelegt werden, wir zuerst
 
             var uniqueStudents = Students
                 .DistinctBy(s => new { s.Vorname, s.Nachname, s.Geburtsdatum })
@@ -1326,14 +1366,22 @@ public class Menüeintrag
                             dict["Geburtsdatum"].ToString() == student.Geburtsdatum;
                     }).LastOrDefault() as IDictionary<string, object>;
 
-                /*var sb = schildschuelerexport
+
+                if (!string.IsNullOrEmpty(configuration["Schulnummer"]) && configuration["Schulnummer"] == "177659")
+                {
+                    var dict = schildschuelerexport
                     ?.Where(rec =>
                     {
                         var dict = (IDictionary<string, object>)rec;
                         return dict["Nachname"].ToString() == student.Nachname &&
                             dict["Vorname"].ToString() == student.Vorname &&
                             dict["Geburtsdatum"].ToString() == student.Geburtsdatum;
-                    }).LastOrDefault() as IDictionary<string, object>;*/
+                    }).LastOrDefault() as IDictionary<string, object>;
+                                        
+                    student.IdSchild = dict["Interne ID-Nummer"].ToString();
+                    student.ExterneIdNummer = dict["Externe ID-Nummer"].ToString();
+                    student.MailSchulisch = student.GenerateMailMitSchildId(configuration);
+                }
 
                 var se = schuelerErzieher
                     .Where(rec =>
@@ -1445,7 +1493,7 @@ public class Menüeintrag
                         : student.ExterneIdNummer.ToString().PadLeft(6, '0');
                     record.Kurzname = student.MailSchulisch.Replace("@students.berufskolleg-borken.de", "");
                     record.Vorname = student.Vorname;
-                    record.Nachname = student.Nachname;
+                    record.Nachname = $"{student.Nachname}#{student.Klasse}";
                     record.Mail = student.MailSchulisch;
                     record.Passwort = student.Nachname.Substring(0, 1).ToUpper() + student.Geburtsdatum;
                     record.Klasse = student.Klasse;
@@ -1753,7 +1801,7 @@ public class Menüeintrag
                 // Nachname|Vorname|Geburtsdatum|Namenszusatz|Geburtsname|Geburtsort|Ortsteil|Telefon-Nr.|E-Mail|2. Staatsang.|Externe ID-Nr|Sportbefreiung|Fahrschülerart|Haltestelle|Einschulungsart|Entlassdatum|Entlassjahrgang|Datum Schulwechsel|Bemerkungen
                 // 
 
-                record.Nachname =
+                record.Nachname = 
                     student.Nachname; // Wenn die ersten 3 Spalten leer sind, dann wird der Betrieb ohne Zuordnung importiert
                 record.Vorname =
                     student.Vorname; // Wenn die ersten 3 Spalten leer sind, dann wird der Betrieb ohne Zuordnung importiert
@@ -2395,13 +2443,13 @@ public class Menüeintrag
         {
             foreach (var student in IStudents)
             {
-                foreach (var recMar in marksPerLs)
+                foreach (var recMar in marksPerLs)                
                 {
                     var dictMar = (IDictionary<string, object>)recMar;
                     if (!(dictMar["Name"].ToString() == student.Nachname + " " + student.Vorname && dictMar["Klasse"].ToString() == student.Klasse)) continue;
                     if (!(string.IsNullOrEmpty(configuration["Teilleistungsarten"].ToString()) || configuration["Teilleistungsarten"].ToString().ToLower().Trim().Split(',').Contains(dictMar["Prüfungsart"].ToString().ToLower()))) continue;
                     dynamic record = new ExpandoObject();
-                    record.Nachname = student.Nachname;
+                    record.Nachname = $"{student.Nachname}#{student.Klasse}";
                     record.Vorname = student.Vorname;
                     record.Geburtsdatum = student.Geburtsdatum;
                     record.Jahr = Global.AktSj[0];

@@ -37,7 +37,7 @@ public static class MenueHelper
 
         try
         {
-            var students = new Students(configuration, quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "schildschuelerexport,txt,optional"], true));
+            var students = new Students(configuration, quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat"], true));
             quelldateien.Meldung.Add(students.GetArtUndZahlen());
 
             Global.DisplayHeader(configuration, quelldateien.Meldung);
@@ -62,7 +62,7 @@ public static class MenueHelper
                     new Menüeintrag(
                         "Webuntis: Schüler*innen-Importdatei für Webuntis erstellen",
                         anrechnungen,
-                        quelldateien.Notwendige(configuration, ["student_,csv","schuelerlernabschnittsdaten,dat", "schuelerzusatzdaten,dat", "schuelererzieher,dat", "schuelerAdressen,dat", "lehrkraefte,dat", "klassen,dat"]),
+                        quelldateien.Notwendige(configuration, ["student_,csv","schuelerlernabschnittsdaten,dat", "schuelerzusatzdaten,dat", "schuelererzieher,dat", "schuelerAdressen,dat", "lehrkraefte,dat", "klassen,dat", "schildschuelerexport,txt,nur177659"]),
                         students,
                         klassen,
                         [
@@ -112,7 +112,7 @@ public static class MenueHelper
                     new Menüeintrag(
                         "Littera: Schüler*innen-Importdatei für Littera erstellen",
                         anrechnungen,
-                        quelldateien.Notwendige(configuration, ["student_,csv","schuelerlernabschnittsdaten,dat", "schuelerzusatzdaten,dat", "schuelererzieher,dat", "schuelerAdressen,dat", "lehrkraefte,dat", "klassen,dat"]),
+                        quelldateien.Notwendige(configuration, ["student_,csv","schuelerlernabschnittsdaten,dat", "schuelerzusatzdaten,dat", "schuelererzieher,dat", "schuelerAdressen,dat", "lehrkraefte,dat", "klassen,dat", "schildschuelerexport,txt,nur177659"]),
                         students,
                         klassen,
                         [
@@ -135,7 +135,7 @@ public static class MenueHelper
                     new Menüeintrag(
                         "Netman: Schüler*innen-Importdatei für Netman erstellen",
                         anrechnungen,
-                        quelldateien.Notwendige(configuration, ["student_,csv","schuelerlernabschnittsdaten,dat", "schuelerzusatzdaten,dat", "schuelererzieher,dat", "schuelerAdressen,dat", "lehrkraefte,dat", "klassen,dat"]),
+                        quelldateien.Notwendige(configuration, ["student_,csv","schuelerlernabschnittsdaten,dat", "schuelerzusatzdaten,dat", "schuelererzieher,dat", "schuelerAdressen,dat", "lehrkraefte,dat", "klassen,dat", "schildschuelerexport,txt,nur177659"]),
                         students,
                         klassen,
                         [
@@ -541,8 +541,11 @@ public static class MenueHelper
                         new Dateien(),
                         students,
                         klassen,
-                        ["Von PDF-Dateien in " + configuration["PfadDownloads"] + " wird eine verschlüsselte Kopie erstellt.",
-                        "Kopien bekommen die Dateiendung '-kennwort.pdf'"],
+                        ["Von allen PDF-Dateien in " + configuration["PfadDownloads"] + " wird eine verschlüsselte Kopie erstellt.",
+                        "Es werden nur Dateien berücksichtigt, die nicht bereits die Endung '-kennwort.pdf' haben.",
+                        $"Es werden nur Dateien berücksichtigt, die nicht älter als {Global.GetColor(Global.ColorZahlen)} Minuten sind.",
+                        "Kopien bekommen die Dateiendung '-kennwort.pdf'"
+                        ],
                         _ =>
                         {
                             var pdfDateien = new PdfDateien();
