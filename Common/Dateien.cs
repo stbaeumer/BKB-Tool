@@ -18,6 +18,16 @@ using Spectre.Console;
 #pragma warning disable CS0618 // Möglicher Null-Verweis-Argument
 #pragma warning disable NU1903 // Möglicher Null-Verweis-Argument
 #pragma warning disable NU1902 // Möglicher Null-Verweis-Argument
+#pragma warning disable CS0252 // Unbeabsichtigter Verweisvergleich. Wandeln Sie die linke Seite in den Typ "string" um, um einen Wertvergleich durchzuführen.
+#pragma warning disable CA2200
+#pragma warning disable CS8618
+#pragma warning disable CS8602 // Dereferenzierung eines möglicherweise nullverweisenden Objekts.
+#pragma warning disable CS8604 // Möglicherweise wird ein nullverweisendes Argument an eine nicht-nullbare Parameterreferenz übergeben.
+#pragma warning disable CS8073
+#pragma warning disable CS0472
+#pragma warning disable CS8625
+#pragma warning disable CS8600
+#pragma warning disable CS0162
 
 public class Dateien : List<Datei>
 {
@@ -30,7 +40,7 @@ public class Dateien : List<Datei>
 
     public Dateien(IConfiguration configuration)
     {
-        Meldung = new List<string>();        
+        Meldung = new List<string>();
         DisplayHeader(configuration);
     }
 
@@ -48,7 +58,7 @@ public class Dateien : List<Datei>
         {
             contentString = string.Join(Environment.NewLine, content);
         }
-                
+
         if (contentString == " ")
         {
             AnsiConsole.Write(new Rule("").RuleStyle(Global.GetColor(Global.ColorBeschreibung)).Centered());
@@ -63,7 +73,7 @@ public class Dateien : List<Datei>
                     .BorderColor(Global.ColorÜberschrift);
 
             AnsiConsole.Write(panel);
-        }        
+        }
     }
 
     public void GetInteressierendeDateienMitAllenEigenschaften(IConfiguration configuration)
@@ -434,11 +444,11 @@ public class Dateien : List<Datei>
     }
 
     public List<dynamic>? GetMatchingList(IConfiguration configuration, string pattern, Students students = null, Klassen klassen = null)
-    {   
+    {
         var datei = this.FirstOrDefault(datei => !string.IsNullOrEmpty(datei.Dateiname) && datei.Dateiname.ToLower().Contains(pattern, StringComparison.CurrentCultureIgnoreCase));
 
         // Mögliche Meldungen werden ausgegeben, wenn die Datei nicht gefunden wurde oder veraltet ist.
-        
+
         if (string.IsNullOrEmpty(datei.AbsoluterPfad) && datei.Endung.ToLower().Contains("dat"))
             datei.Fehlermeldung += $"Die Datei [bold {Global.GetColor(Global.ColorPfadInDateien)}]SchuelerBasisdaten.dat[/] wurde weder in [bold aqua]{configuration["pfadDownloads"]}[/] noch in [bold aqua]{configuration["pfadSchilddatenaustausch"]}[/] gefunden. Am besten gehen Sie jetzt in SchILD zu [bold springGreen2]Datenaustausch > Schnittstelle SchILD NRW > Export[/] und klicken [bold springGreen2]Export starten[/], um alle Dateien nach [bold aqua]{configuration["pfadSchilddatenaustausch"]}[/] zu exportieren. Anschließend kehren Sie hierher zurück.";
         else if (datei.AbsoluterPfad == null)
@@ -448,7 +458,7 @@ public class Dateien : List<Datei>
         else if (datei.IstOptional && datei.Count > 0)
             return datei.ToList();
         else if (datei.AbsoluterPfad == null || datei.AbsoluterPfad.Length == 0 && !datei.IstOptional)
-            datei.Fehlermeldung = $"Die Datei [bold {Global.GetColor(Global.ColorPfadInDateien)}]{pattern}[/] existiert nicht. Bitte prüfen Sie, ob sie im Ordner [{Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/] vorhanden ist.";        
+            datei.Fehlermeldung = $"Die Datei [bold {Global.GetColor(Global.ColorPfadInDateien)}]{pattern}[/] existiert nicht. Bitte prüfen Sie, ob sie im Ordner [{Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/] vorhanden ist.";
 
         datei.FehlermeldungRendern(configuration);
 
@@ -466,10 +476,10 @@ public class Dateien : List<Datei>
             return datei.Filtern(students, students.GetKlassen(klassen));
         else if (datei.AbsoluterPfad.ToLower().Contains("lehrkraefte"))
             return datei.ToList();
-        
+
         return [];
     }
-    
+
     public Dateien Notwendige(IConfiguration configuration, List<string> dateinamenNotwendigeDateien, bool meldungAnzeigen = false)
     {
         var pfadDownloads = configuration["PfadDownloads"];
@@ -517,8 +527,8 @@ public class Dateien : List<Datei>
                             if (datei.Erstelldatum.Date.AddDays(maxDateiAlter) < DateTime.Now)
                             {
                                 datei.Fehlermeldung = $"Die Datei [bold aqua]{absoluterPfad}[/] existiert, ist aber veraltet.";
-                                if(meldungAnzeigen && !datei.IstOptional)
-                                    datei.FehlermeldungRendern(configuration);                                
+                                if (meldungAnzeigen && !datei.IstOptional)
+                                    datei.FehlermeldungRendern(configuration);
                             }
                         }
                         else
@@ -539,7 +549,7 @@ public class Dateien : List<Datei>
                             if (meldungAnzeigen && !datei.IstOptional)
                                 datei.FehlermeldungRendern(configuration);
                         }
-                            
+
 
                         if (datei.Erstelldatum.Date.AddDays(maxDateiAlter) < DateTime.Now.Date)
                         {
@@ -566,7 +576,7 @@ public class Dateien : List<Datei>
                     {
                         opt = " und ist nicht optional";
                     }
-                    
+
                     datei.Fehlermeldung = $"Die Datei [bold {Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads, dateiname)}[/] existiert nicht{opt}.";
                     if (meldungAnzeigen && !datei.IstOptional)
                         datei.FehlermeldungRendern(configuration);
@@ -642,12 +652,12 @@ public class Dateien : List<Datei>
             {
                 Meldung.Add($"[bold {Global.GetColor(Global.ColorZahlen)}]{anzahlDateienMitZeilen}[/] Dateien aus [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["pfadDownloads"]}[/] eingelesen.");
             }
-            DisplayHeader(configuration, Meldung);   
+            DisplayHeader(configuration, Meldung);
         }
         catch (Exception e)
         {
             throw e;
-        }        
+        }
     }
 
     /// <summary>
@@ -779,7 +789,7 @@ public class Dateien : List<Datei>
     public void FehlermeldungRendern(IConfiguration configuration)
     {
         foreach (var datei in this.Where(q => !string.IsNullOrEmpty(q.Fehlermeldung)))
-        {            
+        {
             datei.FehlermeldungRendern(configuration);
         }
     }

@@ -47,7 +47,7 @@ public class PdfDateien : List<PdfDatei>
             {
                 //Console.WriteLine(" "  + file);
                 var path = new TextPath(file);
-                AnsiConsole.Write(path);
+                AnsiConsole.Write(file.ToString().PadLeft(2));
                 Console.WriteLine();
             }
             if (fileGroupPdf.Count == 0)
@@ -55,12 +55,7 @@ public class PdfDateien : List<PdfDatei>
                 return;
             }
 
-            Console.WriteLine("");
-            Console.WriteLine("   1: Schips");
-            Console.WriteLine("   2: Notenlisten");
-            Console.WriteLine("   3: andere PDFs");
-
-            configuration = Global.Konfig("SchipsOderZeugnisseOderAnderePdfs",Global.Modus.Update, configuration, "Was wollen Sie verschlüsseln?");
+            configuration = Global.Konfig("SchipsOderZeugnisseOderAnderePdfs",Global.Modus.Update, configuration, "Was wollen Sie verschlüsseln?", "Wählen Sie zwischen den Optionen:\n1: Schips\n2: Notenlisten\n3: andere PDFs");
 
             var passwort = "";
             var url = "";
@@ -76,8 +71,8 @@ public class PdfDateien : List<PdfDatei>
             }
             else if (configuration["SchipsOderZeugnisseOderAnderePdfs"] == "2")
             {
-                configuration = Global.Konfig("ZeugnisUrl", Global.Modus.Update,configuration, "Zeugnis-Url angeben");
-                configuration = Global.Konfig("ZeugnisPasswort", Global.Modus.Update, configuration, "Zeugnis-Kennwort festlegen");    
+                configuration = Global.Konfig("ZeugnisUrl", Global.Modus.Update,configuration, "Webseite", "Soll eine bestimmte Webseite geöffnet werden, um die verschlüsselte(n) Datei(en) dort hochzuladen?\nFalls Sie keine Seite öffnen wollen, geben Sie ein Leerzeichen ein.");
+                configuration = Global.Konfig("ZeugnisPasswort", Global.Modus.Update, configuration, "Kennwort festlegen", "Mit welchem Kennwort sollen die Dateien verschlüsselt werden?");    
                 passwort = configuration["ZeugnisPasswort"];
                 url = configuration["ZeugnisUrl"];
             }
@@ -111,7 +106,7 @@ public class PdfDateien : List<PdfDatei>
                 document.Close();
                 pdfDoc.Close();
 
-                    Global.ZeileSchreiben(neueDatei, "Kopie mit Kennwort erstellt", ConsoleColor.Blue,ConsoleColor.Black);
+                    Global.ZeileSchreiben(neueDatei, "", ConsoleColor.Blue,ConsoleColor.Black);
                 }                
             }
             Global.OpenWebseite(url);

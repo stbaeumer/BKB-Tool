@@ -16,6 +16,8 @@ namespace Common;
 #pragma warning disable CS8618 // Möglicher Null-Verweis-Argument
 #pragma warning disable CS8619 // Möglicher Null-Verweis-Argument
 #pragma warning disable CS0219 // Möglicher Null-Verweis-Argument
+#pragma warning disable CS8625
+
 
 public class Datei : List<dynamic>
 {

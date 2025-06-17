@@ -206,8 +206,8 @@ public static class MenueHelper
                         students,
                         klassen,
                         [
-                            $"Die Unterrichte (mit Noten) werden in der [aqua]{Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat")}[/] vorbereitet. Hinzu kommen [aqua]{Path.Combine(pfadSchilddatenaustausch ?? "", "Kurse.dat")}[/] und [aqua]{Path.Combine(pfadSchilddatenaustausch ?? "", "Faecher.dat")}[/] und [aqua]{Path.Combine(pfadSchilddatenaustausch ?? "", "Lernabschnittsdaten.dat")}[/].",
-                            $"Es empfiehlt sich die Lernabschnitte zuerst in SchILD anzulegen und zu exportieren. [bold springGreen2]BKB-Tool[/] ergänzt dann die Fehlzeiten passend.",
+                            $"Die Unterrichte (mit Noten) werden in der [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat")}[/] vorbereitet. Hinzu kommen [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "Kurse.dat")}[/] und [aqua]{Path.Combine(pfadSchilddatenaustausch ?? "", "Faecher.dat")}[/] und [aqua]{Path.Combine(pfadSchilddatenaustausch ?? "", "Lernabschnittsdaten.dat")}[/].",
+                            $"Es empfiehlt sich die Lernabschnitte zuerst in SchILD anzulegen und zu exportieren. [bold {Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] ergänzt dann die Fehlzeiten passend.",
                             "Falls mehrere Kollegen dasselbe Fach zeitgleich unterrichten, dann muss ein Zähler an das Fach angehangen werden. Bsp: Zwei LuL unterrichten Mathe. Dann M und M1.",
                             "Damit M1 in den Leistungsdaten erscheint, aber nicht auf dem Zeugnis gedruckt wird, muss die Eigenschaft 'Nicht auf Zeugnis drucken' in SchILD gesetzt werden."
                             ,
@@ -536,15 +536,15 @@ public static class MenueHelper
                         Global.NurBeiDiesenSchulnummern.Nur177659
                     ),
                     new Menüeintrag(
-                        $"PDF-Dateien #1: Von {configuration["PfadDownloads"]}\\*.pdf verschlüsselte Kopien erstellen",
+                        $"PDF-Dateien #1: Von PDF-Dateien in {configuration["PfadDownloads"]} verschlüsselte Kopien erstellen",
                         anrechnungen,
                         new Dateien(),
                         students,
                         klassen,
-                        ["Von allen PDF-Dateien in " + configuration["PfadDownloads"] + " wird eine verschlüsselte Kopie erstellt.",
-                        "Es werden nur Dateien berücksichtigt, die nicht bereits die Endung '-kennwort.pdf' haben.",
-                        $"Es werden nur Dateien berücksichtigt, die nicht älter als {Global.GetColor(Global.ColorZahlen)} Minuten sind.",
-                        "Kopien bekommen die Dateiendung '-kennwort.pdf'"
+                        [
+                            $"Von allen PDF-Dateien in [{Global.GetColor(Global.ColorPfadInDateien)}]" + configuration["PfadDownloads"] + "[/] wird eine verschlüsselte Kopie erstellt.",
+                            $"Es werden nur Dateien berücksichtigt, die nicht bereits die Endung [{Global.GetColor(Global.ColorPfadInDateien)}]-kennwort.pdf[/] haben.",                            
+                            $"Kopien bekommen die Dateiendung [{Global.GetColor(Global.ColorPfadInDateien)}]-kennwort.pdf[/]"
                         ],
                         _ =>
                         {

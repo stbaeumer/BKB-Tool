@@ -24,7 +24,16 @@ namespace Common;
 #pragma warning disable CS0618 // Möglicher Null-Verweis-Argument
 #pragma warning disable NU1903 // Möglicher Null-Verweis-Argument
 #pragma warning disable NU1902 // Möglicher Null-Verweis-Argument
-
+#pragma warning disable CS0252 // Unbeabsichtigter Verweisvergleich. Wandeln Sie die linke Seite in den Typ "string" um, um einen Wertvergleich durchzuführen.
+#pragma warning disable CA2200
+#pragma warning disable CS8618
+#pragma warning disable CS8602 // Dereferenzierung eines möglicherweise nullverweisenden Objekts.
+#pragma warning disable CS8604 // Möglicherweise wird ein nullverweisendes Argument an eine nicht-nullbare Parameterreferenz übergeben.
+#pragma warning disable CS8073
+#pragma warning disable CS0472
+#pragma warning disable CS8625
+#pragma warning disable CS8600
+#pragma warning disable CS0162 // Unbenutzter Code
 
 public class Menüeintrag
 {
@@ -383,7 +392,7 @@ public class Menüeintrag
             absencePerStud = Quelldateien.GetMatchingList(configuration, "absenceperstudent", IStudents, Klassen);
             if (absencePerStud == null || !absencePerStud.Any()) return [];
 
-            configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration, "Abschnitt", $"Geben Sie den Lernabschnitt an. Das Schuljahr beginnt immer mit Abschnitt [bold aqua]1[/]. I.d.R. wechselt der Abschnitt im Halbjahr auf Abschnitt [bold aqua]2[/]", Global.Datentyp.Abschnitt);
+            configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration, "Abschnitt", $"Geben Sie den Lernabschnitt an. Das Schuljahr beginnt immer mit Abschnitt [{Global.GetColor(Global.ColorZahlen)}]1[/]. I.d.R. wechselt der Abschnitt im Halbjahr auf Abschnitt [{Global.GetColor(Global.ColorZahlen)}]2[/]", Global.Datentyp.Abschnitt);
 
             var konferenzart = "";
             switch (configuration["Abschnitt"])
@@ -403,8 +412,8 @@ public class Menüeintrag
             configuration = Global.Konfig($"{konferenzart}zeugnisdatum", Global.Modus.Update, configuration, $"{konferenzart}zeugnisdatum", $"Geben Sie das {konferenzart}zeugnisdatum an. Das kann später in SchILD (mit einem Gruppenprozess) erneut geändert werden.", Global.Datentyp.DateTime);
             zeugnisdatum = DateTime.Parse(configuration[$"{konferenzart}zeugnisdatum"]);
             
-            configuration = Global.Konfig("MaximaleAnzahlFehlstundenProTag", Global.Modus.Update, configuration, "Maximale Anzahl Fehlstunden pro Tag", "Geben Sie die maximale Anzahl zählender Fehlstunden pro Tag an. Wenn der Unterricht spätestens nach 8 Stunden endet, ist 8 ein guter Wert. Sollte die Anzahl der Fehlstunden in Webuntis diesen Wert übersteigen, dann deutet das auf Fehlzeiten im Praktikum oder ein Fehlen bei einer ganztägigen Veranstaltung hin. Es werden keine Fehlstunden an diesem Tag auf dem Zeugnis berücksichtigt.", Global.Datentyp.Int);
-            configuration = Global.Konfig("FehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt", Global.Modus.Update, configuration, "Unberücksichtigte Fehltage", "Geben Sie die Anzahl Tage vor der Zeugniskonferenz an, an denen Fehlzeiten unberücksichtigt bleiben. Wenn dieser Wert z.B. auf [bold springGreen2]3[/] gesetzt wird, wird verhindert, dass Schüler*innen eine Entschuldigung zwar unverzüglich, aber gleichzeitig erst nach der Zeugniskonferenz einreichen. Alternativ kann man den Wert auf 0 setzen und den Zeitraum des Exports der [bold springGreen2]AbsencePerStudent[/] entsprechend einschränken.", Global.Datentyp.Int);
+            configuration = Global.Konfig("MaximaleAnzahlFehlstundenProTag", Global.Modus.Update, configuration, "Maximale Anzahl Fehlstunden pro Tag", $"Geben Sie die maximale Anzahl zählender Fehlstunden pro Tag an. Wenn der Unterricht spätestens nach 8 Stunden endet, ist [{Global.GetColor(Global.ColorZahlen)}]8[/] ein guter Wert. Sollte die Anzahl der Fehlstunden in Webuntis diesen Wert übersteigen, dann deutet das auf Fehlzeiten im Praktikum oder ein Fehlen bei einer ganztägigen Veranstaltung hin. Es werden keine Fehlstunden an diesem Tag auf dem Zeugnis berücksichtigt.", Global.Datentyp.Int);
+            configuration = Global.Konfig("FehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt", Global.Modus.Update, configuration, "Unberücksichtigte Fehltage", $"Geben Sie die Anzahl Tage vor der Zeugniskonferenz an, an denen Fehlzeiten unberücksichtigt bleiben. Wenn dieser Wert z.B. auf [{Global.GetColor(Global.ColorZahlen)}]3[/] gesetzt wird, wird verhindert, dass Schüler*innen eine Entschuldigung zwar unverzüglich, aber gleichzeitig erst nach der Zeugniskonferenz einreichen. Alternativ kann man den Wert auf [{Global.GetColor(Global.ColorZahlen)}]0[/] setzen und den Zeitraum des Exports der [{Global.GetColor(Global.ColorPfadInDateien)}]AbsencePerStudent[/] entsprechend einschränken.", Global.Datentyp.Int);
         }
 
         var records = new List<dynamic>();

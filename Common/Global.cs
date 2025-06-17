@@ -9,27 +9,37 @@ using Spectre.Console;
 using Path = System.IO.Path;
 using dotenv.net;
 
+#pragma warning disable CS0252 // Unbeabsichtigter Verweisvergleich. Wandeln Sie die linke Seite in den Typ "string" um, um einen Wertvergleich durchzuführen.
+#pragma warning disable CA2200
+#pragma warning disable CS8618
+#pragma warning disable CS8602 // Dereferenzierung eines möglicherweise nullverweisenden Objekts.
+#pragma warning disable CS8604 // Möglicherweise wird ein nullverweisendes Argument an eine nicht-nullbare Parameterreferenz übergeben.
+#pragma warning disable CS8073
+#pragma warning disable CS0472
+#pragma warning disable CS8625
+#pragma warning disable CS8600
+
 
 public static class Global
 {
     public static List<(string Meldung, ConsoleColor Farbe)> Zeilen = new();
-    public static int Kalenderwoche { get; set; }    
+    public static int Kalenderwoche { get; set; }
     public static string? WikiJsonUserKennwort { get; set; }
     public static string? WikiJsonUser { get; set; }
-    public static string? WikiUrl { get; set; }    
-    public static string? SchipsUrl { get; set; }    
+    public static string? WikiUrl { get; set; }
+    public static string? SchipsUrl { get; set; }
     public static string? NetmanMailReceiver { get; set; }
     public static string? SmtpServer { get; set; }
     public static string? SmtpPort { get; set; }
     public static string? SmtpPassword { get; set; }
     public static string? SmtpUser { get; set; }
-    public static DateTime Sprechtagsdatum { get; set; }    
-    public static string? AktuellerPfad { get; set; }    
-    public static string? OutputFolder { get; set; }    
+    public static DateTime Sprechtagsdatum { get; set; }
+    public static string? AktuellerPfad { get; set; }
+    public static string? OutputFolder { get; set; }
     public static string? User { get; set; }
     public static int FehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt { get; set; }
     public static object? WikiSprechtagKleineAenderung { get; set; }
-    public static List<string>? Protokoll { get; set; }    
+    public static List<string>? Protokoll { get; set; }
 
     public enum Art
     {
@@ -43,7 +53,7 @@ public static class Global
         Alle,
         AlleBisAufGesperrte,
         NurPrivilegiert,
-        Nur177659,        
+        Nur177659,
         Nur000000
     }
 
@@ -87,7 +97,7 @@ public static class Global
     };
 
     public static string? ConnectionStringUntis { get; set; }
-    public static string? ZipKennwort { get; set; }  
+    public static string? ZipKennwort { get; set; }
     public static string? PfadSchilddatenaustausch { get; private set; }
     public static List<string>? SchulnummernPrivilegiert { get; set; }
     public static string AppVersion { get; set; }
@@ -130,7 +140,7 @@ public static class Global
         {
             contentString = string.Join(Environment.NewLine, content);
         }
-        
+
         var panel = new Panel(contentString)
                 .Header(header)
                 .HeaderAlignment(Justify.Center)
@@ -171,7 +181,7 @@ public static class Global
 
     public static void ZeileSchreiben(string linkeSeite, string rechteSeite, ConsoleColor foreground = ConsoleColor.Black, ConsoleColor background = ConsoleColor.White)
     {
-        var gesamtbreite = Console.WindowWidth;
+        var gesamtbreite = Console.WindowWidth - 2;
         var punkte = gesamtbreite - linkeSeite.Length - rechteSeite.Length - 1;
         var mitte = " .".PadRight(Math.Max(3, punkte), '.') + " ";
 
@@ -207,12 +217,12 @@ public static class Global
                 .Expand()
                 .BorderColor(Global.ColorInfoBox);
 
-                AnsiConsole.Write(panel);
-            
+            AnsiConsole.Write(panel);
+
         }
         else
         {
-            AnsiConsole.MarkupLine("[aqua]" + linkeSeite + "[/]" + "[aqua]" + mitte + "[/]" + "[aqua]" + rechteSeite + "[/]");
+            AnsiConsole.MarkupLine("[aqua] " + linkeSeite + "[/]" + "[aqua]" + mitte + "[/]" + "[aqua]" + rechteSeite + " [/]");
         }
     }
 
@@ -258,13 +268,12 @@ public static class Global
         string encryptedValue = Convert.ToBase64String(data);
         return encryptedValue;
     }
-    
+
     public static void OpenWebseite(string url)
     {
         if (!url.StartsWith("http"))
         {
-            url = "https://wiki.svws.nrw.de/mediawiki/index.php?title=Schnittstellenbeschreibung#";
-            Console.WriteLine("     Die Seite " + url + " wird geöffnet.");
+            return;
         }
 
         try
@@ -295,7 +304,7 @@ public static class Global
                 Directory.CreateDirectory(directoryPath);
             }
         }
-        
+
         var directoryName = Path.GetDirectoryName(Pfad);
         string sourceFile = string.Empty;
 
@@ -329,7 +338,7 @@ public static class Global
         {
             panel.BorderColor(Global.ColorActionInMenüs);
         }
-        
+
         // Der Wert aus der JSON hat Vorrang vor dem defaultwert. Nur wenn die JSON keinen Wert enthält, wird der defaultwert verwendet.
         defaultValue = !string.IsNullOrEmpty(configuration[parameter])
             ? configuration[parameter] ?? defaultValue
@@ -609,7 +618,7 @@ public static class Global
                         {
                             return ValidationResult.Error($"[]  Die Zahl {n} außerhalb des zulässigen Bereichs. Zulässige Werte: {zulässigeAuswahlOptionen}[/]");
                         }
-                                
+
                         return ValidationResult.Success();
                     })
                 .DefaultValue<string>(defaultValue.ToString()));
@@ -755,7 +764,7 @@ public static class Global
             return "";
         }
     }
-    
+
     public static IConfiguration EinstellungenDurchlaufen(Modus modus, IConfiguration configuration)
     {
         // Wenn User.json noch nicht existiert, dann erstellen
@@ -776,7 +785,7 @@ public static class Global
                 {
                     existiertnichtOderNichtBeschreibbar = false;
                 }
-            }while (existiertnichtOderNichtBeschreibbar);
+            } while (existiertnichtOderNichtBeschreibbar);
 
             // User.json mit Standardinhalten füllen
             var bkbJsonContent = CreateBkbJsonContent();
@@ -799,27 +808,26 @@ public static class Global
             }
         }
 
-        while (string.IsNullOrEmpty(configuration["ZustimmungLizenz"]) || 
+        while (string.IsNullOrEmpty(configuration["ZustimmungLizenz"]) ||
                (configuration["ZustimmungLizenz"]?.ToLower() != "ja" && configuration["ZustimmungLizenz"]?.ToLower() != "j"))
         {
 
             DisplayHeader(configuration);
-            configuration = Global.Konfig("ZustimmungLizenz", Global.Modus.Update, configuration, "Ich stimme den Lizenzbedingungen der GPLv3 zu. (Ja/Nein)",
+            configuration = Global.Konfig("ZustimmungLizenz", Global.Modus.Update, configuration, $"[] Ich stimme den Lizenzbedingungen der GPLv3 zu. (Ja/Nein)[/]",
             $"[bold {Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] steht unter der GNU General Public License Version 3 (GPLv3). " +
             "Die GPLv3 ist eine freie Softwarelizenz, die es Ihnen erlaubt, die Software zu verwenden, zu modifizieren und weiterzugeben, solange Sie die Bedingungen der Lizenz einhalten. " +
-            "Die wichtigsten Bedingungen dieser Lizenz sind:\n" +            
-            $"[{Global.GetColor(Global.ColorHinweise)}]Freiheit zur Nutzung, Änderung und Weiterverbreitung:[/] Sie dürfen diese Software frei verwenden, anpassen und weitergeben, solange alle abgeleiteten Werke ebenfalls unter der GPLv3 stehen.\n" +            
-            $"[{Global.GetColor(Global.ColorHinweise)}]Keine Garantie:[/] Diese Software wird \"wie sie ist\" bereitgestellt, ohne jede ausdrückliche oder stillschweigende Gewährleistung, insbesondere ohne Garantie auf Fehlerfreiheit oder Eignung für einen bestimmten Zweck.\n" +            
-            $"[{Global.GetColor(Global.ColorHinweise)}]Keine Haftung:[/] Der Entwickler haftet nicht für direkte oder indirekte Schäden, Datenverluste oder andere Konsequenzen, die durch die Nutzung oder Fehlfunktion dieser Software entstehen.\n" +            
-            $"[{Global.GetColor(Global.ColorHinweise)}]Verwendung auf eigene Gefahr:[/] Die Nutzung erfolgt ausschließlich auf eigenes Risiko.\n" +            
-            $"[{Global.GetColor(Global.ColorHinweise)}]Vollständige Lizenz:[/] Vollständige Lizenzbedingungen unter [lightskyblue3_1 link=https://www.gnu.org/licenses/gpl-3.0.de.html]https://www.gnu.org/licenses/gpl-3.0.de.html[/]." 
-                          
+            "Die wichtigsten Bedingungen dieser Lizenz sind:\n" +
+            $"[{Global.GetColor(Global.ColorHinweise)}]Freiheit zur Nutzung, Änderung und Weiterverbreitung:[/] Sie dürfen diese Software frei verwenden, anpassen und weitergeben, solange alle abgeleiteten Werke ebenfalls unter der GPLv3 stehen.\n" +
+            $"[{Global.GetColor(Global.ColorHinweise)}]Keine Garantie:[/] Diese Software wird \"wie sie ist\" bereitgestellt, ohne jede ausdrückliche oder stillschweigende Gewährleistung, insbesondere ohne Garantie auf Fehlerfreiheit oder Eignung für einen bestimmten Zweck.\n" +
+            $"[{Global.GetColor(Global.ColorHinweise)}]Keine Haftung:[/] Der Entwickler haftet nicht für direkte oder indirekte Schäden, Datenverluste oder andere Konsequenzen, die durch die Nutzung oder Fehlfunktion dieser Software entstehen.\n" +
+            $"[{Global.GetColor(Global.ColorHinweise)}]Verwendung auf eigene Gefahr:[/] Die Nutzung erfolgt ausschließlich auf eigenes Risiko.\n" +
+            $"[{Global.GetColor(Global.ColorHinweise)}]Vollständige Lizenz:[/] Vollständige Lizenzbedingungen unter [lightskyblue3_1 link=https://www.gnu.org/licenses/gpl-3.0.de.html]https://www.gnu.org/licenses/gpl-3.0.de.html[/]."
             , Global.Datentyp.JaNein, "", null, "Ja");
         }
 
         if (modus == Modus.Update)
             DisplayHeader(configuration);
-        
+
         if (modus == Modus.Create)
             DisplayHeader(configuration);
 
@@ -832,7 +840,7 @@ public static class Global
         if (modus != Modus.Read)
         {
             DisplayHeader(configuration, panel);
-        }  
+        }
 
         configuration = Konfig("PfadDownloads", modus, configuration, @"Downloads-Verzeichnis", "Geben Sie den Pfad des Downloads-Verzeichnisses an. In der Regel wird das Verzeichnis bereits richtig vorgeschlagen. Dann einfach [bold springGreen2]ENTER[/] drücken:", Datentyp.Pfad, Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"));
 
@@ -848,38 +856,36 @@ public static class Global
             DisplayHeader(configuration, panel);
         }
 
-        configuration = Konfig("PfadSchilddatenaustausch", modus, configuration, @"SchILD-Ausgabeverzeichnis", "Geben Sie das Verzeichnis an, das in SchILD unter [yellow bold]Datenaustausch > Schnittstelle SchILD-NRW > Export[/] als [yellow bold]Ausgabeverzeichnis[/] eingetragen ist. Wenn dort kein Verzeichnis steht, tragen Sie dort das selbe Verzeichnis ein, das Sie auch hier angeben:", Datentyp.Pfad, @"\\fs01\SchILD-NRW\Ausgabeverzeichnis");
+        configuration = Konfig("PfadSchilddatenaustausch", modus, configuration, @"SchILD-Ausgabeverzeichnis", $"Geben Sie das Verzeichnis an, das in SchILD unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Datenaustausch > Schnittstelle SchILD-NRW > Export[/] als [{Global.GetColor(Global.ColorPfadInDateien)}]Ausgabeverzeichnis[/] eingetragen ist. Wenn dort kein Verzeichnis steht, tragen Sie dort das selbe Verzeichnis ein, das Sie auch hier angeben.\n[{Global.GetColor(Global.ColorHinweise)}]Hinweis:[/] Falls an mehreren Arbeitsplätzen parallel mit [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] gearbeitet wird, kann es sinnvoll sein, dass jede*r ein eigenes Ausgabeverzeichnis bekommt.", Datentyp.Pfad, @"\\fs01\SchILD-NRW\Ausgabeverzeichnis");
 
         if (modus != Modus.Read)
         {
             DisplayHeader(configuration, panel);
         }
 
-        configuration = Konfig("PfadDokumentenverwaltung", modus, configuration, "Pfad zur Dokumentenverwaltung", $"Geben Sie das Verzeichnis an, das in SchILD unter [yellow bold]Extras > Programmeinstellungen > Globale Einstellungen > Dokumentenverwaltung[/] als [yellow bold]Dokumentenverzeichnis[/] eingetragen ist. Die Dokumentenverwaltung muss eingeschaltet sein. Wenn dort kein Verzeichnis steht, tragen Sie dort das selbe Verzeichnis ein, das Sie auch hier angeben:", Datentyp.Pfad, @"\\fs01\SchILD-NRW\Dokumentenverwaltung");
+        configuration = Konfig("PfadDokumentenverwaltung", modus, configuration, "Pfad zur Dokumentenverwaltung", $"Geben Sie das Verzeichnis an, das in SchILD unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Extras > Programmeinstellungen > Globale Einstellungen > Dokumentenverwaltung[/] als [{Global.GetColor(Global.ColorPfadInProgrammen)}]Dokumentenverzeichnis[/] eingetragen ist. Die Dokumentenverwaltung muss eingeschaltet sein. Wenn dort kein Verzeichnis steht, tragen Sie dort das selbe Verzeichnis ein, das Sie auch hier angeben:", Datentyp.Pfad, @"\\fs01\SchILD-NRW\Dokumentenverwaltung");
 
         if (modus != Modus.Read)
         {
             DisplayHeader(configuration, panel);
         }
 
-        configuration = Konfig("MaxDateiAlter", modus, configuration, "Wie viele Tage dürfen Dateien höchstens alt sein?", $"Geben Sie an, wie viele Tage Dateien höchstens alt sein dürfen, um vom [bold springGreen2]BKB-Tool[/] für das Einlesen akzeptiert zu werden. Die Angabe einer (möglichst niedrigen) Zahl soll sicherstellen, dass nicht versehntlich veraltete Dateien eingelesen werden.", Datentyp.Int);
-
-        if (modus != Modus.Read)
-        {
-            DisplayHeader(configuration, panel);
-        }
-
-        configuration = Konfig("AppName", Modus.Read, configuration, "Wie soll die App heißen?", $"Sie können die App [bold springGreen2]BKB-Tool[/] umbennen.", Datentyp.String);
+        configuration = Konfig("MaxDateiAlter", modus, configuration, "Wie viele Tage dürfen Dateien höchstens alt sein?", $"Geben Sie an, wie viele Tage Dateien höchstens alt sein dürfen, um vom [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] für das Einlesen akzeptiert zu werden. Die Angabe einer (möglichst niedrigen) Zahl soll sicherstellen, dass nicht versehntlich veraltete Dateien eingelesen werden.", Datentyp.Int);
 
         if (modus == Modus.Update && SchulnummernPrivilegiert.Contains(configuration["Schulnummer"]))
         {
-            configuration = Konfig("MailDomain", modus, configuration, "Mail-Domain für Schüler*innen", "Geben Sie die Mail-Domain für Ihre Schüler*innen an. Ihre Eingabe muss mit [springGreen2 bold]@[/] beginnen und einen [springGreen2 bold]Punkt[/] enthalten. Beispiel: [springGreen2 bold]@students.meine-schule.de[/]", Datentyp.Mail);
-            configuration = Konfig("ConnectionStringUntis", modus, configuration, "ConnectionStringUntis (optional)");            
+            configuration = Konfig("MailDomain", modus, configuration, "Mail-Domain für Schüler*innen", $"Geben Sie die Mail-Domain für Ihre Schüler*innen an. Ihre Eingabe muss mit [{Global.GetColor(Global.ColorZahlen)}]@[/] beginnen und einen [{Global.GetColor(Global.ColorZahlen)}]Punkt[/] enthalten. Beispiel: [springGreen2 bold]@students.meine-schule.de[/]", Datentyp.Mail);
+            configuration = Konfig("ConnectionStringUntis", modus, configuration, "ConnectionStringUntis (optional)");
             configuration = Konfig("SmtpUser", modus, configuration, "Mail-Benutzer");
             configuration = Konfig("SmtpPassword", modus, configuration, "Mail-Kennwort");
             configuration = Konfig("SmtpPort", modus, configuration, "SMTP-Port");
             configuration = Konfig("SmtpServer", modus, configuration, "SMTP-Server");
             configuration = Konfig("NetmanMailReceiver", modus, configuration, "Wem soll die Netman-Mail geschickt werden?");
+        }
+
+        if (modus != Modus.Read)
+        {
+            DisplayHeader(configuration, panel);
         }
 
         return configuration;
@@ -932,7 +938,7 @@ public static class Global
             MariaPort = Verschluesseln(""),
             MariaDb = Verschluesseln(""),
             MariaPw = Verschluesseln(""),
-            FehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt = Verschluesseln(""),
+            FehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt = Verschluesseln("3"),
             MaximaleAnzahlFehlstundenProTag = Verschluesseln("8"),
             Abschnitt = Verschluesseln("1"),
             Chat = Verschluesseln(""),
@@ -1116,7 +1122,7 @@ public static class Global
             }
         }
         return max == int.MinValue ? 0 : max; // 0, falls keine Zahl gefunden wurde
-    }    
+    }
 
     // Hilfsmethode: Prüft, ob ein Verzeichnis beschreibbar ist
     private static bool IsDirectoryWritable(string dirPath)

@@ -3,6 +3,17 @@ using Common;
 using Microsoft.Extensions.Configuration;
 using Spectre.Console;
 
+#pragma warning disable CS0252 // Unbeabsichtigter Verweisvergleich. Wandeln Sie die linke Seite in den Typ "string" um, um einen Wertvergleich durchzuführen.
+#pragma warning disable CA2200
+#pragma warning disable CS8618
+#pragma warning disable CS8602 // Dereferenzierung eines möglicherweise nullverweisenden Objekts.
+#pragma warning disable CS8604 // Möglicherweise wird ein nullverweisendes Argument an eine nicht-nullbare Parameterreferenz übergeben.
+#pragma warning disable CS8073
+#pragma warning disable CS0472
+#pragma warning disable CS8625
+#pragma warning disable CS8600
+#pragma warning disable CS0162
+
 public class Menue : List<Menüeintrag>
 {
     public int AusgewaehlterMenueEintrag { get; set; }
@@ -10,8 +21,8 @@ public class Menue : List<Menüeintrag>
     public Dateien Quelldateien { get; set; }
     public Klassen Klassen { get; set; }
     public Lehrers Lehrers { get; set; }
-    
-    public Menue(){}
+
+    public Menue() { }
 
     /// <summary>
     /// Menü aufbauen und Dateien Filtern
@@ -90,7 +101,7 @@ public class Menue : List<Menüeintrag>
 
         var menuEintraege = "";
 
-        if(this.Count > 0)
+        if (this.Count > 0)
         {
             menuEintraege = $"[bold {Global.GetColor(Global.ColorActionInMenüs)}] 1 ... " + this.Count() + "[/] oder";
         }
@@ -110,7 +121,7 @@ public class Menue : List<Menüeintrag>
             default:
                 if (int.TryParse(configuration["Auswahl"], out int auswahl) && auswahl > 0 && auswahl <= this.Count())
                 {
-                    configuration["Auswahl"] = (auswahl -1).ToString();
+                    configuration["Auswahl"] = (auswahl - 1).ToString();
                     return configuration;
                 }
                 else

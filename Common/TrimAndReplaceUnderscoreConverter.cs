@@ -16,6 +16,7 @@ using CsvHelper.TypeConversion;
 #pragma warning disable CS0618 // Möglicher Null-Verweis-Argument
 #pragma warning disable NU1903 // Möglicher Null-Verweis-Argument
 #pragma warning disable NU1902 // Möglicher Null-Verweis-Argument
+#pragma warning disable CS8765
 
 
 public class TrimAndReplaceUnderscoreConverter : DefaultTypeConverter
