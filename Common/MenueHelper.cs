@@ -524,7 +524,7 @@ public static class MenueHelper
                         [
                             "Die 10% der KuK mit den meisten offenen Klassenbucheinträgen werden angemahnt.",
                             "Mit weniger als 10 offenen Eintragungen wird nicht gemahnt. Ab 20 oder mehr Stunden wird die Schulleitung in CC informiert.",
-                            "Die Anzahl der offenen Klassenbucheinträge wird aus der Datei 'OpenPeriods' ausgelesen.",
+                            $"Die Anzahl der offenen Klassenbucheinträge wird aus der Datei [{Global.GetColor(Global.ColorPfadInDateien)}]OpenPeriods[/] ausgelesen.",
                             "Die KuK werden zuerst angezeigt. Vor dem Mailversand wird nochmal explizit gefragt."
                         ],
                         m =>

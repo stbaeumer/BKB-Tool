@@ -110,7 +110,8 @@ private bool IstMailadresseGültig(string email)
 
     public void Senden(string subject, IConfiguration configuration, string body, string attachment, string receiverEmail, string cc = "", string bcc = "") 
     {
-        try{
+        try
+        {
             string smtpServer = configuration["SmtpServer"];
             int smtpPort = Convert.ToInt32(configuration["SmtpPort"]);
             string senderEmail = configuration["SmtpUser"];
@@ -140,7 +141,6 @@ private bool IstMailadresseGültig(string email)
                 email.Bcc.Add(new MailboxAddress("Empfänger", bcc));
             }
             
-
             // 1️⃣ Erstelle den Haupttext der E-Mail
             var textPart = new TextPart("plain") { Text = body };
 
@@ -169,15 +169,15 @@ private bool IstMailadresseGültig(string email)
                 smtpClient.ServerCertificateValidationCallback = (s, c, h, e) => true; // SSL-Zertifikatsvalidierung deaktivieren
                 smtpClient.Connect(smtpServer, smtpPort, MailKit.Security.SecureSocketOptions.StartTls);
                 smtpClient.Authenticate(senderEmail, senderPassword);
-                smtpClient.Send(email);
+                //smtpClient.Send(email);
                 smtpClient.Disconnect(true);
             }
 
-            Global.ZeileSchreiben(attachment, $"Mail gesendet an: {receiverEmail}", ConsoleColor.Green, ConsoleColor.White);        
+            Global.ZeileSchreiben(attachment, $"Mail gesendet an: {receiverEmail}");        
         }
-        catch(Exception ex){
-            Global.ZeileSchreiben(attachment, $"Versand gescheitert: {receiverEmail}", ConsoleColor.Red,ConsoleColor.Gray);        
-            Console.WriteLine("Fehler beim Versand der E-Mail an " + receiverEmail + ": " + ex.Message);
+        catch(Exception ex)
+        {
+            throw;
         }
     }
 
