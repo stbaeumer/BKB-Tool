@@ -56,13 +56,13 @@ public class Gruppen : List<Gruppe>
             gruppen.Add(gruppe);
         }
 
-        var panel = new Panel("Die Bildungsgänge werden aus den Anrechnungen ermittelt. Zwei Dinge sind wichtig:\n1. Das Wort 'Bildungsgangleitung' muss im [bold aqua]Text[/] in Untis enthalten sein\n2. einen Link 'bildungsgaenge: ...' in der [bold aqua]Beschr[/].")
+        var panel = new Panel("Die Bildungsgänge werden aus den Untis-Anrechnungen ermittelt. Zwei Dinge sind wichtig:\n1. Das Wort 'Bildungsgangleitung' muss im [bold aqua]Text[/] in Untis enthalten sein\n2. einen Link 'bildungsgaenge: ...' in der [bold aqua]Beschr[/].")
                         .HeaderAlignment(Justify.Left)
                         .SquareBorder()
                         .Expand()
-                        .BorderColor(Color.Red);
+                        .BorderColor(Global.ColorInfoBox);
 
-                AnsiConsole.Write(panel);
+        AnsiConsole.Write(panel);
 
         //Global.ZeileSchreiben("Bildungsgang-Gruppen", records.Count().ToString(), ConsoleColor.Black,ConsoleColor.White);
 
@@ -78,7 +78,7 @@ public class Gruppen : List<Gruppe>
                         .HeaderAlignment(Justify.Left)
                         .SquareBorder()
                         .Expand()
-                        .BorderColor(Color.Red);
+                        .BorderColor(Global.ColorInfoBox);
 
                 AnsiConsole.Write(panel);
 

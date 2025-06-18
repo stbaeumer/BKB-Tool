@@ -308,7 +308,9 @@ public static class MenueHelper
                         students,
                         klassen,
                         [
-                            "Lehrkräfte können über Teams angeschrieben werden."
+                            "Lehrkräfte können über Teams angeschrieben werden.",
+                            $"Dazu wird die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", "ExportLessons.csv")}[/] ausgewertet.",
+                            "Es wird jetzt ein Link nach Teams erstellt, um einen Chat mit den Lehrkräften zu beginnen."
                         ],
                         m =>
                         {
@@ -349,7 +351,7 @@ public static class MenueHelper
                             }
                         },
                         Global.Rubrik.Allgemein,
-                        Global.NurBeiDiesenSchulnummern.Nur000000
+                        Global.NurBeiDiesenSchulnummern.Nur177659
                     ),
                     new Menüeintrag(
                         "Kursbelegung: Vorbereiten",

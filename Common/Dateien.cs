@@ -477,7 +477,7 @@ public class Dateien : List<Datei>
         else if (datei.AbsoluterPfad.ToLower().Contains("lehrkraefte"))
             return datei.ToList();
 
-        return [];
+        return datei.ToList();
     }
 
     public Dateien Notwendige(IConfiguration configuration, List<string> dateinamenNotwendigeDateien, bool meldungAnzeigen = false)

@@ -1502,7 +1502,7 @@ public class Menüeintrag
                         : student.ExterneIdNummer.ToString().PadLeft(6, '0');
                     record.Kurzname = student.MailSchulisch.Replace("@students.berufskolleg-borken.de", "");
                     record.Vorname = student.Vorname;
-                    record.Nachname = $"{student.Nachname}#{student.Klasse}";
+                    record.Nachname = student.Nachname;
                     record.Mail = student.MailSchulisch;
                     record.Passwort = student.Nachname.Substring(0, 1).ToUpper() + student.Geburtsdatum;
                     record.Klasse = student.Klasse;
@@ -2160,40 +2160,62 @@ public class Menüeintrag
         if (exportlessons == null || exportlessons.Count == 0) return [];
 
         Gruppen = new Gruppen();
-        Gruppen.AddRange(new Gruppen().GetBildungsgaenge(exportlessons, Klassen, anrechnungen, lehrers));
-        Gruppen.AddRange(new Gruppen().GetSchulformen(exportlessons, Klassen, anrechnungen, lehrers));
-        Gruppen.Add(new Gruppe().Get(exportlessons, Klassen, anrechnungen, lehrers,
-            "versetzung:blaue_briefe",
-            new List<string>() { "BS", "HBG", "HBT", "HBW", "FS" },
-            new List<int>() { 1 }));
-        Gruppen.Add(new Gruppe().Get(exportlessons, Klassen, anrechnungen, lehrers,
-            "termine:fhr:start",
-            new List<string>() { "BS", "HBG", "HBT", "HBW", "FS", "FM" },
-            new List<int>() { 2 }));
+
+        if(configuration["Schulnummer"] == "177659")
+            Gruppen.AddRange(new Gruppen().GetBildungsgaenge(exportlessons, Klassen, anrechnungen, lehrers));
+
+        if(configuration["Schulnummer"] == "177659")
+            Gruppen.AddRange(new Gruppen().GetSchulformen(exportlessons, Klassen, anrechnungen, lehrers));
+
+        if(configuration["Schulnummer"] == "177659")
+            Gruppen.Add(new Gruppe().Get(exportlessons, Klassen, anrechnungen, lehrers,
+                "versetzung:blaue_briefe",
+                new List<string>() { "BS", "HBG", "HBT", "HBW", "FS" },
+                new List<int>() { 1 }));
+
+        if (configuration["Schulnummer"] == "177659")
+            Gruppen.Add(new Gruppe().Get(exportlessons, Klassen, anrechnungen, lehrers,
+                "termine:fhr:start",
+                new List<string>() { "BS", "HBG", "HBT", "HBW", "FS", "FM" },
+                new List<int>() { 2 }));
+        
         Gruppen.Add(new Gruppe().GetFachschaft(exportlessons, Klassen, anrechnungen, lehrers,
             ":fachschaften:deutsch_kommunikation",
             new List<string>() { "D", "D FU", "D1", "D2", "D G1", "D G2", "D L1", "D L2", "D L", "DL", "DL1", "DL2" }));
+    
         Gruppen.Add(new Gruppe().GetFachschaft(exportlessons, Klassen, anrechnungen, lehrers,
             ":fachschaften:englisch",
             new List<string>() { "E", "E FU", "E1", "E2", "E G1", "E G2", "E L1", "E L2", "E L", "EL", "EL1", "EL2" }));
+
+        Gruppen.Add(new Gruppe().GetFachschaft(exportlessons, Klassen, anrechnungen, lehrers,
+            ":fachschaften:englisch",
+            new List<string>() { "E", "E FU", "E1", "E2", "E G1", "E G2", "E L1", "E L2", "E L", "EL", "EL1", "EL2" }));
+
         Gruppen.Add(new Gruppe().GetFachschaft(exportlessons, Klassen, anrechnungen, lehrers,
             ":fachschaften:religionslehre",
             new List<string>() { "KR", "KR FU", "KR1", "KR2", "KR G1", "KR G2", "ER", "ER G1" }));
+
         Gruppen.Add(new Gruppe().GetFachschaft(exportlessons, Klassen, anrechnungen, lehrers,
             ":fachschaften:mathematik_physik",
             new List<string>() { "M", "M FU", "M1", "M2", "M G1", "M G2", "M L1", "M L2", "M L", "ML", "ML1", "ML2" }));
+
         Gruppen.Add(new Gruppe().GetFachschaft(exportlessons, Klassen, anrechnungen, lehrers,
             ":fachschaften:politik_gesellschaftslehre",
             new List<string>() { "PK", "PK FU", "PK1", "PK2", "GG G1", "GG G2" }));
-        Gruppen.Add(new Gruppe().GetFachschaft(exportlessons, Klassen, anrechnungen, lehrers,
-            ":fachschaften:wirtschaftslehre_in_nicht_kaufm_klassen",
-            new List<string>() { "WL", "WBL" }));
+
+        if(configuration["Schulnummer"] == "177659")
+            Gruppen.Add(new Gruppe().GetFachschaft(exportlessons, Klassen, anrechnungen, lehrers,
+                ":fachschaften:wirtschaftslehre_in_nicht_kaufm_klassen",
+                new List<string>() { "WL", "WBL" }));
+
         Gruppen.Add(new Gruppe().GetFachschaft(exportlessons, Klassen, anrechnungen, lehrers,
             ":fachschaften:sport",
             new List<string>() { "SP", "SP G1", "SP G2" }));
+
         Gruppen.Add(new Gruppe().GetFachschaft(exportlessons, Klassen, anrechnungen, lehrers,
             ":fachschaften:biologie",
             new List<string>() { "BI", "Bi", "Bi FU", "Bi1", "Bi G1", "Bi G2", "BI G1", "BI L1" }));
+
         Gruppen.Add(new Gruppe().GetKollegium(exportlessons, Klassen, anrechnungen, lehrers,
             ":kollegium:start"));
         Gruppen.Add(new Gruppe().GetLehrerinnen(exportlessons, Klassen, anrechnungen, lehrers,
@@ -2203,10 +2225,13 @@ public class Menüeintrag
         Gruppen.Add(new Gruppe().GetKlassenleitungen(exportlessons, Klassen, anrechnungen, lehrers,
             "kollegium:klassenleitungen"));
 
-        Gruppen.Add(new Gruppe().GetBildungsgangleitungen(exportlessons, Klassen, anrechnungen, lehrers,
-            "kollegium:bildungsgangleitungen"));
-        Gruppen.Add(new Gruppe().GetByWikilink(exportlessons, Klassen, anrechnungen, lehrers,
-            "kollegium:schulleitung:erweiterte:start"));
+        if(configuration["Schulnummer"] == "177659")
+            Gruppen.Add(new Gruppe().GetBildungsgangleitungen(exportlessons, Klassen, anrechnungen, lehrers,
+                "kollegium:bildungsgangleitungen"));
+
+        if(configuration["Schulnummer"] == "177659")
+            Gruppen.Add(new Gruppe().GetByWikilink(exportlessons, Klassen, anrechnungen, lehrers,
+                "kollegium:schulleitung:erweiterte:start"));
 
         foreach (var gruppe in Gruppen)
         {

@@ -136,7 +136,7 @@ private bool IstMailadresseGültig(string email)
                 email.Cc.Add(new MailboxAddress("Empfänger", cc));
             }
             
-            if(!string.IsNullOrEmpty(bcc))
+            if(!    string.IsNullOrEmpty(bcc))
             {
                 email.Bcc.Add(new MailboxAddress("Empfänger", bcc));
             }
@@ -169,11 +169,11 @@ private bool IstMailadresseGültig(string email)
                 smtpClient.ServerCertificateValidationCallback = (s, c, h, e) => true; // SSL-Zertifikatsvalidierung deaktivieren
                 smtpClient.Connect(smtpServer, smtpPort, MailKit.Security.SecureSocketOptions.StartTls);
                 smtpClient.Authenticate(senderEmail, senderPassword);
-                //smtpClient.Send(email);
+                smtpClient.Send(email);
                 smtpClient.Disconnect(true);
             }
 
-            Global.ZeileSchreiben(attachment, $"Mail gesendet an: {receiverEmail}");        
+            Global.ZeileSchreiben(receiverEmail, $"Mail gesendet");        
         }
         catch(Exception ex)
         {

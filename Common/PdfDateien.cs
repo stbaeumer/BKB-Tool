@@ -41,7 +41,7 @@ public class PdfDateien : List<PdfDatei>
                     where !f.Contains("-Kennwort")
                     select f).ToList();
 
-            Global.ZeileSchreiben("Dateien bereit für die Verschlüsselung:", fileGroupPdf.Count == 0 ? "keine gefunden" : fileGroupPdf.Count.ToString(), ConsoleColor.White, ConsoleColor.Blue);
+            Global.ZeileSchreiben("Dateien bereit für die Verschlüsselung:", fileGroupPdf.Count == 0 ? "keine gefunden" : fileGroupPdf.Count.ToString());
             
             foreach (var file in fileGroupPdf)
             {
