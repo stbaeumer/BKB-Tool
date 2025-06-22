@@ -31,9 +31,9 @@ public class Students : List<Student>
     public Students(IConfiguration configuration, Dateien quelldateien)
     {
         var schuelerBasisdaten = quelldateien.GetMatchingList(configuration, "schuelerbasisdaten", new Students(), null);
-        if (schuelerBasisdaten == null || schuelerBasisdaten.Count == 0) return;        
+        if (schuelerBasisdaten == null || schuelerBasisdaten.Count == 0) return;
 
-        for(int j = 0; j < schuelerBasisdaten.Count; j++)
+        for (int j = 0; j < schuelerBasisdaten.Count; j++)
         {
             var student = new Student();
             try
@@ -43,7 +43,6 @@ public class Students : List<Student>
                 student.Vorname = dict["Vorname"].ToString();
                 student.Nachname = dict["Nachname"].ToString();
                 student.Geburtsdatum = dict["Geburtsdatum"].ToString();
-                student.MailSchulisch = student.GenerateMailAusGebdat(configuration);
                 student.Klasse = dict["Klasse"].ToString();
                 student.Status = dict["Status"].ToString();
                 student.Geschlecht = dict["Geschlecht"].ToString();
@@ -56,7 +55,7 @@ public class Students : List<Student>
             {
                 Console.WriteLine($"Fehler beim Verarbeiten von {student.Vorname} {student.Nachname}, Zeile {j + 2}: {ex.Message}");
                 continue; // Weiter mit dem nächsten Schüler
-            }            
+            }
         }
     }
 
@@ -567,6 +566,8 @@ public class Students : List<Student>
             var klasse = "";
             do
             {
+                while (Console.KeyAvailable) Console.ReadKey(true);
+
                 klasse = Console.ReadLine();
             } while (!this.Any(x => x.Klasse == klasse.ToUpper()));
 
@@ -586,6 +587,8 @@ public class Students : List<Student>
             Console.WriteLine("");
             Console.WriteLine("   Liegen die " + sortierteKlasse.Count() + " Fotos der Klasse " + klasse.ToUpper() +
                               " im Ordner '" + pfad + "'? Dann ENTER");
+
+while (Console.KeyAvailable) Console.ReadKey(true);
 
             var x = Console.ReadKey();
 
@@ -1158,7 +1161,8 @@ public class Students : List<Student>
 
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("  Danach ENTER:");
-            
+            while (Console.KeyAvailable) Console.ReadKey(true);
+
             var picsString = Console.ReadLine();
             var pics = new List<string>();
 

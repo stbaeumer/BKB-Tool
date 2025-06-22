@@ -255,6 +255,8 @@ ORDER BY CountValue.TEACHER_ID;
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
+            while (Console.KeyAvailable) Console.ReadKey(true);
+
             Console.ReadKey();
         }
 

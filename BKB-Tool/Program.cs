@@ -79,7 +79,7 @@ do
 
             if (menuGefiltert[i].Quelldateien.Where(q => !string.IsNullOrEmpty(q.Fehlermeldung) && !q.IstOptional && !q.Nur177659).Any())
             {
-                AnsiConsole.MarkupLine($"[grey]Zuerst die Hinweise [/][bold red]!?[/][grey] bearbeiten, dann hierher zurückkehren.[/]");
+                AnsiConsole.MarkupLine($"[grey]  Zuerst die Hinweise [/][bold red]!?[/][grey] bearbeiten, dann hierher zurückkehren.[/]");
             }
             else
             {
@@ -92,6 +92,7 @@ do
     catch (Exception ex)
     {
         AnsiConsole.WriteException(ex, ExceptionFormats.Default);
+        while (Console.KeyAvailable) Console.ReadKey(true);
         Console.ReadKey();
     }
 
@@ -226,6 +227,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                     $"Die neue Datei wurde heruntergeladen und gespeichert als [{Global.GetColor(Global.ColorPfadInDateien)}]{zielDatei}[/].",                    
                     $"Mit [{Global.GetColor(Global.ColorActionInMenüs)} bold]ENTER[/] wird jetzt in die Version {githubVer} neugestartet."
                 ]);
+                while (Console.KeyAvailable) Console.ReadKey(true);
                 Console.ReadKey();
 
                 System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo

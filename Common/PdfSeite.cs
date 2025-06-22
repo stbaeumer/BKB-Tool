@@ -79,6 +79,8 @@ public partial class PdfSeite
         if (studs.Count == 1) return studs[0];
         if (studs.Count <= 1) return null!;
         Console.WriteLine("Mehrere Studs gefunden");
+        while (Console.KeyAvailable) Console.ReadKey(true);
+
         Console.ReadKey();
         return null!;
     }
@@ -123,6 +125,8 @@ public partial class PdfSeite
         if (studs.Count == 1) return studs[0];
         if (studs.Count <= 1) return null!;
         Console.WriteLine("Mehrere Studs gefunden");
+        while (Console.KeyAvailable) Console.ReadKey(true);
+
         Console.ReadKey();
         return null!;
     }

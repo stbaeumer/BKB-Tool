@@ -269,6 +269,8 @@ public partial class Student
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
+            while (Console.KeyAvailable) Console.ReadKey(true);
+
             Console.ReadKey();
             return null!;
         }
@@ -322,6 +324,8 @@ public partial class Student
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
+            while (Console.KeyAvailable) Console.ReadKey(true);
+
             Console.ReadKey();
             return null!;
         }
@@ -650,21 +654,6 @@ public partial class Student
         }            
         return result;
     }
-
-    public string GenerateMailMitSchildId(IConfiguration configuration)
-    {
-        if (string.IsNullOrEmpty(Nachname) || string.IsNullOrEmpty(Vorname) || string.IsNullOrEmpty(IdSchild)) return "";
-        
-        var id = IdSchild;
-
-        if (!string.IsNullOrEmpty(ExterneIdNummer))
-        {
-            id = ExterneIdNummer;
-        }
-
-        return Bereinigen(Nachname.ToLower()).Substring(0, 1) + Bereinigen(Vorname.ToLower()).Substring(0, 1) + id.ToString().PadLeft(6, '0') + configuration["MailDomain"];
-    }
-
 
     public string GenerateMailAusGebdat(IConfiguration configuration)
     {

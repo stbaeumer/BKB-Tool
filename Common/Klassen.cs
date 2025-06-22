@@ -357,6 +357,8 @@ FROM Class LEFT JOIN Teacher ON Class.TEACHER_ID = Teacher.TEACHER_ID WHERE (((C
             if ((from s in students where s.Klasse == klasse.Name select s).Any())
             {
                 Console.Write("Die Klasse hat aber Schüler. Das muss unbedingt gefixt werden!");
+                while (Console.KeyAvailable) Console.ReadKey(true);
+
                 Console.ReadKey();
             }
 

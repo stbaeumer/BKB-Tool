@@ -58,6 +58,8 @@ public class Raums : List<Raum>
             catch (Microsoft.Data.SqlClient.SqlException ex)
             {
                 Console.WriteLine("Netzwerkbezogener oder instanzspezifischer Fehler beim Herstellen einer Verbindung mit SQL Server. Der Server wurde nicht gefunden, oder auf ihn kann nicht zugegriffen werden.");
+                while (Console.KeyAvailable) Console.ReadKey(true);
+
                 Console.ReadKey();
             }
             finally

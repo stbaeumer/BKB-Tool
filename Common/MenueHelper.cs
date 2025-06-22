@@ -62,7 +62,7 @@ public static class MenueHelper
                     new Menüeintrag(
                         "Webuntis: Schüler*innen-Importdatei für Webuntis erstellen",
                         anrechnungen,
-                        quelldateien.Notwendige(configuration, ["student_,csv","schuelerlernabschnittsdaten,dat", "schuelerzusatzdaten,dat", "schuelererzieher,dat", "schuelerAdressen,dat", "lehrkraefte,dat", "klassen,dat", "schildschuelerexport,txt,nur177659"]),
+                        quelldateien.Notwendige(configuration, ["student_,csv","schuelerlernabschnittsdaten,dat", "schuelerzusatzdaten,dat", "schuelererzieher,dat", "schuelerAdressen,dat", "lehrkraefte,dat", "klassen,dat"]),
                         students,
                         klassen,
                         [
@@ -72,6 +72,8 @@ public static class MenueHelper
                         m =>
                         {
                             var zeitstempel = DateTime.Now.ToString("yyyyMMdd-HHmm");
+                            if(m.AlleSusHabenEineEindeutigeMailAdresse(configuration)) return;
+                            m.Zieldatei?.Erstellen("|", '\'', new UTF8Encoding(false), false);
                             m.Zieldatei = m.WebuntisOderNetmanOderLitteraCsv(configuration, Path.Combine(pfadDownloads ?? "", zeitstempel +  @"-ImportNachWebuntis.csv"));
                             m.Zieldatei?.Erstellen(";", '\'', new UTF8Encoding(false), false,
                             [
@@ -97,7 +99,8 @@ public static class MenueHelper
                         ],
                         m =>
                         {
-                            var zeitstempel = DateTime.Now.ToString("yyyyMMdd-HHmm");                            
+                            var zeitstempel = DateTime.Now.ToString("yyyyMMdd-HHmm");         
+                            if(m.AlleSusHabenEineEindeutigeMailAdresse(configuration)) return;                   
                             m.IStudents = m.Students.OhneWebuntisFoto(configuration, Path.Combine(Directory.GetCurrentDirectory(), "fotos.txt"));
                             m.IStudents.FotosFürWebuntisZippen(configuration, Path.Combine(pfadDownloads ?? "", zeitstempel +  @"-ImportNachWebuntis.zip"), Path.Combine(Directory.GetCurrentDirectory(), "fotos.txt"),
                             [
@@ -112,7 +115,7 @@ public static class MenueHelper
                     new Menüeintrag(
                         "Littera: Schüler*innen-Importdatei für Littera erstellen",
                         anrechnungen,
-                        quelldateien.Notwendige(configuration, ["student_,csv","schuelerlernabschnittsdaten,dat", "schuelerzusatzdaten,dat", "schuelererzieher,dat", "schuelerAdressen,dat", "lehrkraefte,dat", "klassen,dat", "schildschuelerexport,txt,nur177659"]),
+                        quelldateien.Notwendige(configuration, ["student_,csv","schuelerlernabschnittsdaten,dat", "schuelerzusatzdaten,dat", "schuelererzieher,dat", "schuelerAdressen,dat", "lehrkraefte,dat", "klassen,dat"]),
                         students,
                         klassen,
                         [
@@ -120,7 +123,8 @@ public static class MenueHelper
                         ],
                         m =>
                         {
-                            var zeitstempel = DateTime.Now.ToString("yyyyMMdd-HHmm");                            
+                            var zeitstempel = DateTime.Now.ToString("yyyyMMdd-HHmm");         
+                            if(m.AlleSusHabenEineEindeutigeMailAdresse(configuration)) return;                   
                             m.Zieldatei = m.WebuntisOderNetmanOderLitteraCsv(configuration, Path.Combine(configuration["PfadDownloads"] ?? "", DateTime.Now.AddHours(1).ToString("yyyyMMdd-HHmm") + @"-ImportNachLittera.xml"));
                             m.Zieldatei?.Erstellen(";", '\"', new UTF8Encoding(false), false);
                             if(configuration["Schulnummer"] != null && configuration["Schulnummer"] == "177659")
@@ -135,7 +139,7 @@ public static class MenueHelper
                     new Menüeintrag(
                         "Netman: Schüler*innen-Importdatei für Netman erstellen",
                         anrechnungen,
-                        quelldateien.Notwendige(configuration, ["student_,csv","schuelerlernabschnittsdaten,dat", "schuelerzusatzdaten,dat", "schuelererzieher,dat", "schuelerAdressen,dat", "lehrkraefte,dat", "klassen,dat", "schildschuelerexport,txt,nur177659"]),
+                        quelldateien.Notwendige(configuration, ["student_,csv","schuelerlernabschnittsdaten,dat", "schuelerzusatzdaten,dat", "schuelererzieher,dat", "schuelerAdressen,dat", "lehrkraefte,dat", "klassen,dat"]),
                         students,
                         klassen,
                         [
@@ -145,6 +149,7 @@ public static class MenueHelper
                         m =>
                         {
                             var zeitstempel = DateTime.Now.ToString("yyyyMMdd-HHmm");
+                            if(m.AlleSusHabenEineEindeutigeMailAdresse(configuration)) return;
                             m.Zieldatei = m.WebuntisOderNetmanOderLitteraCsv(configuration, Path.Combine(pfadDownloads ?? "", DateTime.Now.AddHours(1).ToString("yyyyMMdd-HHmm") + @"-ImportNachNetman.csv"));
                             m.Zieldatei?.Erstellen(",", '\'', new UTF8Encoding(false), false);
                             if(configuration["Schulnummer"] != null && configuration["Schulnummer"] == "177659")
@@ -155,7 +160,32 @@ public static class MenueHelper
                         },
                         Global.Rubrik.WöchtentlicheArbeiten,
                         Global.NurBeiDiesenSchulnummern.Nur177659
-                    ),                   
+                    ),
+                    new Menüeintrag(
+                        "Mail-Adressen: SchuelerZusatzdaten werden um schulische Mailadressen ergänzen (falls leer)",
+                        anrechnungen,
+                        quelldateien.Notwendige(configuration, ["schuelerzusatzdaten,dat"]),
+                        students,
+                        klassen,
+                        [
+                            $"Es wird jetzt die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", "SchuelerZusatzdaten.dat")}[/] um die schulischen Mailadressen ergänzt.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1:[/] Vorhandene schulische Mailadressen werden nicht verändert.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #2:[/] Die schulischen Mailadressen sehen wie folgt aus: [{Global.GetColor(Global.ColorTextHervorheben)}]nv061201@meine-schule.de[/], wobei gilt:",
+                            $"[{Global.GetColor(Global.ColorTextHervorheben)}]n[/]: Erster Buchstabe des Nachnamens. Umlaute werden aufgelöst.",
+                            $"[{Global.GetColor(Global.ColorTextHervorheben)}]v[/]: Erster Buchstabe des Vornamens. Umlaute werden aufgelöst.",
+                            $"[{Global.GetColor(Global.ColorTextHervorheben)}]061201[/]: Geburtsdatum in der Notation: JJMMTT.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #3:[/] Dopplungen: Wenn z.B. Zwillinge Markus und Martin heißen, dann wird die Dopplung angezeigt. Es muss dann nach dem Import händisch die Adresse des einen in SchILD angepasst werden.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #4:[/] Eine gültige Mail-Adresse in SchILD ist Voraussetzung für den Import nach Webuntis oder Netman.",
+                        ],
+                        m =>
+                        {                            
+                            configuration = Global.Konfig("MailDomain",Global.Modus.Update,configuration, $"Mail-Domain", $"Geben Sie die schulische Mail-Domain für Mailadressen der Schüler*innen an. Bsp: [{Global.GetColor(Global.ColorHyperlink)}]@students.berufskolleg-borken.de[/]. Ihre Eingabe muss mit [{Global.GetColor(Global.ColorHyperlink)}]@[/] beginnen und mit [{Global.GetColor(Global.ColorHyperlink)}].de[/] etc. enden.");
+                            m.Zieldatei = m.SchuelerZusatzdatenUmMailAdresseErgaenzen(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerZusatzdaten.dat"));
+                            m.Zieldatei?.Erstellen("|", '\'', new UTF8Encoding(false), false);                            
+                        },
+                        Global.Rubrik.WöchtentlicheArbeiten,
+                        Global.NurBeiDiesenSchulnummern.Nur177659
+                    ),
                     new Menüeintrag(
                         "Statistik: Unterrichtsverteilung für UVD und Anrechnungen nach SchILD importieren",
                         anrechnungen,

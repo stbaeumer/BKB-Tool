@@ -403,6 +403,12 @@ public class Datei : List<dynamic>
 
     public void Erstellen(string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
+        if (string.IsNullOrEmpty(AbsoluterPfad) || this.Count == 0)
+        {
+            // Wenn der Pfad leer ist oder die Liste leer ist, wird die Datei nicht erstellt.
+            Global.ZeileSchreiben(AbsoluterPfad, "Datei nicht erstellt, da der Pfad leer ist oder keine Daten vorhanden sind.", ConsoleColor.Red, ConsoleColor.White);        
+            return;
+        }
         /*
         new UTF8Encoding(true), // UTF-8 mit BOM
         new UTF8Encoding(false),   // UTF-8 ohne BOM
@@ -416,8 +422,8 @@ public class Datei : List<dynamic>
             try
             {
                 var xmlDoc = new XmlDocument();
-                var xmlDeclaration = xmlDoc.CreateXmlDeclaration("1.0", "iso-8859-1", null);  
-                xmlDoc.AppendChild(xmlDeclaration);      
+                var xmlDeclaration = xmlDoc.CreateXmlDeclaration("1.0", "iso-8859-1", null);
+                xmlDoc.AppendChild(xmlDeclaration);
                 var root = xmlDoc.CreateElement("Leserdaten");
                 xmlDoc.AppendChild(root);
 
@@ -450,7 +456,7 @@ public class Datei : List<dynamic>
             }
         }
         else
-        { 
+        {
             try
             {
                 var config = new CsvHelper.Configuration.CsvConfiguration(CultureInfo.InvariantCulture)
@@ -516,7 +522,7 @@ public class Datei : List<dynamic>
             }
             finally
             {
-                var rechteSeite = importhinweise != null && importhinweise.Any() ? string.Join("\n", importhinweise) : "";                
+                var rechteSeite = importhinweise != null && importhinweise.Any() ? string.Join("\n", importhinweise) : "";
                 Global.ZeileSchreiben(AbsoluterPfad, rechteSeite, ConsoleColor.White, ConsoleColor.Blue);
             }
         }
@@ -941,11 +947,6 @@ public class Datei : List<dynamic>
         mail.Senden(subject,configuration,body,ZipPfad, configuration["NetmanMailReceiver"], "", configuration["NetmanMailBccReceiver"]);
     }
 
-    internal List<dynamic> FilternSchildSchuelerExport()
-    {
-            return this;
-    }
-
     internal List<dynamic> FilterOpenPeriod()
     {
         return this;
@@ -1000,12 +1001,6 @@ public class Datei : List<dynamic>
 
     internal void FehlermeldungRendern(IConfiguration configuration)
     {
-        // Wenn die Schulnummer 177659 ist und der Dateiname "schildschuelerexport" enthält, wird keine Fehlermeldung angezeigt.
-        if (configuration["Schulnummer"] == "177659" && this.Dateiname.ToLower().Contains("schildschuelerexport"))
-        {
-            return; // Keine Fehlermeldung anzeigen, wenn die Schulnummer nicht gesetzt ist
-        }
-
         if (!string.IsNullOrEmpty(Fehlermeldung) && !IstOptional)
         {
             if (IstOptional)

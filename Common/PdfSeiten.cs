@@ -131,12 +131,16 @@ public class PdfSeiten : List<PdfSeite>
         if (art.Count == 0)
         {
             Console.WriteLine("Art nicht erkannt.");
+            while (Console.KeyAvailable) Console.ReadKey(true);
+
             Console.ReadKey();
         }
 
         if (art.Count > 1)
         {
             Console.WriteLine("Art nicht eindeutig");
+            while (Console.KeyAvailable) Console.ReadKey(true);
+
             Console.ReadKey();
         }
 

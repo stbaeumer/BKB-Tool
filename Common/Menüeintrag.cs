@@ -1,10 +1,9 @@
-﻿using System.Dynamic;
+﻿using System.Configuration;
+using System.Dynamic;
 using System.Globalization;
-using System.Reflection;
+using Microsoft.Extensions.Configuration;
 using System.Text.RegularExpressions;
 using CookComputing.XmlRpc;
-//using DocumentFormat.OpenXml.Office2010.Excel;
-using Microsoft.Extensions.Configuration;
 using Spectre.Console;
 using Color = Spectre.Console.Color;
 
@@ -585,6 +584,8 @@ public class Menüeintrag
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
+            while (Console.KeyAvailable) Console.ReadKey(true);
+
             Console.ReadKey();
             return null;
         }
@@ -1144,48 +1145,7 @@ public class Menüeintrag
             if (lehrkraefte == null || lehrkraefte.Count == 0) return [];
             var klassen = Quelldateien.GetMatchingList(configuration, "klassen", Students, Klassen);
             if (klassen == null || klassen.Count == 0) return [];
-            var schildschuelerexport = Quelldateien.GetMatchingList(configuration, "SchildSchuelerExport", Students, Klassen);
-
-            // Nur wenn die Schulnummer 177659 ist, wird die SchildSchuelerExport-Datei benötigt.
-            if (configuration["Schulnummer"] == "177659")
-            {
-                var datei = Quelldateien.FirstOrDefault(d => d.Dateiname.ToLower().Contains("schildschuelerexport"));
-
-                if (schildschuelerexport == null || schildschuelerexport.Count == 0)
-                {
-                    datei.Fehlermeldung = $"Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]SchildSchuelerExport[/] wurde nicht gefunden.";
-                    var panel2 = new Panel($"[bold {Global.GetColor(Global.ColorHinweise)}]{datei.Fehlermeldung}[/]\n[gray]{string.Join("\n", datei.Hinweise)}[/]")
-                        .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] !? [/]")
-                        .HeaderAlignment(Justify.Left)
-                        .SquareBorder()
-                        .Expand()
-                        .BorderColor(Global.ColorHinweise);
-
-                    AnsiConsole.Write(panel2);
-                    return null;
-                }
-                else
-                {
-                    if (schildschuelerexport.Count != Students.Count)
-                    {
-                        var x = ($"Die Anzahl der Schüler in der Datei {datei.AbsoluterPfad} ({datei.Count}) stimmt nicht überein mit der Anzahl der Schüler ({Students.Count}).\nBeide Dateien müssen identisch viele Elemente haben.");
-
-                        var panel2 = new Panel($"[bold {Global.GetColor(Global.ColorHinweise)}]{datei.Fehlermeldung}[/]\n[gray]{string.Join("\n", datei.Hinweise)}[/]")
-                            .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] !? [/]")
-                            .HeaderAlignment(Justify.Left)
-                            .SquareBorder()
-                            .Expand()
-                            .BorderColor(Global.ColorHinweise);
-
-                        AnsiConsole.Write(panel2);
-                        return [];
-                    }
-                }
-            }
-                
             
-                
-           
             AnsiConsole.Write(new Rule($"[{Global.GetColor(Global.ColorInfoBox)}]Anstehende Änderungen/Neuanlagen:[/]").RuleStyle(Global.GetColor(Global.ColorInfoBox)).LeftJustified());
 
             var table = new Spectre.Console.Table();
@@ -1375,23 +1335,6 @@ public class Menüeintrag
                             dict["Geburtsdatum"].ToString() == student.Geburtsdatum;
                     }).LastOrDefault() as IDictionary<string, object>;
 
-
-                if (!string.IsNullOrEmpty(configuration["Schulnummer"]) && configuration["Schulnummer"] == "177659")
-                {
-                    var dict = schildschuelerexport
-                    ?.Where(rec =>
-                    {
-                        var dict = (IDictionary<string, object>)rec;
-                        return dict["Nachname"].ToString() == student.Nachname &&
-                            dict["Vorname"].ToString() == student.Vorname &&
-                            dict["Geburtsdatum"].ToString() == student.Geburtsdatum;
-                    }).LastOrDefault() as IDictionary<string, object>;
-                                        
-                    student.IdSchild = dict["Interne ID-Nummer"].ToString();
-                    student.ExterneIdNummer = dict["Externe ID-Nummer"].ToString();
-                    student.MailSchulisch = student.GenerateMailMitSchildId(configuration);
-                }
-
                 var se = schuelerErzieher
                     .Where(rec =>
                     {
@@ -1447,24 +1390,22 @@ public class Menüeintrag
 
                 if (Path.GetFileName(zieldateiname).ToLower().Contains("webuntis"))
                 {
-                    record.Schlüssel = string.IsNullOrEmpty(student.ExterneIdNummer)
-                        ? student.IdSchild
-                        : student.ExterneIdNummer.ToString().PadLeft(6, '0');
-
-                    if (studen.Nachname == "Hermann" && studen.Vorname.StartsWith("R"))
+                    if (configuration["Schulnummer"] == "177659")
                     {
-                        string a = "a";
+                        record.Schlüssel = string.IsNullOrEmpty(sz["Externe ID-Nr"].ToString())
+                        ? sz["schulische E-Mail"].ToString().Split('@')[0]
+                        : sz["Externe ID-Nr"].ToString();
+                    }
+                    else
+                    {
+                        record.Schlüssel = sz["schulische E-Mail"].ToString().Split('@')[0];
                     }
 
-                    record.EMINUSMail = student.MailSchulisch;
-                    if (!student.MailSchulisch.Contains(record.Schlüssel))
-                    {
-                        string a = "";
-                    }
+                    record.EMINUSMail = sz["schulische E-Mail"].ToString();                    
                     record.Familienname = student.Nachname;
                     record.Vorname = student.Vorname;
                     record.Klasse = student.Klasse;
-                    record.Kurzname = student.MailSchulisch.Split('@')[0];
+                    record.Kurzname = sz["schulische E-Mail"].ToString().Split('@')[0];
                     record.Geschlecht = student.Geschlecht?.ToString()?.ToUpper() ?? string.Empty;
                     record.Geburtsdatum = student.Geburtsdatum;
                     record.Eintrittsdatum = "";
@@ -1497,9 +1438,17 @@ public class Menüeintrag
                 {
                     // Netman
                     // ed123456	Dagobert	Eggemann	ed123456@students.berufskolleg-borken.de	E01.07.1992	BZ22A	Stappert, Markus
-                    record.Schlüssel = string.IsNullOrEmpty(student.ExterneIdNummer)
-                        ? student.IdSchild
-                        : student.ExterneIdNummer.ToString().PadLeft(6, '0');
+                    if (configuration["Schulnummer"] == "177659")
+                    {
+                        record.Schlüssel = string.IsNullOrEmpty(sz["Externe ID-Nr"].ToString())
+                        ? sz["schulische E-Mail"].ToString().Split('@')[0]
+                        : sz["Externe ID-Nr"].ToString().PadLeft(6, '0');
+                    }
+                    else
+                    {
+                        record.Schlüssel = sz["schulische E-Mail"].ToString().Split('@')[0];
+                    }
+
                     record.Kurzname = student.MailSchulisch.Replace("@students.berufskolleg-borken.de", "");
                     record.Vorname = student.Vorname;
                     record.Nachname = student.Nachname;
@@ -1531,7 +1480,7 @@ public class Menüeintrag
                     record.Anmeldedatum = student.BeginnDerBildungsganges;
                     record.Telefon = sz?["Telefon-Nr."].ToString();
                     record.Mobiltelefon = sz?["Fax/Mobilnr"].ToString();
-                    record.email = student.MailSchulisch;
+                    record.email = sz["schulische E-Mail"].ToString();
                     record.ZusatzInfo = "";
                     record.Bemerkung = "";
                     record.Geschlecht = student.Geschlecht.ToString().ToUpper();
@@ -1554,6 +1503,8 @@ public class Menüeintrag
         catch (Exception ex)
         {
             AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything);
+            while (Console.KeyAvailable) Console.ReadKey(true);
+
             Console.ReadKey();
             return null;
         }
@@ -2240,106 +2191,6 @@ public class Menüeintrag
         return zieldatei;
     }
 
-
-    public Datei MailadressenErgänzen(IConfiguration configuration, string zieldateiname)
-    {
-        var pfadSchilddatenaustausch = configuration["pfadSchilddatenaustausch"] ?? throw new ArgumentNullException(nameof(configuration), "'pfadSchilddatenaustausch' cannot be null.");
-        var absoluterPfad = Path.Combine(pfadSchilddatenaustausch, zieldateiname);
-
-        //Konfig("MailDomain", true, "Mail-Domain der Schüler*innen angeben. Bsp: '@students.berufskolleg-borken.de'");
-        configuration = Global.Konfig("MailDomain", Global.Modus.Update, configuration);
-
-        var zieldatei = new Datei(absoluterPfad);
-        var schuelerZusatzdaten = Quelldateien.GetMatchingList(configuration, "schuelerzusatzdaten", Students, Klassen);
-        if (schuelerZusatzdaten.Count == 0) return [];
-
-        // Die Schild-ID muss aus dem SchildSchuelerExport ausgelesen werden
-        var students = new Students(configuration, @"SchildSchuelerExport", "*.txt");
-        if (Students.Count == 0)
-        {
-            return [];
-        }
-
-        foreach (var recZusatz in schuelerZusatzdaten)
-        {
-            var dictB = (IDictionary<string, object>)recZusatz;
-            var vorname = dictB["Vorname"].ToString();
-            var nachname = dictB["Nachname"].ToString();
-            var geburtsdatum = dictB["Geburtsdatum"].ToString();
-
-            var verschiedeneSuSmitDiesenDaten = schuelerZusatzdaten.Where(rec =>
-            {
-                var x = (IDictionary<string, object>)rec;
-                return vorname == x["Vorname"].ToString() && nachname == x["Nachname"].ToString() &&
-                       geburtsdatum == x["Geburtsdatum"].ToString();
-            }).ToList();
-
-            var verschiedenestudnts = students.Where(rec =>
-                rec.Geburtsdatum == geburtsdatum && rec.Nachname == nachname && rec.Vorname == vorname).ToList();
-
-
-            for (int i = 0; i < verschiedeneSuSmitDiesenDaten.Count; i++)
-            {
-                var x = verschiedeneSuSmitDiesenDaten[i];
-            }
-
-
-            var Zusatz = (IDictionary<string, object>)recZusatz;
-
-
-            var student = students.Where(x =>
-                x.Nachname == Zusatz["Nachname"].ToString() && x.Vorname == Zusatz["Vorname"].ToString() &&
-                x.Geburtsdatum == Zusatz["Geburtsdatum"].ToString());
-
-            dynamic record = new ExpandoObject();
-
-            record.Nachname = Zusatz["Nachname"].ToString();
-            record.Vorname = Zusatz["Vorname"].ToString();
-            record.Geburtsdatum = Zusatz["Geburtsdatum"].ToString();
-            record.Namenszusatz = Zusatz["Namenszusatz"].ToString();
-            record.Geburtsname = Zusatz["Geburtsname"].ToString();
-            record.Geburtsort = Zusatz["Geburtsort"].ToString();
-            record.Ortsteil = Zusatz["Ortsteil"].ToString();
-            record.TelefonMINUSNrPUNKT = Zusatz["Telefon-Nr."].ToString();
-            record.EMINUSMail = Zusatz["E-Mail"].ToString();
-            record.ZWEIPUNKTLEERZEICHENStaatsangPUNKT = Zusatz["2. Staatsang."].ToString();
-            record.ExterneLEERZEICHENIDMINUSNr = Zusatz["Externe ID-Nr"].ToString();
-            record.Sportbefreiung = Zusatz["Sportbefreiung"].ToString();
-            record.Fahrschülerart = Zusatz["Fahrschülerart"].ToString();
-            record.Haltestelle = Zusatz["Haltestelle"].ToString();
-            record.Einschulungsart = Zusatz["Einschulungsart"].ToString();
-            record.Entlassdatum = Zusatz["Entlassdatum"].ToString();
-            record.Entlassjahrgang = Zusatz["Entlassjahrgang"].ToString();
-            record.DatumLEERZEICHENSchulwechsel = Zusatz["Datum Schulwechsel"].ToString();
-            record.Bemerkungen = Zusatz["Bemerkungen"].ToString();
-            record.BKAZVO = Zusatz["BKAZVO"].ToString();
-            record.BeginnBildungsgang = Zusatz["BeginnBildungsgang"].ToString();
-            record.Anmeldedatum = Zusatz["Anmeldedatum"].ToString();
-            record.Bafög = Zusatz["Bafög"].ToString();
-            record.EPMINUSJahre = Zusatz["EP-Jahre"].ToString();
-            record.FaxSCHRÄGSTRICHMobilnr = Zusatz["FaxSCHRÄGSTRICHMobilnr"].ToString();
-            record.Ausweisnummer = Zusatz["Ausweisnummer"].ToString();
-            record.schulischeLEERZEICHENEMINUSMail = "";
-            throw new Exception();
-            //record.MasernMINUSImpfnachweis = Zusatz["Masern-Impfnachweis"].ToString();
-            //record.bisherigeLEERZEICHENID = "";
-            //zieldatei.Add(record);
-        }
-
-        return zieldatei;
-    }
-
-    public enum Datentyp
-    {
-        String,
-        Int,
-        DateTime,
-        Pfad,
-        Url,
-        JaNein,
-        Klassen
-    }
-
     public Datei Kalender2Wiki(IConfiguration configuration, string kalender, string zieldateiname)
     {
         var zieldatei = new Datei(zieldateiname + ".csv");
@@ -2514,6 +2365,8 @@ public class Menüeintrag
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
+            while (Console.KeyAvailable) Console.ReadKey(true);
+
             Console.ReadKey();
         }
 
@@ -2805,5 +2658,221 @@ public class Menüeintrag
             .BorderColor(Color.Yellow3_1);
         
         AnsiConsole.Write(panel3);
+    }
+
+    internal Datei SchuelerZusatzdatenUmMailAdresseErgaenzen(IConfiguration configuration, string zieldateiname)
+    {
+        var schuelerZusatzdaten = Quelldateien.GetMatchingList(configuration, "schuelerzusatzdaten", IStudents, Klassen);
+        if (schuelerZusatzdaten == null || !schuelerZusatzdaten.Any()) return [];
+
+        var zieldatei = new Datei(zieldateiname);
+
+        if (schuelerZusatzdaten.Count != Students.Count)
+        {
+            var panel = new Panel($"Die Anzahl der in der Datei Schuelerzusatzdaten ({schuelerZusatzdaten.Count}) stimmt nicht mit der Anzahl der SchuelerBasisdaten ({Students.Count}) überein. Exportieren Sie die Dateien erneut. Anschließend kehren Sie hierher zurück!")
+                        .HeaderAlignment(Justify.Left)
+                        .SquareBorder()
+                        .Expand()
+                        .BorderColor(Global.ColorFehler);
+
+            AnsiConsole.Write(panel);
+            return null;
+        }
+
+        var mailDomain = configuration["MailDomain"].Trim();        
+        var mehrfachVorhanden = new List<string>();
+
+        foreach (var schueler in schuelerZusatzdaten)
+        {
+            var dict = (IDictionary<string, object>)schueler;
+            dynamic record = new ExpandoObject();
+
+            mehrfachVorhanden = MehrfachVorhanden(mehrfachVorhanden, schuelerZusatzdaten, dict["schulische E-Mail"].ToString(), dict["Nachname"].ToString(), dict["Vorname"].ToString());
+
+            // Schüler mit vorhandener Mail überspringen
+            if (dict.TryGetValue("schulische E-Mail", out var email) && !string.IsNullOrEmpty(email?.ToString()))
+            {
+                continue;
+            }
+
+            foreach (var prop in dict)
+            {
+                var name = prop.Key;
+                var value = prop.Value;
+
+                if (name != "schulische E-Mail")
+                {
+                    if (name == "Nachname")
+                    {
+                        var student = Students.LastOrDefault(s =>
+                            s.Nachname == dict["Nachname"].ToString() &&
+                            s.Vorname == dict["Vorname"].ToString() &&
+                            s.Geburtsdatum == dict["Geburtsdatum"].ToString());
+
+                        ((IDictionary<string, object>)record)[name] = $"{value}#{student.Klasse}";
+                    }
+                    else
+                    {
+                        ((IDictionary<string, object>)record)[name] = value;
+                    }
+                }
+
+                if (name == "schulische E-Mail")
+                {
+                    var student = Students.FirstOrDefault(s => s.Nachname == dict["Nachname"].ToString() && s.Vorname == dict["Vorname"].ToString() && s.Geburtsdatum == dict["Geburtsdatum"].ToString());
+                    if (student == null)
+                    {
+                        // Wenn der Schüler nicht gefunden wurde, überspringe diese Zeile
+                        return [];
+                    }
+
+                    if (DateTime.TryParse(student.Geburtsdatum, out DateTime gebDatum))
+                    {
+                        var n = student.Bereinigen(student.Nachname.ToLower()).Substring(0, 1);
+                        var v = student.Bereinigen(student.Vorname.ToLower()).Substring(0, 1);
+                        var geburtsjahr = gebDatum.Year.ToString().Substring(2, 2);
+                        var geburtsmonat = gebDatum.Month.ToString("D2");
+                        var geburtstag = gebDatum.Day.ToString("D2");
+
+                        var schulischeEmail = $"{n}{v}{geburtsjahr}{geburtsmonat}{geburtstag}{mailDomain}";
+                        student.MailSchulisch = schulischeEmail;
+
+                        ((IDictionary<string, object>)record)[name] = schulischeEmail;
+
+                        mehrfachVorhanden = MehrfachVorhanden(mehrfachVorhanden, schuelerZusatzdaten, schulischeEmail, dict["Nachname"].ToString(), dict["Vorname"].ToString());                                                
+                    }
+                }
+            }
+            zieldatei.Add(record);
+        }
+        Global.ZeileSchreiben($"Mailadressen ergänzt",$"{zieldatei.Count}");
+
+        if (mehrfachVorhanden.Count > 0)
+        {
+            var panel2 = new Panel(
+                $"[bold {Global.GetColor(Global.ColorHinweise)}]Achtung: [/]{mehrfachVorhanden.Count} Mailadressen sind mehrfach vergeben. " +
+                $"\nBitte lösen Sie das Problem, bevor Sie in ein anderes Programm importieren, indem Sie in SchILD unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Individualdaten I[/] bei allen Schüler*innen eine eindeutige Mailadresse setzen." +
+                $"\nWeiter mit [{Global.GetColor(Global.ColorHinweise)}]ENTER[/]")
+                .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] Mehrfach vergebene Mailadressen [/]")
+                .HeaderAlignment(Justify.Left)
+                .SquareBorder()
+                .Expand()
+                .BorderColor(Global.ColorHinweise);
+
+            AnsiConsole.Write(panel2);
+            return null;
+        }
+
+        return zieldatei;
+    }
+
+    private List<string> MehrfachVorhanden(List<string> mehrfachVorhanden, List<dynamic> schuelerZusatzdaten, string mail, string nachname, string vorname)
+    {
+        var doppelte = schuelerZusatzdaten.Where(rec =>
+        {
+            var dict = (IDictionary<string, object>)rec;
+            return  mail == dict["schulische E-Mail"].ToString();
+        }).ToList();
+        
+        if (doppelte.Count > 1)
+        {
+            foreach (var st in doppelte)
+            {
+                if (!string.Equals(st.Vorname, vorname?.ToString(), StringComparison.OrdinalIgnoreCase) ||
+                    !string.Equals(st.Nachname, nachname?.ToString(), StringComparison.OrdinalIgnoreCase))
+                {
+                    if(mehrfachVorhanden.Contains(mail)) continue;
+                    mehrfachVorhanden.Add(mail);
+                }
+            }
+        }
+        return mehrfachVorhanden;
+    }
+
+    internal bool AlleSusHabenEineEindeutigeMailAdresse(IConfiguration configuration)
+    {
+        var problem = false;
+        var schuelerZusatzdaten = Quelldateien.GetMatchingList(configuration, "schuelerzusatzdaten", Students, Klassen);
+        if (schuelerZusatzdaten == null || schuelerZusatzdaten.Count == 0) return false;
+
+        var sz = schuelerZusatzdaten
+                .Where(rec =>
+                {
+                    if (rec == null) return false;
+                    var dict = (IDictionary<string, object>)rec;
+                    return dict != null && string.IsNullOrEmpty(dict["schulische E-Mail"].ToString());
+                }).ToList();
+
+        if (sz.Count > 0)
+        {
+            foreach (var s in sz)
+            {
+                var dict = (IDictionary<string, object>)s;
+                var panel = new Panel(
+                            $"Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]Schuelerzusatzdaten.dat[/] enthält keine schulische E-Mail-Adresse für {dict["Vorname"]} {dict["Nachname"]}. " +
+                            $"\n[{Global.GetColor(Global.ColorHinweise)}]Option1:[/] Ergänzen Sie die schulische E-Mail-Adresse manuell in SchILD unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Individualdaten I[/]" +
+                            $"\n[{Global.GetColor(Global.ColorHinweise)}]Option2:[/] [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] erstellt automatisch alle Mailadressen in [{Global.GetColor(Global.ColorPfadInDateien)}]Schuelerzusatzdaten.dat[/].")
+                        .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] !? [/]")
+                        .HeaderAlignment(Justify.Left)
+                        .SquareBorder()
+                        .Expand()
+                        .BorderColor(Global.ColorFehler);
+            AnsiConsole.Write(panel);
+            }
+
+            problem = true;            
+        }
+
+        // Annahme: schuelerZusatzdaten ist List<IDictionary<string, object>>
+        var doppelteMitAbweichung = schuelerZusatzdaten
+            .Where(sz => sz is IDictionary<string, object> dict && !string.IsNullOrEmpty(dict["schulische E-Mail"]?.ToString()))
+            .GroupBy(sz => ((IDictionary<string, object>)sz)["schulische E-Mail"]?.ToString())
+            .Where(g =>
+                g.Count() > 1 &&
+                g.Select(sz => (
+                    Vorname: ((IDictionary<string, object>)sz)["Vorname"]?.ToString(),
+                    Nachname: ((IDictionary<string, object>)sz)["Nachname"]?.ToString()
+                ))
+                .Distinct(new TupleStringComparer()).Count() > 1
+            )
+            .SelectMany(g => g) // Alle betroffenen Zeilen ausgeben
+            .ToList();
+
+        foreach (IDictionary<string, object> ssz in doppelteMitAbweichung)
+        {
+            var panel = new Panel($"Die E-Mail-Adresse [{Global.GetColor(Global.ColorPfadInDateien)}]{ssz["schulische E-Mail"]}[/] ist mehrfach vergeben, aber die Namen sind unterschiedlich: " +
+                                $"{ssz["Vorname"]} {ssz["Nachname"]}")
+                        .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] !? [/]")
+                        .HeaderAlignment(Justify.Left)
+                        .SquareBorder()
+                        .Expand()
+                        .BorderColor(Global.ColorFehler);
+            AnsiConsole.Write(panel);
+            problem = true;
+        }
+
+        if (problem)
+        {
+            AnsiConsole.MarkupLine($"[grey]  Zuerst die Hinweise [/][bold red]!?[/][grey] bearbeiten, dann hierher zurückkehren.[/]");
+        }
+
+        return problem;
+    }
+
+    // Comparer for (string? Vorname, string? Nachname) tuples
+    private class TupleStringComparer : IEqualityComparer<(string? Vorname, string? Nachname)>
+    {
+        public bool Equals((string? Vorname, string? Nachname) x, (string? Vorname, string? Nachname) y)
+        {
+            return string.Equals(x.Vorname, y.Vorname, StringComparison.OrdinalIgnoreCase)
+                && string.Equals(x.Nachname, y.Nachname, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public int GetHashCode((string? Vorname, string? Nachname) obj)
+        {
+            int hashVorname = obj.Vorname?.ToLowerInvariant().GetHashCode() ?? 0;
+            int hashNachname = obj.Nachname?.ToLowerInvariant().GetHashCode() ?? 0;
+            return hashVorname ^ hashNachname;
+        }
     }
 }

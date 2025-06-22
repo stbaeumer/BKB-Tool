@@ -539,6 +539,8 @@ public static class Global
                             return ValidationResult.Error("[]  Eingabe muss mit @ beginnen und einen Punkt enthalten.[/]");
                         if (!n.Contains(".") && !string.IsNullOrEmpty(n))
                             return ValidationResult.Error("[]  Eingabe muss mit @ beginnen und einen Punkt enthalten.[/]");
+                        if (!(n.Contains(".de") || !n.Contains(".org")))
+                            return ValidationResult.Error("[]  Zulässige TLDs: .de und .org.[/]");
                         return ValidationResult.Success();
                     })
                 .DefaultValue<string>(defaultValue));
@@ -778,6 +780,8 @@ public static class Global
                 {
                     AnsiConsole.MarkupLine($"[red]Das Verzeichnis [bold {Global.GetColor(Global.ColorPfadInDateien)}]" + Directory.GetCurrentDirectory() + "[/] existiert nicht oder ist nicht beschreibbar. Das muss korrigiert werden.[/]");
                     AnsiConsole.MarkupLine($"[red]Drücken Sie eine beliebige Taste, um fortzufahren...[/]");
+                    while (Console.KeyAvailable) Console.ReadKey(true);
+
                     Console.ReadKey();
                     return configuration;
                 }
@@ -874,7 +878,7 @@ public static class Global
 
         if (modus == Modus.Update && SchulnummernPrivilegiert.Contains(configuration["Schulnummer"]))
         {
-            configuration = Konfig("MailDomain", modus, configuration, "Mail-Domain für Schüler*innen", $"Geben Sie die Mail-Domain für Ihre Schüler*innen an. Ihre Eingabe muss mit [{Global.GetColor(Global.ColorZahlen)}]@[/] beginnen und einen [{Global.GetColor(Global.ColorZahlen)}]Punkt[/] enthalten. Beispiel: [springGreen2 bold]@students.meine-schule.de[/]", Datentyp.Mail);
+            //configuration = Konfig("MailDomain", modus, configuration, "Mail-Domain für Schüler*innen", $"Geben Sie die Mail-Domain für Ihre Schüler*innen an. Ihre Eingabe muss mit [{Global.GetColor(Global.ColorZahlen)}]@[/] beginnen und einen [{Global.GetColor(Global.ColorZahlen)}]Punkt[/] enthalten. Beispiel: [springGreen2 bold]@students.meine-schule.de[/]", Datentyp.Mail);
             configuration = Konfig("ConnectionStringUntis", modus, configuration, "ConnectionStringUntis (optional)");
             configuration = Konfig("SmtpUser", modus, configuration, "Mail-Benutzer");
             configuration = Konfig("SmtpPassword", modus, configuration, "Mail-Kennwort");
@@ -1084,6 +1088,8 @@ public static class Global
                         SchildVersionExpected.Max().Date.ToShortDateString() +
                         ".\n\rIhre SchILD-Version: " + schildVersionActual.Date.ToShortDateString() +
                         ". Schauen Sie hier: https://github.com/stbaeumer/schuelerfoto");
+                        while (Console.KeyAvailable) Console.ReadKey(true);
+
                     Console.ReadKey(true);
                     Environment.Exit(0);
                 }
@@ -1096,6 +1102,8 @@ public static class Global
                     else
                     {
                         Console.WriteLine("Fehler beim Erstellen der Datenbankverbindung.");
+                        while (Console.KeyAvailable) Console.ReadKey(true);
+
                         Console.ReadKey(true);
                         Environment.Exit(0);
                     }

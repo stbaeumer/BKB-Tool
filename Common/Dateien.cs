@@ -104,23 +104,6 @@ public class Dateien : List<Datei>
             d => d.FilternDatDatei()
         ));
         Add(new Datei(
-            "SchildSchuelerExport",
-            "Beschreibung",
-            [
-                "Exportieren Sie die Datei aus SchILD, indem Sie den Pfad gehen:",
-                $"1. [bold {Global.GetColor(Global.ColorPfadInDateien)}]Datenaustausch > Export in Text-/Exceldateien > Exportieren[/]",
-                $"2. Dann [bold {Global.GetColor(Global.ColorPfadInDateien)}]SchildSchuelerExport[/] laden.",
-                $"3. [bold {Global.GetColor(Global.ColorActionInMenüs)}]Export starten[/]",
-                $"Ggf. muss die Vorlage erst erstellt werden. Es müssen folgende Felder enthalten sein:",
-                $"[bold {Global.GetColor(Global.ColorKopfzeileInCSV)}]Geburtsdatum, Interne ID-Nummer, Nachname, Vorname, Klasse, Externe ID-Nummer, Status[/]",
-                $"Feld-Trennzeichen: '|'"
-            ],
-            [""],
-            true,
-            d => d.FilternSchildSchuelerExport(),
-            "*.txt"
-        ));
-        Add(new Datei(
             "OpenPeriod",
             "Beschreibung",
             ["Exportieren Sie die Datei aus Webuntis, indem Sie den Pfad gehen:",
@@ -467,9 +450,7 @@ public class Dateien : List<Datei>
         if (!datei.IstOptional && (students == null || students.Count == 0) && datei.IstVeraltet(configuration))
             return [];
         else if (datei.AbsoluterPfad.ToLower().Contains("schuelerbasisdaten") && (students == null || students.Count == 0))
-            return datei.ToList();
-        else if (datei.AbsoluterPfad.ToLower().Contains("schildschuelerexport") && (students == null || students.Count == 0))
-            return datei.ToList();
+            return datei.ToList();        
         else if (datei.IstOptional)
             return datei.ToList();
         else if (students != null && students.Count > 0)
@@ -650,7 +631,7 @@ public class Dateien : List<Datei>
             }
             else
             {
-                Meldung.Add($"[bold {Global.GetColor(Global.ColorZahlen)}]{anzahlDateienMitZeilen}[/] Dateien aus [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["pfadDownloads"]}[/] eingelesen.");
+                Meldung.Add($"[bold {Global.GetColor(Global.ColorZahlen)}]{anzahlDateienMitZeilen}[/] Dateien aus [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["pfadDownloads"]}[/] eingelesen");
             }
             DisplayHeader(configuration, Meldung);
         }
@@ -751,6 +732,8 @@ public class Dateien : List<Datei>
                     .BorderColor(Global.ColorInfoBox);
 
                 AnsiConsole.Write(panel);
+                while (Console.KeyAvailable) Console.ReadKey(true);
+
                 Console.ReadKey();
 
                 // Lösche die vorhandenen .dat-Dateien im Zielordner

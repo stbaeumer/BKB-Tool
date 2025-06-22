@@ -220,6 +220,8 @@ private bool IstMailadresseGültig(string email)
             {
                 builder.HtmlBody = "<html><body><p>Bild konnte nicht geladen werden.</p></body></html>";
                 Console.WriteLine($"Bild {bild} konnte nicht gefunden werden.");
+                while (Console.KeyAvailable) Console.ReadKey(true);
+
                 Console.ReadKey();
             }
 
@@ -240,6 +242,8 @@ private bool IstMailadresseGültig(string email)
         catch (Exception ex)
         {
             Console.WriteLine($"Fehler beim Senden der E-Mail: {ex.Message}");
+            while (Console.KeyAvailable) Console.ReadKey(true);
+
             Console.ReadKey();
         }
     }
