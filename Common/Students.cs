@@ -1589,14 +1589,14 @@ while (Console.KeyAvailable) Console.ReadKey(true);
                     statusstring += " Abgänger, ";
                     break;
                 default:
-                    statusstring += " Sonstige, ";
+                    statusstring += " Beurlaubte, ";
                     break;
             }
         }
 
         if (this.Select(x => x.Status).Distinct().Count() == 1)
         {
-            return $"[{Global.GetColor(Global.ColorZahlen)}] {this.Count().ToString()} [/] Schüler*innen: [springGreen2]nur aktive Schüler exportiert[/]";
+            return $"[{Global.GetColor(Global.ColorZahlen)}] {this.Count().ToString()}[/] Schüler*innen:[springGreen2] nur aktive Schüler exportiert[/]";
         }
         
         return statusstring.TrimEnd(' ').TrimEnd(',').TrimEnd(' ').TrimEnd(',') +  ")";

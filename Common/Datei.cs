@@ -717,84 +717,7 @@ public class Datei : List<dynamic>
         }
         return null;
     }
-
-    internal void ZippeBilder(string pfadZuAtlantisFotos)
-    {
-        
-/*        throw new NotImplementedException();
-        using (var zipFile = new ZipFile())
-        {
-            Console.Write("Vorhandene Bilder ".PadRight(75, '.'));
-
-            UTF8Encoding utf8NoBom = new UTF8Encoding(false);
-            var filePath = "import.csv";
-
-            File.WriteAllText(filePath, "\"id\",\"custom_id\",\"email\",\"path\"" + Environment.NewLine, utf8NoBom);
-
-        List<string> bereitsVerarbeiteteBilder = new List<string>();
-        bereitsVerarbeiteteBilder = (Properties.Settings.Default.bereitsVerarbeiteteBilder).Split(',').ToList();
-
-        int bilderHinzugefügt = 0;
-        int bilderBereitsVorhandenUndNichtErneutHinzugefügt = 0;
-
-        foreach (var schueler in this)
-        {
-            var allFiles = Directory.GetFiles(pfadZuAtlantisFotos, "*" + schueler.Id + ".jpg", SearchOption.AllDirectories);
-
-            foreach (var item in allFiles)
-            {
-                if (schueler.Id.ToString().Length >= 6)
-                {
-                    try
-                    {
-                        if ((from a in bereitsVerarbeiteteBilder where a == schueler.Id.ToString() select a).Count() == 0)
-                        {
-                            zip.AddFile(item).FileName = schueler.Id + ".jpg";
-                            bilderHinzugefügt++;
-                            bereitsVerarbeiteteBilder.Add(schueler.Id.ToString());
-                            //Console.WriteLine("Bild hinzugefügt für " + schueler.Kurzname);
-
-                            if (schueler.Mail != null && schueler.Mail != "")
-                            {
-                                File.AppendAllText(filePath, "\"\",\"\",\"" + schueler.Mail + "\",\"" + schueler.Id + ".jpg" + "\"" + Environment.NewLine, utf8NoBom);
-                            }
-                        }
-                        else
-                        {
-                            bilderBereitsVorhandenUndNichtErneutHinzugefügt++;
-                            // Console.WriteLine("bereits vorhanden");
-                        }
-                    }
-                    catch (Exception)
-                    {
-                    }
-                }
-            }
-        }
-        string f = "";
-
-        foreach (var item in bereitsVerarbeiteteBilder)
-        {
-            f = f + item + ",";
-        }
-
-        Properties.Settings.Default.bereitsVerarbeiteteBilder = f;
-        Properties.Settings.Default.Save();
-
-        Console.WriteLine((" " + bilderBereitsVorhandenUndNichtErneutHinzugefügt).PadLeft(30, '.'));
-
-        Console.Write("Neu eingelesene und gezippte Bilder: ".PadRight(75, '.'));
-
-        zip.Save("SchülerBilder-" + DateTime.Now.ToFileTime() + ".zip");
-
-        zip.AddFile(filePath);
-
-        string datei = "Geevoo-Import-" + DateTime.Now.ToFileTime() + ".zip";
-
-        zip.Save(datei);
-
-        Console.WriteLine((" " + bilderHinzugefügt).PadLeft(30, '.'));*/
-    }
+  
 
     public List<dynamic> FilterLehrkraefte()
     {
@@ -873,59 +796,76 @@ public class Datei : List<dynamic>
         return AbsoluterPfad;
     }
 
-    public void Zippen(string? absoluterPfad, IConfiguration configuration)
+    public void Zippen(string absoluterPfadUndDateiNameZipDatei, IConfiguration configuration, string kennwort = "", int kompressionsLevel = 0, List<string> zuZippendeDateien = null)
     {
-        if (this.Count == 0)
+        if (this.Count == 0 && (zuZippendeDateien == null || zuZippendeDateien.Count == 0))
         {
             return;
         }
-        
-        var zipPfad = absoluterPfad.Replace(".csv", ".zip");
+
+        if (zuZippendeDateien != null && zuZippendeDateien.Count > 0)
+        {
+            Global.ZeileSchreiben("Es werden jetzt Dateien gezippt:", zuZippendeDateien.Count().ToString(), ConsoleColor.White, ConsoleColor.Blue);
+        }
+        else
+        {
+            zuZippendeDateien = new List<string>();
+            zuZippendeDateien.Add(absoluterPfadUndDateiNameZipDatei);
+        }
         
         try
         {
-            using (FileStream zipStream = File.Create(zipPfad))
+            using (FileStream zipStream = File.Create(absoluterPfadUndDateiNameZipDatei))
             using (ZipOutputStream zip = new ZipOutputStream(zipStream))
             {
-                zip.SetLevel(9); // Kompressionslevel (0-9, 9 = beste Kompression)
+                zip.SetLevel(kompressionsLevel); // Kompressionslevel (0-9, 9 = beste Kompression)
 
-                configuration = Global.Konfig("ZipKennwort", Global.Modus.Update, configuration, "Zip-Kennwort", "Die Datei wird nun gezippt.\nGeben Sie das Kennwort ein, mit dem Sie den Zip-Datei verschlüsseln wollen. Geben Sie ein Leerzeichen ein, wenn kein Kennwort gesetzt werden soll.", Global.Datentyp.String, "");
-
-                if (!string.IsNullOrEmpty(configuration["ZipKennwort"]) || configuration["ZipKennwort"].ToString() != " ")
+                if (!string.IsNullOrEmpty(kennwort) && kennwort != " ")
                 {
-                    zip.Password = configuration["ZipKennwort"]; // Passwort setzen
+                    zip.Password = kennwort; // Passwort setzen
                 }
-
-                byte[] buffer = new byte[4096];
-                string dateiName = Path.GetFileName(absoluterPfad);
-
-                ZipEntry entry = new ZipEntry(dateiName)
+                
+                foreach (var zuZippendeDatei in zuZippendeDateien)
                 {
-                    DateTime = DateTime.Now,
-                    CompressionMethod = CompressionMethod.Deflated
-                };
-
-                zip.PutNextEntry(entry);
-
-                using (FileStream dateiStream = File.OpenRead(absoluterPfad))
-                {
-                    int bytesRead;
-                    while ((bytesRead = dateiStream.Read(buffer, 0, buffer.Length)) > 0)
+                    if (!File.Exists(zuZippendeDatei))
                     {
-                        zip.Write(buffer, 0, bytesRead);
+                        Console.WriteLine($"Die Datei {zuZippendeDateien} existiert nicht und wird übersprungen.");
+                        continue; // Überspringe Dateien, die nicht existieren
                     }
-                }
 
+                    byte[] buffer = new byte[4096];
+                    string dateiName = Path.GetFileName(zuZippendeDatei);
+
+                    ZipEntry entry = new ZipEntry(dateiName)
+                    {
+                        DateTime = DateTime.Now,
+                        CompressionMethod = CompressionMethod.Deflated
+                    };
+
+                    zip.PutNextEntry(entry);
+
+                    using (FileStream dateiStream = File.OpenRead(zuZippendeDatei))
+                    {
+                        int bytesRead;
+                        while ((bytesRead = dateiStream.Read(buffer, 0, buffer.Length)) > 0)
+                        {
+                            zip.Write(buffer, 0, bytesRead);
+                        }
+                    }
+                }                
+
+                // Durchlaufe die Liste der absoluten Pfade und füge sie dem Zip-Archiv hinzu
+                
                 zip.CloseEntry();
                 zip.IsStreamOwner = true;
             }
 
-            Global.ZeileSchreiben(zipPfad,"",ConsoleColor.Green, ConsoleColor.White);            
-            ZipPfad = zipPfad;
+            Global.ZeileSchreiben(absoluterPfadUndDateiNameZipDatei, "", ConsoleColor.Green, ConsoleColor.White);
+            ZipPfad = absoluterPfadUndDateiNameZipDatei;
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Fehler beim Zippen: " + ex.Message);
+            throw ex;
         }
     }
 
@@ -1026,5 +966,10 @@ public class Datei : List<dynamic>
                 AnsiConsole.Write(panel2);
             }
         }
+    }
+
+    internal List<string> GetFotosAusSchildPfade(IConfiguration configuration, Students students, object webuntis)
+    {
+        throw new NotImplementedException();
     }
 }

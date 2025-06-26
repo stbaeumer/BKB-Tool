@@ -83,6 +83,12 @@ public static class Global
         Maildomain
     }
 
+    public enum ZipModus
+    {
+        Webuntis,
+        Geevoo
+     }
+
     public enum Modus
     {
         Create,
@@ -119,6 +125,7 @@ public static class Global
     public static Color ColorTextHervorheben { get; set; }
     public static Color ColorFehler { get; set; }
     public static Color ColorInfoBox { get; set; }
+    
 
     public static string? SafeGetString(SqlDataReader reader, int colIndex)
     {
@@ -250,6 +257,12 @@ public static class Global
                     {
                         property.WriteTo(writer);
                     }
+                }
+
+                // Falls der Key nicht existiert, fügen wir ihn hinzu
+                if (!jsonRoot.TryGetProperty(key, out _))
+                {
+                    writer.WriteString(key, finalValue);
                 }
 
                 writer.WriteEndObject();
@@ -588,11 +601,12 @@ public static class Global
                     .PromptStyle(Global.GetColor(Global.ColorActionInMenüs))
                     .Validate(n =>
                     {
-                        if (!Path.Exists(n))
+                        if (!Path.Exists(n.TrimEnd(Path.DirectorySeparatorChar)))
                             return ValidationResult.Error($"[]  Der Pfad {n} existiert nicht.[/]");
                         return ValidationResult.Success();
                     })
                 .DefaultValue<string>(string.IsNullOrEmpty(defaultValue) || !Path.Exists(defaultValue) ? Environment.CurrentDirectory : defaultValue));
+            userInput = userInput.ToString()?.TrimEnd(Path.DirectorySeparatorChar) ?? string.Empty;
         }
         if (datentyp == Datentyp.Int)
         {
@@ -860,7 +874,7 @@ public static class Global
             DisplayHeader(configuration, panel);
         }
 
-        configuration = Konfig("PfadSchilddatenaustausch", modus, configuration, @"SchILD-Ausgabeverzeichnis", $"Geben Sie das Verzeichnis an, das in SchILD unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Datenaustausch > Schnittstelle SchILD-NRW > Export[/] als [{Global.GetColor(Global.ColorPfadInDateien)}]Ausgabeverzeichnis[/] eingetragen ist. Wenn dort kein Verzeichnis steht, tragen Sie dort das selbe Verzeichnis ein, das Sie auch hier angeben.\n[{Global.GetColor(Global.ColorHinweise)}]Hinweis:[/] Falls an mehreren Arbeitsplätzen parallel mit [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] gearbeitet wird, kann es sinnvoll sein, dass jede*r ein eigenes Ausgabeverzeichnis bekommt.", Datentyp.Pfad, @"\\fs01\SchILD-NRW\Ausgabeverzeichnis");
+        configuration = Konfig("PfadSchilddatenaustausch", modus, configuration, @"SchILD-Ausgabeverzeichnis", $"Geben Sie das Verzeichnis an, das in SchILD unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Datenaustausch > Schnittstelle SchILD-NRW > Export[/] als [{Global.GetColor(Global.ColorPfadInDateien)}]Ausgabeverzeichnis[/] eingetragen ist. Wenn dort kein Verzeichnis steht, tragen Sie dort das selbe Verzeichnis ein, das Sie auch hier angeben.\n[{Global.GetColor(Global.ColorHinweise)}]Hinweis:[/] Falls an mehreren Arbeitsplätzen parallel mit [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] gearbeitet wird, kann es sinnvoll sein, dass jede*r ein eigenes Ausgabeverzeichnis in SchILD bekommt.", Datentyp.Pfad, @"\\fs01\SchILD-NRW\Ausgabeverzeichnis");
 
         if (modus != Modus.Read)
         {
@@ -915,6 +929,7 @@ public static class Global
             SchipsOderZeugnisseOderAnderePdfs = Verschluesseln("1"),
             PfadDownloads = Verschluesseln(Environment.GetEnvironmentVariable("DOWNLOADS_PATH") ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads")),
             PfadSchilddatenaustausch,
+            PfadFotosAusSchILD = "",
             Kalenderfilter = Verschluesseln(""),
             Auswahl = "e",
             OnlineHilfeURL = Verschluesseln("https://github.com/stbaeumer/BKB-Tool/wiki"),

@@ -1152,7 +1152,7 @@ public class Menüeintrag
             table.Border(TableBorder.Rounded);
             table.Centered();
             table.Expand();
-
+    
             // Add columns 
             table.AddColumn("Nr");
             table.AddColumn("Name");
@@ -1495,8 +1495,6 @@ public class Menüeintrag
             if (susMitÄnderung.Count() > 2)
                 AnsiConsole.Write(table);
             //    Global.DisplayCenteredBox(susMitÄnderung, 97);
-
-            zieldatei.ZippeBilder("PfadZuAtlantisFotos");
 
             return zieldatei;
         }
@@ -2669,7 +2667,7 @@ public class Menüeintrag
 
         if (schuelerZusatzdaten.Count != Students.Count)
         {
-            var panel = new Panel($"Die Anzahl der in der Datei Schuelerzusatzdaten ({schuelerZusatzdaten.Count}) stimmt nicht mit der Anzahl der SchuelerBasisdaten ({Students.Count}) überein. Exportieren Sie die Dateien erneut. Anschließend kehren Sie hierher zurück!")
+            var panel = new Panel($"Die Anzahl der in der Datei SchuelerZusatzdaten.dat ({schuelerZusatzdaten.Count}) stimmt nicht mit der Anzahl der SchuelerBasisdaten.dat ({Students.Count}) überein. Exportieren Sie die Dateien erneut. Anschließend kehren Sie hierher zurück!")
                         .HeaderAlignment(Justify.Left)
                         .SquareBorder()
                         .Expand()
@@ -2745,7 +2743,7 @@ public class Menüeintrag
             }
             zieldatei.Add(record);
         }
-        Global.ZeileSchreiben($"Mailadressen ergänzt",$"{zieldatei.Count}");
+        Global.ZeileSchreiben($"Schulische Mailadressen ergänzt",$"{zieldatei.Count}");
 
         if (mehrfachVorhanden.Count > 0)
         {
@@ -2771,7 +2769,9 @@ public class Menüeintrag
         var doppelte = schuelerZusatzdaten.Where(rec =>
         {
             var dict = (IDictionary<string, object>)rec;
-            return  mail == dict["schulische E-Mail"].ToString();
+            return  mail == dict["schulische E-Mail"].ToString() && mail != "" &&
+                   !string.IsNullOrEmpty(dict["Nachname"].ToString()) &&
+                   !string.IsNullOrEmpty(dict["Vorname"].ToString());
         }).ToList();
         
         if (doppelte.Count > 1)
@@ -2789,7 +2789,7 @@ public class Menüeintrag
         return mehrfachVorhanden;
     }
 
-    internal bool AlleSusHabenEineEindeutigeMailAdresse(IConfiguration configuration)
+    internal bool NichtAlleSusHabenEineEindeutigeMailAdresse(IConfiguration configuration)
     {
         var problem = false;
         var schuelerZusatzdaten = Quelldateien.GetMatchingList(configuration, "schuelerzusatzdaten", Students, Klassen);
@@ -2810,8 +2810,8 @@ public class Menüeintrag
                 var dict = (IDictionary<string, object>)s;
                 var panel = new Panel(
                             $"Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]Schuelerzusatzdaten.dat[/] enthält keine schulische E-Mail-Adresse für {dict["Vorname"]} {dict["Nachname"]}. " +
-                            $"\n[{Global.GetColor(Global.ColorHinweise)}]Option1:[/] Ergänzen Sie die schulische E-Mail-Adresse manuell in SchILD unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Individualdaten I[/]" +
-                            $"\n[{Global.GetColor(Global.ColorHinweise)}]Option2:[/] [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] erstellt automatisch alle Mailadressen in [{Global.GetColor(Global.ColorPfadInDateien)}]Schuelerzusatzdaten.dat[/].")
+                            $"\n[{Global.GetColor(Global.ColorHinweise)}]Option 1:[/] Ergänzen Sie die schulische E-Mail-Adresse manuell in SchILD unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Individualdaten I[/]." +
+                            $"\n[{Global.GetColor(Global.ColorHinweise)}]Option 2:[/] [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] erstellt automatisch alle Mailadressen in [{Global.GetColor(Global.ColorPfadInDateien)}]Schuelerzusatzdaten.dat[/].")
                         .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] !? [/]")
                         .HeaderAlignment(Justify.Left)
                         .SquareBorder()
@@ -2857,6 +2857,80 @@ public class Menüeintrag
         }
 
         return problem;
+    }
+
+    internal List<string> GetFotosAusSchildPfade(IConfiguration configuration, Students Students, Enum zipModus)
+    {
+        var schuelerZusatzdaten = Quelldateien.GetMatchingList(configuration, "schuelerzusatzdaten", Students, Klassen);
+        if (schuelerZusatzdaten == null || schuelerZusatzdaten.Count == 0) return [];
+            
+        var absolutePfade = new List<string>();
+
+        configuration = Global.Konfig("PfadFotosAusSchILD", Global.Modus.Update, configuration, "Pfad zu den Fotos aus SchILD", $"Geben Sie den Pfad zu den Fotos aus SchILD an. Ggf. müssen sie den Ordner zuerst erstellen. Anschließend müssen die Bilder aus SchILD in den Ordner exportiert werden: [{Global.GetColor(Global.ColorPfadInProgrammen)}]Datenaustausch > Fotos > Fotos exportieren[/]. Der Dateiname muss zusammengesetzt sein aus [{Global.GetColor(Global.ColorHinweise)}]Nachname, Vorname, Geburtsdatum[/]." +
+        "\nVon jedem SchILD-Foto wir eine Kopie von dem von Webuntis geforderten Namen erstellt. Wenn einzelne oder alle Fotos im Ordner gelöscht werden, werden einzelne oder alle Fotos neu für den Übertrag nach Webuntis angelegt.", Global.Datentyp.Pfad);
+        configuration = Global.Konfig("MailDomain", Global.Modus.Update, configuration, $"Mail-Domain", $"Geben Sie die schulische Mail-Domain für Mailadressen der Schüler*innen an. Bsp: [{Global.GetColor(Global.ColorHyperlink)}]@students.berufskolleg-borken.de[/]. Ihre Eingabe muss mit [{Global.GetColor(Global.ColorHyperlink)}]@[/] beginnen und mit [{Global.GetColor(Global.ColorHyperlink)}].de[/] etc. enden.");
+
+        var pfadFotosAusSchILD = configuration["PfadFotosAusSchILD"];
+
+        var alleFotos = Directory.GetFiles(pfadFotosAusSchILD, "*.jpg", SearchOption.AllDirectories);
+        
+        var students = Students;
+
+        foreach (var student in students)
+        {
+            var bisherigerDateinameUndPfad = alleFotos.FirstOrDefault(f =>
+                f.Contains(student.Nachname, StringComparison.OrdinalIgnoreCase) &&
+                f.Contains(student.Vorname, StringComparison.OrdinalIgnoreCase) &&
+                f.Contains(student.Geburtsdatum, StringComparison.OrdinalIgnoreCase));
+
+            // Benenne das Foto im Ordner nach kurzname um
+            if (bisherigerDateinameUndPfad != null)
+            {
+                var neuerDateiname = "";
+
+                var sz = schuelerZusatzdaten
+                    .Where(rec =>
+                    {
+                        if (rec == null) return false;
+                        var dict = (IDictionary<string, object>)rec;
+                        return dict != null && dict["Nachname"] != null && dict["Nachname"].ToString() == student.Nachname &&
+                            dict["Vorname"].ToString() == student.Vorname &&
+                            dict["Geburtsdatum"].ToString() == student.Geburtsdatum;
+                    }).LastOrDefault() as IDictionary<string, object>;
+
+                if (sz != null)
+                {
+                    if ((Global.ZipModus)zipModus == Global.ZipModus.Webuntis)
+                    {
+                        neuerDateiname = sz["schulische E-Mail"].ToString().Replace(configuration["MailDomain"], "").Replace("@", "");
+                    }
+                    else if ((Global.ZipModus)zipModus == Global.ZipModus.Geevoo)
+                    {
+                        neuerDateiname = sz["schulische E-Mail"].ToString().Replace(configuration["MailDomain"], "").Replace("@", "");
+                    }
+                }
+                
+                if (!string.IsNullOrEmpty(neuerDateiname))
+                    {
+                        var dateityp = Path.GetExtension(bisherigerDateinameUndPfad).ToLowerInvariant();
+                        var pfad = Path.GetDirectoryName(bisherigerDateinameUndPfad);
+                        var neuerPfadUndDateiname = Path.Combine(pfad, neuerDateiname + dateityp);
+
+                        // Wenn die neue Datei schon existiert, überspringe sie
+                        if (File.Exists(neuerPfadUndDateiname)) continue;
+
+                        File.Copy(bisherigerDateinameUndPfad, neuerPfadUndDateiname, true);
+
+                        absolutePfade.Add(neuerPfadUndDateiname);
+                    }
+            }
+        }
+
+        if(absolutePfade.Count == 0)
+        {
+            Global.ZeileSchreiben("Keine neuen Fotos gefunden", "0", ConsoleColor.Red, ConsoleColor.White);            
+        }
+        return absolutePfade;
     }
 
     // Comparer for (string? Vorname, string? Nachname) tuples
