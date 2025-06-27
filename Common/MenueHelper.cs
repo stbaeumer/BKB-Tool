@@ -183,7 +183,7 @@ public static class MenueHelper
                         Global.NurBeiDiesenSchulnummern.Nur177659
                     ),
                     new Menüeintrag(
-                        "Mail-Adressen: SchuelerZusatzdaten werden um schulische Mailadressen ergänzen (falls leer)",
+                        "Mail-Adressen: SchuelerZusatzdaten werden um schulische Mailadressen ergänzt (falls leer)",
                         anrechnungen,
                         quelldateien.Notwendige(configuration, ["schuelerzusatzdaten,dat"]),
                         students,
@@ -251,7 +251,7 @@ public static class MenueHelper
                         Global.NurBeiDiesenSchulnummern.Alle
                     ),
                     new Menüeintrag(
-                        "Zeugnisse #1: Unterrichte, Noten & Fehlzeiten nach SchILD importieren",
+                        "Zeugnisse: Unterrichte, Noten & Fehlzeiten nach SchILD importieren",
                         anrechnungen,
                         quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "absenceperstudent,csv", "schuelerlernabschnitt,dat", "schuelerleistungsdaten,dat", "schuelerbasis,dat", "exportlessons,csv", "studentgroupstudents,csv", "marksperlesson,csv"]),
                         students,
@@ -296,7 +296,7 @@ public static class MenueHelper
                         Global.NurBeiDiesenSchulnummern.Alle
                     ),
                     new Menüeintrag(
-                        "Zeugnisse #2: Lehrkräfte an die Eintragung erinnern",
+                        "Klassenbuch: Lehrkräfte an die Eintragung erinnern",
                         anrechnungen,
                         quelldateien,
                         students,
@@ -597,7 +597,7 @@ public static class MenueHelper
                         [
                             $"Von allen PDF-Dateien in [{Global.GetColor(Global.ColorPfadInDateien)}]" + configuration["PfadDownloads"] + "[/] wird eine verschlüsselte Kopie erstellt.",
                             $"Es werden nur Dateien berücksichtigt, die nicht bereits die Endung [{Global.GetColor(Global.ColorPfadInDateien)}]-kennwort.pdf[/] haben.",                            
-                            $"Kopien bekommen die Dateiendung [{Global.GetColor(Global.ColorPfadInDateien)}]-kennwort.pdf[/]"
+                            $"Kopien bekommen die Dateiendung [{Global.GetColor(Global.ColorPfadInDateien)}]-kennwort.pdf[/]."
                         ],
                         _ =>
                         {

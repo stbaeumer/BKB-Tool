@@ -391,7 +391,8 @@ public class Menüeintrag
             absencePerStud = Quelldateien.GetMatchingList(configuration, "absenceperstudent", IStudents, Klassen);
             if (absencePerStud == null || !absencePerStud.Any()) return [];
 
-            configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration, "Abschnitt", $"Geben Sie den Lernabschnitt an. Das Schuljahr beginnt immer mit Abschnitt [{Global.GetColor(Global.ColorZahlen)}]1[/]. I.d.R. wechselt der Abschnitt im Halbjahr auf Abschnitt [{Global.GetColor(Global.ColorZahlen)}]2[/]", Global.Datentyp.Abschnitt);
+            configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration, "Abschnitt", $"Geben Sie den Lernabschnitt an. Das Schuljahr beginnt immer mit Abschnitt [{Global.GetColor(Global.ColorZahlen)}]1[/]. \nI.d.R. wechselt der Abschnitt im Halbjahr auf Abschnitt [{Global.GetColor(Global.ColorZahlen)}]2[/]", Global.Datentyp.Abschnitt);
+            configuration = Global.Konfig("Abschnittswechsel", Global.Modus.Update, configuration, "Abschnittswechsel", $"Geben Sie das Datum des Abschnittswechsels an. \nI.d.R. ist der {new DateTime(Convert.ToInt32(Global.AktSj[1]), 2, 1).ToShortDateString()} (oder ein anderes Datum im Februar) der richtige Wert.", Global.Datentyp.DateTime, new DateTime(Convert.ToInt32(Global.AktSj[1]), 2, 1).ToShortDateString());
 
             var konferenzart = "";
             switch (configuration["Abschnitt"])
@@ -421,8 +422,8 @@ public class Menüeintrag
         {
             foreach (var student in IStudents)
             {
-                var halbjahreszeugnisdatum = DateTime.Parse(configuration["Halbjahreszeugnisdatum"]);
-                var halbjahreswechelInderZukunft = halbjahreszeugnisdatum > DateTime.Now;
+                var abschnittswechsel = DateTime.Parse(configuration["Abschnittswechsel"]);
+                var abschnittswechelInderZukunft = abschnittswechsel > DateTime.Now;
 
                 var dictBasisdaten = schuelerBasisd
                     .Where(recBasis =>
@@ -432,7 +433,7 @@ public class Menüeintrag
                                dictBasis["Vorname"].ToString() == student.Vorname &&
                                dictBasis["Geburtsdatum"].ToString() == student.Geburtsdatum &&
                                dictBasis["Jahr"].ToString() == Global.AktSj[0] &&
-                               ((art == Global.Art.Statistik || halbjahreswechelInderZukunft) ? true : dictBasis["Abschnitt"].ToString() == configuration["Abschnitt"]);
+                               ((art == Global.Art.Statistik || abschnittswechelInderZukunft) ? true : dictBasis["Abschnitt"].ToString() == configuration["Abschnitt"]);
                     }).FirstOrDefault() as IDictionary<string, object>;
 
                 if (dictBasisdaten != null)
@@ -655,20 +656,13 @@ public class Menüeintrag
 
             foreach (var student in IStudents.OrderBy(x => x.Nachname).ThenBy(x => x.Vorname).Where(x => x.Klasse == klasse))
             {
-                if(student.Nachname == "Alp" && student.Vorname.StartsWith("U"))
-                {
-                    string a = "";
-                }
-
                 var istReliabmelder = schBasisds.Any(rec =>
                 {
                     var dict = (IDictionary<string, object>)rec;
                     return dict["Nachname"].ToString() == student.Nachname
                         && dict["Vorname"].ToString() == student.Vorname
                         && dict["Geburtsdatum"].ToString() == student.Geburtsdatum
-                        && !string.IsNullOrEmpty(dict["Abmeldedatum Religionsunterricht"].ToString())
-                    //&& (DateTime.Parse(dict["AbmeldedatumLEERZEICHENReligionsunterricht"].ToString()) < DateTime.Parse(dict["AnmeldedatumLEERZEICHENReligionsunterricht"].ToString()))
-                    ;
+                        && !string.IsNullOrEmpty(dict["Abmeldedatum Religionsunterricht"].ToString());
                 });
 
                 foreach (var fach in verschiedeneFaecherDerKlasse)
@@ -1449,10 +1443,10 @@ public class Menüeintrag
                         record.Schlüssel = sz["schulische E-Mail"].ToString().Split('@')[0];
                     }
 
-                    record.Kurzname = student.MailSchulisch.Replace("@students.berufskolleg-borken.de", "");
+                    record.Kurzname = sz["schulische E-Mail"].ToString().Replace("@students.berufskolleg-borken.de", "");
                     record.Vorname = student.Vorname;
                     record.Nachname = student.Nachname;
-                    record.Mail = student.MailSchulisch;
+                    record.Mail = sz["schulische E-Mail"].ToString();
                     record.Passwort = student.Nachname.Substring(0, 1).ToUpper() + student.Geburtsdatum;
                     record.Klasse = student.Klasse;
                     record.Klassenleitung = klassenleitung;

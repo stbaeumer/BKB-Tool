@@ -1199,16 +1199,16 @@ public partial class Student
         // Der Unterricht mit muss im aktuellen Abschnitt liegen, um berücksichtigt zu werden
 
         var ersterSchultag = new DateTime(Convert.ToInt32(Global.AktSj[0]), 8, 1);
-        var halbjahreswechsel = DateTime.Parse(configuration["Halbjahreszeugnisdatum"]);
+        var abschnittswechsel = DateTime.Parse(configuration["Abschnittswechsel"]);
         var letzterSchultag = new DateTime(Convert.ToInt32(Global.AktSj[1]), 7, 31);
 
         // Der Unterricht muss mindestens teilweise in den interessierenden Abschnitt fallen
         if (configuration["Abschnitt"] == "1")
         {
             // Wenn der Unterricht irgendwann im ersten Hj beginnt, ist er relevant
-            if (ersterSchultag <= von && von <= halbjahreswechsel)
+            if (ersterSchultag <= von && von <= abschnittswechsel)
             {
-                var dauer = Math.Min((halbjahreswechsel - von).TotalDays, (bis - von).TotalDays);
+                var dauer = Math.Min((abschnittswechsel - von).TotalDays, (bis - von).TotalDays);
 
                 // Ein Unterricht muss länger als 30 Tage unterricht worden sein, um im Zeugnis aufzutauchen.
                 // So wird Verwirrung zwischen den Kursen vermieden 
@@ -1241,8 +1241,8 @@ public partial class Student
 
         if (configuration["Abschnitt"] == "2")
         {
-            // Wenn der Unterricht irgendwann im weiten Hj endet, ist er relevant
-            if (halbjahreswechsel <= bis && bis <= letzterSchultag)
+            // Wenn der Unterricht irgendwann im zweiten Hj endet, ist er relevant
+            if (abschnittswechsel <= bis && bis <= letzterSchultag)
             {
                 var dauer = Math.Min((letzterSchultag - von).Days, (bis - von).Days);
 
