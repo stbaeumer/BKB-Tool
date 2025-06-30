@@ -771,9 +771,7 @@ public class Menüeintrag
                         }
                         else // Bei Kursunterrichten wird geschaut, ob der Schüler den Kurs belegt hat. 
                         {
-                            var id = string.IsNullOrEmpty(student.ExterneIdNummer)
-                                ? student.IdSchild
-                                : student.ExterneIdNummer;
+                            var id = student.Id;
                             var studentZeile = stdgroupSs
                                 .Where(record =>
                                 {
@@ -1055,7 +1053,7 @@ public class Menüeintrag
         return zieldatei;
     }
 
-    public void LuLAnEintragungDerZeugnisnotenErinnern(IConfiguration configuration, Lehrers lehrers)
+    public string LuLAnEintragungDerZeugnisnotenErinnern(IConfiguration configuration, Lehrers lehrers)
     {
         var leistungsdaten = Quelldateien.GetMatchingList(configuration, "leistungsdaten", IStudents, Klassen);
         var betreff = "";
@@ -1081,16 +1079,17 @@ public class Menüeintrag
                              ": " + dict["Fachlehrer"].ToString().PadRight(3) + ": " + dict["Fach"]);
                 i++;
 
-                if (!lul.Contains(dict["Fachlehrer"].ToString()))
+                var lehrer = lehrers.FirstOrDefault(x=>x.Kürzel == dict["Fachlehrer"].ToString());
+                
+                if (lehrer != null && !string.IsNullOrEmpty(lehrer.Mail) && !lul.Contains(lehrer.Mail))
                 {
-                    lul.Add(dict["Fachlehrer"].ToString());
+                    lul.Add(lehrer.Mail);
                 }
             }
         }
 
         if (eintaege.Count > 0)
         {
-            Global.DisplayHeader(configuration);
             foreach (var eintrag in eintaege)
             {
                 Console.WriteLine(eintrag);
@@ -1104,13 +1103,13 @@ public class Menüeintrag
                 }
             }
 
-            Global.DisplayHeader(configuration);
             Console.WriteLine("   " + adressen.TrimEnd(','));
         }
         else
         {
             Console.WriteLine("  Es fehlen keine Noten. Gut so.");
         }
+        return String.Join(',',lul);
     }
 
     public void ChatErzeugen(IConfiguration configuration, String mitgliederMail)
@@ -1168,25 +1167,26 @@ public class Menüeintrag
             {
                 if (rec is not IDictionary<string, object> webuntisStudent) continue;
 
+                // Ein Abgänger oder Absolvent, der als Externer oder Gast wiederkommt, hat in seiner aktiven Rolle den niedrigeren Status.
+                // Also wird bei mehrfach vorkommenden Schülern immer der mit dem niedrigsten Status genommen.                 
                 var schildStudent = Students
-                .Where(x =>
-                    x.Nachname == webuntisStudent["longName"].ToString() &&
-                    x.Vorname == webuntisStudent["foreName"].ToString() &&
-                    x.Geburtsdatum == webuntisStudent["birthDate"].ToString())
-                .OrderByDescending(x => int.TryParse(x.IdSchild, out var id) ? id : 0) // IdSchild in int umwandeln, Standardwert 0 bei Fehler
-                .FirstOrDefault(); // Gibt den Schüler mit der höchsten IdSchild zurück
+                    .OrderBy(x => int.TryParse(x.Status, out var status) ? status : 0)
+                    .FirstOrDefault(x =>
+                        x.Nachname == webuntisStudent["longName"].ToString() &&
+                        x.Vorname == webuntisStudent["foreName"].ToString() &&
+                        x.Geburtsdatum == webuntisStudent["birthDate"].ToString());
 
                 schildStudent.GetLetztesZeugnisdatumInDerKlasse(schuelerLernabschnittsdaten);
 
-                if (schildStudent.Nachname == "Hermann" && schildStudent.Vorname.StartsWith("Rebecca"))
+
+                var id = schildStudent.Id;
+
+                if (schildStudent.Nachname == "Beckmann" && schildStudent.Vorname.StartsWith("Da"))
                 {
                     string a = "a";
                 }
-                if (schildStudent == null) continue;
 
-                var id = string.IsNullOrEmpty(schildStudent.ExterneIdNummer)
-                    ? schildStudent.IdSchild
-                    : schildStudent.ExterneIdNummer;
+                if (schildStudent == null) continue;
 
                 var schildStudentMeldung = (schildStudent.Nachname + ", " + schildStudent.Vorname + ", " + id + " (" + schildStudent.Klasse + ")").PadRight(45);
 
@@ -1282,15 +1282,14 @@ public class Menüeintrag
 
             foreach (var studen in uniqueStudents)
             {
-                if (studen.Nachname == "Hermann" && studen.Vorname.StartsWith("R"))
+                if (studen.Nachname == "Beckmann" && studen.Vorname.StartsWith("Da"))
                 {
                     string a = "a";
                 }
 
-                // Es kann sein, dass Schüler nach Abschluss als Gast bleiben. 
-                // Es wird angenommen, dass der letzte in der Importliste der aktuelle ist.
-                var student = Students.OrderByDescending(x => int.TryParse(x.IdSchild, out var id) ? id : 0)
-                .FirstOrDefault(x => x.Nachname == studen.Nachname && x.Vorname == studen.Vorname && x.Geburtsdatum == studen.Geburtsdatum);
+                // Ein Abgänger oder Absolvent, der als Externer oder Gast wiederkommt, hat in seiner aktiven Rolle den niedrigeren Status.
+                // Also wird bei mehrfach vorkommenden Schülern immer der mit dem niedrigsten Status genommen.                 
+                var student = Students.OrderBy(x => int.TryParse(x.Status, out var status) ? status : 0).FirstOrDefault(x => x.Nachname == studen.Nachname && x.Vorname == studen.Vorname && x.Geburtsdatum == studen.Geburtsdatum);
 
                 if (student == null) continue;
 
@@ -1304,7 +1303,7 @@ public class Menüeintrag
                     // ... und der Schüler in Schild aktiv der Gast ist, wird er angelegt
                     if (student.Status is "2" or "6")
                     {
-                        var id = string.IsNullOrEmpty(student.ExterneIdNummer) ? student.IdSchild : student.ExterneIdNummer;
+                        var id = student.Id;
                         susMitÄnderung.Add(((i + ". ").PadRight(5) + student.Nachname + ", " + student.Vorname + ", " + id + " (" + student.Klasse + ")").PadRight(51) + student.Status + "      Neu: " + student.Klasse);
 
                         table.AddRow(new Text[]{
@@ -1423,7 +1422,7 @@ public class Menüeintrag
 
                     // Es werden nur diejenigen Schüler exportiert die aktiv oder Gast sind, 
                     // und alle anderen, deren Entlassdatum heute oder in den letzten sechs Wochen war.                                         
-                    if (student.Status == "2" || student.Status == "6" || student.JüngstEntlassen())
+                    if (student.Status == "2" || student.Status == "6" || student.NochKeineAnzahlWochenHer(6))
                     {
                         zieldatei.Add(record);
                     }
@@ -2085,7 +2084,7 @@ public class Menüeintrag
 
         foreach (Student student in Students)
         {
-            var id = student.GetId(schuelerZusatzdaten);
+            var id = student.Id;
             student.GetMaßnahmen(Quelldateien, maßnahmenString);
             student.GetAbwesenheiten(Quelldateien, id);
 

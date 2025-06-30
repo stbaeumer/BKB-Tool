@@ -37,7 +37,8 @@ public static class MenueHelper
 
         try
         {
-            var students = new Students(configuration, quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat"], true));
+            var students = new Students(configuration, quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "schuelerzusatzdaten,dat"], true));
+
             quelldateien.Meldung.Add(students.GetArtUndZahlen());
 
             Global.DisplayHeader(configuration, quelldateien.Meldung);
@@ -155,7 +156,7 @@ public static class MenueHelper
 
                             if(configuration["Schulnummer"] != null && configuration["Schulnummer"] == "177659")
                             {
-                                configuration = Global.Konfig("ZipKennwort", Global.Modus.Update, configuration, "Zip-Kennwort", "Die Datei wird nun gezippt.\nGeben Sie das Kennwort ein, mit dem Sie den Zip-Datei verschlüsseln wollen. Geben Sie ein Leerzeichen ein, wenn kein Kennwort gesetzt werden soll.", Global.Datentyp.String, "");
+                                configuration = Global.Konfig("ZipKennwort", Global.Modus.Update, configuration, "Zip-Kennwort", "Die Datei wird nun gezippt.\nGeben Sie das Kennwort ein, mit dem Sie die Zip-Datei verschlüsseln wollen. Geben Sie ein Leerzeichen ein, wenn kein Kennwort gesetzt werden soll.", Global.Datentyp.String, "");
                                 m.Zieldatei?.Zippen(Path.Combine(pfadDownloads ?? "", zeitstempel + @"-ImportNachNetman.zip"), configuration, configuration["ZipKennwort"].ToString(), 0, new List<string>(){ Path.Combine(pfadDownloads ?? "", zeitstempel + @"-ImportNachNetman.csv") });
                                 m.Zieldatei?.Mailen(Path.Combine(pfadDownloads ?? "", zeitstempel + @"-ImportNachNetman.zip") ?? "", "Verwaltung", Path.GetFileName(m.Zieldatei.AbsoluterPfad) ?? "", configuration);
                             }                            
@@ -189,14 +190,14 @@ public static class MenueHelper
                         students,
                         klassen,
                         [
-                            $"Es wird jetzt die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", "SchuelerZusatzdaten.dat")}[/] um die schulischen Mailadressen ergänzt.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1:[/] Vorhandene schulische Mailadressen in SchILD werden nicht verändert.",
+                            $"Eine gültige schulische E-Mail-Adresse bei allen SuS ist eine wichtige Voraussetzung für viele Funktionen in [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/].",
+                            $"Es wird jetzt die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", "SchuelerZusatzdaten.dat")}[/] um die schulischen Mailadressen ergänzt und in [{Global.GetColor(Global.ColorPfadInDateien)}]{pfadSchilddatenaustausch}[/] für den Reimport nach SchILD bereitgestellt.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1:[/] Vorhandene schulische Mailadressen in SchILD bleiben unangetastet.",
                             $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #2:[/] Die schulischen Mailadressen sehen wie folgt aus: [{Global.GetColor(Global.ColorTextHervorheben)}]nv061201@meine-schule.de[/], wobei gilt:",
                             $"[{Global.GetColor(Global.ColorTextHervorheben)}]n[/]: Erster Buchstabe des Nachnamens. Umlaute werden aufgelöst.",
                             $"[{Global.GetColor(Global.ColorTextHervorheben)}]v[/]: Erster Buchstabe des Vornamens. Umlaute werden aufgelöst.",
                             $"[{Global.GetColor(Global.ColorTextHervorheben)}]061201[/]: Geburtsdatum in der Notation: JJMMTT.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #3:[/] Wenn z.B. Zwillinge Markus und Martin heißen, dann wird die Dopplung angezeigt. Es muss dann nach dem Import händisch die Adresse des einen in SchILD angepasst werden.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #4:[/] Eine gültige Mail-Adresse in SchILD ist Voraussetzung für den Import nach Webuntis oder Netman.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #3:[/] Wenn z.B. Zwillinge Markus und Martin heißen, dann wird der Konflikt angezeigt. Es muss dann nach dem Import händisch die Adresse des einen in SchILD angepasst werden."
                         ],
                         m =>
                         {
@@ -251,7 +252,7 @@ public static class MenueHelper
                         Global.NurBeiDiesenSchulnummern.Alle
                     ),
                     new Menüeintrag(
-                        "Zeugnisse: Unterrichte, Noten & Fehlzeiten nach SchILD importieren",
+                        "Zeugnisse #1: Unterrichte, Noten & Fehlzeiten nach SchILD importieren",
                         anrechnungen,
                         quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "absenceperstudent,csv", "schuelerlernabschnitt,dat", "schuelerleistungsdaten,dat", "schuelerbasis,dat", "exportlessons,csv", "studentgroupstudents,csv", "marksperlesson,csv"]),
                         students,
@@ -296,17 +297,23 @@ public static class MenueHelper
                         Global.NurBeiDiesenSchulnummern.Alle
                     ),
                     new Menüeintrag(
-                        "Klassenbuch: Lehrkräfte an die Eintragung erinnern",
+                        "Zeugnisse #2: Säumige Lehrer*innen im Teams-Chat an die Noten-Eintragung erinnern",
                         anrechnungen,
-                        quelldateien,
+                        quelldateien.Notwendige(configuration, ["schuelerleistungsdaten,dat"]),
                         students,
                         klassen,
                         [
-                            "Zuerst müssen die Leistungsdaten nach SchILD importiert werden.",
-                            "Aus dem anschließenden Datenexport aus SchILD werden hier alle fehlenden Zeugnisnoten aufgelistet.",
-                            "Alle betreffenden Mail-Adressen der Lehrkräfte können mit Copy & Paste nach Teams kopiert werden."
-                        ],
-                        m => m.LuLAnEintragungDerZeugnisnotenErinnern(configuration, lehrers),
+                            $"Wenn die Frist zur Eintragung der Zeugnisnoten abgelaufen ist, können hier gezielt diejenigen Lehrkräfte erinnert werden, deren Noten noch fehlen. ",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Schritt 1: [/]Alle Leistungsdaten (soweit vorhanden) nach SchILD importieren.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Schritt 2: [/][{Global.GetColor(Global.ColorPfadInDateien)}]SchuelerLeistungsdaten.dat[/] aus SchILD exportieren.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Schritt 3: [/][{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] liest die [{Global.GetColor(Global.ColorPfadInDateien)}]SchuelerLeistungsdaten.dat[/] aus SchILD und öffnet Teams-Chat."                            
+                        ],                        
+                        m =>
+                        {
+                            m.FilterInteressierendeStudentsUndKlassen(configuration);
+                            var lul = m.LuLAnEintragungDerZeugnisnotenErinnern(configuration, lehrers);
+                            m.ChatErzeugen(configuration, lul);
+                        },
                         Global.Rubrik.Leistungsdaten,
                         Global.NurBeiDiesenSchulnummern.Alle
                     ),
@@ -353,7 +360,7 @@ public static class MenueHelper
                         Global.NurBeiDiesenSchulnummern.Nur000000
                     ),
                     new Menüeintrag(
-                        "Teams-Chat: Teams-Chat mit gewünschter Gruppe von Lehrkräften beginnen",
+                        "Teams-Chat: Teams-Chat mit Gruppe von Lehrkräften beginnen",
                         anrechnungen,
                         quelldateien.Notwendige(configuration, ["exportlessons,csv"]),
                         students,
@@ -522,7 +529,7 @@ public static class MenueHelper
                         ],
                         _ => { new Relationsgruppen(klassen, students); },
                         Global.Rubrik.Allgemein,
-                        Global.NurBeiDiesenSchulnummern.Nur000000                        
+                        Global.NurBeiDiesenSchulnummern.Nur177659                        
                     ),
                     new Menüeintrag(
                         $"Altersermäßigung: berechnen für {int.Parse(Global.AktSj[0])}/{int.Parse(Global.AktSj[0]) + 1} und {int.Parse(Global.AktSj[0]) + 1}/{int.Parse(Global.AktSj[0]) + 2}",
@@ -645,23 +652,22 @@ public static class MenueHelper
                         klassen,
                         [
                             $"PDF-Zeugnisse und andere PDF-Dateien werden in die Schüler*innen-Ordner der SchILD-Dokumentenverwaltung einsortiert.",
-                            $"[yellow]Vorbereitung #1[/]: Zu kopierende PDF-Dateien nach {Path.Combine(configuration["PfadDownloads"], "PDF-Input")} kopieren.",
-                            $"[yellow]Vorbereitung #2[/]: Eine UTF8-CSV-Datei mit Spalten: Nachname, Vorname, Geburtsdatum und Klasse aus Atlantis exportieren und in {Path.Combine(pfadDownloads, "PDF-Input")} ablegen.",
-                            $"[aqua]Durchführung #1[/]: (Einzelne) Klasse(n) oder 'alle' auswählen.",
-                            $"[aqua]Durchführung #2[/]: Geben Sie die Schlüsselwörter an, um die interessierenden PDF-Dateien einzugrenzen.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Vorbereitung #1[/]: Zu kopierende PDF-Dateien nach [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(configuration["PfadDownloads"], "PDF-Input")}[/] kopieren.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Vorbereitung #2[/]: Eine UTF8-CSV-Datei mit Spalten: Nachname, Vorname, Geburtsdatum und Klasse aus Atlantis exportieren und in [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(configuration["PfadDownloads"], "PDF-Input")}[/] ablegen.",
+                            $"[{Global.GetColor(Global.ColorTextHervorheben)}]Durchführung #1[/]: (Einzelne) Klasse(n) oder 'alle' auswählen.",
+                            $"[{Global.GetColor(Global.ColorTextHervorheben)}]Durchführung #2[/]: Geben Sie die Schlüsselwörter an, um die interessierenden PDF-Dateien einzugrenzen.",
                         ],
                         m =>
                         {
-
-                            configuration = Global.Konfig("PfadDownloads", Global.Modus.Update, configuration, "Pfad zum eigenen Download-Ordner angeben","",Global.Datentyp.Pfad);
-                            configuration = Global.Konfig("PfadDokumentenverwaltung", Global.Modus.Update, configuration, "Pfad zur SchILD-Dokumentenverwaltung angeben (z.B. \\fs01\\Schild\\Dokumentenverwaltung)","",Global.Datentyp.Pfad);
-                            configuration = Global.Konfig("Schlüsselwörter", Global.Modus.Update, configuration, "Geben Sie kommagetrennt interessierende Schlüsselwörter an (z.B. Abgangszeugnis, Abschlusszeugnis, Jahreszeugnis)","",Global.Datentyp.String);
+                            configuration = Global.Konfig("PfadDownloads", Global.Modus.Read, configuration, "Pfad zum eigenen Download-Ordner angeben","",Global.Datentyp.Pfad);
+                            configuration = Global.Konfig("PfadDokumentenverwaltung", Global.Modus.Update, configuration, $"SchILD-Dokumentenverzeichnis",$"Geben Sie den Pfad zum SchILD-Dokumentenverzeichnis ein. Das ist der Pfad, der in SchILD unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Extras > Programm-Einstellungen > Globale Einstellungen > Dokumentenverwaltung > Dokumentenverzeichnis[/] eingetragen ist. ",Global.Datentyp.Pfad);
+                            configuration = Global.Konfig("Schlüsselwörter", Global.Modus.Update, configuration, "Schlüsselwörter angeben","Geben Sie kommagetrennt interessierende Schlüsselwörter an (z.B. Abgangszeugnis, Abschlusszeugnis, Jahreszeugnis). BKB-Tool durchsucht die PDF-Dateien im Ordner nach den Wörtern. Sobald ein Schlüsselwort matcht, wird die Datei in das Dokumentenverzeichnis kopiert.",Global.Datentyp.String);
 
                             m.IStudents.GetStudentsVonAtlantisCsv(configuration);
                             m.IStudents.PdfDateienVerarbeiten(configuration);
                         },
                         Global.Rubrik.Allgemein,
-                        Global.NurBeiDiesenSchulnummern.Nur000000
+                        Global.NurBeiDiesenSchulnummern.Nur177659
                     ),
                     new Menüeintrag(
                         "Outlook: CSV-Terminexporte für Wiki aufbereiten",

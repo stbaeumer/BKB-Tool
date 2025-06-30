@@ -28,171 +28,23 @@ public partial class Student
 {
     public int F2PlusF3;
     public string? Foto { get; set; } = string.Empty;
-    public string Aktjahrgang { get; set; } = string.Empty;
     public string AktuellerAbschnitt { get; set; } = string.Empty;
-    public string AktuellesHalbjahr { get; set; } = string.Empty;
-    public string Aufnahmedatum { get; set; } = string.Empty;
-    public string Adressart { get; set; } = string.Empty;
-    public string Anrede { get; set; } = string.Empty;
-    public string Asv { get; set; } = string.Empty;
-    public string AufnehmendeSchuleName { get; set; } = string.Empty;
-    public string AufnehmendeSchuleOrt { get; set; } = string.Empty;
-    public string AufnehmendeSchulePlz { get; set; } = string.Empty;
-    public string AufnehmendeSchuleSchulnr { get; set; } = string.Empty;
-    public string AufnehmendeSchuleStraße { get; set; } = string.Empty;
-    public string Aussiedler { get; set; } = string.Empty;
-    public string Ausweisnummer { get; set; } = string.Empty;
-    public string Ausbildungsort { get; set; } = string.Empty;
-    public string Austritt { get; set; } = string.Empty;
-    public string AbschlussartAnEigenerSchuleStatistikKürzel { get; set; } = string.Empty;
-    public string Bemerkungen { get; set; } = string.Empty;
-    public string BeginnDerBildungsganges { get; set; } = string.Empty;
-    public string BerufsschulpflichtErfüllt { get; set; } = string.Empty;
-    public string BesMerkmal { get; set; } = string.Empty;
-    public string BleibtAnSchule { get; set; } = string.Empty;
-    public string Briefanrede { get; set; } = string.Empty;
-    public string Berufsabschluss { get; set; } = string.Empty;
-    public string Berufswechsel { get; set; } = string.Empty;
-    public string Betreuung { get; set; } = string.Empty;
-    public string BetreuerAbteilung { get; set; } = string.Empty;
-    public string BetreuerAnrede { get; set; } = string.Empty;
-    public string BetreuerEmail { get; set; } = string.Empty;
-    public string BetreuerName { get; set; } = string.Empty;
-    public string BetreuerTelefon { get; set; } = string.Empty;
-    public string BetreuerTitel { get; set; } = string.Empty;
-    public string BetreuerVorname { get; set; } = string.Empty;
-    public string Betreuungslehrer { get; set; } = string.Empty;
-    public string BetreuungslehrerAnrede { get; set; } = string.Empty;
-    public string Bezugsjahr { get; set; } = string.Empty;
-    public string Bkazvo { get; set; } = string.Empty;
-    public string Branche { get; set; } = string.Empty;
-    public string Bundesland { get; set; } = string.Empty;
-    public string Einschulungsart { get; set; } = string.Empty;
-    public string ElternteilZugezogen { get; set; } = string.Empty;
-    public string Entlassjahrgang { get; set; } = string.Empty;
-    public string Erzieher1Anrede { get; set; } = string.Empty;
-    public string Erzieher1Briefanrede { get; set; } = string.Empty;
-    public string Erzieher1Nachname { get; set; } = string.Empty;
-    public string Erzieher1Titel { get; set; } = string.Empty;
-    public string Erzieher1Vorname { get; set; } = string.Empty;
-    public string Erzieher2Anrede { get; set; } = string.Empty;
-    public string Erzieher2Briefanrede { get; set; } = string.Empty;
-    public string Erzieher2Nachname { get; set; } = string.Empty;
-    public string Erzieher2Titel { get; set; } = string.Empty;
-    public string Erzieher2Vorname { get; set; } = string.Empty;
-    public string ErzieherArtKlartext { get; set; } = string.Empty;
-    public string ErzieherEmail { get; set; } = string.Empty;
-    public string ErzieherErhältAnschreiben { get; set; } = string.Empty;
-    public string ErzieherOrt { get; set; } = string.Empty;
-    public string ErzieherOrtsteil { get; set; } = string.Empty;
-    public string ErzieherPostleitzahl { get; set; } = string.Empty;
-    public string ErzieherStraße { get; set; } = string.Empty;
-    public string ExterneIdNummer { get; set; } = string.Empty;
-    public string Fachklasse { get; set; } = string.Empty;
-    public string FachklasseBezeichnung { get; set; } = string.Empty;
-    public string FaxNr { get; set; } = string.Empty;
-    public string Förderschwerpunkt1 { get; set; } = string.Empty;
-    public string Förderschwerpunkt2 { get; set; } = string.Empty;
-    public string? Geburtsdatum { get; set; } = string.Empty;
-    public string Geburtsland { get; set; } = string.Empty;
-    public string GeburtslandMutter { get; set; } = string.Empty;
-    public string GeburtslandVater { get; set; } = string.Empty;
-    public string Geburtsname { get; set; } = string.Empty;
-    public string Geburtsort { get; set; } = string.Empty;
-    public string Geschlecht { get; set; } = string.Empty;
-    public string Gliederung { get; set; } = string.Empty;
-    public string GsEmpfehlung { get; set; } = string.Empty;
-    public string Hausnummer { get; set; } = string.Empty;
-    public string HöchsterAllgAbschluss { get; set; } = string.Empty;
-    public string Internatsplatz { get; set; } = string.Empty;
-    public string IdSchild { get; set; } = string.Empty;
-    public string JahrZuzug { get; set; } = string.Empty;
-    public string JahrEinschulung { get; set; } = string.Empty;
-    public string JahrSchulwechsel { get; set; } = string.Empty;
-    public string Jahrgang { get; set; } = string.Empty;
-    public string JahrgangInterneBezeichnung { get; set; } = string.Empty;
-    public string Jva { get; set; } = string.Empty;
-    public string Klasse { get; set; } = string.Empty;
-    public string Klassenart { get; set; } = string.Empty;
-    public string Klassenlehrer { get; set; } = string.Empty;
-    public string KlassenlehrerAmtsbezeichnung { get; set; } = string.Empty;
-    public string KlassenlehrerAnrede { get; set; } = string.Empty;
-    public string KlassenlehrerName { get; set; } = string.Empty;
-    public string KlassenlehrerTitel { get; set; } = string.Empty;
-    public string KlassenlehrerVorname { get; set; } = string.Empty;
-    public string Kreis { get; set; } = string.Empty;
-    public string Koopklasse { get; set; } = string.Empty;
-    public string LetzteSchuleName { get; set; } = string.Empty;
-    public string LetzteSchuleOrt { get; set; } = string.Empty;
-    public string LetzteSchulePlz { get; set; } = string.Empty;
-    public string LetzterBerufsbezAbschlussKürzel { get; set; } = string.Empty;
-    public string LsSchulform { get; set; } = string.Empty;
-    public string Lsschulnummer { get; set; } = string.Empty;
-    public string LsGliederung { get; set; } = string.Empty;
-    public string LsFachklasse { get; set; } = string.Empty;
-    public string Lsklassenart { get; set; } = string.Empty;
-    public string Lsreformpdg { get; set; } = string.Empty;
-    public string LsSschulentl { get; set; } = string.Empty;
-    public string LsJahrgang { get; set; } = string.Empty;
-    public string LsQual { get; set; } = string.Empty;
-    public string Lsversetz { get; set; } = string.Empty;
-    public string MailPrivat { get; set; } = string.Empty;
-    public string MailSchulisch { get; set; } = string.Empty;
-    public string Massnahmetraeger { get; set; } = string.Empty;
-    public string MigrationshintergrundVorhanden { get; set; } = string.Empty;
-    public string Nachname { get; set; } = string.Empty;
-    public string Orgform { get; set; } = string.Empty;
-    public string Ortsteil { get; set; } = string.Empty;
+    public string AktuellesHalbjahr { get; set; } = string.Empty;    
+    public string BeginnDerBildungsganges { get; set; } = string.Empty;    
+    public string ExterneIdNummer { get; set; } = string.Empty;    
+    public string? Geburtsdatum { get; set; } = string.Empty;    
+    public string Geschlecht { get; set; } = string.Empty;    
+    //public string IdSchild { get; set; } = string.Empty;    
+    public string Jahrgang { get; set; } = string.Empty;    
+    public string Klasse { get; set; } = string.Empty;    
+    public string MailSchulisch { get; set; } = string.Empty;    
+    public string Nachname { get; set; } = string.Empty;    
     public string Ort { get; set; } = string.Empty;
-    public string Postleitzahl { get; set; } = string.Empty;
-    public string Produktname { get; set; } = string.Empty;
-    public string Produktversion { get; set; } = string.Empty;
-    public string Reformpdg { get; set; } = string.Empty;
-    public string Religionsanmeldung { get; set; } = string.Empty;
-    public string Religionsabmeldung { get; set; } = string.Empty;
-    public string KonfessionKlartext { get; set; } = string.Empty;
-    public string Labk { get; set; } = string.Empty;
-    public string Schwerstbehinderung { get; set; } = string.Empty;
-    public string SchülerLeJahrDa { get; set; } = string.Empty;
-    public string Schulwechselform { get; set; } = string.Empty;
+    public string Postleitzahl { get; set; } = string.Empty;    
+    public string Schwerstbehinderung { get; set; } = string.Empty;    
     public string Status { get; set; } = string.Empty;
-    public string Straße { get; set; } = string.Empty;
-    public string Schulbesuchsjahre { get; set; } = string.Empty;
-    public string Schulform { get; set; } = string.Empty;
-    public string Zugezogen { get; set; } = string.Empty;
-    public string Zeugnis { get; set; } = string.Empty;
-    public string Volljährig { get; set; } = string.Empty;
-    public string VoFoerderschwerpunkt2 { get; set; } = string.Empty;
-    public string VoReformpdg { get; set; } = string.Empty;
-    public string VoSchwerstbehindert { get; set; } = string.Empty;
-    public string VoFoerderschwerp { get; set; } = string.Empty;
-    public string VoJahrgang { get; set; } = string.Empty;
-    public string VoKlassenart { get; set; } = string.Empty;
-    public string VoOrgform { get; set; } = string.Empty;
-    public string VoGliederung { get; set; } = string.Empty;
-    public string VoKlasse { get; set; } = string.Empty;
-    public string? Vorname { get; set; } = string.Empty;
-    public string VorjahrC05AktjahrC06 { get; set; } = string.Empty;
-    public string Versetzung { get; set; } = string.Empty;
-    public string Vertragsende { get; set; } = string.Empty;
-    public string Vertragsbeginn { get; set; } = string.Empty;
-    public string Verkehrssprache { get; set; } = string.Empty;
-    public string VoFachklasse { get; set; } = string.Empty;
-    public string VoraussAbschlussdatum { get; set; } = string.Empty;
-    public string TelefonNummernBemerkung { get; set; } = string.Empty;
-    public string Telefonnummer2 { get; set; } = string.Empty;
-    public string Telefonnummer { get; set; } = string.Empty;
-    public string StaatsangehörigkeitSchlüssel { get; set; } = string.Empty;
-    public string StaatsangehörigkeitKlartextAdjektiv { get; set; } = string.Empty;
-    public string StaatsangehörigkeitKlartext { get; set; } = string.Empty;
-    public string Sportbefreiung { get; set; } = string.Empty;
-    public string Schwerpunkt { get; set; } = string.Empty;
-    public string SchulpflichtErfüllt { get; set; } = string.Empty;
-    public string SchulNummer { get; set; } = string.Empty;
-    public string Schuljahr { get; set; } = string.Empty;
-    public string SchulformFürSimExport { get; set; } = string.Empty;
-    public string Zeugnisdatum { get; set; } = string.Empty;
-    public string Adressmerkmal { get; set; } = string.Empty;
+    public string Straße { get; set; } = string.Empty;    
+    public string? Vorname { get; set; } = string.Empty;    
     public List<dynamic> Abwesenheiten { get; set; } = new List<dynamic>();
     public string AlleMaßnahmenUndVorgänge { get; set; } = string.Empty;
     public List<dynamic> Massnahmen { get; set; } = new List<dynamic>();
@@ -227,6 +79,7 @@ public partial class Student
     public int SchulnrEigner { get; set; }
     public string PfadDokumentenverwaltung { get; private set; } = string.Empty;
     public DateTime ZeugnisdatumLetztesZeugnisInDieserKlasse { get; private set; }
+    public string Id { get; internal set; }
 
     public string GetFehlstd(List<dynamic>? absencesPerStudent, IConfiguration configuration)
     {
@@ -659,7 +512,7 @@ public partial class Student
     {
         if (string.IsNullOrEmpty(Nachname) || string.IsNullOrEmpty(Vorname) || string.IsNullOrEmpty(Geburtsdatum)) return "";
         
-        var id = IdSchild;
+        var id = Id;
 
         if (!string.IsNullOrEmpty(ExterneIdNummer))
         {
@@ -731,7 +584,7 @@ public partial class Student
         return text;
     }
 
-    public string GetId(List<dynamic> schuelerZusatzdaten)
+    /*public string GetId(List<dynamic> schuelerZusatzdaten)
     {
         // Wenn der Schüler noch eine AtlantisID hat, dann wird die AtlantisID auf Webuntis gematcht.
         // Ansonsten wird die SchildID auf Webuntis gematcht.
@@ -748,8 +601,8 @@ public partial class Student
             return dict["Externe ID-Nr"].ToString();
         }).FirstOrDefault();
 
-        return string.IsNullOrEmpty(externeIdNr) ? IdSchild : externeIdNr;
-    }
+        return string.IsNullOrEmpty(externeIdNr) ? Id : externeIdNr;
+    }*/
 
     public void GetMaßnahmen(List<Datei?> dateien, List<string> maßnahmenString)
     {
@@ -1383,7 +1236,7 @@ public partial class Student
     {
         var pfadDokumentenverwaltung = GetPfadDokumentenverwaltung(configuration);
 
-        var zieldateiname = $"{IdSchild}.jpg";
+        var zieldateiname = $"{Id}.jpg";
 
         var quellPfad = Path.Combine(configuration["PfadDownloads"], "Fotos", Klasse);
 
@@ -1415,7 +1268,7 @@ public partial class Student
         }
     }
 
-    internal bool JüngstEntlassen()
+    internal bool NochKeineAnzahlWochenHer(int anzahlWochen)
     {
         if (!string.IsNullOrEmpty(Entlassdatum))
         {
@@ -1423,7 +1276,7 @@ public partial class Student
             if (DateTime.TryParseExact(Entlassdatum, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out parsedEntlassdatum))
             {
                 var heute = DateTime.Now.Date;
-                var sechsWochenZurueck = heute.AddDays(-42);
+                var sechsWochenZurueck = heute.AddDays(-7 * anzahlWochen);
 
                 if (parsedEntlassdatum >= sechsWochenZurueck && parsedEntlassdatum <= heute)
                 {

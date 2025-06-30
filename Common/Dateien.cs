@@ -631,7 +631,7 @@ public class Dateien : List<Datei>
             }
             else
             {
-                Meldung.Add($"[bold {Global.GetColor(Global.ColorZahlen)}]{anzahlDateienMitZeilen}[/] Dateien aus [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["pfadDownloads"]}[/] eingelesen");
+                Meldung.Add($"[bold {Global.GetColor(Global.ColorZahlen)}]{anzahlDateienMitZeilen}[/] Dateien aus [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["pfadDownloads"]}[/] eingelesen.");
             }
             DisplayHeader(configuration, Meldung);
         }

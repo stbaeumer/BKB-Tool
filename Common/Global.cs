@@ -226,6 +226,18 @@ public static class Global
 
             AnsiConsole.Write(panel);
 
+            if (!RunningInCodeSpace())
+            {               
+                var ordner = Path.GetDirectoryName(linkeSeite);
+                if (!string.IsNullOrEmpty(ordner))
+                {
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = ordner,
+                        UseShellExecute = true
+                    });
+                }        
+            }
         }
         else
         {
@@ -1008,29 +1020,6 @@ public static class Global
 
     public static void WeiterMitAnykey(IConfiguration configuration, Menüeintrag menüeintrag = null)
     {
-        if (!RunningInCodeSpace())
-        {
-            if (menüeintrag != null && menüeintrag.Zieldatei != null && menüeintrag.Zieldatei.Ordner != null)
-            {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = menüeintrag.Zieldatei.Ordner,
-                    UseShellExecute = true
-                });
-            }
-            else
-            {
-                if (menüeintrag != null && menüeintrag.Zieldatei != null && !string.IsNullOrEmpty(Path.GetDirectoryName(menüeintrag.Zieldatei.AbsoluterPfad)))
-                {
-                    Process.Start(new ProcessStartInfo
-                    {
-                        FileName = Path.GetDirectoryName(menüeintrag.Zieldatei.AbsoluterPfad),
-                        UseShellExecute = true
-                    });
-                }
-            }
-        }
-
         var panel = new Panel($"Weiter mit [bold {Global.GetColor(Global.ColorActionInMenüs)}]Anykey[/] oder mit [bold {Global.GetColor(Global.ColorActionInMenüs)}]e[/] Einstellungen durchlaufen oder mit [bold {Global.GetColor(Global.ColorActionInMenüs)}]h[/] Onlinehilfe öffnen.")
                         .HeaderAlignment(Justify.Left)
                         .SquareBorder()

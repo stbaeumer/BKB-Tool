@@ -159,13 +159,16 @@ WHERE (((Schueler.Geloescht)='-') AND ((Schueler.Status)=2) AND ((Schueler.AktSc
                 OleDbCommand oleDbCommand = new OleDbCommand();
                 oleDbCommand = oleDbConnection.CreateCommand();
                 oleDbCommand.CommandText = "UPDATE Schueler SET FotoVorhanden = '+' WHERE ID = @id";
-                oleDbCommand.Parameters.AddWithValue("@id", student.IdSchild);
+
+                    throw new Exception("Die ID muss erst noch ausgelesen werden!!!!!!! ");
+
+                oleDbCommand.Parameters.AddWithValue("@id", student.Id);
                 oleDbCommand.ExecuteNonQuery();
                 student.FotoVorhanden = true;
                 oleDbCommand = new OleDbCommand();
                 oleDbCommand = oleDbConnection.CreateCommand();
                 oleDbCommand.CommandText = "insert into SchuelerFotos (Schueler_ID, Foto, SchulnrEigner) values (@id, @foto, @schulnrEigner)";
-                oleDbCommand.Parameters.AddWithValue("@id", student.IdSchild);
+                oleDbCommand.Parameters.AddWithValue("@id", student.Id);
                 oleDbCommand.Parameters.AddWithValue("@foto", student.Foto != null ? Convert.FromBase64String(student.Foto) : DBNull.Value);
                 oleDbCommand.Parameters.AddWithValue("@schulnrEigner", student.SchulnrEigner);
                 oleDbCommand.ExecuteNonQuery();
@@ -193,12 +196,12 @@ WHERE (((Schueler.Geloescht)='-') AND ((Schueler.Status)=2) AND ((Schueler.AktSc
                 OleDbCommand oleDbCommand = new OleDbCommand();
                 oleDbCommand = oleDbConnection.CreateCommand();
                 oleDbCommand.CommandText = "DELETE * FROM SchuelerFotos WHERE SchuelerFotos.Schueler_ID = @id";
-                oleDbCommand.Parameters.AddWithValue("@id", student.IdSchild);
+                oleDbCommand.Parameters.AddWithValue("@id", student.Id);
                 oleDbCommand.ExecuteNonQuery();
                 oleDbCommand = new OleDbCommand();
                 oleDbCommand = oleDbConnection.CreateCommand();
                 oleDbCommand.CommandText = "UPDATE Schueler SET FotoVorhanden = '-' WHERE ID = @id";
-                oleDbCommand.Parameters.AddWithValue("@id", student.IdSchild);
+                oleDbCommand.Parameters.AddWithValue("@id", student.Id);
                 oleDbCommand.ExecuteNonQuery();
                 student.FotoVorhanden = false;
                 return "ok";

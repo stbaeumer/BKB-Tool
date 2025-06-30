@@ -32,23 +32,35 @@ public class Students : List<Student>
     {
         var schuelerBasisdaten = quelldateien.GetMatchingList(configuration, "schuelerbasisdaten", new Students(), null);
         if (schuelerBasisdaten == null || schuelerBasisdaten.Count == 0) return;
+        var schuelerZusatzdaten = quelldateien.GetMatchingList(configuration, "schuelerzusatzdaten", new Students(), null);
+        if (schuelerZusatzdaten == null || schuelerZusatzdaten.Count == 0) return;
+
+        if (schuelerBasisdaten.Count != schuelerZusatzdaten.Count)
+        {
+            Console.WriteLine("Die Anzahl der Schüler in den Basis- und Zusatzdaten stimmt nicht überein.");
+            return;            
+        }
 
         for (int j = 0; j < schuelerBasisdaten.Count; j++)
         {
             var student = new Student();
             try
             {
-                var dict = (IDictionary<string, object>)schuelerBasisdaten[j];
+                var sb = (IDictionary<string, object>)schuelerBasisdaten[j];
+                var sz = (IDictionary<string, object>)schuelerZusatzdaten[j];
 
-                student.Vorname = dict["Vorname"].ToString();
-                student.Nachname = dict["Nachname"].ToString();
-                student.Geburtsdatum = dict["Geburtsdatum"].ToString();
-                student.Klasse = dict["Klasse"].ToString();
-                student.Status = dict["Status"].ToString();
-                student.Geschlecht = dict["Geschlecht"].ToString();
-                student.Ort = dict["Ort"].ToString();
-                student.Postleitzahl = dict["PLZ"].ToString();
-                student.Straße = dict["Straße"].ToString();
+                student.Vorname = sb["Vorname"].ToString();
+                student.Nachname = sb["Nachname"].ToString();
+                student.Geburtsdatum = sb["Geburtsdatum"].ToString();
+                student.Klasse = sb["Klasse"].ToString();
+                student.Status = sb["Status"].ToString();
+                student.Geschlecht = sb["Geschlecht"].ToString();
+                student.Ort = sb["Ort"].ToString();
+                student.Postleitzahl = sb["PLZ"].ToString();
+                student.Straße = sb["Straße"].ToString();
+                student.MailSchulisch = sz["schulische E-Mail"].ToString();
+                // Wenn eine externe ID eingetragen ist, wird diese verwendet, ansonsten die schulische E-Mail-Adresse ohne Domain.
+                student.Id = string.IsNullOrEmpty(sz["Externe ID-Nr"].ToString()) ? sz["schulische E-Mail"].ToString().Split('@')[0] : sz["Externe ID-Nr"].ToString();
                 Add(student);
             }
             catch (Exception ex)
@@ -308,7 +320,7 @@ public class Students : List<Student>
 
             foreach (var student in this.OrderBy(x => x.Nachname))
             {
-                string id = student.GetId(schuelerZusatzdaten);
+                string id = student.Id;
 
                 if (student.Klasse == kl)
                 {
@@ -630,7 +642,7 @@ while (Console.KeyAvailable) Console.ReadKey(true);
                     if (i < sortierteKlasse.Count())
                     {
                         string neuerDateiname =
-                            $"{sortierteKlasse[i].Nachname}_{sortierteKlasse[i].Vorname}_{sortierteKlasse[i].IdSchild}.jpg";
+                            $"{sortierteKlasse[i].Nachname}_{sortierteKlasse[i].Vorname}_{sortierteKlasse[i].Id}.jpg";
                         string neuerPfad = Path.Combine(klassenpfad, neuerDateiname);
 
                         // Datei verschieben und umbenennen
@@ -656,175 +668,7 @@ while (Console.KeyAvailable) Console.ReadKey(true);
 
     private sealed class SchuelersMap : ClassMap<Student>
     {
-        public SchuelersMap()
-        {
-            Map(m => m.Vorname).Name(" Vorname", "Vorname", "foreName", "Allg. Adresse: Name2");
-            Map(m => m.Aktjahrgang).Name("9 Aktjahrgang");
-            Map(m => m.AktuellerAbschnitt).Name("Aktueller Abschnitt");
-            Map(m => m.AktuellesHalbjahr).Name("Aktuelles Halbjahr");
-            Map(m => m.Aufnahmedatum).Name("22 Aufnahmedatum", "Aufnahmedatum", "entryDate");
-            Map(m => m.Adressmerkmal).Name("68 Adressmerkmal");
-            Map(m => m.Adressart).Name("Allg. Adresse: Adressart");
-            Map(m => m.Anrede).Name("Anrede");
-            Map(m => m.Asv).Name("ASV");
-            Map(m => m.AufnehmendeSchuleName).Name("Aufnehmende Schule: Name");
-            Map(m => m.AufnehmendeSchuleOrt).Name("Aufnehmende Schule: Ort");
-            Map(m => m.AufnehmendeSchulePlz).Name("Aufnehmende Schule: PLZ");
-            Map(m => m.AufnehmendeSchuleSchulnr).Name("Aufnehmende Schule: Schulnr.");
-            Map(m => m.AufnehmendeSchuleStraße).Name("Aufnehmende Schule: Straße");
-            Map(m => m.Aussiedler).Name("Aussiedler");
-            Map(m => m.Ausweisnummer).Name("Ausweisnummer");
-            Map(m => m.Ausbildungsort).Name("24 Ausbildort", "25 Betriebsort");
-            Map(m => m.Austritt).Name(" Austritt", "45 EntlDatum", "Austrittsdatum", "Entlassdatum", "exitDate");
-            Map(m => m.AbschlussartAnEigenerSchuleStatistikKürzel)
-                .Name("Abschlussart an eigener Schule (Statistik-Kürzel)");
-            Map(m => m.Bemerkungen).Name("Allg. Adresse: Bemerkungen", "Bemerkungen");
-            Map(m => m.BeginnDerBildungsganges).Name("Beginn d. Bildungsganges");
-            Map(m => m.BerufsschulpflichtErfüllt).Name("Berufsschulpflicht erfüllt");
-            Map(m => m.BesMerkmal).Name("bes. Merkmal");
-            Map(m => m.BleibtAnSchule).Name("Bleibt an Schule?");
-            Map(m => m.Briefanrede).Name("Briefanrede");
-            Map(m => m.Berufsabschluss).Name("65 Berufsabschluss");
-            Map(m => m.Berufswechsel).Name("Schüler Berufswechsel");
-            Map(m => m.Betreuung).Name("61 Betreuung");
-            Map(m => m.BetreuerAbteilung).Name("Allg. Adresse: Betreuer Abteilung");
-            Map(m => m.BetreuerAnrede).Name("Allg. Adresse: Betreuer Anrede");
-            Map(m => m.BetreuerEmail).Name("Allg. Adresse: Betreuer E-Mail");
-            Map(m => m.BetreuerName).Name("Allg. Adresse: Betreuer Name");
-            Map(m => m.BetreuerTelefon).Name("Allg. Adresse: Betreuer Telefon");
-            Map(m => m.BetreuerTitel).Name("Allg. Adresse: Betreuer Titel");
-            Map(m => m.BetreuerVorname).Name("Allg. Adresse: Betreuer Vorname");
-            Map(m => m.Betreuungslehrer).Name("Allg. Adresse: Betreuungslehrer");
-            Map(m => m.BetreuungslehrerAnrede).Name("Allg. Adresse: Betreuungslehrer Anrede");
-            Map(m => m.Bezugsjahr).Name("1 Bezugsjahr");
-            Map(m => m.Bkazvo).Name("62 BKAZVO");
-            Map(m => m.Branche).Name("Allg. Adresse: Branche");
-            Map(m => m.Bundesland).Name("Allg. Adresse: Bundesland", "Bundesland");
-            Map(m => m.Einschulungsart).Name("58 Einschulungsart");
-            Map(m => m.ElternteilZugezogen).Name("56 Elternteil zugezogen");
-            Map(m => m.Entlassjahrgang).Name("Entlassjahrgang");
-            Map(m => m.Erzieher1Anrede).Name("Erzieher 1: Anrede");
-            Map(m => m.Erzieher1Briefanrede).Name("Erzieher 1: Briefanrede");
-            Map(m => m.Erzieher1Nachname).Name("Erzieher 1: Nachname");
-            Map(m => m.Erzieher1Titel).Name("Erzieher 1: Titel");
-            Map(m => m.Erzieher1Vorname).Name("Erzieher 1: Vorname");
-            Map(m => m.Erzieher2Anrede).Name("Erzieher 2: Anrede");
-            Map(m => m.Erzieher2Briefanrede).Name("Erzieher 2: Briefanrede");
-            Map(m => m.Erzieher2Nachname).Name("Erzieher 2: Nachname");
-            Map(m => m.Erzieher2Titel).Name("Erzieher 2: Titel");
-            Map(m => m.Erzieher2Vorname).Name("Erzieher 2: Vorname");
-            Map(m => m.ErzieherArtKlartext).Name("Erzieher: Art (Klartext)");
-            Map(m => m.ErzieherEmail).Name("Erzieher: E-Mail");
-            Map(m => m.ErzieherErhältAnschreiben).Name("Erzieher: Erhält Anschreiben");
-            Map(m => m.ErzieherOrt).Name("Erzieher: Ort");
-            Map(m => m.ErzieherOrtsteil).Name("Erzieher: Ortsteil");
-            Map(m => m.ErzieherPostleitzahl).Name("Erzieher: Postleitzahl");
-            Map(m => m.ErzieherStraße).Name("Erzieher: Straße");
-            Map(m => m.ExterneIdNummer).Name("Externe ID-Nummer");
-            Map(m => m.Fachklasse).Name("6 Fachklasse", "Fachklasse", "Fachklasse (Kürzel)");
-            Map(m => m.FachklasseBezeichnung).Name("Fachklasse (Bezeichnung)");
-            Map(m => m.FaxNr).Name("Allg. Adresse: Fax-Nr.", "Fax-Nr.");
-            Map(m => m.Förderschwerpunkt1).Name("10 Foerderschwerp", "Förderschwerpunkt 1");
-            Map(m => m.Förderschwerpunkt2).Name("Förderschwerpunkt 2", "63 Förderschwerpunkt 2");
-            Map(m => m.Geburtsdatum).Name("Geburtsdatum", "16 Gebdat", "birthDate");
-            Map(m => m.Geburtsland).Name("Geburtsland");
-            Map(m => m.GeburtslandMutter).Name("Geburtsland Mutter", "54 Geb.Land (Mutter)");
-            Map(m => m.GeburtslandVater).Name("Geburtsland Vater", "55 Geb.Land (Vater)");
-            Map(m => m.Geburtsname).Name("Geburtsname");
-            Map(m => m.Geburtsort).Name("Geburtsort");
-            Map(m => m.Geschlecht).Name("gender", "Geschlecht", "17 Geschlecht");
-            Map(m => m.Gliederung).Name("5 Gliederung", "Gliederung", "Schulgliederung");
-            Map(m => m.GsEmpfehlung).Name("59 GS-Empfehlung");
-            Map(m => m.Hausnummer).Name("Hausnummer");
-            Map(m => m.HöchsterAllgAbschluss).Name("Höchster allg. Abschluss");
-            Map(m => m.Internatsplatz).Name("69 Internatsplatz");
-            Map(m => m.IdSchild).Name("Interne ID-Nummer");
-            Map(m => m.JahrZuzug).Name("50 Jahr Zuzug");
-            Map(m => m.JahrEinschulung).Name("51 Jahr Einschulung");
-            Map(m => m.JahrSchulwechsel).Name("52 Jahr Schulwechsel");
-            Map(m => m.Jahrgang).Name("Jahrgang");
-            Map(m => m.JahrgangInterneBezeichnung).Name("Jahrgang (interne Bezeichnung)");
-            Map(m => m.Jva).Name("13 Jva");
-            Map(m => m.Klasse).Name("4 Klasse", "Klasse");
-            Map(m => m.Klassenart).Name("7 Klassenart");
-            Map(m => m.Klassenlehrer).Name("Klassenlehrer");
-            Map(m => m.KlassenlehrerAmtsbezeichnung).Name("Klassenlehrer: Amtsbezeichnung");
-            Map(m => m.KlassenlehrerAnrede).Name("Klassenlehrer: Anrede");
-            Map(m => m.KlassenlehrerName).Name("Klassenlehrer: Name");
-            Map(m => m.KlassenlehrerTitel).Name("Klassenlehrer: Titel");
-            Map(m => m.KlassenlehrerVorname).Name("Klassenlehrer: Vorname");
-            Map(m => m.Kreis).Name("Kreis");
-            Map(m => m.Koopklasse).Name("70 Koopklasse");
-            Map(m => m.LetzteSchuleName).Name("Letzte Schule: Name");
-            Map(m => m.LetzteSchuleOrt).Name("Letzte Schule: Ort");
-            Map(m => m.LetzteSchulePlz).Name("Letzte Schule: PLZ");
-            Map(m => m.LetzterBerufsbezAbschlussKürzel).Name("Letzter berufsbez. Abschluss (Kürzel)");
-            Map(m => m.LsSchulform).Name("26 LSSchulform", "Letzte Schule: Schulform");
-            Map(m => m.Lsschulnummer).Name("27 Lsschulnummer", "Letzte Schule: Schulnr.");
-            Map(m => m.LsGliederung).Name("28 LSGliederung");
-            Map(m => m.LsFachklasse).Name("29 LSFachklasse");
-            Map(m => m.Lsklassenart).Name("30 Lsklassenart");
-            Map(m => m.Lsreformpdg).Name("31 Lsreformpdg");
-            Map(m => m.LsSschulentl).Name("32 LSSschulentl", "Letzte Schule: Entlassdatum");
-            Map(m => m.LsJahrgang).Name("33 LSJahrgang", "Letzte Schule: Entlassjahrgang");
-            Map(m => m.LsQual).Name("34 LSQual", "Letzter allg. Abschluss (Kürzel)", "Letzte Schule: Abschluss");
-            Map(m => m.Lsversetz).Name("35 Lsversetz", "Letzte Schule: Versetzungsvermerk");
-            Map(m => m.MailPrivat).Name("address.email", "E-Mail (privat)", "Allg. Adresse: E-Mail");
-            Map(m => m.MailSchulisch).Name("E-Mail schulisch)");
-            Map(m => m.Massnahmetraeger).Name("60 Massnahmetraeger");
-            Map(m => m.MigrationshintergrundVorhanden).Name("Migrationshintergrund vorhanden");
-            Map(m => m.Nachname).Name("Nachname", " Familienname", "longName", "Allg. Adresse: Name1");
-            Map(m => m.Orgform).Name("8 Orgform", "Orgform", "Organisationsform");
-            Map(m => m.Ortsteil).Name("Ortsteil");
-            Map(m => m.Ort).Name("Ortsname", "address.city", "15. Ort", "Allg. Adresse: Ort", "Ort");
-            Map(m => m.Postleitzahl).Name("14 Plz", "Postleitzahl", "address.postCode", "Allg. Adresse: PLZ");
-            Map(m => m.Produktname).Name("66 Produktname");
-            Map(m => m.Produktversion).Name("67 Produktversion");
-            Map(m => m.Reformpdg).Name("12 Reformpdg");
-            Map(m => m.Religionsanmeldung).Name("20 Relianmeldung", "Datum Religionsanmeldung", "Religionsanmeldung");
-            Map(m => m.Religionsabmeldung).Name("21 Reliabmeldung", "Religionsabmeldung", "Datum Religionsabmeldung");
-            Map(m => m.KonfessionKlartext).Name("19 Religion");
-            Map(m => m.Labk).Name("23 Labk");
-            Map(m => m.Schwerstbehinderung).Name("Schwerstbehinderung", "11 Schwerstbehindert");
-            Map(m => m.SchülerLeJahrDa).Name("Schüler le. Jahr da");
-            Map(m => m.Schulwechselform).Name("48 Schulwechselform");
-            Map(m => m.Schulbesuchsjahre).Name("Schulbesuchsjahre");
-            Map(m => m.Schulform).Name("Schulform");
-            Map(m => m.SchulformFürSimExport).Name("Schulform (f. SIM-Export)");
-            Map(m => m.Schuljahr).Name("Schuljahr (z.B. 2008/2009)");
-            Map(m => m.SchulNummer).Name("Schul-Nummer");
-            Map(m => m.SchulpflichtErfüllt).Name("Schulpflicht erfüllt", "47 Schulpflichterf");
-            Map(m => m.Schwerpunkt).Name("Schwerpunkt");
-            Map(m => m.Sportbefreiung).Name("Sportbefreiung");
-            Map(m => m.StaatsangehörigkeitKlartext).Name("Staatsangehörigkeit (Klartext)", "18 Staatsang");
-            Map(m => m.StaatsangehörigkeitKlartextAdjektiv).Name("Staatsangehörigkeit (Klartext, Adjektiv)");
-            Map(m => m.StaatsangehörigkeitSchlüssel).Name("Staatsangehörigkeit (Schlüssel)", "18 Staatsang");
-            Map(m => m.Straße).Name("Straße", "Straßenname", "address.street", "Allg. Adresse: Straße");
-            Map(m => m.Status).Name("2 Status", "Status");
-            Map(m => m.Telefonnummer).Name("Telefon-Nr.", "Allg. Adresse: 1. Tel.-Nr.", "address.phone",
-                "Telefon-Nummern: Telefon-Nummer");
-            Map(m => m.Telefonnummer2).Name("Allg. Adresse: 2. Tel.-Nr.", "address.mobile");
-            Map(m => m.TelefonNummernBemerkung).Name("Telefon-Nummern: Bemerkung");
-            Map(m => m.Verkehrssprache).Name("57 Verkehrssprache", "Verkehrssprache in der Familie");
-            Map(m => m.Vertragsbeginn).Name("Allg. Adresse: Vertragsbeginn");
-            Map(m => m.Vertragsende).Name("Allg. Adresse: Vertragsende");
-            Map(m => m.Versetzung).Name("49 Versetzung", "Versetzung");
-            Map(m => m.VorjahrC05AktjahrC06).Name("Vorjahr C05 Aktjahr C06");
-            Map(m => m.VoKlasse).Name("36 VOKlasse");
-            Map(m => m.VoGliederung).Name("37 VOGliederung");
-            Map(m => m.VoFachklasse).Name("38 VOFachklasse");
-            Map(m => m.VoOrgform).Name("39 VOOrgform");
-            Map(m => m.VoKlassenart).Name("40 VOKlassenart");
-            Map(m => m.VoJahrgang).Name("41 VOJahrgang");
-            Map(m => m.VoFoerderschwerp).Name("42 VOFoerderschwerp");
-            Map(m => m.VoSchwerstbehindert).Name("43 VOSchwerstbehindert");
-            Map(m => m.VoReformpdg).Name("44 VOReformpdg");
-            Map(m => m.VoFoerderschwerpunkt2).Name("64 VOFörderschwerpunkt 2");
-            Map(m => m.Volljährig).Name("Volljährig");
-            Map(m => m.VoraussAbschlussdatum).Name("vorauss. Abschlussdatum");
-            Map(m => m.Zeugnis).Name("46 Zeugnis");
-            Map(m => m.Zugezogen).Name("53 zugezogen", "Zuzugsjahr");
-        }
+        
     }
 
     public List<dynamic> AdressenImportieren(Dateien dateien)
@@ -1095,25 +939,6 @@ while (Console.KeyAvailable) Console.ReadKey(true);
         }
 
         return false;
-    }
-
-    public Students DoppelteFiltern()
-    {
-        var stdents = new Students();
-        
-        // Wenn SuS wiederkommen usw., dann bekommen sie eine neue, höhere ID. Also gewinnt die höchste ID.
-        foreach (var student in this.OrderByDescending(x=>x.IdSchild))
-        {
-            if (!stdents.Where(x=>x.Nachname == student.Nachname && x.Vorname == student.Vorname && x.Geburtsdatum == student.Geburtsdatum).Any())
-            {
-                stdents.Add(student);
-            }
-            else
-            {
-                string doppelt;
-            }
-        }
-        return stdents;
     }
 
     internal void GetPfadAtlantisFotos(IConfiguration configuration)
@@ -1485,7 +1310,7 @@ while (Console.KeyAvailable) Console.ReadKey(true);
         {
             if (string.IsNullOrEmpty(student.ExterneIdNummer))
             {
-                if (!fotoIst.Contains(student.IdSchild))
+                if (!fotoIst.Contains(student.Id))
                 {
                     students.Add(student);
                 }
@@ -1510,12 +1335,12 @@ while (Console.KeyAvailable) Console.ReadKey(true);
                 {
                     var pfadDokumentenverwaltung = student.GetPfadDokumentenverwaltung(configuration);
 
-                    var absoluterPfadZumBild = Path.Combine(pfadDokumentenverwaltung, student.IdSchild + ".jpg");
+                    var absoluterPfadZumBild = Path.Combine(pfadDokumentenverwaltung, student.Id + ".jpg");
 
                     if (File.Exists(absoluterPfadZumBild))
                     {
                         // Name der Datei im ZIP-Archiv
-                        string dateiNameImZip = student.IdSchild + ".jpg";
+                        string dateiNameImZip = student.Id + ".jpg";
 
                         // Zip-Eintrag erstellen
                         ZipEntry entry = new ZipEntry(dateiNameImZip)
@@ -1539,7 +1364,7 @@ while (Console.KeyAvailable) Console.ReadKey(true);
                         zip.CloseEntry();
 
                         // Bild in fotos.txt schreiben
-                        File.AppendAllText(fotosTxt, student.IdSchild + Environment.NewLine);
+                        File.AppendAllText(fotosTxt, student.Id + Environment.NewLine);
                     }
                 }
 
@@ -1559,7 +1384,7 @@ while (Console.KeyAvailable) Console.ReadKey(true);
 
     internal string GetArtUndZahlen()
     {
-        var statusstring = $"[{Global.GetColor(Global.ColorZahlen)}]" + this.Count().ToString() + "[/] Schüler*innen: (";
+        var statusstring = $"[{Global.GetColor(Global.ColorZahlen)}]" + this.Count().ToString() + "[/] Schüler*innen: ";
 
         var i = 0;
         var zeile = new List<string>();
@@ -1576,6 +1401,9 @@ while (Console.KeyAvailable) Console.ReadKey(true);
 
             switch (status)
             {
+                case "0":
+                    statusstring += " in Neuaufnahme, ";
+                    break;
                 case "2":
                     statusstring += " Aktive, ";
                     break;
@@ -1586,7 +1414,7 @@ while (Console.KeyAvailable) Console.ReadKey(true);
                     statusstring += " mit Abschluss, ";
                     break;
                 case "9":
-                    statusstring += " Abgänger, ";
+                    statusstring += " abgegangen, ";
                     break;
                 default:
                     statusstring += " Beurlaubte, ";
@@ -1599,6 +1427,6 @@ while (Console.KeyAvailable) Console.ReadKey(true);
             return $"[{Global.GetColor(Global.ColorZahlen)}] {this.Count().ToString()}[/] Schüler*innen:[springGreen2] nur aktive Schüler exportiert[/]";
         }
         
-        return statusstring.TrimEnd(' ').TrimEnd(',').TrimEnd(' ').TrimEnd(',') +  ")";
+        return statusstring.TrimEnd(' ').TrimEnd(',').TrimEnd(' ').TrimEnd(',');
     }
 }

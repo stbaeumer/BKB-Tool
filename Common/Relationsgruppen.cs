@@ -135,7 +135,7 @@
 
             foreach (var student in students)
             {
-                if (!(from s in schuelerSchnellmeldung where s.IdSchild == student.IdSchild select s).Any())
+                if (!(from s in schuelerSchnellmeldung where s.Id == student.Id select s).Any())
                 {
                     datei.Add("Der Schüler " + student.Nachname + ", " + student.Vorname + " " + student.Klasse +
                               " ist nicht in der Schnellmeldung erfasst. Prüfen!");

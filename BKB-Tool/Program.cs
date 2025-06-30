@@ -203,23 +203,33 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                 }
 
                 File.WriteAllText(updaterPath,
-                    "@echo off\n" +
-                    "echo.\n" +
-                    "echo BKB-Tool\n" +
-                    "echo =========\n" +
-                    "echo Warte auf Beenden von BKB-Tool.exe ...\n" +
-                    ":waitforend\n" +
-                    "tasklist | find /I \"BKB-Tool.exe\" >nul\n" +
-                    "if not errorlevel 1 (\n" +
-                    "    timeout /t 1 >nul\n" +
-                    "    goto waitforend\n" +
-                    ")\n" +
-                    "echo Ersetze alte Version ...\n" +
-                    "del /F /Q BKB-Tool.exe\n" +
-                    "rename BKB-Tool_neu.exe BKB-Tool.exe\n" +
-                    "echo Starte neue Version ...\n" +
-                    "start \"\" BKB-Tool.exe\n" +
-                    "exit\n"
+                "@echo off\n" +
+                "echo.\n" +
+                "echo BKB-Tool\n" +
+                "echo =========\n" +
+                "echo Warte auf Beenden von BKB-Tool.exe ...\n" +
+                "set /a counter=0\n" +
+                ":waitforend\n" +
+                "tasklist | find /I \"BKB-Tool.exe\" >nul\n" +
+                "if not errorlevel 1 (\n" +
+                "    timeout /t 1 >nul\n" +
+                "    set /a counter+=1\n" +
+                "    if %counter%==7 (\n" +
+                "        echo Das Beenden dauert auffällig lang. Versuchen Sie BKB-Tool im Taskmanager zu beenden oder starten Sie den Rechner neu.\n" +
+                "    )\n" +
+                "    goto waitforend\n" +
+                ")\n" +
+                "echo Ersetze alte Version ...\n" +
+                "del /F /Q BKB-Tool.exe\n" +
+                "if exist BKB-Tool.exe (\n" +
+                "    echo Fehler: Die alte BKB-Tool.exe konnte nicht gelöscht werden. Bitte schließen Sie alle Instanzen und versuchen Sie es erneut.\n" +
+                "    pause\n" +
+                "    exit /b 1\n" +
+                ")\n" +
+                "rename BKB-Tool_neu.exe BKB-Tool.exe\n" +
+                "echo Starte neue Version ...\n" +
+                "start \"\" BKB-Tool.exe\n" +
+                "exit\n"
                 );
 
                 dateien.DisplayHeader(configuration,
