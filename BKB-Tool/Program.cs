@@ -32,7 +32,7 @@ Global.SchulnummernPrivilegiert = new List<string>{ "177659" }; // Diese Schulnu
 Global.Schulnummer177659 = new List<string> { "177659" }; // Diese Schulnummer bekommen alle Privilegierten plus weitere Menüpunkte angezeigt.
 Global.SchulnummernDebug = new List<string>{ "000000" }; // alles
 
-configuration["AppDescription"] = $"[bold {Global.GetColor(Global.ColorBeschreibung)}]BKB-Tool[/] - Ein Werkzeug an der Schnittstelle zwischen SchILD und Untis.";
+configuration["AppDescription"] = $"[bold {Global.GetColor(Global.ColorBeschreibung)}]BKB-Tool[/] - Ein Werkzeug an der Schnittstelle zwischen SchILD und Webuntis.";
 
 var dateien = new Dateien(configuration);
 
@@ -88,6 +88,17 @@ do
 
             Global.WeiterMitAnykey(configuration, menuGefiltert[i]);
         }
+    }
+    catch (RestartException)
+    {
+        var panel = new Panel(new Markup($"[bold {Global.GetColor(Global.ColorFehler)}]Sie haben abgebrochen.[/]"))            
+            .BorderStyle(new Style(Color.Red))
+            .Expand();
+        AnsiConsole.Write(panel);
+
+        Thread.Sleep(1300);
+
+        continue; // explizit zum Schleifenanfang
     }
     catch (Exception ex)
     {

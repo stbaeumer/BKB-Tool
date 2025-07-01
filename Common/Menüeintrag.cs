@@ -391,8 +391,56 @@ public class Menüeintrag
             absencePerStud = Quelldateien.GetMatchingList(configuration, "absenceperstudent", IStudents, Klassen);
             if (absencePerStud == null || !absencePerStud.Any()) return [];
 
+            // Falls es offene Stunden gibt, kommt ein Hinweis, den man auch bestätigen muss.
+
+              var ab = absencePerStud
+                    .Where(rec =>
+                    {
+                        if (rec == null) return false;
+                        var dict = (IDictionary<string, object>)rec;
+                        return dict != null && dict["Status"] != null && dict["Status"].ToString() == "offen";
+                    }).Count();
+
+            if (ab > 0)
+            {
+                configuration = Global.Konfig("OffeneFehlstunden", Global.Modus.Update, configuration,
+                "",
+                $"Es gibt [{Global.GetColor(Global.ColorHinweise)}]{ab}[/] offene Fehlstunden. Offene Fehlstunden sind weder entschuldigt noch unentschuldigt und werden im Zeugnis nicht berücksichtigt. Wenn das so i.O. ist, dann weiter mit [{Global.GetColor(Global.ColorActionInMenüs)}]ENTER[/]. Abbruch mit [{Global.GetColor(Global.ColorFehler)}]ANYKEY[/].", Global.Datentyp.EnterOderAbbrechen);                
+            }
+
+
             configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration, "Abschnitt", $"Geben Sie den Lernabschnitt an. Das Schuljahr beginnt immer mit Abschnitt [{Global.GetColor(Global.ColorZahlen)}]1[/]. \nI.d.R. wechselt der Abschnitt im Halbjahr auf Abschnitt [{Global.GetColor(Global.ColorZahlen)}]2[/]", Global.Datentyp.Abschnitt);
             configuration = Global.Konfig("Abschnittswechsel", Global.Modus.Update, configuration, "Abschnittswechsel", $"Geben Sie das Datum des Abschnittswechsels an. \nI.d.R. ist der {new DateTime(Convert.ToInt32(Global.AktSj[1]), 2, 1).ToShortDateString()} (oder ein anderes Datum im Februar) der richtige Wert.", Global.Datentyp.DateTime, new DateTime(Convert.ToInt32(Global.AktSj[1]), 2, 1).ToShortDateString());
+
+            // Wenn der Abschnittswechsel hinter uns liegt und gleichzeitig Fehlzeiten von vorher vorliegen, dann wird gefragt, ob die vorherigen Fehlzeiten berücksichtigt werden sollen. 
+            var abschnittswechsel = DateTime.Parse(configuration["Abschnittswechsel"]);
+            var abschnittswechelInderZukunft = abschnittswechsel > DateTime.Now;
+            if (!abschnittswechelInderZukunft)
+            {
+                var alteFehlzeiten = absencePerStud
+                    .Where(rec =>
+                    {
+                        if (rec == null) return false;
+                        var dict = (IDictionary<string, object>)rec;
+                        return dict != null && DateTime.Parse(dict["Datum"].ToString()) < abschnittswechsel;
+                    }).Count();
+
+                if (alteFehlzeiten > 0)
+                    configuration = Global.Konfig("FehlzeitenVorDemAbschnittswechselBeruecksichtigen", Global.Modus.Update, configuration, $"Fehlzeiten vor dem {configuration["Abschnittswechsel"]} auf das Zeugnis? (j/n)", $"Sollen die Fehlzeiten vor dem Abschnittswechsel [{Global.GetColor(Global.ColorZahlen)}]{abschnittswechsel.ToShortDateString()}[/] auf dem Zeugnis hinzugefügt werden?", Global.Datentyp.JaNein, "ja");
+
+
+                // Wenn die Fehlzeiten vor dem Abschnittswechsel nicht berücksichtigt werden sollen, dann werden sie aus der Liste entfernt.
+                if (!configuration["FehlzeitenVorDemAbschnittswechselBeruecksichtigen"].ToLower().StartsWith("j"))
+                {
+                    absencePerStud = absencePerStud
+                        .Where(rec =>
+                        {
+                            if (rec == null) return false;
+                            var dict = (IDictionary<string, object>)rec;
+                            return dict != null && DateTime.Parse(dict["Datum"].ToString()) >= abschnittswechsel;
+                        }).ToList();
+                }
+            }
 
             var konferenzart = "";
             switch (configuration["Abschnitt"])
@@ -2859,10 +2907,6 @@ public class Menüeintrag
             
         var absolutePfade = new List<string>();
 
-        configuration = Global.Konfig("PfadFotosAusSchILD", Global.Modus.Update, configuration, "Pfad zu den Fotos aus SchILD", $"Geben Sie den Pfad zu den Fotos aus SchILD an. Ggf. müssen sie den Ordner zuerst erstellen. Anschließend müssen die Bilder aus SchILD in den Ordner exportiert werden: [{Global.GetColor(Global.ColorPfadInProgrammen)}]Datenaustausch > Fotos > Fotos exportieren[/]. Der Dateiname muss zusammengesetzt sein aus [{Global.GetColor(Global.ColorHinweise)}]Nachname, Vorname, Geburtsdatum[/]." +
-        "\nVon jedem SchILD-Foto wir eine Kopie von dem von Webuntis geforderten Namen erstellt. Wenn einzelne oder alle Fotos im Ordner gelöscht werden, werden einzelne oder alle Fotos neu für den Übertrag nach Webuntis angelegt.", Global.Datentyp.Pfad);
-        configuration = Global.Konfig("MailDomain", Global.Modus.Update, configuration, $"Mail-Domain", $"Geben Sie die schulische Mail-Domain für Mailadressen der Schüler*innen an. Bsp: [{Global.GetColor(Global.ColorHyperlink)}]@students.berufskolleg-borken.de[/]. Ihre Eingabe muss mit [{Global.GetColor(Global.ColorHyperlink)}]@[/] beginnen und mit [{Global.GetColor(Global.ColorHyperlink)}].de[/] etc. enden.");
-
         var pfadFotosAusSchILD = configuration["PfadFotosAusSchILD"];
 
         var alleFotos = Directory.GetFiles(pfadFotosAusSchILD, "*.jpg", SearchOption.AllDirectories);
@@ -2899,23 +2943,24 @@ public class Menüeintrag
                     }
                     else if ((Global.ZipModus)zipModus == Global.ZipModus.Geevoo)
                     {
-                        neuerDateiname = sz["schulische E-Mail"].ToString().Replace(configuration["MailDomain"], "").Replace("@", "");
+                        neuerDateiname = sz["schulische E-Mail"].ToString();
                     }
                 }
                 
                 if (!string.IsNullOrEmpty(neuerDateiname))
-                    {
-                        var dateityp = Path.GetExtension(bisherigerDateinameUndPfad).ToLowerInvariant();
-                        var pfad = Path.GetDirectoryName(bisherigerDateinameUndPfad);
-                        var neuerPfadUndDateiname = Path.Combine(pfad, neuerDateiname + dateityp);
+                {
+                    var dateityp = Path.GetExtension(bisherigerDateinameUndPfad).ToLowerInvariant();
+                    var pfad = Path.GetDirectoryName(bisherigerDateinameUndPfad);
+                    var neuerPfadUndDateinameWebuntis = Path.Combine(pfad, neuerDateiname + dateityp);
 
-                        // Wenn die neue Datei schon existiert, überspringe sie
-                        if (File.Exists(neuerPfadUndDateiname)) continue;
+                    // Wenn die neue Datei schon existiert, überspringe sie
+                    if (File.Exists(neuerPfadUndDateinameWebuntis)) continue;
 
-                        File.Copy(bisherigerDateinameUndPfad, neuerPfadUndDateiname, true);
+                    // Erstelle Webuntis-kompatiblen Dateinamen
+                    File.Copy(bisherigerDateinameUndPfad, neuerPfadUndDateinameWebuntis, true);
 
-                        absolutePfade.Add(neuerPfadUndDateiname);
-                    }
+                    absolutePfade.Add(neuerPfadUndDateinameWebuntis);
+                }
             }
         }
 
@@ -2941,5 +2986,21 @@ public class Menüeintrag
             int hashNachname = obj.Nachname?.ToLowerInvariant().GetHashCode() ?? 0;
             return hashVorname ^ hashNachname;
         }
+    }
+}
+
+[Serializable]
+public class RestartException : Exception
+{
+    public RestartException()
+    {
+    }
+
+    public RestartException(string? message) : base(message)
+    {
+    }
+
+    public RestartException(string? message, Exception? innerException) : base(message, innerException)
+    {
     }
 }

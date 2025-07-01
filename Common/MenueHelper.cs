@@ -171,14 +171,19 @@ public static class MenueHelper
                         students,
                         klassen,
                         [
-                            $"Es werden wird jetzt die Dateien [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachWebuntis.zip")}[/] und [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachGeevoo.zip")}[/] erstellt."
+                            $"Es werden wird jetzt die Dateien [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachWebuntisFotos.zip")}[/] und [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachGeevooFotos.zip")}[/] erstellt."
                         ],
                         m =>
                         {
                             if(m.NichtAlleSusHabenEineEindeutigeMailAdresse(configuration)) return;
                             m.Zieldatei = new Datei();
+                            configuration = Global.Konfig("PfadFotosAusSchILD", Global.Modus.Update, configuration, "Pfad zu den Fotos aus SchILD", $"Geben Sie den Pfad zu den Fotos aus SchILD an. Ggf. müssen sie den Ordner zuerst erstellen. Anschließend müssen die Bilder aus SchILD in den Ordner exportiert werden: [{Global.GetColor(Global.ColorPfadInProgrammen)}]Datenaustausch > Fotos > Fotos exportieren[/]. Der Dateiname muss zusammengesetzt sein aus [{Global.GetColor(Global.ColorHinweise)}]Nachname, Vorname, Geburtsdatum[/]." +
+                                    "\nVon jedem SchILD-Foto wird eine Kopie von dem von Webuntis geforderten Namen erstellt. Wenn einzelne oder alle Fotos im Ordner gelöscht werden, werden einzelne oder alle Fotos neu für den Übertrag nach Webuntis angelegt.", Global.Datentyp.Pfad);
+                            configuration = Global.Konfig("MailDomain", Global.Modus.Update, configuration, $"Mail-Domain", $"Geben Sie die schulische Mail-Domain für Mailadressen der Schüler*innen an. Bsp: [{Global.GetColor(Global.ColorHyperlink)}]@students.berufskolleg-borken.de[/]. Ihre Eingabe muss mit [{Global.GetColor(Global.ColorHyperlink)}]@[/] beginnen und mit [{Global.GetColor(Global.ColorHyperlink)}].de[/] etc. enden.");
                             var absoluteFotoPfade = m.GetFotosAusSchildPfade(configuration, m.Students, Global.ZipModus.Webuntis);
-                            m.Zieldatei?.Zippen(Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachWebuntis.zip"), configuration, "", 0, absoluteFotoPfade);
+                            m.Zieldatei?.Zippen(Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachWebuntisFotos.zip"), configuration, "", 0, absoluteFotoPfade);
+                            absoluteFotoPfade = m.GetFotosAusSchildPfade(configuration, m.Students, Global.ZipModus.Geevoo);
+                            m.Zieldatei?.Zippen(Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachGeevooFotos.zip"), configuration, "", 0, absoluteFotoPfade);
                         },
                         Global.Rubrik.WöchtentlicheArbeiten,
                         Global.NurBeiDiesenSchulnummern.Nur177659
@@ -261,8 +266,8 @@ public static class MenueHelper
                             $"Die Unterrichte (mit Noten) werden in der [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat")}[/] vorbereitet. Hinzu kommen [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "Kurse.dat")}[/] und [aqua]{Path.Combine(pfadSchilddatenaustausch ?? "", "Faecher.dat")}[/] und [aqua]{Path.Combine(pfadSchilddatenaustausch ?? "", "Lernabschnittsdaten.dat")}[/].",
                             $"Es empfiehlt sich die Lernabschnitte zuerst in SchILD anzulegen und zu exportieren. [bold {Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] ergänzt dann die Fehlzeiten passend.",
                             "Falls mehrere Kollegen dasselbe Fach zeitgleich unterrichten, dann muss ein Zähler an das Fach angehangen werden. Bsp: Zwei LuL unterrichten Mathe. Dann M und M1.",
-                            "Damit M1 in den Leistungsdaten erscheint, aber nicht auf dem Zeugnis gedruckt wird, muss die Eigenschaft 'Nicht auf Zeugnis drucken' in SchILD gesetzt werden."
-                            ,
+                            "Damit M1 in den Leistungsdaten erscheint, aber nicht auf dem Zeugnis gedruckt wird, muss die Eigenschaft 'Nicht auf Zeugnis drucken' in SchILD gesetzt werden.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis zu Fehlzeiten:[/] Klassenleitungen müssen offene Fehlstunden auf [{Global.GetColor(Global.ColorHinweise)}](Nicht) entschuldigt[/] setzen. Andrenfalls bleiben die Fehlzeiten unberücksichtigt. ",
                         ],
                         m =>
                         {

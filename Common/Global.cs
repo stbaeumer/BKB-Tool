@@ -80,7 +80,8 @@ public static class Global
         ListInt,
         Float,
         Auswahl,
-        Maildomain
+        Maildomain,
+        EnterOderAbbrechen
     }
 
     public enum ZipModus
@@ -98,8 +99,8 @@ public static class Global
 
     public static List<string> AktSj = new List<string>()
     {
-        (DateTime.Now.Month >= 7 ? DateTime.Now.Year : DateTime.Now.Year - 1).ToString(),
-        (DateTime.Now.Month >= 7 ? DateTime.Now.Year + 1 : DateTime.Now.Year).ToString()
+        (DateTime.Now.Month > 7 ? DateTime.Now.Year : DateTime.Now.Year - 1).ToString(),
+        (DateTime.Now.Month > 7 ? DateTime.Now.Year + 1 : DateTime.Now.Year).ToString()
     };
 
     public static string? ConnectionStringUntis { get; set; }
@@ -369,6 +370,17 @@ public static class Global
             ? configuration[parameter] ?? defaultValue
             : defaultValue;
 
+        if (datentyp == Datentyp.EnterOderAbbrechen)
+        {
+            // Wenn der Wert abgefragt wird, dann wird ein Panel mit dem Hinweis angezeigt
+            AnsiConsole.Write(panel);
+
+            var key = Console.ReadKey(true).Key;
+            if(key != ConsoleKey.Enter)
+            {                
+                throw new RestartException("Abbruch durch den Benutzer.");
+            }
+        }
         if (datentyp == Datentyp.JaNein)
         {
             // Wenn im READ-Modus der Wert plausibel ist, dann wird er nicht erneut abgefragt
@@ -387,14 +399,10 @@ public static class Global
                 .ShowDefaultValue(true)
                 .Validate(n =>
                 {
-                    if (zulässigeAuswahlOptionen.ToLower() != "ja")
-                        return ValidationResult.Error($"[]  Sie müssen [bold springGreen2]Ja[/] eintippen, um [bold springGreen2]BKB-Tool[/] nutzen zu können.[/]");
+                    if (!n.ToLower().StartsWith("j") && !n.ToLower().StartsWith("n"))
+                        return ValidationResult.Error($" Sie müssen ja oder nein eintippen.");
                     return ValidationResult.Success();
                 }));
-
-
-            if (userInput.ToString()?.ToLower() == "ja" || userInput.ToString()?.ToLower() == "j")
-                DisplayHeader(configuration);
         }
         if (datentyp == Datentyp.Auswahl)
         {
@@ -441,7 +449,7 @@ public static class Global
                     .Validate(n =>
                     {
                         if (string.IsNullOrEmpty(n))
-                            return ValidationResult.Error("[]  Eingabe darf nicht leer sein.[/]");
+                            return ValidationResult.Error("[]  Eingabe darf nicht leer sein.[/]");                        
                         return ValidationResult.Success();
                     })
                 .DefaultValue<string>(defaultValue));
