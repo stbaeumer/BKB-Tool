@@ -1198,7 +1198,7 @@ public partial class Student
 
     public string GetPfadDokumentenverwaltung(IConfiguration configuration)
     {
-        Global.Konfig("PfadDokumentenverwaltung", Global.Modus.Read, configuration, "Geben sie den Pfad zur Dokumentenverwaltung an: ","",Global.Datentyp.Pfad);
+        Global.Konfig("PfadDokumentenverwaltung", Global.Modus.Read, configuration, "Geben sie den Pfad zur Dokumentenverwaltung an: ","");
         var pfadDokumentenverwaltung = configuration["PfadDokumentenverwaltung"];    
         var anfangsbuchstabeNachname = Nachname.Substring(0, 1).ToUpper();
         var ordner = Nachname + ", " + Vorname + ", " + Geburtsdatum.Replace(".", "_");

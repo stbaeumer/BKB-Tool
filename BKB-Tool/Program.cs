@@ -11,7 +11,7 @@ Global.User = Environment.UserName;
 IConfiguration? configuration = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile($"{Global.User}.json", optional: true, reloadOnChange: true).Build();
 
 Global.ColorÜberschrift = Color.Aqua; // Überschrift
-Global.ColorUnterschrift = Color.Aqua; // Überschrift
+Global.ColorUnterschrift = Color.Aqua; // 2.Überschrift
 Global.ColorBeschreibung = Color.SpringGreen2; // Beschreibung
 Global.ColorPfadInProgrammen = Color.Yellow; 
 Global.ColorPfadInDateien = Color.SpringGreen2; // Pfad in Dateien
@@ -27,7 +27,7 @@ Global.ColorInfoBox = Color.Orange1; // Zahlen
 
 Global.AppVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0.0"; // Major.Minor.Build.Revision
 
-Global.SchulnummernGesperrt = new List<string> { "999999" }; // Diese Schulnummer können das Programm nicht verwenden.
+Global.SchulnummernGesperrt = new List<string> { "999999" }; // Diese Schulnummern können das Programm nicht verwenden.
 Global.SchulnummernPrivilegiert = new List<string>{ "177659" }; // Diese Schulnummern bekommen alle Jedermann-Punkte plus weitere Menüpunkte angezeigt.
 Global.Schulnummer177659 = new List<string> { "177659" }; // Diese Schulnummer bekommen alle Privilegierten plus weitere Menüpunkte angezeigt.
 Global.SchulnummernDebug = new List<string>{ "000000" }; // alles
@@ -91,7 +91,7 @@ do
     }
     catch (RestartException)
     {
-        var panel = new Panel(new Markup($"[bold {Global.GetColor(Global.ColorFehler)}]Sie haben abgebrochen.[/]"))            
+        var panel = new Panel(new Markup($"[bold {Global.GetColor(Global.ColorFehler)}]Sie haben abgebrochen.[/]"))
             .BorderStyle(new Style(Color.Red))
             .Expand();
         AnsiConsole.Write(panel);
@@ -159,7 +159,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                     $"Ein Update auf Version [tan]{githubVersion}[/] ist verfügbar. Drücken Sie eine [{Global.GetColor(Global.ColorActionInMenüs)} bold]beliebige Taste[/], um das Update zu starten."
                 ]
                 );
-                
+
                 Console.ReadKey(); // Warten auf Benutzereingabe, bevor das Update gestartet wird
 
                 // Lade die Datei nach bkb-neu.exe herunter und führe den Autoupdater aus.
@@ -245,7 +245,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
 
                 dateien.DisplayHeader(configuration,
                 [
-                    $"Die neue Datei wurde heruntergeladen und gespeichert als [{Global.GetColor(Global.ColorPfadInDateien)}]{zielDatei}[/].",                    
+                    $"Die neue Datei wurde heruntergeladen und gespeichert als [{Global.GetColor(Global.ColorPfadInDateien)}]{zielDatei}[/].",
                     $"Mit [{Global.GetColor(Global.ColorActionInMenüs)} bold]ENTER[/] wird jetzt in die Version {githubVer} neugestartet."
                 ]);
                 while (Console.KeyAvailable) Console.ReadKey(true);
@@ -257,7 +257,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                     UseShellExecute = true,
                     CreateNoWindow = true
                 });
-                
+
                 Environment.Exit(0); // Beendet das aktuelle Programm sofort, damit das Update funktioniert                
             }
         }
@@ -278,5 +278,5 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
     }
 
     // Sicherstellen, dass die Konfiguration zurückgegeben wird, auch wenn ein Fehler auftritt
-    return configuration;    
+    return configuration;
 }

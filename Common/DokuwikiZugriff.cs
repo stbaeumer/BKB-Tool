@@ -54,7 +54,7 @@ public class DokuwikiZugriff
 {
     public DokuwikiZugriff(IConfiguration configuration)
     {
-        Global.Konfig("WikiUrl", Global.Modus.Update, configuration, "URL zum dokuwiki xmlrpc.","",Global.Datentyp.Url);
+        Global.Konfig("WikiUrl", Global.Modus.Update, configuration, "URL zum dokuwiki xmlrpc.","");
         Global.Konfig("WikiJsonUser", Global.Modus.Update, configuration, "Benutzer, mit dem auf Json zugegriffen wird.");
         Global.Konfig("WikiJsonUserKennwort", Global.Modus.Update, configuration, "Kennwort");
         

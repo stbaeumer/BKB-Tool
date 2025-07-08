@@ -41,7 +41,7 @@ public static class MenueHelper
 
             quelldateien.Meldung.Add(students.GetArtUndZahlen());
 
-            Global.DisplayHeader(configuration, quelldateien.Meldung);
+            Global.DisplayHeader(configuration, quelldateien.Meldung.Where(x => !string.IsNullOrEmpty(x)).ToList());
 
             lehrers = new Lehrers(configuration, quelldateien.Notwendige(configuration, ["lehrkraefte,dat"], true));
             
@@ -130,7 +130,7 @@ public static class MenueHelper
                             m.Zieldatei?.Erstellen(";", '\"', new UTF8Encoding(false), false);
                             if(configuration["Schulnummer"] != null && configuration["Schulnummer"] == "177659")
                             {
-                                configuration = Global.Konfig("PfadLitteraImport", Global.Modus.Update, configuration, "Littera-Import-Pfad", $"Wohin soll die neue Datei nach dem Erstellen verschoben werden?", Global.Datentyp.Pfad, @"\\fs01\Littera\Atlantis Import Daten", null, null);
+                                configuration = Global.Konfig("PfadLitteraImport", Global.Modus.Update, configuration, "Littera-Import-Pfad", $"Wohin soll die neue Datei nach dem Erstellen verschoben werden?", @"\\fs01\Littera\Atlantis Import Daten", null, null);
                                 m.Zieldatei?.Verschieben(configuration["PfadLitteraImport"]);
                             }
                         },
@@ -156,7 +156,7 @@ public static class MenueHelper
 
                             if(configuration["Schulnummer"] != null && configuration["Schulnummer"] == "177659")
                             {
-                                configuration = Global.Konfig("ZipKennwort", Global.Modus.Update, configuration, "Zip-Kennwort", "Die Datei wird nun gezippt.\nGeben Sie das Kennwort ein, mit dem Sie die Zip-Datei verschlüsseln wollen. Geben Sie ein Leerzeichen ein, wenn kein Kennwort gesetzt werden soll.", Global.Datentyp.String, "");
+                                configuration = Global.Konfig("ZipKennwort", Global.Modus.Update, configuration, "Zip-Kennwort", "Die Datei wird nun gezippt.\nGeben Sie das Kennwort ein, mit dem Sie die Zip-Datei verschlüsseln wollen. Geben Sie ein Leerzeichen ein, wenn kein Kennwort gesetzt werden soll.", "");
                                 m.Zieldatei?.Zippen(Path.Combine(pfadDownloads ?? "", zeitstempel + @"-ImportNachNetman.zip"), configuration, configuration["ZipKennwort"].ToString(), 0, new List<string>(){ Path.Combine(pfadDownloads ?? "", zeitstempel + @"-ImportNachNetman.csv") });
                                 m.Zieldatei?.Mailen(Path.Combine(pfadDownloads ?? "", zeitstempel + @"-ImportNachNetman.zip") ?? "", "Verwaltung", Path.GetFileName(m.Zieldatei.AbsoluterPfad) ?? "", configuration);
                             }                            
@@ -171,15 +171,14 @@ public static class MenueHelper
                         students,
                         klassen,
                         [
-                            $"Es werden wird jetzt die Dateien [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachWebuntisFotos.zip")}[/] und [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachGeevooFotos.zip")}[/] erstellt."
+                            $"Es werden jetzt die Dateien [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachWebuntisFotos.zip")}[/] und [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachGeevooFotos.zip")}[/] erstellt."
                         ],
                         m =>
                         {
                             if(m.NichtAlleSusHabenEineEindeutigeMailAdresse(configuration)) return;
                             m.Zieldatei = new Datei();
-                            configuration = Global.Konfig("PfadFotosAusSchILD", Global.Modus.Update, configuration, "Pfad zu den Fotos aus SchILD", $"Geben Sie den Pfad zu den Fotos aus SchILD an. Ggf. müssen sie den Ordner zuerst erstellen. Anschließend müssen die Bilder aus SchILD in den Ordner exportiert werden: [{Global.GetColor(Global.ColorPfadInProgrammen)}]Datenaustausch > Fotos > Fotos exportieren[/]. Der Dateiname muss zusammengesetzt sein aus [{Global.GetColor(Global.ColorHinweise)}]Nachname, Vorname, Geburtsdatum[/]." +
-                                    "\nVon jedem SchILD-Foto wird eine Kopie von dem von Webuntis geforderten Namen erstellt. Wenn einzelne oder alle Fotos im Ordner gelöscht werden, werden einzelne oder alle Fotos neu für den Übertrag nach Webuntis angelegt.", Global.Datentyp.Pfad);
-                            configuration = Global.Konfig("MailDomain", Global.Modus.Update, configuration, $"Mail-Domain", $"Geben Sie die schulische Mail-Domain für Mailadressen der Schüler*innen an. Bsp: [{Global.GetColor(Global.ColorHyperlink)}]@students.berufskolleg-borken.de[/]. Ihre Eingabe muss mit [{Global.GetColor(Global.ColorHyperlink)}]@[/] beginnen und mit [{Global.GetColor(Global.ColorHyperlink)}].de[/] etc. enden.");
+                            configuration = Global.Konfig("PfadFotosAusSchILD", Global.Modus.Update, configuration);
+                            configuration = Global.Konfig("MailDomain", Global.Modus.Update, configuration);
                             var absoluteFotoPfade = m.GetFotosAusSchildPfade(configuration, m.Students, Global.ZipModus.Webuntis);
                             m.Zieldatei?.Zippen(Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachWebuntisFotos.zip"), configuration, "", 0, absoluteFotoPfade);
                             absoluteFotoPfade = m.GetFotosAusSchildPfade(configuration, m.Students, Global.ZipModus.Geevoo);
@@ -189,7 +188,7 @@ public static class MenueHelper
                         Global.NurBeiDiesenSchulnummern.Nur177659
                     ),
                     new Menüeintrag(
-                        "Mail-Adressen: SchuelerZusatzdaten werden um schulische Mailadressen ergänzt (falls leer)",
+                        "Mail-Adressen: SchuelerZusatzdaten.dat wird um schulische Mailadressen ergänzt (falls leer)",
                         anrechnungen,
                         quelldateien.Notwendige(configuration, ["schuelerzusatzdaten,dat"]),
                         students,
@@ -257,46 +256,49 @@ public static class MenueHelper
                         Global.NurBeiDiesenSchulnummern.Alle
                     ),
                     new Menüeintrag(
-                        "Zeugnisse #1: Unterrichte, Noten & Fehlzeiten nach SchILD importieren",
+                        "Zeugnisse #1: Lernabschnittsdaten: Fehlzeiten von Webuntis nach SchILD importieren",
                         anrechnungen,
-                        quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "absenceperstudent,csv", "schuelerlernabschnitt,dat", "schuelerleistungsdaten,dat", "schuelerbasis,dat", "exportlessons,csv", "studentgroupstudents,csv", "marksperlesson,csv"]),
+                        quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "absenceperstudent,csv", "schuelerlernabschnitt,dat"]),
                         students,
                         klassen,
                         [
-                            $"Die Unterrichte (mit Noten) werden in der [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat")}[/] vorbereitet. Hinzu kommen [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "Kurse.dat")}[/] und [aqua]{Path.Combine(pfadSchilddatenaustausch ?? "", "Faecher.dat")}[/] und [aqua]{Path.Combine(pfadSchilddatenaustausch ?? "", "Lernabschnittsdaten.dat")}[/].",
-                            $"Es empfiehlt sich die Lernabschnitte zuerst in SchILD anzulegen und zu exportieren. [bold {Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] ergänzt dann die Fehlzeiten passend.",
-                            "Falls mehrere Kollegen dasselbe Fach zeitgleich unterrichten, dann muss ein Zähler an das Fach angehangen werden. Bsp: Zwei LuL unterrichten Mathe. Dann M und M1.",
-                            "Damit M1 in den Leistungsdaten erscheint, aber nicht auf dem Zeugnis gedruckt wird, muss die Eigenschaft 'Nicht auf Zeugnis drucken' in SchILD gesetzt werden.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis zu Fehlzeiten:[/] Klassenleitungen müssen offene Fehlstunden auf [{Global.GetColor(Global.ColorHinweise)}](Nicht) entschuldigt[/] setzen. Andrenfalls bleiben die Fehlzeiten unberücksichtigt. ",
+                            $"Die Fehlzeiten aktiver Schüler*innen aus Webuntis werden in der [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLernabschnittsdaten.dat")}[/] für den Import nach SchILD vorbereitet.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Vorbereitung 1:[/] Lernabschnitte in SchILD anlegen.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Vorbereitung 2:[/] Klassenleitungen müssen offene Fehlstunden auf [{Global.GetColor(Global.ColorHinweise)}](nicht) entschuldigt[/] setzen. Anderenfalls bleiben die Fehlzeiten auf dem Zeugnis unberücksichtigt. ",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Vorbereitung 3:[/] Alle *.dat-Dateien aus SchILD exportieren. "
+                        ],
+                        m =>
+                        {
+                            m.FilterInteressierendeStudentsUndKlassen(configuration);
+                            m.Zieldatei = m.Lernabschnittsdaten(configuration, Global.Art.Zeugnis, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLernabschnittsdaten.dat"));
+                            m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, configuration, ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt"], []);
+                            m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
+                        },
+                        Global.Rubrik.Leistungsdaten,
+                        Global.NurBeiDiesenSchulnummern.Alle
+                    ),                    
+                    new Menüeintrag(
+                        "Zeugnisse #2: Kurse, Unterrichte und Gesamtnoten von Webuntis nach SchILD importieren",
+                        anrechnungen,
+                        quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "absenceperstudent,csv", "schuelerlernabschnitt,dat", "schuelerleistungsdaten,dat", "schuelerbasis,dat", "exportlessons,csv", "studentgroupstudents,csv", "marksperlesson,csv", "klassen,dat"]),
+                        students,
+                        klassen,
+                        [
+                            $"Die Kurse und Unterrichte (mit Noten) werden in [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat")}[/] und [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat")}[/] vorbereitet.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Vorbereitung:[/] Lernabschnitte in SchILD anlegen und dann alle *.dat-Dateien frisch exportieren. ",                            
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis:[/] Falls mehrere Kollegen dasselbe Fach zeitgleich unterrichten, dann muss ein Zähler an das Fach angehangen werden. Bsp: Zwei LuL unterrichten Mathe: Dann M und M1. Beide Fächer müssen in SchILD existieren. Damit M1 in den Leistungsdaten erscheint, aber nicht auf dem Zeugnis gedruckt wird, muss die Eigenschaft 'Nicht auf Zeugnis drucken' in SchILD gesetzt werden.",                            
                         ],
                         m =>
                         {
                             m.FilterInteressierendeStudentsUndKlassen(configuration);
 
-                            m.Zieldatei = m.Lernabschnittsdaten(configuration, Global.Art.Zeugnis, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLernabschnittsdaten.dat"));
-                            //m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, configuration, ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt"], []);
-                            m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
-
-                            m.Zieldatei = m.Leistungsdaten(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat"), Global.Art.Zeugnis);
-                            //m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, configuration, ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach"], ["Jahrgang"]);
-                            m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
-
-                            /*
-                            m.Zieldatei = m.Teilleistungen(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerTeilleistungen.dat"));
-                            m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, configuration, ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt"], []);
-                            m.Zieldatei.Erstellen("|", '\0', new UTF8Encoding(true), false);    
-
-                            m.Zieldatei = m.Faecher(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Faecher.dat"));
-                            m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
-
                             m.Zieldatei = m.Kurse(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Kurse.dat"));
                             m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, configuration, ["KursBez"], ["Klasse", "Schulnr", "WochenstdPUNKTLEERZEICHENKL"]);
                             m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
 
-                            Console.ForegroundColor = ConsoleColor.Yellow;
-                            Console.WriteLine("  Schritt #1: Import nach SchILD durchführen.");
-                            Console.WriteLine("  Schritt #2: Notenkontrollliste nach Wiki hochladen.");
-                            Console.WriteLine("  Schritt #3: Lehrkräfte benachrichtigen.");                            */
+                            m.Zieldatei = m.Leistungsdaten(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat"), Global.Art.Zeugnis);
+                            m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, configuration, ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach"], ["Jahrgang"]);
+                            m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
                         },
                         Global.Rubrik.Leistungsdaten,
                         Global.NurBeiDiesenSchulnummern.Alle
@@ -311,8 +313,8 @@ public static class MenueHelper
                             $"Wenn die Frist zur Eintragung der Zeugnisnoten abgelaufen ist, können hier gezielt diejenigen Lehrkräfte erinnert werden, deren Noten noch fehlen. ",
                             $"[{Global.GetColor(Global.ColorHinweise)}]Schritt 1: [/]Alle Leistungsdaten (soweit vorhanden) nach SchILD importieren.",
                             $"[{Global.GetColor(Global.ColorHinweise)}]Schritt 2: [/][{Global.GetColor(Global.ColorPfadInDateien)}]SchuelerLeistungsdaten.dat[/] aus SchILD exportieren.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Schritt 3: [/][{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] liest die [{Global.GetColor(Global.ColorPfadInDateien)}]SchuelerLeistungsdaten.dat[/] aus SchILD und öffnet Teams-Chat."                            
-                        ],                        
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Schritt 3: [/][{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] liest die [{Global.GetColor(Global.ColorPfadInDateien)}]SchuelerLeistungsdaten.dat[/] aus SchILD und öffnet Teams-Chat."
+                        ],
                         m =>
                         {
                             m.FilterInteressierendeStudentsUndKlassen(configuration);
@@ -397,7 +399,7 @@ public static class MenueHelper
 
                             AnsiConsole.Write(table);
 
-                            configuration = Global.Konfig("TeamsChatAuswahl", Global.Modus.Update, configuration, "Bitte eine Zahl auswählen:", "Bitte eine Zahl auswählen:", Global.Datentyp.Int, (datei.Count).ToString(), students, zulässigeAuswahlOptionen);
+                            configuration = Global.Konfig("TeamsChatAuswahl", Global.Modus.Update, configuration, "Bitte eine Zahl auswählen:", "Bitte eine Zahl auswählen:", (datei.Count).ToString(), students, zulässigeAuswahlOptionen);
 
                             var nummer = int.Parse(configuration["TeamsChatAuswahl"]);
 
@@ -435,28 +437,28 @@ public static class MenueHelper
                         Global.NurBeiDiesenSchulnummern.Nur000000
                     ),
                     new Menüeintrag(
-                        "Fotos #1: Anweisungen zum Fotografieren der Schüler*innen zeigen",
+                        "Fotos machen: Schüler*innen klassenweise fotografieren",
                         anrechnungen,
                         quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat"]),
                         students,
                         klassen,
                         [
-                            "Erstellen Sie jetzt Fotos aller Schüler (z.B. mit dem Handy). Dabei ist die [bold red]Reihenfolge[/] und die [bold red]Anzahl[/] der Schüler laut SchILD exakt einzuhalten. ",
-                            "   [bold aqua]Hinweis #1:[/] Wenn ein Schüler fehlt, dann die weiße Wand fotografieren, damit Reihenfolge und Anzahl stimmen.",
-                            "   [bold aqua]Hinweis #2:[/] Wenn ein Foto nicht gelungen ist, dann löschen und neu erstellen.",
-                            "   [bold aqua]Hinweis #3:[/] Wenn mehr als eine Klasse ausgewählt wird, wird nur die erste Klasse berücksichtigt",
+                            $"Erstellen Sie jetzt Fotos der vor Ihnen stehenden Klasse (z.B. mit dem Handy). Dabei ist die [{Global.GetColor(Global.ColorInfoBox)}]Reihenfolge & Anzahl[/] laut folgender Tabelle exakt einzuhalten. ",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1:[/] Wenn jemand fehlt, dann die weiße Wand fotografieren, damit [{Global.GetColor(Global.ColorInfoBox)}]Reihenfolge & Anzahl[/] stimmen.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #2:[/] Wenn ein Foto nicht gelungen ist, dann löschen und neu erstellen.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #3:[/] Wenn mehr als eine Klasse ausgewählt wird, wird nur die erste Klasse berücksichtigt",
                         ],
                         m =>
                         {
                             m.FilterInteressierendeStudentsUndKlassen(configuration);
-                            m.IStudents.KlassenordnerErstellen(configuration);
                             m.IStudents.KlassenListenAnzeigen(configuration);
+                            m.IStudents.KlassenordnerErstellen(configuration);
                         },
                         Global.Rubrik.Allgemein,
-                        Global.NurBeiDiesenSchulnummern.Nur000000
+                        Global.NurBeiDiesenSchulnummern.Nur177659
                     ),
                     new Menüeintrag(
-                        "Fotos #2: Erstellte Schüler*innenfotos hochladen",
+                        "Fotos hochladen: Erstellte Schüler*innenfotos nach SchILD hochladen",
                         anrechnungen,
                         quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat"]),
                         students,
@@ -472,7 +474,7 @@ public static class MenueHelper
                             m.Students.FotosVerarbeiten(configuration, m.IKlassen);
                         },
                         Global.Rubrik.Allgemein,
-                        Global.NurBeiDiesenSchulnummern.Nur000000
+                        Global.NurBeiDiesenSchulnummern.Nur177659
                     ),
                     new Menüeintrag(
                         "Atlantis-Fotos: Fotos der Schüler*innen aus Atlantis in die SchILD2-Datenbank (und in die Schild-Dokumentenverwaltung) hochladen",
@@ -647,7 +649,7 @@ public static class MenueHelper
                             }
                         },
                         Global.Rubrik.Allgemein,
-                        Global.NurBeiDiesenSchulnummern.Nur000000
+                        Global.NurBeiDiesenSchulnummern.Nur177659
                     ),
                     new Menüeintrag(
                         "PDF-Zeugnisse: Von Atlantis in die SchILD-Dokumentenverwaltung kopieren",
@@ -664,9 +666,9 @@ public static class MenueHelper
                         ],
                         m =>
                         {
-                            configuration = Global.Konfig("PfadDownloads", Global.Modus.Read, configuration, "Pfad zum eigenen Download-Ordner angeben","",Global.Datentyp.Pfad);
-                            configuration = Global.Konfig("PfadDokumentenverwaltung", Global.Modus.Update, configuration, $"SchILD-Dokumentenverzeichnis",$"Geben Sie den Pfad zum SchILD-Dokumentenverzeichnis ein. Das ist der Pfad, der in SchILD unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Extras > Programm-Einstellungen > Globale Einstellungen > Dokumentenverwaltung > Dokumentenverzeichnis[/] eingetragen ist. ",Global.Datentyp.Pfad);
-                            configuration = Global.Konfig("Schlüsselwörter", Global.Modus.Update, configuration, "Schlüsselwörter angeben","Geben Sie kommagetrennt interessierende Schlüsselwörter an (z.B. Abgangszeugnis, Abschlusszeugnis, Jahreszeugnis). BKB-Tool durchsucht die PDF-Dateien im Ordner nach den Wörtern. Sobald ein Schlüsselwort matcht, wird die Datei in das Dokumentenverzeichnis kopiert.",Global.Datentyp.String);
+                            configuration = Global.Konfig("PfadDownloads", Global.Modus.Read, configuration, "Pfad zum eigenen Download-Ordner angeben","");
+                            configuration = Global.Konfig("PfadDokumentenverwaltung", Global.Modus.Update, configuration, $"SchILD-Dokumentenverzeichnis",$"Geben Sie den Pfad zum SchILD-Dokumentenverzeichnis ein. Das ist der Pfad, der in SchILD unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Extras > Programm-Einstellungen > Globale Einstellungen > Dokumentenverwaltung > Dokumentenverzeichnis[/] eingetragen ist. ");
+                            configuration = Global.Konfig("Schlüsselwörter", Global.Modus.Update, configuration, "Schlüsselwörter angeben","Geben Sie kommagetrennt interessierende Schlüsselwörter an (z.B. Abgangszeugnis, Abschlusszeugnis, Jahreszeugnis). BKB-Tool durchsucht die PDF-Dateien im Ordner nach den Wörtern. Sobald ein Schlüsselwort matcht, wird die Datei in das Dokumentenverzeichnis kopiert.");
 
                             m.IStudents.GetStudentsVonAtlantisCsv(configuration);
                             m.IStudents.PdfDateienVerarbeiten(configuration);

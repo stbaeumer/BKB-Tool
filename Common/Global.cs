@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Spectre.Console;
 using Path = System.IO.Path;
 using dotenv.net;
+using static KonfigHelper;
 
 #pragma warning disable CS0252 // Unbeabsichtigter Verweisvergleich. Wandeln Sie die linke Seite in den Typ "string" um, um einen Wertvergleich durchzuführen.
 #pragma warning disable CA2200
@@ -81,14 +82,15 @@ public static class Global
         Float,
         Auswahl,
         Maildomain,
-        EnterOderAbbrechen
+        EnterOderAbbrechen,
+        ListString
     }
 
     public enum ZipModus
     {
         Webuntis,
         Geevoo
-     }
+    }
 
     public enum Modus
     {
@@ -126,7 +128,7 @@ public static class Global
     public static Color ColorTextHervorheben { get; set; }
     public static Color ColorFehler { get; set; }
     public static Color ColorInfoBox { get; set; }
-    
+
 
     public static string? SafeGetString(SqlDataReader reader, int colIndex)
     {
@@ -228,7 +230,7 @@ public static class Global
             AnsiConsole.Write(panel);
 
             if (!RunningInCodeSpace())
-            {               
+            {
                 var ordner = Path.GetDirectoryName(linkeSeite);
                 if (!string.IsNullOrEmpty(ordner))
                 {
@@ -237,7 +239,7 @@ public static class Global
                         FileName = ordner,
                         UseShellExecute = true
                     });
-                }        
+                }
             }
         }
         else
@@ -346,9 +348,18 @@ public static class Global
         return sourceFile ?? string.Empty;
     }
 
-    public static IConfiguration Konfig(string parameter, Modus modus, IConfiguration configuration, string aufforderung = "", string hinweise = "", Datentyp datentyp = Datentyp.String, string defaultValue = "alle", Students? students = null, string zulässigeAuswahlOptionen = "")
+    public static IConfiguration Konfig(string parameter, Modus modus, IConfiguration configuration, string aufforderung = "", string hinweise = "", string defaultValue = "alle", Students? students = null, string zulässigeAuswahlOptionen = "")
     {
         object userInput = "";
+        Datentyp datentyp = Datentyp.String;
+
+        if (KonfigMetadaten.TryGetValue(parameter, out var meta))
+        {
+            if (string.IsNullOrWhiteSpace(aufforderung)) aufforderung = meta.Aufforderung;
+            if (string.IsNullOrWhiteSpace(hinweise)) hinweise = meta.Hinweise;
+            if (string.IsNullOrWhiteSpace(defaultValue) || defaultValue == "alle") defaultValue = meta.DefaultValue;
+            datentyp = meta.Datentyp;
+        }
 
         var panel = new Panel(hinweise)
             //.Header($"[bold]  {parameter}  [/]")
@@ -376,8 +387,8 @@ public static class Global
             AnsiConsole.Write(panel);
 
             var key = Console.ReadKey(true).Key;
-            if(key != ConsoleKey.Enter)
-            {                
+            if (key != ConsoleKey.Enter)
+            {
                 throw new RestartException("Abbruch durch den Benutzer.");
             }
         }
@@ -394,13 +405,14 @@ public static class Global
             AnsiConsole.Write(panel);
 
             userInput = AnsiConsole.Prompt(
-            new TextPrompt<string>(aufforderung)
+            new TextPrompt<string>($"[] {aufforderung}[/]")
                 .PromptStyle(Global.GetColor(Global.ColorActionInMenüs))
+                .DefaultValue(defaultValue.ToLower() == "j" ? "j" : defaultValue.ToString())
                 .ShowDefaultValue(true)
                 .Validate(n =>
                 {
-                    if (!n.ToLower().StartsWith("j") && !n.ToLower().StartsWith("n"))
-                        return ValidationResult.Error($" Sie müssen ja oder nein eintippen.");
+                    if (n.ToLower() != "j" && n.ToLower() != "n" && n.ToLower() != "ja" && n.ToLower() != "nein")
+                        return ValidationResult.Error($"[bold aqua]  Sie müssen ja oder nein eintippen.[/]");
                     return ValidationResult.Success();
                 }));
         }
@@ -449,7 +461,7 @@ public static class Global
                     .Validate(n =>
                     {
                         if (string.IsNullOrEmpty(n))
-                            return ValidationResult.Error("[]  Eingabe darf nicht leer sein.[/]");                        
+                            return ValidationResult.Error("[]  Eingabe darf nicht leer sein.[/]");
                         return ValidationResult.Success();
                     })
                 .DefaultValue<string>(defaultValue));
@@ -708,6 +720,29 @@ public static class Global
                     })
                 .DefaultValue<string>(defaultValue.ToString()));
         }
+        if (datentyp == Datentyp.ListString)
+        {
+            // Wenn im READ-Modus der Wert plausibel ist, dann wird er nicht erneut abgefragt
+            if (modus == Modus.Read && !string.IsNullOrEmpty(defaultValue))
+            {
+                configuration[parameter] = defaultValue;
+                return configuration;
+            }
+
+            // Wenn der Wert abgefragt wird, dann wird ein Panel mit dem Hinweis angezeigt
+            AnsiConsole.Write(panel);
+
+            userInput = AnsiConsole.Prompt(
+                new TextPrompt<string>($"[] {aufforderung}[/]")
+                .PromptStyle(Global.GetColor(Global.ColorActionInMenüs))
+                    .ShowDefaultValue(true)
+                    .Validate(n =>
+                    {
+                        var teile = n.ToString().Trim().Split(',');
+                        return ValidationResult.Success();
+                    })
+                .DefaultValue<string>(defaultValue.ToString()));
+        }
         if (datentyp == Datentyp.Abschnitt)
         {
             // Wenn im READ-Modus der Wert plausibel ist, dann wird er nicht erneut abgefragt
@@ -860,14 +895,10 @@ public static class Global
             $"[{Global.GetColor(Global.ColorHinweise)}]Keine Haftung:[/] Der Entwickler haftet nicht für direkte oder indirekte Schäden, Datenverluste oder andere Konsequenzen, die durch die Nutzung oder Fehlfunktion dieser Software entstehen.\n" +
             $"[{Global.GetColor(Global.ColorHinweise)}]Verwendung auf eigene Gefahr:[/] Die Nutzung erfolgt ausschließlich auf eigenes Risiko.\n" +
             $"[{Global.GetColor(Global.ColorHinweise)}]Vollständige Lizenz:[/] Vollständige Lizenzbedingungen unter [lightskyblue3_1 link=https://www.gnu.org/licenses/gpl-3.0.de.html]https://www.gnu.org/licenses/gpl-3.0.de.html[/]."
-            , Global.Datentyp.JaNein, "", null, "Ja");
+            , "", null, "Ja");
         }
 
-        if (modus == Modus.Update)
-            DisplayHeader(configuration);
-
-        if (modus == Modus.Create)
-            DisplayHeader(configuration);
+        DisplayHeader(configuration);
 
         var panel = new List<string>()
         {
@@ -875,54 +906,11 @@ public static class Global
             $"Dateien (aus Webuntis etc.), die [bold {Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] importieren soll, werden aus [{Global.GetColor(Global.ColorPfadInDateien)}]" + configuration["PfadDownloads"] + "[/] eingelesen."
         };
 
-        if (modus != Modus.Read)
+        // Durchlaufe alle Einstellungen gemäß KonfigHelper
+        foreach (var eintrag in KonfigMetadaten)
         {
-            DisplayHeader(configuration, panel);
-        }
-
-        configuration = Konfig("PfadDownloads", modus, configuration, @"Downloads-Verzeichnis", "Geben Sie den Pfad des Downloads-Verzeichnisses an. In der Regel wird das Verzeichnis bereits richtig vorgeschlagen. Dann einfach [bold springGreen2]ENTER[/] drücken:", Datentyp.Pfad, Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"));
-
-        if (modus != Modus.Read)
-        {
-            DisplayHeader(configuration, panel);
-        }
-
-        configuration = Konfig("Schulnummer", modus, configuration, @"Schulnummer", "Geben Sie Ihre Schulnummer an. Je nach Schulnummer werden evtl. unterschiedliche Funktionen angeboten.", Datentyp.Int);
-
-        if (modus != Modus.Read)
-        {
-            DisplayHeader(configuration, panel);
-        }
-
-        configuration = Konfig("PfadSchilddatenaustausch", modus, configuration, @"SchILD-Ausgabeverzeichnis", $"Geben Sie das Verzeichnis an, das in SchILD unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Datenaustausch > Schnittstelle SchILD-NRW > Export[/] als [{Global.GetColor(Global.ColorPfadInDateien)}]Ausgabeverzeichnis[/] eingetragen ist. Wenn dort kein Verzeichnis steht, tragen Sie dort das selbe Verzeichnis ein, das Sie auch hier angeben.\n[{Global.GetColor(Global.ColorHinweise)}]Hinweis:[/] Falls an mehreren Arbeitsplätzen parallel mit [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] gearbeitet wird, kann es sinnvoll sein, dass jede*r ein eigenes Ausgabeverzeichnis in SchILD bekommt.", Datentyp.Pfad, @"\\fs01\SchILD-NRW\Ausgabeverzeichnis");
-
-        if (modus != Modus.Read)
-        {
-            DisplayHeader(configuration, panel);
-        }
-
-        configuration = Konfig("PfadDokumentenverwaltung", modus, configuration, "Pfad zur Dokumentenverwaltung", $"Geben Sie das Verzeichnis an, das in SchILD unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Extras > Programmeinstellungen > Globale Einstellungen > Dokumentenverwaltung[/] als [{Global.GetColor(Global.ColorPfadInProgrammen)}]Dokumentenverzeichnis[/] eingetragen ist. Die Dokumentenverwaltung muss eingeschaltet sein. Wenn dort kein Verzeichnis steht, tragen Sie dort das selbe Verzeichnis ein, das Sie auch hier angeben:", Datentyp.Pfad, @"\\fs01\SchILD-NRW\Dokumentenverwaltung");
-
-        if (modus != Modus.Read)
-        {
-            DisplayHeader(configuration, panel);
-        }
-
-        configuration = Konfig("MaxDateiAlter", modus, configuration, "Wie viele Tage dürfen Dateien höchstens alt sein?", $"Geben Sie an, wie viele Tage Dateien höchstens alt sein dürfen, um vom [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] für das Einlesen akzeptiert zu werden. Die Angabe einer (möglichst niedrigen) Zahl soll sicherstellen, dass nicht versehntlich veraltete Dateien eingelesen werden.", Datentyp.Int);
-
-        if (modus == Modus.Update && SchulnummernPrivilegiert.Contains(configuration["Schulnummer"]))
-        {
-            //configuration = Konfig("MailDomain", modus, configuration, "Mail-Domain für Schüler*innen", $"Geben Sie die Mail-Domain für Ihre Schüler*innen an. Ihre Eingabe muss mit [{Global.GetColor(Global.ColorZahlen)}]@[/] beginnen und einen [{Global.GetColor(Global.ColorZahlen)}]Punkt[/] enthalten. Beispiel: [springGreen2 bold]@students.meine-schule.de[/]", Datentyp.Mail);
-            configuration = Konfig("ConnectionStringUntis", modus, configuration, "ConnectionStringUntis (optional)");
-            configuration = Konfig("SmtpUser", modus, configuration, "Mail-Benutzer");
-            configuration = Konfig("SmtpPassword", modus, configuration, "Mail-Kennwort");
-            configuration = Konfig("SmtpPort", modus, configuration, "SMTP-Port");
-            configuration = Konfig("SmtpServer", modus, configuration, "SMTP-Server");
-            configuration = Konfig("NetmanMailReceiver", modus, configuration, "Wem soll die Netman-Mail geschickt werden?");
-        }
-
-        if (modus != Modus.Read)
-        {
+            if (modus == Modus.Read || eintrag.Value.InGrundeinstellungAbfragen == false) { continue; }
+            configuration = Konfig(eintrag.Key, modus, configuration, eintrag.Value.Aufforderung, eintrag.Value.Hinweise, eintrag.Value.DefaultValue);
             DisplayHeader(configuration, panel);
         }
 
@@ -956,14 +944,14 @@ public static class Global
             ZustimmungLizenz = "nein",
             AppName = Verschluesseln("BKB-Tool"),
             AppVersion = Verschluesseln("1.0.0"),
-            AppDescription = Verschluesseln("BKB-Tool - Ein Werkzeug an der Schnittstelle zwischen SchILD und Untis."),
+            AppDescription = Verschluesseln("BKB-Tool - Ein Werkzeug an der Schnittstelle zwischen SchILD und Webuntis."),
             Klassen = Verschluesseln("HBG"),
             Vergleich = Verschluesseln("n"),
             Kennwort = Verschluesseln(""),
             InputFolder = Verschluesseln(""),
             OutputFolder = Verschluesseln(""),
-            Halbjahreszeugnisdatum = Verschluesseln(new DateTime(Convert.ToInt32(Global.AktSj[1]), 02,01).ToString("dd.MM.yyyy")),
-            Halbjahreskonferenzdatum = Verschluesseln(new DateTime(Convert.ToInt32(Global.AktSj[1]), 02,01).ToString("dd.MM.yyyy")),
+            Halbjahreszeugnisdatum = Verschluesseln(new DateTime(Convert.ToInt32(Global.AktSj[1]), 02, 01).ToString("dd.MM.yyyy")),
+            Halbjahreskonferenzdatum = Verschluesseln(new DateTime(Convert.ToInt32(Global.AktSj[1]), 02, 01).ToString("dd.MM.yyyy")),
             Abschnittswechsel = Verschluesseln(new DateTime(Convert.ToInt32(Global.AktSj[1]), 02, 01).ToString("dd.MM.yyyy")),
             Jahreszeugnisdatum = Verschluesseln(DateTime.Now.ToString("dd.MM.yyyy")),
             Jahreskonferenzdatum = Verschluesseln(DateTime.Now.ToString("dd.MM.yyyy")),
@@ -984,7 +972,7 @@ public static class Global
             Chat = Verschluesseln(""),
             AusbuchenNachWievielTagen = Verschluesseln(""),
             DatenimportLetztesDatum = Verschluesseln(DateTime.Now.ToString("dd.MM.yyyy")),
-            MaxDateiAlter = Verschluesseln("6"),
+            MaxDateiAlter = Verschluesseln("3"),
             AktSj = Verschluesseln(""),
             Klasse = Verschluesseln(""),
             MailDomain = Verschluesseln("@students.berufskolleg-borken.de"),
@@ -1009,7 +997,8 @@ public static class Global
             Schlüsselwörter = Verschluesseln("Jahreszeugnis, Abschlusszeugnis, Abgangszeugnis, Zeugnis"),
             Teilleistungsarten = Verschluesseln("Vornote,Abschluss-Schriftl."),
             LehrkraefteSonderzeiten = Verschluesseln(""),
-            VolleStelle = Verschluesseln("25,5")
+            VolleStelle = Verschluesseln("25,5"),
+            Lk1faecher = Verschluesseln("D,BI,M,E")
         };
     }
 
@@ -1071,7 +1060,7 @@ public static class Global
     {
         do
         {
-            configuration = Global.Konfig("AccessPfad", Global.Modus.Read, configuration, "Pfad zur Access-Datenbank", "", Global.Datentyp.Datei);
+            configuration = Global.Konfig("AccessPfad", Global.Modus.Read, configuration, "Pfad zur Access-Datenbank", "");
             configuration = Global.Konfig("AccessPassword", Global.Modus.Read, configuration, "Passwort zur Access-Datenbank");
 
             DateTime[] releases =
@@ -1101,7 +1090,7 @@ public static class Global
                         SchildVersionExpected.Max().Date.ToShortDateString() +
                         ".\n\rIhre SchILD-Version: " + schildVersionActual.Date.ToShortDateString() +
                         ". Schauen Sie hier: https://github.com/stbaeumer/schuelerfoto");
-                        while (Console.KeyAvailable) Console.ReadKey(true);
+                    while (Console.KeyAvailable) Console.ReadKey(true);
 
                     Console.ReadKey(true);
                     Environment.Exit(0);
@@ -1210,9 +1199,227 @@ public static class Global
         if (string.IsNullOrEmpty(s)) return s;
         return char.ToLowerInvariant(s[0]) + s.Substring(1);
     }
-
-    internal static object GetColor(object fehler)
-    {
-        throw new NotImplementedException();
-    }
 }    
+
+
+public class KonfigMeta
+{
+    public string Key { get; set; }
+    public string DefaultValue { get; set; }
+    public string Aufforderung { get; set; }
+    public string Hinweise { get; set; }
+    public Global.Datentyp Datentyp { get; set; }
+    public Global.NurBeiDiesenSchulnummern NurBeiDiesenSchulnummern { get; internal set; }
+    public bool InGrundeinstellungAbfragen { get; internal set; }
+}
+
+public static class KonfigHelper
+{
+    
+    /*
+    configuration = Konfig("PfadDownloads", modus, configuration, @"Downloads-Verzeichnis", "Geben Sie den Pfad des Downloads-Verzeichnisses an. In der Regel wird das Verzeichnis bereits richtig vorgeschlagen. Dann einfach [bold springGreen2]ENTER[/] drücken:", Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"));
+        configuration = Konfig("Schulnummer", modus, configuration, @"Schulnummer", "Geben Sie Ihre Schulnummer an. Je nach Schulnummer werden evtl. unterschiedliche Funktionen angeboten.");
+        configuration = Konfig("PfadSchilddatenaustausch", modus, configuration, @"SchILD-Ausgabeverzeichnis", $"Geben Sie das Verzeichnis an, das in SchILD unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Datenaustausch > Schnittstelle SchILD-NRW > Export[/] als [{Global.GetColor(Global.ColorPfadInProgrammen)}]Ausgabeverzeichnis[/] eingetragen ist. Wenn dort nichts eingetragen ist, tragen Sie dort das selbe Verzeichnis ein, das Sie auch hier eintragen.\n[{Global.GetColor(Global.ColorHinweise)}]Hinweis:[/] Falls an mehreren Arbeitsplätzen parallel mit [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] gearbeitet wird, kann es sinnvoll sein, dass jede*r ein eigenes Ausgabeverzeichnis in SchILD bekommt.", @"\\fs01\SchILD-NRW\Ausgabeverzeichnis");
+        configuration = Konfig("PfadDokumentenverwaltung", modus, configuration, "Pfad zur Dokumentenverwaltung", $"Geben Sie das Verzeichnis an, das in SchILD unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Extras > Programmeinstellungen > Globale Einstellungen > Dokumentenverwaltung[/] als [{Global.GetColor(Global.ColorPfadInProgrammen)}]Dokumentenverzeichnis[/] eingetragen ist. Die Dokumentenverwaltung muss eingeschaltet sein. Wenn dort nichts eingetragen ist, tragen Sie dort das selbe Verzeichnis ein, das Sie auch hier angeben:", @"\\fs01\SchILD-NRW\Dokumentenverwaltung");
+        configuration = Konfig("MaxDateiAlter", modus, configuration, "Wie viele Tage dürfen Dateien höchstens alt sein?", $"Geben Sie an, wie viele Tage Dateien höchstens alt sein dürfen, um vom [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] für das Einlesen akzeptiert zu werden. Die Angabe einer (möglichst niedrigen) Zahl soll sicherstellen, dass nicht versehntlich veraltete Dateien eingelesen werden.");
+        configuration = Konfig("LK1-Fächer", modus, configuration, "Fächer des 1.LKs", $"Geben Sie kommasepariert die möglichen Fächer des 1.LKs an. Bitte nur die Fächer angeben, ohne 'LK' etc. Beispiel: D,BI,M,E", "D,BI,M,E");
+
+        if (modus == Modus.Update && SchulnummernPrivilegiert.Contains(configuration["Schulnummer"]))
+        {
+            //configuration = Konfig("MailDomain", modus, configuration, "Mail-Domain für Schüler*innen", $"Geben Sie die Mail-Domain für Ihre Schüler*innen an. Ihre Eingabe muss mit [{Global.GetColor(Global.ColorZahlen)}]@[/] beginnen und einen [{Global.GetColor(Global.ColorZahlen)}]Punkt[/] enthalten. Beispiel: [springGreen2 bold]@students.meine-schule.de[/]", Datentyp.Mail);
+            configuration = Konfig("ConnectionStringUntis", modus, configuration, "ConnectionStringUntis (optional)");
+            configuration = Konfig("SmtpUser", modus, configuration, "Mail-Benutzer");
+            configuration = Konfig("SmtpPassword", modus, configuration, "Mail-Kennwort");
+            configuration = Konfig("SmtpPort", modus, configuration, "SMTP-Port");
+            configuration = Konfig("SmtpServer", modus, configuration, "SMTP-Server");
+            configuration = Konfig("NetmanMailReceiver", modus, configuration, "Wem soll die Netman-Mail geschickt werden?");
+        }
+    
+    */
+
+
+    public static readonly Dictionary<string, KonfigMeta> KonfigMetadaten = new()
+    {
+        ["Schulnummer"] = new KonfigMeta
+        {
+            Key = "Schulnummer",
+            DefaultValue = "",
+            Aufforderung = "Schulnummer",
+            Hinweise = "Geben Sie Ihre Schulnummer an. Je nach Schulnummer werden evtl. unterschiedliche Funktionen angeboten.",
+            Datentyp = Global.Datentyp.String,
+            InGrundeinstellungAbfragen = true,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },        
+        ["Klassen"] = new KonfigMeta
+        {
+            Key = "Klassen",
+            DefaultValue = "",
+            Aufforderung = "Interessierende Klasse(n)",
+            Hinweise = $"Geben Sie die interessierende(n) Klasse(n) an. Mehrere Klassen sind mit Komma zu trennen. Es können auch Namensteile von Klassen angegeben werden, wordurch alle Klassen gewählt werden, deren Klassenname den Namensteil enthält. Alle Klassen werden mit dem Wort [bold springGreen2]alle[/] gewählt.",
+            Datentyp = Global.Datentyp.Klassen,
+            InGrundeinstellungAbfragen = true,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },
+        ["PfadDownloads"] = new KonfigMeta
+        {
+            Key = "PfadDownloads",
+            DefaultValue = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"),
+            Aufforderung = "Downloads-Verzeichnis",
+            Hinweise = "Geben Sie den Pfad des Downloads-Verzeichnisses an. In der Regel wird das Verzeichnis bereits richtig vorgeschlagen. Dann einfach [bold springGreen2]ENTER[/] drücken:",
+            Datentyp = Global.Datentyp.Pfad,
+            InGrundeinstellungAbfragen = true,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },
+        ["PfadSchilddatenaustausch"] = new KonfigMeta
+        {
+            Key = "PfadSchilddatenaustausch",
+            DefaultValue = "",
+            Aufforderung = "SchILD-Ausgabeverzeichnis",
+            Hinweise = $"Geben Sie das Verzeichnis an, das in SchILD unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Datenaustausch > Schnittstelle SchILD-NRW > Export[/] als [{Global.GetColor(Global.ColorPfadInProgrammen)}]Ausgabeverzeichnis[/] eingetragen ist.",
+            Datentyp = Global.Datentyp.Pfad,
+            InGrundeinstellungAbfragen = true,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },
+        ["PfadDokumentenverwaltung"] = new KonfigMeta
+        {
+            Key = "PfadDokumentenverwaltung",
+            DefaultValue = "",
+            Aufforderung = "Pfad zur Dokumentenverwaltung",
+            Hinweise = $"Geben Sie das Verzeichnis an, das in SchILD unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Extras > Programmeinstellungen > Globale Einstellungen > Dokumentenverwaltung[/] als [{Global.GetColor(Global.ColorPfadInProgrammen)}]Dokumentenverzeichnis[/] eingetragen ist.",
+            Datentyp = Global.Datentyp.Pfad,
+            InGrundeinstellungAbfragen = true,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },        
+        ["PfadFotosAusSchILD"] = new KonfigMeta
+        {
+            Key = "PfadFotosAusSchILD",
+            DefaultValue = "",
+            Aufforderung = "Pfad zu den Fotos aus SchILD",
+            Hinweise =  $"Exportieren Sie die Schülerfotos aus SchILD ([{Global.GetColor(Global.ColorPfadInProgrammen)}]Datenaustausch > Fotos > Fotos exportieren[/]). Der Dateiname zusammengesetzt sein aus [{Global.GetColor(Global.ColorHinweise)}]Nachname, Vorname, Geburtsdatum[/]. Geben Sie hier an, in welchen Ordner Sie exportiert haben. " +
+                        $"\n[{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] erstellt im Folgenden von jedem SchILD-Foto eine Kopie mit dem von Webuntis geforderten Namen. An den vorhandenen Kopien erkennnt [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/], welche Fotos neu importiert werden müssen. Sie können also einzelne oder alle Fotos erneut für den Import vorsehen, indem Sie einzelne oder alle Fotos im Exportordner löschen.",
+            Datentyp = Global.Datentyp.Pfad,
+            InGrundeinstellungAbfragen = true,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },
+        ["MaxDateiAlter"] = new KonfigMeta
+        {
+            Key = "MaxDateiAlter",
+            DefaultValue = "3",
+            Aufforderung = "Wie viele Tage dürfen Dateien höchstens alt sein?",
+            Hinweise = $"Geben Sie an, wie viele Tage Dateien höchstens alt sein dürfen, um vom [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] für das Einlesen akzeptiert zu werden.",
+            Datentyp = Global.Datentyp.Int,
+            InGrundeinstellungAbfragen = true,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },
+        ["AppDescription"] = new KonfigMeta
+        {
+            Key = "AppDescription",
+            DefaultValue = "BKB-Tool - Ein Werkzeug an der Schnittstelle zwischen SchILD und Webuntis.",
+            Aufforderung = "Beschreibung der App",
+            Hinweise = "Kurze Beschreibung der Anwendung.",
+            Datentyp = Global.Datentyp.String,
+            InGrundeinstellungAbfragen = true,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },
+        ["Abschnitt"] = new KonfigMeta
+        {
+            Key = "Abschnitt",
+            DefaultValue = "1",
+            Aufforderung = "Lernabschnitt",
+            Hinweise = $"Geben Sie den Lernabschnitt an. Das Schuljahr beginnt immer mit Abschnitt [{Global.GetColor(Global.ColorZahlen)}]1[/]. I.d.R. wechselt der Abschnitt im Halbjahr auf Abschnitt [{Global.GetColor(Global.ColorZahlen)}]2[/].",
+            Datentyp = Global.Datentyp.Abschnitt,
+            InGrundeinstellungAbfragen = true,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },
+        ["Abschnittswechsel"] = new KonfigMeta
+        {
+            Key = "Abschnittswechsel",
+            DefaultValue = new DateTime(DateTime.Now.Month > 7 ? DateTime.Now.Year + 1 : DateTime.Now.Year, 2, 1).ToShortDateString(),
+            Aufforderung = "Abschnittswechsel",
+            Hinweise = $"Geben Sie das Datum des Abschnittswechsels an. I.d.R. ist der [{Global.GetColor(Global.ColorZahlen)}]{new DateTime(DateTime.Now.Month > 7 ? DateTime.Now.Year + 1 : DateTime.Now.Year, 2, 1).ToShortDateString()}[/] (oder ein anderes Datum im Februar) der richtige Wert.",
+            Datentyp = Global.Datentyp.DateTime,
+            InGrundeinstellungAbfragen = true,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },
+        ["ZustimmungLizenz"] = new KonfigMeta
+        {
+            Key = "ZustimmungLizenz",
+            DefaultValue = "nein",
+            Aufforderung = "Lizenz zustimmen",
+            Hinweise = "Bitte stimmen Sie der Lizenz zu, um das Programm zu nutzen. Geben Sie 'ja' ein, um fortzufahren.",
+            Datentyp = Global.Datentyp.JaNein,
+            InGrundeinstellungAbfragen = true,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },
+        ["MailDomain"] = new KonfigMeta
+        {
+            Key = "MailDomain",
+            DefaultValue = "@students.berufskolleg-borken.de",
+            Aufforderung = "Mail-Domain",
+            Hinweise = $"Geben Sie die schulische Mail-Domain für Mailadressen der Schüler*innen an. Bsp: [{Global.GetColor(Global.ColorHyperlink)}]@students.berufskolleg-borken.de[/]. Ihre Eingabe muss mit [{Global.GetColor(Global.ColorHyperlink)}]@[/] beginnen und mit [{Global.GetColor(Global.ColorHyperlink)}].de[/] etc. enden.",
+            Datentyp = Global.Datentyp.Maildomain,
+            InGrundeinstellungAbfragen = true,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },
+        ["WikiUrl"] = new KonfigMeta
+        {
+            Key = "WikiUrl",
+            DefaultValue = "https://wiki.berufskolleg-borken.de/xmlrpc.php",
+            Aufforderung = "URL zum dokuwiki xmlrpc",
+            Hinweise = "Geben Sie die URL zum dokuwiki xmlrpc an.",
+            Datentyp = Global.Datentyp.Url,
+            InGrundeinstellungAbfragen = true,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },
+        ["ConnectionStringUntis"] = new KonfigMeta
+        {
+            Key = "ConnectionStringUntis",
+            DefaultValue = "",
+            Aufforderung = "ConnectionStringUntis (optional)",
+            Hinweise = "Bitte geben Sie den ConnectionString für Untis an (optional).",
+            Datentyp = Global.Datentyp.String,
+            InGrundeinstellungAbfragen = true,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },
+        ["WikiJsonUser"] = new KonfigMeta
+        {
+            Key = "WikiJsonUser",
+            DefaultValue = "",
+            Aufforderung = "Benutzer für Wiki JSON Zugriff",
+            Hinweise = "Geben Sie den Benutzernamen für den Zugriff auf das Wiki JSON an.",
+            Datentyp = Global.Datentyp.String,
+            InGrundeinstellungAbfragen = true,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },
+        ["WikiJsonUserKennwort"] = new KonfigMeta
+        {
+            Key = "WikiJsonUserKennwort",
+            DefaultValue = "",
+            Aufforderung = "Kennwort für Wiki JSON Zugriff",
+            Hinweise = "Geben Sie das Kennwort für den Zugriff auf das Wiki JSON an.",
+            Datentyp = Global.Datentyp.String,
+            InGrundeinstellungAbfragen = true,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },
+        ["ConnectionStringSchild"] = new KonfigMeta
+        {
+            Key = "ConnectionStringSchild",
+            DefaultValue = "",
+            Aufforderung = "ConnectionString für SchILD",
+            Hinweise = "Geben Sie den ConnectionString für SchILD an (optional).",
+            Datentyp = Global.Datentyp.String,
+            InGrundeinstellungAbfragen = true,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },
+        ["ConnectionStringWebuntis"] = new KonfigMeta
+        {
+            Key = "ConnectionStringWebuntis",
+            DefaultValue = "",
+            Aufforderung = "ConnectionString für Webuntis",
+            Hinweise = "Geben Sie den ConnectionString für Webuntis an (optional).",
+            Datentyp = Global.Datentyp.String,
+            InGrundeinstellungAbfragen = true,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        }
+    };
+}

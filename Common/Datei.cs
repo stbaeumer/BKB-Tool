@@ -142,8 +142,8 @@ public class Datei : List<dynamic>
         foreach (var rec in this)
         {
             var dict = (IDictionary<string, object>)rec;
-            //if (dict["klassen"].ToString().Split('~').Any(klasse => IKlassen.Contains(klasse)))
-            if (true)
+            
+            if (dict["klassen"].ToString().Split('~').Any(klasse => KlassenNamen.Contains(klasse)))
             {
                 liste.Add(rec);
             }
@@ -531,6 +531,17 @@ public class Datei : List<dynamic>
     public Datei? VergleichenUndFiltern(Dateien vorhandeneDateien, IConfiguration configuration, string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert)
     {
         var neueDatei = new Datei(AbsoluterPfad);
+        var dateiendung = Path.GetExtension(AbsoluterPfad);
+
+        var table = new Table();
+        table.Expand();
+        table.Border(TableBorder.Rounded);
+        //table.Title = new TableTitle($"Vergleich von [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.GetFileName(AbsoluterPfad)}[/] mit vorhandenen Dateien");
+        table.Expand();
+        table.AddColumn("Schüler*in, SJ, Abschnitt");
+        table.AddColumn("Attribut");
+        table.AddColumn("alt");
+        table.AddColumn("neu");
 
         List<dynamic> vorhandene = new List<dynamic>();
 
@@ -550,21 +561,38 @@ public class Datei : List<dynamic>
             return this;
         }
 
+        // Wenn in der vorhandenen eine Spalte namens Nachname existiert und die Dateiendung .dat ist,
+        // dann muss in jeder Zeile der Nachname um #Klasse ergänzt werden.
+        if (anhandDieserAttributeWirdVerglichen.Contains("Nachname") && dateiendung == ".dat")
+        {
+            // In jeder Zeile den Nachnamen um #Klasse ergänzen
+            foreach (var vorhandeneRec in vorhandene)
+            {
+                var vorhandeneDict = (IDictionary<string, object>)vorhandeneRec;
+                if (vorhandeneDict.ContainsKey("Nachname"))
+                {
+                    var nachname = vorhandeneDict["Nachname"].ToString();
+                    if (vorhandeneDict.ContainsKey("Klasse"))
+                    {
+                        nachname += "#" + vorhandeneDict["Klasse"];
+                    }
+                    vorhandeneDict["Nachname"] = nachname;
+                }
+            }
+        }
+
+
         // Für jede neue Zeile ...
         foreach (var neueRec in this)
         {
             var neueDict = (IDictionary<string, object>)neueRec;
 
-            var zeileMitIdentischenVergleichsattributen =
-                GetZeileMitIdentischenVergleichsattributen(vorhandene, neueDict, anhandDieserAttributeWirdVerglichen);
+            var zeileMitIdentischenVergleichsattributen = GetZeileMitIdentischenVergleichsattributen(vorhandene, neueDict, anhandDieserAttributeWirdVerglichen);
 
             // Fall1: Wenn keine Zeile in den Vergleichsattributen auf die vorhandenen matcht, wird die Zeile neu angelegt.
             if (zeileMitIdentischenVergleichsattributen == null)
             {
                 neueDatei.Add(neueRec);
-                Global.ZeileSchreiben(neueDict["InternBez"].ToString(),
-                    "NEU",
-                    ConsoleColor.Green, ConsoleColor.White);
                 continue; // und die Schleife übersprungen
             }
 
@@ -579,8 +607,7 @@ public class Datei : List<dynamic>
 
             // Fall3: Wenn eine vorhandene Zeile auf die Vergleichsattribute matcht und die sonstigen Attribute nicht identisch sind, ...
             if (nichtIdentischeSonstigeAttribute.Count <= 0) continue;
-            var vorhandeneZeileMitAbweichendenSonstigenAttr =
-                GetVorhandeneZeile(neueDict, vorhandene, anhandDieserAttributeWirdVerglichen);
+            var vorhandeneZeileMitAbweichendenSonstigenAttr = GetVorhandeneZeile(neueDict, vorhandene, anhandDieserAttributeWirdVerglichen);
             var linkeSeite = GetLinkeSeite(neueDict, anhandDieserAttributeWirdVerglichen);
 
             //Console.ForegroundColor = ConsoleColor.DarkYellow;
@@ -591,19 +618,23 @@ public class Datei : List<dynamic>
                 var neu = GetNeuerWert(neueDict, nichtIdentischesSonstigesAttribut);
                 var leh = Global.PrüfeAufNullOrEmpty(neueDict, "Fachlehrer");
 
-                Global.ZeileSchreiben(
-                    linkeSeite.ToString().TrimEnd(',') + leh,
-                    nichtIdentischesSonstigesAttribut + ": " + alt + " \u2192 " + neu,
-                    ConsoleColor.Blue, ConsoleColor.White);
+                table.AddRow(
+                    linkeSeite,
+                    nichtIdentischesSonstigesAttribut.Replace("PUNKT", ".").Replace("LEERZEICHEN", " ")
+                        .Replace("MINUS", "-").Replace("UNTERSTRICH", "_").Replace("SLASH", "/"),
+                    alt,
+                    neu);
             }
-
-
             neueDatei.Add(neueRec);
         }
 
         if (!neueDatei.Any())
         {
             Global.ZeileSchreiben(AbsoluterPfad, "identische Dateien", ConsoleColor.DarkYellow, ConsoleColor.White);
+        }
+        else
+        {
+            AnsiConsole.Write(table);
         }
 
         return neueDatei;
@@ -877,11 +908,11 @@ public class Datei : List<dynamic>
         }
 
         configuration = Global.Konfig("SmtpUser", Global.Modus.Update, configuration, "Mail-Benutzername", "Geben Sie den Benutzernamen für den SMTP-Server an, z.B. Ihre E-Mail-Adresse.");
-        configuration = Global.Konfig("SmtpPassword", Global.Modus.Update, configuration, "Mail-Kennwort", "Geben Sie das Kennwort für den SMTP-Server an, z.B. das Passwort Ihrer E-Mail-Adresse.", Global.Datentyp.String, "");
-        configuration = Global.Konfig("SmtpPort", Global.Modus.Update, configuration, "SMTP-Port", "Geben Sie den Port für den SMTP-Server an, z.B. 587 für TLS oder 465 für SSL.", Global.Datentyp.Int, "587");
-        configuration = Global.Konfig("SmtpServer", Global.Modus.Update, configuration, "SMTP-Server", "Geben Sie den SMTP-Server an, z.B. smtp.office365.com.", Global.Datentyp.String, "smtp.office365.com");
+        configuration = Global.Konfig("SmtpPassword", Global.Modus.Update, configuration, "Mail-Kennwort", "Geben Sie das Kennwort für den SMTP-Server an, z.B. das Passwort Ihrer E-Mail-Adresse.",  "");
+        configuration = Global.Konfig("SmtpPort", Global.Modus.Update, configuration, "SMTP-Port", "Geben Sie den Port für den SMTP-Server an, z.B. 587 für TLS oder 465 für SSL.", "587");
+        configuration = Global.Konfig("SmtpServer", Global.Modus.Update, configuration, "SMTP-Server", "Geben Sie den SMTP-Server an, z.B. smtp.office365.com.", "smtp.office365.com");
         configuration = Global.Konfig("NetmanMailReceiver", Global.Modus.Update, configuration, "Empfänger-Adresse", "Wem soll die Netman-Mail geschickt werden?");
-        configuration = Global.Konfig("NetmanMailBccReceiver", Global.Modus.Update, configuration, "BCC-Adresse", "Wem soll die Netman-Mail in BCC geschickt werden?",Global.Datentyp.Mail,"");
+        configuration = Global.Konfig("NetmanMailBccReceiver", Global.Modus.Update, configuration, "BCC-Adresse", "Wem soll die Netman-Mail in BCC geschickt werden?","");
         
         var mail = new Mail();
         mail.Senden(subject,configuration,body,ZipPfad, configuration["NetmanMailReceiver"], "", configuration["NetmanMailBccReceiver"]);

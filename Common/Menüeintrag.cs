@@ -105,7 +105,7 @@ public class Menüeintrag
         var klassen = Quelldateien.GetMatchingList(configuration, "klassen", IStudents, Klassen);
         if (klassen == null || !klassen.Any()) return new Datei(zielDateiname);
 
-        var quit = Global.Konfig("MaxDateiAlter", Global.Modus.Update, configuration, "Maximales Alter der eingelesenen Dateien", "", Global.Datentyp.Int);
+        var quit = Global.Konfig("MaxDateiAlter", Global.Modus.Update, configuration, "Maximales Alter der eingelesenen Dateien", "");
 
         throw new Exception("Fehler bei der Konfiguration des maximalen Alters der eingelesenen Dateien. Bitte überprüfen Sie die Eingabe.");
         /*
@@ -220,7 +220,7 @@ public class Menüeintrag
     {
         var interessierendeStudents = new Students();
 
-        Global.Konfig("Klassen", Global.Modus.Update, configuration, "Interessierende Klasse(n)", $"Geben Sie die interessierende(n) Klasse(n) an. Mehrere Klassen sind mit Komma zu trennen. Es können auch Namensteile von Klassen angegeben werden, wordurch alle Klassen gewählt werden, deren Klassenname den Namensteil enthält. Alle Klassen werden mit dem Wort [bold springGreen2]alle[/] gewählt.", Global.Datentyp.Klassen, "", this.Students);
+        Global.Konfig("Klassen", Global.Modus.Update, configuration, "", "", "", this.Students);
 
         var interessierendeKlassen = configuration["Klassen"].ToString().Split(",").ToList();
 
@@ -314,7 +314,7 @@ public class Menüeintrag
                         .Replace("B2", "").Replace("C2", "").Replace("A2", "")
                         .Replace(" GD", " G1").Replace(" GE", " G1").Replace(" GB", " G1").Replace("  ", " ");
 
-                    var kursart = GetKursart(jahrgang, fach);
+                    var kursart = GetKursart(configuration, jahrgang, fach);
                     var note = dict["Field8"].ToString();
                     var tendenz = dict["Field10"].ToString();
                     var punkte = dict["Field11"].ToString();
@@ -361,14 +361,18 @@ public class Menüeintrag
         return zieldatei;
     }
 
-    private static string GetKursart(string jahrgang, string fach)
+    private static string GetKursart(IConfiguration configuration, string jahrgang, string fach)
     {
+        //ToDo: Hier müssen weitere Konfigs kommen.
+        
         if (!jahrgang.StartsWith("GY")) return "PUK";
-        if (!jahrgang.EndsWith("02") && !jahrgang.EndsWith("03") && !jahrgang.EndsWith("12") &&
-            !jahrgang.EndsWith("13")) return "PUK";
+        if (!jahrgang.EndsWith("02") && !jahrgang.EndsWith("03") && !jahrgang.EndsWith("12") && !jahrgang.EndsWith("13")) return "PUK";
         if (!fach.Contains(" L")) return fach.Contains(" G") ? "GKS" : "PUK";
         var linkerTeil = fach.Split(' ')[0].TrimEnd();
-        return new List<string>() { "D", "M", "E", "BI" }.Contains(linkerTeil) ? "LK1" : "LK2";
+        
+        configuration = Global.Konfig("Lk1faecher", Global.Modus.Read, configuration, "Fächer des 1.LKs", $"Gegen Sie kommasepariert die möglichen Fächer des 1.LKs an. Bitte nur die Fächer angeben, ohne 'LK' etc. Beispiel: D,BI,M,E", "D,BI,M,E");
+        var lk1faecher = configuration["Lk1faecher"].ToString().Split(',').Select(x => x.Trim()).ToList();
+        return lk1faecher.Contains(linkerTeil) ? "LK1" : "LK2";
     }
 
     public Datei Lernabschnittsdaten(IConfiguration configuration, Global.Art art, string zieldateiname)
@@ -391,26 +395,8 @@ public class Menüeintrag
             absencePerStud = Quelldateien.GetMatchingList(configuration, "absenceperstudent", IStudents, Klassen);
             if (absencePerStud == null || !absencePerStud.Any()) return [];
 
-            // Falls es offene Stunden gibt, kommt ein Hinweis, den man auch bestätigen muss.
-
-              var ab = absencePerStud
-                    .Where(rec =>
-                    {
-                        if (rec == null) return false;
-                        var dict = (IDictionary<string, object>)rec;
-                        return dict != null && dict["Status"] != null && dict["Status"].ToString() == "offen";
-                    }).Count();
-
-            if (ab > 0)
-            {
-                configuration = Global.Konfig("OffeneFehlstunden", Global.Modus.Update, configuration,
-                "",
-                $"Es gibt [{Global.GetColor(Global.ColorHinweise)}]{ab}[/] offene Fehlstunden. Offene Fehlstunden sind weder entschuldigt noch unentschuldigt und werden im Zeugnis nicht berücksichtigt. Wenn das so i.O. ist, dann weiter mit [{Global.GetColor(Global.ColorActionInMenüs)}]ENTER[/]. Abbruch mit [{Global.GetColor(Global.ColorFehler)}]ANYKEY[/].", Global.Datentyp.EnterOderAbbrechen);                
-            }
-
-
-            configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration, "Abschnitt", $"Geben Sie den Lernabschnitt an. Das Schuljahr beginnt immer mit Abschnitt [{Global.GetColor(Global.ColorZahlen)}]1[/]. \nI.d.R. wechselt der Abschnitt im Halbjahr auf Abschnitt [{Global.GetColor(Global.ColorZahlen)}]2[/]", Global.Datentyp.Abschnitt);
-            configuration = Global.Konfig("Abschnittswechsel", Global.Modus.Update, configuration, "Abschnittswechsel", $"Geben Sie das Datum des Abschnittswechsels an. \nI.d.R. ist der {new DateTime(Convert.ToInt32(Global.AktSj[1]), 2, 1).ToShortDateString()} (oder ein anderes Datum im Februar) der richtige Wert.", Global.Datentyp.DateTime, new DateTime(Convert.ToInt32(Global.AktSj[1]), 2, 1).ToShortDateString());
+            configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration, "Abschnitt", $"Geben Sie den Lernabschnitt an. Das Schuljahr beginnt immer mit Abschnitt [{Global.GetColor(Global.ColorZahlen)}]1[/]. \nI.d.R. wechselt der Abschnitt im Halbjahr auf Abschnitt [{Global.GetColor(Global.ColorZahlen)}]2[/].");
+            configuration = Global.Konfig("Abschnittswechsel", Global.Modus.Update, configuration, "Abschnittswechsel", $"Geben Sie das Datum des Abschnittswechsels an. \nI.d.R. ist der [{Global.GetColor(Global.ColorZahlen)}]{new DateTime(Convert.ToInt32(Global.AktSj[1]), 2, 1).ToShortDateString()}[/] (oder ein anderes Datum im Februar) der richtige Wert.", new DateTime(Convert.ToInt32(Global.AktSj[1]), 2, 1).ToShortDateString());
 
             // Wenn der Abschnittswechsel hinter uns liegt und gleichzeitig Fehlzeiten von vorher vorliegen, dann wird gefragt, ob die vorherigen Fehlzeiten berücksichtigt werden sollen. 
             var abschnittswechsel = DateTime.Parse(configuration["Abschnittswechsel"]);
@@ -426,7 +412,7 @@ public class Menüeintrag
                     }).Count();
 
                 if (alteFehlzeiten > 0)
-                    configuration = Global.Konfig("FehlzeitenVorDemAbschnittswechselBeruecksichtigen", Global.Modus.Update, configuration, $"Fehlzeiten vor dem {configuration["Abschnittswechsel"]} auf das Zeugnis? (j/n)", $"Sollen die Fehlzeiten vor dem Abschnittswechsel [{Global.GetColor(Global.ColorZahlen)}]{abschnittswechsel.ToShortDateString()}[/] auf dem Zeugnis hinzugefügt werden?", Global.Datentyp.JaNein, "ja");
+                    configuration = Global.Konfig("FehlzeitenVorDemAbschnittswechselBeruecksichtigen", Global.Modus.Update, configuration, $"Fehlzeiten vor dem {configuration["Abschnittswechsel"]} auf das Zeugnis? (j/n)", $"Sollen die Fehlzeiten vor dem Abschnittswechsel am [{Global.GetColor(Global.ColorZahlen)}]{abschnittswechsel.ToShortDateString()}[/] auf dem Zeugnis hinzugefügt werden?", "ja");
 
 
                 // Wenn die Fehlzeiten vor dem Abschnittswechsel nicht berücksichtigt werden sollen, dann werden sie aus der Liste entfernt.
@@ -442,6 +428,23 @@ public class Menüeintrag
                 }
             }
 
+            // Falls es offene Stunden gibt, kommt ein Hinweis, den man auch bestätigen muss.
+            var ab = absencePerStud
+                    .Where(rec =>
+                    {
+                        if (rec == null) return false;
+                        var dict = (IDictionary<string, object>)rec;
+                        return dict != null && dict["Status"] != null && dict["Status"].ToString() == "offen";
+                    }).Count();
+
+            if (ab > 0)
+            {
+                configuration = Global.Konfig("OffeneFehlstunden", Global.Modus.Update, configuration,
+                "",
+                $"Es gibt [{Global.GetColor(Global.ColorHinweise)}]{ab}[/] offene Fehlstunden. Offene Fehlstunden sind weder entschuldigt noch unentschuldigt und werden im Zeugnis nicht berücksichtigt. Mit [{Global.GetColor(Global.ColorActionInMenüs)}]ENTER[/] geht es ohne die [{Global.GetColor(Global.ColorHinweise)}]{ab}[/] offenen Fehlstunden weiter. Abbruch mit [{Global.GetColor(Global.ColorFehler)}]ANYKEY[/].");                
+            }
+
+
             var konferenzart = "";
             switch (configuration["Abschnitt"])
             {
@@ -455,177 +458,186 @@ public class Menüeintrag
                     throw new Exception("Ungültiger Abschnitt. Bitte geben Sie 1 oder 2 ein.");
             }
             
-            configuration = Global.Konfig($"{konferenzart}konferenzdatum", Global.Modus.Update, configuration, $"{konferenzart}konferenzdatum", $"Geben Sie das {konferenzart}konferenzdatum an. Das kann später in SchILD (mit einem Gruppenprozess) erneut geändert werden.", Global.Datentyp.DateTime);
+            configuration = Global.Konfig($"{konferenzart}konferenzdatum", Global.Modus.Update, configuration, $"{konferenzart}konferenzdatum", $"Geben Sie das {konferenzart}konferenzdatum an. Das kann später in SchILD (mit einem Gruppenprozess) erneut geändert werden.");
             konferenzdatum = DateTime.Parse(configuration[$"{konferenzart}konferenzdatum"]);
-            configuration = Global.Konfig($"{konferenzart}zeugnisdatum", Global.Modus.Update, configuration, $"{konferenzart}zeugnisdatum", $"Geben Sie das {konferenzart}zeugnisdatum an. Das kann später in SchILD (mit einem Gruppenprozess) erneut geändert werden.", Global.Datentyp.DateTime);
-            zeugnisdatum = DateTime.Parse(configuration[$"{konferenzart}zeugnisdatum"]);
-            
-            configuration = Global.Konfig("MaximaleAnzahlFehlstundenProTag", Global.Modus.Update, configuration, "Maximale Anzahl Fehlstunden pro Tag", $"Geben Sie die maximale Anzahl zählender Fehlstunden pro Tag an. Wenn der Unterricht spätestens nach 8 Stunden endet, ist [{Global.GetColor(Global.ColorZahlen)}]8[/] ein guter Wert. Sollte die Anzahl der Fehlstunden in Webuntis diesen Wert übersteigen, dann deutet das auf Fehlzeiten im Praktikum oder ein Fehlen bei einer ganztägigen Veranstaltung hin. Es werden keine Fehlstunden an diesem Tag auf dem Zeugnis berücksichtigt.", Global.Datentyp.Int);
-            configuration = Global.Konfig("FehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt", Global.Modus.Update, configuration, "Unberücksichtigte Fehltage", $"Geben Sie die Anzahl Tage vor der Zeugniskonferenz an, an denen Fehlzeiten unberücksichtigt bleiben. Wenn dieser Wert z.B. auf [{Global.GetColor(Global.ColorZahlen)}]3[/] gesetzt wird, wird verhindert, dass Schüler*innen eine Entschuldigung zwar unverzüglich, aber gleichzeitig erst nach der Zeugniskonferenz einreichen. Alternativ kann man den Wert auf [{Global.GetColor(Global.ColorZahlen)}]0[/] setzen und den Zeitraum des Exports der [{Global.GetColor(Global.ColorPfadInDateien)}]AbsencePerStudent[/] entsprechend einschränken.", Global.Datentyp.Int);
+            configuration = Global.Konfig($"{konferenzart}zeugnisdatum", Global.Modus.Update, configuration, $"{konferenzart}zeugnisdatum", $"Geben Sie das {konferenzart}zeugnisdatum an. Das kann später in SchILD (mit einem Gruppenprozess) erneut geändert werden.");
+            zeugnisdatum = DateTime.Parse(configuration[$"{konferenzart}zeugnisdatum"]);            
+            configuration = Global.Konfig("MaximaleAnzahlFehlstundenProTag", Global.Modus.Update, configuration, "Max. Unterrichtstunden pro Tag", $"Geben Sie maximale Anzahl der Unterrichtsstunden pro Tag an. \nWenn maximal 8 Stunden pro Tag unterrichtet werden, ist [{Global.GetColor(Global.ColorZahlen)}]8[/] ein guter Wert. Sollte die Anzahl der Fehlstunden pro Tag in Webuntis diesen Wert übersteigen, dann deutet das auf Fehlzeiten im Praktikum oder ein Fehlen bei einer ganztägigen Veranstaltung hin. Solche Fehlstunden (außerhalb von Unterricht) bleiben auf dem Zeugnis unberücksichtigt.");
+            configuration = Global.Konfig("FehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt", Global.Modus.Update, configuration, "Unberücksichtigte Fehltage", $"Geben Sie die Anzahl Tage vor der Zeugniskonferenz an, an denen Fehlzeiten unberücksichtigt bleiben. Wenn dieser Wert z.B. auf [{Global.GetColor(Global.ColorZahlen)}]3[/] gesetzt wird, wird verhindert, dass Schüler*innen eine Entschuldigung zwar unverzüglich, aber gleichzeitig erst nach der Zeugniskonferenz einreichen. Alternativ kann man den Wert auf [{Global.GetColor(Global.ColorZahlen)}]0[/] setzen und den Zeitraum des Exports der [{Global.GetColor(Global.ColorPfadInDateien)}]AbsencePerStudent[/] entsprechend einschränken.");
         }
 
         var records = new List<dynamic>();
 
         try
         {
-            foreach (var student in IStudents)
+            AnsiConsole.Status()
+            .Spinner(Spinner.Known.Dots)
+            .Start("Lernabschnittsdaten.dat verarbeiten ...", ctx =>
             {
-                var abschnittswechsel = DateTime.Parse(configuration["Abschnittswechsel"]);
-                var abschnittswechelInderZukunft = abschnittswechsel > DateTime.Now;
-
-                var dictBasisdaten = schuelerBasisd
-                    .Where(recBasis =>
-                    {
-                        var dictBasis = (IDictionary<string, object>)recBasis;
-                        return dictBasis["Nachname"].ToString() == student.Nachname &&
-                               dictBasis["Vorname"].ToString() == student.Vorname &&
-                               dictBasis["Geburtsdatum"].ToString() == student.Geburtsdatum &&
-                               dictBasis["Jahr"].ToString() == Global.AktSj[0] &&
-                               ((art == Global.Art.Statistik || abschnittswechelInderZukunft) ? true : dictBasis["Abschnitt"].ToString() == configuration["Abschnitt"]);
-                    }).FirstOrDefault() as IDictionary<string, object>;
-
-                if (dictBasisdaten != null)
+                foreach (var student in IStudents)
                 {
-                    var versetzung = "";
-                    var abschluss = "";
-                    var klassenlehrer = Klassen.Where(rec => rec.Name == student.Klasse)
-                        .Select(rec => rec.Klassenleitungen[0].Kürzel).FirstOrDefault();
-                    var jahrgang = string.IsNullOrEmpty(dictBasisdaten!["Jahrgang"].ToString())
-                        ? ""
-                        : dictBasisdaten["Jahrgang"].ToString();
-                    var schulgliederung = string.IsNullOrEmpty(dictBasisdaten["Schulgliederung"].ToString())
-                        ? ""
-                        : dictBasisdaten["Schulgliederung"].ToString();
-                    var orgForm = string.IsNullOrEmpty(dictBasisdaten["OrgForm"].ToString())
-                        ? ""
-                        : dictBasisdaten["OrgForm"].ToString();
-                    var klassenart = string.IsNullOrEmpty(dictBasisdaten["Klassenart"].ToString())
-                        ? ""
-                        : dictBasisdaten["Klassenart"].ToString();
-                    var fachklasse = string.IsNullOrEmpty(dictBasisdaten["Fachklasse"].ToString())
-                        ? ""
-                        : dictBasisdaten["Fachklasse"].ToString();
-                    var zeugnisart = "";
-                    var schwerstbehinderung = student.Schwerstbehinderung;
-                    var wiederholung = "";
+                    var abschnittswechsel = DateTime.Parse(configuration["Abschnittswechsel"]);
+                    var abschnittswechelInderZukunft = abschnittswechsel > DateTime.Now;
 
-                    var dictLernabschnitt = schuelerLernab
-                        .Where(recLern =>
+                    var dictBasisdaten = schuelerBasisd
+                        .Where(recBasis =>
                         {
-                            var dictLern = (IDictionary<string, object>)recLern;
-                            return dictLern["Nachname"].ToString() == student.Nachname &&
-                                   dictLern["Vorname"].ToString() == student.Vorname &&
-                                   dictLern["Geburtsdatum"].ToString() == student.Geburtsdatum &&
-                                   dictLern["Jahr"].ToString() == Global.AktSj[0] &&
-                                   dictLern["Abschnitt"].ToString() == configuration["Abschnitt"];
+                            var dictBasis = (IDictionary<string, object>)recBasis;
+                            return dictBasis["Nachname"].ToString() == student.Nachname &&
+                                dictBasis["Vorname"].ToString() == student.Vorname &&
+                                dictBasis["Geburtsdatum"].ToString() == student.Geburtsdatum &&
+                                dictBasis["Jahr"].ToString() == Global.AktSj[0] &&
+                                ((art == Global.Art.Statistik || abschnittswechelInderZukunft) ? true : dictBasis["Abschnitt"].ToString() == configuration["Abschnitt"]);
                         }).FirstOrDefault() as IDictionary<string, object>;
 
-                    var fehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt = Global.FehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt;
-
-                    // Wenn bereits Lernabschnittsdaten existieren, werden die Daten dort entnommen.
-                    if (dictLernabschnitt != null)
+                    if (dictBasisdaten != null)
                     {
-                        konferenzdatum = konferenzdatum.Year == 1
-                            ? string.IsNullOrEmpty(dictLernabschnitt["Konferenzdatum"].ToString())
-                                ? konferenzdatum
-                                : Convert.ToDateTime(dictLernabschnitt["Konferenzdatum"].ToString())
-                            : konferenzdatum;
-                        zeugnisdatum = zeugnisdatum.Year == 1
-                            ? string.IsNullOrEmpty(dictLernabschnitt["Zeugnisdatum"].ToString())
-                                ? zeugnisdatum
-                                : Convert.ToDateTime(dictLernabschnitt["Zeugnisdatum"].ToString())
-                            : zeugnisdatum;
-                        jahrgang = string.IsNullOrEmpty(jahrgang)
-                            ? string.IsNullOrEmpty(dictLernabschnitt["Jahrgang"].ToString())
-                                ? jahrgang
-                                : dictLernabschnitt["Jahrgang"].ToString()
-                            : jahrgang;
-                        orgForm = string.IsNullOrEmpty(orgForm)
-                            ? string.IsNullOrEmpty(dictLernabschnitt["OrgForm"].ToString())
-                                ? orgForm
-                                : dictLernabschnitt["OrgForm"].ToString()
-                            : orgForm;
-                        klassenart = string.IsNullOrEmpty(klassenart)
-                            ? string.IsNullOrEmpty(dictLernabschnitt["Klassenart"].ToString())
-                                ? klassenart
-                                : dictLernabschnitt["Klassenart"].ToString()
-                            : klassenart;
-                        schulgliederung = string.IsNullOrEmpty(schulgliederung)
-                            ? string.IsNullOrEmpty(dictLernabschnitt["Schulgliederung"].ToString())
-                                ? schulgliederung
-                                : dictLernabschnitt["Schulgliederung"].ToString()
-                            : schulgliederung;
-                        klassenlehrer = string.IsNullOrEmpty(klassenlehrer)
-                            ? string.IsNullOrEmpty(dictLernabschnitt["Klassenlehrer"].ToString())
-                                ? klassenlehrer
-                                : dictLernabschnitt["Klassenlehrer"].ToString()
-                            : klassenlehrer;
-                        versetzung = string.IsNullOrEmpty(versetzung)
-                            ? string.IsNullOrEmpty(dictLernabschnitt["Versetzung"].ToString())
-                                ? versetzung
-                                : dictLernabschnitt["Versetzung"].ToString()
-                            : versetzung;
-                        abschluss = string.IsNullOrEmpty(abschluss)
-                            ? string.IsNullOrEmpty(dictLernabschnitt["Abschluss"].ToString())
-                                ? abschluss
-                                : dictLernabschnitt["Abschluss"].ToString()
-                            : abschluss;
-                        fachklasse = string.IsNullOrEmpty(fachklasse)
-                            ? string.IsNullOrEmpty(dictLernabschnitt["Fachklasse"].ToString())
-                                ? fachklasse
-                                : dictLernabschnitt["Fachklasse"].ToString()
-                            : fachklasse;
-                        zeugnisart = string.IsNullOrEmpty(zeugnisart)
-                            ? string.IsNullOrEmpty(dictLernabschnitt["Zeugnisart"].ToString())
-                                ? zeugnisart
-                                : dictLernabschnitt["Zeugnisart"].ToString()
-                            : zeugnisart;
-                        schwerstbehinderung = string.IsNullOrEmpty(schwerstbehinderung)
-                            ? string.IsNullOrEmpty(dictLernabschnitt["Schwerstbehinderung"].ToString())
-                                ? schwerstbehinderung
-                                : dictLernabschnitt["Schwerstbehinderung"].ToString()
-                            : schwerstbehinderung;
-                        wiederholung = string.IsNullOrEmpty(wiederholung)
-                            ? string.IsNullOrEmpty(dictLernabschnitt["Wiederholung"].ToString())
-                                ? wiederholung
-                                : dictLernabschnitt["Wiederholung"].ToString()
-                            : wiederholung;
-                    }
+                        //if (dictBasisdaten["Status"] == "2")
+                        if(true)
+                        { 
+                            var versetzung = "";
+                            var abschluss = "";
+                            var klassenlehrer = Klassen.Where(rec => rec.Name == student.Klasse)
+                                .Select(rec => rec.Klassenleitungen[0].Kürzel).FirstOrDefault();
+                            var jahrgang = string.IsNullOrEmpty(dictBasisdaten!["Jahrgang"].ToString())
+                                ? ""
+                                : dictBasisdaten["Jahrgang"].ToString();
+                            var schulgliederung = string.IsNullOrEmpty(dictBasisdaten["Schulgliederung"].ToString())
+                                ? ""
+                                : dictBasisdaten["Schulgliederung"].ToString();
+                            var orgForm = string.IsNullOrEmpty(dictBasisdaten["OrgForm"].ToString())
+                                ? ""
+                                : dictBasisdaten["OrgForm"].ToString();
+                            var klassenart = string.IsNullOrEmpty(dictBasisdaten["Klassenart"].ToString())
+                                ? ""
+                                : dictBasisdaten["Klassenart"].ToString();
+                            var fachklasse = string.IsNullOrEmpty(dictBasisdaten["Fachklasse"].ToString())
+                                ? ""
+                                : dictBasisdaten["Fachklasse"].ToString();
+                            var zeugnisart = "";
+                            var schwerstbehinderung = student.Schwerstbehinderung;
+                            var wiederholung = "";
 
-                    dynamic record = new ExpandoObject();
-                    record.Nachname = $"{student.Nachname}#{student.Klasse}";
-                    record.Vorname = student.Vorname;
-                    record.Geburtsdatum = student.Geburtsdatum;
-                    record.Jahr = Global.AktSj[0];
-                    record.Abschnitt = art == Global.Art.Statistik ? "1" : configuration["Abschnitt"];
-                    record.Jahrgang = jahrgang;
-                    record.Klasse = student.Klasse;
-                    record.Schulgliederung = schulgliederung;
-                    record.OrgForm = orgForm;
-                    record.Klassenart = klassenart;
-                    record.Fachklasse = fachklasse;
-                    record.Förderschwerpunkt = "";
-                    record.ZWEIPUNKTLEERZEICHENFörderschwerpunkt = "";
-                    record.Schwerstbehinderung = schwerstbehinderung;
-                    record.Wertung = "J";
-                    record.Wiederholung = wiederholung;
-                    record.Klassenlehrer = klassenlehrer;
-                    record.Versetzung = versetzung;
-                    record.Abschluss = abschluss;
-                    record.Schwerpunkt = "";
-                    record.Konferenzdatum = art == Global.Art.Statistik ? "" : konferenzdatum.ToShortDateString();
-                    record.Zeugnisdatum = art == Global.Art.Statistik ? "" : zeugnisdatum.ToShortDateString();
-                    record.SummeFehlstd = art == Global.Art.Statistik ? "" : student.GetFehlstd(absencePerStud, configuration);
-                    record.SummeFehlstdUNTERSTRICHunentschuldigt = art == Global.Art.Statistik ? "" : student.GetUnentFehlstd(absencePerStud, configuration);
-                    record.allgPUNKTMINUSbildenderLEERZEICHENAbschluss = "";
-                    record.berufsbezPUNKTLEERZEICHENAbschluss = "";
-                    record.Zeugnisart = zeugnisart;
-                    record.FehlstundenMINUSGrenzwert = "";
-                    record.DatumLEERZEICHENvon = "";
-                    record.DatumLEERZEICHENbis = "";
-                    records.Add(record);
+                            var dictLernabschnitt = schuelerLernab
+                                .Where(recLern =>
+                                {
+                                    var dictLern = (IDictionary<string, object>)recLern;
+                                    return dictLern["Nachname"].ToString() == student.Nachname &&
+                                        dictLern["Vorname"].ToString() == student.Vorname &&
+                                        dictLern["Geburtsdatum"].ToString() == student.Geburtsdatum &&
+                                        dictLern["Jahr"].ToString() == Global.AktSj[0] &&
+                                        dictLern["Abschnitt"].ToString() == configuration["Abschnitt"];
+                                }).FirstOrDefault() as IDictionary<string, object>;
+
+                            var fehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt = Global.FehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt;
+
+                            // Wenn bereits Lernabschnittsdaten existieren, werden die Daten dort entnommen.
+                            if (dictLernabschnitt != null)
+                            {
+                                konferenzdatum = konferenzdatum.Year == 1
+                                    ? string.IsNullOrEmpty(dictLernabschnitt["Konferenzdatum"].ToString())
+                                        ? konferenzdatum
+                                        : Convert.ToDateTime(dictLernabschnitt["Konferenzdatum"].ToString())
+                                    : konferenzdatum;
+                                zeugnisdatum = zeugnisdatum.Year == 1
+                                    ? string.IsNullOrEmpty(dictLernabschnitt["Zeugnisdatum"].ToString())
+                                        ? zeugnisdatum
+                                        : Convert.ToDateTime(dictLernabschnitt["Zeugnisdatum"].ToString())
+                                    : zeugnisdatum;
+                                jahrgang = string.IsNullOrEmpty(jahrgang)
+                                    ? string.IsNullOrEmpty(dictLernabschnitt["Jahrgang"].ToString())
+                                        ? jahrgang
+                                        : dictLernabschnitt["Jahrgang"].ToString()
+                                    : jahrgang;
+                                orgForm = string.IsNullOrEmpty(orgForm)
+                                    ? string.IsNullOrEmpty(dictLernabschnitt["OrgForm"].ToString())
+                                        ? orgForm
+                                        : dictLernabschnitt["OrgForm"].ToString()
+                                    : orgForm;
+                                klassenart = string.IsNullOrEmpty(klassenart)
+                                    ? string.IsNullOrEmpty(dictLernabschnitt["Klassenart"].ToString())
+                                        ? klassenart
+                                        : dictLernabschnitt["Klassenart"].ToString()
+                                    : klassenart;
+                                schulgliederung = string.IsNullOrEmpty(schulgliederung)
+                                    ? string.IsNullOrEmpty(dictLernabschnitt["Schulgliederung"].ToString())
+                                        ? schulgliederung
+                                        : dictLernabschnitt["Schulgliederung"].ToString()
+                                    : schulgliederung;
+                                klassenlehrer = string.IsNullOrEmpty(klassenlehrer)
+                                    ? string.IsNullOrEmpty(dictLernabschnitt["Klassenlehrer"].ToString())
+                                        ? klassenlehrer
+                                        : dictLernabschnitt["Klassenlehrer"].ToString()
+                                    : klassenlehrer;
+                                versetzung = string.IsNullOrEmpty(versetzung)
+                                    ? string.IsNullOrEmpty(dictLernabschnitt["Versetzung"].ToString())
+                                        ? versetzung
+                                        : dictLernabschnitt["Versetzung"].ToString()
+                                    : versetzung;
+                                abschluss = string.IsNullOrEmpty(abschluss)
+                                    ? string.IsNullOrEmpty(dictLernabschnitt["Abschluss"].ToString())
+                                        ? abschluss
+                                        : dictLernabschnitt["Abschluss"].ToString()
+                                    : abschluss;
+                                fachklasse = string.IsNullOrEmpty(fachklasse)
+                                    ? string.IsNullOrEmpty(dictLernabschnitt["Fachklasse"].ToString())
+                                        ? fachklasse
+                                        : dictLernabschnitt["Fachklasse"].ToString()
+                                    : fachklasse;
+                                zeugnisart = string.IsNullOrEmpty(zeugnisart)
+                                    ? string.IsNullOrEmpty(dictLernabschnitt["Zeugnisart"].ToString())
+                                        ? zeugnisart
+                                        : dictLernabschnitt["Zeugnisart"].ToString()
+                                    : zeugnisart;
+                                schwerstbehinderung = string.IsNullOrEmpty(schwerstbehinderung)
+                                    ? string.IsNullOrEmpty(dictLernabschnitt["Schwerstbehinderung"].ToString())
+                                        ? schwerstbehinderung
+                                        : dictLernabschnitt["Schwerstbehinderung"].ToString()
+                                    : schwerstbehinderung;
+                                wiederholung = string.IsNullOrEmpty(wiederholung)
+                                    ? string.IsNullOrEmpty(dictLernabschnitt["Wiederholung"].ToString())
+                                        ? wiederholung
+                                        : dictLernabschnitt["Wiederholung"].ToString()
+                                    : wiederholung;
+                            }
+
+                            dynamic record = new ExpandoObject();
+                            record.Nachname = $"{student.Nachname}#{student.Klasse}";
+                            record.Vorname = student.Vorname;
+                            record.Geburtsdatum = student.Geburtsdatum;
+                            record.Jahr = Global.AktSj[0];
+                            record.Abschnitt = art == Global.Art.Statistik ? "1" : configuration["Abschnitt"];
+                            record.Jahrgang = jahrgang;
+                            record.Klasse = student.Klasse;
+                            record.Schulgliederung = schulgliederung;
+                            record.OrgForm = orgForm;
+                            record.Klassenart = klassenart;
+                            record.Fachklasse = fachklasse;
+                            record.Förderschwerpunkt = "";
+                            record.ZWEIPUNKTLEERZEICHENFörderschwerpunkt = "";
+                            record.Schwerstbehinderung = schwerstbehinderung;
+                            record.Wertung = "J";
+                            record.Wiederholung = wiederholung;
+                            record.Klassenlehrer = klassenlehrer;
+                            record.Versetzung = versetzung;
+                            record.Abschluss = abschluss;
+                            record.Schwerpunkt = "";
+                            record.Konferenzdatum = art == Global.Art.Statistik ? "" : konferenzdatum.ToShortDateString();
+                            record.Zeugnisdatum = art == Global.Art.Statistik ? "" : zeugnisdatum.ToShortDateString();
+                            record.SummeFehlstd = art == Global.Art.Statistik ? "" : student.GetFehlstd(absencePerStud, configuration);
+                            record.SummeFehlstdUNTERSTRICHunentschuldigt = art == Global.Art.Statistik ? "" : student.GetUnentFehlstd(absencePerStud, configuration);
+                            record.allgPUNKTMINUSbildenderLEERZEICHENAbschluss = "";
+                            record.berufsbezPUNKTLEERZEICHENAbschluss = "";
+                            record.Zeugnisart = zeugnisart;
+                            record.FehlstundenMINUSGrenzwert = "";
+                            record.DatumLEERZEICHENvon = "";
+                            record.DatumLEERZEICHENbis = "";
+                            records.Add(record);
+                        }
+                    }   
                 }
-            }
+                Global.ZeileSchreiben("Lernabschnittsdaten.dat verarbeitet:", records.Count().ToString());
+            });
 
             zielDatei.AddRange(records);
             return zielDatei;
@@ -693,172 +705,128 @@ public class Menüeintrag
             IStudents.AddRange(x);
         }
 
-        foreach (var klasse in IStudents.OrderBy(x => x.Klasse).Select(x => x.Klasse).Distinct())
+        AnsiConsole.Status()
+            .Spinner(Spinner.Known.Dots)
+            .Start("SchuelerLeistungsdaten.dat verarbeiten ...", ctx =>
         {
-            var isFirstRun = true;
-
-            var verschiedeneFaecherDerKlasse = VerschiedeneFaecher(klasse, expLessons);
-
-            var religionWurdeUnterrichtet = verschiedeneFaecherDerKlasse
-                .Any(fach => new List<string>() { "rel", "kr", "er", "reli" }.Contains(fach.ToLower()));
-
-            foreach (var student in IStudents.OrderBy(x => x.Nachname).ThenBy(x => x.Vorname).Where(x => x.Klasse == klasse))
+            foreach (var klasse in IStudents.OrderBy(x => x.Klasse).Select(x => x.Klasse).Distinct())
             {
-                var istReliabmelder = schBasisds.Any(rec =>
+                var isFirstRun = true;
+
+                var verschiedeneFaecherDerKlasse = VerschiedeneFaecher(klasse, expLessons);
+
+                var religionWurdeUnterrichtet = verschiedeneFaecherDerKlasse
+                    .Any(fach => new List<string>() { "rel", "kr", "er", "reli" }.Contains(fach.ToLower()));
+
+
+
+                foreach (var student in IStudents.OrderBy(x => x.Nachname).ThenBy(x => x.Vorname).Where(x => x.Klasse == klasse))
                 {
-                    var dict = (IDictionary<string, object>)rec;
-                    return dict["Nachname"].ToString() == student.Nachname
-                        && dict["Vorname"].ToString() == student.Vorname
-                        && dict["Geburtsdatum"].ToString() == student.Geburtsdatum
-                        && !string.IsNullOrEmpty(dict["Abmeldedatum Religionsunterricht"].ToString());
-                });
-
-                foreach (var fach in verschiedeneFaecherDerKlasse)
-                {
-                    // Normalerweise gibt es nur einen Unterricht. 
-                    var unterrichteMitDiesemFach = GetUnterrichteMitDiesemFach(fach, klasse, expLessons);
-
-                    var dictExp = (IDictionary<string, object>)unterrichteMitDiesemFach[0];
-
-                    var zusatzlehrkraft = "";
-                    var zusatzlehrkraftWochenstunden = "";
-
-                    // In der Statistikzählen allen Fächer mit, auch wenn sie nicht relevant sind.
-                    if (art != Global.Art.Statistik)
-                    {
-                        if (!student.UnterrichtIstRelevantFürZeugnisInDiesemAbschnitt(dictExp, configuration)) continue;
-                    }
-
-                    // Wenn dieses Fach mit diesem Lehrer bereits in den records existiert,
-                    // dann wird es nicht erneut hinzugefügt.
-
-                    var gibtDasFachMitDemLehrerSchon = records.Any(rec =>
+                    var istReliabmelder = schBasisds.Any(rec =>
                     {
                         var dict = (IDictionary<string, object>)rec;
-                        return dict["Fach"].ToString() == dictExp["subject"].ToString() &&
-                               dict["Fachlehrer"].ToString() == dictExp["teacher"].ToString() &&
-                               dict["Vorname"].ToString() == student.Vorname &&
-                               dict["Nachname"].ToString() == student.Nachname &&
-                               dict["Geburtsdatum"].ToString() == student.Geburtsdatum;
+                        return dict["Nachname"].ToString() == student.Nachname
+                            && dict["Vorname"].ToString() == student.Vorname
+                            && dict["Geburtsdatum"].ToString() == student.Geburtsdatum
+                            && !string.IsNullOrEmpty(dict["Abmeldedatum Religionsunterricht"].ToString());
                     });
 
-                    if (!gibtDasFachMitDemLehrerSchon)
+                    foreach (var fach in verschiedeneFaecherDerKlasse)
                     {
-                        string jahrgang = student.GetJahrgang(schBasisds);
-                        string note = student.GetNote(jahrgang, marksPerLs, dictExp["subject"].ToString()!, art);
+                        // Normalerweise gibt es nur einen Unterricht. 
+                        var unterrichteMitDiesemFach = GetUnterrichteMitDiesemFach(fach, klasse, expLessons);
 
-                        // Wenn Reli unterricht wurde und der Schüler abgemeldet ist, dann wird NT eingesetzt.
-                        if (
-                            new List<string>() { "rel", "kr", "er", "reli" }.Contains(fach.ToLower())
-                            && religionWurdeUnterrichtet)
+                        var dictExp = (IDictionary<string, object>)unterrichteMitDiesemFach[0];
+
+                        var zusatzlehrkraft = "";
+                        var zusatzlehrkraftWochenstunden = "";
+
+                        // In der Statistikzählen allen Fächer mit, auch wenn sie nicht relevant sind.
+                        if (art != Global.Art.Statistik)
                         {
-                            if (istReliabmelder)
-                            {
-                                note = "NT";
-                            }
+                            if (!student.UnterrichtIstRelevantFürZeugnisInDiesemAbschnitt(dictExp, configuration)) continue;
                         }
 
-                        string kursart = GetKursart(jahrgang, fach);
-                        bool mahnung = student.GetMahnung(marksPerLs, dictExp["subject"].ToString()!);
+                        // Wenn dieses Fach mit diesem Lehrer bereits in den records existiert,
+                        // dann wird es nicht erneut hinzugefügt.
 
-                        // Die Kursart 
-                        var kursartBisher = schLeistus
-                            .Where(record =>
-                            {
-                                var dict = (IDictionary<string, object>)record;
-                                return dict["Vorname"].ToString() == student.Vorname &&
-                                       dict["Nachname"].ToString() == student.Nachname &&
-                                       dict["Geburtsdatum"].ToString() == student.Geburtsdatum &&
-                                       dictExp["subject"] != null &&
-                                       dict["Fach"].ToString() == dictExp["subject"].ToString();
-                            })
-                            .Select(record =>
-                            {
-                                var dict = (IDictionary<string, object>)record;
-                                return dict["Kursart"].ToString();
-                            })
-                            .FirstOrDefault()
-                            ?.ToString();
-
-                        if (!string.IsNullOrEmpty(kursartBisher))
-                            kursart = kursartBisher;
-
-                        // Klassenunterrichte und Religion wird immer hinzugefügt
-                        if (dictExp["studentgroup"].ToString() == "" || new List<string>() { "rel", "kr", "er", "reli", "religion", "rel1" }.Contains(fach.ToLower()))
+                        var gibtDasFachMitDemLehrerSchon = records.Any(rec =>
                         {
-                            dynamic record = new ExpandoObject();
-                            record.Nachname = $"{student.Nachname}#{klasse}";
-                            record.Vorname = student.Vorname;
-                            record.Geburtsdatum = student.Geburtsdatum;
-                            record.Jahr = Global.AktSj[0];
-                            record.Abschnitt = configuration["Abschnitt"];
-                            record.Fach = dictExp["subject"].ToString();
-                            record.Fachlehrer = dictExp["teacher"].ToString();
-                            record.Kursart = kursart;
-                            record.Kurs = "";
-                            record.Note = art == Global.Art.Statistik ? "" : note;
-                            record.Abiturfach = "";
-                            record.WochenstdPUNKT = dictExp["periods"];
-                            record.ExterneLEERZEICHENSchulnrPUNKT = "";
-                            record.Zusatzkraft = zusatzlehrkraft;
-                            record.WochenstdPUNKTLEERZEICHENZK = zusatzlehrkraftWochenstunden;
-                            record.Jahrgang = "";
-                            record.Jahrgänge = "";
-                            record.FehlstdPUNKT = ""; // Fehlzeiten werden über die Abschnittsdaten importiert.
-                            record.unentschPUNKTLEERZEICHENFehlstdPUNKT = "";
-                            if (art == Global.Art.Mahnung)
-                            {
-                                record.Mahnung = "J";
-                                record.Sortierung = "";
-                                record.Mahndatum = "";//DateTime.Now.ToShortDateString();
-                            }
-                            if ((mahnung && art == Global.Art.Mahnung) || art != Global.Art.Mahnung)
-                            {
-                                records.Add(record);
-                            }
-                        }
-                        else // Bei Kursunterrichten wird geschaut, ob der Schüler den Kurs belegt hat. 
+                            var dict = (IDictionary<string, object>)rec;
+                            return dict["Fach"].ToString() == dictExp["subject"].ToString() &&
+                                dict["Fachlehrer"].ToString() == dictExp["teacher"].ToString() &&
+                                dict["Vorname"].ToString() == student.Vorname &&
+                                dict["Nachname"].ToString() == student.Nachname &&
+                                dict["Geburtsdatum"].ToString() == student.Geburtsdatum;
+                        });
+
+                        if (!gibtDasFachMitDemLehrerSchon)
                         {
-                            var id = student.Id;
-                            var studentZeile = stdgroupSs
+                            string jahrgang = student.GetJahrgang(schBasisds);
+                            string note = student.GetNote(jahrgang, marksPerLs, dictExp["subject"].ToString()!, art);
+
+                            // Wenn Reli unterricht wurde und der Schüler abgemeldet ist, dann wird NT eingesetzt.
+                            if (
+                                new List<string>() { "rel", "kr", "er", "reli" }.Contains(fach.ToLower())
+                                && religionWurdeUnterrichtet)
+                            {
+                                if (istReliabmelder)
+                                {
+                                    note = "NT";
+                                }
+                            }
+
+                            string kursart = GetKursart(configuration, jahrgang, fach);
+                            bool mahnung = student.GetMahnung(marksPerLs, dictExp["subject"].ToString()!);
+
+                            // Die Kursart 
+                            var kursartBisher = schLeistus
                                 .Where(record =>
                                 {
                                     var dict = (IDictionary<string, object>)record;
-                                    return dict["studentId"].ToString() == id &&
-                                           dict["studentgroup.name"].ToString() ==
-                                           dictExp["studentgroup"].ToString();
+                                    return dict["Vorname"].ToString() == student.Vorname &&
+                                        dict["Nachname"].ToString() == student.Nachname &&
+                                        dict["Geburtsdatum"].ToString() == student.Geburtsdatum &&
+                                        dictExp["subject"] != null &&
+                                        dict["Fach"].ToString() == dictExp["subject"].ToString();
                                 })
-                                .FirstOrDefault();
-                            var dictStudentgroup = (IDictionary<string, object>)studentZeile!;
+                                .Select(record =>
+                                {
+                                    var dict = (IDictionary<string, object>)record;
+                                    return dict["Kursart"].ToString();
+                                })
+                                .FirstOrDefault()
+                                ?.ToString();
 
-                            if (dictStudentgroup != null)
+                            if (!string.IsNullOrEmpty(kursartBisher))
+                                kursart = kursartBisher;
+
+                            // Klassenunterrichte und Religion wird immer hinzugefügt
+                            if (dictExp["studentgroup"].ToString() == "" || new List<string>() { "rel", "kr", "er", "reli", "religion", "rel1" }.Contains(fach.ToLower()))
                             {
-                                if (!student.UnterrichtIstRelevantFürZeugnisInDiesemAbschnitt(dictStudentgroup, configuration))
-                                    continue;
                                 dynamic record = new ExpandoObject();
                                 record.Nachname = $"{student.Nachname}#{klasse}";
                                 record.Vorname = student.Vorname;
                                 record.Geburtsdatum = student.Geburtsdatum;
                                 record.Jahr = Global.AktSj[0];
                                 record.Abschnitt = configuration["Abschnitt"];
-                                record.Fach = dictStudentgroup["subject"].ToString();
+                                record.Fach = dictExp["subject"].ToString();
                                 record.Fachlehrer = dictExp["teacher"].ToString();
                                 record.Kursart = kursart;
-                                record.Kurs = dictStudentgroup["studentgroup.name"].ToString()!.Substring(0,
-                                    Math.Min(dictStudentgroup["studentgroup.name"].ToString()!.Length, 20));
-                                record.Note = note;
+                                record.Kurs = "";
+                                record.Note = art == Global.Art.Statistik ? "" : note;
                                 record.Abiturfach = "";
                                 record.WochenstdPUNKT = dictExp["periods"];
                                 record.ExterneLEERZEICHENSchulnrPUNKT = "";
                                 record.Zusatzkraft = zusatzlehrkraft;
                                 record.WochenstdPUNKTLEERZEICHENZK = zusatzlehrkraftWochenstunden;
-                                record.Jahrgang = student.Jahrgang;
+                                record.Jahrgang = "";
                                 record.Jahrgänge = "";
-                                record.FehlstdPUNKT = "";
+                                record.FehlstdPUNKT = ""; // Fehlzeiten werden über die Abschnittsdaten importiert.
                                 record.unentschPUNKTLEERZEICHENFehlstdPUNKT = "";
                                 if (art == Global.Art.Mahnung)
                                 {
-                                    record.Mahnung = "";
+                                    record.Mahnung = "J";
                                     record.Sortierung = "";
                                     record.Mahndatum = "";//DateTime.Now.ToShortDateString();
                                 }
@@ -867,11 +835,63 @@ public class Menüeintrag
                                     records.Add(record);
                                 }
                             }
+                            else // Bei Kursunterrichten wird geschaut, ob der Schüler den Kurs belegt hat. 
+                            {
+                                var id = student.Id;
+                                var studentZeile = stdgroupSs
+                                    .Where(record =>
+                                    {
+                                        var dict = (IDictionary<string, object>)record;
+                                        return dict["studentId"].ToString() == id &&
+                                            dict["studentgroup.name"].ToString() ==
+                                            dictExp["studentgroup"].ToString();
+                                    })
+                                    .FirstOrDefault();
+                                var dictStudentgroup = (IDictionary<string, object>)studentZeile!;
+
+                                if (dictStudentgroup != null)
+                                {
+                                    if (!student.UnterrichtIstRelevantFürZeugnisInDiesemAbschnitt(dictStudentgroup, configuration))
+                                        continue;
+                                    dynamic record = new ExpandoObject();
+                                    record.Nachname = $"{student.Nachname}#{klasse}";
+                                    record.Vorname = student.Vorname;
+                                    record.Geburtsdatum = student.Geburtsdatum;
+                                    record.Jahr = Global.AktSj[0];
+                                    record.Abschnitt = configuration["Abschnitt"];
+                                    record.Fach = dictStudentgroup["subject"].ToString();
+                                    record.Fachlehrer = dictExp["teacher"].ToString();
+                                    record.Kursart = kursart;
+                                    record.Kurs = dictStudentgroup["studentgroup.name"].ToString()!.Substring(0,
+                                        Math.Min(dictStudentgroup["studentgroup.name"].ToString()!.Length, 20));
+                                    record.Note = note;
+                                    record.Abiturfach = "";
+                                    record.WochenstdPUNKT = dictExp["periods"];
+                                    record.ExterneLEERZEICHENSchulnrPUNKT = "";
+                                    record.Zusatzkraft = zusatzlehrkraft;
+                                    record.WochenstdPUNKTLEERZEICHENZK = zusatzlehrkraftWochenstunden;
+                                    record.Jahrgang = student.Jahrgang;
+                                    record.Jahrgänge = "";
+                                    record.FehlstdPUNKT = "";
+                                    record.unentschPUNKTLEERZEICHENFehlstdPUNKT = "";
+                                    if (art == Global.Art.Mahnung)
+                                    {
+                                        record.Mahnung = "";
+                                        record.Sortierung = "";
+                                        record.Mahndatum = "";//DateTime.Now.ToShortDateString();
+                                    }
+                                    if ((mahnung && art == Global.Art.Mahnung) || art != Global.Art.Mahnung)
+                                    {
+                                        records.Add(record);
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
-        }
+            Global.ZeileSchreiben("SchuelerLeistungsdaten.dat verarbeitet:", records.Count().ToString());
+        });
 
         zieldatei.AddRange(records);
         return zieldatei;
@@ -912,14 +932,16 @@ public class Menüeintrag
         var exportLessons = Quelldateien.GetMatchingList(configuration, "exportlesson", IStudents, Klassen);
         if (exportLessons == null || exportLessons.Count == 0) return [];
 
-        var klassen = Quelldateien.GetMatchingList(configuration, "Klassen", IStudents, Klassen);
+        var klassen = Quelldateien.GetMatchingList(configuration, "klassen", IStudents, Klassen);
         if (klassen == null || klassen.Count == 0) return [];
 
         foreach (var recExp in exportLessons)
         {
             var dictExp = (IDictionary<string, object>)recExp;
 
+            // Wenn es keine Schülergruppe gibt, wird der Eintrag übersprungen.
             if (string.IsNullOrEmpty(dictExp["studentgroup"].ToString())) continue;
+
             foreach (var klasse in dictExp["klassen"].ToString()!.Split('~'))
             {
                 var zeileKlasse = klassen.Where(record =>
@@ -931,24 +953,23 @@ public class Menüeintrag
                 if (!IStudents.Select(x => x.Klasse).ToList().Contains(klasse)) continue;
                 {
                     dynamic record = new ExpandoObject();
-                    record.KursBez = dictExp["studentgroup"].ToString()!.Substring(0,
-                        Math.Min(dictExp["studentgroup"].ToString()!.Length, 20));
+                    record.KursBez = dictExp["studentgroup"].ToString()!.Substring(0, Math.Min(dictExp["studentgroup"].ToString()!.Length, 20));
                     record.Klasse = klasse;
                     record.Jahr = Global.AktSj[0];
                     record.Abschnitt = configuration["Abschnitt"];
                     record.Jahrgang = zeileKlasse?.Jahrgang;
                     record.Fach = Global.PrüfeAufNullOrEmpty(dictExp, "subject");
-                    record.Kursart = GetKursart(record.Jahrgang, dictExp["subject"].ToString());
+                    record.Kursart = GetKursart(configuration, record.Jahrgang, dictExp["subject"].ToString());
                     record.WochenstdPUNKT = dictExp["periods"];
                     record.WochenstdPUNKTLEERZEICHENKL = "";
                     record.Kursleiter = dictExp["teacher"];
                     record.Epochenunterricht = "";
-                    record.Schulnr = "177659";
+                    record.Schulnr = configuration["Schulnummer"];
                     record.WochenstdPUNKTLEERZEICHENZK = "";
                     record.Zusatzkraft = "";
                     record.WochenstdLEERZEICHENZK = "";
                     record.WeitereLEERZEICHENZusatzkraft = "";
-                    zieldatei.AddRange(record);
+                    zieldatei.Add(record);
                 }
             }
         }
@@ -1111,53 +1132,61 @@ public class Menüeintrag
         var eintaege = new List<string>();
 
         int i = 1;
-        foreach (var leistungsdatum in leistungsdaten)
+        
+
+        AnsiConsole.Status()
+            .Spinner(Spinner.Known.Dots)
+            .Start("Lehrkräfte verarbeiten ...", ctx =>
         {
-            var dict = (IDictionary<string, object>)leistungsdatum;
-
-            // Wenn keine Note erteilt wurde ...
-            if (dict["Note"].ToString() == "")
+            foreach (var leistungsdatum in leistungsdaten)
             {
-                var student = IStudents.FirstOrDefault(x =>
-                    x.Vorname == dict["Vorname"].ToString() && x.Nachname == dict["Nachname"].ToString() &&
-                    x.Geburtsdatum == dict["Geburtsdatum"].ToString());
+                var dict = (IDictionary<string, object>)leistungsdatum;
 
-                eintaege.Add(i.ToString().PadLeft(4) + ". " + student.Klasse.ToString().PadRight(6) + ", " +
-                             (dict["Nachname"] + ", " + dict["Vorname"]).ToString().PadRight(20).Substring(0, 19) +
-                             ": " + dict["Fachlehrer"].ToString().PadRight(3) + ": " + dict["Fach"]);
-                i++;
-
-                var lehrer = lehrers.FirstOrDefault(x=>x.Kürzel == dict["Fachlehrer"].ToString());
-                
-                if (lehrer != null && !string.IsNullOrEmpty(lehrer.Mail) && !lul.Contains(lehrer.Mail))
+                // Wenn keine Note erteilt wurde ...
+                if (dict["Note"].ToString() == "")
                 {
-                    lul.Add(lehrer.Mail);
-                }
-            }
-        }
+                    var student = IStudents.FirstOrDefault(x =>
+                        x.Vorname == dict["Vorname"].ToString() && x.Nachname == dict["Nachname"].ToString() &&
+                        x.Geburtsdatum == dict["Geburtsdatum"].ToString());
 
-        if (eintaege.Count > 0)
-        {
-            foreach (var eintrag in eintaege)
-            {
-                Console.WriteLine(eintrag);
-            }
+                    eintaege.Add(i.ToString().PadLeft(4) + ". " + student.Klasse.ToString().PadRight(6) + ", " +
+                                (dict["Nachname"] + ", " + dict["Vorname"]).ToString().PadRight(20).Substring(0, 19) +
+                                ": " + dict["Fachlehrer"].ToString().PadRight(3) + ": " + dict["Fach"]);
+                    i++;
 
-            foreach (var lehrer in lehrers)
-            {
-                if (lul.Contains(lehrer.Kürzel))
-                {
-                    adressen += lehrer.Mail + ",";
+                    var lehrer = lehrers.FirstOrDefault(x => x.Kürzel == dict["Fachlehrer"].ToString());
+
+                    if (lehrer != null && !string.IsNullOrEmpty(lehrer.Mail) && !lul.Contains(lehrer.Mail))
+                    {
+                        lul.Add(lehrer.Mail);
+                    }
                 }
             }
 
-            Console.WriteLine("   " + adressen.TrimEnd(','));
-        }
-        else
-        {
-            Console.WriteLine("  Es fehlen keine Noten. Gut so.");
-        }
-        return String.Join(',',lul);
+            if (eintaege.Count > 0)
+            {
+                foreach (var eintrag in eintaege)
+                {
+                    Console.WriteLine(eintrag);
+                }
+
+                foreach (var lehrer in lehrers)
+                {
+                    if (lul.Contains(lehrer.Kürzel))
+                    {
+                        adressen += lehrer.Mail + ",";
+                    }
+                }
+
+                Console.WriteLine("   " + adressen.TrimEnd(','));
+            }
+            else
+            {
+                Console.WriteLine("  Es fehlen keine Noten. Gut so.");
+            }
+            Global.ZeileSchreiben("Lehrkräfte verarbeitet:", i.ToString());
+        });
+        return String.Join(',', lul);
     }
 
     public void ChatErzeugen(IConfiguration configuration, String mitgliederMail)
@@ -1187,7 +1216,7 @@ public class Menüeintrag
             var klassen = Quelldateien.GetMatchingList(configuration, "klassen", Students, Klassen);
             if (klassen == null || klassen.Count == 0) return [];
             
-            AnsiConsole.Write(new Rule($"[{Global.GetColor(Global.ColorInfoBox)}]Anstehende Änderungen/Neuanlagen:[/]").RuleStyle(Global.GetColor(Global.ColorInfoBox)).LeftJustified());
+            //AnsiConsole.Write(new Rule($"[{Global.GetColor(Global.ColorInfoBox)}]Anstehende Änderungen/Neuanlagen:[/]").RuleStyle(Global.GetColor(Global.ColorInfoBox)).LeftJustified());
 
             var table = new Spectre.Console.Table();
             table.Border(TableBorder.Rounded);
@@ -1211,115 +1240,123 @@ public class Menüeintrag
 
             var i = 1;
 
-            foreach (var rec in webuntisStudents)
+            AnsiConsole.Status()
+            .Spinner(Spinner.Known.Dots)
+            .Start("Webuntis-Schüler*innen verarbeiten ...", ctx =>
             {
-                if (rec is not IDictionary<string, object> webuntisStudent) continue;
-
-                // Ein Abgänger oder Absolvent, der als Externer oder Gast wiederkommt, hat in seiner aktiven Rolle den niedrigeren Status.
-                // Also wird bei mehrfach vorkommenden Schülern immer der mit dem niedrigsten Status genommen.                 
-                var schildStudent = Students
-                    .OrderBy(x => int.TryParse(x.Status, out var status) ? status : 0)
-                    .FirstOrDefault(x =>
-                        x.Nachname == webuntisStudent["longName"].ToString() &&
-                        x.Vorname == webuntisStudent["foreName"].ToString() &&
-                        x.Geburtsdatum == webuntisStudent["birthDate"].ToString());
-
-                schildStudent.GetLetztesZeugnisdatumInDerKlasse(schuelerLernabschnittsdaten);
-
-
-                var id = schildStudent.Id;
-
-                if (schildStudent.Nachname == "Beckmann" && schildStudent.Vorname.StartsWith("Da"))
+                foreach (var rec in webuntisStudents)
                 {
-                    string a = "a";
-                }
+                    if (rec is not IDictionary<string, object> webuntisStudent) continue;
 
-                if (schildStudent == null) continue;
+                    // Ein Abgänger oder Absolvent, der als Externer oder Gast wiederkommt, hat in seiner aktiven Rolle den niedrigeren Status.
+                    // Also wird bei mehrfach vorkommenden Schülern immer der mit dem niedrigsten Status genommen.                 
+                    var schildStudent = Students
+                        .OrderBy(x => int.TryParse(x.Status, out var status) ? status : 0)
+                        .FirstOrDefault(x =>
+                            x.Nachname == webuntisStudent["longName"].ToString() &&
+                            x.Vorname == webuntisStudent["foreName"].ToString() &&
+                            x.Geburtsdatum == webuntisStudent["birthDate"].ToString());
 
-                var schildStudentMeldung = (schildStudent.Nachname + ", " + schildStudent.Vorname + ", " + id + " (" + schildStudent.Klasse + ")").PadRight(45);
+                    schildStudent.GetLetztesZeugnisdatumInDerKlasse(schuelerLernabschnittsdaten);
 
-                // Wenn er aktiv oder Gast ist, wird seine Klassenzugehörigkeit gecheckt.
-                if (new List<string>() { "2", "6" }.Contains(schildStudent.Status))
-                {
-                    if (webuntisStudent["klasse.name"].ToString() != schildStudent.Klasse)
+
+                    var id = schildStudent.Id;
+
+                    if (schildStudent.Nachname == "Beckmann" && schildStudent.Vorname.StartsWith("Da"))
                     {
-                        susMitÄnderung.Add((i + ". ").PadRight(5) + schildStudentMeldung + " " + schildStudent.Status + "      " + webuntisStudent["klasse.name"].ToString() + " -> " + schildStudent.Klasse);
-
-                        table.AddRow(new Text[]{
-                            new Text(i+".").RightJustified(),
-                            new Text(schildStudent.Nachname).LeftJustified(),
-                            new Text(schildStudent.Vorname).LeftJustified(),
-                            new Text(id).LeftJustified(),
-                            new Text(schildStudent.Klasse).LeftJustified(),
-                            new Text(schildStudent.Status).LeftJustified(),
-                            new Text(webuntisStudent["klasse.name"].ToString() + " -> " + schildStudent.Klasse).LeftJustified()});
-
-                        i++;
+                        string a = "a";
                     }
-                }
 
-                // Wenn der SchildStudent nicht aktiv (2) ist und auch kein Gast (Externer) (6) ist ...
-                if (!new List<string>() { "2", "6" }.Contains(schildStudent.Status))
-                {
-                    // Prüfen, ob ein Austrittsdatum vorhanden ist und ob es in der Vergangenheit liegt
-                    string exitDateString = webuntisStudent["exitDate"]?.ToString() ?? string.Empty;
+                    if (schildStudent == null) continue;
 
-                    if (exitDateString != null && !string.IsNullOrEmpty(exitDateString))
+                    var schildStudentMeldung = (schildStudent.Nachname + ", " + schildStudent.Vorname + ", " + id + " (" + schildStudent.Klasse + ")").PadRight(45);
+
+                    // Wenn er aktiv oder Gast ist, wird seine Klassenzugehörigkeit gecheckt.
+                    if (new List<string>() { "2", "6" }.Contains(schildStudent.Status))
                     {
-                        DateTime exitDate;
-                        bool isValidDate = DateTime.TryParseExact(
-                        exitDateString,
-                        "dd.MM.yyyy",  // Das erwartete Datumsformat (bspw. "31.07.2025")
-                        CultureInfo.InvariantCulture,
-                        DateTimeStyles.None,
-                        out exitDate);
+                        if (webuntisStudent["klasse.name"].ToString() != schildStudent.Klasse)
+                        {
+                            susMitÄnderung.Add((i + ". ").PadRight(5) + schildStudentMeldung + " " + schildStudent.Status + "      " + webuntisStudent["klasse.name"].ToString() + " -> " + schildStudent.Klasse);
 
-                        if (isValidDate && exitDate >= DateTime.Now)
-                        {                            
-                            schildStudent.GetEntlassdatum(schuelerZusatzdaten);                            
+                            table.AddRow(new Text[]{
+                                new Text(i+".").RightJustified(),
+                                new Text(schildStudent.Nachname).LeftJustified(),
+                                new Text(schildStudent.Vorname).LeftJustified(),
+                                new Text(id).LeftJustified(),
+                                new Text(schildStudent.Klasse).LeftJustified(),
+                                new Text(schildStudent.Status).LeftJustified(),
+                                new Text(webuntisStudent["klasse.name"].ToString() + " -> " + schildStudent.Klasse).LeftJustified()});
 
-                            if (schildStudent.ZeugnisdatumLetztesZeugnisInDieserKlasse != null)
-                            {
-                                //DateTime entl;
-                                //bool isValid = DateTime.TryParseExact(schildStudent.Entlassdatum, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out entl);
-
-                                if(schildStudent.ZeugnisdatumLetztesZeugnisInDieserKlasse >= DateTime.Now)
-                                {
-                                    susMitÄnderung.Add((i + ". ").PadRight(5) + schildStudentMeldung + " " + schildStudent.Status + "      Austritt: " + schildStudent.ZeugnisdatumLetztesZeugnisInDieserKlasse.ToShortDateString());
-
-                                    table.AddRow(new Text[]{
-                                        new Text(i+".").RightJustified(),
-                                        new Text(schildStudent.Nachname).LeftJustified(),
-                                        new Text(schildStudent.Vorname).LeftJustified(),
-                                        new Text(id).LeftJustified(),
-                                        new Text(schildStudent.Klasse).LeftJustified(),
-                                        new Text(schildStudent.Status).LeftJustified(),
-                                        new Text("Austritt: " + schildStudent.ZeugnisdatumLetztesZeugnisInDieserKlasse.ToShortDateString())});
-
-                                    schildStudent.Entlassdatum = DateTime.Now.ToShortDateString();
-                                }
-                                else
-                                {
-                                    susMitÄnderung.Add((i + ". ").PadRight(5) + schildStudentMeldung + " " + schildStudent.Status + "      Austritt: " + schildStudent.ZeugnisdatumLetztesZeugnisInDieserKlasse.ToString("dd.MM.yyyy"));
-
-                                    table.AddRow(new Text[]{
-                                        new Text(i+".").RightJustified(),
-                                        new Text(schildStudent.Nachname).LeftJustified(),
-                                        new Text(schildStudent.Vorname).LeftJustified(),
-                                        new Text(id).LeftJustified(),
-                                        new Text(schildStudent.Klasse).LeftJustified(),
-                                        new Text(schildStudent.Status).LeftJustified(),
-                                        new Text("Austritt: " + schildStudent.ZeugnisdatumLetztesZeugnisInDieserKlasse.ToString("dd.MM.yyyy"))});
-
-                                    schildStudent.Entlassdatum = DateTime.Now.ToShortDateString();
-                                }
-                            }
                             i++;
                         }
                     }
-                }
-            }
 
+                    // Wenn der SchildStudent nicht aktiv (2) ist und auch kein Gast (Externer) (6) ist ...
+                    if (!new List<string>() { "2", "6" }.Contains(schildStudent.Status))
+                    {
+                        // Prüfen, ob ein Austrittsdatum vorhanden ist und ob es in der Vergangenheit liegt
+                        string exitDateString = webuntisStudent["exitDate"]?.ToString() ?? string.Empty;
+
+                        if (exitDateString != null && !string.IsNullOrEmpty(exitDateString))
+                        {
+                            DateTime exitDate;
+                            bool isValidDate = DateTime.TryParseExact(
+                            exitDateString,
+                            "dd.MM.yyyy",  // Das erwartete Datumsformat (bspw. "31.07.2025")
+                            CultureInfo.InvariantCulture,
+                            DateTimeStyles.None,
+                            out exitDate);
+
+                            if (isValidDate && exitDate >= DateTime.Now)
+                            {
+                                schildStudent.GetEntlassdatum(schuelerZusatzdaten);
+
+                                if (schildStudent.ZeugnisdatumLetztesZeugnisInDieserKlasse != null)
+                                {
+                                    //DateTime entl;
+                                    //bool isValid = DateTime.TryParseExact(schildStudent.Entlassdatum, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out entl);
+
+                                    if (schildStudent.ZeugnisdatumLetztesZeugnisInDieserKlasse >= DateTime.Now)
+                                    {
+                                        susMitÄnderung.Add((i + ". ").PadRight(5) + schildStudentMeldung + " " + schildStudent.Status + "      Austritt: " + schildStudent.ZeugnisdatumLetztesZeugnisInDieserKlasse.ToShortDateString());
+
+                                        table.AddRow(new Text[]{
+                                            new Text(i+".").RightJustified(),
+                                            new Text(schildStudent.Nachname).LeftJustified(),
+                                            new Text(schildStudent.Vorname).LeftJustified(),
+                                            new Text(id).LeftJustified(),
+                                            new Text(schildStudent.Klasse).LeftJustified(),
+                                            new Text(schildStudent.Status).LeftJustified(),
+                                            new Text("Austritt: " + schildStudent.ZeugnisdatumLetztesZeugnisInDieserKlasse.ToShortDateString())});
+
+                                        schildStudent.Entlassdatum = DateTime.Now.ToShortDateString();
+                                    }
+                                    else
+                                    {
+                                        susMitÄnderung.Add((i + ". ").PadRight(5) + schildStudentMeldung + " " + schildStudent.Status + "      Austritt: " + schildStudent.ZeugnisdatumLetztesZeugnisInDieserKlasse.ToString("dd.MM.yyyy"));
+
+                                        table.AddRow(new Text[]{
+                                            new Text(i+".").RightJustified(),
+                                            new Text(schildStudent.Nachname).LeftJustified(),
+                                            new Text(schildStudent.Vorname).LeftJustified(),
+                                            new Text(id).LeftJustified(),
+                                            new Text(schildStudent.Klasse).LeftJustified(),
+                                            new Text(schildStudent.Status).LeftJustified(),
+                                            new Text("Austritt: " + schildStudent.ZeugnisdatumLetztesZeugnisInDieserKlasse.ToString("dd.MM.yyyy"))});
+
+                                        schildStudent.Entlassdatum = DateTime.Now.ToShortDateString();
+                                    }
+                                }
+                                i++;
+                                Thread.Sleep(10);
+                            }
+                        }
+                    }
+                }
+                
+                Global.ZeileSchreiben("Webuntis-Schüler*innen verarbeitet:", webuntisStudents.Count().ToString());
+            });
+              
             // Ab hier die Neuanlagen
 
             var uniqueStudents = Students
@@ -1328,215 +1365,224 @@ public class Menüeintrag
                 .ThenBy(s => s.Nachname)
                 .ThenBy(s => s.Vorname);
 
-            foreach (var studen in uniqueStudents)
+
+            AnsiConsole.Status()
+            .Spinner(Spinner.Known.Dots)
+            .Start("SchILD-Schüler*innen verarbeiten ...", ctx =>
             {
-                if (studen.Nachname == "Beckmann" && studen.Vorname.StartsWith("Da"))
+                foreach (var studen in uniqueStudents)
                 {
-                    string a = "a";
-                }
-
-                // Ein Abgänger oder Absolvent, der als Externer oder Gast wiederkommt, hat in seiner aktiven Rolle den niedrigeren Status.
-                // Also wird bei mehrfach vorkommenden Schülern immer der mit dem niedrigsten Status genommen.                 
-                var student = Students.OrderBy(x => int.TryParse(x.Status, out var status) ? status : 0).FirstOrDefault(x => x.Nachname == studen.Nachname && x.Vorname == studen.Vorname && x.Geburtsdatum == studen.Geburtsdatum);
-
-                if (student == null) continue;
-
-                // Wenn der Schüler in Webuntis nicht existiert, ...
-                if (!webuntisStudents.Any(rec =>
+                    if (studen.Nachname == "Beckmann" && studen.Vorname.StartsWith("Da"))
                     {
-                        var dict = (IDictionary<string, object>)rec;
-                        return dict["longName"].ToString() == student.Nachname && dict["foreName"].ToString() == student.Vorname && dict["birthDate"].ToString() == student.Geburtsdatum;
-                    }))
-                {
-                    // ... und der Schüler in Schild aktiv der Gast ist, wird er angelegt
-                    if (student.Status is "2" or "6")
-                    {
-                        var id = student.Id;
-                        susMitÄnderung.Add(((i + ". ").PadRight(5) + student.Nachname + ", " + student.Vorname + ", " + id + " (" + student.Klasse + ")").PadRight(51) + student.Status + "      Neu: " + student.Klasse);
-
-                        table.AddRow(new Text[]{
-                                        new Text(i+".").RightJustified(),
-                                        new Text(student.Nachname).LeftJustified(),
-                            new Text(student.Vorname).LeftJustified(),
-                            new Text(id).LeftJustified(),
-                            new Text(student.Klasse).LeftJustified(),
-                                        new Text(student.Status).LeftJustified(),
-                                        new Text("Neu in: " + student.Klasse)});
-                        i++;
+                        string a = "a";
                     }
-                }
 
-                var sz = schuelerZusatzdaten
-                    .Where(rec =>
-                    {
-                        if (rec == null) return false;
-                        var dict = (IDictionary<string, object>)rec;
-                        return dict != null && dict["Nachname"] != null && dict["Nachname"].ToString() == student.Nachname &&
-                            dict["Vorname"].ToString() == student.Vorname &&
-                            dict["Geburtsdatum"].ToString() == student.Geburtsdatum;
-                    }).LastOrDefault() as IDictionary<string, object>;
+                    // Ein Abgänger oder Absolvent, der als Externer oder Gast wiederkommt, hat in seiner aktiven Rolle den niedrigeren Status.
+                    // Also wird bei mehrfach vorkommenden Schülern immer der mit dem niedrigsten Status genommen.                 
+                    var student = Students.OrderBy(x => int.TryParse(x.Status, out var status) ? status : 0).FirstOrDefault(x => x.Nachname == studen.Nachname && x.Vorname == studen.Vorname && x.Geburtsdatum == studen.Geburtsdatum);
 
-                var se = schuelerErzieher
-                    .Where(rec =>
-                    {
-                        var dict = (IDictionary<string, object>)rec;
-                        return dict["Nachname"].ToString() == student.Nachname &&
-                            dict["Vorname"].ToString() == student.Vorname &&
-                            dict["Geburtsdatum"].ToString() == student.Geburtsdatum;
-                    }).LastOrDefault() as IDictionary<string, object>;
+                    if (student == null) continue;
 
-                var sa = schuelerAdressen
-                    .Where(rec =>
-                    {
-                        var dict = (IDictionary<string, object>)rec;
-                        return dict["Nachname"].ToString() == student.Nachname &&
-                            dict["Vorname"].ToString() == student.Vorname &&
-                            dict["Geburtsdatum"].ToString() == student.Geburtsdatum &&
-                            dict["Adressart"].ToString() == "Betrieb";
-                    }).LastOrDefault() as IDictionary<string, object>;
-
-                var klasse = klassen
-                .Where(rec =>
-                {
-                    var dict = (IDictionary<string, object>)rec;
-                    return dict["InternBez"].ToString() == student.Klasse;
-                }).LastOrDefault() as IDictionary<string, object>;
-
-                var klassenleitung = "";
-
-                if (klasse != null && klasse.ContainsKey("Klassenlehrer"))
-                {
-                    var dictklassenleitung = lehrkraefte.Where(rec =>
+                    // Wenn der Schüler in Webuntis nicht existiert, ...
+                    if (!webuntisStudents.Any(rec =>
                         {
                             var dict = (IDictionary<string, object>)rec;
-                            return dict["InternKrz"].ToString() == klasse["Klassenlehrer"].ToString();
+                            return dict["longName"].ToString() == student.Nachname && dict["foreName"].ToString() == student.Vorname && dict["birthDate"].ToString() == student.Geburtsdatum;
+                        }))
+                    {
+                        // ... und der Schüler in Schild aktiv der Gast ist, wird er angelegt
+                        if (student.Status is "2" or "6")
+                        {
+                            var id = student.Id;
+                            susMitÄnderung.Add(((i + ". ").PadRight(5) + student.Nachname + ", " + student.Vorname + ", " + id + " (" + student.Klasse + ")").PadRight(51) + student.Status + "      Neu: " + student.Klasse);
+
+                            table.AddRow(new Text[]{
+                                                new Text(i+".").RightJustified(),
+                                                new Text(student.Nachname).LeftJustified(),
+                                    new Text(student.Vorname).LeftJustified(),
+                                    new Text(id).LeftJustified(),
+                                    new Text(student.Klasse).LeftJustified(),
+                                                new Text(student.Status).LeftJustified(),
+                                                new Text("Neu in: " + student.Klasse)});
+                            i++;
+                        }
+                    }
+
+                    var sz = schuelerZusatzdaten
+                        .Where(rec =>
+                        {
+                            if (rec == null) return false;
+                            var dict = (IDictionary<string, object>)rec;
+                            return dict != null && dict["Nachname"] != null && dict["Nachname"].ToString() == student.Nachname &&
+                                dict["Vorname"].ToString() == student.Vorname &&
+                                dict["Geburtsdatum"].ToString() == student.Geburtsdatum;
                         }).LastOrDefault() as IDictionary<string, object>;
 
-                    klassenleitung = dictklassenleitung["Vorname"] + " " + dictklassenleitung["Nachname"];
-                }
+                    var se = schuelerErzieher
+                        .Where(rec =>
+                        {
+                            var dict = (IDictionary<string, object>)rec;
+                            return dict["Nachname"].ToString() == student.Nachname &&
+                                dict["Vorname"].ToString() == student.Vorname &&
+                                dict["Geburtsdatum"].ToString() == student.Geburtsdatum;
+                        }).LastOrDefault() as IDictionary<string, object>;
 
-                int alter = -1;
-                if (DateTime.TryParseExact(student.Geburtsdatum, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime geburtsdatum))
-                {
-                    alter = DateTime.Now.Year - geburtsdatum.Year;
+                    var sa = schuelerAdressen
+                        .Where(rec =>
+                        {
+                            var dict = (IDictionary<string, object>)rec;
+                            return dict["Nachname"].ToString() == student.Nachname &&
+                                dict["Vorname"].ToString() == student.Vorname &&
+                                dict["Geburtsdatum"].ToString() == student.Geburtsdatum &&
+                                dict["Adressart"].ToString() == "Betrieb";
+                        }).LastOrDefault() as IDictionary<string, object>;
 
-                    // Falls der Geburtstag dieses Jahr noch nicht war, Alter um 1 verringern
-                    if (DateTime.Now < geburtsdatum.AddYears(alter))
+                    var klasse = klassen
+                    .Where(rec =>
                     {
-                        alter--;
+                        var dict = (IDictionary<string, object>)rec;
+                        return dict["InternBez"].ToString() == student.Klasse;
+                    }).LastOrDefault() as IDictionary<string, object>;
+
+                    var klassenleitung = "";
+
+                    if (klasse != null && klasse.ContainsKey("Klassenlehrer"))
+                    {
+                        var dictklassenleitung = lehrkraefte.Where(rec =>
+                            {
+                                var dict = (IDictionary<string, object>)rec;
+                                return dict["InternKrz"].ToString() == klasse["Klassenlehrer"].ToString();
+                            }).LastOrDefault() as IDictionary<string, object>;
+
+                        klassenleitung = dictklassenleitung["Vorname"] + " " + dictklassenleitung["Nachname"];
+                    }
+
+                    int alter = -1;
+                    if (DateTime.TryParseExact(student.Geburtsdatum, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime geburtsdatum))
+                    {
+                        alter = DateTime.Now.Year - geburtsdatum.Year;
+
+                        // Falls der Geburtstag dieses Jahr noch nicht war, Alter um 1 verringern
+                        if (DateTime.Now < geburtsdatum.AddYears(alter))
+                        {
+                            alter--;
+                        }
+                    }
+
+                    dynamic record = new ExpandoObject();
+
+                    if (Path.GetFileName(zieldateiname).ToLower().Contains("webuntis"))
+                    {
+                        if (configuration["Schulnummer"] == "177659")
+                        {
+                            record.Schlüssel = string.IsNullOrEmpty(sz["Externe ID-Nr"].ToString())
+                            ? sz["schulische E-Mail"].ToString().Split('@')[0]
+                            : sz["Externe ID-Nr"].ToString();
+                        }
+                        else
+                        {
+                            record.Schlüssel = sz["schulische E-Mail"].ToString().Split('@')[0];
+                        }
+
+                        record.EMINUSMail = sz["schulische E-Mail"].ToString();
+                        record.Familienname = student.Nachname;
+                        record.Vorname = student.Vorname;
+                        record.Klasse = student.Klasse;
+                        record.Kurzname = sz["schulische E-Mail"].ToString().Split('@')[0];
+                        record.Geschlecht = student.Geschlecht?.ToString()?.ToUpper() ?? string.Empty;
+                        record.Geburtsdatum = student.Geburtsdatum;
+                        record.Eintrittsdatum = "";
+                        record.Austrittsdatum = student.Status == "2" || student.Status == "6" ? "31.07." + Global.AktSj[1] : student.ZeugnisdatumLetztesZeugnisInDieserKlasse != null ? student.ZeugnisdatumLetztesZeugnisInDieserKlasse.ToShortDateString() : sz?["Entlassdatum"].ToString();
+                        record.Telefon = sz?["Telefon-Nr."].ToString();
+                        record.Mobil = "";
+                        record.Strasse = alter >= 18 ? student.Straße.ToString() : se?["Straße"].ToString();
+                        record.PLZ = alter >= 18 ? student.Postleitzahl.ToString() : se?["PLZ"].ToString();
+                        record.Ort = alter >= 18 ? student.Ort.ToString() : se?["Ort"].ToString();
+                        record.ErzName = alter >= 18 ? "" : se?["Vorname 1.Person"].ToString() + " " + se?["Nachname 1.Person"].ToString();
+                        record.ErzMobil = alter >= 18 ? "" : "";
+                        record.ErzTelefon = alter >= 18 ? "" : "";
+                        record.Volljährig = alter >= 18 ? "1" : "0";
+                        record.BetriebName = sa == null ? "" : sa["Name1"].ToString();
+                        record.BetriebStrasse = sa == null ? "" : sa["Straße"].ToString();
+                        record.BetriebPlz = sa == null ? "" : sa["PLZ"].ToString();
+                        record.BetriebOrt = sa == null ? "" : sa["Ort"].ToString();
+                        record.BetriebTelefon = sa == null ? "" : sa["1. Tel.-Nr."].ToString();
+                        record.O365Identität = student.MailSchulisch;
+                        record.Benutzername = student.MailSchulisch.Replace("@students.berufskolleg-borken.de", "");
+
+                        // Es werden nur diejenigen Schüler exportiert die aktiv oder Gast sind, 
+                        // und alle anderen, deren Entlassdatum heute oder in den letzten sechs Wochen war.                                         
+                        if (student.Status == "2" || student.Status == "6" || student.NochKeineAnzahlWochenHer(6))
+                        {
+                            zieldatei.Add(record);
+                        }
+                    }
+                    else if (Path.GetFileName(zieldateiname).ToLower().Contains("netman"))
+                    {
+                        // Netman
+                        // ed123456	Dagobert	Eggemann	ed123456@students.berufskolleg-borken.de	E01.07.1992	BZ22A	Stappert, Markus
+                        if (configuration["Schulnummer"] == "177659")
+                        {
+                            record.Schlüssel = string.IsNullOrEmpty(sz["Externe ID-Nr"].ToString())
+                            ? sz["schulische E-Mail"].ToString().Split('@')[0]
+                            : sz["Externe ID-Nr"].ToString().PadLeft(6, '0');
+                        }
+                        else
+                        {
+                            record.Schlüssel = sz["schulische E-Mail"].ToString().Split('@')[0];
+                        }
+
+                        record.Kurzname = sz["schulische E-Mail"].ToString().Replace("@students.berufskolleg-borken.de", "");
+                        record.Vorname = student.Vorname;
+                        record.Nachname = student.Nachname;
+                        record.Mail = sz["schulische E-Mail"].ToString();
+                        record.Passwort = student.Nachname.Substring(0, 1).ToUpper() + student.Geburtsdatum;
+                        record.Klasse = student.Klasse;
+                        record.Klassenleitung = klassenleitung;
+
+                        student.GetLetztesZeugnisdatumInDerKlasse(schuelerLernabschnittsdaten);
+
+                        // Aktive SuS oder Schüler mit Abschluss/Abgang, deren letztes Zeugnis noch keine 42 Tage zurückliegt.
+                        if (new List<string>() { "2", "6" }.Contains(student.Status) || (new List<string>() { "8", "9" }.Contains(student.Status) && student.ZeugnisdatumLetztesZeugnisInDieserKlasse.AddDays(42) >= DateTime.Now))
+                        {
+                            zieldatei.Add(record);
+                        }
+                    }
+                    else if (Path.GetFileNameWithoutExtension(zieldateiname).ToLower().Contains("littera"))
+                    {
+                        // Littera
+                        record.LGruppe = student.Klasse;
+                        record.Geburtsdatum = student.Geburtsdatum;
+                        record.Titel = "";
+                        record.Nachname = student.Nachname;
+                        record.Vorname = student.Vorname;
+                        record.Strasse = alter >= 18 ? student.Straße.ToString() : se?["Straße"].ToString();
+                        record.PLZ = alter >= 18 ? student.Postleitzahl.ToString() : se?["PLZ"].ToString();
+                        record.Ort = alter >= 18 ? student.Ort.ToString() : se?["Ort"].ToString();
+                        record.Geschlecht = student.Geschlecht.ToString();
+                        record.Anmeldedatum = student.BeginnDerBildungsganges;
+                        record.Telefon = sz?["Telefon-Nr."].ToString();
+                        record.Mobiltelefon = sz?["Fax/Mobilnr"].ToString();
+                        record.email = sz["schulische E-Mail"].ToString();
+                        record.ZusatzInfo = "";
+                        record.Bemerkung = "";
+                        record.Geschlecht = student.Geschlecht.ToString().ToUpper();
+
+                        if (student.Status is "2" or "6")
+                        {
+                            zieldatei.Add(record);
+                        }
                     }
                 }
 
-                dynamic record = new ExpandoObject();
+                Global.ZeileSchreiben("SchILD-Schüler*innen verarbeitet:", zieldatei.Count().ToString());                
+            });
 
-                if (Path.GetFileName(zieldateiname).ToLower().Contains("webuntis"))
-                {
-                    if (configuration["Schulnummer"] == "177659")
-                    {
-                        record.Schlüssel = string.IsNullOrEmpty(sz["Externe ID-Nr"].ToString())
-                        ? sz["schulische E-Mail"].ToString().Split('@')[0]
-                        : sz["Externe ID-Nr"].ToString();
-                    }
-                    else
-                    {
-                        record.Schlüssel = sz["schulische E-Mail"].ToString().Split('@')[0];
-                    }
-
-                    record.EMINUSMail = sz["schulische E-Mail"].ToString();                    
-                    record.Familienname = student.Nachname;
-                    record.Vorname = student.Vorname;
-                    record.Klasse = student.Klasse;
-                    record.Kurzname = sz["schulische E-Mail"].ToString().Split('@')[0];
-                    record.Geschlecht = student.Geschlecht?.ToString()?.ToUpper() ?? string.Empty;
-                    record.Geburtsdatum = student.Geburtsdatum;
-                    record.Eintrittsdatum = "";
-                    record.Austrittsdatum = student.Status == "2" || student.Status == "6" ? "31.07." + Global.AktSj[1] : student.ZeugnisdatumLetztesZeugnisInDieserKlasse != null ? student.ZeugnisdatumLetztesZeugnisInDieserKlasse.ToShortDateString() : sz?["Entlassdatum"].ToString();
-                    record.Telefon = sz?["Telefon-Nr."].ToString();
-                    record.Mobil = "";
-                    record.Strasse = alter >= 18 ? student.Straße.ToString() : se?["Straße"].ToString();
-                    record.PLZ = alter >= 18 ? student.Postleitzahl.ToString() : se?["PLZ"].ToString();
-                    record.Ort = alter >= 18 ? student.Ort.ToString() : se?["Ort"].ToString();
-                    record.ErzName = alter >= 18 ? "" : se?["Vorname 1.Person"].ToString() + " " + se?["Nachname 1.Person"].ToString();
-                    record.ErzMobil = alter >= 18 ? "" : "";
-                    record.ErzTelefon = alter >= 18 ? "" : "";
-                    record.Volljährig = alter >= 18 ? "1" : "0";
-                    record.BetriebName = sa == null ? "" : sa["Name1"].ToString();
-                    record.BetriebStrasse = sa == null ? "" : sa["Straße"].ToString();
-                    record.BetriebPlz = sa == null ? "" : sa["PLZ"].ToString();
-                    record.BetriebOrt = sa == null ? "" : sa["Ort"].ToString();
-                    record.BetriebTelefon = sa == null ? "" : sa["1. Tel.-Nr."].ToString();
-                    record.O365Identität = student.MailSchulisch;
-                    record.Benutzername = student.MailSchulisch.Replace("@students.berufskolleg-borken.de", "");
-
-                    // Es werden nur diejenigen Schüler exportiert die aktiv oder Gast sind, 
-                    // und alle anderen, deren Entlassdatum heute oder in den letzten sechs Wochen war.                                         
-                    if (student.Status == "2" || student.Status == "6" || student.NochKeineAnzahlWochenHer(6))
-                    {
-                        zieldatei.Add(record);
-                    }
-                }
-                else if (Path.GetFileName(zieldateiname).ToLower().Contains("netman"))
-                {
-                    // Netman
-                    // ed123456	Dagobert	Eggemann	ed123456@students.berufskolleg-borken.de	E01.07.1992	BZ22A	Stappert, Markus
-                    if (configuration["Schulnummer"] == "177659")
-                    {
-                        record.Schlüssel = string.IsNullOrEmpty(sz["Externe ID-Nr"].ToString())
-                        ? sz["schulische E-Mail"].ToString().Split('@')[0]
-                        : sz["Externe ID-Nr"].ToString().PadLeft(6, '0');
-                    }
-                    else
-                    {
-                        record.Schlüssel = sz["schulische E-Mail"].ToString().Split('@')[0];
-                    }
-
-                    record.Kurzname = sz["schulische E-Mail"].ToString().Replace("@students.berufskolleg-borken.de", "");
-                    record.Vorname = student.Vorname;
-                    record.Nachname = student.Nachname;
-                    record.Mail = sz["schulische E-Mail"].ToString();
-                    record.Passwort = student.Nachname.Substring(0, 1).ToUpper() + student.Geburtsdatum;
-                    record.Klasse = student.Klasse;
-                    record.Klassenleitung = klassenleitung;
-
-                    student.GetLetztesZeugnisdatumInDerKlasse(schuelerLernabschnittsdaten);
-
-                    // Aktive SuS oder Schüler mit Abschluss/Abgang, deren letztes Zeugnis noch keine 42 Tage zurückliegt.
-                    if (new List<string>() { "2", "6" }.Contains(student.Status) || (new List<string>(){"8", "9"}.Contains(student.Status) && student.ZeugnisdatumLetztesZeugnisInDieserKlasse.AddDays(42) >= DateTime.Now))
-                    {
-                        zieldatei.Add(record);
-                    }
-                }
-                else if (Path.GetFileNameWithoutExtension(zieldateiname).ToLower().Contains("littera"))
-                {
-                    // Littera
-                    record.LGruppe = student.Klasse;
-                    record.Geburtsdatum = student.Geburtsdatum;
-                    record.Titel = "";
-                    record.Nachname = student.Nachname;
-                    record.Vorname = student.Vorname;
-                    record.Strasse = alter >= 18 ? student.Straße.ToString() : se?["Straße"].ToString();
-                    record.PLZ = alter >= 18 ? student.Postleitzahl.ToString() : se?["PLZ"].ToString();
-                    record.Ort = alter >= 18 ? student.Ort.ToString() : se?["Ort"].ToString();
-                    record.Geschlecht = student.Geschlecht.ToString();
-                    record.Anmeldedatum = student.BeginnDerBildungsganges;
-                    record.Telefon = sz?["Telefon-Nr."].ToString();
-                    record.Mobiltelefon = sz?["Fax/Mobilnr"].ToString();
-                    record.email = sz["schulische E-Mail"].ToString();
-                    record.ZusatzInfo = "";
-                    record.Bemerkung = "";
-                    record.Geschlecht = student.Geschlecht.ToString().ToUpper();
-                                        
-                    if (student.Status is "2" or "6")
-                    {
-                        zieldatei.Add(record);
-                    }
-                }
-            }
+            Thread.Sleep(1000);
 
             if (susMitÄnderung.Count() > 2)
                 AnsiConsole.Write(table);
-            //    Global.DisplayCenteredBox(susMitÄnderung, 97);
-
+            
             return zieldatei;
         }
         catch (Exception ex)
@@ -1642,9 +1688,7 @@ public class Menüeintrag
     {
         var dokuwikiZugriff = new DokuwikiZugriff(configuration);
 
-        Global.Konfig("WikiSprechtagKleineAenderung", Global.Modus.Update, configuration,
-            "Handelt es sich um eine kleine Änderung? Kleine Änderungen erzeugen keine neue Version (j/n)", "",
-            Global.Datentyp.JaNein);
+        Global.Konfig("WikiSprechtagKleineAenderung", Global.Modus.Update, configuration, "Handelt es sich um eine kleine Änderung? Kleine Änderungen erzeugen keine neue Version (j/n)", "");
 
         dokuwikiZugriff.Options = new XmlRpcStruct
         {
@@ -1657,7 +1701,7 @@ public class Menüeintrag
         var exportLessons = Quelldateien.GetMatchingList(configuration, "exportlessons", IStudents, Klassen);
         if (exportLessons == null || !exportLessons.Any()) return;
 
-        Global.Konfig("Sprechtagsdatum", Global.Modus.Update, configuration, "Datum des Sprechtags angeben (tt.mm.jjjj)", "", Global.Datentyp.DateTime);
+        Global.Konfig("Sprechtagsdatum", Global.Modus.Update, configuration, "Datum des Sprechtags angeben (tt.mm.jjjj)", "");
         //Global.Konfig("wikiSprechtagSeite", true, "Seite eingeben, die manipuliert werden soll.");
 
         hinweis = hinweis.Replace(" nach der allgemeinen Zeugnisausgabe", ", " + Global.Sprechtagsdatum + ",");
@@ -2354,8 +2398,8 @@ public class Menüeintrag
 
     public Datei Teilleistungen(IConfiguration configuration, string zieldateiname)
     {
-        configuration = Global.Konfig("Teilleistungsarten", Global.Modus.Update, configuration, "Welche Teilleistungsarten (kommagetrennt) sollen gezogen werden?", "Die Teilleistungsart(en) in Webuntis und in SchILD müssen identisch heißen. Ansonsten werden keine Teilleistungen nach SchILD importiert.", Global.Datentyp.String, "Vornote,Abschluss-Schriftl.,Abschluss-Mündl.");
-        configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration, "Abschnitt angeben", $"Für welchen Abschnitt sollen die Teilleistungen ausgegeben werden?\nGeben die Ziffer [{Global.GetColor(Global.ColorZahlen)}]1[/] (1. Halbjahr) oder [{Global.GetColor(Global.ColorZahlen)}]2[/] (2. Halbjahr) an. ", Global.Datentyp.String, "");
+        configuration = Global.Konfig("Teilleistungsarten", Global.Modus.Update, configuration, "Welche Teilleistungsarten (kommagetrennt) sollen gezogen werden?", "Die Teilleistungsart(en) in Webuntis und in SchILD müssen identisch heißen. Ansonsten werden keine Teilleistungen nach SchILD importiert.", "Vornote,Abschluss-Schriftl.,Abschluss-Mündl.");
+        configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration, "Abschnitt angeben", $"Für welchen Abschnitt sollen die Teilleistungen ausgegeben werden?\nGeben die Ziffer [{Global.GetColor(Global.ColorZahlen)}]1[/] (1. Halbjahr) oder [{Global.GetColor(Global.ColorZahlen)}]2[/] (2. Halbjahr) an. ", "");
 
         var zieldatei = new Datei(zieldateiname);
         var records = new List<dynamic>();
@@ -2482,7 +2526,7 @@ public class Menüeintrag
         if (gpu004 == null) return [];
 
         if (nurDieseGründe == "")
-            configuration = Global.Konfig("LehrkraefteSonderzeiten", Global.Modus.Update, configuration, "Welche Anrechnungsgründe sollen ignoriert bzw. auf 0 gesetzt werden?", "", Global.Datentyp.ListInt, "098,099,007,360,160");
+            configuration = Global.Konfig("LehrkraefteSonderzeiten", Global.Modus.Update, configuration, "Welche Anrechnungsgründe sollen ignoriert bzw. auf 0 gesetzt werden?", "", "098,099,007,360,160");
 
         var lehrers = lehrkraefte
             .Where(rec => ((IDictionary<string, object>)rec)["statistik-relevant"].ToString() == "J")
@@ -2560,7 +2604,7 @@ public class Menüeintrag
         }
 
         if (nurDieseGründe == "200")
-            configuration = Global.Konfig("VolleStelle", Global.Modus.Update, configuration, "Wie viele Stunden entsprechen einer vollen Stelle?", "", Global.Datentyp.Float, "25,5");
+            configuration = Global.Konfig("VolleStelle", Global.Modus.Update, configuration, "Wie viele Stunden entsprechen einer vollen Stelle?", "", "25,5");
 
         foreach (var lehrerDyn in lehrers)
         {
@@ -2846,20 +2890,26 @@ public class Menüeintrag
 
         if (sz.Count > 0)
         {
-            foreach (var s in sz)
+            AnsiConsole.Status()
+            .Spinner(Spinner.Known.Dots)
+            .Start("Fehlende Mailadressen ...", ctx =>
             {
-                var dict = (IDictionary<string, object>)s;
-                var panel = new Panel(
-                            $"Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]Schuelerzusatzdaten.dat[/] enthält keine schulische E-Mail-Adresse für {dict["Vorname"]} {dict["Nachname"]}. " +
-                            $"\n[{Global.GetColor(Global.ColorHinweise)}]Option 1:[/] Ergänzen Sie die schulische E-Mail-Adresse manuell in SchILD unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Individualdaten I[/]." +
-                            $"\n[{Global.GetColor(Global.ColorHinweise)}]Option 2:[/] [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] erstellt automatisch alle Mailadressen in [{Global.GetColor(Global.ColorPfadInDateien)}]Schuelerzusatzdaten.dat[/].")
-                        .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] !? [/]")
-                        .HeaderAlignment(Justify.Left)
-                        .SquareBorder()
-                        .Expand()
-                        .BorderColor(Global.ColorFehler);
-            AnsiConsole.Write(panel);
-            }
+                foreach (var s in sz)
+                {
+                    var dict = (IDictionary<string, object>)s;
+                    var panel = new Panel(
+                                $"Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]Schuelerzusatzdaten.dat[/] enthält keine schulische E-Mail-Adresse für {dict["Vorname"]} {dict["Nachname"]}. " +
+                                $"\n[{Global.GetColor(Global.ColorHinweise)}]Option 1:[/] Ergänzen Sie die schulische E-Mail-Adresse manuell in SchILD unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Individualdaten I[/]." +
+                                $"\n[{Global.GetColor(Global.ColorHinweise)}]Option 2:[/] [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] erstellt automatisch alle Mailadressen in [{Global.GetColor(Global.ColorPfadInDateien)}]Schuelerzusatzdaten.dat[/].")
+                            .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] !? [/]")
+                            .HeaderAlignment(Justify.Left)
+                            .SquareBorder()
+                            .Expand()
+                            .BorderColor(Global.ColorFehler);
+                    AnsiConsole.Write(panel);
+                }
+                Global.ZeileSchreiben($"Fehlende Mailadressen:", $"{sz.Count}");
+            });
 
             problem = true;            
         }
@@ -2879,23 +2929,29 @@ public class Menüeintrag
             .SelectMany(g => g) // Alle betroffenen Zeilen ausgeben
             .ToList();
 
-        foreach (IDictionary<string, object> ssz in doppelteMitAbweichung)
+        AnsiConsole.Status()
+            .Spinner(Spinner.Known.Dots)
+            .Start("Doppelt vergebene Mailadressen ...", ctx =>
         {
-            var panel = new Panel($"Die E-Mail-Adresse [{Global.GetColor(Global.ColorPfadInDateien)}]{ssz["schulische E-Mail"]}[/] ist mehrfach vergeben, aber die Namen sind unterschiedlich: " +
-                                $"{ssz["Vorname"]} {ssz["Nachname"]}")
-                        .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] !? [/]")
-                        .HeaderAlignment(Justify.Left)
-                        .SquareBorder()
-                        .Expand()
-                        .BorderColor(Global.ColorFehler);
-            AnsiConsole.Write(panel);
-            problem = true;
-        }
+            foreach (IDictionary<string, object> ssz in doppelteMitAbweichung)
+            {
+                var panel = new Panel($"Die E-Mail-Adresse [{Global.GetColor(Global.ColorPfadInDateien)}]{ssz["schulische E-Mail"]}[/] ist mehrfach vergeben, aber die Namen sind unterschiedlich: " +
+                                    $"{ssz["Vorname"]} {ssz["Nachname"]}")
+                            .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] !? [/]")
+                            .HeaderAlignment(Justify.Left)
+                            .SquareBorder()
+                            .Expand()
+                            .BorderColor(Global.ColorFehler);
+                AnsiConsole.Write(panel);
+                problem = true;
+            }
+            Global.ZeileSchreiben($"Doppelt vergebene Mailadressen:", $"{doppelteMitAbweichung.Count}");
+        });
 
         if (problem)
-        {
-            AnsiConsole.MarkupLine($"[grey]  Zuerst die Hinweise [/][bold red]!?[/][grey] bearbeiten, dann hierher zurückkehren.[/]");
-        }
+            {
+                AnsiConsole.MarkupLine($"[grey]  Zuerst die Hinweise [/][bold red]!?[/][grey] bearbeiten, dann hierher zurückkehren.[/]");
+            }
 
         return problem;
     }
@@ -2913,61 +2969,67 @@ public class Menüeintrag
         
         var students = Students;
 
-        foreach (var student in students)
+        AnsiConsole.Status()
+            .Spinner(Spinner.Known.Dots)
+            .Start($"Schüler*innen für {zipModus} verarbeiten ...", ctx =>
         {
-            var bisherigerDateinameUndPfad = alleFotos.FirstOrDefault(f =>
-                f.Contains(student.Nachname, StringComparison.OrdinalIgnoreCase) &&
-                f.Contains(student.Vorname, StringComparison.OrdinalIgnoreCase) &&
-                f.Contains(student.Geburtsdatum, StringComparison.OrdinalIgnoreCase));
-
-            // Benenne das Foto im Ordner nach kurzname um
-            if (bisherigerDateinameUndPfad != null)
+            foreach (var student in students)
             {
-                var neuerDateiname = "";
+                var bisherigerDateinameUndPfad = alleFotos.FirstOrDefault(f =>
+                    f.Contains(student.Nachname, StringComparison.OrdinalIgnoreCase) &&
+                    f.Contains(student.Vorname, StringComparison.OrdinalIgnoreCase) &&
+                    f.Contains(student.Geburtsdatum, StringComparison.OrdinalIgnoreCase));
 
-                var sz = schuelerZusatzdaten
-                    .Where(rec =>
-                    {
-                        if (rec == null) return false;
-                        var dict = (IDictionary<string, object>)rec;
-                        return dict != null && dict["Nachname"] != null && dict["Nachname"].ToString() == student.Nachname &&
-                            dict["Vorname"].ToString() == student.Vorname &&
-                            dict["Geburtsdatum"].ToString() == student.Geburtsdatum;
-                    }).LastOrDefault() as IDictionary<string, object>;
-
-                if (sz != null)
+                // Benenne das Foto im Ordner nach kurzname um
+                if (bisherigerDateinameUndPfad != null)
                 {
-                    if ((Global.ZipModus)zipModus == Global.ZipModus.Webuntis)
+                    var neuerDateiname = "";
+
+                    var sz = schuelerZusatzdaten
+                        .Where(rec =>
+                        {
+                            if (rec == null) return false;
+                            var dict = (IDictionary<string, object>)rec;
+                            return dict != null && dict["Nachname"] != null && dict["Nachname"].ToString() == student.Nachname &&
+                                dict["Vorname"].ToString() == student.Vorname &&
+                                dict["Geburtsdatum"].ToString() == student.Geburtsdatum;
+                        }).LastOrDefault() as IDictionary<string, object>;
+
+                    if (sz != null)
                     {
-                        neuerDateiname = sz["schulische E-Mail"].ToString().Replace(configuration["MailDomain"], "").Replace("@", "");
+                        if ((Global.ZipModus)zipModus == Global.ZipModus.Webuntis)
+                        {
+                            neuerDateiname = sz["schulische E-Mail"].ToString().Replace(configuration["MailDomain"], "").Replace("@", "");
+                        }
+                        else if ((Global.ZipModus)zipModus == Global.ZipModus.Geevoo)
+                        {
+                            neuerDateiname = sz["schulische E-Mail"].ToString();
+                        }
                     }
-                    else if ((Global.ZipModus)zipModus == Global.ZipModus.Geevoo)
+
+                    if (!string.IsNullOrEmpty(neuerDateiname))
                     {
-                        neuerDateiname = sz["schulische E-Mail"].ToString();
+                        var dateityp = Path.GetExtension(bisherigerDateinameUndPfad).ToLowerInvariant();
+                        var pfad = Path.GetDirectoryName(bisherigerDateinameUndPfad);
+                        var neuerPfadUndDateinameWebuntis = Path.Combine(pfad, neuerDateiname + dateityp);
+
+                        // Wenn die neue Datei schon existiert, überspringe sie
+                        if (File.Exists(neuerPfadUndDateinameWebuntis)) continue;
+
+                        // Erstelle Webuntis-kompatiblen Dateinamen
+                        File.Copy(bisherigerDateinameUndPfad, neuerPfadUndDateinameWebuntis, true);
+
+                        absolutePfade.Add(neuerPfadUndDateinameWebuntis);
                     }
-                }
-                
-                if (!string.IsNullOrEmpty(neuerDateiname))
-                {
-                    var dateityp = Path.GetExtension(bisherigerDateinameUndPfad).ToLowerInvariant();
-                    var pfad = Path.GetDirectoryName(bisherigerDateinameUndPfad);
-                    var neuerPfadUndDateinameWebuntis = Path.Combine(pfad, neuerDateiname + dateityp);
-
-                    // Wenn die neue Datei schon existiert, überspringe sie
-                    if (File.Exists(neuerPfadUndDateinameWebuntis)) continue;
-
-                    // Erstelle Webuntis-kompatiblen Dateinamen
-                    File.Copy(bisherigerDateinameUndPfad, neuerPfadUndDateinameWebuntis, true);
-
-                    absolutePfade.Add(neuerPfadUndDateinameWebuntis);
                 }
             }
-        }
+            Global.ZeileSchreiben($"Fotos aus SchILD für {zipModus} verarbeitet:", $"{absolutePfade.Count}");
+        });
 
-        if(absolutePfade.Count == 0)
-        {
-            Global.ZeileSchreiben("Keine neuen Fotos gefunden", "0", ConsoleColor.Red, ConsoleColor.White);            
-        }
+        if (absolutePfade.Count == 0)
+            {
+                Global.ZeileSchreiben("Keine neuen Fotos gefunden", "0", ConsoleColor.Red, ConsoleColor.White);
+            }
         return absolutePfade;
     }
 

@@ -1059,7 +1059,7 @@ while (Console.KeyAvailable) Console.ReadKey(true);
 
     internal void GetPfadDokumentenverwaltung(IConfiguration configuration)
     {
-        Global.Konfig("PfadDokumentenverwaltung",Global.Modus.Update, configuration, "Geben Sie den Pfad zur Dokumentenverwaltung an:","", Global.Datentyp.Pfad);
+        Global.Konfig("PfadDokumentenverwaltung",Global.Modus.Update, configuration, "Geben Sie den Pfad zur Dokumentenverwaltung an:","");
 
         foreach (var student in this)
         {
@@ -1112,29 +1112,30 @@ while (Console.KeyAvailable) Console.ReadKey(true);
     {
         var verschiedeneKlassen = configuration["Klassen"].Split(",").ToList();
         var pfadDownloads = configuration["PfadDownloads"];
-        
+
         foreach (var klasse in verschiedeneKlassen)
-        {            
-            var panel = new Panel($"Fotografieren Sie jetzt die Schüler*innen der Klasse {klasse} in der exakt vorgegebenen Reihenfolge." + 
-            "\nWenn ein Schüler fehlt, fotographieren Sie die weiße Wand, damit die Anzahl stimmt." + 
-            "\nWenn ein Foto nicht gut geworden ist, dann direkt noch einmal fotographieren und das erste Bild löschen oder aufschreiben und später löschen. Die Reihenfolge darf nicht verändert werden." + 
-            "\nNotieren Sie die exakte Uhrzeit des ersten Fotos pro Klassse, falls mehrere Klassen direkt hintereinander fotographiert werden." + 
-            "\nAm Ende müssen Sie die Fotos händisch in den Ordner [aqua]" + Path.Combine(pfadDownloads, "Fotos", klasse) + "[/] verschieben.")
-                            .Header($" [bold springGreen2] {klasse} [/]")
+        {
+            var panel = new Panel($"[{Global.GetColor(Global.ColorHinweise)}]Wichtig:[/] Wenn ein*e Schüler*in fehlt, fotografieren Sie die weiße Wand, damit die Anzahl stimmt." +
+                                    $"\nAm Ende müssen Sie die Fotos händisch in den Ordner [{Global.GetColor(Global.ColorPfadInDateien)}]" + Path.Combine(pfadDownloads, "Fotos", klasse) + "[/] verschieben.")
+                            .Header($"[{Global.GetColor(Global.ColorInfoBox)}] Jetzt {this.Where(x => x.Klasse == klasse).Count()} Fotos der {klasse} machen! [/]")
                             .HeaderAlignment(Justify.Left)
                             .SquareBorder()
                             .Expand()
-                            .BorderColor(Spectre.Console.Color.SpringGreen2);
-                
+                            .BorderColor(Spectre.Console.Color.DodgerBlue1);
+
             AnsiConsole.Write(panel);
 
             int i = 1;
             var table = new Table();
-            table.AddColumn("Nr.");
-            table.AddColumn("Nachname");
-            table.AddColumn("Vorname");            
-            table.AddColumn("Geburtsdatum");
-            table.AddColumn("Klasse");
+            table.Expand();
+            var orangeStyle = new Style(foreground: Spectre.Console.Color.Orange1);
+            table.AddColumn(new TableColumn($"[{Global.GetColor(Global.ColorInfoBox)}]Nr.[/]"));
+            table.AddColumn(new TableColumn($"[{Global.GetColor(Global.ColorInfoBox)}]Nachname[/]"));
+            table.AddColumn(new TableColumn($"[{Global.GetColor(Global.ColorInfoBox)}]Vorname[/]"));
+            table.AddColumn(new TableColumn($"[{Global.GetColor(Global.ColorInfoBox)}]Geburtsdatum[/]"));
+            table.AddColumn(new TableColumn($"[{Global.GetColor(Global.ColorInfoBox)}]Klasse[/]"));
+            table.BorderColor(Spectre.Console.Color.DodgerBlue1);
+            table.SquareBorder();
 
             foreach (var student in this.Where(x => x.Klasse == klasse))
             {
@@ -1143,12 +1144,13 @@ while (Console.KeyAvailable) Console.ReadKey(true);
             }
             AnsiConsole.Write(table);
 
-            AnsiConsole.Write(new Panel($"Verschieben Sie die Fotos jetzt (oder später) nach [bold dodgerBlue11]" + Path.Combine(pfadDownloads, "Fotos", klasse) + "[/].")
-                            .Header($"[bold dodgerBlue11] Alle Fotos gemacht? [/]")
+            AnsiConsole.Write(new Panel($"Verschieben Sie die [{Global.GetColor(Global.ColorZahlen)}]{this.Where(x => x.Klasse == klasse).Count()}[/] Fotos nach [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads, "Fotos", klasse)}[/].")
+                            .Header($"[{Global.GetColor(Global.ColorInfoBox)}] [{Global.GetColor(Global.ColorZahlen)}]{this.Where(x => x.Klasse == klasse).Count()}[/] Fotos gemacht? [/]")
                             .HeaderAlignment(Justify.Left)
                             .SquareBorder()
                             .Expand()
                             .BorderColor(Spectre.Console.Color.DodgerBlue1));
+            Thread.Sleep(1000);
         }
     }
 
@@ -1251,8 +1253,8 @@ while (Console.KeyAvailable) Console.ReadKey(true);
     internal void FotosVerarbeiten(IConfiguration configuration, List<string> klassen)
     {
         if(klassen.Count() == 0) return;
-        configuration = Global.Konfig("PfadDownloads", Global.Modus.Read, configuration, "Pfad zum Downloads-Ordner", "Pfad zu den Downloads", Global.Datentyp.Pfad);
-        configuration = Global.Konfig("PfadDokumentenverwaltung", Global.Modus.Update, configuration, "Pfad zur Dokumentenverwaltung", "Pfad zur Dokumentenverwaltung", Global.Datentyp.Pfad);
+        configuration = Global.Konfig("PfadDownloads", Global.Modus.Read, configuration, "Pfad zum Downloads-Ordner", "Pfad zu den Downloads");
+        configuration = Global.Konfig("PfadDokumentenverwaltung", Global.Modus.Update, configuration, "Pfad zur Dokumentenverwaltung", "Pfad zur Dokumentenverwaltung");
         
         var tableFoto = new Spectre.Console.Table();
         tableFoto.Expand();
@@ -1424,7 +1426,7 @@ while (Console.KeyAvailable) Console.ReadKey(true);
 
         if (this.Select(x => x.Status).Distinct().Count() == 1)
         {
-            return $"[{Global.GetColor(Global.ColorZahlen)}] {this.Count().ToString()}[/] Schüler*innen:[springGreen2] nur aktive Schüler exportiert[/]";
+            return $"[{Global.GetColor(Global.ColorZahlen)}]{this.Count().ToString()}[/] Schüler*innen:[springGreen2] nur aktive Schüler exportiert[/]";
         }
         
         return statusstring.TrimEnd(' ').TrimEnd(',').TrimEnd(' ').TrimEnd(',');

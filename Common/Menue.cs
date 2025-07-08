@@ -62,6 +62,7 @@ public class Menue : List<Menüeintrag>
         grid.AddColumn();
         grid.AddColumn();
 
+        
         for (int i = 0; i < this.Count(); i++)
         {
             var links = this[i].Titel.Split(':')[0].Trim();
@@ -77,7 +78,7 @@ public class Menue : List<Menüeintrag>
                 new Text(rechts, new Style(Color.White , Color.Black)).LeftJustified()
             });
         }
-
+         
         AnsiConsole.Write(grid);
     }
 
@@ -106,7 +107,7 @@ public class Menue : List<Menüeintrag>
             menuEintraege = $"[bold {Global.GetColor(Global.ColorActionInMenüs)}] 1 ... " + this.Count() + "[/] oder";
         }
 
-        configuration = Global.Konfig("Auswahl", Global.Modus.Update, configuration, "Auswahl", $"Wählen Sie{menuEintraege} [bold {Global.GetColor(Global.ColorTextHervorheben)}]e[/] für Einstellungen oder [bold {Global.GetColor(Global.ColorTextHervorheben)}]h[/] für Onlinehilfe", Global.Datentyp.Auswahl, null, null, zulässigeAuswahlOptionen);
+        configuration = Global.Konfig("Auswahl", Global.Modus.Update, configuration, "Auswahl", $"Wählen Sie{menuEintraege} [bold {Global.GetColor(Global.ColorTextHervorheben)}]e[/] für Einstellungen oder [bold {Global.GetColor(Global.ColorTextHervorheben)}]h[/] für Onlinehilfe", null, null, zulässigeAuswahlOptionen);
 
         switch (configuration["Auswahl"])
         {
