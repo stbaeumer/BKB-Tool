@@ -58,6 +58,7 @@ public class Menüeintrag
     public Global.Rubrik Rubrik { get; private set; }
     public Global.NurBeiDiesenSchulnummern NurBeiDiesenSchulnummern { get; }
     public Datei Zieldatei { get; set; }
+    public List<string> AlleSchildKursBez { get; private set; }
 
     public Menüeintrag(string titel, Anrechnungen anrechnungen, Dateien quelldateien, Students students, Klassen klassen, List<string> beschreibung, Action<Menüeintrag> funktion, Global.Rubrik rubrik = Global.Rubrik.Allgemein, Global.NurBeiDiesenSchulnummern nurbeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Alle)
     {
@@ -395,7 +396,7 @@ public class Menüeintrag
             absencePerStud = Quelldateien.GetMatchingList(configuration, "absenceperstudent", IStudents, Klassen);
             if (absencePerStud == null || !absencePerStud.Any()) return [];
 
-            configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration, "Abschnitt", $"Geben Sie den Lernabschnitt an. Das Schuljahr beginnt immer mit Abschnitt [{Global.GetColor(Global.ColorZahlen)}]1[/]. \nI.d.R. wechselt der Abschnitt im Halbjahr auf Abschnitt [{Global.GetColor(Global.ColorZahlen)}]2[/].");
+            configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration, "Abschnitt", $"Geben Sie den Lernabschnitt an. Das Schuljahr beginnt immer mit Abschnitt [{Global.GetColor(Global.ColorZahlen)}]1[/]. \nI.d.R. wechselt der Abschnitt nach den Halbjahreszeugnissen auf Abschnitt [{Global.GetColor(Global.ColorZahlen)}]2[/].");
             configuration = Global.Konfig("Abschnittswechsel", Global.Modus.Update, configuration, "Abschnittswechsel", $"Geben Sie das Datum des Abschnittswechsels an. \nI.d.R. ist der [{Global.GetColor(Global.ColorZahlen)}]{new DateTime(Convert.ToInt32(Global.AktSj[1]), 2, 1).ToShortDateString()}[/] (oder ein anderes Datum im Februar) der richtige Wert.", new DateTime(Convert.ToInt32(Global.AktSj[1]), 2, 1).ToShortDateString());
 
             // Wenn der Abschnittswechsel hinter uns liegt und gleichzeitig Fehlzeiten von vorher vorliegen, dann wird gefragt, ob die vorherigen Fehlzeiten berücksichtigt werden sollen. 
@@ -897,6 +898,303 @@ public class Menüeintrag
         return zieldatei;
     }
 
+    public Datei Kurse(IConfiguration configuration, string zieldateiname, Kurse kurse)
+    {
+        var zieldatei = new Datei(zieldateiname);
+
+        AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Kurse bilden: ...", ctx =>
+        {            
+            foreach (var kurs in kurse)
+            {   
+                dynamic record = new ExpandoObject();
+                record.KursBez = kurs.KursBez.Substring(0, Math.Min(kurs.KursBez.Length, 20));
+
+                // record.Klasse muss leer bleiben, wenn Schülergruppe verwendet werden.
+                // Anderenfalls werden alle SuS aller Klassen zugewiesen.
+                record.Klasse = string.IsNullOrEmpty(kurs.Schülergruppe) ? string.Join(",", kurs.Klassen) : "";
+
+                record.Jahr = Global.AktSj[0];
+                record.Abschnitt = configuration["Abschnitt"].ToString();
+                record.Jahrgang = string.Join(",", kurs.Jahrgaenge);
+                record.Fach = kurs.Fach;
+                record.Kursart = kurs.Kursart;
+                record.WochenstdPUNKT = kurs.Wochenstunden;
+                record.WochenstdPUNKTLEERZEICHENKL = kurs.KursleiterWochenstunden;
+                record.Kursleiter = kurs.Kursleiter;
+                record.Epochenunterricht = "";
+                record.Schulnr = "";
+                // Falls es eine Zsatzkraft gibt
+                if(kurs.Lehrkraefte.Count > 0)
+                {
+                    record.WochenstdPUNKTLEERZEICHENZK = kurs.LehrkraefteWochenstunden[0];
+                    record.Zusatzkraft = kurs.Lehrkraefte[0];
+                }
+                if(kurs.Lehrkraefte.Count > 1)
+                {
+                    for (int i = 1; i < kurs.Lehrkraefte.Count; i++)
+                    {
+                        ((IDictionary<string, object>)record)[$"WochenstdLEERZEICHENZK{i}"] = kurs.LehrkraefteWochenstunden[i];
+                        ((IDictionary<string, object>)record)[$"WeitereLEERZEICHENZusatzkraft{i}"] = kurs.Lehrkraefte[i];                        
+                    }
+                }            
+                zieldatei.Add(record);
+            }
+
+            Global.ZeileSchreiben("Kurse bilden:", zieldatei.Count().ToString());
+        });
+        
+        return zieldatei;
+    }
+
+    private List<string> GetDistincteKombinationenUnrPlusFachOhneSchuelergruppen(List<dynamic> gpu002)
+    {
+        var mehrfachVorkommendeField1 = gpu002
+            .Where(record =>
+            {
+                var dict = (IDictionary<string, object>)record;
+                // Field42 muss null oder leer sein
+                return string.IsNullOrEmpty(dict.ContainsKey("Field42") ? dict["Field42"]?.ToString() : "");
+            })
+            .Select(record =>
+            {
+                var dict = (IDictionary<string, object>)record;
+                return dict.ContainsKey("Field1") ? dict["Field1"]?.ToString() : null;
+            })
+            .Where(val => !string.IsNullOrEmpty(val))
+            .GroupBy(val => val)
+            .Where(g => g.Count() > 1)
+            .Select(g => g.Key)
+            .Distinct()
+            .ToList();
+
+        return gpu002
+            .Where(record =>
+            {
+                var dict = (IDictionary<string, object>)record;
+                var field1 = dict.ContainsKey("Field1") ? dict["Field1"]?.ToString() : "";
+                // Field42 muss null oder leer sein UND Field1 muss mehrfach vorkommen
+                return string.IsNullOrEmpty(dict.ContainsKey("Field42") ? dict["Field42"]?.ToString() : "")
+                    && !string.IsNullOrEmpty(field1)
+                    && mehrfachVorkommendeField1.Contains(field1);
+            })
+            .Select(record =>
+            {
+                var dict = (IDictionary<string, object>)record;
+                var field1 = dict.ContainsKey("Field1") ? dict["Field1"]?.ToString() : "";
+                var field7 = dict.ContainsKey("Field7") ? dict["Field7"]?.ToString() : "";
+                return $"{field7}-{field1}";
+            })
+            .Where(val => !string.IsNullOrEmpty(val) && val != "-")
+            .Distinct()
+            .ToList();
+    }
+
+    private List<string> GetDistincteKombinationenUnrPlusFachBeiSchuelergruppen(List<dynamic> gpu002)
+    {
+        
+
+
+
+        return gpu002
+                .Where(record =>
+                {
+                    var dict = (IDictionary<string, object>)record;
+                    return dict.ContainsKey("Field42") && !string.IsNullOrEmpty(dict["Field42"]?.ToString());
+                })
+                .Select(record =>
+                {
+                    var dict = (IDictionary<string, object>)record;
+                    var field1 = dict.ContainsKey("Field1") ? dict["Field1"]?.ToString() : "";
+                    var field7 = dict.ContainsKey("Field7") ? dict["Field7"]?.ToString() : "";
+                    return $"{field7}-{field1}";
+                })
+                .Distinct()
+                .ToList();        
+    }
+
+    public Datei LeistungsdatenStatistik(IConfiguration configuration, string zieldateiname)
+    {
+        var zieldatei = new Datei(zieldateiname);
+        
+        var stdgroupSs = Quelldateien.GetMatchingList(configuration, "studentgroupstudents", IStudents, Klassen);
+        if (stdgroupSs == null || stdgroupSs.Count == 0) return [];
+
+        List<dynamic> gpu002 = Quelldateien.GetMatchingList(configuration, "gpu002", IStudents, Klassen);
+        if (gpu002 == null || gpu002.Count == 0) return [];
+
+        List<dynamic> schLeistus = Quelldateien.GetMatchingList(configuration, "schuelerleistungsdaten", IStudents, Klassen);
+        if (schLeistus == null || schLeistus.Count == 0) return [];
+        
+        configuration["Abschnitt"] = "1";
+
+        var records = new List<dynamic>();
+
+        // Wenn in der GPU002 zwei Zeilen mit der gleichen ID in Column1 stehen, dann ist das in Schild zwingend ein Kurs.
+        // Wenn eine Schülergruppe in der GPU002 existiert, wird die Untis-Schülergruppe zum Schild-Kursnamen.
+        // Wenn keine Schülergruppe existiert, dann heißt der Kurs U1234, wobei 1234 die Untis-Kurs-ID ist und 2025 das Schuljahr. 
+        // Wenn ID und Raum bei mehreren KuK identisch sind, dann Teamteaching. 
+
+        AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("SchuelerLeistungsdaten.dat verarbeiten ...", ctx =>
+        {
+            foreach (var klasse in IStudents.OrderBy(x => x.Klasse).Select(x => x.Klasse).Distinct())
+            {
+
+                var isFirstRun = true;
+
+                var verschiedeneFaecherDerKlasse = VerschiedeneFaecher(klasse, gpu002);
+
+                var religionWurdeUnterrichtet = verschiedeneFaecherDerKlasse.Any(fach => new List<string>() { "rel", "kr", "er", "reli" }.Contains(fach.ToLower()));
+
+                foreach (var student in IStudents.OrderBy(x => x.Nachname).ThenBy(x => x.Vorname).Where(x => x.Klasse == klasse))
+                {
+                    // Prüfen, ob der Schüler in der GPU002 als Reliabmelder eingetragen ist.
+
+
+
+
+
+
+                    var istReliabmelder = gpu002.Any(rec =>
+                    {
+                        var dict = (IDictionary<string, object>)rec;
+                        return dict["Nachname"].ToString() == student.Nachname
+                            && dict["Vorname"].ToString() == student.Vorname
+                            && dict["Geburtsdatum"].ToString() == student.Geburtsdatum
+                            && !string.IsNullOrEmpty(dict["Abmeldedatum Religionsunterricht"].ToString());
+                    });
+
+                    foreach (var fach in verschiedeneFaecherDerKlasse)
+                    {
+                        // Normalerweise gibt es nur einen Unterricht. 
+                        var unterrichteMitDiesemFach = GetUnterrichteMitDiesemFach(fach, klasse, gpu002);
+
+                        var dictExp = (IDictionary<string, object>)unterrichteMitDiesemFach[0];
+
+                        var zusatzlehrkraft = "";
+                        var zusatzlehrkraftWochenstunden = "";
+
+                        // Wenn dieses Fach mit diesem Lehrer bereits in den records existiert,
+                        // dann wird es nicht erneut hinzugefügt.
+
+                        var gibtDasFachMitDemLehrerSchon = records.Any(rec =>
+                        {
+                            var dict = (IDictionary<string, object>)rec;
+                            return dict["Fach"].ToString() == dictExp["subject"].ToString() &&
+                                dict["Fachlehrer"].ToString() == dictExp["teacher"].ToString() &&
+                                dict["Vorname"].ToString() == student.Vorname &&
+                                dict["Nachname"].ToString() == student.Nachname &&
+                                dict["Geburtsdatum"].ToString() == student.Geburtsdatum;
+                        });
+
+                        if (!gibtDasFachMitDemLehrerSchon)
+                        {
+                            string jahrgang = student.GetJahrgang(gpu002);                            
+
+                            string kursart = GetKursart(configuration, jahrgang, fach);
+
+                            // Die Kursart 
+                            var kursartBisher = schLeistus
+                                .Where(record =>
+                                {
+                                    var dict = (IDictionary<string, object>)record;
+                                    return dict["Vorname"].ToString() == student.Vorname &&
+                                        dict["Nachname"].ToString() == student.Nachname &&
+                                        dict["Geburtsdatum"].ToString() == student.Geburtsdatum &&
+                                        dictExp["subject"] != null &&
+                                        dict["Fach"].ToString() == dictExp["subject"].ToString();
+                                })
+                                .Select(record =>
+                                {
+                                    var dict = (IDictionary<string, object>)record;
+                                    return dict["Kursart"].ToString();
+                                })
+                                .FirstOrDefault()
+                                ?.ToString();
+
+                            if (!string.IsNullOrEmpty(kursartBisher))
+                                kursart = kursartBisher;
+
+                            // Klassenunterrichte und Religion wird immer hinzugefügt
+                            if (dictExp["studentgroup"].ToString() == "" || new List<string>() { "rel", "kr", "er", "reli", "religion", "rel1" }.Contains(fach.ToLower()))
+                            {
+                                dynamic record = new ExpandoObject();
+                                record.Nachname = $"{student.Nachname}#{klasse}";
+                                record.Vorname = student.Vorname;
+                                record.Geburtsdatum = student.Geburtsdatum;
+                                record.Jahr = Global.AktSj[0];
+                                record.Abschnitt = configuration["Abschnitt"];
+                                record.Fach = dictExp["subject"].ToString();
+                                record.Fachlehrer = dictExp["teacher"].ToString();
+                                record.Kursart = kursart;
+                                record.Kurs = "";
+                                record.Note = "";
+                                record.Abiturfach = "";
+                                record.WochenstdPUNKT = dictExp["periods"];
+                                record.ExterneLEERZEICHENSchulnrPUNKT = "";
+                                record.Zusatzkraft = zusatzlehrkraft;
+                                record.WochenstdPUNKTLEERZEICHENZK = zusatzlehrkraftWochenstunden;
+                                record.Jahrgang = "";
+                                record.Jahrgänge = "";
+                                record.FehlstdPUNKT = ""; // Fehlzeiten werden über die Abschnittsdaten importiert.
+                                record.unentschPUNKTLEERZEICHENFehlstdPUNKT = "";
+                                record.Mahnung = "J";
+                                record.Sortierung = "";
+                                record.Mahndatum = "";//DateTime.Now.ToShortDateString();
+                                records.Add(record);
+                            }
+                            else // Bei Kursunterrichten wird geschaut, ob der Schüler den Kurs belegt hat. 
+                            {
+                                var id = student.Id;
+                                var studentZeile = stdgroupSs
+                                    .Where(record =>
+                                    {
+                                        var dict = (IDictionary<string, object>)record;
+                                        return dict["studentId"].ToString() == id &&
+                                            dict["studentgroup.name"].ToString() ==
+                                            dictExp["studentgroup"].ToString();
+                                    })
+                                    .FirstOrDefault();
+                                var dictStudentgroup = (IDictionary<string, object>)studentZeile!;
+
+                                if (dictStudentgroup != null)
+                                {
+                                    if (!student.UnterrichtIstRelevantFürZeugnisInDiesemAbschnitt(dictStudentgroup, configuration))
+                                        continue;
+                                    dynamic record = new ExpandoObject();
+                                    record.Nachname = $"{student.Nachname}#{klasse}";
+                                    record.Vorname = student.Vorname;
+                                    record.Geburtsdatum = student.Geburtsdatum;
+                                    record.Jahr = Global.AktSj[0];
+                                    record.Abschnitt = configuration["Abschnitt"];
+                                    record.Fach = dictStudentgroup["subject"].ToString();
+                                    record.Fachlehrer = dictExp["teacher"].ToString();
+                                    record.Kursart = kursart;
+                                    record.Kurs = dictStudentgroup["studentgroup.name"].ToString()!.Substring(0,
+                                        Math.Min(dictStudentgroup["studentgroup.name"].ToString()!.Length, 20));
+                                    record.Note = "";
+                                    record.Abiturfach = "";
+                                    record.WochenstdPUNKT = dictExp["periods"];
+                                    record.ExterneLEERZEICHENSchulnrPUNKT = "";
+                                    record.Zusatzkraft = zusatzlehrkraft;
+                                    record.WochenstdPUNKTLEERZEICHENZK = zusatzlehrkraftWochenstunden;
+                                    record.Jahrgang = student.Jahrgang;
+                                    record.Jahrgänge = "";
+                                    record.FehlstdPUNKT = "";
+                                    record.unentschPUNKTLEERZEICHENFehlstdPUNKT = "";
+                                    records.Add(record);                                    
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            Global.ZeileSchreiben("SchuelerLeistungsdaten.dat verarbeitet:", records.Count().ToString());
+        });
+
+        zieldatei.AddRange(records);
+        return zieldatei;
+    }
+
     private List<dynamic>? GetUnterrichteMitDiesemFach(string fach, string klasse, List<dynamic>? exportLessons)
     {
         return exportLessons.Where(rec =>
@@ -923,60 +1221,7 @@ public class Menüeintrag
                 return dict["subject"].ToString();
             }).Distinct().ToList();
     }
-
-    public Datei Kurse(IConfiguration configuration, string zieldateiname)
-    {
-        var zieldatei = new Datei(zieldateiname);
-        var records = new List<dynamic>();
-
-        var exportLessons = Quelldateien.GetMatchingList(configuration, "exportlesson", IStudents, Klassen);
-        if (exportLessons == null || exportLessons.Count == 0) return [];
-
-        var klassen = Quelldateien.GetMatchingList(configuration, "klassen", IStudents, Klassen);
-        if (klassen == null || klassen.Count == 0) return [];
-
-        foreach (var recExp in exportLessons)
-        {
-            var dictExp = (IDictionary<string, object>)recExp;
-
-            // Wenn es keine Schülergruppe gibt, wird der Eintrag übersprungen.
-            if (string.IsNullOrEmpty(dictExp["studentgroup"].ToString())) continue;
-
-            foreach (var klasse in dictExp["klassen"].ToString()!.Split('~'))
-            {
-                var zeileKlasse = klassen.Where(record =>
-                {
-                    var dict = (IDictionary<string, object>)record;
-                    return dict["InternBez"].ToString() == klasse;
-                }).FirstOrDefault();
-
-                if (!IStudents.Select(x => x.Klasse).ToList().Contains(klasse)) continue;
-                {
-                    dynamic record = new ExpandoObject();
-                    record.KursBez = dictExp["studentgroup"].ToString()!.Substring(0, Math.Min(dictExp["studentgroup"].ToString()!.Length, 20));
-                    record.Klasse = klasse;
-                    record.Jahr = Global.AktSj[0];
-                    record.Abschnitt = configuration["Abschnitt"];
-                    record.Jahrgang = zeileKlasse?.Jahrgang;
-                    record.Fach = Global.PrüfeAufNullOrEmpty(dictExp, "subject");
-                    record.Kursart = GetKursart(configuration, record.Jahrgang, dictExp["subject"].ToString());
-                    record.WochenstdPUNKT = dictExp["periods"];
-                    record.WochenstdPUNKTLEERZEICHENKL = "";
-                    record.Kursleiter = dictExp["teacher"];
-                    record.Epochenunterricht = "";
-                    record.Schulnr = configuration["Schulnummer"];
-                    record.WochenstdPUNKTLEERZEICHENZK = "";
-                    record.Zusatzkraft = "";
-                    record.WochenstdLEERZEICHENZK = "";
-                    record.WeitereLEERZEICHENZusatzkraft = "";
-                    zieldatei.Add(record);
-                }
-            }
-        }
-
-        return zieldatei;
-    }
-
+    
     static bool IsValidHttpUrl(string url)
     {
         return Uri.TryCreate(url, UriKind.Absolute, out Uri? uriResult) &&
@@ -3031,6 +3276,38 @@ public class Menüeintrag
                 Global.ZeileSchreiben("Keine neuen Fotos gefunden", "0", ConsoleColor.Red, ConsoleColor.White);
             }
         return absolutePfade;
+    }
+
+    internal Datei? KurseLehrkraefte(IConfiguration configuration, string zieldateiname, Kurse kurse)
+    {
+        var zieldatei = new Datei(zieldateiname);
+
+        AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("KurseLehrkräfte: ...", ctx =>
+        {
+            foreach (var kurs in kurse)
+            {
+                // Alle Lehrkraefte des Kurses werden durchlaufen
+                for (int i = 0; i < kurs.Lehrkraefte.Count; i++)
+                {
+                    var lehrer = kurs.Lehrkraefte[i];
+                    if (lehrer == null || string.IsNullOrEmpty(kurs.Lehrkraefte[i])) continue;
+
+                    // Prüfen, ob der Lehrer bereits in der Datei ist
+                    // if (zieldatei.Any(rec => rec.Lehrkraft == kurs.Lehrkraefte[i])) continue;
+
+                    dynamic record = new ExpandoObject();
+                    record.KursBez = kurs.KursBez.Substring(0, Math.Min(kurs.KursBez.Length, 20));
+                    record.Jahr = Global.AktSj[0];
+                    record.Abschnitt = configuration["Abschnitt"].ToString();
+                    record.Lehrkraft = kurs.Lehrkraefte[i];
+                    record.Wochenstd = kurs.LehrkraefteWochenstunden[i];
+                    record.Jahrgang = ""; // kann leer bleiben                
+                    zieldatei.Add(record);
+                }
+            }
+            Global.ZeileSchreiben("KurseLehrkräfte:", zieldatei.Count().ToString());
+        });
+        return zieldatei;
     }
 
     // Comparer for (string? Vorname, string? Nachname) tuples

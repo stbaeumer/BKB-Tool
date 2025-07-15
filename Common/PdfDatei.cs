@@ -132,14 +132,10 @@ public class PdfDatei
 
     public PdfDatei(IConfiguration configuration, string dateiPfad, Lehrers lehrers)
     {
-        Global.DisplayHeader(configuration);
-
         if (dateiPfad != null)
         {
-            var pdfDatei = new PdfDatei(dateiPfad);
-            
             // Öffne die PDF-Datei
-            using (var document = PdfSharp.Pdf.IO.PdfReader.Open(dateiPfad, PdfSharp.Pdf.IO.PdfDocumentOpenMode.ReadOnly))
+            using (var document = PdfReader.Open(dateiPfad, PdfDocumentOpenMode.ReadOnly))
             {
                 // Iteriere durch alle Seiten der PDF-Datei
                 for (int i = 0; i < document.PageCount; i++)

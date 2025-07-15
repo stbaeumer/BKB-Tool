@@ -69,6 +69,7 @@ do
         menuGefiltert.AuswahlGridRendern();
 
         configuration = menuGefiltert.GetAusgewaehlterMenueintrag(configuration, ["e", "h"]);
+
         var i = Convert.ToInt32(configuration["Auswahl"]);
 
         dateien.DisplayHeader(configuration);

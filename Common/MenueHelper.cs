@@ -29,8 +29,6 @@ public static class MenueHelper
         var pfadSchilddatenaustausch = configuration["PfadSchilddatenaustausch"];
         var netmanMailReceiver = configuration["NetmanMailReceiver"];
         var pdfKennwort = configuration["PdfKennwort"];
-        var betreff = configuration["Betreff"];
-        var body = configuration["Body"];
         var betreffMassenmail = configuration["BetreffMassenmail"];
         var inputFolder = configuration["InputFolder"];
         var outputFolder = configuration["OutputFolder"];        
@@ -213,27 +211,40 @@ public static class MenueHelper
                         Global.NurBeiDiesenSchulnummern.Nur177659
                     ),
                     new Menüeintrag(
-                        "Statistik: Unterrichtsverteilung für UVD und Anrechnungen nach SchILD importieren",
+                        "Statistik: Unterrichtsverteilung und Anrechnungen nach SchILD importieren",
                         anrechnungen,
-                        quelldateien.Notwendige(configuration, ["exportlessons,csv", "studentgroupstudents,csv", "schuelerlernabschnitt,dat", "schuelerleistungsdaten,dat", "schuelerbasis,dat", "lehrkraefte,dat", "lehrkraeftesonderzeiten,dat", "schuelerbasisdaten,dat", "GPU020,txt"]),
+                        quelldateien.Notwendige(configuration, ["studentgroupstudents,csv", "klassen,dat", "schuelerlernabschnitt,dat", "schuelerleistungsdaten,dat", "schuelerbasis,dat", "lehrkraefte,dat", "kurse,dat", "lehrkraeftesonderzeiten,dat", "schuelerbasisdaten,dat", "GPU002,txt"]),
                         students,
                         klassen,
                         [
-                            "Es werden jetzt die Dateien [bold springGreen2]" + Path.Combine(pfadSchilddatenaustausch ?? "", "Lernabschnitte.dat") + "[/], [bold springGreen2]" + Path.Combine(pfadSchilddatenaustausch ?? "", "Leistungsdaten.dat") + "[/] und [bold springGreen2]" + Path.Combine(pfadSchilddatenaustausch ?? "", "LehrkraefteSonderzeiten.dat") + "[/] erstellt.",
-                            "Unterrichte in Blockklassen werden mit dem Faktor 3 multipliziert.",
-                            "Da SchILD bei Unterrichten nur Ganzzahlen entgegennehmen kann werden die Werte aus Webuntis gerundet.",
-                            "Die Datei LehrkraefteSonderzeiten.dat muss zuerst aus SchILD exportiert werden. Die exportierte Datei wird dann für den ReImport aufbereitet.",
+                            $"Es werden jetzt folgende Dateien für den Import nach SchILD erstellt: \n[{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "Lernabschnitte.dat")}[/] \n[{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "Leistungsdaten.dat")}[/] \n[{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "LehrkraefteSonderzeiten.dat")}[/]",
+                            $"Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]LehrkraefteSonderzeiten.dat[/] wird nicht komplett neu erstellt. Die exportierte Datei wird lediglich für den ReImport aufbereitet.",
+                            $"Die Benennung der Kurse entspricht dem Kursleiterkürzel plus alle beteiligten Untis-Unterrichtsnummern.",
+                            $"Zähler im Anschluss an Fächer (M1, M2, ...) werden abgeschnitten (also zu M).",
+                            $"Bei mehreren beteiligten Lehrkräften wird das alphabetisch erste Lehrkraftkürzel zum Kursleiter.",
+                            $"Team-Teaching ist daran erkennbar, dass die Summe der Kurs-Wochenstunden kleiner ist als die Summe der Lehrkräfte-Wochenstunden.",
                         ],
                         m =>
                         {
                             m.FilterInteressierendeStudentsUndKlassen(configuration);
-                            //m.IStudents = m.Students;
-                            //m.IKlassen = m.Klassen;
+                            configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration);
+                            configuration = Global.Konfig("Schulnummer", Global.Modus.Read, configuration);
+                            configuration = Global.Konfig("StatistikDatum", Global.Modus.Update, configuration);
+                            configuration = Global.Konfig("InteressierendeUnterrichtsgruppen", Global.Modus.Update, configuration);
+                         
                             m.Zieldatei = m.Lernabschnittsdaten(configuration, Global.Art.Statistik, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLernabschnittsdaten.dat"));
-                            //m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, configuration, ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt"], []);
+                            m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, configuration, ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt"], []);
                             m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
 
-                            m.Zieldatei = m.Leistungsdaten(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat"), Global.Art.Statistik);
+                            var kurse = new Kurse(configuration, m, Global.Art.Statistik, klassen);
+                            m.Zieldatei = m.Kurse(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Kurse.dat"), kurse);
+                            m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
+                            
+                            //m.Zieldatei = m.KurseLehrkraefte(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "KurseLehrkraefte.dat"), kurse);
+                            //m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
+
+/*
+                            m.Zieldatei = m.LeistungsdatenStatistik(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat"));
                             //m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, configuration, ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach"], ["Jahrgang"]);
                             m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
 
@@ -242,11 +253,11 @@ public static class MenueHelper
 
                             m.Zieldatei = m.Lehrkraefte(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Lehrkraefte.dat"));
                             m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
-
+*/
                             //m.Zieldatei = m.Faecher(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Faecher.dat"));
                             //m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
 
-                            //m.Zieldatei = m.Kurse(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Kurse.dat"));
+                            //Zieldatei = m.Kurse(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Kurse.dat"));
                             //m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, configuration, ["KursBez"], ["Klasse", "Schulnr", "WochenstdPUNKTLEERZEICHENKL"]);
                             //m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);  
 
@@ -292,7 +303,7 @@ public static class MenueHelper
                         {
                             m.FilterInteressierendeStudentsUndKlassen(configuration);
 
-                            m.Zieldatei = m.Kurse(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Kurse.dat"));
+                            //m.Zieldatei = m.Kurse(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Kurse.dat"));
                             m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, configuration, ["KursBez"], ["Klasse", "Schulnr", "WochenstdPUNKTLEERZEICHENKL"]);
                             m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
 
@@ -628,25 +639,30 @@ public static class MenueHelper
                         students,
                         klassen,
                         [
-                            "Die zuletzt bearbeitete PDF-Datei wird eingelesen.",
-                            "Jede Seite der Datei wird nach E-Mail-Adressen durchsucht.",
-                            "Die betreffenden Seiten werden an die E-Mail-Adressen gemailt.",
-                            "Optional wird verschlüsselt."
+                            "1. Die zuletzt bearbeitete PDF-Datei wird eingelesen.",
+                            "2. Jede Seite der Datei wird nach E-Mail-Adressen durchsucht.",
+                            "3. Die betreffenden Seiten werden an die E-Mail-Adressen gemailt.",
+                            "4. Optional wird verschlüsselt."
                         ],
                         m =>
                         {
                             var pdfDatei = Directory.GetFiles(pfadDownloads, "*.pdf").OrderByDescending(File.GetLastWriteTime).FirstOrDefault();
                             Global.ZeileSchreiben("Die neueste PDF-Datei wird versendet:", pdfDatei, ConsoleColor.White, ConsoleColor.Black);
-                            Global.Konfig("PdfKennwort", Global.Modus.Update, configuration, "Kennwort für das verschlüsseln von PDFs angeben");
-                            Global.Konfig("Betreff", Global.Modus.Update, configuration, "Betreff angeben. Der Betreff wird um das Lehrerkürzel ergänzt)");
-                            Global.Konfig("Body", Global.Modus.Update, configuration, @"Body angeben (\n wird durch Zeilenumbruch ersetzt; [Lehrer] wird durch Lehrername ersetzt)");
-                            foreach (PdfSeite seite in (new PdfDatei(configuration, pdfDatei, new Lehrers(configuration, m.Quelldateien))).Seiten)
+                            Global.Konfig("PdfKennwort", Global.Modus.Update, configuration);
+                            Global.Konfig("Betreff", Global.Modus.Update, configuration);
+                            Global.Konfig("Body", Global.Modus.Update, configuration);
+                            Global.Konfig("BccAdresse", Global.Modus.Update, configuration);
+
+                            AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("E-Mails verarbeiten ...", ctx =>
                             {
-                                seite?.GetMailReceiver(lehrers);
-                                seite?.PdfDocumentCreate(pdfDatei);
-                                seite?.PdfDocumentEncrypt(pdfKennwort);
-                                seite?.Mailen(betreff, body, configuration);
-                            }
+                                foreach (PdfSeite seite in (new PdfDatei(configuration, pdfDatei, new Lehrers(configuration, m.Quelldateien))).Seiten)
+                                {
+                                    seite?.GetMailReceiver(lehrers);
+                                    seite?.PdfDocumentCreate(pdfDatei);
+                                    seite?.PdfDocumentEncrypt(pdfKennwort);
+                                    seite?.Mailen(configuration);
+                                }
+                            });
                         },
                         Global.Rubrik.Allgemein,
                         Global.NurBeiDiesenSchulnummern.Nur177659
@@ -813,4 +829,3 @@ public static class MenueHelper
         }   
     }
 }
-    

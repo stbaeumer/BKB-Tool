@@ -111,8 +111,8 @@ public class Dateien : List<Datei>
                 "OpenPeriod",
                 "Beschreibung",
                 ["Exportieren Sie die Datei aus Webuntis, indem Sie den Pfad gehen:",
-            $"[bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Klassenbuch > Offene Stunden > Bericht[/]",
-            $"Die PDF-Datei in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/] speichern."],
+                $"[bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Klassenbuch > Offene Stunden > Bericht[/]",
+                $"Die PDF-Datei in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/] speichern."],
                 [""],
                 true,
                 d => d.FilterOpenPeriod(),
@@ -123,14 +123,31 @@ public class Dateien : List<Datei>
                 "Beschreibung",
                 [
                     "Exportieren Sie die Datei aus Webuntis, indem Sie als Administrator den Pfad gehen:",
-                $"1. [bold {Global.GetColor(Global.ColorKopfzeileInCSV)}]Stammdaten > Schüler*innen > Berichte > Schüler > CSV-Ausgabe[/]",
-                $"2. Die Datei in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/] speichern."
+                    $"1. [bold {Global.GetColor(Global.ColorKopfzeileInCSV)}]Stammdaten > Schüler*innen > Berichte > Schüler > CSV-Ausgabe[/]",
+                    $"2. Die Datei in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/] speichern."
                 ],
                 [""],
                 true,
                 d => d.FilternWebuntisStudent(),
                 "*.csv",
                 "\t"
+            ));
+            Add(new Datei(
+                "GPU002",
+                "Beschreibung",
+                [
+                    "Exportieren Sie die Datei aus Untis, indem Sie als Admin den Pfad gehen:",
+                    $"[bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Datei > Import/Export > Export TXT Datei > Unterricht[/]",
+                    $"Trennzeichen: [{Global.GetColor(Global.ColorPfadInDateien)}]|[/]",
+                    $"Textbegrenzung: [{Global.GetColor(Global.ColorPfadInDateien)}]\"[/]",
+                    $"Encoding: [{Global.GetColor(Global.ColorPfadInDateien)}]UTF-8[/]",
+                    $"Die Datei speichern: [{Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}GPU002.TXT[/]"
+                ],
+                [""],
+                false,
+                d => d.FilternKlassenGPU002(),
+                "*.TXT",
+                "|"
             ));
             Add(new Datei(
                 "GPU003",

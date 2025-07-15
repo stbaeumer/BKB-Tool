@@ -822,6 +822,35 @@ public class Datei : List<dynamic>
         return this;
     }
 
+    public List<dynamic> FilternKlassenGPU002()
+    {
+        var listeUnterrichtsIds = new List<string>();
+
+        // Es werden allen IDs herausgesucht, an denen sich eine interessierende Klasse beteiligt.
+        foreach (var rec in this)
+        {
+            var dict = (IDictionary<string, object>)rec;
+            if (KlassenNamen.Any(k => k == dict["Field5"].ToString()))
+            {
+                listeUnterrichtsIds.Add(dict["Field1"].ToString());
+            }
+        }
+
+        var liste = new List<dynamic>();
+
+        // Es werden allen Zeilen (auch von anderen Klassen) herausgesucht, die über die ID mit den interessierenden Klassen verbunden sind.        
+        foreach (var rec in this)
+        {
+            var dict = (IDictionary<string, object>)rec;
+            if (listeUnterrichtsIds.Any(k => k == dict["Field1"].ToString()))
+            {
+                liste.Add(rec);
+            }
+        }
+
+        return liste;
+    }
+
     public string? GetAbsoluterPfad()
     {
         return AbsoluterPfad;
@@ -907,12 +936,11 @@ public class Datei : List<dynamic>
             return;
         }
 
-        configuration = Global.Konfig("SmtpUser", Global.Modus.Update, configuration, "Mail-Benutzername", "Geben Sie den Benutzernamen für den SMTP-Server an, z.B. Ihre E-Mail-Adresse.");
-        configuration = Global.Konfig("SmtpPassword", Global.Modus.Update, configuration, "Mail-Kennwort", "Geben Sie das Kennwort für den SMTP-Server an, z.B. das Passwort Ihrer E-Mail-Adresse.",  "");
-        configuration = Global.Konfig("SmtpPort", Global.Modus.Update, configuration, "SMTP-Port", "Geben Sie den Port für den SMTP-Server an, z.B. 587 für TLS oder 465 für SSL.", "587");
-        configuration = Global.Konfig("SmtpServer", Global.Modus.Update, configuration, "SMTP-Server", "Geben Sie den SMTP-Server an, z.B. smtp.office365.com.", "smtp.office365.com");
-        configuration = Global.Konfig("NetmanMailReceiver", Global.Modus.Update, configuration, "Empfänger-Adresse", "Wem soll die Netman-Mail geschickt werden?");
-        configuration = Global.Konfig("NetmanMailBccReceiver", Global.Modus.Update, configuration, "BCC-Adresse", "Wem soll die Netman-Mail in BCC geschickt werden?","");
+        configuration = Global.Konfig("SmtpUser", Global.Modus.Update, configuration);
+        configuration = Global.Konfig("SmtpPassword", Global.Modus.Update, configuration);
+        configuration = Global.Konfig("SmtpPort", Global.Modus.Update, configuration);
+        configuration = Global.Konfig("SmtpServer", Global.Modus.Update, configuration);
+        configuration = Global.Konfig("BCC-Adresse", Global.Modus.Update, configuration);
         
         var mail = new Mail();
         mail.Senden(subject,configuration,body,ZipPfad, configuration["NetmanMailReceiver"], "", configuration["NetmanMailBccReceiver"]);

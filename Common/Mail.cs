@@ -248,23 +248,23 @@ private bool IstMailadresseGültig(string email)
         }
     }
 
-    public void Senden(string subject, string sender, string body, Stream attachmentStream, string attachmentName, string receiver)
+    public void Senden(IConfiguration configuration, string subject, string sender, string body, Stream attachmentStream, string attachmentName, string receiver)
     {
         var mailMessage = new MailMessage(sender, receiver, subject, body);
         mailMessage.Attachments.Add(new Attachment(attachmentStream, attachmentName));
 
         // Füge den Absender als CC hinzu
-        mailMessage.CC.Add(sender);
+        mailMessage.CC.Add(configuration["BCCAdresse"]);
 
-        if(Global.SmtpPassword == null || Global.SmtpPassword.Length <= 3)
+        if(configuration["SmtpPassword"]  == null || configuration["SmtpPassword"].Length <= 3)
         {
-            Console.WriteLine("Bitte geben Sie das Passwort von " + Global.SmtpUser +" für den E-Mail-Versand ein:");
+            Console.WriteLine($"Bitte geben Sie das Passwort von {configuration["SmtpUser"]} für den E-Mail-Versand ein:");
             Global.SmtpPassword = Console.ReadLine();
         }
 
-        using (var smtpClient = new System.Net.Mail.SmtpClient(Global.SmtpServer, Convert.ToInt32(Global.SmtpPort)))
+        using (var smtpClient = new System.Net.Mail.SmtpClient(configuration["SmtpServer"], Convert.ToInt32(configuration["SmtpPort"])))
         {
-            smtpClient.Credentials = new NetworkCredential(Global.SmtpUser, Global.SmtpPassword);
+            smtpClient.Credentials = new NetworkCredential(sender, configuration["SmtpPassword"]);
             smtpClient.EnableSsl = true;
             smtpClient.Send(mailMessage);
         }

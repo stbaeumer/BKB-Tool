@@ -211,38 +211,29 @@ public partial class PdfSeite
         }
     }
 
-    internal void Mailen(string betreff, string body, IConfiguration configuration)
-{
-    if (Global.SmtpUser == null || Global.SmtpPassword == null || Global.SmtpPort == null || Global.SmtpServer == null || Global.NetmanMailReceiver == null)
-    {
-        Global.Konfig("SmtpUser", Global.Modus.Update,configuration, "Mail-Benutzer angeben");
-        Global.Konfig("SmtpPassword",Global.Modus.Update, configuration, "Mail-Kennwort eingeben");
-        Global.Konfig("SmtpPort",Global.Modus.Update, configuration, "SMTP-Port eingeben");
-        Global.Konfig("SmtpServer",Global.Modus.Update, configuration, "SMTP-Server angeben");
-        Global.Konfig("NetmanMailReceiver",Global.Modus.Update, configuration, "Wem soll die Netman-Mail geschickt werden?");
-    }
+    internal void Mailen(IConfiguration configuration)
+    {    
+        foreach (var lehrer in MailReceiver)
+        {        
+            var receiverEmail = lehrer.Mail;
+            var subject = $"{configuration["Betreff"]}";
 
-    foreach (var lehrer in MailReceiver)
-    {        
-        var receiverEmail = lehrer.Mail;
-        var subject = $"{betreff} {lehrer.Titel}{lehrer.Vorname} {lehrer.Nachname} ({lehrer.Kürzel})";        
-
-        body = body.Replace("[Lehrer]", $"{lehrer.Titel} {lehrer.Vorname} {lehrer.Nachname} ({lehrer.Kürzel})");
-        body = body.Replace("\\n", Environment.NewLine);
-        if (PdfDocument != null)
-        {
-            using (var memoryStream = new MemoryStream())
+            var body = configuration["Body"];
+            body = body.Replace("#Lehrer#", $"{lehrer.Titel} {lehrer.Vorname} {lehrer.Nachname} ({lehrer.Kürzel})");
+            body = body.Replace("\\n", Environment.NewLine);
+            if (PdfDocument != null)
             {
-                // Speichern des PDF-Dokuments in den MemoryStream
-                PdfDocument.Save(memoryStream, false);
-                memoryStream.Position = 0; // Zurücksetzen des Streams auf den Anfang
+                using (var memoryStream = new MemoryStream())
+                {
+                    // Speichern des PDF-Dokuments in den MemoryStream
+                    PdfDocument.Save(memoryStream, false);
+                    memoryStream.Position = 0; // Zurücksetzen des Streams auf den Anfang
 
-                // Erstellen und Senden der E-Mail
-                var mail = new Mail();
-                mail.Senden(subject, Global.SmtpUser, body, memoryStream, this.DateiName, receiverEmail);
+                    // Erstellen und Senden der E-Mail
+                    var mail = new Mail();
+                    mail.Senden(configuration, subject, configuration["SmtpUser"], body, memoryStream, this.DateiName, receiverEmail);
+                }
             }
         }
-        Global.ZeileSchreiben(receiverEmail, "gesendet", ConsoleColor.Green, ConsoleColor.White);
     }
-}
 }
