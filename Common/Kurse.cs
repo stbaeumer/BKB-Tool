@@ -4,7 +4,7 @@ using Spectre.Console;
 
 public class Kurse : List<Kurs>
 {    
-    public Kurse(IConfiguration configuration, Menüeintrag m, Global.Art art, Klassen alleKlassen)
+    public Kurse(IConfiguration configuration, Menüeintrag m, Global.Art art)
     {
         // Aus der Kurse.dat wird die Kursart ermittelt. Wenn die Kursart in SchILD einmal gesetzt ist, wird sie nicht mehr geändert.
         List<dynamic> kurseDat = m.Quelldateien.GetMatchingList(configuration, "kurse.", m.IStudents, m.Klassen);        
@@ -20,15 +20,6 @@ public class Kurse : List<Kurs>
             AnsiConsole.MarkupLine($"[grey]Keine GPU002-Daten gefunden. Bitte exportieren Sie die Datei erneut.[/]");
             return;
         }
-
-        List<dynamic> klassen = m.Quelldateien.GetMatchingList(configuration, "klassen", m.IStudents, m.Klassen);
-        if (klassen == null || klassen.Count == 0)
-        {
-            AnsiConsole.MarkupLine($"[grey]Keine Klassen.dat gefunden. Bitte exportieren Sie die Datei erneut.[/]");
-            return;
-        }
-
-        
 
         AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Kurse aus GPU002.TXT: ...", ctx =>
         {
@@ -55,14 +46,13 @@ public class Kurse : List<Kurs>
 
                 var unterrichtsId = dict["Field1"]?.ToString();
 
-                if (unterrichtsId == "985")
+                if (unterrichtsId == "1303")
                 {
                     string test = "Test"; // Debugging purpose
                 }
 
                 if (zeileIstKursOderGehörtZuKurs(gpu002, dict))
                 {
-                    var jahrgang = GetJahrgang(alleKlassen, dict);
                     var fach = Bereinigen(dict["Field7"]?.ToString());
                     var schuelergruppe = dict["Field42"]?.ToString();
                     var klasse = dict["Field5"]?.ToString();
@@ -84,12 +74,6 @@ public class Kurse : List<Kurs>
                     // Wenn die Kombination aus vorhandener Schülergruppe, Klasse & Fach noch nicht vorhanden -> neuer Kurs
                     if (kurs == null)
                     {
-                        // Die Kursart wird aus der Kurse.dat ermittelt, wenn sie dort einmal gesetzt ist. Sie steckt in "Kursart" des Dictionaries.
-                        var dictKurs = kurseDat
-                            .Select(k => k as IDictionary<string, object>)
-                            .FirstOrDefault(k => k != null && k.ContainsKey("Fach") && k["Fach"]?.ToString() == fach && k.ContainsKey("Kursart") && k["Kursart"] != null);
-                        string kursart = dictKurs?["Kursart"]?.ToString() ?? string.Empty;
-
                         this.Add(new Kurs
                         {
                             // Klassen nicht leer -> Alle bekommen den Kurs zugewiesen
@@ -98,9 +82,9 @@ public class Kurse : List<Kurs>
 
                             KursBez = $"{lehrer}-{untisId}",                            
                             Fach = Bereinigen(fach),
-                            Klassen = new List<string>() { klasse },
-                            Jahrgaenge = jahrgang != null ? new List<string> { jahrgang } : new List<string>(),
-                            Kursart = kursart,
+                            Klassen = new List<string>() { klasse },                 
+                            // Die Kursart wird aus der Kurse.dat ermittelt, wenn sie dort einmal gesetzt ist. Sie steckt in "Kursart" des Dictionaries.
+                            Kursart = GetKursart(configuration, kurseDat, fach, lehrer, untisId),
                             Wochenstunden = wochentundenLehrkraft,
                             Kursleiter = lehrer,
                             KursleiterWochenstunden = wochentundenLehrkraft,
@@ -124,16 +108,9 @@ public class Kurse : List<Kurs>
                             if (!kurs.Klassen.Contains(klasse))
                                 kurs.Klassen.Add(klasse);
 
-                            if (kurs.Jahrgaenge.Contains(jahrgang) == false && jahrgang != null && !string.IsNullOrEmpty(jahrgang))
-                                kurs.Jahrgaenge.Add(jahrgang);
-
-
                             // Die Anzahl der Wochenstunden wird nicht erhöht.
                             continue;
                         }
-
-
-
 
                         // Wenn UnterrichtsId nicht in der Liste der UnterrichtsIds des Kurses enthalten ist, wird sie hinzugefügt
                         if (!kurs.UnterrichtsIds.Contains(int.Parse(unterrichtsId)))
@@ -143,9 +120,6 @@ public class Kurse : List<Kurs>
                             kurs.KursBez = $"{kurs.Kursleiter}-{string.Join('-', kurs.UnterrichtsIds)}";
                             // Die Wochenstunden des Kurses erhöhen sich nur, wenn die UnterrichtsId neu ist
                             kurs.Wochenstunden += wochentundenLehrkraft;
-
-                            if (kurs.Jahrgaenge.Contains(jahrgang) == false && jahrgang != null && !string.IsNullOrEmpty(jahrgang))
-                                kurs.Jahrgaenge.Add(jahrgang);
                         }
 
                         // Wenn lehrer == Kursleiter, dann wird die Wochenstundenzahl des Kursleiters aktualisiert
@@ -176,6 +150,47 @@ public class Kurse : List<Kurs>
             }
             Global.ZeileSchreiben("Kurse aus GPU002.TXT:", this.Count().ToString());
         });
+    }
+
+    private string GetKursart(IConfiguration configuration, List<dynamic> kurseDat, string fach, string kursleiter, string unterrichtsId)
+    {
+        List<string> kursarten = new List<string>() { "GK", "LK", "AB", "ZK", "VTF", "PJK" };
+        List<string> unserekursarten = configuration["Kursarten"]?.Split(',').Select(s => s).ToList();
+
+        var dictKurs = kurseDat
+            .Select(k => k as IDictionary<string, object>)
+            .FirstOrDefault(k => k != null && k.ContainsKey("Fach") &&
+                k["Fach"]?.ToString() == fach &&
+                k["Kursleiter"]?.ToString() == kursleiter &&
+                k["KursBez"].ToString().Contains(unterrichtsId) &&
+                k.ContainsKey("Kursart") && k["Kursart"] != null
+                );
+        var stringKurs = dictKurs?["Kursart"]?.ToString() ?? string.Empty;
+
+        // Wenn die Kursart in der Kurse.dat bereits vorher gesetzt wurde, wird sie übernommen.        
+        if (stringKurs != "")
+            return stringKurs;
+
+        if (unserekursarten == null || unserekursarten.Count != 6)
+            return ""; // Fehlerfall, leere Rückgabe
+
+        try
+        {
+            for (int i = 0; i < kursarten.Count; i++)
+            {
+                // Kursart in der Konfiguration ist in der Kurse.dat nicht gesetzt, aber in der Konfiguration vorhanden
+                if (fach.Contains(unserekursarten[i]))
+                {
+                    return kursarten[i];
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            AnsiConsole.MarkupLine($"[red]Fehler beim Zuordnen der Kursarten[/]");
+            return ""; // Fehlerfall, leere Rückgabe
+        }        
+        return ""; // Wenn keine Kursart gefunden wurde, wird eine leere Zeichenkette zurückgegeben
     }
 
     private string GetJahrgang(List<dynamic> klassen, IDictionary<string, object> dict)

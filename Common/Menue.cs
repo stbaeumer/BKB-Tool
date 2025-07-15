@@ -100,14 +100,7 @@ public class Menue : List<Menüeintrag>
     {
         var zulässigeAuswahlOptionen = GetZulässigeAuswahl(weitere);
 
-        var menuEintraege = "";
-
-        if (this.Count > 0)
-        {
-            menuEintraege = $"[bold {Global.GetColor(Global.ColorActionInMenüs)}] 1 ... " + this.Count() + "[/] oder";
-        }
-
-        configuration = Global.Konfig("Auswahl", Global.Modus.Update, configuration, "Auswahl", $"Wählen Sie{menuEintraege} [bold {Global.GetColor(Global.ColorTextHervorheben)}]e[/] für Einstellungen oder [bold {Global.GetColor(Global.ColorTextHervorheben)}]h[/] für Onlinehilfe", null, null, zulässigeAuswahlOptionen);
+        configuration = Global.Konfig("Auswahl", Global.Modus.Update, configuration, "", -1, -1, "", null, null, zulässigeAuswahlOptionen);
 
         switch (configuration["Auswahl"])
         {
@@ -116,7 +109,7 @@ public class Menue : List<Menüeintrag>
                 configuration["Auswahl"] = "-1";
                 return configuration;
             case "e":
-                configuration = Global.EinstellungenDurchlaufen(Global.Modus.Update, configuration);
+                configuration = Global.EinstellungenDurchlaufen(configuration, Global.Modus.Update);
                 configuration["Auswahl"] = "-1";
                 return configuration;
             default:

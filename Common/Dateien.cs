@@ -78,6 +78,9 @@ public class Dateien : List<Datei>
 
     public void GetInteressierendeDateienMitAllenEigenschaften(IConfiguration configuration)
     {
+        configuration = Global.Konfig("PfadDownloads", Global.Modus.Read, configuration);
+        configuration = Global.Konfig("PfadSchilddatenaustausch", Global.Modus.Read, configuration);
+
         AnsiConsole.Status()
             .Spinner(Spinner.Known.Dots)
             .Start("Dateien einlesen ...", ctx =>
@@ -607,7 +610,8 @@ public class Dateien : List<Datei>
     {
         try
         {
-            var maxDateiAlterString = configuration["maxDateiAlter"];
+            configuration = Global.Konfig("MaxDateiAlter", Global.Modus.Read, configuration);
+            var maxDateiAlterString = configuration["MaxDateiAlter"];
             int maxDateiAlter = 6; // Standardwert
 
             if (!string.IsNullOrEmpty(maxDateiAlterString) && int.TryParse(maxDateiAlterString, out int parsedValue))
@@ -705,15 +709,15 @@ public class Dateien : List<Datei>
     /// </summary>
     public void ExportAusSchildVerschieben(IConfiguration configuration)
     {
-        var pfadSchilddatenaustausch = configuration["PfadSchilddatenaustausch"];
+        configuration = Global.Konfig("PfadSchilddatenaustausch", Global.Modus.Read, configuration);
         var pfadDownloads = configuration["PfadDownloads"];
 
         // Stelle sicher, dass der Zielordner existiert
-        if (!Directory.Exists(pfadSchilddatenaustausch))
+        if (!Directory.Exists(configuration["PfadSchilddatenaustausch"]))
         {
             try
             {
-                Directory.CreateDirectory(pfadSchilddatenaustausch);
+                Directory.CreateDirectory(configuration["PfadSchilddatenaustausch"]);
             }
             catch (Exception ex)
             {
@@ -723,8 +727,8 @@ public class Dateien : List<Datei>
         }
 
         // Die SchildSchuelerExport wird immer kopiert.
-        var datei = !string.IsNullOrEmpty(pfadSchilddatenaustausch)
-            ? Directory.GetFiles(pfadSchilddatenaustausch, "*", SearchOption.TopDirectoryOnly).FirstOrDefault(f => Path.GetFileName(f).ToLower().Contains("schildschuelerexport"))
+        var datei = !string.IsNullOrEmpty(configuration["PfadSchilddatenaustausch"])
+            ? Directory.GetFiles(configuration["PfadSchilddatenaustausch"], "*", SearchOption.TopDirectoryOnly).FirstOrDefault(f => Path.GetFileName(f).ToLower().Contains("schildschuelerexport"))
             : null;
 
         if (datei != null)
@@ -736,8 +740,8 @@ public class Dateien : List<Datei>
             File.Copy(datei, destinationPath, true);
         }
 
-        var datFiles = !string.IsNullOrEmpty(pfadSchilddatenaustausch)
-            ? Directory.GetFiles(pfadSchilddatenaustausch, "*.dat").ToList()
+        var datFiles = !string.IsNullOrEmpty(configuration["PfadSchilddatenaustausch"])
+            ? Directory.GetFiles(configuration["PfadSchilddatenaustausch"], "*.dat").ToList()
             : new List<string>();
 
         if (datFiles.Count > 5)
@@ -761,8 +765,8 @@ public class Dateien : List<Datei>
 
                 var panel = new Panel(
                     $"SchILD verwendet für den Export und den (Re-)Import denselben Ordner. Deswegen verschiebt [bold {Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] jetzt " +
-                    $"[bold {Global.GetColor(Global.ColorZahlen)}]{datFiles.Count} aus SchILD exportierte *.dat-Dateien[/] direkt von [bold {Global.GetColor(Global.ColorPfadInDateien)}]{pfadSchilddatenaustausch}[/] nach [bold {Global.GetColor(Global.ColorPfadInDateien)}]{pfadDownloads}[/]. " +
-                    $"\nDie aufbereiteten Dateien stellt [bold {Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] wiederum in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{pfadSchilddatenaustausch}[/] bereit. " +
+                    $"[bold {Global.GetColor(Global.ColorZahlen)}]{datFiles.Count} aus SchILD exportierte *.dat-Dateien[/] direkt von [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadSchilddatenaustausch"]}[/] nach [bold {Global.GetColor(Global.ColorPfadInDateien)}]{pfadDownloads}[/]. " +
+                    $"\nDie aufbereiteten Dateien stellt [bold {Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] wiederum in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadSchilddatenaustausch"]}[/] bereit. " +
                     "So bleiben die Import-Dateien und Export-Dateien stets getrennt voneinander." +
                     $"\nWeiter mit [bold {Global.GetColor(Global.ColorActionInMenüs)}]ENTER[/]."
                     )

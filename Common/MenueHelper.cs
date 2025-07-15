@@ -128,7 +128,7 @@ public static class MenueHelper
                             m.Zieldatei?.Erstellen(";", '\"', new UTF8Encoding(false), false);
                             if(configuration["Schulnummer"] != null && configuration["Schulnummer"] == "177659")
                             {
-                                configuration = Global.Konfig("PfadLitteraImport", Global.Modus.Update, configuration, "Littera-Import-Pfad", $"Wohin soll die neue Datei nach dem Erstellen verschoben werden?", @"\\fs01\Littera\Atlantis Import Daten", null, null);
+                                configuration = Global.Konfig("PfadLitteraImport", Global.Modus.Update, configuration, "Littera-Import-Pfad");
                                 m.Zieldatei?.Verschieben(configuration["PfadLitteraImport"]);
                             }
                         },
@@ -154,7 +154,7 @@ public static class MenueHelper
 
                             if(configuration["Schulnummer"] != null && configuration["Schulnummer"] == "177659")
                             {
-                                configuration = Global.Konfig("ZipKennwort", Global.Modus.Update, configuration, "Zip-Kennwort", "Die Datei wird nun gezippt.\nGeben Sie das Kennwort ein, mit dem Sie die Zip-Datei verschlüsseln wollen. Geben Sie ein Leerzeichen ein, wenn kein Kennwort gesetzt werden soll.", "");
+                                configuration = Global.Konfig("ZipKennwort", Global.Modus.Update, configuration, "Zip-Kennwort");
                                 m.Zieldatei?.Zippen(Path.Combine(pfadDownloads ?? "", zeitstempel + @"-ImportNachNetman.zip"), configuration, configuration["ZipKennwort"].ToString(), 0, new List<string>(){ Path.Combine(pfadDownloads ?? "", zeitstempel + @"-ImportNachNetman.csv") });
                                 m.Zieldatei?.Mailen(Path.Combine(pfadDownloads ?? "", zeitstempel + @"-ImportNachNetman.zip") ?? "", "Verwaltung", Path.GetFileName(m.Zieldatei.AbsoluterPfad) ?? "", configuration);
                             }                            
@@ -203,7 +203,7 @@ public static class MenueHelper
                         ],
                         m =>
                         {
-                            configuration = Global.Konfig("MailDomain",Global.Modus.Update,configuration, $"Mail-Domain", $"Geben Sie die schulische Mail-Domain für Mailadressen der Schüler*innen an. Bsp: [{Global.GetColor(Global.ColorHyperlink)}]@students.berufskolleg-borken.de[/]. Ihre Eingabe muss mit [{Global.GetColor(Global.ColorHyperlink)}]@[/] beginnen und mit [{Global.GetColor(Global.ColorHyperlink)}].de[/] etc. enden.");
+                            configuration = Global.Konfig("MailDomain",Global.Modus.Update,configuration);
                             m.Zieldatei = m.SchuelerZusatzdatenUmMailAdresseErgaenzen(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerZusatzdaten.dat"));
                             m.Zieldatei?.Erstellen("|", '\'', new UTF8Encoding(false), false);
                         },
@@ -227,27 +227,24 @@ public static class MenueHelper
                         m =>
                         {
                             m.FilterInteressierendeStudentsUndKlassen(configuration);
-                            configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration);
+                            configuration = Global.Konfig("Abschnitt", Global.Modus.Read, configuration);
                             configuration = Global.Konfig("Schulnummer", Global.Modus.Read, configuration);
-                            configuration = Global.Konfig("StatistikDatum", Global.Modus.Update, configuration);
+                            configuration = Global.Konfig("StatistikDatum", Global.Modus.Read, configuration);                            
+                            configuration = Global.Konfig("Kursarten", Global.Modus.Read, configuration);
                             configuration = Global.Konfig("InteressierendeUnterrichtsgruppen", Global.Modus.Update, configuration);
                          
                             m.Zieldatei = m.Lernabschnittsdaten(configuration, Global.Art.Statistik, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLernabschnittsdaten.dat"));
                             m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, configuration, ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt"], []);
                             m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
 
-                            var kurse = new Kurse(configuration, m, Global.Art.Statistik, klassen);
+                            var kurse = new Kurse(configuration, m, Global.Art.Statistik);
                             m.Zieldatei = m.Kurse(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Kurse.dat"), kurse);
                             m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
-                            
-                            //m.Zieldatei = m.KurseLehrkraefte(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "KurseLehrkraefte.dat"), kurse);
-                            //m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
-
-/*
-                            m.Zieldatei = m.LeistungsdatenStatistik(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat"));
-                            //m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, configuration, ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach"], ["Jahrgang"]);
+  
+                            m.Zieldatei = m.Leistungsdaten(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat"));
+                            m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, configuration, ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach"], ["Jahrgang"]);
                             m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
-
+/*
                             m.Zieldatei = m.LehrkraefteSonderzeiten(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "LehrkraefteSonderzeiten.dat"));
                             m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
 
@@ -410,7 +407,7 @@ public static class MenueHelper
 
                             AnsiConsole.Write(table);
 
-                            configuration = Global.Konfig("TeamsChatAuswahl", Global.Modus.Update, configuration, "Bitte eine Zahl auswählen:", "Bitte eine Zahl auswählen:", (datei.Count).ToString(), students, zulässigeAuswahlOptionen);
+                            configuration = Global.Konfig("TeamsChatAuswahl", Global.Modus.Update, configuration);
 
                             var nummer = int.Parse(configuration["TeamsChatAuswahl"]);
 
@@ -682,9 +679,9 @@ public static class MenueHelper
                         ],
                         m =>
                         {
-                            configuration = Global.Konfig("PfadDownloads", Global.Modus.Read, configuration, "Pfad zum eigenen Download-Ordner angeben","");
-                            configuration = Global.Konfig("PfadDokumentenverwaltung", Global.Modus.Update, configuration, $"SchILD-Dokumentenverzeichnis",$"Geben Sie den Pfad zum SchILD-Dokumentenverzeichnis ein. Das ist der Pfad, der in SchILD unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Extras > Programm-Einstellungen > Globale Einstellungen > Dokumentenverwaltung > Dokumentenverzeichnis[/] eingetragen ist. ");
-                            configuration = Global.Konfig("Schlüsselwörter", Global.Modus.Update, configuration, "Schlüsselwörter angeben","Geben Sie kommagetrennt interessierende Schlüsselwörter an (z.B. Abgangszeugnis, Abschlusszeugnis, Jahreszeugnis). BKB-Tool durchsucht die PDF-Dateien im Ordner nach den Wörtern. Sobald ein Schlüsselwort matcht, wird die Datei in das Dokumentenverzeichnis kopiert.");
+                            configuration = Global.Konfig("PfadDownloads", Global.Modus.Read, configuration);
+                            configuration = Global.Konfig("PfadDokumentenverwaltung", Global.Modus.Read, configuration);
+                            configuration = Global.Konfig("Schlüsselwörter", Global.Modus.Update, configuration);
 
                             m.IStudents.GetStudentsVonAtlantisCsv(configuration);
                             m.IStudents.PdfDateienVerarbeiten(configuration);

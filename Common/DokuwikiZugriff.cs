@@ -54,9 +54,9 @@ public class DokuwikiZugriff
 {
     public DokuwikiZugriff(IConfiguration configuration)
     {
-        Global.Konfig("WikiUrl", Global.Modus.Update, configuration, "URL zum dokuwiki xmlrpc.","");
-        Global.Konfig("WikiJsonUser", Global.Modus.Update, configuration, "Benutzer, mit dem auf Json zugegriffen wird.");
-        Global.Konfig("WikiJsonUserKennwort", Global.Modus.Update, configuration, "Kennwort");
+        Global.Konfig("WikiUrl", Global.Modus.Update, configuration);
+        Global.Konfig("WikiJsonUser", Global.Modus.Update, configuration);
+        Global.Konfig("WikiJsonUserKennwort", Global.Modus.Update, configuration);
         
         // Proxy erstellen
         Proxy = XmlRpcProxyGen.Create<IDokuWikiApi>();

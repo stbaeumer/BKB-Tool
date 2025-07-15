@@ -55,7 +55,7 @@ public class PdfDateien : List<PdfDatei>
                 return;
             }
 
-            configuration = Global.Konfig("SchipsOderZeugnisseOderAnderePdfs",Global.Modus.Update, configuration, "Was wollen Sie verschlüsseln?", "Wählen Sie zwischen den Optionen:\n1: Schips\n2: Notenlisten\n3: andere PDFs");
+            configuration = Global.Konfig("SchipsOderZeugnisseOderAnderePdfs",Global.Modus.Update, configuration);
 
             var passwort = "";
             var url = "";
@@ -71,8 +71,8 @@ public class PdfDateien : List<PdfDatei>
             }
             else if (configuration["SchipsOderZeugnisseOderAnderePdfs"] == "2")
             {
-                configuration = Global.Konfig("ZeugnisUrl", Global.Modus.Update,configuration, "Webseite", "Soll eine bestimmte Webseite geöffnet werden, um die verschlüsselte(n) Datei(en) dort hochzuladen?\nFalls Sie keine Seite öffnen wollen, geben Sie ein Leerzeichen ein.");
-                configuration = Global.Konfig("ZeugnisPasswort", Global.Modus.Update, configuration, "Kennwort festlegen", "Mit welchem Kennwort sollen die Dateien verschlüsselt werden?");    
+                configuration = Global.Konfig("ZeugnisUrl", Global.Modus.Update, configuration);
+                configuration = Global.Konfig("ZeugnisPasswort", Global.Modus.Update, configuration);    
                 passwort = configuration["ZeugnisPasswort"];
                 url = configuration["ZeugnisUrl"];
             }

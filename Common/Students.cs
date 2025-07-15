@@ -1059,7 +1059,7 @@ while (Console.KeyAvailable) Console.ReadKey(true);
 
     internal void GetPfadDokumentenverwaltung(IConfiguration configuration)
     {
-        Global.Konfig("PfadDokumentenverwaltung",Global.Modus.Update, configuration, "Geben Sie den Pfad zur Dokumentenverwaltung an:","");
+        Global.Konfig("PfadDokumentenverwaltung",Global.Modus.Update, configuration);
 
         foreach (var student in this)
         {
@@ -1253,8 +1253,8 @@ while (Console.KeyAvailable) Console.ReadKey(true);
     internal void FotosVerarbeiten(IConfiguration configuration, List<string> klassen)
     {
         if(klassen.Count() == 0) return;
-        configuration = Global.Konfig("PfadDownloads", Global.Modus.Read, configuration, "Pfad zum Downloads-Ordner", "Pfad zu den Downloads");
-        configuration = Global.Konfig("PfadDokumentenverwaltung", Global.Modus.Update, configuration, "Pfad zur Dokumentenverwaltung", "Pfad zur Dokumentenverwaltung");
+        configuration = Global.Konfig("PfadDownloads", Global.Modus.Read, configuration);
+        configuration = Global.Konfig("PfadDokumentenverwaltung", Global.Modus.Update, configuration);
         
         var tableFoto = new Spectre.Console.Table();
         tableFoto.Expand();

@@ -106,7 +106,7 @@ public class Menüeintrag
         var klassen = Quelldateien.GetMatchingList(configuration, "klassen", IStudents, Klassen);
         if (klassen == null || !klassen.Any()) return new Datei(zielDateiname);
 
-        var quit = Global.Konfig("MaxDateiAlter", Global.Modus.Update, configuration, "Maximales Alter der eingelesenen Dateien", "");
+        var quit = Global.Konfig("MaxDateiAlter", Global.Modus.Update, configuration);
 
         throw new Exception("Fehler bei der Konfiguration des maximalen Alters der eingelesenen Dateien. Bitte überprüfen Sie die Eingabe.");
         /*
@@ -221,7 +221,7 @@ public class Menüeintrag
     {
         var interessierendeStudents = new Students();
 
-        Global.Konfig("Klassen", Global.Modus.Update, configuration, "", "", "", this.Students);
+        Global.Konfig("Klassen", Global.Modus.Update, configuration, "",-1,-1,"","",this.Students);
 
         var interessierendeKlassen = configuration["Klassen"].ToString().Split(",").ToList();
 
@@ -371,7 +371,7 @@ public class Menüeintrag
         if (!fach.Contains(" L")) return fach.Contains(" G") ? "GKS" : "PUK";
         var linkerTeil = fach.Split(' ')[0].TrimEnd();
         
-        configuration = Global.Konfig("Lk1faecher", Global.Modus.Read, configuration, "Fächer des 1.LKs", $"Gegen Sie kommasepariert die möglichen Fächer des 1.LKs an. Bitte nur die Fächer angeben, ohne 'LK' etc. Beispiel: D,BI,M,E", "D,BI,M,E");
+        configuration = Global.Konfig("Lk1faecher", Global.Modus.Read, configuration);
         var lk1faecher = configuration["Lk1faecher"].ToString().Split(',').Select(x => x.Trim()).ToList();
         return lk1faecher.Contains(linkerTeil) ? "LK1" : "LK2";
     }
@@ -389,15 +389,15 @@ public class Menüeintrag
         var konferenzdatum = DateTime.Now;
         var zeugnisdatum = DateTime.Now;
 
+        configuration = Global.Konfig("Abschnitt", Global.Modus.Read, configuration);
+        configuration = Global.Konfig("Abschnittswechsel", Global.Modus.Read, configuration);
+
         var zielDatei = new Datei(zieldateiname, new Datei(schuelerLernab));
 
         if (art != Global.Art.Statistik)
         {
             absencePerStud = Quelldateien.GetMatchingList(configuration, "absenceperstudent", IStudents, Klassen);
             if (absencePerStud == null || !absencePerStud.Any()) return [];
-
-            configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration, "Abschnitt", $"Geben Sie den Lernabschnitt an. Das Schuljahr beginnt immer mit Abschnitt [{Global.GetColor(Global.ColorZahlen)}]1[/]. \nI.d.R. wechselt der Abschnitt nach den Halbjahreszeugnissen auf Abschnitt [{Global.GetColor(Global.ColorZahlen)}]2[/].");
-            configuration = Global.Konfig("Abschnittswechsel", Global.Modus.Update, configuration, "Abschnittswechsel", $"Geben Sie das Datum des Abschnittswechsels an. \nI.d.R. ist der [{Global.GetColor(Global.ColorZahlen)}]{new DateTime(Convert.ToInt32(Global.AktSj[1]), 2, 1).ToShortDateString()}[/] (oder ein anderes Datum im Februar) der richtige Wert.", new DateTime(Convert.ToInt32(Global.AktSj[1]), 2, 1).ToShortDateString());
 
             // Wenn der Abschnittswechsel hinter uns liegt und gleichzeitig Fehlzeiten von vorher vorliegen, dann wird gefragt, ob die vorherigen Fehlzeiten berücksichtigt werden sollen. 
             var abschnittswechsel = DateTime.Parse(configuration["Abschnittswechsel"]);
@@ -413,7 +413,7 @@ public class Menüeintrag
                     }).Count();
 
                 if (alteFehlzeiten > 0)
-                    configuration = Global.Konfig("FehlzeitenVorDemAbschnittswechselBeruecksichtigen", Global.Modus.Update, configuration, $"Fehlzeiten vor dem {configuration["Abschnittswechsel"]} auf das Zeugnis? (j/n)", $"Sollen die Fehlzeiten vor dem Abschnittswechsel am [{Global.GetColor(Global.ColorZahlen)}]{abschnittswechsel.ToShortDateString()}[/] auf dem Zeugnis hinzugefügt werden?", "ja");
+                    configuration = Global.Konfig("FehlzeitenVorDemAbschnittswechselBeruecksichtigen", Global.Modus.Update, configuration);
 
 
                 // Wenn die Fehlzeiten vor dem Abschnittswechsel nicht berücksichtigt werden sollen, dann werden sie aus der Liste entfernt.
@@ -440,9 +440,7 @@ public class Menüeintrag
 
             if (ab > 0)
             {
-                configuration = Global.Konfig("OffeneFehlstunden", Global.Modus.Update, configuration,
-                "",
-                $"Es gibt [{Global.GetColor(Global.ColorHinweise)}]{ab}[/] offene Fehlstunden. Offene Fehlstunden sind weder entschuldigt noch unentschuldigt und werden im Zeugnis nicht berücksichtigt. Mit [{Global.GetColor(Global.ColorActionInMenüs)}]ENTER[/] geht es ohne die [{Global.GetColor(Global.ColorHinweise)}]{ab}[/] offenen Fehlstunden weiter. Abbruch mit [{Global.GetColor(Global.ColorFehler)}]ANYKEY[/].");                
+                configuration = Global.Konfig("OffeneFehlstunden", Global.Modus.Update, configuration);                
             }
 
 
@@ -459,12 +457,12 @@ public class Menüeintrag
                     throw new Exception("Ungültiger Abschnitt. Bitte geben Sie 1 oder 2 ein.");
             }
             
-            configuration = Global.Konfig($"{konferenzart}konferenzdatum", Global.Modus.Update, configuration, $"{konferenzart}konferenzdatum", $"Geben Sie das {konferenzart}konferenzdatum an. Das kann später in SchILD (mit einem Gruppenprozess) erneut geändert werden.");
-            konferenzdatum = DateTime.Parse(configuration[$"{konferenzart}konferenzdatum"]);
-            configuration = Global.Konfig($"{konferenzart}zeugnisdatum", Global.Modus.Update, configuration, $"{konferenzart}zeugnisdatum", $"Geben Sie das {konferenzart}zeugnisdatum an. Das kann später in SchILD (mit einem Gruppenprozess) erneut geändert werden.");
-            zeugnisdatum = DateTime.Parse(configuration[$"{konferenzart}zeugnisdatum"]);            
-            configuration = Global.Konfig("MaximaleAnzahlFehlstundenProTag", Global.Modus.Update, configuration, "Max. Unterrichtstunden pro Tag", $"Geben Sie maximale Anzahl der Unterrichtsstunden pro Tag an. \nWenn maximal 8 Stunden pro Tag unterrichtet werden, ist [{Global.GetColor(Global.ColorZahlen)}]8[/] ein guter Wert. Sollte die Anzahl der Fehlstunden pro Tag in Webuntis diesen Wert übersteigen, dann deutet das auf Fehlzeiten im Praktikum oder ein Fehlen bei einer ganztägigen Veranstaltung hin. Solche Fehlstunden (außerhalb von Unterricht) bleiben auf dem Zeugnis unberücksichtigt.");
-            configuration = Global.Konfig("FehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt", Global.Modus.Update, configuration, "Unberücksichtigte Fehltage", $"Geben Sie die Anzahl Tage vor der Zeugniskonferenz an, an denen Fehlzeiten unberücksichtigt bleiben. Wenn dieser Wert z.B. auf [{Global.GetColor(Global.ColorZahlen)}]3[/] gesetzt wird, wird verhindert, dass Schüler*innen eine Entschuldigung zwar unverzüglich, aber gleichzeitig erst nach der Zeugniskonferenz einreichen. Alternativ kann man den Wert auf [{Global.GetColor(Global.ColorZahlen)}]0[/] setzen und den Zeitraum des Exports der [{Global.GetColor(Global.ColorPfadInDateien)}]AbsencePerStudent[/] entsprechend einschränken.");
+            configuration = Global.Konfig($"Konferenzdatum", Global.Modus.Read, configuration);
+            konferenzdatum = DateTime.Parse(configuration["Konferenzdatum"]);
+            configuration = Global.Konfig($"Zeugnisdatum", Global.Modus.Read, configuration);
+            zeugnisdatum = DateTime.Parse(configuration["Zeugnisdatum"]);            
+            configuration = Global.Konfig("MaximaleAnzahlFehlstundenProTag", Global.Modus.Read, configuration);
+            configuration = Global.Konfig("FehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt", Global.Modus.Read, configuration);
         }
 
         var records = new List<dynamic>();
@@ -915,7 +913,7 @@ public class Menüeintrag
 
                 record.Jahr = Global.AktSj[0];
                 record.Abschnitt = configuration["Abschnitt"].ToString();
-                record.Jahrgang = string.Join(",", kurs.Jahrgaenge);
+                record.Jahrgang = ""; //kann leer bleiben
                 record.Fach = kurs.Fach;
                 record.Kursart = kurs.Kursart;
                 record.WochenstdPUNKT = kurs.Wochenstunden;
@@ -1012,7 +1010,7 @@ public class Menüeintrag
                 .ToList();        
     }
 
-    public Datei LeistungsdatenStatistik(IConfiguration configuration, string zieldateiname)
+    public Datei Leistungsdaten(IConfiguration configuration, string zieldateiname)
     {
         var zieldatei = new Datei(zieldateiname);
         
@@ -1038,11 +1036,8 @@ public class Menüeintrag
         {
             foreach (var klasse in IStudents.OrderBy(x => x.Klasse).Select(x => x.Klasse).Distinct())
             {
-
                 var isFirstRun = true;
-
                 var verschiedeneFaecherDerKlasse = VerschiedeneFaecher(klasse, gpu002);
-
                 var religionWurdeUnterrichtet = verschiedeneFaecherDerKlasse.Any(fach => new List<string>() { "rel", "kr", "er", "reli" }.Contains(fach.ToLower()));
 
                 foreach (var student in IStudents.OrderBy(x => x.Nachname).ThenBy(x => x.Vorname).Where(x => x.Klasse == klasse))
@@ -1933,7 +1928,7 @@ public class Menüeintrag
     {
         var dokuwikiZugriff = new DokuwikiZugriff(configuration);
 
-        Global.Konfig("WikiSprechtagKleineAenderung", Global.Modus.Update, configuration, "Handelt es sich um eine kleine Änderung? Kleine Änderungen erzeugen keine neue Version (j/n)", "");
+        Global.Konfig("WikiSprechtagKleineAenderung", Global.Modus.Update, configuration);
 
         dokuwikiZugriff.Options = new XmlRpcStruct
         {
@@ -1946,7 +1941,7 @@ public class Menüeintrag
         var exportLessons = Quelldateien.GetMatchingList(configuration, "exportlessons", IStudents, Klassen);
         if (exportLessons == null || !exportLessons.Any()) return;
 
-        Global.Konfig("Sprechtagsdatum", Global.Modus.Update, configuration, "Datum des Sprechtags angeben (tt.mm.jjjj)", "");
+        Global.Konfig("Sprechtagsdatum", Global.Modus.Update, configuration);
         //Global.Konfig("wikiSprechtagSeite", true, "Seite eingeben, die manipuliert werden soll.");
 
         hinweis = hinweis.Replace(" nach der allgemeinen Zeugnisausgabe", ", " + Global.Sprechtagsdatum + ",");
@@ -2643,8 +2638,8 @@ public class Menüeintrag
 
     public Datei Teilleistungen(IConfiguration configuration, string zieldateiname)
     {
-        configuration = Global.Konfig("Teilleistungsarten", Global.Modus.Update, configuration, "Welche Teilleistungsarten (kommagetrennt) sollen gezogen werden?", "Die Teilleistungsart(en) in Webuntis und in SchILD müssen identisch heißen. Ansonsten werden keine Teilleistungen nach SchILD importiert.", "Vornote,Abschluss-Schriftl.,Abschluss-Mündl.");
-        configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration, "Abschnitt angeben", $"Für welchen Abschnitt sollen die Teilleistungen ausgegeben werden?\nGeben die Ziffer [{Global.GetColor(Global.ColorZahlen)}]1[/] (1. Halbjahr) oder [{Global.GetColor(Global.ColorZahlen)}]2[/] (2. Halbjahr) an. ", "");
+        configuration = Global.Konfig("Teilleistungsarten", Global.Modus.Update, configuration);
+        configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration);
 
         var zieldatei = new Datei(zieldateiname);
         var records = new List<dynamic>();
@@ -2771,7 +2766,7 @@ public class Menüeintrag
         if (gpu004 == null) return [];
 
         if (nurDieseGründe == "")
-            configuration = Global.Konfig("LehrkraefteSonderzeiten", Global.Modus.Update, configuration, "Welche Anrechnungsgründe sollen ignoriert bzw. auf 0 gesetzt werden?", "", "098,099,007,360,160");
+            configuration = Global.Konfig("LehrkraefteSonderzeiten", Global.Modus.Update, configuration);
 
         var lehrers = lehrkraefte
             .Where(rec => ((IDictionary<string, object>)rec)["statistik-relevant"].ToString() == "J")
@@ -2849,7 +2844,7 @@ public class Menüeintrag
         }
 
         if (nurDieseGründe == "200")
-            configuration = Global.Konfig("VolleStelle", Global.Modus.Update, configuration, "Wie viele Stunden entsprechen einer vollen Stelle?", "", "25,5");
+            configuration = Global.Konfig("VolleStelle", Global.Modus.Update, configuration);
 
         foreach (var lehrerDyn in lehrers)
         {

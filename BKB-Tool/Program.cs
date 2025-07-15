@@ -40,16 +40,9 @@ do
 {
     try
     {
-        dateien = new Dateien();
-        if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), Global.User + ".json")))
-        {
-            configuration = Global.EinstellungenDurchlaufen(Global.Modus.Create, configuration);
-        }
-        else
-        {
-            configuration = Global.EinstellungenDurchlaufen(Global.Modus.Read, configuration);
-        }
-
+        dateien = new Dateien();        
+        configuration = Global.EinstellungenDurchlaufen(configuration);
+        
         CheckForUpdate(configuration);
         var table = new Table().Centered();
 
@@ -132,6 +125,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
         using var doc = System.Text.Json.JsonDocument.Parse(json);
         var releases = doc.RootElement.EnumerateArray();
         string githubVersion = null;
+        configuration = Global.Konfig("Schulnummer", Global.Modus.Read, configuration);
         bool allowPrerelease = configuration["Schulnummer"] == "000000";
 
         foreach (var release in releases)

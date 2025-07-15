@@ -348,7 +348,7 @@ public static class Global
         return sourceFile ?? string.Empty;
     }
 
-    public static IConfiguration Konfig(string parameter, Modus modus, IConfiguration configuration, string aufforderung = "", string hinweise = "", string defaultValue = "", Students? students = null, string zulässigeAuswahlOptionen = "")
+    public static IConfiguration Konfig(string parameter, Modus modus, IConfiguration configuration, string aufforderung = "", int lfdNrVon = -1, int bis = -1, string hinweise = "", string defaultValue = "", Students? students = null, string zulässigeAuswahlOptionen = "")
     {
         object userInput = "";
         Datentyp datentyp = Datentyp.String;
@@ -358,6 +358,7 @@ public static class Global
             if (string.IsNullOrWhiteSpace(aufforderung)) aufforderung = meta.Aufforderung;
             if (string.IsNullOrWhiteSpace(hinweise)) hinweise = meta.Hinweise;
             if (string.IsNullOrWhiteSpace(defaultValue) || defaultValue == "") defaultValue = meta.DefaultValue;
+            // Der Datentyp wird aus der KonfigMeta entnommen
             datentyp = meta.Datentyp;
         }
 
@@ -412,7 +413,7 @@ public static class Global
                 .Validate(n =>
                 {
                     if (n.ToLower() != "j" && n.ToLower() != "n" && n.ToLower() != "ja" && n.ToLower() != "nein")
-                        return ValidationResult.Error($"[bold aqua]  Sie müssen ja oder nein eintippen.[/]");
+                        return ValidationResult.Error($"  Sie müssen [{Global.GetColor(Global.ColorActionInMenüs)}]ja[/] oder [{Global.GetColor(Global.ColorFehler)}]nein[/] eintippen.");
                     return ValidationResult.Success();
                 }));
         }
@@ -660,7 +661,7 @@ public static class Global
                     {
                         if (!int.TryParse(n.ToString(), out _))
                         {
-                            return ValidationResult.Error($"[]  {n} ist keine Zahl[/]");
+                            return ValidationResult.Error($"[{Global.GetColor(Global.ColorFehler)}]  {n}[/] ist keine Zahl. Bitte eine Zahl eingeben.");
                         }
                         if (zulässigeAuswahlOptionen != "" && !zulässigeAuswahlOptionen.Contains(n.ToString()))
                         {
@@ -690,7 +691,7 @@ public static class Global
                     .Validate(n =>
                     {
                         if (!float.TryParse(n.ToString(), out _))
-                            return ValidationResult.Error($"[]  {n} ist keine Zahl[/]");
+                            return ValidationResult.Error($"  [{Global.GetColor(Global.ColorFehler)}]  {n}[/] ist keine Zahl.");
                         return ValidationResult.Success();
                     })
                 .DefaultValue<string>(defaultValue.ToString()));
@@ -763,7 +764,7 @@ public static class Global
                     {
                         if (!int.TryParse(n.ToString(), out _))
                         {
-                            return ValidationResult.Error($"[]  {n} ist keine Zahl[/]");
+                            return ValidationResult.Error($"[{Global.GetColor(Global.ColorFehler)}]  {n}[/] ist keine Zahl. Bitte eine Zahl eingeben.");
                         }
                         else
                         {
@@ -836,7 +837,7 @@ public static class Global
         }
     }
 
-    public static IConfiguration EinstellungenDurchlaufen(Modus modus, IConfiguration configuration)
+    public static IConfiguration EinstellungenDurchlaufen(IConfiguration configuration, Global.Modus modus = Global.Modus.Read)
     {
         // Wenn User.json noch nicht existiert, dann erstellen
         if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), Global.User + ".json")))
@@ -886,16 +887,7 @@ public static class Global
         {
 
             DisplayHeader(configuration);
-            configuration = Global.Konfig("ZustimmungLizenz", Global.Modus.Update, configuration, $"[] Ich stimme den Lizenzbedingungen der GPLv3 zu. (Ja/Nein)[/]",
-            $"[bold {Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] steht unter der GNU General Public License Version 3 (GPLv3). " +
-            "Die GPLv3 ist eine freie Softwarelizenz, die es Ihnen erlaubt, die Software zu verwenden, zu modifizieren und weiterzugeben, solange Sie die Bedingungen der Lizenz einhalten. " +
-            "Die wichtigsten Bedingungen dieser Lizenz sind:\n" +
-            $"[{Global.GetColor(Global.ColorHinweise)}]Freiheit zur Nutzung, Änderung und Weiterverbreitung:[/] Sie dürfen diese Software frei verwenden, anpassen und weitergeben, solange alle abgeleiteten Werke ebenfalls unter der GPLv3 stehen.\n" +
-            $"[{Global.GetColor(Global.ColorHinweise)}]Keine Garantie:[/] Diese Software wird \"wie sie ist\" bereitgestellt, ohne jede ausdrückliche oder stillschweigende Gewährleistung, insbesondere ohne Garantie auf Fehlerfreiheit oder Eignung für einen bestimmten Zweck.\n" +
-            $"[{Global.GetColor(Global.ColorHinweise)}]Keine Haftung:[/] Der Entwickler haftet nicht für direkte oder indirekte Schäden, Datenverluste oder andere Konsequenzen, die durch die Nutzung oder Fehlfunktion dieser Software entstehen.\n" +
-            $"[{Global.GetColor(Global.ColorHinweise)}]Verwendung auf eigene Gefahr:[/] Die Nutzung erfolgt ausschließlich auf eigenes Risiko.\n" +
-            $"[{Global.GetColor(Global.ColorHinweise)}]Vollständige Lizenz:[/] Vollständige Lizenzbedingungen unter [lightskyblue3_1 link=https://www.gnu.org/licenses/gpl-3.0.de.html]https://www.gnu.org/licenses/gpl-3.0.de.html[/]."
-            , "", null, "Ja");
+            configuration = Global.Konfig("ZustimmungLizenz", Global.Modus.Read, configuration);
         }
 
         DisplayHeader(configuration);
@@ -906,11 +898,18 @@ public static class Global
             $"Dateien (aus Webuntis etc.), die [bold {Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] importieren soll, werden aus [{Global.GetColor(Global.ColorPfadInDateien)}]" + configuration["PfadDownloads"] + "[/] eingelesen."
         };
 
+        var kon = KonfigMetadaten.Where(e =>
+            e.Value.InitialAbfragen == true || // nur solche, die initial abgefragt werden sollen
+            (
+                e.Value.InGrundeinstellungAbfragen == true && // nur solche, die in Grundeinstellung abgefragt werden sollen
+                configuration[e.Key] != null && // nur solche, die in der Konfiguration gespeichert sind
+                configuration[e.Key] != ""
+            )).ToList();
+
         // Durchlaufe alle Einstellungen gemäß KonfigHelper
-        foreach (var eintrag in KonfigMetadaten)
+        for(var i = 0; i < kon.Count(); i++)
         {
-            if (modus == Modus.Read || eintrag.Value.InGrundeinstellungAbfragen == false) { continue; }
-            configuration = Konfig(eintrag.Key, modus, configuration, eintrag.Value.Aufforderung, eintrag.Value.Hinweise, eintrag.Value.DefaultValue);
+            configuration = Konfig(kon[i].Key, modus, configuration, kon[i].Value.Aufforderung, i+1, kon.Count(), kon[i].Value.Hinweise, kon[i].Value.DefaultValue);
             DisplayHeader(configuration, panel);
         }
 
@@ -923,82 +922,85 @@ public static class Global
 
         return new
         {
-            ConnectionStringUntis = Verschluesseln(Environment.GetEnvironmentVariable("UNTIS_CONNECTION_STRING") ?? ""),
-            Dokumentenverwaltung = Verschluesseln(@"\\fs01\SchILD-NRW\Dokumentenverwaltung"),
-            Schulnummer = Verschluesseln("177659" ?? ""),
-            SchipsPasswort = Verschluesseln(Environment.GetEnvironmentVariable("SCHIPS_PASSWORD") ?? ""),
-            ZeugnisPasswort = Verschluesseln(Environment.GetEnvironmentVariable("ZEUGNIS_PASSWORD") ?? ""),
-            SmtpPassword = Verschluesseln(Environment.GetEnvironmentVariable("SMTP_PASSWORD") ?? ""),
-            AccessPassword = Verschluesseln(Environment.GetEnvironmentVariable("ACCESS_PASSWORD") ?? ""),
-            SmtpPasswordMassenmail = Verschluesseln(Environment.GetEnvironmentVariable("SMTP_PASSWORD_MASSENMAIL") ?? ""),
-            ZeugnisUrl = Verschluesseln("https://bkb.wiki/notenlisten:start"),
-            SchipsUrl = Verschluesseln("https://bkb.wiki/statistik:schips:start"),
-            PdfKennwort = Verschluesseln(Environment.GetEnvironmentVariable("PDF_PASSWORD") ?? ""),
-            SchipsOderZeugnisseOderAnderePdfs = Verschluesseln("1"),
-            PfadDownloads = Verschluesseln(Environment.GetEnvironmentVariable("DOWNLOADS_PATH") ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads")),
-            PfadSchilddatenaustausch,
-            PfadFotosAusSchILD = "",
-            Kalenderfilter = Verschluesseln(""),
-            Auswahl = "e",
-            OnlineHilfeURL = Verschluesseln("https://github.com/stbaeumer/BKB-Tool/wiki"),
             ZustimmungLizenz = "nein",
-            AppName = Verschluesseln("BKB-Tool"),
-            AppVersion = Verschluesseln("1.0.0"),
-            AppDescription = Verschluesseln("BKB-Tool - Ein Werkzeug an der Schnittstelle zwischen SchILD und Webuntis."),
-            Klassen = Verschluesseln("HBG"),
-            Vergleich = Verschluesseln("n"),
-            Kennwort = Verschluesseln(""),
-            InputFolder = Verschluesseln(""),
-            OutputFolder = Verschluesseln(""),
-            Halbjahreszeugnisdatum = Verschluesseln(new DateTime(Convert.ToInt32(Global.AktSj[1]), 02, 01).ToString("dd.MM.yyyy")),
-            Halbjahreskonferenzdatum = Verschluesseln(new DateTime(Convert.ToInt32(Global.AktSj[1]), 02, 01).ToString("dd.MM.yyyy")),
-            Abschnittswechsel = Verschluesseln(new DateTime(Convert.ToInt32(Global.AktSj[1]), 02, 01).ToString("dd.MM.yyyy")),
-            Jahreszeugnisdatum = Verschluesseln(DateTime.Now.ToString("dd.MM.yyyy")),
-            Jahreskonferenzdatum = Verschluesseln(DateTime.Now.ToString("dd.MM.yyyy")),
-            Sprechtagsdatum = Verschluesseln(DateTime.Now.ToString("dd.MM.yyyy")),
-            WikiUrl = Verschluesseln("http://192.168.134.10/lib/exe/xmlrpc.php"),
-            WikiJsonUser = Verschluesseln("root"),
-            WikiJsonUserKennwort = Verschluesseln(""),
-            WikiSprechtagKleineAenderung = Verschluesseln(""),
-            Zaehlerfach = Verschluesseln("j"),
-            MariaUser = Verschluesseln(""),
-            MariaIp = Verschluesseln(""),
-            MariaPort = Verschluesseln(""),
-            MariaDb = Verschluesseln(""),
-            MariaPw = Verschluesseln(""),
-            FehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt = Verschluesseln("3"),
-            MaximaleAnzahlFehlstundenProTag = Verschluesseln("8"),
-            Abschnitt = Verschluesseln("1"),
-            Chat = Verschluesseln(""),
-            AusbuchenNachWievielTagen = Verschluesseln(""),
-            DatenimportLetztesDatum = Verschluesseln(DateTime.Now.ToString("dd.MM.yyyy")),
-            MaxDateiAlter = Verschluesseln("3"),
-            AktSj = Verschluesseln(""),
-            Klasse = Verschluesseln(""),
-            MailDomain = Verschluesseln("@students.berufskolleg-borken.de"),
-            ZipKennwort = Verschluesseln("Geheim123"),
-            EinstellungenVorgenommen = Verschluesseln("n"),
-            SmtpServer = Verschluesseln("smtp.office365.com"),
-            SmtpUser = Verschluesseln("webuntis@berufskolleg-borken.de"),
-            SmtpPort = Verschluesseln("587"),
-            NetmanMailReceiver = Verschluesseln("stefan.baeumer@berufskolleg-borken.de"),
-            NetmanMailBccReceiver = Verschluesseln("catrin.stakenkoetter@berufskolleg-borken.de"),
-            Betreff = Verschluesseln("Betreff"),
-            Body = Verschluesseln("Guten Morgen #Lehrer#,\n\nbitte beachten Sie den Anhang.\n\nErläuterungen dazu finden Sie hier: https://bkb.wiki/konzepte:stundenplanungskonzept#information_aller_lehrkraefte_per_mail \n\nViele Grüße aus der Schulverwaltung"),
-            AccessPfad = Verschluesseln(@"\\fs01\SchILD-NRW\DB\Test.mdb"),
-            PdfInputFolder = Verschluesseln(@"PDF-Input"),
-            PdfOutputFolder = Verschluesseln(@"PDF-Output"),
-            PfadDokumentenverwaltung = Verschluesseln(@"\\fs01\SchILD-NRW\Dokumentenverwaltung"),
-            BodyMassenmail = Verschluesseln("Guten Morgen #Lehrer#,\n\nbitte beachten Sie den Anhang.\n\nErläuterungen dazu finden Sie hier: https://bkb.wiki/konzepte:stundenplanungskonzept#information_aller_lehrkraefte_per_mail \n\nViele Grüße aus der Schulverwaltung"),
-            Verbose = Verschluesseln("false"),
-            SmtpUserMassenmail = Verschluesseln("campusfest@berufskolleg-borken.de"),
-            SmtpServerMassenmail = Verschluesseln("smtp-hve.office365.com"),
-            BetreffMassenmail = Verschluesseln("Save the date: Campusfest am Berufskolleg Borken"),
-            Schlüsselwörter = Verschluesseln("Jahreszeugnis, Abschlusszeugnis, Abgangszeugnis, Zeugnis"),
-            Teilleistungsarten = Verschluesseln("Vornote,Abschluss-Schriftl."),
-            LehrkraefteSonderzeiten = Verschluesseln(""),
-            VolleStelle = Verschluesseln("25,5"),
-            Lk1faecher = Verschluesseln("D,BI,M,E")
+/*
+                        ConnectionStringUntis = Verschluesseln(Environment.GetEnvironmentVariable("UNTIS_CONNECTION_STRING") ?? ""),
+                        Dokumentenverwaltung = Verschluesseln(@"\\fs01\SchILD-NRW\Dokumentenverwaltung"),
+                        Schulnummer = Verschluesseln("177659" ?? ""),
+                        SchipsPasswort = Verschluesseln(Environment.GetEnvironmentVariable("SCHIPS_PASSWORD") ?? ""),
+                        ZeugnisPasswort = Verschluesseln(Environment.GetEnvironmentVariable("ZEUGNIS_PASSWORD") ?? ""),
+                        SmtpPassword = Verschluesseln(Environment.GetEnvironmentVariable("SMTP_PASSWORD") ?? ""),
+                        AccessPassword = Verschluesseln(Environment.GetEnvironmentVariable("ACCESS_PASSWORD") ?? ""),
+                        SmtpPasswordMassenmail = Verschluesseln(Environment.GetEnvironmentVariable("SMTP_PASSWORD_MASSENMAIL") ?? ""),
+                        ZeugnisUrl = Verschluesseln("https://bkb.wiki/notenlisten:start"),
+                        SchipsUrl = Verschluesseln("https://bkb.wiki/statistik:schips:start"),
+                        PdfKennwort = Verschluesseln(Environment.GetEnvironmentVariable("PDF_PASSWORD") ?? ""),
+                        SchipsOderZeugnisseOderAnderePdfs = Verschluesseln("1"),
+                        PfadDownloads = Verschluesseln(Environment.GetEnvironmentVariable("DOWNLOADS_PATH") ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads")),
+                        PfadSchilddatenaustausch,
+                        PfadFotosAusSchILD = "",
+                        Kalenderfilter = Verschluesseln(""),
+                        Auswahl = "e",
+                        OnlineHilfeURL = Verschluesseln("https://github.com/stbaeumer/BKB-Tool/wiki"),
+
+                        AppName = Verschluesseln("BKB-Tool"),
+                        AppVersion = Verschluesseln("1.0.0"),
+                        AppDescription = Verschluesseln("BKB-Tool - Ein Werkzeug an der Schnittstelle zwischen SchILD und Webuntis."),
+                        Klassen = Verschluesseln("HBG"),
+                        Vergleich = Verschluesseln("n"),
+                        Kennwort = Verschluesseln(""),
+                        InputFolder = Verschluesseln(""),
+                        OutputFolder = Verschluesseln(""),
+                        Halbjahreszeugnisdatum = Verschluesseln(new DateTime(Convert.ToInt32(Global.AktSj[1]), 02, 01).ToString("dd.MM.yyyy")),
+                        Halbjahreskonferenzdatum = Verschluesseln(new DateTime(Convert.ToInt32(Global.AktSj[1]), 02, 01).ToString("dd.MM.yyyy")),
+                        Abschnittswechsel = Verschluesseln(new DateTime(Convert.ToInt32(Global.AktSj[1]), 02, 01).ToString("dd.MM.yyyy")),
+                        Jahreszeugnisdatum = Verschluesseln(DateTime.Now.ToString("dd.MM.yyyy")),
+                        Jahreskonferenzdatum = Verschluesseln(DateTime.Now.ToString("dd.MM.yyyy")),
+                        Sprechtagsdatum = Verschluesseln(DateTime.Now.ToString("dd.MM.yyyy")),
+                        WikiUrl = Verschluesseln("http://192.168.134.10/lib/exe/xmlrpc.php"),
+                        WikiJsonUser = Verschluesseln("root"),
+                        WikiJsonUserKennwort = Verschluesseln(""),
+                        WikiSprechtagKleineAenderung = Verschluesseln(""),
+                        Zaehlerfach = Verschluesseln("j"),
+                        MariaUser = Verschluesseln(""),
+                        MariaIp = Verschluesseln(""),
+                        MariaPort = Verschluesseln(""),
+                        MariaDb = Verschluesseln(""),
+                        MariaPw = Verschluesseln(""),
+                        FehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt = Verschluesseln("3"),
+                        MaximaleAnzahlFehlstundenProTag = Verschluesseln("8"),
+                        Abschnitt = Verschluesseln("1"),
+                        Chat = Verschluesseln(""),
+                        AusbuchenNachWievielTagen = Verschluesseln(""),
+                        DatenimportLetztesDatum = Verschluesseln(DateTime.Now.ToString("dd.MM.yyyy")),
+                        MaxDateiAlter = Verschluesseln("3"),
+                        AktSj = Verschluesseln(""),
+                        Klasse = Verschluesseln(""),
+                        MailDomain = Verschluesseln("@students.berufskolleg-borken.de"),
+                        ZipKennwort = Verschluesseln("Geheim123"),
+                        EinstellungenVorgenommen = Verschluesseln("n"),
+                        SmtpServer = Verschluesseln("smtp.office365.com"),
+                        SmtpUser = Verschluesseln("webuntis@berufskolleg-borken.de"),
+                        SmtpPort = Verschluesseln("587"),
+                        NetmanMailReceiver = Verschluesseln("stefan.baeumer@berufskolleg-borken.de"),
+                        NetmanMailBccReceiver = Verschluesseln("catrin.stakenkoetter@berufskolleg-borken.de"),
+                        Betreff = Verschluesseln("Betreff"),
+                        Body = Verschluesseln("Guten Morgen #Lehrer#,\n\nbitte beachten Sie den Anhang.\n\nErläuterungen dazu finden Sie hier: https://bkb.wiki/konzepte:stundenplanungskonzept#information_aller_lehrkraefte_per_mail \n\nViele Grüße aus der Schulverwaltung"),
+                        AccessPfad = Verschluesseln(@"\\fs01\SchILD-NRW\DB\Test.mdb"),
+                        PdfInputFolder = Verschluesseln(@"PDF-Input"),
+                        PdfOutputFolder = Verschluesseln(@"PDF-Output"),
+                        PfadDokumentenverwaltung = Verschluesseln(@"\\fs01\SchILD-NRW\Dokumentenverwaltung"),
+                        BodyMassenmail = Verschluesseln("Guten Morgen #Lehrer#,\n\nbitte beachten Sie den Anhang.\n\nErläuterungen dazu finden Sie hier: https://bkb.wiki/konzepte:stundenplanungskonzept#information_aller_lehrkraefte_per_mail \n\nViele Grüße aus der Schulverwaltung"),
+                        Verbose = Verschluesseln("false"),
+                        SmtpUserMassenmail = Verschluesseln("campusfest@berufskolleg-borken.de"),
+                        SmtpServerMassenmail = Verschluesseln("smtp-hve.office365.com"),
+                        BetreffMassenmail = Verschluesseln("Save the date: Campusfest am Berufskolleg Borken"),
+                        Schlüsselwörter = Verschluesseln("Jahreszeugnis, Abschlusszeugnis, Abgangszeugnis, Zeugnis"),
+                        Teilleistungsarten = Verschluesseln("Vornote,Abschluss-Schriftl."),
+                        LehrkraefteSonderzeiten = Verschluesseln(""),
+                        VolleStelle = Verschluesseln("25,5"),
+                        Lk1faecher = Verschluesseln("D,BI,M,E")
+              */
         };
     }
 
@@ -1029,7 +1031,7 @@ public static class Global
 
         if (weiter.Key == ConsoleKey.E)
         {
-            configuration = EinstellungenDurchlaufen(Modus.Update, configuration);
+            configuration = EinstellungenDurchlaufen(configuration);
             return;
         }
 
@@ -1060,8 +1062,8 @@ public static class Global
     {
         do
         {
-            configuration = Global.Konfig("AccessPfad", Global.Modus.Read, configuration, "Pfad zur Access-Datenbank", "");
-            configuration = Global.Konfig("AccessPassword", Global.Modus.Read, configuration, "Passwort zur Access-Datenbank");
+            configuration = Global.Konfig("AccessPfad", Global.Modus.Read, configuration);
+            configuration = Global.Konfig("AccessPassword", Global.Modus.Read, configuration);
 
             DateTime[] releases =
             {
@@ -1210,7 +1212,13 @@ public class KonfigMeta
     public string Hinweise { get; set; }
     public Global.Datentyp Datentyp { get; set; }
     public Global.NurBeiDiesenSchulnummern NurBeiDiesenSchulnummern { get; internal set; }
+
+    /// <summary>
+    /// Sobald der Wert in die json aufgenommen wurde, wird er in den Grundenstellungen immer wieder abgefragt.
+    /// Wenn der Wert nicht in den Grundeinstellungen abgefragt werden soll, dann auf false     
+    /// </summary>
     public bool InGrundeinstellungAbfragen { get; internal set; }
+    public bool InitialAbfragen { get; internal set; }
 }
 
 public static class KonfigHelper
@@ -1248,6 +1256,7 @@ public static class KonfigHelper
             Hinweise = "Kurze Beschreibung der Anwendung.",
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = false,
+            InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
         },
         ["Abschnitt"] = new KonfigMeta
@@ -1258,6 +1267,7 @@ public static class KonfigHelper
             Hinweise = $"Geben Sie den Lernabschnitt an. Das Schuljahr beginnt immer mit Abschnitt [{Global.GetColor(Global.ColorZahlen)}]1[/]. I.d.R. wechselt der Abschnitt nach den Halbjahreszeugnissen auf Abschnitt [{Global.GetColor(Global.ColorZahlen)}]2[/].",
             Datentyp = Global.Datentyp.Abschnitt,
             InGrundeinstellungAbfragen = true,
+            InitialAbfragen = true,
             NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
         },
         ["Abschnittswechsel"] = new KonfigMeta
@@ -1267,17 +1277,41 @@ public static class KonfigHelper
             Aufforderung = "Abschnittswechsel",
             Hinweise = $"Geben Sie das Datum des Abschnittswechsels an. I.d.R. ist der [{Global.GetColor(Global.ColorZahlen)}]{new DateTime(DateTime.Now.Month > 7 ? DateTime.Now.Year + 1 : DateTime.Now.Year, 2, 1).ToShortDateString()}[/] (oder ein anderes Datum im Februar) der richtige Wert.",
             Datentyp = Global.Datentyp.DateTime,
-            InGrundeinstellungAbfragen = false,
+            InGrundeinstellungAbfragen = true,
+            InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
         },
-        ["InteressierendeUnterrichtsgruppen"] = new KonfigMeta
+        ["AccessPfad"] = new KonfigMeta
         {
-            Key = "InteressierendeUnterrichtsgruppen",
-            DefaultValue = "",
-            Aufforderung = "Interessierende Unterrichtsgruppen",
-            Hinweise = $"Geben Sie kommasepariert alle Unterrichtsgruppen an, die am Stichtag anwesend sein werden. Groß- und Kleinschreibung beachten!",
-            Datentyp = Global.Datentyp.ListString,
+            Key = "AccessPfad",
+            DefaultValue = "1",
+            Aufforderung = "Access-Pfad",
+            Hinweise = $"Geben Sie den Pfad zur Access-Datenbank an.",
+            Datentyp = Global.Datentyp.Pfad,
+            InGrundeinstellungAbfragen = true,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },
+        ["AccessPassword"] = new KonfigMeta
+        {
+            Key = "AccessPassword",
+            DefaultValue = "1",
+            Aufforderung = "Access-Kennwort",
+            Hinweise = $"Geben Sie das Kennwort der Access-Datenbank an. Das ist nicht der Login zu SchILD, sondern das Kennwort der Access-Datenbank selbst.",
+            Datentyp = Global.Datentyp.String,
+            InGrundeinstellungAbfragen = true,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },
+        ["Auswahl"] = new KonfigMeta
+        {
+            Key = "Auswahl",
+            DefaultValue = "1",
+            Aufforderung = "Auswahl",
+            Hinweise = $"Geben Sie eine [bold {Global.GetColor(Global.ColorTextHervorheben)}]Ziffer[/] ein oder [bold {Global.GetColor(Global.ColorTextHervorheben)}]e[/] für Einstellungen oder [bold {Global.GetColor(Global.ColorTextHervorheben)}]h[/] für Onlinehilfe",
+            Datentyp = Global.Datentyp.Auswahl,
             InGrundeinstellungAbfragen = false,
+            InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
         },
         ["Betreff"] = new KonfigMeta
@@ -1288,6 +1322,7 @@ public static class KonfigHelper
             Hinweise = $"Geben Sie den Betreff an.",
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = false,
+            InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
         },
         ["BccAdresse"] = new KonfigMeta
@@ -1298,6 +1333,7 @@ public static class KonfigHelper
             Hinweise = $"Geben Sie BCC-Adresse an. Geben Sie ein Leerzeichen ein, wenn Sie keine BCC-Adresse wünschen.",
             Datentyp = Global.Datentyp.Mail,
             InGrundeinstellungAbfragen = false,
+            InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
         },
         ["Body"] = new KonfigMeta
@@ -1307,7 +1343,8 @@ public static class KonfigHelper
             Aufforderung = "Geben Sie Nachricht ein.",
             Hinweise = $"Geben Sie Nachricht ein. Geben Sie \\n ein, um einen Zeilenumbruch zu erzeugen. geben Sie #Lehrer# als Platzhalter für den Namen des Lehrers ein. Der Name wird dann automatisch ersetzt.",
             Datentyp = Global.Datentyp.String,
-            InGrundeinstellungAbfragen = false,
+            InGrundeinstellungAbfragen = true,
+            InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
         },
         ["ConnectionStringSchild"] = new KonfigMeta
@@ -1317,7 +1354,8 @@ public static class KonfigHelper
             Aufforderung = "ConnectionString für SchILD",
             Hinweise = "Geben Sie den ConnectionString für SchILD an (optional).",
             Datentyp = Global.Datentyp.String,
-            InGrundeinstellungAbfragen = false,
+            InGrundeinstellungAbfragen = true,
+            InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
         },
         ["ConnectionStringWebuntis"] = new KonfigMeta
@@ -1327,7 +1365,8 @@ public static class KonfigHelper
             Aufforderung = "ConnectionString für Webuntis",
             Hinweise = "Geben Sie den ConnectionString für Webuntis an (optional).",
             Datentyp = Global.Datentyp.String,
-            InGrundeinstellungAbfragen = false,
+            InGrundeinstellungAbfragen = true,
+            InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
         },
         ["ConnectionStringUntis"] = new KonfigMeta
@@ -1337,7 +1376,30 @@ public static class KonfigHelper
             Aufforderung = "ConnectionStringUntis (optional)",
             Hinweise = "Bitte geben Sie den ConnectionString für Untis an (optional).",
             Datentyp = Global.Datentyp.String,
+            InGrundeinstellungAbfragen = true,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },
+        ["FehlzeitenVorDemAbschnittswechselBeruecksichtigen"] = new KonfigMeta
+        {
+            Key = "FehlzeitenVorDemAbschnittswechselBeruecksichtigen",
+            DefaultValue = "Nein",
+            Aufforderung = $"Fehlzeiten vor dem Abschnittswechsel auf das Zeugnis? (j/n)",
+            Hinweise = $"Sollen die Fehlzeiten vor dem Abschnittswechsel auf dem Zeugnis hinzugefügt werden?",
+            Datentyp = Global.Datentyp.JaNein,
             InGrundeinstellungAbfragen = false,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },
+        ["InteressierendeUnterrichtsgruppen"] = new KonfigMeta
+        {
+            Key = "InteressierendeUnterrichtsgruppen",
+            DefaultValue = "1.HJ,U",
+            Aufforderung = "Interessierende Unterrichtsgruppen",
+            Hinweise = $"Geben Sie kommasepariert alle Unterrichtsgruppen an, die am Stichtag anwesend sein werden. Groß- und Kleinschreibung beachten!\nUnterrichte ohne Unterrichtsgrupe werden immer berücksichtigt.",
+            Datentyp = Global.Datentyp.ListString,
+            InGrundeinstellungAbfragen = true,
+            InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
         },
         ["Klassen"] = new KonfigMeta
@@ -1348,6 +1410,54 @@ public static class KonfigHelper
             Hinweise = $"Geben Sie die interessierende(n) Klasse(n) an. Mehrere Klassen sind mit Komma zu trennen. Es können auch Namensteile von Klassen angegeben werden, wordurch alle Klassen gewählt werden, deren Klassenname den Namensteil enthält. Alle Klassen werden mit dem Wort [bold springGreen2]alle[/] gewählt.",
             Datentyp = Global.Datentyp.Klassen,
             InGrundeinstellungAbfragen = false,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },
+        ["Konferenzdatum"] = new KonfigMeta
+        {
+            Key = "Konferenzdatum",
+            DefaultValue = "",
+            Aufforderung = "Konferenzdatum",
+            Hinweise = $"Geben Sie das Konferenzdatum an. Das kann später in SchILD (mit einem Gruppenprozess) erneut geändert werden.",
+            Datentyp = Global.Datentyp.DateTime,
+            InGrundeinstellungAbfragen = false,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },
+        ["Kursarten"] = new KonfigMeta
+        {
+            Key = "Kursarten",
+            DefaultValue = " G, L, A, Z, V, P",
+            Aufforderung = "Kursarten",
+            Hinweise = $"Geben Sie im Folgenden an, wie sich bei Ihnen die Kursarten aus den Fächern ableiten lassen. Wenn Ihre LKs beispielsweise so aussehen: [{Global.GetColor(Global.ColorHinweise)}]M L1, D L2, E L1[/], dann geben Sie hier für LKs (inkl. führendes Leerzeichen) '[{Global.GetColor(Global.ColorHinweise)}] L[/]' an." +
+            $"\nDie Kursarten in SchILD sind: [{Global.GetColor(Global.ColorHinweise)}]GK, LK, AB, ZK, VTF, PJK[/]" +
+            $"\nIhre vollständige Eingabe könnte also so aussehen: [{Global.GetColor(Global.ColorActionInMenüs)}] G, L, A, Z, V, P[/]." +
+            $"\nWenn Sie die automatische Zuordnung nicht nutzen möchten, weil Sie z.B. keine Kurse nutzen, geben Sie weniger als 5 Kommas ein.",
+            Datentyp = Global.Datentyp.String,
+            InGrundeinstellungAbfragen = true,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },
+        ["Lk1faecher"] = new KonfigMeta
+        {
+            Key = "Lk1faecher",
+            DefaultValue = "D,BI,M,E",
+            Aufforderung = "Fächer des 1.LKs",
+            Hinweise = $"Geben Sie kommasepariert die möglichen Fächer des 1.LKs an. Bitte nur die Fächer angeben, ohne 'LK' etc. Beispiel: [{Global.GetColor(Global.ColorActionInMenüs)}]D,BI,M,E[/]",
+            Datentyp = Global.Datentyp.Maildomain,
+            InGrundeinstellungAbfragen = false,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },
+        ["LehrkraefteSonderzeiten"] = new KonfigMeta
+        {
+            Key = "LehrkraefteSonderzeiten",
+            DefaultValue = "D,BI,M,E",
+            Aufforderung = "098,099,007,360,160",
+            Hinweise = "Welche Anrechnungsgründe sollen ignoriert bzw. auf 0 gesetzt werden?",
+            Datentyp = Global.Datentyp.ListInt,
+            InGrundeinstellungAbfragen = false,
+            InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
         },
         ["MailDomain"] = new KonfigMeta
@@ -1357,7 +1467,8 @@ public static class KonfigHelper
             Aufforderung = "Mail-Domain",
             Hinweise = $"Geben Sie die schulische Mail-Domain für Mailadressen der Schüler*innen an. Bsp: [{Global.GetColor(Global.ColorHyperlink)}]@students.berufskolleg-borken.de[/]. Ihre Eingabe muss mit [{Global.GetColor(Global.ColorHyperlink)}]@[/] beginnen und mit [{Global.GetColor(Global.ColorHyperlink)}].de[/] etc. enden.",
             Datentyp = Global.Datentyp.Maildomain,
-            InGrundeinstellungAbfragen = false,
+            InGrundeinstellungAbfragen = true,
+            InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
         },
         ["PdfKennwort"] = new KonfigMeta
@@ -1367,7 +1478,8 @@ public static class KonfigHelper
             Aufforderung = "PDF-Kennwort",
             Hinweise = $"Geben Sie optional ein Kennwort für PDF-Dateien an, die Sie mit [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] erstellen möchten. Das Kennwort wird für alle PDF-Dateien verwendet, die Sie mit [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] erstellen. Wenn Sie kein Kennwort wünschen, dann ein Leerzeichen eingeben.",
             Datentyp = Global.Datentyp.String,
-            InGrundeinstellungAbfragen = false,
+            InGrundeinstellungAbfragen = true,
+            InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
         },
         ["MaxDateiAlter"] = new KonfigMeta
@@ -1378,8 +1490,20 @@ public static class KonfigHelper
             Hinweise = $"Geben Sie an, wie viele Tage Dateien höchstens alt sein dürfen, um vom [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] für das Einlesen akzeptiert zu werden.",
             Datentyp = Global.Datentyp.Int,
             InGrundeinstellungAbfragen = true,
+            InitialAbfragen = true,
             NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
         },
+        ["OffeneFehlstunden"] = new KonfigMeta
+        {
+            Key = "OffeneFehlstunden",
+            DefaultValue = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"),
+            Aufforderung = "Downloads-Verzeichnis",
+            Hinweise = $"Es gibt offene Fehlstunden. Offene Fehlstunden sind weder entschuldigt noch unentschuldigt und werden im Zeugnis nicht berücksichtigt. Mit [{Global.GetColor(Global.ColorActionInMenüs)}]ENTER[/] geht es ohne Berücksichtigung der offenen Fehlstunden weiter. Abbruch mit [{Global.GetColor(Global.ColorFehler)}]ANYKEY[/].",
+            Datentyp = Global.Datentyp.JaNein,
+            InGrundeinstellungAbfragen = false,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        }, 
         ["PfadDownloads"] = new KonfigMeta
         {
             Key = "PfadDownloads",
@@ -1388,16 +1512,18 @@ public static class KonfigHelper
             Hinweise = "Geben Sie den Pfad des Downloads-Verzeichnisses an. In der Regel wird das Verzeichnis bereits richtig vorgeschlagen. Dann einfach [bold springGreen2]ENTER[/] drücken:",
             Datentyp = Global.Datentyp.Pfad,
             InGrundeinstellungAbfragen = true,
+            InitialAbfragen = true,
             NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
         },
         ["PfadSchilddatenaustausch"] = new KonfigMeta
         {
             Key = "PfadSchilddatenaustausch",
-            DefaultValue = "",
+            DefaultValue = $"\\\\fs01\\SchILD-NRW\\Ausgabeverzeichnis",
             Aufforderung = "SchILD-Ausgabeverzeichnis",
             Hinweise = $"Geben Sie das Verzeichnis an, das in SchILD unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Datenaustausch > Schnittstelle SchILD-NRW > Export[/] als [{Global.GetColor(Global.ColorPfadInProgrammen)}]Ausgabeverzeichnis[/] eingetragen ist.",
             Datentyp = Global.Datentyp.Pfad,
             InGrundeinstellungAbfragen = true,
+            InitialAbfragen = true,
             NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
         },
         ["PfadDokumentenverwaltung"] = new KonfigMeta
@@ -1408,6 +1534,7 @@ public static class KonfigHelper
             Hinweise = $"Geben Sie das Verzeichnis an, das in SchILD unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Extras > Programmeinstellungen > Globale Einstellungen > Dokumentenverwaltung[/] als [{Global.GetColor(Global.ColorPfadInProgrammen)}]Dokumentenverzeichnis[/] eingetragen ist.",
             Datentyp = Global.Datentyp.Pfad,
             InGrundeinstellungAbfragen = true,
+            InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
         },
         ["PfadFotosAusSchILD"] = new KonfigMeta
@@ -1418,17 +1545,52 @@ public static class KonfigHelper
             Hinweise = $"Exportieren Sie die Schülerfotos aus SchILD ([{Global.GetColor(Global.ColorPfadInProgrammen)}]Datenaustausch > Fotos > Fotos exportieren[/]). Der Dateiname zusammengesetzt sein aus [{Global.GetColor(Global.ColorHinweise)}]Nachname, Vorname, Geburtsdatum[/]. Geben Sie hier an, in welchen Ordner Sie exportiert haben. " +
                         $"\n[{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] erstellt im Folgenden von jedem SchILD-Foto eine Kopie mit dem von Webuntis geforderten Namen. An den vorhandenen Kopien erkennnt [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/], welche Fotos neu importiert werden müssen. Sie können also einzelne oder alle Fotos erneut für den Import vorsehen, indem Sie einzelne oder alle Fotos im Exportordner löschen.",
             Datentyp = Global.Datentyp.Pfad,
+            InGrundeinstellungAbfragen = true,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },
+        ["PfadLitteraImport"] = new KonfigMeta
+        {
+            Key = "PfadLitteraImport",
+            DefaultValue = @"\\fs01\Littera\Atlantis Import Daten",
+            Aufforderung = "Pfad des Littera-Imports",
+            Hinweise = $"Wohin soll die neue Datei nach dem Erstellen verschoben werden?",
+            Datentyp = Global.Datentyp.Pfad,
+            InGrundeinstellungAbfragen = true,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },
+        ["Schlüsselwörter"] = new KonfigMeta
+        {
+            Key = "Schlüsselwörter",
+            DefaultValue = "Jahreeszeugnis, Abschlusszeugnis, Abgangszeugnis, Zeugnis",
+            Aufforderung = "Schlüsselwörter",
+            Hinweise = "Geben Sie kommagetrennt interessierende Schlüsselwörter an (z.B. Abgangszeugnis, Abschlusszeugnis, Jahreszeugnis). BKB-Tool durchsucht die PDF-Dateien im Ordner nach den Wörtern. Sobald ein Schlüsselwort matcht, wird die Datei in das Dokumentenverzeichnis kopiert.",
+            Datentyp = Global.Datentyp.ListString,
             InGrundeinstellungAbfragen = false,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },
+        ["SchipsOderZeugnisseOderAnderePdfs"] = new KonfigMeta
+        {
+            Key = "SchipsOderZeugnisseOderAnderePdfs",
+            DefaultValue = "",
+            Aufforderung = "Was wollen Sie verschlüsseln?",
+            Hinweise = "Wählen Sie zwischen den Optionen:\n1: Schips\n2: Notenlisten\n3: andere PDFs",
+            Datentyp = Global.Datentyp.Int,
+            InGrundeinstellungAbfragen = false,
+            InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
         },
         ["Schulnummer"] = new KonfigMeta
         {
             Key = "Schulnummer",
-            DefaultValue = "",
+            DefaultValue = "177659",
             Aufforderung = "Schulnummer",
             Hinweise = "Geben Sie Ihre Schulnummer an. Je nach Schulnummer werden evtl. unterschiedliche Funktionen angeboten.",
-            Datentyp = Global.Datentyp.String,
+            Datentyp = Global.Datentyp.Int,
             InGrundeinstellungAbfragen = true,
+            InitialAbfragen = true,
             NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
         },
         ["SmtpKennwort"] = new KonfigMeta
@@ -1438,7 +1600,8 @@ public static class KonfigHelper
             Aufforderung = "SMTP-Kennwort",
             Hinweise = "Geben Sie das SMTP-Kennwort an.",
             Datentyp = Global.Datentyp.String,
-            InGrundeinstellungAbfragen = false,
+            InGrundeinstellungAbfragen = true,
+            InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
         },
         ["SmtpPort"] = new KonfigMeta
@@ -1448,7 +1611,8 @@ public static class KonfigHelper
             Aufforderung = "SMTP-Port",
             Hinweise = "Geben Sie den SMTP-Port an.",
             Datentyp = Global.Datentyp.String,
-            InGrundeinstellungAbfragen = false,
+            InGrundeinstellungAbfragen = true,
+            InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
         },        
         ["SmtpServer"] = new KonfigMeta
@@ -1458,7 +1622,19 @@ public static class KonfigHelper
             Aufforderung = "SMTP-Server",
             Hinweise = "Geben Sie den SMTP-Server an.",
             Datentyp = Global.Datentyp.String,
-            InGrundeinstellungAbfragen = false,
+            InGrundeinstellungAbfragen = true,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },
+        ["SprechtagsDatum"] = new KonfigMeta
+        {
+            Key = "SprechtagsDatum",
+            DefaultValue = $"01.09.{DateTime.Now.Year}",
+            Aufforderung = "Sprechtag am",
+            Hinweise = "Geben Sie das Datum des Sprechtags an (tt.mm.jjjj).",
+            Datentyp = Global.Datentyp.DateTime,
+            InGrundeinstellungAbfragen = true,
+            InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
         },
         ["StatistikDatum"] = new KonfigMeta
@@ -1468,7 +1644,41 @@ public static class KonfigHelper
             Aufforderung = "Abgabedatum der Statistik",
             Hinweise = "Geben Sie das Datum der Abgabe an. Das ist wichtig, um diejenigen Unterrichte auszuschließen, die befristet sind und nicht am Stichtag stattfinden.",
             Datentyp = Global.Datentyp.DateTime,
+            InGrundeinstellungAbfragen = true,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },
+        ["TeamsChatAuswahl"] = new KonfigMeta
+        {
+            Key = "TeamsChatAuswahl",
+            DefaultValue = "1",
+            Aufforderung = "Teams-Chat-Auswahl",
+            Hinweise = "Bitte eine Zahl auswählen:",
+            Datentyp = Global.Datentyp.Int,
+            InGrundeinstellungAbfragen = true,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },
+        ["Teilleistungsarten"] = new KonfigMeta
+        {
+            Key = "Teilleistungsarten",
+            DefaultValue = "Vornote,Abschluss-Schriftl.,Abschluss-Mündl.",
+            Aufforderung = "Welche Teilleistungsarten (kommagetrennt) sollen gezogen werden?",
+            Hinweise = "Die Teilleistungsart(en) in Webuntis und in SchILD müssen identisch heißen. Ansonsten werden keine Teilleistungen nach SchILD importiert.",
+            Datentyp = Global.Datentyp.ListString,
             InGrundeinstellungAbfragen = false,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },
+        ["VolleStelle"] = new KonfigMeta
+        {
+            Key = "VolleStelle",
+            DefaultValue = "25,5",
+            Aufforderung = "Wie viele Stunden entsprechen einer vollen Stelle?",
+            Hinweise = "Die Teilleistungsart(en) in Webuntis und in SchILD müssen identisch heißen. Ansonsten werden keine Teilleistungen nach SchILD importiert.",
+            Datentyp = Global.Datentyp.ListString,
+            InGrundeinstellungAbfragen = false,
+            InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
         },
         ["WikiUrl"] = new KonfigMeta
@@ -1478,7 +1688,8 @@ public static class KonfigHelper
             Aufforderung = "URL zum dokuwiki xmlrpc",
             Hinweise = "Geben Sie die URL zum dokuwiki xmlrpc an.",
             Datentyp = Global.Datentyp.Url,
-            InGrundeinstellungAbfragen = false,
+            InGrundeinstellungAbfragen = true,
+            InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
         },        
         ["WikiJsonUser"] = new KonfigMeta
@@ -1488,7 +1699,8 @@ public static class KonfigHelper
             Aufforderung = "Benutzer für Wiki JSON Zugriff",
             Hinweise = "Geben Sie den Benutzernamen für den Zugriff auf das Wiki JSON an.",
             Datentyp = Global.Datentyp.String,
-            InGrundeinstellungAbfragen = false,
+            InGrundeinstellungAbfragen = true,
+            InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
         },
         ["WikiJsonUserKennwort"] = new KonfigMeta
@@ -1498,17 +1710,81 @@ public static class KonfigHelper
             Aufforderung = "Kennwort für Wiki JSON Zugriff",
             Hinweise = "Geben Sie das Kennwort für den Zugriff auf das Wiki JSON an.",
             Datentyp = Global.Datentyp.String,
+            InGrundeinstellungAbfragen = true,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },
+        ["WikiSprechtagKleineAenderung"] = new KonfigMeta
+        {
+            Key = "WikiSprechtagKleineAenderung",
+            DefaultValue = "",
+            Aufforderung = "Kleine Änderung",
+            Hinweise = "Handelt es sich um eine kleine Änderung? Kleine Änderungen erzeugen keine neue Version (j/n)",
+            Datentyp = Global.Datentyp.JaNein,
             InGrundeinstellungAbfragen = false,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },
+        ["Zeugnisdatum"] = new KonfigMeta
+        {
+            Key = "Zeugnisdatum",
+            DefaultValue = "",
+            Aufforderung = "Zeugnisdatum",
+            Hinweise = $"Geben Sie das Zeugnisdatum an. Das kann später in SchILD (mit einem Gruppenprozess) erneut geändert werden.",
+            Datentyp = Global.Datentyp.DateTime,
+            InGrundeinstellungAbfragen = false,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },
+        ["ZeugnisUrl"] = new KonfigMeta
+        {
+            Key = "ZeugnisUrl",
+            DefaultValue = "",
+            Aufforderung = "Zeugnis-URL",
+            Hinweise = $"Soll eine bestimmte Webseite geöffnet werden, um die verschlüsselte(n) Datei(en) dort hochzuladen?\nFalls Sie keine Seite öffnen wollen, geben Sie ein Leerzeichen ein.",
+            Datentyp = Global.Datentyp.DateTime,
+            InGrundeinstellungAbfragen = false,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },
+        ["ZeugnisPasswort"] = new KonfigMeta
+        {
+            Key = "ZeugnisPasswort",
+            DefaultValue = "",
+            Aufforderung = "Kennwort festlegen",
+            Hinweise = "Mit welchem Kennwort sollen die Dateien verschlüsselt werden?",
+            Datentyp = Global.Datentyp.DateTime,
+            InGrundeinstellungAbfragen = false,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },
+        ["ZipKennwort"] = new KonfigMeta
+        {
+            Key = "ZipKennwort",
+            DefaultValue = "Geheim123",
+            Aufforderung = "Zip-Kennwort",
+            Hinweise = "Die Datei wird nun gezippt.\nGeben Sie das Kennwort ein, mit dem Sie die Zip-Datei verschlüsseln wollen. Geben Sie ein Leerzeichen ein, wenn kein Kennwort gesetzt werden soll.",
+            Datentyp = Global.Datentyp.String,
+            InGrundeinstellungAbfragen = true,
+            InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
         },
         ["ZustimmungLizenz"] = new KonfigMeta
         {
             Key = "ZustimmungLizenz",
             DefaultValue = "nein",
-            Aufforderung = "Lizenz zustimmen",
-            Hinweise = "Bitte stimmen Sie der Lizenz zu, um das Programm zu nutzen. Geben Sie 'ja' ein, um fortzufahren.",
+            Aufforderung = $"Sie müssen der Lizenz mit [bold {Global.GetColor(Global.ColorÜberschrift)}]ja[/] zustimmen",
+            Hinweise = $"[bold {Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] steht unter der GNU General Public License Version 3 (GPLv3). " +
+            "Die GPLv3 ist eine freie Softwarelizenz, die es Ihnen erlaubt, die Software zu verwenden, zu modifizieren und weiterzugeben, solange Sie die Bedingungen der Lizenz einhalten. " +
+            "Die wichtigsten Bedingungen dieser Lizenz sind:\n" +
+            $"[{Global.GetColor(Global.ColorHinweise)}]Freiheit zur Nutzung, Änderung und Weiterverbreitung:[/] Sie dürfen diese Software frei verwenden, anpassen und weitergeben, solange alle abgeleiteten Werke ebenfalls unter der GPLv3 stehen.\n" +
+            $"[{Global.GetColor(Global.ColorHinweise)}]Keine Garantie:[/] Diese Software wird \"wie sie ist\" bereitgestellt, ohne jede ausdrückliche oder stillschweigende Gewährleistung, insbesondere ohne Garantie auf Fehlerfreiheit oder Eignung für einen bestimmten Zweck.\n" +
+            $"[{Global.GetColor(Global.ColorHinweise)}]Keine Haftung:[/] Der Entwickler haftet nicht für direkte oder indirekte Schäden, Datenverluste oder andere Konsequenzen, die durch die Nutzung oder Fehlfunktion dieser Software entstehen.\n" +
+            $"[{Global.GetColor(Global.ColorHinweise)}]Verwendung auf eigene Gefahr:[/] Die Nutzung erfolgt ausschließlich auf eigenes Risiko.\n" +
+            $"[{Global.GetColor(Global.ColorHinweise)}]Vollständige Lizenz:[/] Vollständige Lizenzbedingungen unter [lightskyblue3_1 link=https://www.gnu.org/licenses/gpl-3.0.de.html]https://www.gnu.org/licenses/gpl-3.0.de.html[/].",
             Datentyp = Global.Datentyp.JaNein,
             InGrundeinstellungAbfragen = false,
+            InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
         }
     };
