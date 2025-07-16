@@ -23,11 +23,13 @@ public class Students : List<Student>
     private Students InteressierendeStudents { get; set; }
     private string DateiPfad { get; set; }
     private DateTime Erstelldatum { get; }
-    
+    public string Klasse { get; }
+    public string? Schuelergruppe { get; }
+
     public Students()
     {
     }
- 
+
     public Students(IConfiguration configuration, Dateien quelldateien)
     {
         var schuelerBasisdaten = quelldateien.GetMatchingList(configuration, "schuelerbasisdaten", new Students(), null);
@@ -38,7 +40,7 @@ public class Students : List<Student>
         if (schuelerBasisdaten.Count != schuelerZusatzdaten.Count)
         {
             Console.WriteLine("Die Anzahl der Schüler in den Basis- und Zusatzdaten stimmt nicht überein.");
-            return;            
+            return;
         }
 
         for (int j = 0; j < schuelerBasisdaten.Count; j++)
@@ -113,8 +115,50 @@ public class Students : List<Student>
             }
         }
 
-        Global.ZeileSchreiben( (DateiPfad + " ").PadRight(90, '.') + " " + Erstelldatum, this.Count().ToString(),
-            ConsoleColor.Yellow,ConsoleColor.Gray);
+        Global.ZeileSchreiben((DateiPfad + " ").PadRight(90, '.') + " " + Erstelldatum, this.Count().ToString(),
+            ConsoleColor.Yellow, ConsoleColor.Gray);
+    }
+
+    public Students(string klasse, string? schuelergruppe, List<dynamic>? studentgroupStudents = null)
+    {
+        Klasse = klasse;
+        Schuelergruppe = schuelergruppe;        
+
+        if (string.IsNullOrEmpty(schuelergruppe) && !string.IsNullOrEmpty(klasse))
+        {
+            // Es werden keine SuS doppelt hinzugefügt, daher wird die Schülergruppe nicht berücksichtigt
+            // und es werden nur Schüler der angegebenen Klasse zurückgegeben.
+            foreach (var student in this.Where(x => x.Klasse == klasse))
+            {
+                if (!this.Any(x => x.ExterneIdNummer == student.ExterneIdNummer))
+                {
+                    Add(student);
+                }
+            }
+        }
+        if (!string.IsNullOrEmpty(schuelergruppe))
+        {
+            // Wenn eine Schülergruppe angegeben ist, nur die Schüler dieser Gruppe
+            var schuelerDieserGruppe = studentgroupStudents
+                .Select(x => x as IDictionary<string, object>)
+                .Where(dict =>
+                    dict != null &&
+                    dict.ContainsKey("Schuelergruppe") &&
+                    dict["Schuelergruppe"]?.ToString() == schuelergruppe)
+                .ToList();
+
+            foreach (var student in schuelerDieserGruppe)
+            {
+                if (!this.Any(x => x.ExterneIdNummer == student["studentId"]))
+                {
+                    var stu = this.Where(x => x.ExterneIdNummer == student["studentId"]).FirstOrDefault();
+                    if (stu != null)
+                    {
+                        Add(stu);
+                    }
+                }
+            }
+        }        
     }
 
     public Students GetStudentsVonAtlantisCsv(IConfiguration configuration)
@@ -124,7 +168,7 @@ public class Students : List<Student>
 
         if (!Directory.Exists(inputFolder))
         {
-            Directory.CreateDirectory(inputFolder);                 
+            Directory.CreateDirectory(inputFolder);
             var path = new TextPath(inputFolder);
 
             path.RootStyle = new Style(foreground: Spectre.Console.Color.Red);
@@ -149,7 +193,7 @@ public class Students : List<Student>
             if (Directory.GetFiles(inputFolder, "*.csv").Length == 1)
             {
                 var csvPath = Directory.GetFiles(inputFolder, "*.csv").FirstOrDefault();
-                
+
                 if (csvPath != null)
                 {
                     try
@@ -172,7 +216,7 @@ public class Students : List<Student>
                                     this.Add(student);
                                 }
                             }
-                            Global.ZeileSchreiben(csvPath, this.Count().ToString(),ConsoleColor.Yellow,ConsoleColor.Gray);
+                            Global.ZeileSchreiben(csvPath, this.Count().ToString(), ConsoleColor.Yellow, ConsoleColor.Gray);
                             return this;
                         }
                     }
@@ -180,7 +224,7 @@ public class Students : List<Student>
                     {
                         Console.WriteLine($"Fehler beim Einlesen der CSV-Datei: {ex.Message}");
                     }
-                }   
+                }
                 else
                 {
                     AnsiConsole.Write(new Panel("Die Datei 'atlantisschueler.csv' wurde nicht gefunden. Bitte erstellen Sie die Datei im UTF8-Format.")
@@ -189,8 +233,8 @@ public class Students : List<Student>
                         .SquareBorder()
                         .Expand()
                         .BorderColor(Spectre.Console.Color.HotPink3_1));
-                }  
-            }      
+                }
+            }
             else if (Directory.GetFiles(inputFolder, "*.csv").Length == 0)
             {
                 AnsiConsole.Write(new Panel($"{Path.Combine(inputFolder, "atlantisschueler.csv")} existiert nicht. Bitte erstellen Sie die Datei im UTF8-Format.")
@@ -201,14 +245,14 @@ public class Students : List<Student>
                         .BorderColor(Spectre.Console.Color.HotPink3_1));
             }
             else if (Directory.GetFiles(inputFolder, "*.csv").Length > 1)
-            {                
+            {
                 AnsiConsole.Write(new Panel($"Es gibt mehrere CSV-Dateien in {inputFolder}. Es darf nur eine CSV-Datei vorhanden sein.")
                         .Header($" [bold hotpink3_1] Hinweis [/]")
                         .HeaderAlignment(Justify.Left)
                         .SquareBorder()
                         .Expand()
                         .BorderColor(Spectre.Console.Color.HotPink3_1));
-            
+
             }
             AnsiConsole.Write(new Panel("Lösen Sie das Problem, dann ENTER.")
                         .Header($" [bold springGreen2] Hinweis [/]")
@@ -261,8 +305,8 @@ public class Students : List<Student>
         int nachSovielenTagenVerjährenFehlzeitenBeiMaßnahme,
         Klassen klasses,
         Dateien dateien)
-        {
-        
+    {
+
         var schuelerZusatzdaten = dateien.GetMatchingList(configuration, "schuelerzusatzdaten", null, null);
         if (schuelerZusatzdaten == null || !schuelerZusatzdaten.Any()) return;
 
@@ -600,7 +644,7 @@ public class Students : List<Student>
             Console.WriteLine("   Liegen die " + sortierteKlasse.Count() + " Fotos der Klasse " + klasse.ToUpper() +
                               " im Ordner '" + pfad + "'? Dann ENTER");
 
-while (Console.KeyAvailable) Console.ReadKey(true);
+            while (Console.KeyAvailable) Console.ReadKey(true);
 
             var x = Console.ReadKey();
 
@@ -668,7 +712,7 @@ while (Console.KeyAvailable) Console.ReadKey(true);
 
     private sealed class SchuelersMap : ClassMap<Student>
     {
-        
+
     }
 
     public List<dynamic> AdressenImportieren(Dateien dateien)
@@ -965,8 +1009,8 @@ while (Console.KeyAvailable) Console.ReadKey(true);
             if (!string.IsNullOrEmpty(passendeDatei))
             {
                 // Setze die AtlantisFotoUrl-Eigenschaft
-                student.PfadFoto = passendeDatei;                
-            }            
+                student.PfadFoto = passendeDatei;
+            }
         }
     }
 
@@ -976,7 +1020,7 @@ while (Console.KeyAvailable) Console.ReadKey(true);
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("  Ziehen Sie genau " + this.Count() + " Schülerfotos in folgender Reihenfolge aus dem Explorer auf die App:");
-            
+
             var nr = 0;
             foreach (var student in this)
             {
@@ -1022,14 +1066,14 @@ while (Console.KeyAvailable) Console.ReadKey(true);
 
     internal void Pfad2FotoStream()
     {
-        foreach(var student in this)
+        foreach (var student in this)
         {
-            if(!string.IsNullOrEmpty(student.PfadFoto))
+            if (!string.IsNullOrEmpty(student.PfadFoto))
             {
                 student.Pfad2FotoStream();
             }
-        }        
-        Global.ZeileSchreiben("Fotos in Stream umgewandelt",this.Where(x=>x.PfadFoto != null).Count().ToString(), ConsoleColor.Green, ConsoleColor.Black);    
+        }
+        Global.ZeileSchreiben("Fotos in Stream umgewandelt", this.Where(x => x.PfadFoto != null).Count().ToString(), ConsoleColor.Green, ConsoleColor.Black);
     }
 
     internal void PdfDateienVerarbeiten(IConfiguration configuration)
@@ -1041,7 +1085,7 @@ while (Console.KeyAvailable) Console.ReadKey(true);
             var pdfDatei = new PdfDatei(dateiName);
             pdfDatei.Seiten.Read(dateiName);
             pdfDatei.Students = pdfDatei.GetStudentsMitSeiten(this);
-            
+
             foreach (var student in pdfDatei.Students)
             {
                 string art = student.PdfSeiten.GetArt(schlüsselwörter);
@@ -1049,7 +1093,7 @@ while (Console.KeyAvailable) Console.ReadKey(true);
                 student.CreateFolderPdfDateien();
                 student.ZieldateiSpeichern(art, datum, dateiName);
             }
-            
+
             if (pdfDatei.Students.Any())
             {
                 pdfDatei.SeitenAusQuelldateienLöschen();
@@ -1059,7 +1103,7 @@ while (Console.KeyAvailable) Console.ReadKey(true);
 
     internal void GetPfadDokumentenverwaltung(IConfiguration configuration)
     {
-        Global.Konfig("PfadDokumentenverwaltung",Global.Modus.Update, configuration);
+        Global.Konfig("PfadDokumentenverwaltung", Global.Modus.Update, configuration);
 
         foreach (var student in this)
         {
@@ -1070,7 +1114,7 @@ while (Console.KeyAvailable) Console.ReadKey(true);
     internal void ErstellenPfadDokumentenverwaltung(IConfiguration configuration)
     {
         foreach (var student in this)
-        {            
+        {
             student.ErstellePfadDokumentenverwaltung(configuration);
         }
     }
@@ -1086,10 +1130,10 @@ while (Console.KeyAvailable) Console.ReadKey(true);
     internal void KlassenordnerErstellen(IConfiguration configuration)
     {
         var pfadDownloads = configuration["PfadDownloads"];
-     
+
         // Ordner "Fotos" unterhalb von Global.PfadExportdateien
         var fotosOrdner = Path.Combine(pfadDownloads, "Fotos");
-     
+
         var verschiedeneKlassen = this.Select(x => x.Klasse).Distinct().ToList();
         foreach (var klasse in verschiedeneKlassen)
         {
@@ -1097,11 +1141,11 @@ while (Console.KeyAvailable) Console.ReadKey(true);
             if (!Directory.Exists(pfad))
             {
                 Directory.CreateDirectory(pfad);
-                Global.ZeileSchreiben("Ordner " + pfad, "erstellt.", ConsoleColor.Green, ConsoleColor.Black);                 
+                Global.ZeileSchreiben("Ordner " + pfad, "erstellt.", ConsoleColor.Green, ConsoleColor.Black);
             }
             else
             {
-                Global.ZeileSchreiben("Ordner " + pfad, "existiert bereits.", ConsoleColor.Green, ConsoleColor.Black); 
+                Global.ZeileSchreiben("Ordner " + pfad, "existiert bereits.", ConsoleColor.Green, ConsoleColor.Black);
             }
             // Öffne das Verzeichnis im Explorer
             System.Diagnostics.Process.Start("explorer.exe", pfad);
@@ -1168,16 +1212,16 @@ while (Console.KeyAvailable) Console.ReadKey(true);
         tableFoto.Centered();
         tableFoto.AddColumn("Nr.");
         tableFoto.AddColumn("Klasse");
-        tableFoto.AddColumn("Anzahl Schüler*innen");        
+        tableFoto.AddColumn("Anzahl Schüler*innen");
         tableFoto.AddColumn("Anzahl Fotos in Ordner");
         tableFoto.AddColumn("Status");
-                
+
         List<string> klassen = new List<string>();
 
         int i = 1;
-        foreach (var klasse in verschiedeneKlassen.OrderBy(x=>x))
+        foreach (var klasse in verschiedeneKlassen.OrderBy(x => x))
         {
-            if(Path.Exists(Path.Combine(pfadFotos, klasse)))
+            if (Path.Exists(Path.Combine(pfadFotos, klasse)))
             {
                 /*
                 Geevoo-ID (Interne ID)
@@ -1190,47 +1234,47 @@ while (Console.KeyAvailable) Console.ReadKey(true);
 
                 var anzahlFotos = Directory.GetFiles(Path.Combine(pfadFotos, klasse), "*.jpg").Count();
 
-               var nichtZugeordneteFotos = Directory.GetFiles(Path.Combine(pfadFotos, klasse), "*.jpg")
-                .Where(datei =>
-                {
-                    var dateiname = Path.GetFileNameWithoutExtension(datei).ToLower();
-                    return !this.Any(schueler =>
-                    {
-                        var geburtsdatum = DateTime.ParseExact(schueler.Geburtsdatum, "dd.MM.yyyy", CultureInfo.InvariantCulture)
-                                                .ToString("ddMMyyyy");
-                        return dateiname.Contains(schueler.Nachname.ToLower()) &&
-                            dateiname.Contains(schueler.Vorname.ToLower()) &&
-                            dateiname.Contains(geburtsdatum);
-                    });
-                })
-                .ToList();
+                var nichtZugeordneteFotos = Directory.GetFiles(Path.Combine(pfadFotos, klasse), "*.jpg")
+                 .Where(datei =>
+                 {
+                     var dateiname = Path.GetFileNameWithoutExtension(datei).ToLower();
+                     return !this.Any(schueler =>
+                     {
+                         var geburtsdatum = DateTime.ParseExact(schueler.Geburtsdatum, "dd.MM.yyyy", CultureInfo.InvariantCulture)
+                                                 .ToString("ddMMyyyy");
+                         return dateiname.Contains(schueler.Nachname.ToLower()) &&
+                             dateiname.Contains(schueler.Vorname.ToLower()) &&
+                             dateiname.Contains(geburtsdatum);
+                     });
+                 })
+                 .ToList();
 
                 var anzahlSuS = this.Where(x => x.Klasse == klasse).Count();
 
                 var status = "";
-                
+
                 if (nichtZugeordneteFotos.Count() == anzahlSuS)
                 {
                     status += " Bereit für Weiterverarbeitung.";
                     klassen.Add(klasse);
                 }
-                
+
                 tableFoto.AddRow(i.ToString(), klasse, anzahlSuS.ToString(), nichtZugeordneteFotos.Count().ToString(), status);
                 i++;
             }
         }
-        
+
         AnsiConsole.Write(tableFoto);
-        
-        if(klassen.Count() > 0)
-        {            
+
+        if (klassen.Count() > 0)
+        {
             // Ask for the user's favorite fruits
             ausgewählteKlassen = AnsiConsole.Prompt(
             new MultiSelectionPrompt<string>()
-            .Title("Für welche Klassen sollen die Fotos jetzt nach SchILD übertragen werden?")            
+            .Title("Für welche Klassen sollen die Fotos jetzt nach SchILD übertragen werden?")
             .PageSize(10)
-            .HighlightStyle(new Style(foreground: Spectre.Console.Color.Yellow, decoration: Decoration.Bold))            
-            .InstructionsText("Auswahl mit PFEILTASTEN und LEERTASTE. Dann ENTER.")              
+            .HighlightStyle(new Style(foreground: Spectre.Console.Color.Yellow, decoration: Decoration.Bold))
+            .InstructionsText("Auswahl mit PFEILTASTEN und LEERTASTE. Dann ENTER.")
             .AddChoices(klassen)
             .Required(false)
             .Select(klassen.First())
@@ -1244,7 +1288,7 @@ while (Console.KeyAvailable) Console.ReadKey(true);
                             .SquareBorder()
                             .Expand()
                             .BorderColor(Spectre.Console.Color.SpringGreen2);
-                
+
             AnsiConsole.Write(panel);
         }
         return ausgewählteKlassen;
@@ -1252,36 +1296,36 @@ while (Console.KeyAvailable) Console.ReadKey(true);
 
     internal void FotosVerarbeiten(IConfiguration configuration, List<string> klassen)
     {
-        if(klassen.Count() == 0) return;
+        if (klassen.Count() == 0) return;
         configuration = Global.Konfig("PfadDownloads", Global.Modus.Read, configuration);
         configuration = Global.Konfig("PfadDokumentenverwaltung", Global.Modus.Update, configuration);
-        
+
         var tableFoto = new Spectre.Console.Table();
         tableFoto.Expand();
         tableFoto.Border(TableBorder.Rounded);
         tableFoto.BorderColor(Spectre.Console.Color.SpringGreen2);
         tableFoto.Centered();
         tableFoto.AddColumn("Klasse");
-        tableFoto.AddColumn("Name");        
+        tableFoto.AddColumn("Name");
         tableFoto.AddColumn("Stream erstellt");
         tableFoto.AddColumn("altes Bild gelöscht (sofern vorhanden)");
         tableFoto.AddColumn("neues Bild in SchILD2 erstellt.");
         tableFoto.AddColumn("Pfad in die Dokumentenverwaltung erstellt (falls nicht vorhanden)");
         tableFoto.AddColumn("Bild in die Dokumentenverwaltung kopiert.");
         tableFoto.AddColumn("Bild im Quellordner umbenannt.");
-        
+
         DataAccess dataAccess = Global.DataAccessHerstellen(configuration);
 
         foreach (var klasse in klassen)
         {
             var studentsSortiert = this.Where(x => x.Klasse == klasse).OrderBy(x => x.Nachname).ThenBy(x => x.Vorname).ToList();
             var fotosSortiert = Directory.GetFiles(Path.Combine(configuration["PfadDownloads"], "Fotos", klasse), "*.jpg").OrderBy(x => Path.GetFileNameWithoutExtension(x).ToLower()).ToList();
-            
+
             for (int i = 0; i < studentsSortiert.Count(); i++)
             {
                 var student = studentsSortiert[i];
                 var foto = fotosSortiert[i];
-                
+
                 student.PfadFoto = foto;
                 var fotostreamErstellt = student.Pfad2FotoStream();
                 var erfolgDelete = dataAccess.DeleteImage(student);
@@ -1298,9 +1342,9 @@ while (Console.KeyAvailable) Console.ReadKey(true);
 
     internal Students OhneWebuntisFoto(IConfiguration configuration, string fotosTxt)
     {
-        if(!File.Exists(fotosTxt))
+        if (!File.Exists(fotosTxt))
         {
-            File.Create(fotosTxt).Close();            
+            File.Create(fotosTxt).Close();
         }
 
         // Lies aus der Datei fotos.txt im current folder alle fotos in eine List<string>
@@ -1379,7 +1423,7 @@ while (Console.KeyAvailable) Console.ReadKey(true);
         }
         finally
         {
-            var rechteSeite = importhinweise != null && importhinweise.Any() ? string.Join("\n", importhinweise) : "";                
+            var rechteSeite = importhinweise != null && importhinweise.Any() ? string.Join("\n", importhinweise) : "";
             Global.ZeileSchreiben(zipPfad, rechteSeite, ConsoleColor.White, ConsoleColor.Blue);
         }
     }
@@ -1428,7 +1472,50 @@ while (Console.KeyAvailable) Console.ReadKey(true);
         {
             return $"[{Global.GetColor(Global.ColorZahlen)}]{this.Count().ToString()}[/] Schüler*innen:[springGreen2] nur aktive Schüler exportiert[/]";
         }
-        
+
         return statusstring.TrimEnd(' ').TrimEnd(',').TrimEnd(' ').TrimEnd(',');
     }
+
+    internal IEnumerable<Student> GetSchuelerDerKlasseOderSchuelergruppe(string klasse, string? schuelergruppe, List<dynamic> studentgroupStudents)
+    {
+        var students = new Students();
+
+        if (string.IsNullOrEmpty(schuelergruppe) && !string.IsNullOrEmpty(klasse))
+        {
+            // Es werden keine SuS doppelt hinzugefügt, daher wird die Schülergruppe nicht berücksichtigt
+            // und es werden nur Schüler der angegebenen Klasse zurückgegeben.
+            foreach (var student in this.Where(x => x.Klasse == klasse))
+            {
+                if (!students.Any(x => x.ExterneIdNummer == student.ExterneIdNummer))
+                {
+                    students.Add(student);
+                }
+            }
+        }
+        if (!string.IsNullOrEmpty(schuelergruppe))
+        {
+            // Wenn eine Schülergruppe angegeben ist, nur die Schüler dieser Gruppe
+            var schuelerDieserGruppe = studentgroupStudents
+                .Select(x => x as IDictionary<string, object>)
+                .Where(dict =>
+                    dict != null &&
+                    dict.ContainsKey("Schuelergruppe") &&
+                    dict["Schuelergruppe"]?.ToString() == schuelergruppe)
+                .ToList();
+
+            foreach (var student in schuelerDieserGruppe)
+            {
+                if (!students.Any(x => x.ExterneIdNummer == student["studentId"]))
+                {
+                    var stu = this.Where(x => x.ExterneIdNummer == student["studentId"]).FirstOrDefault();
+                    if (stu != null)
+                    {
+                        students.Add(stu);
+                    }
+                }
+            }
+        }        
+        return students;
+    }
 }
+   

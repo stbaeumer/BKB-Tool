@@ -282,7 +282,7 @@ public partial class Student
         return noteOderPunkte == "N" ? note : "";
     }
 
-    internal string GetNote(string jahrgang, List<dynamic>? marksPerLesson, string fach, Global.Art art)
+    internal string GetNote(string jahrgang, List<dynamic>? marksPerLesson, string fach, Global.Zweck art)
     {
         var linkeSeite = Nachname + ", " + Vorname + " (" + Klasse + "), " + fach;
 
@@ -302,7 +302,7 @@ public partial class Student
                             // Bei Mahnungen stecken die Noten in der Spalte "Note"
                             // Bei Zeugnissen in der Spalte "Gesamtnote"
 
-                            if (art == Global.Art.Mahnung)
+                            if (art == Global.Zweck.Mahnung)
                             {
                                 if (dict["Note"] != null && dict["Note"].ToString() != "")
                                 {

@@ -231,17 +231,18 @@ public static class MenueHelper
                             configuration = Global.Konfig("Schulnummer", Global.Modus.Read, configuration);
                             configuration = Global.Konfig("StatistikDatum", Global.Modus.Read, configuration);                            
                             configuration = Global.Konfig("Kursarten", Global.Modus.Read, configuration);
-                            configuration = Global.Konfig("InteressierendeUnterrichtsgruppen", Global.Modus.Update, configuration);
+                            configuration = Global.Konfig("InteressierendeUnterrichtsgruppen", Global.Modus.Update, configuration); // wird immer abgefragt
                          
-                            m.Zieldatei = m.Lernabschnittsdaten(configuration, Global.Art.Statistik, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLernabschnittsdaten.dat"));
+                            m.Zieldatei = m.Lernabschnittsdaten(configuration, Global.Zweck.Statistik, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLernabschnittsdaten.dat"));
                             m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, configuration, ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt"], []);
                             m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
-
-                            var kurse = new Kurse(configuration, m, Global.Art.Statistik);
-                            m.Zieldatei = m.Kurse(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Kurse.dat"), kurse);
+                                                        
+                            m.Unterrichte = new Unterrichte(configuration, m, Global.Zweck.Statistik, Global.Art.Kurse);
+                            m.Zieldatei = m.Kurse(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Kurse.dat"));
                             m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
   
-                            m.Zieldatei = m.Leistungsdaten(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat"));
+                            m.Unterrichte.AddRange(new Unterrichte(configuration, m, Global.Zweck.Statistik, Global.Art.NichtKursUnterrichte));
+                            m.Zieldatei = m.LeistungsdatenStatistik(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat"), Global.Zweck.Statistik);
                             m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, configuration, ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach"], ["Jahrgang"]);
                             m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
 /*
@@ -278,7 +279,7 @@ public static class MenueHelper
                         m =>
                         {
                             m.FilterInteressierendeStudentsUndKlassen(configuration);
-                            m.Zieldatei = m.Lernabschnittsdaten(configuration, Global.Art.Zeugnis, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLernabschnittsdaten.dat"));
+                            m.Zieldatei = m.Lernabschnittsdaten(configuration, Global.Zweck.Zeugnis, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLernabschnittsdaten.dat"));
                             m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, configuration, ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt"], []);
                             m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
                         },
@@ -304,7 +305,7 @@ public static class MenueHelper
                             m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, configuration, ["KursBez"], ["Klasse", "Schulnr", "WochenstdPUNKTLEERZEICHENKL"]);
                             m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
 
-                            m.Zieldatei = m.Leistungsdaten(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat"), Global.Art.Zeugnis);
+                            //m.Zieldatei = m.Leistungsdaten(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat"), Global.Zweck.Zeugnis);
                             m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, configuration, ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach"], ["Jahrgang"]);
                             m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
                         },
@@ -368,7 +369,7 @@ public static class MenueHelper
                         m =>
                         {
                             m.FilterInteressierendeStudentsUndKlassen(configuration);
-                            m.Zieldatei = m.Leistungsdaten(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat"), Global.Art.Mahnung);
+                            //m.Zieldatei = m.Leistungsdaten(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat"), Global.Zweck.Mahnung);
                             m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
                         },
                         Global.Rubrik.Leistungsdaten,

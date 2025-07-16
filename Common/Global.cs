@@ -42,11 +42,17 @@ public static class Global
     public static object? WikiSprechtagKleineAenderung { get; set; }
     public static List<string>? Protokoll { get; set; }
 
-    public enum Art
+    public enum Zweck
     {
         Mahnung,
         Statistik,
         Zeugnis
+    }
+
+    public enum Art
+    {
+        Kurse,
+        NichtKursUnterrichte,
     }
 
     public enum NurBeiDiesenSchulnummern
@@ -127,8 +133,7 @@ public static class Global
     public static Color ColorUnterschrift { get; set; }
     public static Color ColorTextHervorheben { get; set; }
     public static Color ColorFehler { get; set; }
-    public static Color ColorInfoBox { get; set; }
-
+    public static Color ColorInfoBox { get; set; }    
 
     public static string? SafeGetString(SqlDataReader reader, int colIndex)
     {
