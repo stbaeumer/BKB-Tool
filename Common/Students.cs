@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
 using Spectre.Console;
 using ICSharpCode.SharpZipLib.Zip;
+using Common;
 
 #pragma warning disable CS8602 // Dereferenzierung eines möglicherweise null-Objekts.
 #pragma warning disable CS8604 // Möglicher Null-Verweis-Argument
@@ -117,48 +118,6 @@ public class Students : List<Student>
 
         Global.ZeileSchreiben((DateiPfad + " ").PadRight(90, '.') + " " + Erstelldatum, this.Count().ToString(),
             ConsoleColor.Yellow, ConsoleColor.Gray);
-    }
-
-    public Students(string klasse, string? schuelergruppe, List<dynamic>? studentgroupStudents = null)
-    {
-        Klasse = klasse;
-        Schuelergruppe = schuelergruppe;        
-
-        if (string.IsNullOrEmpty(schuelergruppe) && !string.IsNullOrEmpty(klasse))
-        {
-            // Es werden keine SuS doppelt hinzugefügt, daher wird die Schülergruppe nicht berücksichtigt
-            // und es werden nur Schüler der angegebenen Klasse zurückgegeben.
-            foreach (var student in this.Where(x => x.Klasse == klasse))
-            {
-                if (!this.Any(x => x.ExterneIdNummer == student.ExterneIdNummer))
-                {
-                    Add(student);
-                }
-            }
-        }
-        if (!string.IsNullOrEmpty(schuelergruppe))
-        {
-            // Wenn eine Schülergruppe angegeben ist, nur die Schüler dieser Gruppe
-            var schuelerDieserGruppe = studentgroupStudents
-                .Select(x => x as IDictionary<string, object>)
-                .Where(dict =>
-                    dict != null &&
-                    dict.ContainsKey("Schuelergruppe") &&
-                    dict["Schuelergruppe"]?.ToString() == schuelergruppe)
-                .ToList();
-
-            foreach (var student in schuelerDieserGruppe)
-            {
-                if (!this.Any(x => x.ExterneIdNummer == student["studentId"]))
-                {
-                    var stu = this.Where(x => x.ExterneIdNummer == student["studentId"]).FirstOrDefault();
-                    if (stu != null)
-                    {
-                        Add(stu);
-                    }
-                }
-            }
-        }        
     }
 
     public Students GetStudentsVonAtlantisCsv(IConfiguration configuration)
@@ -1476,25 +1435,39 @@ public class Students : List<Student>
         return statusstring.TrimEnd(' ').TrimEnd(',').TrimEnd(' ').TrimEnd(',');
     }
 
-    internal IEnumerable<Student> GetSchuelerDerKlasseOderSchuelergruppe(string klasse, string? schuelergruppe, List<dynamic> studentgroupStudents)
+/// <summary>
+/// Wenn sich die Belegung durch den Schüler mit dem Zeitraum von-bis überschneidet, wird der Schüler zurückgegeben.
+/// Wenn beide Zeiträume sich nicht überschneiden, wird der Schüler nicht zurückgegeben.
+/// Wenn es um die Statistik geht, fallen von und bis auf einen einzigen Tag.
+/// </summary>
+/// <param name="von"></param>
+/// <param name="bis"></param>
+/// <param name="klasse"></param>
+/// <param name="schuelergruppe"></param>
+/// <param name="studentgroupStudents"></param>
+/// <returns></returns>
+    internal Students Filter(IConfiguration configuration, Global.Zweck zweck, string klasse, string? schuelergruppe = null, List<dynamic> studentgroupStudents = null)
     {
-        var students = new Students();
+        var studentsGefiltert = new Students();
 
+        // Fall 1: Schülergruppe leer
         if (string.IsNullOrEmpty(schuelergruppe) && !string.IsNullOrEmpty(klasse))
         {
-            // Es werden keine SuS doppelt hinzugefügt, daher wird die Schülergruppe nicht berücksichtigt
-            // und es werden nur Schüler der angegebenen Klasse zurückgegeben.
+            // Alle Schüler der angegebenen Klasse hinzugefügt.
             foreach (var student in this.Where(x => x.Klasse == klasse))
             {
-                if (!students.Any(x => x.ExterneIdNummer == student.ExterneIdNummer))
+                // Doppelte Einträge vermeiden
+                if (!studentsGefiltert.Any(x => x.Id == student.Id))
                 {
-                    students.Add(student);
+                    studentsGefiltert.Add(student);
                 }
             }
-        }
+        }        
+
+        // Fall 2: Schülergruppe angegeben        
         if (!string.IsNullOrEmpty(schuelergruppe))
         {
-            // Wenn eine Schülergruppe angegeben ist, nur die Schüler dieser Gruppe
+            // Wenn eine Schülergruppe angegeben ist, nur die Schüler dieser Gruppe hinzufügen.
             var schuelerDieserGruppe = studentgroupStudents
                 .Select(x => x as IDictionary<string, object>)
                 .Where(dict =>
@@ -1505,17 +1478,53 @@ public class Students : List<Student>
 
             foreach (var student in schuelerDieserGruppe)
             {
-                if (!students.Any(x => x.ExterneIdNummer == student["studentId"]))
+                // Wenn es den Schüler mit der Schülergruppe in den IStudents gibt ...
+                if (!this.Any(x => x.Id == student["studentId"]))
                 {
-                    var stu = this.Where(x => x.ExterneIdNummer == student["studentId"]).FirstOrDefault();
+                    // ... wird er hinzugefügt. 
+                    var stu = this.Where(x => x.Id == student["studentId"]).FirstOrDefault();
                     if (stu != null)
                     {
-                        students.Add(stu);
+                        // Nur Kursbelegungen, die sich mit dem Zeitraum von-bis überschneiden, werden zurückgegeben.
+                        DateTime ersterSchultag = new DateTime(Convert.ToInt32(Global.AktSj[0]), 8, 1); // Beispiel für den ersten Schultag
+                        DateTime letzterSchultag = new DateTime(Convert.ToInt32(Global.AktSj[1]), 7, 31); // Beispiel für den ersten Schultag
+
+                        // Interessierender Zeitraum
+                        DateTime von = ersterSchultag;
+                        DateTime bis = letzterSchultag;
+
+                        // Wenn es um die Statistik geht, wird der Zeitraum von-bis auf einen Tag gesetzt
+                        if (zweck == Global.Zweck.Statistik)
+                        {
+                            von = DateTime.ParseExact(configuration["StatistikDatum"], "dd.MM.yyyy", CultureInfo.InvariantCulture);
+                            bis = von;
+                        }
+                        
+                        // Wenn startDate leer ist, nehme ersten Schultag
+                        DateTime belegungVon = ersterSchultag;
+                        DateTime belegungBis = letzterSchultag;
+
+                        if (!string.IsNullOrEmpty(student["startDate"].ToString()))
+                            belegungVon = DateTime.ParseExact(student["startDate"].ToString(), "dd-MM-yyyy", CultureInfo.InvariantCulture);
+
+                        // Wenn endDate leer ist, nehme letzten Schultag
+                        if (!string.IsNullOrEmpty(student["endDate"].ToString()))
+                            belegungBis = DateTime.ParseExact(student["endDate"].ToString(), "dd-MM-yyyy", CultureInfo.InvariantCulture);
+
+
+                        if ((belegungVon <= bis && belegungBis >= von) || (belegungVon == von && belegungBis == bis))
+                        {
+                            // Wenn der Schüler bereits in der Liste ist, wird er nicht erneut hinzugefügt.
+                            if (!studentsGefiltert.Any(x => x.Id == stu.Id))
+                            {
+                                studentsGefiltert.Add(stu);
+                            }
+                        }
                     }
                 }
             }
-        }        
-        return students;
+        }
+        return studentsGefiltert;
     }
 }
    

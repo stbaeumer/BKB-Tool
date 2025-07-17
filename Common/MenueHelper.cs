@@ -219,7 +219,7 @@ public static class MenueHelper
                         [
                             $"Es werden jetzt folgende Dateien für den Import nach SchILD erstellt: \n[{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "Lernabschnitte.dat")}[/] \n[{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "Leistungsdaten.dat")}[/] \n[{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "LehrkraefteSonderzeiten.dat")}[/]",
                             $"Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]LehrkraefteSonderzeiten.dat[/] wird nicht komplett neu erstellt. Die exportierte Datei wird lediglich für den ReImport aufbereitet.",
-                            $"Die Benennung der Kurse entspricht dem Kursleiterkürzel plus alle beteiligten Untis-Unterrichtsnummern.",
+                            $"Die Kursbezeichnungen setzen sich zusammen aus dem Kursleiterkürzel plus alle beteiligten Untis-Unterrichtsnummern.",
                             $"Zähler im Anschluss an Fächer (M1, M2, ...) werden abgeschnitten (also zu M).",
                             $"Bei mehreren beteiligten Lehrkräften wird das alphabetisch erste Lehrkraftkürzel zum Kursleiter.",
                             $"Team-Teaching ist daran erkennbar, dass die Summe der Kurs-Wochenstunden kleiner ist als die Summe der Lehrkräfte-Wochenstunden.",
@@ -231,8 +231,7 @@ public static class MenueHelper
                             configuration = Global.Konfig("Schulnummer", Global.Modus.Read, configuration);
                             configuration = Global.Konfig("StatistikDatum", Global.Modus.Read, configuration);                            
                             configuration = Global.Konfig("Kursarten", Global.Modus.Read, configuration);
-                            configuration = Global.Konfig("InteressierendeUnterrichtsgruppen", Global.Modus.Update, configuration); // wird immer abgefragt
-                         
+                            
                             m.Zieldatei = m.Lernabschnittsdaten(configuration, Global.Zweck.Statistik, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLernabschnittsdaten.dat"));
                             m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, configuration, ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt"], []);
                             m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);

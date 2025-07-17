@@ -148,7 +148,7 @@ public static class Global
         AnsiConsole.Write(new FigletText("BKB-Tool").Centered().Color(ColorÜberschrift));
 
         var unterschrift = GetColor(ColorUnterschrift);
-        var contentString = configuration["AppDescription"] ?? "BKB-Tool - Ein Werkzeug für die Arbeit mit dem BKB-Schilddatenaustausch";
+        var contentString = configuration["AppDescription"] ?? "BKB-Tool - Ein Werkzeug an der Schnittstelle zwischen SchILD & WebUntis";
         var header = $"[{unterschrift}] BKB-Tool[/] | [{unterschrift} link=https://github.com/stbaeumer/BKB-Tool]https://github.com/stbaeumer/BKB-Tool[/] | [{unterschrift}]GPLv3[/] | [{unterschrift}]Version {Global.AppVersion} [/]";
 
         if (content != null && content.Count > 0)
@@ -382,7 +382,8 @@ public static class Global
             panel.BorderColor(Global.ColorActionInMenüs);
         }
 
-        // Der Wert aus der JSON hat Vorrang vor dem defaultwert. Nur wenn die JSON keinen Wert enthält, wird der defaultwert verwendet.
+        // Der Wert aus der JSON hat Vorrang vor dem defaultwert. Nur wenn die JSON keinen Wert enthält oder der Wert nicht zulässig ist, wird der defaultwert verwendet.
+        
         defaultValue = !string.IsNullOrEmpty(configuration[parameter])
             ? configuration[parameter] ?? defaultValue
             : defaultValue;
@@ -735,19 +736,38 @@ public static class Global
                 return configuration;
             }
 
+            // Nur die zulässigen Auswahloptionen werden als Defaultwert verwendet
+            string default1 = "";                        
+            foreach (var z in zulässigeAuswahlOptionen.Split(','))
+            {
+                if (!string.IsNullOrEmpty(z) && defaultValue.Split(",").Contains(z))
+                {
+                    default1 += z + ",";
+                }
+            }
+            // Wennaus dem Defaultwert nichts matcht, dann werden die zulässigen Werte übernommen.
+            if (default1.Length == 0)
+            {
+                default1 = zulässigeAuswahlOptionen;
+            }
+
             // Wenn der Wert abgefragt wird, dann wird ein Panel mit dem Hinweis angezeigt
-            AnsiConsole.Write(panel);
+                AnsiConsole.Write(panel);
 
             userInput = AnsiConsole.Prompt(
-                new TextPrompt<string>($"[] {aufforderung}[/]")
+                new TextPrompt<string>($"[] {aufforderung} ({zulässigeAuswahlOptionen}) [/]")
                 .PromptStyle(Global.GetColor(Global.ColorActionInMenüs))
                     .ShowDefaultValue(true)
                     .Validate(n =>
                     {
                         var teile = n.ToString().Trim().Split(',');
+                        if (!teile.All(t => zulässigeAuswahlOptionen.Split(',').Contains(t.Trim())))
+                        {
+                            return ValidationResult.Error($"[{Global.GetColor(Global.ColorFehler)}]  {n}[/] ist keine kommagetrennte Liste aus zulässigen Werten. Zulässige Werte: {zulässigeAuswahlOptionen}");
+                        }
                         return ValidationResult.Success();
                     })
-                .DefaultValue<string>(defaultValue.ToString()));
+                .DefaultValue<string>(default1.ToString().TrimEnd(',')));
         }
         if (datentyp == Datentyp.Abschnitt)
         {
@@ -1401,9 +1421,9 @@ public static class KonfigHelper
             Key = "InteressierendeUnterrichtsgruppen",
             DefaultValue = "1.HJ,U",
             Aufforderung = "Interessierende Unterrichtsgruppen",
-            Hinweise = $"Geben Sie kommasepariert alle Unterrichtsgruppen an, die am Stichtag anwesend sein werden. Groß- und Kleinschreibung beachten!\nUnterrichte ohne Unterrichtsgrupe werden immer berücksichtigt.",
+            Hinweise = $"Geben Sie kommasepariert alle Unterrichtsgruppen an, die am Stichtag anwesend sein werden. \nGroß- und Kleinschreibung beachten!\nUnterrichte ohne Unterrichtsgrupe werden immer berücksichtigt.",
             Datentyp = Global.Datentyp.ListString,
-            InGrundeinstellungAbfragen = true,
+            InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
         },

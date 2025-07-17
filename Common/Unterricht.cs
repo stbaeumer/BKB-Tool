@@ -17,7 +17,7 @@ public class Unterricht
     public int Wochenstunden { get; internal set; }
     public List<string> Jahrgaenge { get; internal set; }
     public Students Students { get; set; }    
-    public Unterricht(Menüeintrag m, string? unterrichtsId, string fach, string? schuelergruppe, string? klasse, string? lehrer, int wochentundenLehrkraft)
+    public Unterricht(Global.Zweck zweck, Menüeintrag m, IConfiguration configuration, string? unterrichtsId, string fach, string? schuelergruppe, string? klasse, string? lehrer, int wochentundenLehrkraft, List<dynamic> studentgroupStudents)
     {
         Fach = Bereinigen(fach);
         Klassen = new List<string>() { klasse };
@@ -26,11 +26,12 @@ public class Unterricht
         Kursleiter = lehrer;
         KursleiterWochenstunden = wochentundenLehrkraft;
         UnterrichtsIds = new List<int> { int.Parse(unterrichtsId) };
-        Students = new Students(klasse, schuelergruppe);        
+        Students = m.IStudents.Filter(configuration, zweck, klasse, schuelergruppe, studentgroupStudents);
         Global.ZeileSchreiben($"{klasse} {fach} {lehrer}", $"Schüler*innen: {Students.Count}");                    
     }
 
-    public Unterricht(Menüeintrag m, string? unterrichtsId, string fach, string? schuelergruppe, string? klasse, string? lehrer, int wochentundenLehrkraft, List<dynamic> kurseDat, IConfiguration configuration, List<dynamic> studentgroupStudents) : this(m, unterrichtsId, fach, schuelergruppe, klasse, lehrer, wochentundenLehrkraft)
+    public Unterricht(Global.Zweck zweck, Menüeintrag m, string? unterrichtsId, string fach, string? schuelergruppe, string? klasse, string? lehrer, int wochentundenLehrkraft, List<dynamic> kurseDat, IConfiguration configuration, List<dynamic> studentgroupStudents) 
+        : this(zweck, m, unterrichtsId, fach, schuelergruppe, klasse, lehrer, wochentundenLehrkraft, studentgroupStudents)
     {
         // Klassen nicht leer -> Alle bekommen den Kurs zugewiesen
         //                       KursBez darf leer bleiben
@@ -48,8 +49,7 @@ public class Unterricht
         LehrkraefteWochenstunden = new List<int>();
         Schülergruppe = schuelergruppe;
         UnterrichtsIds = new List<int> { int.Parse(unterrichtsId) };
-        Students = new Students();
-        Students.AddRange(m.IStudents.GetSchuelerDerKlasseOderSchuelergruppe(klasse, schuelergruppe, studentgroupStudents));
+        Students = m.IStudents.Filter(configuration, zweck, klasse, schuelergruppe, studentgroupStudents);
         Global.ZeileSchreiben($"{KursBez}", $"");
     }
 
@@ -105,7 +105,7 @@ public class Unterricht
         return fachBereinigt;
     }
 
-    internal void Updaten(Menüeintrag m, string fach, string lehrer, string unterrichtsId, string schuelergruppe, string klasse, int wochentundenLehrkraft, List<dynamic> studentgroupStudents)
+    internal void Updaten(Global.Zweck zweck, IConfiguration configuration, string fach, string lehrer, string unterrichtsId, string schuelergruppe, string klasse, int wochentundenLehrkraft, List<dynamic> studentgroupStudents)
     {
         // Wenn der Kurs bereits existiert und in einer zweiten Zeile eine weitere Klasse hinzugefügt wird
         if (KursBez.StartsWith(lehrer) && KursBez.Contains(unterrichtsId) && Schülergruppe == schuelergruppe && Bereinigen(Fach) == Bereinigen(fach))
@@ -114,7 +114,7 @@ public class Unterricht
             {
                 Klassen.Add(klasse);
                 // Die SuS der weiteren Klasse werden dem Kurs hinzugefügt
-                Students.AddRange(m.IStudents.GetSchuelerDerKlasseOderSchuelergruppe(klasse, schuelergruppe, studentgroupStudents));
+                Students.AddRange(m.IStudents.Filter(m, zweck, klasse, schuelergruppe, studentgroupStudents));
             }
 
             // Die Anzahl der Wochenstunden wird nicht erhöht.

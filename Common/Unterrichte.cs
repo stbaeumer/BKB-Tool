@@ -6,30 +6,35 @@ public class Unterrichte : List<Unterricht>
 {    
     public Unterrichte(IConfiguration configuration, Menüeintrag m, Global.Zweck zweck, Global.Art art)
     {
+        // Aus der Kurse.dat wird die Kursart ermittelt. Wenn die Kursart in SchILD einmal gesetzt ist, wird sie nicht mehr geändert.
+        List<dynamic> kurseDat = m.Quelldateien.GetMatchingList(configuration, "kurse.", m.IStudents, m.Klassen);        
+        if (kurseDat == null)
+        {
+            AnsiConsole.MarkupLine($"[grey]Keine Kurse.dat gefunden. Bitte exportieren Sie die Datei erneut.[/]");
+            return;
+        }
+
+        List<dynamic> gpu002 = m.Quelldateien.GetMatchingList(configuration, "gpu002", m.IStudents, m.Klassen);
+        if (gpu002 == null || gpu002.Count == 0)
+        {
+            AnsiConsole.MarkupLine($"[grey]Keine GPU002-Daten gefunden. Bitte exportieren Sie die Datei erneut.[/]");
+            return;
+        }
+
+        List<dynamic> studentgroupStudents = m.Quelldateien.GetMatchingList(configuration, "studentgroupstudents", m.IStudents, m.Klassen);
+        if (studentgroupStudents == null || studentgroupStudents.Count == 0)
+        {
+            AnsiConsole.MarkupLine($"[grey]Keine studentgroupStudents gefunden. Bitte exportieren Sie die Datei erneut.[/]");
+            return;
+        }
+
+        var zulässigeAuswahlOptionen = GetZulässigeUnterrichtsgruppen(configuration, gpu002);
+
+        if (Global.Art.Kurse == art)
+            configuration = Global.Konfig("InteressierendeUnterrichtsgruppen", Global.Modus.Update, configuration, "", -1, -1, "", "", null, zulässigeAuswahlOptionen); // wird immer abgefragt
+
         AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start($"{art} aus GPU002.TXT einlesen ...", ctx =>
         {
-            // Aus der Kurse.dat wird die Kursart ermittelt. Wenn die Kursart in SchILD einmal gesetzt ist, wird sie nicht mehr geändert.
-            List<dynamic> kurseDat = m.Quelldateien.GetMatchingList(configuration, "kurse.", m.IStudents, m.Klassen);        
-            if (kurseDat == null)
-            {
-                AnsiConsole.MarkupLine($"[grey]Keine Kurse.dat gefunden. Bitte exportieren Sie die Datei erneut.[/]");
-                return;
-            }
-
-            List<dynamic> gpu002 = m.Quelldateien.GetMatchingList(configuration, "gpu002", m.IStudents, m.Klassen);
-            if (gpu002 == null || gpu002.Count == 0)
-            {
-                AnsiConsole.MarkupLine($"[grey]Keine GPU002-Daten gefunden. Bitte exportieren Sie die Datei erneut.[/]");
-                return;
-            }
-
-            List<dynamic> studentgroupStudents = m.Quelldateien.GetMatchingList(configuration, "studentgroupstudents", m.IStudents, m.Klassen);
-            if (studentgroupStudents == null || studentgroupStudents.Count == 0)
-            {
-                AnsiConsole.MarkupLine($"[grey]Keine studentgroupStudents gefunden. Bitte exportieren Sie die Datei erneut.[/]");
-                return;
-            }
-
             // Ordne die GPU002 aufsteigend nach Field6. Dadurch wird erreicht, dass die erste Lehrkrft im Alphabet Kursleiter ist.
             gpu002 = gpu002.OrderBy(record => {var dict = (IDictionary<string, object>)record; return dict.ContainsKey("Field6") ? dict["Field6"]?.ToString() : string.Empty; }).ToList();
 
@@ -44,8 +49,13 @@ public class Unterrichte : List<Unterricht>
                 if (zweck == Global.Zweck.Statistik && !dict.ContainsKey("Field12") && außerhalbDesStatistikdatums(configuration, dict))
                     continue; // Statistikdatum liegt außerhalb des Zeitraums.
 
-                //if(art == Global.Art.Zeugnis && !dict.ContainsKey("Field12") && außerhalbDesAktuellenAbschnitts(configuration, dict))
-                //    continue; // Statistikdatum liegt außerhalb des Zeitraums.
+                DateTime von = jjjjmmddNachDateTime(dict["Field15"]);
+                DateTime bis = jjjjmmddNachDateTime(dict["Field16"]);
+                DateTime statistikDatum = tt_mm_jjjjNachDateTime(configuration["StatistikDatum"]);
+
+                // Wenn das Statistikdatum außerhalb des Zeitraums von Field15 und Field16 liegt, wird die Zeile übersprungen.
+                if (zweck == Global.Zweck.Statistik && (von > statistikDatum || statistikDatum > bis))
+                    continue; // Statistikdatum liegt außerhalb des Zeitraums.
 
                 var unterrichtsId = dict["Field1"]?.ToString();
                 var fach = Bereinigen(dict["Field7"]?.ToString());
@@ -55,7 +65,7 @@ public class Unterrichte : List<Unterricht>
                 int wochentundenLehrkraft = int.TryParse(dict["Field2"]?.ToString(), out int ws) ? ws : 0;
                 int wochenstundenKurs = 0;
 
-                if (unterrichtsId == "1019")
+                if (unterrichtsId == "587")
                 {
                     string test = "Test"; // Debugging purpose
                 }
@@ -74,21 +84,63 @@ public class Unterrichte : List<Unterricht>
 
                     if (kurs == null)
                     {
-                        Add(new Unterricht(m, unterrichtsId, fach, schuelergruppe, klasse, lehrer, wochentundenLehrkraft, kurseDat, configuration, studentgroupStudents));
+                        Add(new Unterricht(zweck, m, unterrichtsId, fach, schuelergruppe, klasse, lehrer, wochentundenLehrkraft, kurseDat, configuration, studentgroupStudents));
                     }
                     else
                     {
                         // Wochenstunden werden bei Bedarf erhöht usw.
-                        kurs.Updaten(m, fach, lehrer, unterrichtsId, schuelergruppe, klasse, wochentundenLehrkraft, studentgroupStudents);
+                        kurs.Updaten(zweck, configuration, fach, lehrer, unterrichtsId, schuelergruppe, klasse, wochentundenLehrkraft, studentgroupStudents);
                     }
                 }
                 else if (art == Global.Art.NichtKursUnterrichte && !zeileIstKursOderGehörtZuKurs(gpu002, dict))
                 {
-                    Add(new Unterricht(m, unterrichtsId, fach, schuelergruppe, klasse, lehrer, wochentundenLehrkraft));
+                    Add(new Unterricht(zweck, m, configuration, unterrichtsId, fach, schuelergruppe, klasse, lehrer, wochentundenLehrkraft, studentgroupStudents));
                 }
             }
+
             Global.ZeileSchreiben($"{art} aus GPU002.TXT eingelesen:", this.Count().ToString());
         });
+    }
+
+    private DateTime tt_mm_jjjjNachDateTime(string? v)
+    {
+        if (string.IsNullOrEmpty(v) || v.Length != 10)
+            return DateTime.MinValue; // Ungültiges Datum
+
+        if (DateTime.TryParseExact(v, "dd.MM.yyyy", null, System.Globalization.DateTimeStyles.None, out DateTime dateTime))
+        {
+            return dateTime;
+        }
+        return DateTime.MinValue; // Ungültiges Datum
+    }
+
+    private DateTime jjjjmmddNachDateTime(object v)
+    {
+        if (v == null || v.ToString().Length != 8)
+            return DateTime.MinValue; // Ungültiges Datum
+
+        if (DateTime.TryParseExact(v.ToString(), "yyyyMMdd", null, System.Globalization.DateTimeStyles.None, out DateTime dateTime))
+        {
+            return dateTime;
+        }
+        return DateTime.MinValue; // Ungültiges Datum
+    }
+
+    private string GetZulässigeUnterrichtsgruppen(IConfiguration configuration, List<dynamic> gpu002)
+    {
+        var x = gpu002
+            .Select(record => (IDictionary<string, object>)record)
+            .Where(dict => dict.ContainsKey("Field12") && !string.IsNullOrEmpty(dict["Field12"]?.ToString()))
+            .Select(dict => dict["Field12"].ToString())
+            .Distinct()
+            .OrderBy(s => s)
+            .ToList();
+        if (x.Count == 0)
+        {
+            AnsiConsole.MarkupLine($"[grey]Keine Unterrichtsgruppen gefunden. Bitte exportieren Sie die Datei erneut.[/]");
+            return string.Empty;
+        }
+        return string.Join(",", x);
     }
 
     public Unterrichte()
