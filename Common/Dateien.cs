@@ -1,4 +1,5 @@
 ﻿using System.Configuration;
+using System.Diagnostics;
 using System.Text.Json;
 using Common;
 using Microsoft.Extensions.Configuration;
@@ -40,46 +41,13 @@ public class Dateien : List<Datei>
 
     public Dateien(IConfiguration configuration)
     {
-        Meldung = new List<string>();
-        DisplayHeader(configuration);
-    }
-
-    public void DisplayHeader(IConfiguration configuration, List<string> content = null)
-    {
-        Console.Clear();
-        AnsiConsole.Write(new FigletText("BKB-Tool").Centered().Color(Global.ColorÜberschrift));
-
-        var unterschrift = Global.GetColor(Global.ColorUnterschrift);
-
-        var contentString = ""; //configuration["AppDescription"] ?? "BKB-Tool - Ein Werkzeug für die Arbeit mit dem BKB-Schilddatenaustausch";
-        var header = $"[{unterschrift}] BKB-Tool[/] | [{unterschrift} link=https://github.com/stbaeumer/BKB-Tool]https://github.com/stbaeumer/BKB-Tool[/] | [{unterschrift}]GPLv3[/] | [{unterschrift}]Version {Global.AppVersion} [/]";
-
-        if (content != null && content.Count > 0)
-        {
-            contentString = string.Join(Environment.NewLine, content);
-        }
-
-        if (contentString == "")
-        {
-            AnsiConsole.Write(new Rule(header).RuleStyle(Global.GetColor(Global.ColorÜberschrift)).Centered());
-        }
-        else
-        {
-            var panel = new Panel(contentString)
-                    .Header(header)
-                    .HeaderAlignment(Justify.Center)
-                    .RoundedBorder()//.SquareBorder()
-                    .Expand()
-                    .BorderColor(Global.ColorÜberschrift);
-
-            AnsiConsole.Write(panel);
-        }
+        Meldung = new List<string>();        
     }
 
     public void GetInteressierendeDateienMitAllenEigenschaften(IConfiguration configuration)
     {
-        configuration = Global.Konfig("PfadDownloads", Global.Modus.Read, configuration);
-        configuration = Global.Konfig("PfadSchilddatenaustausch", Global.Modus.Read, configuration);
+        configuration = Global.Konfig("PfadDownloads", Global.Modus.ReadSilent, configuration);
+        configuration = Global.Konfig("PfadSchilddatenaustausch", Global.Modus.ReadSilent, configuration);
 
         AnsiConsole.Status()
             .Spinner(Spinner.Known.Dots)
@@ -449,8 +417,12 @@ public class Dateien : List<Datei>
             Add(new Datei(
                 "StudentgroupStudents",
                 "Beschreibung",
-                schildhinweise,
-                [""],
+                [
+                    "Exportieren Sie die Datei aus Webuntis, indem Sie als Administrator den Pfad gehen:",
+                    $"1. [bold {Global.GetColor(Global.ColorKopfzeileInCSV)}]Administration > Export > StudentgroupStudents.csv[/]",
+                    $"2. Die Datei in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/] speichern."
+                ],
+                [],
                 true,
                 d => d.FilternStudentgroupStudents(),
                 "*.csv",
@@ -503,76 +475,51 @@ public class Dateien : List<Datei>
 
         foreach (var dateinameNotwendig in dateinamenNotwendigeDateien)
         {
-            try
+            var dateiendung = dateinameNotwendig.Split(',')[1].Trim().ToLower();
+            var dateiname = dateinameNotwendig.Split(',')[0];
+
+            var datei = this.First(datei => !string.IsNullOrEmpty(datei.Dateiname)
+                    && !datei.Dateiname.ToLower().Contains("-kennwort")
+                    && datei.Dateiname.ToLower().StartsWith(dateiname.ToLower(), StringComparison.CurrentCultureIgnoreCase)
+                    && datei.Endung.ToLower().Contains("*." + dateiendung.ToLower(), StringComparison.CurrentCultureIgnoreCase));
+
+            datei.IstOptional = dateinameNotwendig.Split(',').Length > 2 && dateinameNotwendig.Split(',')[2].ToLower().Contains("opt") ? true : false;
+            datei.Nur177659 = dateinameNotwendig.Split(',').Length > 2 && dateinameNotwendig.ToLower().Contains("177659") ? true : false;
+
+            if (datei.Nur177659)
             {
-                var dateiendung = dateinameNotwendig.Split(',')[1].Trim().ToLower();
-                var dateiname = dateinameNotwendig.Split(',')[0];
+                string aaa = "";
+            }
 
-                var datei = this.First(datei => !string.IsNullOrEmpty(datei.Dateiname)
-                        && !datei.Dateiname.ToLower().Contains("-kennwort")
-                        && datei.Dateiname.ToLower().StartsWith(dateiname.ToLower(), StringComparison.CurrentCultureIgnoreCase)
-                        && datei.Endung.ToLower().Contains("*." + dateiendung.ToLower(), StringComparison.CurrentCultureIgnoreCase));
+            var absoluterPfad = this.First(datei => !string.IsNullOrEmpty(datei.Dateiname)
+            && !datei.Dateiname.ToLower().Contains("-kennwort")
+            && datei.Dateiname.ToLower().StartsWith(dateiname.ToLower(), StringComparison.CurrentCultureIgnoreCase)
+            && datei.Endung.ToLower().Contains("*." + dateiendung.ToLower(), StringComparison.CurrentCultureIgnoreCase)
+            ).AbsoluterPfad;
 
-                datei.IstOptional = dateinameNotwendig.Split(',').Length > 2 && dateinameNotwendig.Split(',')[2].ToLower().Contains("opt") ? true : false;
-                datei.Nur177659 = dateinameNotwendig.Split(',').Length > 2 && dateinameNotwendig.ToLower().Contains("177659") ? true : false;
+            if (absoluterPfad.ToLower().Contains("-kennwort"))
+            {
+                absoluterPfad = "";
+            }
 
-                if (datei.Nur177659)
+            if (absoluterPfad.Length > 0)
+            {
+                if (datei.Count == 0)
                 {
-                    string aaa = "";
-                }
-
-                var absoluterPfad = this.First(datei => !string.IsNullOrEmpty(datei.Dateiname)
-                && !datei.Dateiname.ToLower().Contains("-kennwort")
-                && datei.Dateiname.ToLower().StartsWith(dateiname.ToLower(), StringComparison.CurrentCultureIgnoreCase)
-                && datei.Endung.ToLower().Contains("*." + dateiendung.ToLower(), StringComparison.CurrentCultureIgnoreCase)
-                ).AbsoluterPfad;
-
-                if (absoluterPfad.ToLower().Contains("-kennwort"))
-                {
-                    absoluterPfad = "";
-                }
-
-                if (absoluterPfad.Length > 0)
-                {
-                    if (datei.Count == 0)
+                    if (datei.AbsoluterPfad.EndsWith(".pdf"))
                     {
-                        if (datei.AbsoluterPfad.EndsWith(".pdf"))
+                        if (datei.Erstelldatum.Date.AddDays(maxDateiAlter) < DateTime.Now)
                         {
-                            if (datei.Erstelldatum.Date.AddDays(maxDateiAlter) < DateTime.Now)
-                            {
-                                datei.Fehlermeldung = $"Die Datei [bold aqua]{absoluterPfad}[/] existiert, ist aber veraltet.";
-                                if (meldungAnzeigen && !datei.IstOptional)
-                                    datei.FehlermeldungRendern(configuration);
-                            }
-                        }
-                        else
-                        {
-                            if (!datei.DarfLeerSein)
-                            {
-                                datei.Fehlermeldung = $"Die Datei [bold aqua]{absoluterPfad}[/] existiert, ist aber leer. Ist die Datei evtl. vorher in Excel o.ä. geöffnet worden? Oder stimmt der Delimiter nicht? Der korrekte Delimiter ist: '[bold aqua]{datei.Delimiter}[/]'";
-                                if (meldungAnzeigen && !datei.IstOptional)
-                                    datei.FehlermeldungRendern(configuration);
-                            }
+                            datei.Fehlermeldung = $"Die Datei [bold aqua]{absoluterPfad}[/] existiert, ist aber veraltet.";
+                            if (meldungAnzeigen && !datei.IstOptional)
+                                datei.FehlermeldungRendern(configuration);
                         }
                     }
                     else
                     {
-                        if (((IDictionary<string, object>)datei[0]).Count == 1)
+                        if (!datei.DarfLeerSein)
                         {
-                            datei.Fehlermeldung = $"Die Datei [bold {Global.GetColor(Global.ColorPfadInDateien)}]{absoluterPfad}[/] hat nur eine einzige Spalte. Das korrekte Trennzeichen ist: [{Global.GetColor(Global.ColorZahlen)}]'{datei.Delimiter}'[/].";
-                            if (meldungAnzeigen && !datei.IstOptional)
-                                datei.FehlermeldungRendern(configuration);
-                        }
-
-
-                        if (datei.Erstelldatum.Date.AddDays(maxDateiAlter) < DateTime.Now.Date)
-                        {
-                            var veraltet = $"darf aber nicht älter als [bold {Global.GetColor(Global.ColorHinweise)}]{configuration["MaxDateiAlter"]}[/] Tage sein.";
-                            if (configuration["MaxDateiAlter"] == "1")
-                                veraltet = "darf aber nicht älter als von gestern sein.";
-                            if (configuration["MaxDateiAlter"] == "0")
-                                veraltet = "muss aber von heute sein.";
-                            datei.Fehlermeldung = $"Die Datei [bold {Global.GetColor(Global.ColorPfadInDateien)}]{datei.AbsoluterPfad}[/] ist veraltet. Sie wurde am [bold {Global.GetColor(Global.ColorHinweise)}]{datei.Erstelldatum:dd.MM.yyyy}[/] erstellt, {veraltet}";
+                            datei.Fehlermeldung = $"Die Datei [bold aqua]{absoluterPfad}[/] existiert, ist aber leer. Ist die Datei evtl. vorher in Excel o.ä. geöffnet worden? Oder stimmt der Delimiter nicht? Der korrekte Delimiter ist: '[bold aqua]{datei.Delimiter}[/]'";
                             if (meldungAnzeigen && !datei.IstOptional)
                                 datei.FehlermeldungRendern(configuration);
                         }
@@ -580,27 +527,45 @@ public class Dateien : List<Datei>
                 }
                 else
                 {
-                    var opt = "";
-
-                    if (datei.IstOptional)
+                    if (((IDictionary<string, object>)datei[0]).Count == 1)
                     {
-                        opt = ", ist aber optional";
-                    }
-                    else
-                    {
-                        opt = " und ist nicht optional";
+                        datei.Fehlermeldung = $"Die Datei [bold {Global.GetColor(Global.ColorPfadInDateien)}]{absoluterPfad}[/] hat nur eine einzige Spalte. Das korrekte Trennzeichen ist: [{Global.GetColor(Global.ColorZahlen)}]'{datei.Delimiter}'[/].";
+                        if (meldungAnzeigen && !datei.IstOptional)
+                            datei.FehlermeldungRendern(configuration);
                     }
 
-                    datei.Fehlermeldung = $"Die Datei [bold {Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads, dateiname)}[/] existiert nicht{opt}.";
-                    if (meldungAnzeigen && !datei.IstOptional)
-                        datei.FehlermeldungRendern(configuration);
+
+                    if (datei.Erstelldatum.Date.AddDays(maxDateiAlter) < DateTime.Now.Date)
+                    {
+                        var veraltet = $"darf aber nicht älter als [bold {Global.GetColor(Global.ColorHinweise)}]{configuration["MaxDateiAlter"]}[/] Tage sein.";
+                        if (configuration["MaxDateiAlter"] == "1")
+                            veraltet = "darf aber nicht älter als von gestern sein.";
+                        if (configuration["MaxDateiAlter"] == "0")
+                            veraltet = "muss aber von heute sein.";
+                        datei.Fehlermeldung = $"Die Datei [bold {Global.GetColor(Global.ColorPfadInDateien)}]{datei.AbsoluterPfad}[/] ist veraltet. Sie wurde am [bold {Global.GetColor(Global.ColorHinweise)}]{datei.Erstelldatum:dd.MM.yyyy}[/] erstellt, {veraltet}";
+                        if (meldungAnzeigen && !datei.IstOptional)
+                            datei.FehlermeldungRendern(configuration);
+                    }
                 }
-                notwendige.Add(datei);
             }
-            catch (Exception e)
+            else
             {
-                Console.WriteLine(e.Message);
+                var opt = "";
+
+                if (datei.IstOptional)
+                {
+                    opt = ", ist aber optional";
+                }
+                else
+                {
+                    opt = " und ist nicht optional";
+                }
+
+                datei.Fehlermeldung = $"Die Datei [bold {Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads, dateiname)}[/] existiert nicht{opt}.";
+                if (meldungAnzeigen && !datei.IstOptional)
+                    datei.FehlermeldungRendern(configuration);
             }
+            notwendige.Add(datei);            
         }
 
         return notwendige;
@@ -610,7 +575,7 @@ public class Dateien : List<Datei>
     {
         try
         {
-            configuration = Global.Konfig("MaxDateiAlter", Global.Modus.Read, configuration);
+            configuration = Global.Konfig("MaxDateiAlter", Global.Modus.ReadSilent, configuration);
             var maxDateiAlterString = configuration["MaxDateiAlter"];
             int maxDateiAlter = 6; // Standardwert
 
@@ -678,7 +643,7 @@ public class Dateien : List<Datei>
                 }
             });
             Meldung.Add("");
-            DisplayHeader(configuration, Meldung);
+            Global.DisplayHeader(configuration);
         }
         catch (Exception e)
         {
@@ -709,7 +674,7 @@ public class Dateien : List<Datei>
     /// </summary>
     public void ExportAusSchildVerschieben(IConfiguration configuration)
     {
-        configuration = Global.Konfig("PfadSchilddatenaustausch", Global.Modus.Read, configuration);
+        configuration = Global.Konfig("PfadSchilddatenaustausch", Global.Modus.ReadSilent, configuration);
         var pfadDownloads = configuration["PfadDownloads"];
 
         // Stelle sicher, dass der Zielordner existiert
@@ -817,7 +782,7 @@ public class Dateien : List<Datei>
     public void FehlermeldungRendern(IConfiguration configuration)
     {
         foreach (var datei in this.Where(q => !string.IsNullOrEmpty(q.Fehlermeldung)))
-        {
+        {            
             datei.FehlermeldungRendern(configuration);
         }
     }
@@ -833,6 +798,62 @@ public class Dateien : List<Datei>
         catch
         {
             return false;
+        }
+    }
+
+    internal void Erstellen(Dateien quelldateien)
+    {
+        // Zuerst werden die Ordner geöffnet. Der User sieht dann in den Ordnern, wie die Dateien live erzeugt werden.
+        OeffneOrdner();
+
+        // Erstelle alle Dateien, die in der Liste enthalten sind.
+        foreach (var datei in this)
+        {
+            try
+            {
+                datei.VergleichenUndFiltern(quelldateien);
+                datei.Erstellen();
+            }
+            catch (Exception ex)
+            {
+                AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything);
+                AnsiConsole.MarkupLine($"[bold {Global.GetColor(Global.ColorFehler)}]Fehler beim Erstellen der Datei [bold {Global.GetColor(Global.ColorPfadInDateien)}]{datei.Dateiname}[/]: {ex.Message}[/]");
+            }
+        }
+    }
+
+    private void OeffneOrdner()
+    {
+        var verschiedeneOrdner = this.Select(datei => Path.GetDirectoryName(datei.AbsoluterPfad))
+            .Distinct()
+            .Where(dir => !string.IsNullOrEmpty(dir) && Directory.Exists(dir))
+            .ToList();
+
+        // Öffne die Ordner, in denen die Dateien gespeichert werden sollen.
+        foreach (var ordner in verschiedeneOrdner)
+        {
+            if (ordner != null && Directory.Exists(ordner))
+            {
+                try
+                {
+                    if (IsDirectoryWritable(ordner))
+                    {
+                        Process.Start(new ProcessStartInfo
+                        {
+                            FileName = ordner,
+                            UseShellExecute = true
+                        });
+                    }
+                    else
+                    {
+                        AnsiConsole.MarkupLine($"[bold {Global.GetColor(Global.ColorFehler)}]Der Ordner [bold {Global.GetColor(Global.ColorPfadInDateien)}]{ordner}[/] ist nicht beschreibbar.[/]");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything);
+                }
+            }
         }
     }
 }

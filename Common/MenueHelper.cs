@@ -39,7 +39,13 @@ public static class MenueHelper
 
             quelldateien.Meldung.Add(students.GetArtUndZahlen());
 
-            Global.DisplayHeader(configuration, quelldateien.Meldung.Where(x => !string.IsNullOrEmpty(x)).ToList());
+            var panel = new Panel(string.Join(' ', quelldateien.Meldung))
+                .HeaderAlignment(Justify.Center)
+                .RoundedBorder()//.SquareBorder()
+                .Expand()
+                .BorderColor(Global.ColorÜberschrift);
+
+            AnsiConsole.Write(panel);
 
             lehrers = new Lehrers(configuration, quelldateien.Notwendige(configuration, ["lehrkraefte,dat"], true));
             
@@ -69,19 +75,18 @@ public static class MenueHelper
                             $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis:[/] Das Zeugnisdatum des letzten Zeugnisses in einer Klasse wird zum Webuntis-Austrittsdatum bei Schüler*innen, deren Status weder aktiv noch extern ist."
                         ],
                         m =>
-                        {
-                            var zeitstempel = DateTime.Now.ToString("yyyyMMdd-HHmm");
+                        {                            
                             if(m.NichtAlleSusHabenEineEindeutigeMailAdresse(configuration)) return;
-                            m.Zieldatei?.Erstellen("|", '\'', new UTF8Encoding(false), false);
-                            m.Zieldatei = m.WebuntisOderNetmanOderLitteraCsv(configuration, Path.Combine(pfadDownloads ?? "", zeitstempel +  @"-ImportNachWebuntis.csv"));
-                            m.Zieldatei?.Erstellen(";", '\'', new UTF8Encoding(false), false,
+                            m.Zieldateien =
                             [
-                                $"1. In Webuntis als Webuntis-Admin:  [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Stammdaten > Schüler*innen > Import[/]",
-                                $"2. Datei auswählen, UTF8",
-                                $"3. Profil: Schuelerimport, dann Vorschau",
-                                $"Mehr zum Profil Schuelerimport: [{Global.GetColor(Global.ColorHyperlink)}][link=https://github.com/stbaeumer/BKB-Tool/wiki]https://github.com/stbaeumer/BKB-Tool/wiki[/][/]"
-                            ]
-                            );
+                                m.WebuntisOderNetmanOderLitteraCsv(configuration, Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") +  @"-ImportNachWebuntis.csv"), ";", '\'', new UTF8Encoding(false), false,
+                                [
+                                    $"1. In Webuntis als Webuntis-Admin:  [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Stammdaten > Schüler*innen > Import[/]",
+                                    $"2. Datei auswählen, UTF8",
+                                    $"3. Profil: Schuelerimport, dann Vorschau",
+                                    $"Mehr zum Profil Schuelerimport: [{Global.GetColor(Global.ColorHyperlink)}][link=https://github.com/stbaeumer/BKB-Tool/wiki]https://github.com/stbaeumer/BKB-Tool/wiki[/][/]"
+                                ]),
+                            ];
                         },
                         Global.Rubrik.WöchtentlicheArbeiten,
                         Global.NurBeiDiesenSchulnummern.Alle
@@ -98,10 +103,9 @@ public static class MenueHelper
                         ],
                         m =>
                         {
-                            var zeitstempel = DateTime.Now.ToString("yyyyMMdd-HHmm");         
                             if(m.NichtAlleSusHabenEineEindeutigeMailAdresse(configuration)) return;                   
                             m.IStudents = m.Students.OhneWebuntisFoto(configuration, Path.Combine(Directory.GetCurrentDirectory(), "fotos.txt"));
-                            m.IStudents.FotosFürWebuntisZippen(configuration, Path.Combine(pfadDownloads ?? "", zeitstempel +  @"-ImportNachWebuntis.zip"), Path.Combine(Directory.GetCurrentDirectory(), "fotos.txt"),
+                            m.IStudents.FotosFürWebuntisZippen(configuration, Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") +  @"-ImportNachWebuntis.zip"), Path.Combine(Directory.GetCurrentDirectory(), "fotos.txt"),
                             [
                                 "1. [bold yellow]Stammdaten > Schüler*innen > Bildimport[/]",
                                 "2. Identifizierung Fremdschlüssel",
@@ -123,13 +127,17 @@ public static class MenueHelper
                         m =>
                         {
                             var zeitstempel = DateTime.Now.ToString("yyyyMMdd-HHmm");         
-                            if(m.NichtAlleSusHabenEineEindeutigeMailAdresse(configuration)) return;                   
-                            m.Zieldatei = m.WebuntisOderNetmanOderLitteraCsv(configuration, Path.Combine(configuration["PfadDownloads"] ?? "", DateTime.Now.AddHours(1).ToString("yyyyMMdd-HHmm") + @"-ImportNachLittera.xml"));
-                            m.Zieldatei?.Erstellen(";", '\"', new UTF8Encoding(false), false);
+                            if(m.NichtAlleSusHabenEineEindeutigeMailAdresse(configuration)) return;
+                            m.Zieldateien =
+                            [
+                                m.WebuntisOderNetmanOderLitteraCsv(configuration, Path.Combine(configuration["PfadDownloads"] ?? "", DateTime.Now.AddHours(1).ToString("yyyyMMdd-HHmm") + @"-ImportNachLittera.xml"), ",", '\'', new UTF8Encoding(false), false)
+                            ];
+                            
                             if(configuration["Schulnummer"] != null && configuration["Schulnummer"] == "177659")
                             {
                                 configuration = Global.Konfig("PfadLitteraImport", Global.Modus.Update, configuration, "Littera-Import-Pfad");
-                                m.Zieldatei?.Verschieben(configuration["PfadLitteraImport"]);
+                                if(m.Zieldateien[0] == null) return;
+                                    m.Zieldatei?.Verschieben(configuration["PfadLitteraImport"]);
                             }
                         },
                         Global.Rubrik.WöchtentlicheArbeiten,
@@ -147,11 +155,11 @@ public static class MenueHelper
                         ],
                         m =>
                         {
+                            m.Zieldateien = new Dateien();
                             var zeitstempel = DateTime.Now.ToString("yyyyMMdd-HHmm");
                             if(m.NichtAlleSusHabenEineEindeutigeMailAdresse(configuration)) return;
-                            m.Zieldatei = m.WebuntisOderNetmanOderLitteraCsv(configuration, Path.Combine(pfadDownloads ?? "", zeitstempel + @"-ImportNachNetman.csv"));
-                            m.Zieldatei?.Erstellen(",", '\'', new UTF8Encoding(false), false);
-
+                            m.Zieldatei = m.WebuntisOderNetmanOderLitteraCsv(configuration, Path.Combine(pfadDownloads ?? "", zeitstempel + @"-ImportNachNetman.csv"), ",", '\'', new UTF8Encoding(false), false);
+                            
                             if(configuration["Schulnummer"] != null && configuration["Schulnummer"] == "177659")
                             {
                                 configuration = Global.Konfig("ZipKennwort", Global.Modus.Update, configuration, "Zip-Kennwort");
@@ -192,20 +200,28 @@ public static class MenueHelper
                         students,
                         klassen,
                         [
-                            $"Eine gültige schulische E-Mail-Adresse bei allen SuS ist eine wichtige Voraussetzung für viele Funktionen in [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/].",
-                            $"Es wird jetzt die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", "SchuelerZusatzdaten.dat")}[/] um die schulischen Mailadressen ergänzt und in [{Global.GetColor(Global.ColorPfadInDateien)}]{pfadSchilddatenaustausch}[/] für den Reimport nach SchILD bereitgestellt.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1:[/] Vorhandene schulische Mailadressen in SchILD bleiben unangetastet.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #2:[/] Die schulischen Mailadressen sehen wie folgt aus: [{Global.GetColor(Global.ColorTextHervorheben)}]nv061201@meine-schule.de[/], wobei gilt:",
-                            $"[{Global.GetColor(Global.ColorTextHervorheben)}]n[/]: Erster Buchstabe des Nachnamens. Umlaute werden aufgelöst.",
+                            $"Alle Schüler*innen bekommen jetzt eine gültige schulinterne E-Mail-Adresse in SchILD. Das ist eine wichtige Voraussetzung für viele Funktionen in [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/].",
+                            $"Es wird jetzt die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", "SchuelerZusatzdaten.dat")}[/] um die schulinterne Mailadressen ergänzt und in [{Global.GetColor(Global.ColorPfadInDateien)}]{pfadSchilddatenaustausch}[/] für den Reimport nach SchILD bereitgestellt.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1:[/] Vorhandene schulinterne Mailadressen in SchILD bleiben unangetastet.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #2:[/] BKB-Tool bildet die schulinterne Mailadressen wie folgt: [{Global.GetColor(Global.ColorTextHervorheben)}]nv061201@meine-schule.de[/], wobei gilt:",
+                            $"[{Global.GetColor(Global.ColorTextHervorheben)}]n[/]: Erster Buchstabe des Nachnamens. Umlaute werden aufgelöst. Bsp.: [{Global.GetColor(Global.ColorTextHervorheben)}]Ü[/] wird zu [{Global.GetColor(Global.ColorTextHervorheben)}]u[/] usw.",
                             $"[{Global.GetColor(Global.ColorTextHervorheben)}]v[/]: Erster Buchstabe des Vornamens. Umlaute werden aufgelöst.",
                             $"[{Global.GetColor(Global.ColorTextHervorheben)}]061201[/]: Geburtsdatum in der Notation: JJMMTT.",
                             $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #3:[/] Wenn z.B. Zwillinge Markus und Martin heißen, dann wird der Konflikt angezeigt. Es muss dann nach dem Import händisch die Adresse des einen in SchILD angepasst werden."
                         ],
                         m =>
                         {
-                            configuration = Global.Konfig("MailDomain",Global.Modus.Update,configuration);
-                            m.Zieldatei = m.SchuelerZusatzdatenUmMailAdresseErgaenzen(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerZusatzdaten.dat"));
-                            m.Zieldatei?.Erstellen("|", '\'', new UTF8Encoding(false), false);
+                            configuration = Global.Konfig("MailDomain", Global.Modus.Read, configuration);
+
+                            m.Zieldateien =
+                            [
+                                m.SchuelerZusatzdatenUmMailAdresseErgaenzen(
+                                    configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerZusatzdaten.dat"),
+                                    ["Nachname", "Vorname", "Geburtsdatum"],
+                                    [],
+                                    "|", '\'', new UTF8Encoding(false), false)
+                            ];
+                            m.Zieldateien.Erstellen(quelldateien);
                         },
                         Global.Rubrik.WöchtentlicheArbeiten,
                         Global.NurBeiDiesenSchulnummern.Nur177659
@@ -232,37 +248,30 @@ public static class MenueHelper
                             configuration = Global.Konfig("StatistikDatum", Global.Modus.Read, configuration);                            
                             configuration = Global.Konfig("Kursarten", Global.Modus.Read, configuration);
                             
-                            m.Zieldatei = m.Lernabschnittsdaten(configuration, Global.Zweck.Statistik, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLernabschnittsdaten.dat"));
-                            m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, configuration, ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt"], []);
-                            m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
-                                                        
                             m.Unterrichte = new Unterrichte(configuration, m, Global.Zweck.Statistik, Global.Art.Kurse);
-                            m.Zieldatei = m.Kurse(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Kurse.dat"));
-                            m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
-  
                             m.Unterrichte.AddRange(new Unterrichte(configuration, m, Global.Zweck.Statistik, Global.Art.NichtKursUnterrichte));
-                            m.Zieldatei = m.LeistungsdatenStatistik(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat"), Global.Zweck.Statistik);
-                            m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, configuration, ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach"], ["Jahrgang"]);
-                            m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
-/*
-                            m.Zieldatei = m.LehrkraefteSonderzeiten(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "LehrkraefteSonderzeiten.dat"));
-                            m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
 
-                            m.Zieldatei = m.Lehrkraefte(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Lehrkraefte.dat"));
-                            m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
-*/
-                            //m.Zieldatei = m.Faecher(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Faecher.dat"));
-                            //m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
+                            m.Zieldateien =
+                            [
+                                m.Lernabschnittsdaten(configuration, Global.Zweck.Statistik, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLernabschnittsdaten.dat"), "|", '\0', new UTF8Encoding(true), false),
+                                m.Kurse(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Kurse.dat"), "|", '\0', new UTF8Encoding(true), false),
+                                m.LeistungsdatenStatistik(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat"), Global.Zweck.Statistik),
+                                m.LehrkraefteSonderzeiten(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "LehrkraefteSonderzeiten.dat"), "|", '\0', new UTF8Encoding(true), false),
+                                m.Lehrkraefte(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Lehrkraefte.dat"),"|", '\0', new UTF8Encoding(true), false),
+                                m.Faecher(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Faecher.dat"),"|", '\0', new UTF8Encoding(true), false)
+                            ];
 
-                            //Zieldatei = m.Kurse(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Kurse.dat"));
+                            //m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, configuration, ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt"], []);                            
+                            //m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, configuration, ["Nachname", "Vor
                             //m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, configuration, ["KursBez"], ["Klasse", "Schulnr", "WochenstdPUNKTLEERZEICHENKL"]);
-                            //m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);  
 
-                            m.Zieldatei.Ordner = pfadSchilddatenaustausch ?? "";
+                            m.Zieldateien.Erstellen(quelldateien);
+
+                            //m.Zieldatei.Ordner = pfadSchilddatenaustausch ?? "";
                         },
                         Global.Rubrik.Leistungsdaten,
                         Global.NurBeiDiesenSchulnummern.Alle
-                    ),
+                    )/*,
                     new Menüeintrag(
                         "Zeugnisse #1: Lernabschnittsdaten: Fehlzeiten von Webuntis nach SchILD importieren",
                         anrechnungen,
@@ -807,22 +816,13 @@ public static class MenueHelper
                         },
                         Global.Rubrik.Allgemein,
                         Global.NurBeiDiesenSchulnummern.Nur000000
-                    )
+                    )*/
                 ]
             );
         }
         catch (Exception ex)
         {
-            var panel3 = new Panel(ex.Message)
-            .Header($" [bold {Global.GetColor(Global.ColorFehler)}] Es ist zu einem Fehler gekommen [/]")
-            .HeaderAlignment(Justify.Left)
-            .SquareBorder()
-            .Expand()
-            .BorderColor(Global.ColorFehler);
-        
-            AnsiConsole.Write(panel3);
-            Global.WeiterMitAnykey(configuration);
-            return null;            
+            throw ex;
         }   
     }
 }

@@ -21,8 +21,17 @@ namespace Common;
 
 public class Datei : List<dynamic>
 {
+    private bool shouldAllQuote;
+    private string[] anhandDieserAttributeWirdVerglichen;
+    private string[] dieseAttributeWerdenBeimVergleichIgnoriert;
+
     public string Endung { get; set; } = null!;
     public string Delimiter { get; set; } = null!;
+    public char Quote { get; set; }
+    public Encoding Encoding { get; set; }
+    public bool ShouldAllQuote { get; private set; }
+    public bool ShouldQuote { get; set; }
+    public List<string> Importhinweise { get; set; }
     public bool DarfLeerSein { get; set; } = false;
     public bool HasHeader { get; set; }
     public string Name { get; set; } = null!;
@@ -48,6 +57,8 @@ public class Datei : List<dynamic>
     public string Ordner { get; internal set; }
     public bool IstOptional { get; internal set; }
     public bool Nur177659 { get; internal set; }
+    public string[] AnhandDieserAttributeWirdVerglichen { get; private set; }
+    public string[] DieseAttributeWerdenBeimVergleichIgnoriert { get; private set; }
 
     public Datei(string name, bool vorhanden)
     {
@@ -100,6 +111,27 @@ public class Datei : List<dynamic>
         Endung = endung;
         Delimiter = delimiter;
         DarfLeerSein = darfLeerSein;
+    }
+
+    public Datei(string absoluterPfad, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise) : this(absoluterPfad)
+    {
+        AbsoluterPfad = absoluterPfad;
+        Delimiter = delimiter;
+        Quote = quote;
+        Encoding = encoding;
+        ShouldAllQuote = shouldAllQuote;
+        Importhinweise = importhinweise;
+    }
+
+    public Datei(string absoluterPfad, string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise) : this(absoluterPfad)
+    {
+        AnhandDieserAttributeWirdVerglichen = anhandDieserAttributeWirdVerglichen;
+        DieseAttributeWerdenBeimVergleichIgnoriert = dieseAttributeWerdenBeimVergleichIgnoriert;
+        Delimiter = delimiter;
+        Quote = quote;
+        Encoding = encoding;
+        ShouldAllQuote = shouldAllQuote;
+        Importhinweise = importhinweise;
     }
 
     public List<dynamic> Filtern(Students students, Klassen klassen)
@@ -401,12 +433,12 @@ public class Datei : List<dynamic>
         return liste;
     }
 
-    public void Erstellen(string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
+    public void Erstellen()
     {
-        if (string.IsNullOrEmpty(AbsoluterPfad) || this.Count == 0)
+        if (string.IsNullOrEmpty(AbsoluterPfad) || Count == 0)
         {
             // Wenn der Pfad leer ist oder die Liste leer ist, wird die Datei nicht erstellt.
-            Global.ZeileSchreiben(AbsoluterPfad, "Datei nicht erstellt, da der Pfad leer ist oder keine Daten vorhanden sind.", ConsoleColor.Red, ConsoleColor.White);        
+            Global.ZeileSchreiben(AbsoluterPfad, "Datei nicht erstellt, da der Pfad leer ist oder keine Daten vorhanden sind.", ConsoleColor.Red, ConsoleColor.White);
             return;
         }
         /*
@@ -459,18 +491,18 @@ public class Datei : List<dynamic>
         {
             try
             {
-                var config = new CsvHelper.Configuration.CsvConfiguration(CultureInfo.InvariantCulture)
+                var config = new CsvConfiguration(CultureInfo.InvariantCulture)
                 {
-                    Delimiter = delimiter,
-                    Quote = quote,
-                    ShouldQuote = args => shouldAllQuote
+                    Delimiter = this.Delimiter,
+                    Quote = this.Quote,
+                    ShouldQuote = args => this.ShouldAllQuote
                 };
 
                 File.Delete(AbsoluterPfad);
 
                 if (this != null && this.Any())
                 {
-                    using var writer = new StreamWriter(AbsoluterPfad, false, encoding);
+                    using var writer = new StreamWriter(AbsoluterPfad, false, this.Encoding);
                     using var csv = new CsvWriter(writer, config);
 
                     // Header manuell extrahieren
@@ -522,13 +554,13 @@ public class Datei : List<dynamic>
             }
             finally
             {
-                var rechteSeite = importhinweise != null && importhinweise.Any() ? string.Join("\n", importhinweise) : "";
+                var rechteSeite = Importhinweise != null && Importhinweise.Any() ? string.Join("\n", Importhinweise) : "";
                 Global.ZeileSchreiben(AbsoluterPfad, rechteSeite, ConsoleColor.White, ConsoleColor.Blue);
             }
         }
     }
 
-    public Datei? VergleichenUndFiltern(Dateien vorhandeneDateien, IConfiguration configuration, string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert)
+    public Datei? VergleichenUndFiltern(Dateien quelldateien)
     {
         var neueDatei = new Datei(AbsoluterPfad);
         var dateiendung = Path.GetExtension(AbsoluterPfad);
@@ -547,7 +579,7 @@ public class Datei : List<dynamic>
 
         // Die vorhandene hat denselben Namen wie die zieldatei
         // die vorhandene Datei wird im Downloadsordner gesucht
-        foreach (var vorhandeneDatei in vorhandeneDateien)
+        foreach (var vorhandeneDatei in quelldateien)
         {
             if (Path.GetFileName(vorhandeneDatei.AbsoluterPfad) == Path.GetFileName(AbsoluterPfad))
             {
@@ -563,7 +595,7 @@ public class Datei : List<dynamic>
 
         // Wenn in der vorhandenen eine Spalte namens Nachname existiert und die Dateiendung .dat ist,
         // dann muss in jeder Zeile der Nachname um #Klasse ergänzt werden.
-        if (anhandDieserAttributeWirdVerglichen.Contains("Nachname") && dateiendung == ".dat")
+        if (AnhandDieserAttributeWirdVerglichen.Contains("Nachname") && dateiendung == ".dat")
         {
             // In jeder Zeile den Nachnamen um #Klasse ergänzen
             foreach (var vorhandeneRec in vorhandene)
@@ -1015,6 +1047,7 @@ public class Datei : List<dynamic>
             }
             else
             {
+                throw new Exception($"[bold {Global.GetColor(Global.ColorHinweise)}]{Fehlermeldung}[/]\n[gray]{string.Join("\n", Hinweise)}[/]");
                 var panel2 = new Panel($"[bold {Global.GetColor(Global.ColorHinweise)}]{Fehlermeldung}[/]\n[gray]{string.Join("\n", Hinweise)}[/]")
                 .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] !? [/]")
                 .HeaderAlignment(Justify.Left)

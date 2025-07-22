@@ -1389,7 +1389,7 @@ public class Students : List<Student>
 
     internal string GetArtUndZahlen()
     {
-        var statusstring = $"[{Global.GetColor(Global.ColorZahlen)}]" + this.Count().ToString() + "[/] Schüler*innen: ";
+        var statusstring = $"\n[{Global.GetColor(Global.ColorZahlen)}]" + this.Count().ToString() + "[/] Schüler*innen: ";
 
         var i = 0;
         var zeile = new List<string>();
@@ -1397,7 +1397,7 @@ public class Students : List<Student>
 
         if (this == null || this.Count == 0)
         {
-            throw new Exception("Keine Schülerdaten gefunden.");
+            throw new Exception($"Keine Schülerdaten gefunden. Notwendige Dateien heruntergeladen? \nDateien veraltet? Drücken Sie [{Global.GetColor(Global.ColorActionInMenüs)}]e[/], um in den Einstellungen festzulegen, ab wann Dateien als veraltet verworfen werden.");
         }
 
         foreach (var status in this.Select(x => x.Status).Distinct().OrderBy(x => x).ToList())

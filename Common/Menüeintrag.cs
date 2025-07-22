@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using CookComputing.XmlRpc;
 using Spectre.Console;
 using Color = Spectre.Console.Color;
+using System.Text;
 
 namespace Common;
 
@@ -60,6 +61,7 @@ public class Menüeintrag
     public Datei Zieldatei { get; set; }
     public List<string> AlleSchildKursBez { get; private set; }
     public Unterrichte Unterrichte { get; set; }
+    public Dateien Zieldateien { get; set; }
 
     public Menüeintrag(string titel, Anrechnungen anrechnungen, Dateien quelldateien, Students students, Klassen klassen, List<string> beschreibung, Action<Menüeintrag> funktion, Global.Rubrik rubrik = Global.Rubrik.Allgemein, Global.NurBeiDiesenSchulnummern nurbeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Alle)
     {
@@ -84,6 +86,7 @@ public class Menüeintrag
             Rubrik = rubrik;
             NurBeiDiesenSchulnummern = nurbeiDiesenSchulnummern;
             Unterrichte = new Unterrichte();
+            Zieldateien = new Dateien();
         }
     }
 
@@ -378,7 +381,7 @@ public class Menüeintrag
         return lk1faecher.Contains(linkerTeil) ? "LK1" : "LK2";
     }
 
-    public Datei Lernabschnittsdaten(IConfiguration configuration, Global.Zweck art, string zieldateiname)
+    public Datei Lernabschnittsdaten(IConfiguration configuration, Global.Zweck art, string zieldateiname, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
         var schuelerLernab = Quelldateien.GetMatchingList(configuration, "lernabschnittsdat", IStudents, Klassen);
         if (schuelerLernab == null || !schuelerLernab.Any()) return [];
@@ -395,7 +398,12 @@ public class Menüeintrag
         configuration = Global.Konfig("Abschnittswechsel", Global.Modus.Read, configuration);
 
         var zielDatei = new Datei(zieldateiname, new Datei(schuelerLernab));
-
+        zielDatei.Delimiter = delimiter;
+        zielDatei.Quote = quote;
+        zielDatei.Encoding = encoding;
+        zielDatei.ShouldQuote = shouldAllQuote;
+        zielDatei.Importhinweise = importhinweise;
+        
         if (art != Global.Zweck.Statistik)
         {
             absencePerStud = Quelldateien.GetMatchingList(configuration, "absenceperstudent", IStudents, Klassen);
@@ -442,7 +450,7 @@ public class Menüeintrag
 
             if (ab > 0)
             {
-                configuration = Global.Konfig("OffeneFehlstunden", Global.Modus.Update, configuration);                
+                configuration = Global.Konfig("OffeneFehlstunden", Global.Modus.Update, configuration);
             }
 
 
@@ -458,11 +466,11 @@ public class Menüeintrag
                 default:
                     throw new Exception("Ungültiger Abschnitt. Bitte geben Sie 1 oder 2 ein.");
             }
-            
+
             configuration = Global.Konfig($"Konferenzdatum", Global.Modus.Read, configuration);
             konferenzdatum = DateTime.Parse(configuration["Konferenzdatum"]);
             configuration = Global.Konfig($"Zeugnisdatum", Global.Modus.Read, configuration);
-            zeugnisdatum = DateTime.Parse(configuration["Zeugnisdatum"]);            
+            zeugnisdatum = DateTime.Parse(configuration["Zeugnisdatum"]);
             configuration = Global.Konfig("MaximaleAnzahlFehlstundenProTag", Global.Modus.Read, configuration);
             configuration = Global.Konfig("FehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt", Global.Modus.Read, configuration);
         }
@@ -941,10 +949,10 @@ public class Menüeintrag
     }
     */
 
-    public Datei Kurse(IConfiguration configuration, string zieldateiname)
+    public Datei Kurse(IConfiguration configuration, string zieldateiname, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
         var kurse = this.Unterrichte;
-        var zieldatei = new Datei(zieldateiname);
+        var zieldatei = new Datei(zieldateiname, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Kurse bilden: ...", ctx =>
         {
@@ -1270,9 +1278,9 @@ public class Menüeintrag
     }
 
 
-    public Datei? Faecher(IConfiguration configuration, string zieldateiname)
+    public Datei? Faecher(IConfiguration configuration, string zieldateiname, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
-        var zieldatei = new Datei(zieldateiname);
+        var zieldatei = new Datei(zieldateiname, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         var records = new List<dynamic>();
         var exportLessons = Quelldateien.GetMatchingList(configuration, "exportlessons", IStudents, Klassen);
@@ -1481,18 +1489,18 @@ public class Menüeintrag
         lehrers.GetTeamsUrl(mitgliederMail.Split(';'), String.Join(';', IKlassen));
     }
 
-    public Datei? WebuntisOderNetmanOderLitteraCsv(IConfiguration configuration, string zieldateiname)
+    public Datei WebuntisOderNetmanOderLitteraCsv(IConfiguration configuration, string zieldateiname, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
         try
         {
-            var zieldatei = new Datei(zieldateiname);
+            var zieldatei = new Datei(zieldateiname, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
             List<dynamic>? webuntisStudents = Quelldateien.GetMatchingList(configuration, "student_", Students, Klassen);
             if (webuntisStudents == null || webuntisStudents.Count == 0) return [];
             var schuelerZusatzdaten = Quelldateien.GetMatchingList(configuration, "schuelerzusatzdaten", Students, Klassen);
             if (schuelerZusatzdaten == null || schuelerZusatzdaten.Count == 0) return [];
             var schuelerLernabschnittsdaten = Quelldateien.GetMatchingList(configuration, "schuelerlernabschnittsdaten", Students, Klassen);
-            if (schuelerLernabschnittsdaten == null || schuelerLernabschnittsdaten.Count == 0) return [];            
+            if (schuelerLernabschnittsdaten == null || schuelerLernabschnittsdaten.Count == 0) return [];
             var schuelerErzieher = Quelldateien.GetMatchingList(configuration, "schuelererzieher", Students, Klassen);
             if (schuelerErzieher == null || schuelerErzieher.Count == 0) return [];
             var schuelerAdressen = Quelldateien.GetMatchingList(configuration, "schueleradressen", Students, Klassen);
@@ -1501,14 +1509,14 @@ public class Menüeintrag
             if (lehrkraefte == null || lehrkraefte.Count == 0) return [];
             var klassen = Quelldateien.GetMatchingList(configuration, "klassen", Students, Klassen);
             if (klassen == null || klassen.Count == 0) return [];
-            
+
             //AnsiConsole.Write(new Rule($"[{Global.GetColor(Global.ColorInfoBox)}]Anstehende Änderungen/Neuanlagen:[/]").RuleStyle(Global.GetColor(Global.ColorInfoBox)).LeftJustified());
 
             var table = new Spectre.Console.Table();
             table.Border(TableBorder.Rounded);
             table.Centered();
             table.Expand();
-    
+
             // Add columns 
             table.AddColumn("Nr");
             table.AddColumn("Name");
@@ -1639,10 +1647,10 @@ public class Menüeintrag
                         }
                     }
                 }
-                
+
                 Global.ZeileSchreiben("Webuntis-Schüler*innen verarbeitet:", webuntisStudents.Count().ToString());
             });
-              
+
             // Ab hier die Neuanlagen
 
             var uniqueStudents = Students
@@ -1861,14 +1869,14 @@ public class Menüeintrag
                     }
                 }
 
-                Global.ZeileSchreiben("SchILD-Schüler*innen verarbeitet:", zieldatei.Count().ToString());                
+                Global.ZeileSchreiben("SchILD-Schüler*innen verarbeitet:", zieldatei.Count().ToString());
             });
 
             Thread.Sleep(1000);
 
             if (susMitÄnderung.Count() > 2)
                 AnsiConsole.Write(table);
-            
+
             return zieldatei;
         }
         catch (Exception ex)
@@ -2793,11 +2801,14 @@ public class Menüeintrag
     /// <param name="zieldateiname"></param>
     /// <param name="nurDieseGründe"></param>
     /// <returns></returns>
-    internal Datei? LehrkraefteSonderzeiten(IConfiguration configuration, string zieldateiname, string nurDieseGründe = "")
+    internal Datei? LehrkraefteSonderzeiten(IConfiguration configuration, string zieldateiname, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
+        configuration = Global.Konfig("NurDieseGruende", Global.Modus.Update, configuration);
+        var nurDieseGründe = configuration["NurDieseGruende"].ToString().Trim();
+
         var akt = int.Parse(Global.AktSj[0]);
 
-        var zieldatei = new Datei(zieldateiname);
+        var zieldatei = new Datei(zieldateiname, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         var lehrkraefte = Quelldateien.GetMatchingList(configuration, "lehrkraefte", IStudents, Klassen);
         if (lehrkraefte == null || lehrkraefte.Count == 0) return [];
@@ -2811,8 +2822,7 @@ public class Menüeintrag
         var gpu004 = Quelldateien.GetMatchingList(configuration, "gpu004", IStudents, Klassen); // Lehrkraefte
         if (gpu004 == null) return [];
 
-        if (nurDieseGründe == "")
-            configuration = Global.Konfig("LehrkraefteSonderzeiten", Global.Modus.Update, configuration);
+        configuration = Global.Konfig("LehrkraefteSonderzeiten", Global.Modus.Update, configuration);
 
         var lehrers = lehrkraefte
             .Where(rec => ((IDictionary<string, object>)rec)["statistik-relevant"].ToString() == "J")
@@ -2985,9 +2995,9 @@ public class Menüeintrag
         return zieldatei;
     }
 
-    internal Datei? Lehrkraefte(IConfiguration configuration, string zieldateiname)
+    internal Datei? Lehrkraefte(IConfiguration configuration, string zieldateiname, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
-        var zieldatei = new Datei(zieldateiname);
+        var zieldatei = new Datei(zieldateiname, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         dynamic record = new ExpandoObject();
         record.InternKrz = "";
@@ -3029,12 +3039,12 @@ public class Menüeintrag
         AnsiConsole.Write(panel3);
     }
 
-    internal Datei SchuelerZusatzdatenUmMailAdresseErgaenzen(IConfiguration configuration, string zieldateiname)
+    internal Datei SchuelerZusatzdatenUmMailAdresseErgaenzen(IConfiguration configuration, string zieldateiname, string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
         var schuelerZusatzdaten = Quelldateien.GetMatchingList(configuration, "schuelerzusatzdaten", IStudents, Klassen);
         if (schuelerZusatzdaten == null || !schuelerZusatzdaten.Any()) return [];
 
-        var zieldatei = new Datei(zieldateiname);
+        var zieldatei = new Datei(zieldateiname, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         if (schuelerZusatzdaten.Count != Students.Count)
         {
@@ -3049,14 +3059,17 @@ public class Menüeintrag
         }
 
         var mailDomain = configuration["MailDomain"].Trim();        
-        var mehrfachVorhanden = new List<string>();
+        var mehrfachVorhanden = new List<dynamic>();
 
         foreach (var schueler in schuelerZusatzdaten)
         {
             var dict = (IDictionary<string, object>)schueler;
             dynamic record = new ExpandoObject();
 
-            mehrfachVorhanden = MehrfachVorhanden(mehrfachVorhanden, schuelerZusatzdaten, dict["schulische E-Mail"].ToString(), dict["Nachname"].ToString(), dict["Vorname"].ToString());
+            if(MehrfachVorhanden(schuelerZusatzdaten, dict["schulische E-Mail"].ToString()))
+            {
+                mehrfachVorhanden.Add(schueler);
+            }
 
             // Schüler mit vorhandener Mail überspringen
             if (dict.TryGetValue("schulische E-Mail", out var email) && !string.IsNullOrEmpty(email?.ToString()))
@@ -3108,34 +3121,30 @@ public class Menüeintrag
 
                         ((IDictionary<string, object>)record)[name] = schulischeEmail;
 
-                        mehrfachVorhanden = MehrfachVorhanden(mehrfachVorhanden, schuelerZusatzdaten, schulischeEmail, dict["Nachname"].ToString(), dict["Vorname"].ToString());                                                
+                        if (MehrfachVorhanden(schuelerZusatzdaten, dict["schulische E-Mail"].ToString()))
+                        {
+                            mehrfachVorhanden.Add(schueler);
+                        }
+                        //Global.ZeileSchreiben($"{student.Nachname} {student.Vorname} ({student.Geburtsdatum})", $"NEU: {schulischeEmail}");
                     }
                 }
-            }
+            }            
             zieldatei.Add(record);
         }
-        Global.ZeileSchreiben($"Schulische Mailadressen ergänzt",$"{zieldatei.Count}");
+
+        //Global.ZeileSchreiben($"Anzahl Schüler*innen mit neuer schulinterner E-Mail-Adresse:", $"{zieldatei.Count}");
 
         if (mehrfachVorhanden.Count > 0)
         {
-            var panel2 = new Panel(
-                $"[bold {Global.GetColor(Global.ColorHinweise)}]Achtung: [/]{mehrfachVorhanden.Count} Mailadressen sind mehrfach vergeben. " +
-                $"\nBitte lösen Sie das Problem, bevor Sie in ein anderes Programm importieren, indem Sie in SchILD unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Individualdaten I[/] bei allen Schüler*innen eine eindeutige Mailadresse setzen." +
-                $"\nWeiter mit [{Global.GetColor(Global.ColorHinweise)}]ENTER[/]")
-                .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] Mehrfach vergebene Mailadressen [/]")
-                .HeaderAlignment(Justify.Left)
-                .SquareBorder()
-                .Expand()
-                .BorderColor(Global.ColorHinweise);
-
-            AnsiConsole.Write(panel2);
-            return null;
+            var schüler = string.Join(", ", mehrfachVorhanden.Select(s => $"{s.Nachname} {s.Vorname} ({s.Geburtsdatum})"));
+            var fehler = $"[{Global.GetColor(Global.ColorHinweise)}]Achtung: schulinterne Mailadresse(n) in SchILD mehrfach vergeben![/] \nLösen Sie das Problem, indem Sie jetzt in SchILD unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Individualdaten I[/] bei den Schüler*innen ({schüler}) händisch eine eindeutige schulinterne Mailadresse setzen. Sie könnten z.B. bei einem eine [{Global.GetColor(Global.ColorZahlen)}]1[/] an die Mail anhängen.\nAnschließend exportieren Sie alle *.dat-Dateien erneut und kehren hierher zurück.";
+            throw new Exception(fehler);
         }
 
         return zieldatei;
     }
 
-    private List<string> MehrfachVorhanden(List<string> mehrfachVorhanden, List<dynamic> schuelerZusatzdaten, string mail, string nachname, string vorname)
+    private bool MehrfachVorhanden(List<dynamic> schuelerZusatzdaten, string mail)
     {
         var doppelte = schuelerZusatzdaten.Where(rec =>
         {
@@ -3144,20 +3153,12 @@ public class Menüeintrag
                    !string.IsNullOrEmpty(dict["Nachname"].ToString()) &&
                    !string.IsNullOrEmpty(dict["Vorname"].ToString());
         }).ToList();
-        
+
         if (doppelte.Count > 1)
         {
-            foreach (var st in doppelte)
-            {
-                if (!string.Equals(st.Vorname, vorname?.ToString(), StringComparison.OrdinalIgnoreCase) ||
-                    !string.Equals(st.Nachname, nachname?.ToString(), StringComparison.OrdinalIgnoreCase))
-                {
-                    if(mehrfachVorhanden.Contains(mail)) continue;
-                    mehrfachVorhanden.Add(mail);
-                }
-            }
+            return true;
         }
-        return mehrfachVorhanden;
+        return false;
     }
 
     internal bool NichtAlleSusHabenEineEindeutigeMailAdresse(IConfiguration configuration)

@@ -30,8 +30,7 @@ public class Unterricht
         Global.ZeileSchreiben($"{klasse} {fach} {lehrer}", $"Schüler*innen: {Students.Count}");                    
     }
 
-    public Unterricht(Global.Zweck zweck, Menüeintrag m, string? unterrichtsId, string fach, string? schuelergruppe, string? klasse, string? lehrer, int wochentundenLehrkraft, List<dynamic> kurseDat, IConfiguration configuration, List<dynamic> studentgroupStudents) 
-        : this(zweck, m, unterrichtsId, fach, schuelergruppe, klasse, lehrer, wochentundenLehrkraft, studentgroupStudents)
+    public Unterricht(Global.Zweck zweck, Menüeintrag m, string? unterrichtsId, string fach, string? schuelergruppe, string? klasse, string? lehrer, int wochentundenLehrkraft, List<dynamic> kurseDat, IConfiguration configuration, List<dynamic> studentgroupStudents)         
     {
         // Klassen nicht leer -> Alle bekommen den Kurs zugewiesen
         //                       KursBez darf leer bleiben
@@ -105,7 +104,7 @@ public class Unterricht
         return fachBereinigt;
     }
 
-    internal void Updaten(Global.Zweck zweck, IConfiguration configuration, string fach, string lehrer, string unterrichtsId, string schuelergruppe, string klasse, int wochentundenLehrkraft, List<dynamic> studentgroupStudents)
+    internal void Updaten(Global.Zweck zweck, Menüeintrag m, IConfiguration configuration, string fach, string lehrer, string unterrichtsId, string schuelergruppe, string klasse, int wochentundenLehrkraft, List<dynamic> studentgroupStudents)
     {
         // Wenn der Kurs bereits existiert und in einer zweiten Zeile eine weitere Klasse hinzugefügt wird
         if (KursBez.StartsWith(lehrer) && KursBez.Contains(unterrichtsId) && Schülergruppe == schuelergruppe && Bereinigen(Fach) == Bereinigen(fach))
@@ -114,7 +113,7 @@ public class Unterricht
             {
                 Klassen.Add(klasse);
                 // Die SuS der weiteren Klasse werden dem Kurs hinzugefügt
-                Students.AddRange(m.IStudents.Filter(m, zweck, klasse, schuelergruppe, studentgroupStudents));
+                Students.AddRange(m.IStudents.Filter(configuration, zweck, klasse, schuelergruppe, studentgroupStudents));
             }
 
             // Die Anzahl der Wochenstunden wird nicht erhöht.

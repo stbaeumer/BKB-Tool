@@ -109,6 +109,7 @@ public class Menue : List<Menüeintrag>
                 configuration["Auswahl"] = "-1";
                 return configuration;
             case "e":
+                Global.DisplayHeader(configuration);
                 configuration = Global.EinstellungenDurchlaufen(configuration, Global.Modus.Update);
                 configuration["Auswahl"] = "-1";
                 return configuration;

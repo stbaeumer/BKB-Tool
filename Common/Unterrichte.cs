@@ -89,7 +89,7 @@ public class Unterrichte : List<Unterricht>
                     else
                     {
                         // Wochenstunden werden bei Bedarf erhöht usw.
-                        kurs.Updaten(zweck, configuration, fach, lehrer, unterrichtsId, schuelergruppe, klasse, wochentundenLehrkraft, studentgroupStudents);
+                        kurs.Updaten(zweck, m, configuration, fach, lehrer, unterrichtsId, schuelergruppe, klasse, wochentundenLehrkraft, studentgroupStudents);
                     }
                 }
                 else if (art == Global.Art.NichtKursUnterrichte && !zeileIstKursOderGehörtZuKurs(gpu002, dict))

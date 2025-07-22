@@ -89,7 +89,8 @@ public static class Global
         Auswahl,
         Maildomain,
         EnterOderAbbrechen,
-        ListString
+        ListString,
+        MultiSelect
     }
 
     public enum ZipModus
@@ -102,7 +103,8 @@ public static class Global
     {
         Create,
         Update,
-        Read
+        Read, // Wird verwendet, um Einstellungen zu lesen und den Benutzer zu fragen
+        ReadSilent // Wird verwendet, um Einstellungen zu lesen, ohne den Benutzer zu fragen
     }
 
     public static List<string> AktSj = new List<string>()
@@ -156,6 +158,7 @@ public static class Global
             contentString = string.Join(Environment.NewLine, content);
         }
 
+        contentString = ""; // $"\n\n";
         var panel = new Panel(contentString)
                 .Header(header)
                 .HeaderAlignment(Justify.Center)
@@ -373,14 +376,17 @@ public static class Global
             .SquareBorder()
             .Expand();
 
+        if (lfdNrVon > 0 && bis > 0)
+            panel.Header($"[bold]  {lfdNrVon} von {bis}  [/]");
+
         if (parameter == "Auswahl")
-        {
-            panel.BorderColor(Global.ColorÜberschrift);
-        }
-        else
-        {
-            panel.BorderColor(Global.ColorActionInMenüs);
-        }
+            {
+                panel.BorderColor(Global.ColorÜberschrift);
+            }
+            else
+            {
+                panel.BorderColor(Global.ColorActionInMenüs);
+            }
 
         // Der Wert aus der JSON hat Vorrang vor dem defaultwert. Nur wenn die JSON keinen Wert enthält oder der Wert nicht zulässig ist, wird der defaultwert verwendet.
         
@@ -401,10 +407,12 @@ public static class Global
         }
         if (datentyp == Datentyp.JaNein)
         {
-            // Wenn im READ-Modus der Wert plausibel ist, dann wird er nicht erneut abgefragt
-            if (modus == Modus.Read && !string.IsNullOrEmpty(defaultValue) && defaultValue.ToLower().StartsWith("j"))
+            // Der Wert wird im Read-Modus nicht erneut abgefragt, wenn der Wert plausibel ist und schon ein Wert in der configuration existiert.
+            if ((modus == Modus.ReadSilent || modus == Modus.Read) && !string.IsNullOrEmpty(defaultValue) && defaultValue.ToLower().StartsWith("j") && !string.IsNullOrEmpty(configuration[parameter]))
             {
                 configuration[parameter] = defaultValue;
+                if(modus != Modus.ReadSilent)
+                    ZeileSchreiben($"{aufforderung}", defaultValue);
                 return configuration;
             }
 
@@ -425,10 +433,12 @@ public static class Global
         }
         if (datentyp == Datentyp.Auswahl)
         {
-            // Wenn im READ-Modus der Wert plausibel ist, dann wird er nicht erneut abgefragt
-            if (modus == Modus.Read && !string.IsNullOrEmpty(defaultValue))
+            // Der Wert wird im Read-Modus nicht erneut abgefragt, wenn der Wert plausibel ist und schon ein Wert in der configuration existiert.
+            if ((modus == Modus.ReadSilent || modus == Modus.Read) && !string.IsNullOrEmpty(defaultValue) && !string.IsNullOrEmpty(configuration[parameter]))
             {
-                configuration[parameter] = defaultValue;
+                configuration[parameter] = defaultValue;                
+                if(modus != Modus.ReadSilent)
+                    ZeileSchreiben($"{aufforderung}", defaultValue);
                 return configuration;
             }
 
@@ -451,10 +461,12 @@ public static class Global
         }
         if (datentyp == Datentyp.String)
         {
-            // Wenn im READ-Modus der Wert plausibel ist, dann wird er nicht erneut abgefragt
-            if (modus == Modus.Read && !string.IsNullOrEmpty(defaultValue))
+            // Der Wert wird im Read-Modus nicht erneut abgefragt, wenn der Wert plausibel ist und schon ein Wert in der configuration existiert.
+            if ((modus == Modus.ReadSilent || modus == Modus.Read) && !string.IsNullOrEmpty(defaultValue) && !string.IsNullOrEmpty(configuration[parameter]))
             {
                 configuration[parameter] = defaultValue;
+                if(modus != Modus.ReadSilent)
+                    ZeileSchreiben($"{aufforderung}", defaultValue);
                 return configuration;
             }
 
@@ -477,10 +489,12 @@ public static class Global
         {
             defaultValue = File.Exists(defaultValue) ? defaultValue : string.Empty;
 
-            // Wenn im READ-Modus der Wert plausibel ist, dann wird er nicht erneut abgefragt
-            if (modus == Modus.Read && !string.IsNullOrEmpty(defaultValue) && File.Exists(defaultValue))
+            // Der Wert wird im Read-Modus nicht erneut abgefragt, wenn der Wert plausibel ist und schon ein Wert in der configuration existiert.
+            if ((modus == Modus.ReadSilent || modus == Modus.Read) && !string.IsNullOrEmpty(defaultValue) && File.Exists(defaultValue)  && !string.IsNullOrEmpty(configuration[parameter]))
             {
                 configuration[parameter] = defaultValue;
+                if(modus != Modus.ReadSilent)
+                    ZeileSchreiben($"{aufforderung}", defaultValue);
                 return configuration;
             }
 
@@ -515,13 +529,13 @@ public static class Global
                     .ShowDefaultValue(true)
                     .Validate(n =>
                     {
-                        if (!string.IsNullOrEmpty(n) && n == "alle")
+                        if (!string.IsNullOrEmpty(n) && n.ToLower() == "alle")
                             return ValidationResult.Success();
                         if (n.Split(',').Any(teil => verschiedeneKlassen.Any(klasse => klasse.ToLower().Contains(teil.Trim().ToLower()))))
                             return ValidationResult.Success();
                         if (verschiedeneKlassen.Any(s => s.ToLower().StartsWith(n.ToLower())))
                             return ValidationResult.Success();
-                        return ValidationResult.Error($"Die Eingabe ist ungültig. \n Haben Sie die Klasse vielleicht nicht aus SchILD exportiert? \n Geben Sie eine Klasse an oder 'alle'.");
+                        return ValidationResult.Error($"Die Eingabe ist ungültig. \n Haben Sie alle *.dat-Dateien aus SchILD exportiert? \n Geben Sie eine Klasse an oder [{GetColor(Global.ColorActionInMenüs)}]alle[/].");
                     })
                 .DefaultValue<string>(defaultValue));
 
@@ -543,14 +557,58 @@ public static class Global
                     }
                 }
             }
-            userInput = string.Join(",", interessierendeKlassen);
+
+            if (x.ToLower() == "alle")
+                userInput = string.Join(",", verschiedeneKlassen);
+            else
+                userInput = string.Join(",", interessierendeKlassen);
+        }
+        if (datentyp == Datentyp.MultiSelect)
+        {
+            // Wenn der Wert abgefragt wird, dann wird ein Panel mit dem Hinweis angezeigt
+            AnsiConsole.Write(panel);
+
+            var vorausgewählt = new[] { defaultValue }
+                .SelectMany(s => s.Split(','))
+                .Where(s => !string.IsNullOrEmpty(s))
+                .ToList();
+
+            if (vorausgewählt.Count == 0)
+            {
+                vorausgewählt = zulässigeAuswahlOptionen
+                    .Split(',')
+                    .Select(s => s.Trim())
+                    .Where(s => !string.IsNullOrEmpty(s))
+                    .ToList();
+            }
+
+            var prompt = new MultiSelectionPrompt<string>()
+                    .Title($"{aufforderung}:")
+                    .NotRequired() // Not required to have a favorite fruit
+                    .PageSize(10)
+                    .MoreChoicesText("[grey](Mit Pfeiltasten navigieren)[/]")
+                    .InstructionsText(
+                        "(Mit [blue]<Leertaste>[/] auswählen, " +
+                        "Mit [green]ENTER[/] bestätigen)")
+                    .AddChoiceGroup("alle", zulässigeAuswahlOptionen.Split(','));
+
+            foreach (var element in vorausgewählt) // vorausgewähltListe ist z.B. List<string>
+            {
+                prompt.Select<string>(element);
+            }
+            // Prompt anzeigen und Ergebnis als kommagetrennte Liste speichern
+            var userInputList = AnsiConsole.Prompt(prompt);
+            userInput = string.Join(",", userInputList);
+            ZeileSchreiben($"{aufforderung}", userInput.ToString() ?? string.Empty);
         }
         if (datentyp == Datentyp.Url)
         {
-            // Wenn im READ-Modus der Wert plausibel ist, dann wird er nicht erneut abgefragt
-            if (modus == Modus.Read && (!string.IsNullOrEmpty(defaultValue) || defaultValue.StartsWith("https://")))
+            // Der Wert wird im Read-Modus nicht erneut abgefragt, wenn der Wert plausibel ist und schon ein Wert in der configuration existiert.
+            if ((modus == Modus.ReadSilent || modus == Modus.Read) && (!string.IsNullOrEmpty(defaultValue) || defaultValue.StartsWith("https://")) && !string.IsNullOrEmpty(configuration[parameter]))
             {
                 configuration[parameter] = defaultValue;
+                if(modus != Modus.ReadSilent)
+                    ZeileSchreiben($"{aufforderung}", defaultValue);
                 return configuration;
             }
 
@@ -571,10 +629,12 @@ public static class Global
         }
         if (datentyp == Datentyp.Mail)
         {
-            // Wenn im READ-Modus der Wert plausibel ist, dann wird er nicht erneut abgefragt
-            if (modus == Modus.Read && (!string.IsNullOrEmpty(defaultValue) && defaultValue.StartsWith("@") && defaultValue.Contains(".")))
+            // Der Wert wird im Read-Modus nicht erneut abgefragt, wenn der Wert plausibel ist und schon ein Wert in der configuration existiert.
+            if ((modus == Modus.ReadSilent || modus == Modus.Read) && (!string.IsNullOrEmpty(defaultValue) && defaultValue.StartsWith("@") && defaultValue.Contains("."))  && !string.IsNullOrEmpty(configuration[parameter]))
             {
                 configuration[parameter] = defaultValue;
+                if(modus != Modus.ReadSilent)
+                    ZeileSchreiben($"{aufforderung}", defaultValue);
                 return configuration;
             }
 
@@ -599,10 +659,12 @@ public static class Global
         }
         if (datentyp == Datentyp.Maildomain)
         {
-            // Wenn im READ-Modus der Wert plausibel ist, dann wird er nicht erneut abgefragt
-            if (modus == Modus.Read && (!string.IsNullOrEmpty(defaultValue) && defaultValue.StartsWith("@") && defaultValue.Contains(".")))
+            // Der Wert wird im Read-Modus nicht erneut abgefragt, wenn der Wert plausibel ist und schon ein Wert in der configuration existiert.
+            if ((modus == Modus.ReadSilent || modus == Modus.Read) && (!string.IsNullOrEmpty(defaultValue) && defaultValue.StartsWith("@") && defaultValue.Contains("."))  && !string.IsNullOrEmpty(configuration[parameter]))
             {
                 configuration[parameter] = defaultValue;
+                if(modus != Modus.ReadSilent)
+                    ZeileSchreiben($"{aufforderung}", defaultValue);
                 return configuration;
             }
 
@@ -625,10 +687,12 @@ public static class Global
         }
         if (datentyp == Datentyp.Pfad)
         {
-            // Wenn im READ-Modus der Wert plausibel ist, dann wird er nicht erneut abgefragt
-            if (modus == Modus.Read && Path.Exists(defaultValue))
+            // Der Wert wird im Read-Modus nicht erneut abgefragt, wenn der Wert plausibel ist und schon ein Wert in der configuration existiert.
+            if ((modus == Modus.ReadSilent || modus == Modus.Read) && Path.Exists(defaultValue) && !string.IsNullOrEmpty(configuration[parameter]))
             {
                 configuration[parameter] = defaultValue;
+                if(modus != Modus.ReadSilent)
+                    ZeileSchreiben($"{aufforderung}", defaultValue);
                 return configuration;
             }
             // Wenn der Wert abgefragt wird, dann wird ein Panel mit dem Hinweis angezeigt
@@ -641,7 +705,7 @@ public static class Global
                     .Validate(n =>
                     {
                         if (!Path.Exists(n.TrimEnd(Path.DirectorySeparatorChar)))
-                            return ValidationResult.Error($"[]  Der Pfad {n} existiert nicht.[/]");
+                            return ValidationResult.Error($" Der Pfad [{Global.GetColor(Global.ColorFehler)}]{n}[/] existiert nicht.");
                         return ValidationResult.Success();
                     })
                 .DefaultValue<string>(string.IsNullOrEmpty(defaultValue) || !Path.Exists(defaultValue) ? Environment.CurrentDirectory : defaultValue));
@@ -649,10 +713,12 @@ public static class Global
         }
         if (datentyp == Datentyp.Int)
         {
-            // Wenn im READ-Modus der Wert plausibel ist, dann wird er nicht erneut abgefragt
-            if (modus == Modus.Read && int.TryParse(defaultValue, out _))
+            // Der Wert wird im Read-Modus nicht erneut abgefragt, wenn der Wert plausibel ist und schon ein Wert in der configuration existiert.
+            if ((modus == Modus.ReadSilent || modus == Modus.Read) && int.TryParse(defaultValue, out _) && !string.IsNullOrEmpty(configuration[parameter]))
             {
                 configuration[parameter] = defaultValue;
+                if(modus != Modus.ReadSilent)
+                    ZeileSchreiben($"{aufforderung}", defaultValue);
                 return configuration;
             }
 
@@ -671,7 +737,7 @@ public static class Global
                         }
                         if (zulässigeAuswahlOptionen != "" && !zulässigeAuswahlOptionen.Contains(n.ToString()))
                         {
-                            return ValidationResult.Error($"[]  Die Zahl {n} außerhalb des zulässigen Bereichs. Zulässige Werte: {zulässigeAuswahlOptionen}[/]");
+                            return ValidationResult.Error($"Die Zahl {n} außerhalb des zulässigen Bereichs. Zulässige Werte: [{Global.GetColor(Global.ColorActionInMenüs)}]{zulässigeAuswahlOptionen}[/]");
                         }
 
                         return ValidationResult.Success();
@@ -680,10 +746,12 @@ public static class Global
         }
         if (datentyp == Datentyp.Float)
         {
-            // Wenn im READ-Modus der Wert plausibel ist, dann wird er nicht erneut abgefragt
-            if (modus == Modus.Read && float.TryParse(defaultValue, out _))
+            // Der Wert wird im Read-Modus nicht erneut abgefragt, wenn der Wert plausibel ist und schon ein Wert in der configuration existiert.
+            if ((modus == Modus.ReadSilent || modus == Modus.Read) && float.TryParse(defaultValue, out _) && !string.IsNullOrEmpty(configuration[parameter]))
             {
                 configuration[parameter] = defaultValue;
+                if(modus != Modus.ReadSilent)
+                    ZeileSchreiben($"{aufforderung}", defaultValue);
                 return configuration;
             }
 
@@ -704,10 +772,12 @@ public static class Global
         }
         if (datentyp == Datentyp.ListInt)
         {
-            // Wenn im READ-Modus der Wert plausibel ist, dann wird er nicht erneut abgefragt
-            if (modus == Modus.Read && int.TryParse(defaultValue, out _))
+            // Der Wert wird im Read-Modus nicht erneut abgefragt, wenn der Wert plausibel ist und schon ein Wert in der configuration existiert.
+            if ((modus == Modus.ReadSilent || modus == Modus.Read) && int.TryParse(defaultValue, out _) && !string.IsNullOrEmpty(configuration[parameter]))
             {
                 configuration[parameter] = defaultValue;
+                if(modus != Modus.ReadSilent)
+                    ZeileSchreiben($"{aufforderung}", defaultValue);
                 return configuration;
             }
 
@@ -729,10 +799,12 @@ public static class Global
         }
         if (datentyp == Datentyp.ListString)
         {
-            // Wenn im READ-Modus der Wert plausibel ist, dann wird er nicht erneut abgefragt
-            if (modus == Modus.Read && !string.IsNullOrEmpty(defaultValue))
+            // Der Wert wird im Read-Modus nicht erneut abgefragt, wenn der Wert plausibel ist und schon ein Wert in der configuration existiert.
+            if ((modus == Modus.ReadSilent || modus == Modus.Read) && !string.IsNullOrEmpty(defaultValue) && !string.IsNullOrEmpty(configuration[parameter]))
             {
                 configuration[parameter] = defaultValue;
+                if(modus != Modus.ReadSilent)
+                    ZeileSchreiben($"{aufforderung}", defaultValue);
                 return configuration;
             }
 
@@ -763,7 +835,7 @@ public static class Global
                         var teile = n.ToString().Trim().Split(',');
                         if (!teile.All(t => zulässigeAuswahlOptionen.Split(',').Contains(t.Trim())))
                         {
-                            return ValidationResult.Error($"[{Global.GetColor(Global.ColorFehler)}]  {n}[/] ist keine kommagetrennte Liste aus zulässigen Werten. Zulässige Werte: {zulässigeAuswahlOptionen}");
+                            return ValidationResult.Error($"[{Global.GetColor(Global.ColorFehler)}]  {n}[/] ist keine kommagetrennte Liste aus zulässigen Werten. Zulässige Werte: [{Global.GetColor(Global.ColorActionInMenüs)}]{zulässigeAuswahlOptionen}[/]");
                         }
                         return ValidationResult.Success();
                     })
@@ -771,10 +843,12 @@ public static class Global
         }
         if (datentyp == Datentyp.Abschnitt)
         {
-            // Wenn im READ-Modus der Wert plausibel ist, dann wird er nicht erneut abgefragt
-            if (modus == Modus.Read && int.TryParse(defaultValue, out _))
+            // Der Wert wird im Read-Modus nicht erneut abgefragt, wenn der Wert plausibel ist und schon ein Wert in der configuration existiert.
+            if ((modus == Modus.ReadSilent || modus == Modus.Read) && int.TryParse(defaultValue, out _)  && !string.IsNullOrEmpty(configuration[parameter]))
             {
                 configuration[parameter] = defaultValue;
+                if(modus != Modus.ReadSilent)
+                    ZeileSchreiben($"{aufforderung}", defaultValue);
                 return configuration;
             }
 
@@ -803,10 +877,12 @@ public static class Global
         }
         if (datentyp == Datentyp.DateTime)
         {
-            // Wenn im READ-Modus der Wert plausibel ist, dann wird er nicht erneut abgefragt
-            if (modus == Modus.Read && DateTime.TryParse(defaultValue, out _))
+            // Der Wert wird im Read-Modus nicht erneut abgefragt, wenn der Wert plausibel ist und schon ein Wert in der configuration existiert.
+            if ((modus == Modus.ReadSilent || modus == Modus.Read) && DateTime.TryParse(defaultValue, out _) && !string.IsNullOrEmpty(configuration[parameter]))
             {
                 configuration[parameter] = defaultValue;
+                if(modus != Modus.ReadSilent)
+                    ZeileSchreiben($"{aufforderung}", defaultValue);
                 return configuration;
             }
 
@@ -910,19 +986,10 @@ public static class Global
         while (string.IsNullOrEmpty(configuration["ZustimmungLizenz"]) ||
                (configuration["ZustimmungLizenz"]?.ToLower() != "ja" && configuration["ZustimmungLizenz"]?.ToLower() != "j"))
         {
-
-            DisplayHeader(configuration);
             configuration = Global.Konfig("ZustimmungLizenz", Global.Modus.Read, configuration);
+            DisplayHeader(configuration);
         }
-
-        DisplayHeader(configuration);
-
-        var panel = new List<string>()
-        {
-            $"Es werden jetzt verschiedene Einstellungen durchlaufen. Ihre Einstellungen werden verschlüsselt in der Datei [{Global.GetColor(Global.ColorPfadInDateien)}]" + Path.Combine(Directory.GetCurrentDirectory(), Global.User + ".json[/]") + " gespeichert. " +
-            $"Dateien (aus Webuntis etc.), die [bold {Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] importieren soll, werden aus [{Global.GetColor(Global.ColorPfadInDateien)}]" + configuration["PfadDownloads"] + "[/] eingelesen."
-        };
-
+        
         var kon = KonfigMetadaten.Where(e =>
             e.Value.InitialAbfragen == true || // nur solche, die initial abgefragt werden sollen
             (
@@ -932,10 +999,10 @@ public static class Global
             )).ToList();
 
         // Durchlaufe alle Einstellungen gemäß KonfigHelper
-        for(var i = 0; i < kon.Count(); i++)
-        {
-            configuration = Konfig(kon[i].Key, modus, configuration, kon[i].Value.Aufforderung, i+1, kon.Count(), kon[i].Value.Hinweise, kon[i].Value.DefaultValue);
-            DisplayHeader(configuration, panel);
+        for (var i = 0; i < kon.Count(); i++)
+        {            
+            configuration = Konfig(kon[i].Key, modus, configuration, kon[i].Value.Aufforderung, i + 1, kon.Count(), kon[i].Value.Hinweise, kon[i].Value.DefaultValue);
+            DisplayHeader(configuration);
         }
 
         return configuration;
@@ -1054,9 +1121,10 @@ public static class Global
 
         var weiter = Console.ReadKey(true); // true unterdrückt die Ausgabe des Zeichens im Terminal
 
+        DisplayHeader(configuration);
         if (weiter.Key == ConsoleKey.E)
         {
-            configuration = EinstellungenDurchlaufen(configuration);
+            configuration = EinstellungenDurchlaufen(configuration, Global.Modus.Update);
             return;
         }
 
@@ -1065,8 +1133,6 @@ public static class Global
             OpenWebseite(configuration["OnlineHilfeURL"]);
             return;
         }
-
-        DisplayHeader(configuration, [" "]);
     }
     public static string Entschluesseln(string encryptedValue)
     {
@@ -1273,7 +1339,29 @@ public static class KonfigHelper
 
     public static readonly Dictionary<string, KonfigMeta> KonfigMetadaten = new()
     {
-        ["AppDescription"] = new KonfigMeta
+        ["PfadDownloads"] = new KonfigMeta
+        {
+            Key = "PfadDownloads",
+            DefaultValue = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"),
+            Aufforderung = "Downloads-Verzeichnis",
+            Hinweise = "Geben Sie den Pfad des Downloads-Verzeichnisses an. In der Regel wird das Verzeichnis bereits richtig vorgeschlagen. Dann einfach [bold springGreen2]ENTER[/] drücken:",
+            Datentyp = Global.Datentyp.Pfad,
+            InGrundeinstellungAbfragen = true,
+            InitialAbfragen = true,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },
+        ["PfadSchilddatenaustausch"] = new KonfigMeta
+        {
+            Key = "PfadSchilddatenaustausch",
+            DefaultValue = $"\\\\fs01\\SchILD-NRW\\Ausgabeverzeichnis",
+            Aufforderung = "SchILD-Ausgabeverzeichnis",
+            Hinweise = $"Geben Sie den Pfad und das Verzeichnis an, das in SchILD eingetragen ist als [{Global.GetColor(Global.ColorPfadInProgrammen)}]Ausgabeverzeichnis[/] unter: \n[{Global.GetColor(Global.ColorPfadInProgrammen)}]Datenaustausch > Schnittstelle SchILD-NRW > Export[/]",
+            Datentyp = Global.Datentyp.Pfad,
+            InGrundeinstellungAbfragen = true,
+            InitialAbfragen = true,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },
+        ["AppDescription"] = new KonfigMeta        
         {
             Key = "AppDescription",
             DefaultValue = "BKB-Tool - Ein Werkzeug an der Schnittstelle zwischen SchILD und Webuntis.",
@@ -1289,7 +1377,7 @@ public static class KonfigHelper
             Key = "Abschnitt",
             DefaultValue = "1",
             Aufforderung = "Lernabschnitt",
-            Hinweise = $"Geben Sie den Lernabschnitt an. Das Schuljahr beginnt immer mit Abschnitt [{Global.GetColor(Global.ColorZahlen)}]1[/]. I.d.R. wechselt der Abschnitt nach den Halbjahreszeugnissen auf Abschnitt [{Global.GetColor(Global.ColorZahlen)}]2[/].",
+            Hinweise = $"Geben Sie den Lernabschnitt an. Das Schuljahr beginnt immer mit Abschnitt [{Global.GetColor(Global.ColorZahlen)}]1[/]. \nI.d.R. wechselt der Abschnitt nach den Halbjahreszeugnissen auf Abschnitt [{Global.GetColor(Global.ColorZahlen)}]2[/].",
             Datentyp = Global.Datentyp.Abschnitt,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = true,
@@ -1421,8 +1509,8 @@ public static class KonfigHelper
             Key = "InteressierendeUnterrichtsgruppen",
             DefaultValue = "1.HJ,U",
             Aufforderung = "Interessierende Unterrichtsgruppen",
-            Hinweise = $"Geben Sie kommasepariert alle Unterrichtsgruppen an, die am Stichtag anwesend sein werden. \nGroß- und Kleinschreibung beachten!\nUnterrichte ohne Unterrichtsgrupe werden immer berücksichtigt.",
-            Datentyp = Global.Datentyp.ListString,
+            Hinweise = $"Geben Sie alle Unterrichtsgruppen an, die am Stichtag anwesend sein werden. Unterrichte ohne Unterrichtsgrupe werden immer berücksichtigt.\nGroß- und Kleinschreibung beachten!\nWenn Sie alle Unterrichtsgruppen berücksichtigen wollen, schreiben wie das Wort [{Global.GetColor(Global.ColorActionInMenüs)}]alle[/] gewählt.",
+            Datentyp = Global.Datentyp.MultiSelect,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
@@ -1512,10 +1600,21 @@ public static class KonfigHelper
             Key = "MaxDateiAlter",
             DefaultValue = "3",
             Aufforderung = "Wie viele Tage dürfen Dateien höchstens alt sein?",
-            Hinweise = $"Geben Sie an, wie viele Tage Dateien höchstens alt sein dürfen, um vom [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] für das Einlesen akzeptiert zu werden.",
+            Hinweise = $"Geben Sie an, wie viele Tage Dateien höchstens alt sein dürfen, um vom [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] für das Einlesen akzeptiert zu werden. Die Angabe einer (möglichst niedrigen) Zahl soll sicherstellen, dass nicht versehentlich veraltete Dateien eingelesen werden.",
             Datentyp = Global.Datentyp.Int,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = true,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },
+        ["NurDieseGruende"] = new KonfigMeta
+        {
+            Key = "NurDieseGruende",
+            DefaultValue = "200",
+            Aufforderung = "Nur diese Gründe",
+            Hinweise = $"Geben Sie die interessierenden Gründe an.",
+            Datentyp = Global.Datentyp.ListInt,
+            InGrundeinstellungAbfragen = false,
+            InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
         },
         ["OffeneFehlstunden"] = new KonfigMeta
@@ -1528,29 +1627,7 @@ public static class KonfigHelper
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
-        }, 
-        ["PfadDownloads"] = new KonfigMeta
-        {
-            Key = "PfadDownloads",
-            DefaultValue = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"),
-            Aufforderung = "Downloads-Verzeichnis",
-            Hinweise = "Geben Sie den Pfad des Downloads-Verzeichnisses an. In der Regel wird das Verzeichnis bereits richtig vorgeschlagen. Dann einfach [bold springGreen2]ENTER[/] drücken:",
-            Datentyp = Global.Datentyp.Pfad,
-            InGrundeinstellungAbfragen = true,
-            InitialAbfragen = true,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
-        },
-        ["PfadSchilddatenaustausch"] = new KonfigMeta
-        {
-            Key = "PfadSchilddatenaustausch",
-            DefaultValue = $"\\\\fs01\\SchILD-NRW\\Ausgabeverzeichnis",
-            Aufforderung = "SchILD-Ausgabeverzeichnis",
-            Hinweise = $"Geben Sie das Verzeichnis an, das in SchILD unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Datenaustausch > Schnittstelle SchILD-NRW > Export[/] als [{Global.GetColor(Global.ColorPfadInProgrammen)}]Ausgabeverzeichnis[/] eingetragen ist.",
-            Datentyp = Global.Datentyp.Pfad,
-            InGrundeinstellungAbfragen = true,
-            InitialAbfragen = true,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
-        },
+        },         
         ["PfadDokumentenverwaltung"] = new KonfigMeta
         {
             Key = "PfadDokumentenverwaltung",
@@ -1806,7 +1883,7 @@ public static class KonfigHelper
             $"[{Global.GetColor(Global.ColorHinweise)}]Keine Garantie:[/] Diese Software wird \"wie sie ist\" bereitgestellt, ohne jede ausdrückliche oder stillschweigende Gewährleistung, insbesondere ohne Garantie auf Fehlerfreiheit oder Eignung für einen bestimmten Zweck.\n" +
             $"[{Global.GetColor(Global.ColorHinweise)}]Keine Haftung:[/] Der Entwickler haftet nicht für direkte oder indirekte Schäden, Datenverluste oder andere Konsequenzen, die durch die Nutzung oder Fehlfunktion dieser Software entstehen.\n" +
             $"[{Global.GetColor(Global.ColorHinweise)}]Verwendung auf eigene Gefahr:[/] Die Nutzung erfolgt ausschließlich auf eigenes Risiko.\n" +
-            $"[{Global.GetColor(Global.ColorHinweise)}]Vollständige Lizenz:[/] Vollständige Lizenzbedingungen unter [lightskyblue3_1 link=https://www.gnu.org/licenses/gpl-3.0.de.html]https://www.gnu.org/licenses/gpl-3.0.de.html[/].",
+            $"[{Global.GetColor(Global.ColorHinweise)}]Vollständige Lizenz unter:[/] [lightskyblue3_1 link=https://www.gnu.org/licenses/gpl-3.0.de.html]https://www.gnu.org/licenses/gpl-3.0.de.html[/].",
             Datentyp = Global.Datentyp.JaNein,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,

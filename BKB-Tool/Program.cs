@@ -33,7 +33,7 @@ Global.Schulnummer177659 = new List<string> { "177659" }; // Diese Schulnummer b
 Global.SchulnummernDebug = new List<string>{ "000000" }; // alles
 
 configuration["AppDescription"] = $"[bold {Global.GetColor(Global.ColorBeschreibung)}]BKB-Tool[/] - Ein Werkzeug an der Schnittstelle zwischen SchILD und Webuntis.";
-
+Global.DisplayHeader(configuration);
 var dateien = new Dateien(configuration);
 
 do
@@ -41,7 +41,7 @@ do
     try
     {
         dateien = new Dateien();        
-        configuration = Global.EinstellungenDurchlaufen(configuration);
+        configuration = Global.EinstellungenDurchlaufen(configuration, Global.Modus.ReadSilent);
         
         CheckForUpdate(configuration);
         var table = new Table().Centered();
@@ -64,12 +64,14 @@ do
         configuration = menuGefiltert.GetAusgewaehlterMenueintrag(configuration, ["e", "h"]);
 
         var i = Convert.ToInt32(configuration["Auswahl"]);
-
-        dateien.DisplayHeader(configuration);
+        
         if (i >= 0)
         {
-            menuGefiltert[i].RenderAuswahlÜberschrift(configuration);
-            menuGefiltert[i].Quelldateien.FehlermeldungRendern(configuration);
+            Global.DisplayHeader(configuration);
+            menuGefiltert[i].RenderAuswahlÜberschrift(configuration);        
+            if (menuGefiltert[i].Quelldateien.Any(q => !string.IsNullOrEmpty(q.Fehlermeldung)))
+                throw new Exception($"[bold {Global.GetColor(Global.ColorHinweise)}]{menuGefiltert[i].Quelldateien.FirstOrDefault(q => !string.IsNullOrEmpty(q.Fehlermeldung)).Fehlermeldung}[/]\n[gray]{string.Join("\n", menuGefiltert[i].Quelldateien.FirstOrDefault(q => !string.IsNullOrEmpty(q.Fehlermeldung)).Hinweise)}[/]");
+                //menuGefiltert[i].Quelldateien.FehlermeldungRendern(configuration);
 
             if (menuGefiltert[i].Quelldateien.Where(q => !string.IsNullOrEmpty(q.Fehlermeldung) && !q.IstOptional && !q.Nur177659).Any())
             {
@@ -81,26 +83,23 @@ do
             }
 
             Global.WeiterMitAnykey(configuration, menuGefiltert[i]);
-        }
-    }
-    catch (RestartException)
-    {
-        var panel = new Panel(new Markup($"[bold {Global.GetColor(Global.ColorFehler)}]Sie haben abgebrochen.[/]"))
-            .BorderStyle(new Style(Color.Red))
-            .Expand();
-        AnsiConsole.Write(panel);
-
-        Thread.Sleep(1300);
-
-        continue; // explizit zum Schleifenanfang
+        }    
     }
     catch (Exception ex)
     {
-        AnsiConsole.WriteException(ex, ExceptionFormats.Default);
-        while (Console.KeyAvailable) Console.ReadKey(true);
-        Console.ReadKey();
-    }
+        var panel3 = new Panel(ex.Message)
+            .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] !? [/]")
+            .HeaderAlignment(Justify.Left)
+            .SquareBorder()
+            .Expand()
+            .BorderColor(Global.ColorFehler);
+        
+            AnsiConsole.Write(panel3);
+            Global.WeiterMitAnykey(configuration);
+            
 
+        continue; // Fehler behandeln und zum nächsten Durchlauf springen
+    }    
 } while (true);
 
 IConfiguration CheckForUpdate(IConfiguration configuration)
@@ -125,7 +124,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
         using var doc = System.Text.Json.JsonDocument.Parse(json);
         var releases = doc.RootElement.EnumerateArray();
         string githubVersion = null;
-        configuration = Global.Konfig("Schulnummer", Global.Modus.Read, configuration);
+        configuration = Global.Konfig("Schulnummer", Global.Modus.ReadSilent, configuration);
         bool allowPrerelease = configuration["Schulnummer"] == "000000";
 
         foreach (var release in releases)
@@ -149,11 +148,13 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
         {
             if (githubVer > lokalVer)
             {
-                dateien.DisplayHeader(configuration,
-                [
-                    $"Ein Update auf Version [tan]{githubVersion}[/] ist verfügbar. Drücken Sie eine [{Global.GetColor(Global.ColorActionInMenüs)} bold]beliebige Taste[/], um das Update zu starten."
-                ]
-                );
+                Global.DisplayHeader(configuration);
+
+                // Der Update-Hinweis wird in einem Panel angezeigt
+                var panelUpdate = new Panel(new Markup($"Ein Update auf Version [tan]{githubVersion}[/] ist verfügbar. Drücken Sie eine [{Global.GetColor(Global.ColorActionInMenüs)} bold]beliebige Taste[/], um das Update zu starten."))
+                    .BorderStyle(new Style(Color.Red))
+                    .Expand();
+                AnsiConsole.Write(panelUpdate);
 
                 Console.ReadKey(); // Warten auf Benutzereingabe, bevor das Update gestartet wird
 
@@ -238,7 +239,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                 "exit\n"
                 );
 
-                dateien.DisplayHeader(configuration,
+                Global.DisplayHeader(configuration,
                 [
                     $"Die neue Datei wurde heruntergeladen und gespeichert als [{Global.GetColor(Global.ColorPfadInDateien)}]{zielDatei}[/].",
                     $"Mit [{Global.GetColor(Global.ColorActionInMenüs)} bold]ENTER[/] wird jetzt in die Version {githubVer} neugestartet."
