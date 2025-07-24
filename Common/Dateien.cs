@@ -801,10 +801,9 @@ public class Dateien : List<Datei>
         }
     }
 
-    internal void Erstellen(Dateien quelldateien)
+    internal void VergleichenFilternErstellen(Dateien quelldateien)
     {
-        // Zuerst werden die Ordner geöffnet. Der User sieht dann in den Ordnern, wie die Dateien live erzeugt werden.
-        OeffneOrdner();
+        var bereitsGeöffnet = false;
 
         // Erstelle alle Dateien, die in der Liste enthalten sind.
         foreach (var datei in this)
@@ -812,6 +811,14 @@ public class Dateien : List<Datei>
             try
             {
                 datei.VergleichenUndFiltern(quelldateien);
+
+                // OrdnerOeffenen wird nur einmal aufgerufen, sobald die erste Datei, die count > 0 hat, erstellt wird.
+                if (datei.Count > 0 && !bereitsGeöffnet)
+                {
+                    OrdnerOeffnen();
+                    bereitsGeöffnet = true;
+                }
+
                 datei.Erstellen();
             }
             catch (Exception ex)
@@ -822,7 +829,7 @@ public class Dateien : List<Datei>
         }
     }
 
-    private void OeffneOrdner()
+    private void OrdnerOeffnen()
     {
         var verschiedeneOrdner = this.Select(datei => Path.GetDirectoryName(datei.AbsoluterPfad))
             .Distinct()

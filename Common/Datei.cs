@@ -6,6 +6,7 @@ using ICSharpCode.SharpZipLib.Zip;
 using Microsoft.Extensions.Configuration;
 using Spectre.Console;
 using System.Xml;
+using Spectre.Console.Rendering;
 
 namespace Common;
 
@@ -21,10 +22,6 @@ namespace Common;
 
 public class Datei : List<dynamic>
 {
-    private bool shouldAllQuote;
-    private string[] anhandDieserAttributeWirdVerglichen;
-    private string[] dieseAttributeWerdenBeimVergleichIgnoriert;
-
     public string Endung { get; set; } = null!;
     public string Delimiter { get; set; } = null!;
     public char Quote { get; set; }
@@ -57,7 +54,10 @@ public class Datei : List<dynamic>
     public string Ordner { get; internal set; }
     public bool IstOptional { get; internal set; }
     public bool Nur177659 { get; internal set; }
-    public string[] AnhandDieserAttributeWirdVerglichen { get; private set; }
+    /// <summary>
+    /// KeyAttribute, anhand derer die Datei mit anderen Dateien verglichen wird.    
+    /// </summary>
+    public string[] AnhandDieserSchlüsselAttributeWirdVerglichen { get; private set; }
     public string[] DieseAttributeWerdenBeimVergleichIgnoriert { get; private set; }
 
     public Datei(string name, bool vorhanden)
@@ -125,7 +125,7 @@ public class Datei : List<dynamic>
 
     public Datei(string absoluterPfad, string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise) : this(absoluterPfad)
     {
-        AnhandDieserAttributeWirdVerglichen = anhandDieserAttributeWirdVerglichen;
+        AnhandDieserSchlüsselAttributeWirdVerglichen = anhandDieserAttributeWirdVerglichen;
         DieseAttributeWerdenBeimVergleichIgnoriert = dieseAttributeWerdenBeimVergleichIgnoriert;
         Delimiter = delimiter;
         Quote = quote;
@@ -438,7 +438,14 @@ public class Datei : List<dynamic>
         if (string.IsNullOrEmpty(AbsoluterPfad) || Count == 0)
         {
             // Wenn der Pfad leer ist oder die Liste leer ist, wird die Datei nicht erstellt.
-            Global.ZeileSchreiben(AbsoluterPfad, "Datei nicht erstellt, da der Pfad leer ist oder keine Daten vorhanden sind.", ConsoleColor.Red, ConsoleColor.White);
+            var panel = new Panel($"{AbsoluterPfad}")
+                .Header($"[red]Datei nicht erstellt, da der Pfad leer ist oder keine Daten vorhanden sind[/]")
+                .HeaderAlignment(Justify.Left)
+                .SquareBorder()
+                .Expand()
+                .BorderColor(Color.Red);
+            
+            AnsiConsole.Write(panel);
             return;
         }
         /*
@@ -563,133 +570,153 @@ public class Datei : List<dynamic>
     public Datei? VergleichenUndFiltern(Dateien quelldateien)
     {
         var neueDatei = new Datei(AbsoluterPfad);
-        var dateiendung = Path.GetExtension(AbsoluterPfad);
-
-        var table = new Table();
-        table.Expand();
-        table.Border(TableBorder.Rounded);
-        //table.Title = new TableTitle($"Vergleich von [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.GetFileName(AbsoluterPfad)}[/] mit vorhandenen Dateien");
-        table.Expand();
-        table.AddColumn("Schüler*in, SJ, Abschnitt");
-        table.AddColumn("Attribut");
-        table.AddColumn("alt");
-        table.AddColumn("neu");
-
-        List<dynamic> vorhandene = new List<dynamic>();
-
-        // Die vorhandene hat denselben Namen wie die zieldatei
-        // die vorhandene Datei wird im Downloadsordner gesucht
-        foreach (var vorhandeneDatei in quelldateien)
+        bool skipProcessing = false;
+        
+        AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Vergleichen & Filtern ...", ctx =>
         {
-            if (Path.GetFileName(vorhandeneDatei.AbsoluterPfad) == Path.GetFileName(AbsoluterPfad))
+            var dateiendung = Path.GetExtension(AbsoluterPfad);
+            var tableRows = new List<Text>();
+            var table = TableErstellen(AnhandDieserSchlüsselAttributeWirdVerglichen);
+
+            var vorhandeneRec = GetVorhandeneRec(quelldateien);
+            if (vorhandeneRec == null || vorhandeneRec.Count == 0)
             {
-                vorhandene = vorhandeneDatei;
-                break; // Schleife abbrechen, wenn die Datei gefunden wurde
+                skipProcessing = true;
+                return;
             }
-        }
-         
-        if (vorhandene == null || vorhandene.Count == 0)
-        {
-            return this;
-        }
 
-        // Wenn in der vorhandenen eine Spalte namens Nachname existiert und die Dateiendung .dat ist,
-        // dann muss in jeder Zeile der Nachname um #Klasse ergänzt werden.
-        if (AnhandDieserAttributeWirdVerglichen.Contains("Nachname") && dateiendung == ".dat")
-        {
-            // In jeder Zeile den Nachnamen um #Klasse ergänzen
-            foreach (var vorhandeneRec in vorhandene)
+            // Wenn in der vorhandenen eine Spalte namens Nachname existiert und die Dateiendung .dat ist,
+            // dann muss in jeder Zeile der Nachname um #Klasse ergänzt werden.
+            if (AnhandDieserSchlüsselAttributeWirdVerglichen.Contains("Nachname") && dateiendung == ".dat")
             {
-                var vorhandeneDict = (IDictionary<string, object>)vorhandeneRec;
-                if (vorhandeneDict.ContainsKey("Nachname"))
+                // In jeder Zeile den Nachnamen um #Klasse ergänzen
+                foreach (var vRec in vorhandeneRec)
                 {
-                    var nachname = vorhandeneDict["Nachname"].ToString();
-                    if (vorhandeneDict.ContainsKey("Klasse"))
+                    var vorhandeneDict = (IDictionary<string, object>)vRec;
+                    if (vorhandeneDict.ContainsKey("Nachname"))
                     {
-                        nachname += "#" + vorhandeneDict["Klasse"];
+                        var nachname = vorhandeneDict["Nachname"].ToString();
+                        if (vorhandeneDict.ContainsKey("Klasse"))
+                        {
+                            nachname += "#" + vorhandeneDict["Klasse"];
+                        }
+                        vorhandeneDict["Nachname"] = nachname;
                     }
-                    vorhandeneDict["Nachname"] = nachname;
                 }
             }
-        }
 
+            // Die Tabelle soll auf drei Zeilen begrenzt werden. Falls mehr als zwei Zeilen gefunden werden, wird eine dritte Zeile mit "..." eingefügt.
 
-        // Für jede neue Zeile ...
-        foreach (var neueRec in this)
-        {
-            var neueDict = (IDictionary<string, object>)neueRec;
+            var maxRows = 2;
+            var rows = 0;
 
-            var zeileMitIdentischenVergleichsattributen = GetZeileMitIdentischenVergleichsattributen(vorhandene, neueDict, anhandDieserAttributeWirdVerglichen);
-
-            // Fall1: Wenn keine Zeile in den Vergleichsattributen auf die vorhandenen matcht, wird die Zeile neu angelegt.
-            if (zeileMitIdentischenVergleichsattributen == null)
+            // Für jede neue Zeile ...
+            foreach (var neueRec in this)
             {
+                var neueDict = (IDictionary<string, object>)neueRec;
+
+                // ... wird geprüft, ob es eine vorhandene Zeile gibt, die auf die Schlüsselattribute matcht.
+                var zeileMitIdentischenVergleichsattributen = GetZeileMitIdentischenVergleichsattributen(vorhandeneRec, neueDict, AnhandDieserSchlüsselAttributeWirdVerglichen);
+
+                // Fall1: Wenn keine Zeile in den Vergleichsattributen auf die vorhandenen matcht, wird die Zeile neu angelegt.
+                if (zeileMitIdentischenVergleichsattributen == null) { neueDatei.Add(neueRec); continue; } // und die Schleife übersprungen
+
+                // Fall2: Wenn eine vorhandene Zeile auf die Vergleichsattribute matcht, werden abweichende Nicht-Schlüssel-Attributwerte gesucht, ...
+                var nichtIdentischeSonstigeAttribute = GetNichtIdentischeSonstigeAttribute(zeileMitIdentischenVergleichsattributen, neueDict);
+
+                // Fall2a: Wenn eine vorhandene Zeile auf die Vergleichsattribute matcht und die sonstigen Attribute nicht abweichen, ...
+                if (nichtIdentischeSonstigeAttribute.Count == 0) continue; // ... überspringe den Rest der Schleife
+
+                // Fall2b: Wenn eine vorhandene Zeile auf die Vergleichsattribute matcht und die sonstigen Attribute nicht identisch sind, ...
+                if (nichtIdentischeSonstigeAttribute.Count <= 0) continue;
+
+                // Für die ersten 2 abweichenden Attribute dieser Zeile wird eine Zeile in der Tabelle erstellt.
+                for (int i = 0; i < nichtIdentischeSonstigeAttribute.Count; i++)
+                {
+                    if (rows > maxRows) break; // Wenn die maximale Anzahl an Zeilen erreicht ist, breche die Schleife ab.                    
+                    if (rows == maxRows)
+                        table.AddRow(new Text("..."), new Text("..."), new Text("..."), new Text("..."));
+                    if (rows < maxRows)
+                        table.AddRow(RenderZeile(neueDict, vorhandeneRec, nichtIdentischeSonstigeAttribute[i], zeileMitIdentischenVergleichsattributen));
+                    rows++;
+                }
+
                 neueDatei.Add(neueRec);
-                continue; // und die Schleife übersprungen
             }
 
-            var nichtIdentischeSonstigeAttribute = GetNichtIdentischeSonstigeAttribute(
-                zeileMitIdentischenVergleichsattributen, neueDict, dieseAttributeWerdenBeimVergleichIgnoriert);
-
-            // Fall2: Wenn eine vorhandene Zeile auf die Vergleichsattribute matcht und die sonstigen Attribute nicht abweichen, ...
-            if (nichtIdentischeSonstigeAttribute.Count == 0)
+            if (rows == 0)
             {
-                continue; // ... überspringe den Rest der Schleife
+                table.AddRow(new Text("keine Änderungen, nichts anzuzeigen"), new Text("..."), new Text("..."), new Text("..."));
             }
 
-            // Fall3: Wenn eine vorhandene Zeile auf die Vergleichsattribute matcht und die sonstigen Attribute nicht identisch sind, ...
-            if (nichtIdentischeSonstigeAttribute.Count <= 0) continue;
-            var vorhandeneZeileMitAbweichendenSonstigenAttr = GetVorhandeneZeile(neueDict, vorhandene, anhandDieserAttributeWirdVerglichen);
-            var linkeSeite = GetLinkeSeite(neueDict, anhandDieserAttributeWirdVerglichen);
+            AnsiConsole.Write(table);            
+            AnsiConsole.Write(new Align(
+            new Text($"Summe: {neueDatei.Count}"),
+            HorizontalAlignment.Right,
+            VerticalAlignment.Bottom
+            ));
+        });
 
-            //Console.ForegroundColor = ConsoleColor.DarkYellow;
-            foreach (var nichtIdentischesSonstigesAttribut in nichtIdentischeSonstigeAttribute)
-            {
-                var alt = GetAlterWert(vorhandeneZeileMitAbweichendenSonstigenAttr,
-                    nichtIdentischesSonstigesAttribut);
-                var neu = GetNeuerWert(neueDict, nichtIdentischesSonstigesAttribut);
-                var leh = Global.PrüfeAufNullOrEmpty(neueDict, "Fachlehrer");
-
-                table.AddRow(
-                    linkeSeite,
-                    nichtIdentischesSonstigesAttribut.Replace("PUNKT", ".").Replace("LEERZEICHEN", " ")
-                        .Replace("MINUS", "-").Replace("UNTERSTRICH", "_").Replace("SLASH", "/"),
-                    alt,
-                    neu);
-            }
-            neueDatei.Add(neueRec);
-        }
-
-        if (!neueDatei.Any())
-        {
-            Global.ZeileSchreiben(AbsoluterPfad, "identische Dateien", ConsoleColor.DarkYellow, ConsoleColor.White);
-        }
-        else
-        {
-            AnsiConsole.Write(table);
-        }
+        if (skipProcessing)
+            return this;
 
         return neueDatei;
     }
 
-    private string GetAlterWert(IDictionary<string, object> vorhandeneZeileMitAbweichendenSonstigenAttr,
-        string nichtIdentischesSonstigesAttribut)
+    private IEnumerable<IRenderable> RenderZeile(IDictionary<string, object> neueDict, List<dynamic> vorhandeneRec, string nichtIdentischesSonstigesAttribut, IDictionary<string, object> zeileMitIdentischenVergleichsattributen)
     {
-        if (vorhandeneZeileMitAbweichendenSonstigenAttr == null ||
-            string.IsNullOrEmpty(nichtIdentischesSonstigesAttribut))
-        {
-            return "   "; // Falls Eingaben ungültig sind
-        }
-
-        if (vorhandeneZeileMitAbweichendenSonstigenAttr.TryGetValue(nichtIdentischesSonstigesAttribut,
-                out object value))
-        {
-            return value?.ToString(); // Wert als String zurückgeben
-        }
-
-        return "   "; // Falls der Key nicht existiert
+        return
+        [
+            new Text(GetLinkeSeite(neueDict, AnhandDieserSchlüsselAttributeWirdVerglichen)),
+            new Text(nichtIdentischesSonstigesAttribut.Replace("PUNKT", ".").Replace("LEERZEICHEN", " ").Replace("MINUS", "-").Replace("UNTERSTRICH", "_").Replace("SLASH", "/")),
+            new Text(GetAlterWert(zeileMitIdentischenVergleichsattributen, nichtIdentischesSonstigesAttribut)),
+            new Text(GetNeuerWert(neueDict, nichtIdentischesSonstigesAttribut))
+        ];
     }
 
+    private string GetAlterWert(IDictionary<string, object> zeileMitIdentischenVergleichsattributen, string nichtIdentischesSonstigesAttribut)
+    {
+        // Suche aus allen Spalten aus zeileMitIdentischenVergleichsattributen denjenigen Spaltenwert, dessen Spaltenname nichtIdentischesSonstigesAttribut entspricht.
+        if (zeileMitIdentischenVergleichsattributen != null && zeileMitIdentischenVergleichsattributen.TryGetValue(nichtIdentischesSonstigesAttribut, out var value))
+        {
+            return value?.ToString() ?? string.Empty;
+        }
+        return string.Empty;
+    }
+
+    private Table TableErstellen(string[] anhandDieserSchlüsselAttributeWirdVerglichen)
+    {
+        var table = new Table();
+        table.Expand();
+        table.Border(TableBorder.Rounded);
+        table.Title = new TableTitle($"Vergleich von [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.GetFileName(AbsoluterPfad)}[/] alt & neu");
+        table.Expand();
+        table.AddColumn(string.Join(", ", anhandDieserSchlüsselAttributeWirdVerglichen));
+        table.AddColumn("Attribut");
+        table.AddColumn("alt");
+        table.AddColumn("neu");
+        return table;
+    }
+
+    /// <summary>
+    /// Die vorhandene hat denselben Namen wie die zieldatei wird im Downloadsordner gesucht
+    /// </summary>
+    /// <param name="quelldateien"></param>
+    /// <returns></returns>
+    private List<dynamic> GetVorhandeneRec(Dateien quelldateien)
+    {
+        var vorhandeneRec = new List<dynamic>();
+
+        foreach (var vorhandeneDatei in quelldateien)
+        {
+            if (Path.GetFileName(vorhandeneDatei.AbsoluterPfad) == Path.GetFileName(AbsoluterPfad))
+            {
+                vorhandeneRec = vorhandeneDatei;
+                break; // Schleife abbrechen, wenn die Datei gefunden wurde
+            }
+        }
+        return vorhandeneRec ?? new List<dynamic>(); // Rückgabe der gefundenen Datei oder leere Liste, wenn keine Datei gefunden wurde
+    }
 
     private static IDictionary<string, object> GetVorhandeneZeile(IDictionary<string, object> neueDict,
         List<dynamic> vorhandene, string[] anhandDieserAttributeWirdVerglichen)
@@ -716,21 +743,28 @@ public class Datei : List<dynamic>
 
     private string GetNeuerWert(IDictionary<string, object> neueDict, string nichtIdentischesSonstigesAttribut)
     {
-        var k = nichtIdentischesSonstigesAttribut.Replace(".", "PUNKT").Replace(" ", "LEERZEICHEN")
-            .Replace("-", "MINUS").Replace("_", "UNTERSTRICH");
-        return Global.PrüfeAufNullOrEmpty(neueDict, k);
+        return neueDict.TryGetValue(nichtIdentischesSonstigesAttribut, out var neuerWert)
+            ? (neuerWert?.ToString()?.Length > 20
+                ? neuerWert.ToString().Substring(0, 17) + "..."
+                : neuerWert?.ToString() ?? string.Empty)
+            : string.Empty;
     }
 
-    private string GetLinkeSeite(IDictionary<string, object> neueDict,
-        string[] anhandDieserAttributeWirdVerglichen)
+    private string GetLinkeSeite(IDictionary<string, object> neueDict, string[] anhandDieserAttributeWirdVerglichen)
     {
         var linkeSeite = "";
 
         for (int i = 0; i < anhandDieserAttributeWirdVerglichen.Length; i++)
         {
-            if (Global.PrüfeAufNullOrEmpty(neueDict, anhandDieserAttributeWirdVerglichen[i]).Length > 0)
+            var wert = Global.PrüfeAufNullOrEmpty(neueDict, anhandDieserAttributeWirdVerglichen[i]);
+            if (wert.Length > 0)
             {
-                linkeSeite += Global.PrüfeAufNullOrEmpty(neueDict, anhandDieserAttributeWirdVerglichen[i]) + ", ";
+                linkeSeite += wert + ",";
+                if (linkeSeite.Length > 30)
+                {
+                    linkeSeite = linkeSeite.Substring(0, 27) + "...";
+                    break;
+                }
             }
         }
 
@@ -738,15 +772,16 @@ public class Datei : List<dynamic>
     }
 
     private List<string> GetNichtIdentischeSonstigeAttribute(IDictionary<string, object> vorhDict,
-        IDictionary<string, object> neueDict, string[] dieseAttributeWerdenBeimVergleichIgnoriert)
+        IDictionary<string, object> neueDict)
     {
         List<string> nichtIdentischeSonstige = new List<string>();
         foreach (var key in vorhDict.Keys)
         {
-            var k = key.Replace(".", "PUNKT").Replace(" ", "LEERZEICHEN").Replace("-", "MINUS")
-                .Replace("_", "UNTERSTRICH").Replace("/", "SCHRÄGSTRICH");
-            if (dieseAttributeWerdenBeimVergleichIgnoriert.Contains(k)) continue;
-            if (!neueDict.TryGetValue(k, out var value)) continue;
+            var k = key.Replace(".", "PUNKT").Replace(" ", "LEERZEICHEN").Replace("-", "MINUS").Replace("_", "UNTERSTRICH").Replace("/", "SCHRÄGSTRICH");
+            // Die Felder, die mit Field beginnen, sind nicht relevant
+            if (DieseAttributeWerdenBeimVergleichIgnoriert.Contains(key)) continue;
+            if (AnhandDieserSchlüsselAttributeWirdVerglichen.Contains(key)) continue; // Die Vergleichsattribute werden nicht berücksichtigt
+            if (!neueDict.TryGetValue(key, out var value)) continue;
             if (vorhDict[key].Equals(value)) continue;
             // Z.B. bei Fehlstunden bleibt die neue Zelle leer. In der alten steht 0
             if (vorhDict[key].ToString() == "0" && neueDict[k].ToString() == "") continue;
@@ -756,13 +791,6 @@ public class Datei : List<dynamic>
         return nichtIdentischeSonstige;
     }
 
-    /// <summary>
-    /// Prüfe, ob die Vergleichsattribute identisch sind.
-    /// </summary>
-    /// <param name="vorhandene"></param>
-    /// <param name="neueDict"></param>
-    /// <param name="anhandDieserAttributeWirdVerglichen"></param>
-    /// <returns></returns>
     public IDictionary<string, object> GetZeileMitIdentischenVergleichsattributen(List<dynamic> vorhandene,
         IDictionary<string, object> neueDict, string[] anhandDieserAttributeWirdVerglichen)
     {
@@ -771,7 +799,8 @@ public class Datei : List<dynamic>
             var match = anhandDieserAttributeWirdVerglichen.All(key =>
                 neueDict.ContainsKey(key) &&
                 vorhDict.ContainsKey(key) &&
-                neueDict[key].Equals(vorhDict[key])
+                // Vergleichen nur die Zeichen vor dem ersten #-Zeichen                    
+                neueDict[key].ToString().Split('#')[0].Equals(vorhDict[key].ToString().Split('#')[0])
             );
             if (match)
             {

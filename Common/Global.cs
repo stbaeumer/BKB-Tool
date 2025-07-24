@@ -229,7 +229,7 @@ public static class Global
             }
 
             var panel = new Panel(s)
-                .Header($"[bold {Global.GetColor(ColorInfoBox)}] Bereit für den Import: [/]")
+                .Header($"[bold {Global.GetColor(ColorInfoBox)}] Bereit für den Import [/]")
                 .HeaderAlignment(Justify.Left)
                 .SquareBorder()
                 .Expand()

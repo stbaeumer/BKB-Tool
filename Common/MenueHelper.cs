@@ -221,10 +221,10 @@ public static class MenueHelper
                                     [],
                                     "|", '\'', new UTF8Encoding(false), false)
                             ];
-                            m.Zieldateien.Erstellen(quelldateien);
+                            m.Zieldateien.VergleichenFilternErstellen(quelldateien);
                         },
                         Global.Rubrik.WöchtentlicheArbeiten,
-                        Global.NurBeiDiesenSchulnummern.Nur177659
+                        Global.NurBeiDiesenSchulnummern.Alle
                     ),
                     new Menüeintrag(
                         "Statistik: Unterrichtsverteilung und Anrechnungen nach SchILD importieren",
@@ -265,7 +265,7 @@ public static class MenueHelper
                             //m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, configuration, ["Nachname", "Vor
                             //m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, configuration, ["KursBez"], ["Klasse", "Schulnr", "WochenstdPUNKTLEERZEICHENKL"]);
 
-                            m.Zieldateien.Erstellen(quelldateien);
+                            m.Zieldateien.VergleichenFilternErstellen(quelldateien);
 
                             //m.Zieldatei.Ordner = pfadSchilddatenaustausch ?? "";
                         },
