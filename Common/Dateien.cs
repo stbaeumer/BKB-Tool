@@ -728,23 +728,13 @@ public class Dateien : List<Datei>
 
                 // Panel: Wenn keine .dat-Dateien vorhanden sind, wird eine Warnung ausgegeben.
 
-                var panel = new Panel(
-                    $"SchILD verwendet für den Export und den (Re-)Import denselben Ordner. Deswegen verschiebt [bold {Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] jetzt " +
+                var hinweis = $"SchILD verwendet für den Export und den (Re-)Import denselben Ordner. Deswegen verschiebt [bold {Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] jetzt " +
                     $"[bold {Global.GetColor(Global.ColorZahlen)}]{datFiles.Count} aus SchILD exportierte *.dat-Dateien[/] direkt von [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadSchilddatenaustausch"]}[/] nach [bold {Global.GetColor(Global.ColorPfadInDateien)}]{pfadDownloads}[/]. " +
                     $"\nDie aufbereiteten Dateien stellt [bold {Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] wiederum in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadSchilddatenaustausch"]}[/] bereit. " +
                     "So bleiben die Import-Dateien und Export-Dateien stets getrennt voneinander." +
-                    $"\nWeiter mit [bold {Global.GetColor(Global.ColorActionInMenüs)}]ENTER[/]."
-                    )
-                    .Header($"[bold {Global.GetColor(Global.ColorInfoBox)}] Hinweis: [/]")
-                    .HeaderAlignment(Justify.Left)
-                    .SquareBorder()
-                    .Expand()
-                    .BorderColor(Global.ColorInfoBox);
+                    $"\nWeiter mit [bold {Global.GetColor(Global.ColorActionInMenüs)}]ENTER[/].";
 
-                AnsiConsole.Write(panel);
-                while (Console.KeyAvailable) Console.ReadKey(true);
-
-                Console.ReadKey();
+                Global.Konfig("FirstRun", Global.Modus.Read, configuration, null, -1, -1, hinweis);
 
                 // Lösche die vorhandenen .dat-Dateien im Zielordner
                 foreach (var file in existingDatFiles)

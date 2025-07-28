@@ -105,7 +105,7 @@ public class Menue : List<Menüeintrag>
         switch (configuration["Auswahl"])
         {
             case "h":
-                Global.OpenWebseite(configuration["OnlineHilfeURL"]);
+                Global.OpenWebseite($"{Global.HilfeUrl}");
                 configuration["Auswahl"] = "-1";
                 return configuration;
             case "e":

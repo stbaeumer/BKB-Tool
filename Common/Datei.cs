@@ -649,12 +649,11 @@ public class Datei : List<dynamic>
                 table.AddRow(new Text("keine Änderungen, nichts anzuzeigen"), new Text("..."), new Text("..."), new Text("..."));
             }
 
-            AnsiConsole.Write(table);            
+            AnsiConsole.Write(table);
             AnsiConsole.Write(new Align(
-            new Text($"Summe: {neueDatei.Count}"),
-            HorizontalAlignment.Right,
-            VerticalAlignment.Bottom
-            ));
+                new Text($"Summe: {neueDatei.Count} "),
+                HorizontalAlignment.Right,
+                VerticalAlignment.Top));
         });
 
         if (skipProcessing)

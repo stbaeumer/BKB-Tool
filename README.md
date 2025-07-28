@@ -27,3 +27,13 @@
 
 
 ```
+
+
+
+## Funktionen in BKB-Tool
+
+### [Schüler*innen-Importdatei für Webuntis erstellen](Funktionen#webuntis)
+### [Schüler*innen-Importdatei für Littera erstellen](Funktionen#Littera)
+### [Schüler*innen-Importdatei für Netman erstellen](Funktionen#Netman)
+### [Schuelerzusatzdaten.dat werden um schulinterne Mailadressen ergänzt (falls leer)](Funktionen#Mailadressen)
+### [Unterrichtsverteilung und Anrechnungen nach SchILD importieren](Funktionen#Statistik)

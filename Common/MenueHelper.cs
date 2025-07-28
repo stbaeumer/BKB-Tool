@@ -194,20 +194,18 @@ public static class MenueHelper
                         Global.NurBeiDiesenSchulnummern.Nur177659
                     ),
                     new Menüeintrag(
-                        "Mail-Adressen: SchuelerZusatzdaten.dat wird um schulische Mailadressen ergänzt (falls leer)",
+                        "Mailadressen: SchuelerZusatzdaten.dat werden um schulinterne Mailadressen ergänzt (falls leer)",
                         anrechnungen,
                         quelldateien.Notwendige(configuration, ["schuelerzusatzdaten,dat"]),
                         students,
                         klassen,
                         [
-                            $"Alle Schüler*innen bekommen jetzt eine gültige schulinterne E-Mail-Adresse in SchILD. Das ist eine wichtige Voraussetzung für viele Funktionen in [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/].",
-                            $"Es wird jetzt die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", "SchuelerZusatzdaten.dat")}[/] um die schulinterne Mailadressen ergänzt und in [{Global.GetColor(Global.ColorPfadInDateien)}]{pfadSchilddatenaustausch}[/] für den Reimport nach SchILD bereitgestellt.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1:[/] Vorhandene schulinterne Mailadressen in SchILD bleiben unangetastet.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #2:[/] BKB-Tool bildet die schulinterne Mailadressen wie folgt: [{Global.GetColor(Global.ColorTextHervorheben)}]nv061201@meine-schule.de[/], wobei gilt:",
-                            $"[{Global.GetColor(Global.ColorTextHervorheben)}]n[/]: Erster Buchstabe des Nachnamens. Umlaute werden aufgelöst. Bsp.: [{Global.GetColor(Global.ColorTextHervorheben)}]Ü[/] wird zu [{Global.GetColor(Global.ColorTextHervorheben)}]u[/] usw.",
-                            $"[{Global.GetColor(Global.ColorTextHervorheben)}]v[/]: Erster Buchstabe des Vornamens. Umlaute werden aufgelöst.",
-                            $"[{Global.GetColor(Global.ColorTextHervorheben)}]061201[/]: Geburtsdatum in der Notation: JJMMTT.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #3:[/] Wenn z.B. Zwillinge Markus und Martin heißen, dann wird der Konflikt angezeigt. Es muss dann nach dem Import händisch die Adresse des einen in SchILD angepasst werden."
+                            $"Es wird jetzt die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", "SchuelerZusatzdaten.dat")}[/] um schulinterne Mailadressen ergänzt und in [{Global.GetColor(Global.ColorPfadInDateien)}]{pfadSchilddatenaustausch}[/] für den Reimport nach SchILD bereitgestellt.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1:[/] BKB-Tool bildet die schulinterne Mailadressen wie folgt: [{Global.GetColor(Global.ColorTextHervorheben)}]nv061231@meine-schule.de[/], wobei gilt:",
+                            $"[{Global.GetColor(Global.ColorTextHervorheben)}]            n[/]      : Erster Buchstabe des Nachnamens. Umlaute werden aufgelöst. Bsp.: [{Global.GetColor(Global.ColorTextHervorheben)}]Ü[/] wird zu [{Global.GetColor(Global.ColorTextHervorheben)}]u[/] usw.",
+                            $"[{Global.GetColor(Global.ColorTextHervorheben)}]            v[/]      : Erster Buchstabe des Vornamens. Umlaute werden aufgelöst.",
+                            $"[{Global.GetColor(Global.ColorTextHervorheben)}]            061231[/] : Geburtsdatum in der Notation: JJMMTT.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #2:[/] Vorhandene schulinterne SchILD-Mailadressen in [{Global.GetColor(Global.ColorPfadInProgrammen)}]Individualdaten I[/] bleiben unangetastet.",
                         ],
                         m =>
                         {

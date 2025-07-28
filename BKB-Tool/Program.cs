@@ -24,6 +24,7 @@ Global.ColorZahlen = Color.Tan; // Zahlen
 Global.ColorTextHervorheben = Color.SpringGreen2; // Zahlen
 Global.ColorFehler = Color.Red; // Zahlen
 Global.ColorInfoBox = Color.Orange1; // Zahlen
+Global.HilfeUrl = "https://github.com/stbaeumer/BKB-Tool";
 
 Global.AppVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0.0"; // Major.Minor.Build.Revision
 
@@ -33,7 +34,7 @@ Global.Schulnummer177659 = new List<string> { "177659" }; // Diese Schulnummer b
 Global.SchulnummernDebug = new List<string>{ "000000" }; // alles
 
 configuration["AppDescription"] = $"[bold {Global.GetColor(Global.ColorBeschreibung)}]BKB-Tool[/] - Ein Werkzeug an der Schnittstelle zwischen SchILD und Webuntis.";
-Global.DisplayHeader(configuration);
+//Global.DisplayHeader(configuration);
 var dateien = new Dateien(configuration);
 
 do

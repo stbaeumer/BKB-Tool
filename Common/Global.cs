@@ -90,7 +90,8 @@ public static class Global
         Maildomain,
         EnterOderAbbrechen,
         ListString,
-        MultiSelect
+        MultiSelect,
+        FirstRun
     }
 
     public enum ZipModus
@@ -135,7 +136,8 @@ public static class Global
     public static Color ColorUnterschrift { get; set; }
     public static Color ColorTextHervorheben { get; set; }
     public static Color ColorFehler { get; set; }
-    public static Color ColorInfoBox { get; set; }    
+    public static Color ColorInfoBox { get; set; }
+    public static string HilfeUrl { get; set; }
 
     public static string? SafeGetString(SqlDataReader reader, int colIndex)
     {
@@ -405,13 +407,32 @@ public static class Global
                 throw new RestartException("Abbruch durch den Benutzer.");
             }
         }
+        if (datentyp == Datentyp.FirstRun)
+        {
+            // Der Wert wird im Read-Modus nicht erneut abgefragt, wenn der Wert plausibel ist und schon ein Wert in der configuration existiert.
+            if ((modus == Modus.ReadSilent || modus == Modus.Read) && !string.IsNullOrEmpty(defaultValue))
+            {
+                configuration[parameter] = defaultValue;
+                return configuration;
+            }
+
+            // Wenn der Wert abgefragt wird, dann wird ein Panel mit dem Hinweis angezeigt
+            AnsiConsole.Write(panel);
+
+            var key = Console.ReadKey(true).Key;
+            if (key != ConsoleKey.Enter)
+            {
+                throw new RestartException("Abbruch durch den Benutzer.");
+            }
+            userInput = "true";
+        }
         if (datentyp == Datentyp.JaNein)
         {
             // Der Wert wird im Read-Modus nicht erneut abgefragt, wenn der Wert plausibel ist und schon ein Wert in der configuration existiert.
             if ((modus == Modus.ReadSilent || modus == Modus.Read) && !string.IsNullOrEmpty(defaultValue) && defaultValue.ToLower().StartsWith("j") && !string.IsNullOrEmpty(configuration[parameter]))
             {
                 configuration[parameter] = defaultValue;
-                if(modus != Modus.ReadSilent)
+                if (modus != Modus.ReadSilent)
                     ZeileSchreiben($"{aufforderung}", defaultValue);
                 return configuration;
             }
@@ -986,8 +1007,8 @@ public static class Global
         while (string.IsNullOrEmpty(configuration["ZustimmungLizenz"]) ||
                (configuration["ZustimmungLizenz"]?.ToLower() != "ja" && configuration["ZustimmungLizenz"]?.ToLower() != "j"))
         {
-            configuration = Global.Konfig("ZustimmungLizenz", Global.Modus.Read, configuration);
             DisplayHeader(configuration);
+            configuration = Global.Konfig("ZustimmungLizenz", Global.Modus.Read, configuration);            
         }
         
         var kon = KonfigMetadaten.Where(e =>
@@ -1000,9 +1021,9 @@ public static class Global
 
         // Durchlaufe alle Einstellungen gemäß KonfigHelper
         for (var i = 0; i < kon.Count(); i++)
-        {            
+        {   
+            DisplayHeader(configuration);         
             configuration = Konfig(kon[i].Key, modus, configuration, kon[i].Value.Aufforderung, i + 1, kon.Count(), kon[i].Value.Hinweise, kon[i].Value.DefaultValue);
-            DisplayHeader(configuration);
         }
 
         return configuration;
@@ -1130,7 +1151,13 @@ public static class Global
 
         if (weiter.Key == ConsoleKey.H)
         {
-            OpenWebseite(configuration["OnlineHilfeURL"]);
+            var url = "";
+            if (menüeintrag != null)
+            {
+                url = $"#{menüeintrag.Titel.Split(':')[0].ToLower()}";
+            }
+
+            OpenWebseite($"{HilfeUrl}{url}");
             return;
         }
     }
@@ -1492,6 +1519,17 @@ public static class KonfigHelper
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+        },
+        ["FirstRun"] = new KonfigMeta
+        {
+            Key = "FirstRun",
+            DefaultValue = "",
+            Aufforderung = "Mit ENTER bestätigen",
+            Hinweise = "",
+            Datentyp = Global.Datentyp.FirstRun,
+            InGrundeinstellungAbfragen = false,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Alle
         },
         ["FehlzeitenVorDemAbschnittswechselBeruecksichtigen"] = new KonfigMeta
         {

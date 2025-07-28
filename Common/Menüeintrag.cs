@@ -3137,7 +3137,7 @@ public class Menüeintrag
         if (mehrfachVorhanden.Count > 0)
         {
             var schüler = string.Join(", ", mehrfachVorhanden.Select(s => $"{s.Nachname} {s.Vorname} ({s.Geburtsdatum})"));
-            var fehler = $"[{Global.GetColor(Global.ColorHinweise)}]Achtung: schulinterne Mailadresse(n) in SchILD mehrfach vergeben![/] \nLösen Sie das Problem, indem Sie jetzt in SchILD unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Individualdaten I[/] bei den Schüler*innen ({schüler}) händisch eine eindeutige schulinterne Mailadresse setzen. Sie könnten z.B. bei einem eine [{Global.GetColor(Global.ColorZahlen)}]1[/] an die Mail anhängen.\nAnschließend exportieren Sie alle *.dat-Dateien erneut und kehren hierher zurück.";
+            var fehler = $"[{Global.GetColor(Global.ColorHinweise)}]Achtung:[/] Schulinterne Mailadresse(n) in SchILD mehrfach vergeben bei Schüler*innen {schüler} \nLösen Sie das Problem, indem Sie in SchILD unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Individualdaten I[/] händisch Eindeutigkeit herstellen. Sie könnten z.B. bei einer/m Schüler*innen händisch eine [{Global.GetColor(Global.ColorZahlen)}]1[/] anhängen.\nAnschließend exportieren Sie alle *.dat-Dateien erneut und kehren hierher zurück.";
             throw new Exception(fehler);
         }
 
