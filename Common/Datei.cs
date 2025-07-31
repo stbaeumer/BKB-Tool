@@ -616,13 +616,13 @@ public class Datei : List<dynamic>
                 var neueDict = (IDictionary<string, object>)neueRec;
 
                 // ... wird geprüft, ob es eine vorhandene Zeile gibt, die auf die Schlüsselattribute matcht.
-                var zeileMitIdentischenVergleichsattributen = GetZeileMitIdentischenVergleichsattributen(vorhandeneRec, neueDict, AnhandDieserSchlüsselAttributeWirdVerglichen);
+                var zeileMitIdentischenSchlüsselattributen = GetZeileMitIdentischenSchlüsselattributen(vorhandeneRec, neueDict, AnhandDieserSchlüsselAttributeWirdVerglichen);
 
                 // Fall1: Wenn keine Zeile in den Vergleichsattributen auf die vorhandenen matcht, wird die Zeile neu angelegt.
-                if (zeileMitIdentischenVergleichsattributen == null) { neueDatei.Add(neueRec); continue; } // und die Schleife übersprungen
+                if (zeileMitIdentischenSchlüsselattributen == null) { neueDatei.Add(neueRec); continue; } // und die Schleife übersprungen
 
                 // Fall2: Wenn eine vorhandene Zeile auf die Vergleichsattribute matcht, werden abweichende Nicht-Schlüssel-Attributwerte gesucht, ...
-                var nichtIdentischeSonstigeAttribute = GetNichtIdentischeSonstigeAttribute(zeileMitIdentischenVergleichsattributen, neueDict);
+                var nichtIdentischeSonstigeAttribute = GetNichtIdentischeSonstigeAttribute(zeileMitIdentischenSchlüsselattributen, neueDict);
 
                 // Fall2a: Wenn eine vorhandene Zeile auf die Vergleichsattribute matcht und die sonstigen Attribute nicht abweichen, ...
                 if (nichtIdentischeSonstigeAttribute.Count == 0) continue; // ... überspringe den Rest der Schleife
@@ -637,7 +637,7 @@ public class Datei : List<dynamic>
                     if (rows == maxRows)
                         table.AddRow(new Text("..."), new Text("..."), new Text("..."), new Text("..."));
                     if (rows < maxRows)
-                        table.AddRow(RenderZeile(neueDict, vorhandeneRec, nichtIdentischeSonstigeAttribute[i], zeileMitIdentischenVergleichsattributen));
+                        table.AddRow(RenderZeile(neueDict, vorhandeneRec, nichtIdentischeSonstigeAttribute[i], zeileMitIdentischenSchlüsselattributen));
                     rows++;
                 }
 
@@ -659,7 +659,10 @@ public class Datei : List<dynamic>
         if (skipProcessing)
             return this;
 
-        return neueDatei;
+        // Entferne alle Zeilen aus this und ersetzte durch neueDatei.
+        Clear();
+        AddRange(neueDatei);
+        return this;
     }
 
     private IEnumerable<IRenderable> RenderZeile(IDictionary<string, object> neueDict, List<dynamic> vorhandeneRec, string nichtIdentischesSonstigesAttribut, IDictionary<string, object> zeileMitIdentischenVergleichsattributen)
@@ -790,15 +793,18 @@ public class Datei : List<dynamic>
         return nichtIdentischeSonstige;
     }
 
-    public IDictionary<string, object> GetZeileMitIdentischenVergleichsattributen(List<dynamic> vorhandene,
-        IDictionary<string, object> neueDict, string[] anhandDieserAttributeWirdVerglichen)
+    public IDictionary<string, object> GetZeileMitIdentischenSchlüsselattributen(
+        List<dynamic> vorhandene,
+        IDictionary<string, object>
+        neueDict,
+        string[] anhandDieserAttributeWirdVerglichen)
     {
         foreach (var vorhDict in vorhandene.Select(vorhRec => (IDictionary<string, object>)vorhRec))
         {
             var match = anhandDieserAttributeWirdVerglichen.All(key =>
                 neueDict.ContainsKey(key) &&
                 vorhDict.ContainsKey(key) &&
-                // Vergleichen nur die Zeichen vor dem ersten #-Zeichen                    
+                // Vergleiche nur die Zeichen vor dem ersten #-Zeichen                    
                 neueDict[key].ToString().Split('#')[0].Equals(vorhDict[key].ToString().Split('#')[0])
             );
             if (match)

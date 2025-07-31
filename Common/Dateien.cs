@@ -802,7 +802,7 @@ public class Dateien : List<Datei>
             {
                 datei.VergleichenUndFiltern(quelldateien);
 
-                // OrdnerOeffenen wird nur einmal aufgerufen, sobald die erste Datei, die count > 0 hat, erstellt wird.
+                // OrdnerOeffnen wird nur einmal aufgerufen, sobald die erste Datei, die count > 0 hat, erstellt wird.
                 if (datei.Count > 0 && !bereitsGeöffnet)
                 {
                     OrdnerOeffnen();

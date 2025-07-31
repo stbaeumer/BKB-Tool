@@ -754,7 +754,7 @@ public static class Global
                     {
                         if (!int.TryParse(n.ToString(), out _))
                         {
-                            return ValidationResult.Error($"[{Global.GetColor(Global.ColorFehler)}]  {n}[/] ist keine Zahl. Bitte eine Zahl eingeben.");
+                            return ValidationResult.Error($"[{Global.GetColor(Global.ColorFehler)}]  {n}[/] ist keine zulässige Zahl. Bitte eine Zahl eingeben.");
                         }
                         if (zulässigeAuswahlOptionen != "" && !zulässigeAuswahlOptionen.Contains(n.ToString()))
                         {
@@ -786,7 +786,7 @@ public static class Global
                     .Validate(n =>
                     {
                         if (!float.TryParse(n.ToString(), out _))
-                            return ValidationResult.Error($"  [{Global.GetColor(Global.ColorFehler)}]  {n}[/] ist keine Zahl.");
+                            return ValidationResult.Error($"  [{Global.GetColor(Global.ColorFehler)}]  {n}[/] ist keine zulässige Zahl.");
                         return ValidationResult.Success();
                     })
                 .DefaultValue<string>(defaultValue.ToString()));
@@ -884,7 +884,7 @@ public static class Global
                     {
                         if (!int.TryParse(n.ToString(), out _))
                         {
-                            return ValidationResult.Error($"[{Global.GetColor(Global.ColorFehler)}]  {n}[/] ist keine Zahl. Bitte eine Zahl eingeben.");
+                            return ValidationResult.Error($"[{Global.GetColor(Global.ColorFehler)}]  {n}[/] ist keine zulässige Zahl. Bitte eine Zahl eingeben.");
                         }
                         else
                         {

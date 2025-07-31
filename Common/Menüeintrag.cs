@@ -1889,9 +1889,17 @@ public class Menüeintrag
         }
     }
 
-    public Datei KlassenErstellen(IConfiguration configuration, string absoluterPfad)
+    public Datei KlassenErstellen(
+        IConfiguration configuration,
+        string zieldateiname,
+        string[] anhandDieserAttributeWirdVerglichen,
+        string[] dieseAttributeWerdenBeimVergleichIgnoriert,
+        string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null,
+        string defaultwert = "",        
+        Global.Modus modus = Global.Modus.Update)
     {
-        var zieldatei = new Datei(absoluterPfad);
+
+        var zieldatei = new Datei(zieldateiname, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         var schildKlassen = Quelldateien.GetMatchingList(configuration, "klassen", Students, Klassen);
         if (schildKlassen.Count == 0) return [];
@@ -1903,11 +1911,6 @@ public class Menüeintrag
         foreach (var untisKlasse in untisKlassen)
         {
             var dictUntis = (IDictionary<string, object>)untisKlasse;
-
-            if (dictUntis["Field1"].ToString() == "AGG25C")
-            {
-                string aa = "";
-            }
 
             var klasseVonDerKopiertWird = dictUntis["Field1"].ToString();
 
@@ -1931,7 +1934,6 @@ public class Menüeintrag
             if (schildKlasseVonDerKopiertWird != null)
             {
                 var s = (IDictionary<string, object>)schildKlasseVonDerKopiertWird;
-                // Wenn es diese Klasse in SchILD nicht gibt, wird sie angelegt
                 dynamic record = new ExpandoObject();
                 record.InternBez = dictUntis["Field1"].ToString();
                 record.StatistikBez = dictUntis["Field1"].ToString();
