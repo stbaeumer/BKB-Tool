@@ -161,7 +161,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
 
                 // Lade die Datei nach bkb-neu.exe herunter und führe den Autoupdater aus.
 
-                // Download-URL aus dem Release-Asset holen (wie zuvor empfohlen)
+                // Download-URL aus dem Release-Asset holen
                 string downloadUrl = null;
                 foreach (var asset in releases
                     .First(r => !r.GetProperty("draft").GetBoolean() && (allowPrerelease || !r.GetProperty("prerelease").GetBoolean()))
@@ -240,11 +240,17 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                 "exit\n"
                 );
 
-                Global.DisplayHeader(configuration,
-                [
-                    $"Die neue Datei wurde heruntergeladen und gespeichert als [{Global.GetColor(Global.ColorPfadInDateien)}]{zielDatei}[/].",
-                    $"Mit [{Global.GetColor(Global.ColorActionInMenüs)} bold]ENTER[/] wird jetzt in die Version {githubVer} neugestartet."
-                ]);
+                var panel = new Panel(
+                    $"Die neue Datei wurde heruntergeladen und gespeichert als [{Global.GetColor(Global.ColorPfadInDateien)}]{zielDatei}[/].\n" +
+                    $"Mit [{Global.GetColor(Global.ColorActionInMenüs)} bold]ENTER[/] wird jetzt in die Version {githubVer} neugestartet.")
+                    .Header("[bold green]Update erfolgreich[/]")
+                    .HeaderAlignment(Justify.Left)
+                    .SquareBorder()
+                    .Expand()
+                    .BorderColor(Global.ColorActionInMenüs);
+                
+                AnsiConsole.Write(panel);
+
                 while (Console.KeyAvailable) Console.ReadKey(true);
                 Console.ReadKey();
 
