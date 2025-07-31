@@ -1126,10 +1126,11 @@ public class Students : List<Student>
                             .Expand()
                             .BorderColor(Spectre.Console.Color.DodgerBlue1);
 
-            AnsiConsole.Write(panel);
+            //AnsiConsole.Write(panel);
 
             int i = 1;
             var table = new Table();
+            table.Title = new TableTitle($"Jetzt {this.Where(x => x.Klasse == klasse).Count()} Fotos machen und in [{Global.GetColor(Global.ColorPfadInDateien)}]" + Path.Combine(pfadDownloads, "Fotos", klasse) + "[/] ablegen.");
             table.Expand();
             var orangeStyle = new Style(foreground: Spectre.Console.Color.Orange1);
             table.AddColumn(new TableColumn($"[{Global.GetColor(Global.ColorInfoBox)}]Nr.[/]"));
@@ -1142,17 +1143,17 @@ public class Students : List<Student>
 
             foreach (var student in this.Where(x => x.Klasse == klasse))
             {
-                table.AddRow(i.ToString(), student.Nachname, student.Vorname, student.Geburtsdatum, student.Klasse);
+                table.AddRow(i.ToString().PadLeft(2), student.Nachname, student.Vorname, student.Geburtsdatum, student.Klasse);
                 i++;
             }
             AnsiConsole.Write(table);
 
-            AnsiConsole.Write(new Panel($"Verschieben Sie die [{Global.GetColor(Global.ColorZahlen)}]{this.Where(x => x.Klasse == klasse).Count()}[/] Fotos nach [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads, "Fotos", klasse)}[/].")
+            /*AnsiConsole.Write(new Panel($"Verschieben Sie die [{Global.GetColor(Global.ColorZahlen)}]{this.Where(x => x.Klasse == klasse).Count()}[/] Fotos nach [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads, "Fotos", klasse)}[/].")
                             .Header($"[{Global.GetColor(Global.ColorInfoBox)}] [{Global.GetColor(Global.ColorZahlen)}]{this.Where(x => x.Klasse == klasse).Count()}[/] Fotos gemacht? [/]")
                             .HeaderAlignment(Justify.Left)
                             .SquareBorder()
                             .Expand()
-                            .BorderColor(Spectre.Console.Color.DodgerBlue1));
+                            .BorderColor(Spectre.Console.Color.DodgerBlue1));*/
             Thread.Sleep(1000);
         }
     }
@@ -1172,7 +1173,7 @@ public class Students : List<Student>
         tableFoto.AddColumn("Nr.");
         tableFoto.AddColumn("Klasse");
         tableFoto.AddColumn("Anzahl Schüler*innen");
-        tableFoto.AddColumn("Anzahl Fotos in Ordner");
+        tableFoto.AddColumn("Anzahl Fotos im Ordner");
         tableFoto.AddColumn("Status");
 
         List<string> klassen = new List<string>();
@@ -1216,6 +1217,10 @@ public class Students : List<Student>
                 {
                     status += " Bereit für Weiterverarbeitung.";
                     klassen.Add(klasse);
+                }else if (nichtZugeordneteFotos.Count() < anzahlSuS){
+                    status += $"[{Global.GetColor(Global.ColorFehler)}] Zu wenige Fotos im Ordner.[/]";
+                }else if (nichtZugeordneteFotos.Count() < anzahlSuS){
+                    status += $"[{Global.GetColor(Global.ColorFehler)}] Zu viele Fotos im Ordner.[/]";
                 }
 
                 tableFoto.AddRow(i.ToString(), klasse, anzahlSuS.ToString(), nichtZugeordneteFotos.Count().ToString(), status);
@@ -1257,7 +1262,7 @@ public class Students : List<Student>
     {
         if (klassen.Count() == 0) return;
         configuration = Global.Konfig("PfadDownloads", Global.Modus.Read, configuration);
-        configuration = Global.Konfig("PfadDokumentenverwaltung", Global.Modus.Update, configuration);
+        configuration = Global.Konfig("PfadDokumentenverwaltung", Global.Modus.Read, configuration);
 
         var tableFoto = new Spectre.Console.Table();
         tableFoto.Expand();
@@ -1285,6 +1290,7 @@ public class Students : List<Student>
                 var student = studentsSortiert[i];
                 var foto = fotosSortiert[i];
 
+                student.IdSchildInt = dataAccess.GetIdSchildInt(student);
                 student.PfadFoto = foto;
                 var fotostreamErstellt = student.Pfad2FotoStream();
                 var erfolgDelete = dataAccess.DeleteImage(student);

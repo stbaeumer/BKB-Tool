@@ -222,11 +222,11 @@ public class Menüeintrag
     /// <summary>
     /// Die IStundets und die IKlassen (List<string>) werden als Eigenschaft des Menüeintrags initialisiert.
     /// </summary>
-    public void FilterInteressierendeStudentsUndKlassen(IConfiguration configuration)
+    public void FilterInteressierendeStudentsUndKlassen(IConfiguration configuration, string aufforderung = "", string hinweise = "")
     {
         var interessierendeStudents = new Students();
 
-        Global.Konfig("Klassen", Global.Modus.Update, configuration, "",-1,-1,"","",this.Students);
+        Global.Konfig("Klassen", Global.Modus.Update, configuration, aufforderung, -1, -1, hinweise, "", this.Students);
 
         var interessierendeKlassen = configuration["Klassen"].ToString().Split(",").ToList();
 
@@ -1278,7 +1278,7 @@ public class Menüeintrag
     }
 
 
-    public Datei? Faecher(IConfiguration configuration, string zieldateiname, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
+    public Datei? Faecher(IConfiguration configuration, string zieldateiname, string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
         var zieldatei = new Datei(zieldateiname, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
@@ -2801,14 +2801,24 @@ public class Menüeintrag
     /// <param name="zieldateiname"></param>
     /// <param name="nurDieseGründe"></param>
     /// <returns></returns>
-    internal Datei? LehrkraefteSonderzeiten(IConfiguration configuration, string zieldateiname, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
+    internal Datei? LehrkraefteSonderzeiten(
+        IConfiguration configuration,
+        string zieldateiname,
+        string[] anhandDieserAttributeWirdVerglichen,
+        string[] dieseAttributeWerdenBeimVergleichIgnoriert,
+        string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null,
+        string defaultwert = "",        
+        Global.Modus modus = Global.Modus.Update)
     {
-        configuration = Global.Konfig("NurDieseGruende", Global.Modus.Update, configuration);
+        if (defaultwert != "200")
+            configuration = Global.Konfig("NurDieseGruende", modus, configuration, "", -1, -1, null, defaultwert);
         var nurDieseGründe = configuration["NurDieseGruende"].ToString().Trim();
+
+        
 
         var akt = int.Parse(Global.AktSj[0]);
 
-        var zieldatei = new Datei(zieldateiname, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+        var zieldatei = new Datei(zieldateiname, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         var lehrkraefte = Quelldateien.GetMatchingList(configuration, "lehrkraefte", IStudents, Klassen);
         if (lehrkraefte == null || lehrkraefte.Count == 0) return [];
@@ -2822,7 +2832,7 @@ public class Menüeintrag
         var gpu004 = Quelldateien.GetMatchingList(configuration, "gpu004", IStudents, Klassen); // Lehrkraefte
         if (gpu004 == null) return [];
 
-        configuration = Global.Konfig("LehrkraefteSonderzeiten", Global.Modus.Update, configuration);
+        configuration = Global.Konfig("LehrkraefteSonderzeiten", Global.Modus.ReadSilent, configuration, "", -1, -1, null, "000");
 
         var lehrers = lehrkraefte
             .Where(rec => ((IDictionary<string, object>)rec)["statistik-relevant"].ToString() == "J")
@@ -2846,6 +2856,9 @@ public class Menüeintrag
 
         if (nurDieseGründe != "")
             verschiedeneGründe = nurDieseGründe.Split(',').ToList();
+
+        if (nurDieseGründe == "200")
+            configuration = Global.Konfig("VolleStelle", Global.Modus.Update, configuration);
 
         if (nurDieseGründe != "200")
             configuration["LehrkraefteSonderzeiten"] = "200";
@@ -2898,9 +2911,6 @@ public class Menüeintrag
             table.AddColumn(new TableColumn($"SOLL {akt}/ {akt + 1} lt. SchILD"));
             table.AddColumn(new TableColumn($"SOLL {akt + 1}/ {akt + 2} lt.SchILD"));
         }
-
-        if (nurDieseGründe == "200")
-            configuration = Global.Konfig("VolleStelle", Global.Modus.Update, configuration);
 
         foreach (var lehrerDyn in lehrers)
         {
@@ -2995,9 +3005,9 @@ public class Menüeintrag
         return zieldatei;
     }
 
-    internal Datei? Lehrkraefte(IConfiguration configuration, string zieldateiname, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
+    internal Datei? Lehrkraefte(IConfiguration configuration, string zieldateiname, string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
-        var zieldatei = new Datei(zieldateiname, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+        var zieldatei = new Datei(zieldateiname, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         dynamic record = new ExpandoObject();
         record.InternKrz = "";
@@ -3117,6 +3127,28 @@ public class Menüeintrag
                         var geburtstag = gebDatum.Day.ToString("D2");
 
                         var schulischeEmail = $"{n}{v}{geburtsjahr}{geburtsmonat}{geburtstag}{mailDomain}";
+                        
+                        // Wenn die E-Mail-Adresse bereits existiert, dann hänge eine Zahl an                            
+                        var counter = 1;
+                        while (schuelerZusatzdaten.Any(s => ((IDictionary<string, object>)s)["schulische E-Mail"].ToString() == schulischeEmail))
+                        {
+                            schulischeEmail = $"{n}{v}{geburtsjahr}{geburtsmonat}{geburtstag}{counter}{mailDomain}";                                                                
+                            counter++;
+                        }
+
+                        // Wenn der Counter größer als 1 ist, dann gib ein Panel aus
+                        if (counter > 1)
+                        {
+                            var panel = new Panel($"Die E-Mail-Adresse für {student.Vorname} {student.Nachname} ({student.Geburtsdatum}) soll neu angelegt werden, wurde aber bereits zuvor in SchILD vergeben. Deswegen schreibt [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] jetzt für {student.Vorname} {student.Nachname} einen Zähler vor das [{Global.GetColor(Global.ColorHinweise)}]@[/]: [{Global.GetColor(Global.ColorZahlen)}]{schulischeEmail}[/]. So wird Eindeutigkeit gewährleistet.\nOptional können Sie nach dem SchILD-Import die E-Mail-Adresse von {student.Vorname} nochmal ändern, wenn Sie anderweitig Eindeutigkeit herstellen wollen (z.B. Buchstabe statt Zähler).\nWeiter mit [{Global.GetColor(Global.ColorActionInMenüs)}]ENTER[/].")
+                                .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] Hinweis: Doppelung bei E-Mail-Adresse [/]")
+                                .HeaderAlignment(Justify.Left)
+                                .SquareBorder()
+                                .Expand()
+                                .BorderColor(Global.ColorHinweise);
+                            AnsiConsole.Write(panel);
+                            Console.ReadKey(true);
+                        }
+
                         student.MailSchulisch = schulischeEmail;
 
                         ((IDictionary<string, object>)record)[name] = schulischeEmail;
@@ -3137,7 +3169,7 @@ public class Menüeintrag
         if (mehrfachVorhanden.Count > 0)
         {
             var schüler = string.Join(", ", mehrfachVorhanden.Select(s => $"{s.Nachname} {s.Vorname} ({s.Geburtsdatum})"));
-            var fehler = $"[{Global.GetColor(Global.ColorHinweise)}]Achtung:[/] Schulinterne Mailadresse(n) in SchILD mehrfach vergeben bei Schüler*innen {schüler} \nLösen Sie das Problem, indem Sie in SchILD unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Individualdaten I[/] händisch Eindeutigkeit herstellen. Sie könnten z.B. bei einer/m Schüler*innen händisch eine [{Global.GetColor(Global.ColorZahlen)}]1[/] anhängen.\nAnschließend exportieren Sie alle *.dat-Dateien erneut und kehren hierher zurück.";
+            var fehler = $"Unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Individualdaten I[/] haben mehrere dieselbe schulinterne Mailadresse: {schüler} \nLösen Sie das Problem, indem Sie in SchILD unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Individualdaten I[/] händisch Eindeutigkeit herstellen. Sie könnten z.B. bei einer/einem Schüler*in händisch eine [{Global.GetColor(Global.ColorZahlen)}]1[/] anhängen.\nAnschließend exportieren Sie alle *.dat-Dateien erneut und kehren hierher zurück.";
             throw new Exception(fehler);
         }
 

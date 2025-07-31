@@ -29,7 +29,7 @@
 ```
 
 
-
+<a name="funktionen"></a>
 ## Funktionen in BKB-Tool
 
 <a name="webuntis"></a>
@@ -44,7 +44,9 @@
 <a name="mailadressen"></a>
 ### Schuelerzusatzdaten.dat werden um schulinterne Mailadressen ergänzt (falls leer)
 
-Mailaddssen der Shüler*innen und Schüler können wahlweise manuell in den Individualdaten I eingetippt werden oder über die Datei Schuelerzusatzdaten.dat hochgalden werden. 
+Eine eindeutige Mailadresse in SchILD ist unbedingt erstrebenswert. Die Adresse wird dann von SchILD an Drittproramme (z.B. O365) übergeben.
+
+Die Mailaddressen der Schüler*innen und Schüler können wahlweise manuell in den Individualdaten I eingetippt werden oder über die Datei Schuelerzusatzdaten.dat hochgalden werden. 
 
 
 

@@ -433,7 +433,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;
                 if (modus != Modus.ReadSilent)
-                    ZeileSchreiben($"{aufforderung}", defaultValue);
+                    ZeileSchreiben($"[]  {aufforderung}[/]", defaultValue);
                 return configuration;
             }
 
@@ -459,7 +459,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;                
                 if(modus != Modus.ReadSilent)
-                    ZeileSchreiben($"{aufforderung}", defaultValue);
+                    ZeileSchreiben($"[]  {aufforderung}[/]", defaultValue);
                 return configuration;
             }
 
@@ -487,7 +487,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;
                 if(modus != Modus.ReadSilent)
-                    ZeileSchreiben($"{aufforderung}", defaultValue);
+                    ZeileSchreiben($"[]  {aufforderung}[/]", defaultValue);
                 return configuration;
             }
 
@@ -515,7 +515,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;
                 if(modus != Modus.ReadSilent)
-                    ZeileSchreiben($"{aufforderung}", defaultValue);
+                    ZeileSchreiben($"[]  {aufforderung}[/]", defaultValue);
                 return configuration;
             }
 
@@ -523,7 +523,7 @@ public static class Global
             AnsiConsole.Write(panel);
 
             userInput = AnsiConsole.Prompt(
-                new TextPrompt<string>($"[] {aufforderung}[/]")
+                new TextPrompt<string>($"[]  {aufforderung}[/]")
                     .ShowDefaultValue(true)
                     .PromptStyle(Global.GetColor(Global.ColorActionInMenüs))
                     .Validate(n =>
@@ -545,7 +545,7 @@ public static class Global
             AnsiConsole.Write(panel);
 
             userInput = AnsiConsole.Prompt(
-                new TextPrompt<string>($"{aufforderung}")
+                new TextPrompt<string>($"[]  {aufforderung}[/]")
                 .PromptStyle(Global.GetColor(Global.ColorActionInMenüs))
                     .ShowDefaultValue(true)
                     .Validate(n =>
@@ -620,7 +620,7 @@ public static class Global
             // Prompt anzeigen und Ergebnis als kommagetrennte Liste speichern
             var userInputList = AnsiConsole.Prompt(prompt);
             userInput = string.Join(",", userInputList);
-            ZeileSchreiben($"{aufforderung}", userInput.ToString() ?? string.Empty);
+            ZeileSchreiben($"[]  {aufforderung}[/]", userInput.ToString() ?? string.Empty);
         }
         if (datentyp == Datentyp.Url)
         {
@@ -629,7 +629,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;
                 if(modus != Modus.ReadSilent)
-                    ZeileSchreiben($"{aufforderung}", defaultValue);
+                    ZeileSchreiben($"[]  {aufforderung}[/]", defaultValue);
                 return configuration;
             }
 
@@ -655,7 +655,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;
                 if(modus != Modus.ReadSilent)
-                    ZeileSchreiben($"{aufforderung}", defaultValue);
+                    ZeileSchreiben($"[]  {aufforderung}[/]", defaultValue);
                 return configuration;
             }
 
@@ -685,7 +685,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;
                 if(modus != Modus.ReadSilent)
-                    ZeileSchreiben($"{aufforderung}", defaultValue);
+                    ZeileSchreiben($"[]  {aufforderung}[/]", defaultValue);
                 return configuration;
             }
 
@@ -713,7 +713,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;
                 if(modus != Modus.ReadSilent)
-                    ZeileSchreiben($"{aufforderung}", defaultValue);
+                    ZeileSchreiben($"[]  {aufforderung}[/]", defaultValue);
                 return configuration;
             }
             // Wenn der Wert abgefragt wird, dann wird ein Panel mit dem Hinweis angezeigt
@@ -739,7 +739,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;
                 if(modus != Modus.ReadSilent)
-                    ZeileSchreiben($"{aufforderung}", defaultValue);
+                    ZeileSchreiben($"[]  {aufforderung}[/]", defaultValue);
                 return configuration;
             }
 
@@ -772,7 +772,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;
                 if(modus != Modus.ReadSilent)
-                    ZeileSchreiben($"{aufforderung}", defaultValue);
+                    ZeileSchreiben($"[]  {aufforderung}[/]", defaultValue);
                 return configuration;
             }
 
@@ -798,7 +798,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;
                 if(modus != Modus.ReadSilent)
-                    ZeileSchreiben($"{aufforderung}", defaultValue);
+                    ZeileSchreiben($"[]  {aufforderung}[/]", defaultValue);
                 return configuration;
             }
 
@@ -825,7 +825,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;
                 if(modus != Modus.ReadSilent)
-                    ZeileSchreiben($"{aufforderung}", defaultValue);
+                    ZeileSchreiben($"[]  {aufforderung}[/]", defaultValue);
                 return configuration;
             }
 
@@ -869,7 +869,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;
                 if(modus != Modus.ReadSilent)
-                    ZeileSchreiben($"{aufforderung}", defaultValue);
+                    ZeileSchreiben($"[]  {aufforderung}[/]", defaultValue);
                 return configuration;
             }
 
@@ -903,7 +903,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;
                 if(modus != Modus.ReadSilent)
-                    ZeileSchreiben($"{aufforderung}", defaultValue);
+                    ZeileSchreiben($"[]  {aufforderung}[/]", defaultValue);
                 return configuration;
             }
 
@@ -1424,9 +1424,9 @@ public static class KonfigHelper
         ["AccessPfad"] = new KonfigMeta
         {
             Key = "AccessPfad",
-            DefaultValue = "1",
+            DefaultValue = @"\\fs01\SchILD-NRW\DB\Test.mdb",
             Aufforderung = "Access-Pfad",
-            Hinweise = $"Geben Sie den Pfad zur Access-Datenbank an.",
+            Hinweise = $"Geben Sie den Pfad zur Access-Datenbank an. Beispiel:[{Global.GetColor(Global.ColorPfadInProgrammen)}]{@"\\fs01\SchILD-NRW\DB\Test.mdb"}[/]\nGeben Sie stets den kompletten Pfad inklusive Dateinname an.",
             Datentyp = Global.Datentyp.Pfad,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
@@ -1435,9 +1435,9 @@ public static class KonfigHelper
         ["AccessPassword"] = new KonfigMeta
         {
             Key = "AccessPassword",
-            DefaultValue = "1",
+            DefaultValue = "",
             Aufforderung = "Access-Kennwort",
-            Hinweise = $"Geben Sie das Kennwort der Access-Datenbank an. Das ist nicht der Login zu SchILD, sondern das Kennwort der Access-Datenbank selbst.",
+            Hinweise = $"Geben Sie das Kennwort der Access-Datenbank an. Es geht nicht um Ihr persönliches Kennwort in SchILD, sondern um das Kennwort der Access-Datenbank selbst.",
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
@@ -1603,8 +1603,8 @@ public static class KonfigHelper
         ["LehrkraefteSonderzeiten"] = new KonfigMeta
         {
             Key = "LehrkraefteSonderzeiten",
-            DefaultValue = "D,BI,M,E",
-            Aufforderung = "098,099,007,360,160",
+            DefaultValue = "098,099,007,360,160",
+            Aufforderung = "Gründe",
             Hinweise = "Welche Anrechnungsgründe sollen ignoriert bzw. auf 0 gesetzt werden?",
             Datentyp = Global.Datentyp.ListInt,
             InGrundeinstellungAbfragen = false,
@@ -1669,7 +1669,7 @@ public static class KonfigHelper
         ["PfadDokumentenverwaltung"] = new KonfigMeta
         {
             Key = "PfadDokumentenverwaltung",
-            DefaultValue = "",
+            DefaultValue = @"\\fs01\SchILD-NRW\Dokumentenverwaltung",
             Aufforderung = "Pfad zur Dokumentenverwaltung",
             Hinweise = $"Geben Sie das Verzeichnis an, das in SchILD unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Extras > Programmeinstellungen > Globale Einstellungen > Dokumentenverwaltung[/] als [{Global.GetColor(Global.ColorPfadInProgrammen)}]Dokumentenverzeichnis[/] eingetragen ist.",
             Datentyp = Global.Datentyp.Pfad,
@@ -1814,10 +1814,10 @@ public static class KonfigHelper
         {
             Key = "VolleStelle",
             DefaultValue = "25,5",
-            Aufforderung = "Wie viele Stunden entsprechen einer vollen Stelle?",
-            Hinweise = "Die Teilleistungsart(en) in Webuntis und in SchILD müssen identisch heißen. Ansonsten werden keine Teilleistungen nach SchILD importiert.",
-            Datentyp = Global.Datentyp.ListString,
-            InGrundeinstellungAbfragen = false,
+            Aufforderung = "Volle Stelle",
+            Hinweise = $"Geben Sie an, wie viele Stunden einer vollen Stelle entsprechen. Das ist wichtig, um die Altersermäßigung berechnen zu können. Beispiel: [{Global.GetColor(Global.ColorZahlen)}]25,5[/].",
+            Datentyp = Global.Datentyp.Float,
+            InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
         },

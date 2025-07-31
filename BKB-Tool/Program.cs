@@ -89,7 +89,7 @@ do
     catch (Exception ex)
     {
         var panel3 = new Panel(ex.Message)
-            .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] !? [/]")
+            .Header($"[bold {Global.GetColor(Global.ColorFehler)}] Es ist zu einem Fehler gekommen [/]")
             .HeaderAlignment(Justify.Left)
             .SquareBorder()
             .Expand()

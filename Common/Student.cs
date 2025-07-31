@@ -1198,7 +1198,7 @@ public partial class Student
 
     public string GetPfadDokumentenverwaltung(IConfiguration configuration)
     {
-        Global.Konfig("PfadDokumentenverwaltung", Global.Modus.Read, configuration);
+        Global.Konfig("PfadDokumentenverwaltung", Global.Modus.ReadSilent, configuration);
         var pfadDokumentenverwaltung = configuration["PfadDokumentenverwaltung"];    
         var anfangsbuchstabeNachname = Nachname.Substring(0, 1).ToUpper();
         var ordner = Nachname + ", " + Vorname + ", " + Geburtsdatum.Replace(".", "_");
@@ -1236,7 +1236,7 @@ public partial class Student
     {
         var pfadDokumentenverwaltung = GetPfadDokumentenverwaltung(configuration);
 
-        var zieldateiname = $"{Id}.jpg";
+        var zieldateiname = $"{IdSchildInt}.jpg";
 
         var quellPfad = Path.Combine(configuration["PfadDownloads"], "Fotos", Klasse);
 

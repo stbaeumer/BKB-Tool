@@ -159,16 +159,13 @@ WHERE (((Schueler.Geloescht)='-') AND ((Schueler.Status)=2) AND ((Schueler.AktSc
                 OleDbCommand oleDbCommand = new OleDbCommand();
                 oleDbCommand = oleDbConnection.CreateCommand();
                 oleDbCommand.CommandText = "UPDATE Schueler SET FotoVorhanden = '+' WHERE ID = @id";
-
-                    throw new Exception("Die ID muss erst noch ausgelesen werden!!!!!!! ");
-
-                oleDbCommand.Parameters.AddWithValue("@id", student.Id);
+                oleDbCommand.Parameters.AddWithValue("@id", student.IdSchildInt);
                 oleDbCommand.ExecuteNonQuery();
                 student.FotoVorhanden = true;
                 oleDbCommand = new OleDbCommand();
                 oleDbCommand = oleDbConnection.CreateCommand();
                 oleDbCommand.CommandText = "insert into SchuelerFotos (Schueler_ID, Foto, SchulnrEigner) values (@id, @foto, @schulnrEigner)";
-                oleDbCommand.Parameters.AddWithValue("@id", student.Id);
+                oleDbCommand.Parameters.AddWithValue("@id", student.IdSchildInt);
                 oleDbCommand.Parameters.AddWithValue("@foto", student.Foto != null ? Convert.FromBase64String(student.Foto) : DBNull.Value);
                 oleDbCommand.Parameters.AddWithValue("@schulnrEigner", student.SchulnrEigner);
                 oleDbCommand.ExecuteNonQuery();
@@ -196,12 +193,12 @@ WHERE (((Schueler.Geloescht)='-') AND ((Schueler.Status)=2) AND ((Schueler.AktSc
                 OleDbCommand oleDbCommand = new OleDbCommand();
                 oleDbCommand = oleDbConnection.CreateCommand();
                 oleDbCommand.CommandText = "DELETE * FROM SchuelerFotos WHERE SchuelerFotos.Schueler_ID = @id";
-                oleDbCommand.Parameters.AddWithValue("@id", student.Id);
+                oleDbCommand.Parameters.AddWithValue("@id", student.IdSchildInt);
                 oleDbCommand.ExecuteNonQuery();
                 oleDbCommand = new OleDbCommand();
                 oleDbCommand = oleDbConnection.CreateCommand();
                 oleDbCommand.CommandText = "UPDATE Schueler SET FotoVorhanden = '-' WHERE ID = @id";
-                oleDbCommand.Parameters.AddWithValue("@id", student.Id);
+                oleDbCommand.Parameters.AddWithValue("@id", student.IdSchildInt);
                 oleDbCommand.ExecuteNonQuery();
                 student.FotoVorhanden = false;
                 return "ok";
@@ -209,6 +206,36 @@ WHERE (((Schueler.Geloescht)='-') AND ((Schueler.Status)=2) AND ((Schueler.AktSc
             catch (Exception ex)
             {
                 return ex.Message;
+            }
+            finally
+            {
+                oleDbConnection.Close();
+            }
+        }
+    }
+
+    internal int GetIdSchildInt(Student student)
+    {
+        using (OleDbConnection oleDbConnection = new OleDbConnection(ConnectionString))
+        {
+            try
+            {
+                oleDbConnection.Open();
+                OleDbCommand oleDbCommand = new OleDbCommand();
+                oleDbCommand = oleDbConnection.CreateCommand();
+                oleDbCommand.CommandText = "SELECT ID FROM Schueler WHERE Nachname = @nachname AND Vorname = @vorname AND Klasse = @klasse";
+                oleDbCommand.Parameters.AddWithValue("@nachname", student.Nachname);
+                oleDbCommand.Parameters.AddWithValue("@vorname", student.Vorname);
+                oleDbCommand.Parameters.AddWithValue("@klasse", student.Klasse);
+
+                var result = oleDbCommand.ExecuteScalar();
+                if (result != null && int.TryParse(result.ToString(), out int id))
+                    return id;
+                return -1;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Fehler beim Auslesen der Schueler-ID aus der SchILD-Datenbank: \n" + ex.Message);
             }
             finally
             {
