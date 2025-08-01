@@ -206,7 +206,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                 // wenn die Datei schon existiert, dann löschen
                 if (File.Exists(updaterPath))
                 {
-                    AnsiConsole.MarkupLine($"[bold yellow]{updaterPath}, wird gelöscht.[/]");
+                    //AnsiConsole.MarkupLine($"[bold yellow]{updaterPath} wird gelöscht.[/]");
                     File.Delete(updaterPath);
                 }
 
@@ -241,9 +241,9 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                 );
 
                 var panel = new Panel(
-                    $"Die neue Datei wurde heruntergeladen und gespeichert als [{Global.GetColor(Global.ColorPfadInDateien)}]{zielDatei}[/].\n" +
+                    //$"Die neue Datei wurde heruntergeladen und gespeichert als [{Global.GetColor(Global.ColorPfadInDateien)}]{zielDatei}[/].\n" +
                     $"Mit [{Global.GetColor(Global.ColorActionInMenüs)} bold]ENTER[/] wird jetzt in die Version {githubVer} neugestartet.")
-                    .Header("[bold green]Update erfolgreich[/]")
+                    .Header("[bold green]  Update erfolgreich  [/]")
                     .HeaderAlignment(Justify.Left)
                     .SquareBorder()
                     .Expand()
