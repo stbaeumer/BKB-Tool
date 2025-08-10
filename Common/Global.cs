@@ -152,15 +152,15 @@ public static class Global
         AnsiConsole.Write(new FigletText("BKB-Tool").Centered().Color(ColorÜberschrift));
 
         var unterschrift = GetColor(ColorUnterschrift);
-        var contentString = configuration["AppDescription"] ?? "BKB-Tool - Ein Werkzeug an der Schnittstelle zwischen SchILD & WebUntis";
+        var contentString = ""; //configuration["AppDescription"] ?? "BKB-Tool - Ein Werkzeug an der Schnittstelle zwischen SchILD & WebUntis";
         var header = $"[{unterschrift}] BKB-Tool[/] | [{unterschrift} link=https://github.com/stbaeumer/BKB-Tool]https://github.com/stbaeumer/BKB-Tool[/] | [{unterschrift}]GPLv3[/] | [{unterschrift}]Version {Global.AppVersion} [/]";
 
         if (content != null && content.Count > 0)
         {
-            contentString = string.Join(Environment.NewLine, content);
+            contentString = content.LastOrDefault() ?? string.Empty;   
         }
 
-        contentString = ""; // $"\n\n";
+        //contentString = "\n"; // $"\n\n";
         var panel = new Panel(contentString)
                 .Header(header)
                 .HeaderAlignment(Justify.Center)

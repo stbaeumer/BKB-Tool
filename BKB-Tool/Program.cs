@@ -33,7 +33,7 @@ Global.SchulnummernPrivilegiert = new List<string>{ "177659" }; // Diese Schulnu
 Global.Schulnummer177659 = new List<string> { "177659" }; // Diese Schulnummer bekommen alle Privilegierten plus weitere Menüpunkte angezeigt.
 Global.SchulnummernDebug = new List<string>{ "000000" }; // alles
 
-configuration["AppDescription"] = $"[bold {Global.GetColor(Global.ColorBeschreibung)}]BKB-Tool[/] - Ein Werkzeug an der Schnittstelle zwischen SchILD und Webuntis.";
+configuration["AppDescription"] = "";// $"[bold {Global.GetColor(Global.ColorBeschreibung)}]BKB-Tool[/] - Ein Werkzeug an der Schnittstelle zwischen SchILD und Webuntis.";
 //Global.DisplayHeader(configuration);
 var dateien = new Dateien(configuration);
 

@@ -36,7 +36,7 @@ public static class MenueHelper
         try
         {
             var students = new Students(configuration, quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "schuelerzusatzdaten,dat"], true));
-
+            
             quelldateien.Meldung.Add(students.GetArtUndZahlen());
 
             var panel = new Panel(string.Join(' ', quelldateien.Meldung))
@@ -45,7 +45,9 @@ public static class MenueHelper
                 .Expand()
                 .BorderColor(Global.ColorÜberschrift);
 
-            AnsiConsole.Write(panel);
+            //AnsiConsole.Write(panel);
+
+            Global.DisplayHeader(configuration, quelldateien.Meldung);
 
             lehrers = new Lehrers(configuration, quelldateien.Notwendige(configuration, ["lehrkraefte,dat"], true));
             

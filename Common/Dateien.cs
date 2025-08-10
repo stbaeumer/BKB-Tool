@@ -635,7 +635,7 @@ public class Dateien : List<Datei>
                 }
                 else
                 {
-                    Meldung.Add($"[bold {Global.GetColor(Global.ColorZahlen)}]{anzahlDateienMitZeilen}[/] Dateien aus [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["pfadDownloads"]}[/] eingelesen.");
+                    //Meldung.Add($"[bold {Global.GetColor(Global.ColorZahlen)}]{anzahlDateienMitZeilen}[/] Dateien aus [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["pfadDownloads"]}[/] eingelesen.");
                 }
                 if (anzahlDateienMitZeilen == 0 && dateienImPfad.Count > 0)
                 {
@@ -643,7 +643,7 @@ public class Dateien : List<Datei>
                 }
             });
             Meldung.Add("");
-            Global.DisplayHeader(configuration);
+            Global.DisplayHeader(configuration, Meldung);
         }
         catch (Exception e)
         {

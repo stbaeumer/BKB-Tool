@@ -1395,7 +1395,7 @@ public class Students : List<Student>
 
     internal string GetArtUndZahlen()
     {
-        var statusstring = $"\n[{Global.GetColor(Global.ColorZahlen)}]" + this.Count().ToString() + "[/] Schüler*innen: ";
+        var statusstring = $"[{Global.GetColor(Global.ColorZahlen)}]" + this.Count().ToString() + "[/] Schüler*innen: ";
 
         var i = 0;
         var zeile = new List<string>();
