@@ -1,5 +1,6 @@
 using System.Dynamic;
 using System.Globalization;
+using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
@@ -17,6 +18,8 @@ public partial class Anrechnungen : List<Anrechnung>
 
     public Anrechnungen(Lehrers lehrers, IConfiguration configuration)
     {
+        configuration = Global.Konfig("ConnectionStringUntis", Global.Modus.Update, configuration);
+
         using var odbcConnection = new SqlConnection(configuration["ConnectionStringUntis"]);
         var beschreibungs = new Beschreibungs();
         var cvreasons = new CvReasons();
@@ -205,7 +208,12 @@ ORDER BY CountValue.TEACHER_ID;
         return "";
     }
 
-    public Datei Anlegen(string dateiname, List<int> nurDieseGrunde, List<int> furDieseGrundeKeinenWert, List<string?> furDieseLehrerKeineWerte)
+    public Datei Anlegen(
+        string dateiname,
+        List<int> nurDieseGrunde,
+        List<int> furDieseGrundeKeinenWert,
+        List<string?> furDieseLehrerKeineWerte,
+        string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
         var zieldatei = new Datei(dateiname);
 

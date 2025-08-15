@@ -40,7 +40,6 @@ public class Menüeintrag
     public Gruppen Gruppen { get; set; }
     public List<string> Beschreibung { get; set; }
     public Dateien Quelldateien { get; set; }
-    public Anrechnungen Anrechnungen { get; set; }
     public bool DateienFehlenOderSindLeer { get; set; }
     public string Titel { get; set; }
     public Action<Menüeintrag> Funktion { get; } // Funktion mit Menüeintrag als Parameter
@@ -63,17 +62,15 @@ public class Menüeintrag
     public Unterrichte Unterrichte { get; set; }
     public Dateien Zieldateien { get; set; }
 
-    public Menüeintrag(string titel, Anrechnungen anrechnungen, Dateien quelldateien, Students students, Klassen klassen, List<string> beschreibung, Action<Menüeintrag> funktion, Global.Rubrik rubrik = Global.Rubrik.Allgemein, Global.NurBeiDiesenSchulnummern nurbeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Alle)
+    public Menüeintrag(string titel, Dateien quelldateien, Students students, Klassen klassen, List<string> beschreibung, Action<Menüeintrag> funktion, Global.Rubrik rubrik = Global.Rubrik.Allgemein, Global.NurBeiDiesenSchulnummern nurbeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Alle)
     {
         if (titel == null) throw new ArgumentNullException(nameof(titel));
-        if (anrechnungen == null) throw new ArgumentNullException(nameof(anrechnungen));
         if (quelldateien == null) throw new ArgumentNullException(nameof(quelldateien));
         if (students == null) throw new ArgumentNullException(nameof(students));
         if (klassen == null) throw new ArgumentNullException(nameof(klassen));
         if (beschreibung == null) throw new ArgumentNullException(nameof(beschreibung));
         {
             Titel = titel;
-            Anrechnungen = anrechnungen;
             Quelldateien = quelldateien;
             Students = students;
             Klassen = klassen;
@@ -2312,7 +2309,10 @@ public class Menüeintrag
         return zieldatei;
     }
 
-    public Datei GetFaecher(IConfiguration configuration, string zieldateiname)
+    public Datei GetFaecher(
+        IConfiguration configuration,
+        string zieldateiname,
+        string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
 
         var faecher = Quelldateien.GetMatchingList(configuration, "faecher", IStudents, Klassen);
@@ -2342,7 +2342,10 @@ public class Menüeintrag
         return zieldatei;
     }
 
-    public Datei GetLehrer(IConfiguration configuration, string zieldateiname)
+    public Datei GetLehrer(
+        IConfiguration configuration,
+        string zieldateiname,
+        string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
         var zieldatei = new Datei(zieldateiname);
         var lehrkraefte = Quelldateien.GetMatchingList(configuration, "lehrkraefte", IStudents, Klassen);
@@ -2368,7 +2371,10 @@ public class Menüeintrag
         return zieldatei;
     }
 
-    public Datei? Praktikanten(List<string> interessierendeKlassenUndJg, string zieldateiname)
+    public Datei? Praktikanten(
+        List<string> interessierendeKlassenUndJg,
+        string zieldateiname,
+        string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
 
         var records = new List<dynamic>();
@@ -2398,7 +2404,10 @@ public class Menüeintrag
         return zieldatei;
     }
 
-    public Datei? KlassenAnlegen(IConfiguration configuration, string zieldateiname)
+    public Datei? KlassenAnlegen(
+        IConfiguration configuration,
+        string zieldateiname,
+        string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
         var std = Students;
         var kl = Klassen;
@@ -2483,9 +2492,14 @@ public class Menüeintrag
         return sMitAbwesenheiten;
     }
 
-    public Datei GetGruppen(IConfiguration configuration, string zieldateiname, Anrechnungen anrechnungen, Lehrers lehrers)
+    public Datei GetGruppen(
+        IConfiguration configuration,
+        Anrechnungen anrechnungen,
+        string zieldateiname,
+        Lehrers lehrers,
+        string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
-        var zieldatei = new Datei(zieldateiname);
+        var zieldatei = new Datei(zieldateiname, delimiter, quote, encoding, shouldAllQuote, importhinweise);
         var exportlessons = Quelldateien.GetMatchingList(configuration, "exportlesson", IStudents, Klassen);
         if (exportlessons == null || exportlessons.Count == 0) return [];
 
@@ -2570,9 +2584,14 @@ public class Menüeintrag
         return zieldatei;
     }
 
-    public Datei Kalender2Wiki(IConfiguration configuration, string kalender, string zieldateiname)
+    public Datei Kalender2Wiki(
+        IConfiguration configuration,
+        string kalender,
+        string zieldateiname,
+        string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
-        var zieldatei = new Datei(zieldateiname + ".csv");
+        var zieldatei = new Datei(zieldateiname + ".csv", delimiter, quote, encoding, shouldAllQuote, importhinweise);
+        
         var kalenderRec = Quelldateien.GetMatchingList(configuration, kalender, Students, Klassen);
         if (kalenderRec?.Count != 0)
         {

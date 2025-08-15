@@ -23,8 +23,6 @@ public static class MenueHelper
         var raums = new Raums();
         var lehrers = new Lehrers();
         var klassen = new Klassen();
-        var anrechnungen = new Anrechnungen();
-
         var pfadDownloads = configuration["PfadDownloads"];
         var pfadSchilddatenaustausch = configuration["PfadSchilddatenaustausch"];
         var netmanMailReceiver = configuration["NetmanMailReceiver"];
@@ -68,7 +66,6 @@ public static class MenueHelper
                 [
                     new Menüeintrag(
                         "Webuntis: Schüler*innen-Importdatei für Webuntis erstellen",
-                        anrechnungen,
                         quelldateien.Notwendige(configuration, ["student_,csv","schuelerlernabschnittsdaten,dat", "schuelerzusatzdaten,dat", "schuelererzieher,dat", "schuelerAdressen,dat", "lehrkraefte,dat", "klassen,dat"]),
                         students,
                         klassen,
@@ -95,7 +92,6 @@ public static class MenueHelper
                     ),
                     new Menüeintrag(
                         "Webuntis-Fotos: Zipdatei mit Fotos für Webuntis erstellen",
-                        anrechnungen,
                         quelldateien.Notwendige(configuration, ["student_,csv","schuelerlernabschnittsdaten,dat", "schuelerzusatzdaten,dat", "schuelererzieher,dat", "schuelerAdressen,dat", "lehrkraefte,dat", "klassen,dat"]),
                         students,
                         klassen,
@@ -119,7 +115,6 @@ public static class MenueHelper
                     ),
                     new Menüeintrag(
                         "Littera: Schüler*innen-Importdatei für Littera erstellen",
-                        anrechnungen,
                         quelldateien.Notwendige(configuration, ["student_,csv","schuelerlernabschnittsdaten,dat", "schuelerzusatzdaten,dat", "schuelererzieher,dat", "schuelerAdressen,dat", "lehrkraefte,dat", "klassen,dat"]),
                         students,
                         klassen,
@@ -147,7 +142,6 @@ public static class MenueHelper
                     ),
                     new Menüeintrag(
                         "Netman: Schüler*innen-Importdatei für Netman erstellen",
-                        anrechnungen,
                         quelldateien.Notwendige(configuration, ["student_,csv","schuelerlernabschnittsdaten,dat", "schuelerzusatzdaten,dat", "schuelererzieher,dat", "schuelerAdressen,dat", "lehrkraefte,dat", "klassen,dat"]),
                         students,
                         klassen,
@@ -174,7 +168,6 @@ public static class MenueHelper
                     ),
                     new Menüeintrag(
                         "Fotos aus SchILD: Schüler*innen-Fotos aus SchILD für Webuntis und Geevoo bereitstellen",
-                        anrechnungen,
                         quelldateien.Notwendige(configuration, ["schuelerZusatzdaten,dat"]),
                         students,
                         klassen,
@@ -196,8 +189,7 @@ public static class MenueHelper
                         Global.NurBeiDiesenSchulnummern.Nur177659
                     ),
                     new Menüeintrag(
-                        "Mailadressen: Schulinterne Mailadressen in den Individualdaten I ergänzen (falls leer)",
-                        anrechnungen,
+                        "Mailadressen: fehlende Schulinterne Mailadressen in den Individualdaten I ergänzen",
                         quelldateien.Notwendige(configuration, ["schuelerzusatzdaten,dat"]),
                         students,
                         klassen,
@@ -229,7 +221,6 @@ public static class MenueHelper
                     ),
                     new Menüeintrag(
                         "Statistik: Unterrichtsverteilung und Anrechnungen nach SchILD importieren",
-                        anrechnungen,
                         quelldateien.Notwendige(configuration, ["studentgroupstudents,csv", "klassen,dat", "schuelerlernabschnitt,dat", "schuelerleistungsdaten,dat", "schuelerbasis,dat", "lehrkraefte,dat", "kurse,dat", "lehrkraeftesonderzeiten,dat", "schuelerbasisdaten,dat", "GPU002,txt"]),
                         students,
                         klassen,
@@ -281,7 +272,6 @@ public static class MenueHelper
                     ),
                     new Menüeintrag(
                         $"Altersermäßigung: berechnen für {int.Parse(Global.AktSj[0])}/{int.Parse(Global.AktSj[0]) + 1} und {int.Parse(Global.AktSj[0]) + 1}/{int.Parse(Global.AktSj[0]) + 2}",
-                        anrechnungen,
                         quelldateien.Notwendige(configuration, ["lehrkraefte,dat", "lehrkraeftesonderzeiten,dat,optional", "GPU020,txt,optional", "GPU004,txt,optional"]),
                         students,
                         klassen,
@@ -315,7 +305,6 @@ public static class MenueHelper
                     ),
                     new Menüeintrag(
                         "Fotos erstellen: Schüler*innen klassenweise fotografieren",
-                        anrechnungen,
                         quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat"]),
                         students,
                         klassen,
@@ -337,7 +326,6 @@ public static class MenueHelper
                     ),
                     new Menüeintrag(
                         "Fotos hochladen: Erstellte Schüler*innenfotos nach SchILD2 hochladen",
-                        anrechnungen,
                         quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat"]),
                         students,
                         klassen,
@@ -352,23 +340,22 @@ public static class MenueHelper
                         },
                         Global.Rubrik.Allgemein,
                         Global.NurBeiDiesenSchulnummern.Nur177659
-                    ),                    
+                    ),
                     new Menüeintrag(
                     "Klassen: Vor dem Schuljahreswechsel von Untis nach SchILD übergeben",
-                    anrechnungen,
                     quelldateien.Notwendige(configuration, ["klassen,dat", "GPU003,txt"]),
                     students,
                     klassen,
                     [
                         "Vor dem Schuljahreswechsel werden alle neuen Klassen von Untis nach SchILD übergeben.",
-                        "Dazu werden die Klassen des kommenden Schuljahres zuerst in Untis angelegt und die Klassen (GPU003.TXT) aus Untis exportiert.",                                                
+                        "Dazu werden die Klassen des kommenden Schuljahres zuerst in Untis angelegt und die Klassen (GPU003.TXT) aus Untis exportiert.",
                         "Eigenschaften der neuen Klassen werden aus SchILD-Vorjahresklassen entnommen.",
                         "Bei vorhandenen Klassen werden abweichende Eigenschaften (z.B. Klassenleitung) angepasst.",
                     ],
                     m =>
                     {
                         m.Zieldateien =
-                        [                                
+                        [
                             m.KlassenErstellen(
                                 configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Klassen.dat"),
                                 ["InternBez"],
@@ -376,11 +363,76 @@ public static class MenueHelper
                                 "|", '\0', new UTF8Encoding(true), false),
                         ];
 
-                        m.Zieldateien.VergleichenFilternErstellen(quelldateien);                        
+                        m.Zieldateien.VergleichenFilternErstellen(quelldateien);
                     },
                     Global.Rubrik.Allgemein,
                     Global.NurBeiDiesenSchulnummern.Nur177659
                 ),
+                new Menüeintrag(
+                    "Wiki: Diverse SQLite-Dateien (Organigramm, Praktikum etc.) erstellen",
+                    quelldateien.Notwendige(configuration, [
+                        "schuelerzusatzdaten,dat", "absenceperstudent,csv", "exportlesson,csv", "GPU020,txt"
+                    ]),
+                    students,
+                    klassen,
+                    [
+                        $"Das Organigramm wird aus Untisanrechnungen gebildet. Beispiele: {{...}} > KATEGORIE; [[...]] > HINWEIS, Text ohne Klammern wird zur ROLLE; A14, A15, A16 ohne Klammern > AMT; Untis-Beschreibung > AUFGABE. Im Organigramm wird nach Kategorie, Aufgabe oder Beschreibung gruppiert.",
+                        $"Untisanrechnungen: 1.Struct Schema Editor > Untisanrechnungen > Löschen/Leeren > 'untisanrechnungen' eingeben, dann Leeren",
+                        $"Untisanrechnungen: 2.Struct Schema Editor > Untisanrechnungen > Importieren/Exportieren > Importieren von Rohdaten > Global > Durchsuchen"
+                    ],
+                    m =>
+                    {
+                        var anrechnungen = new Anrechnungen(lehrers, configuration);
+
+                        m.Zieldateien =
+                        [
+                            m.GetGruppen(configuration, anrechnungen, Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-gruppen.csv"), lehrers, ",", '\"', new UTF8Encoding(false), true),
+                            m.GetLehrer(configuration, Path.Combine(Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-lul-utf8OhneBom-einmalig-vor-SJ-Beginn.csv")), ",", '\'', new UTF8Encoding(false), false),
+                            m.Zieldatei = m.Praktikanten(
+                                [
+                                    "BW,1", "BT,1", "BS,1", "BS,2", "HBG,1", "HBT,1", "HBW,1", "GG,1", "GT,1", "GW,1", "IFK,1"
+                                ],
+                                Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + @"-praktikanten-utf8OhneBom-einmalig-vor-SJ-Beginn.csv"), ",", '\'', new UTF8Encoding(false), false),
+                            m.KlassenAnlegen(configuration, Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + @"-klassen-utf8OhneBom-einmalig-vor-SJ-Beginn.csv"), ",", '\"', new UTF8Encoding(false), true)
+                        ];
+
+                        m.Schulpflichtüberwachung(configuration);
+
+                        m.Zieldateien.Add(m.GetFaecher(configuration, Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-faecher.csv"), ",", '\'', new UTF8Encoding(false), false));
+
+                        m.Zieldateien.VergleichenFilternErstellen(quelldateien);
+                    },
+                    Global.Rubrik.Wiki,
+                    Global.NurBeiDiesenSchulnummern.Nur177659
+                ),
+                new Menüeintrag(
+                        "Outlook: CSV-Terminexporte für Wiki aufbereiten",
+                        quelldateien.Notwendige(configuration,["termine_fhr,csv", "termine_verwaltung,csv", "termine_berufliches_gymnasium,csv", "termine_kollegium,csv"]),
+                        students,
+                        klassen,
+                        [
+                            $"Die Kalender müssen mit Copy&Paste aus Outlook in die CSV-Dateien im Download-Ordner kopiert werden.",
+                            $"Falls der Inhalt im Body (Spalte Nachricht) mehrzeilig ist, wird nur die erste Zeile berücksichtigt.",
+                            $"Es werden nur Termine berücksichtigt, die mindestens eine Kategorie haben. Kategorien werden zu Links in Wiki.",
+                            $"Termine aus vergangenen Schuljahren werden nicht mit übertragen.",
+                            $"Die Kalender im Wiki zuerst leeren. Anschließend die neuen CSV als Global importieren."
+                        ],
+                        m =>
+                        {
+                            foreach (var kalender in new List<string>(){"termine_berufliches_gymnasium", "termine_kollegium", "termine_verwaltung", "termine_fhr" })
+                            {
+                                m.Zieldateien =
+                                [
+                                    m.Kalender2Wiki(configuration, kalender, Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachWiki-" + kalender), ",", '\"', new UTF8Encoding(false), true)
+                                ];
+
+                                m.Zieldateien[0].Erstellen();
+                            }
+                        },
+                        Global.Rubrik.Wiki,
+                        Global.NurBeiDiesenSchulnummern.Nur177659
+                    ),
+                
                 /*,
                     new Menüeintrag(
                         "Zeugnisse #1: Lernabschnittsdaten: Fehlzeiten von Webuntis nach SchILD importieren",

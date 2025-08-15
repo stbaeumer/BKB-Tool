@@ -26,11 +26,11 @@ Global.ColorFehler = Color.Red; // Zahlen
 Global.ColorInfoBox = Color.Orange1; // Zahlen
 Global.HilfeUrl = "https://github.com/stbaeumer/BKB-Tool";
 
-Global.AppVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0.0"; // Major.Minor.Build.Revision
+Global.AppVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0"; // Major.Minor.Build
 
 Global.SchulnummernGesperrt = new List<string> { "999999" }; // Diese Schulnummern können das Programm nicht verwenden.
 Global.SchulnummernPrivilegiert = new List<string>{ "177659" }; // Diese Schulnummern bekommen alle Jedermann-Punkte plus weitere Menüpunkte angezeigt.
-Global.Schulnummer177659 = new List<string> { "177659" }; // Diese Schulnummer bekommen alle Privilegierten plus weitere Menüpunkte angezeigt.
+Global.Schulnummer177659 = new List<string> { "177659" }; // Diese Schulnummer bekommt alle Privilegierten plus weitere Menüpunkte angezeigt.
 Global.SchulnummernDebug = new List<string>{ "000000" }; // alles
 
 configuration["AppDescription"] = "";// $"[bold {Global.GetColor(Global.ColorBeschreibung)}]BKB-Tool[/] - Ein Werkzeug an der Schnittstelle zwischen SchILD und Webuntis.";

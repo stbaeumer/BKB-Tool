@@ -153,7 +153,7 @@ public static class Global
 
         var unterschrift = GetColor(ColorUnterschrift);
         var contentString = ""; //configuration["AppDescription"] ?? "BKB-Tool - Ein Werkzeug an der Schnittstelle zwischen SchILD & WebUntis";
-        var header = $"[{unterschrift}] BKB-Tool[/] | [{unterschrift} link=https://github.com/stbaeumer/BKB-Tool]https://github.com/stbaeumer/BKB-Tool[/] | [{unterschrift}]GPLv3[/] | [{unterschrift}]Version {Global.AppVersion} [/]";
+        var header = $"[{unterschrift} link=https://github.com/stbaeumer/BKB-Tool] https://github.com/stbaeumer/BKB-Tool[/] | [{unterschrift}]GPLv3[/] | [{unterschrift}]v{AppVersion} [/]";
 
         if (content != null && content.Count > 0)
         {
@@ -1015,6 +1015,8 @@ public static class Global
             e.Value.InitialAbfragen == true || // nur solche, die initial abgefragt werden sollen
             (
                 e.Value.InGrundeinstellungAbfragen == true && // nur solche, die in Grundeinstellung abgefragt werden sollen
+                e.Value.NurBeiDiesenSchulnummern != null && // nur solche, die für bestimmte Schulnummern abgefragt werden sollen
+                e.Value.NurBeiDiesenSchulnummern.Contains(configuration["Schulnummer"]) &&
                 configuration[e.Key] != null && // nur solche, die in der Konfiguration gespeichert sind
                 configuration[e.Key] != ""
             )).ToList();
@@ -1329,7 +1331,7 @@ public class KonfigMeta
     public string Aufforderung { get; set; }
     public string Hinweise { get; set; }
     public Global.Datentyp Datentyp { get; set; }
-    public Global.NurBeiDiesenSchulnummern NurBeiDiesenSchulnummern { get; internal set; }
+    public List<string> NurBeiDiesenSchulnummern { get; internal set; }
 
     /// <summary>
     /// Sobald der Wert in die json aufgenommen wurde, wird er in den Grundenstellungen immer wieder abgefragt.
@@ -1375,7 +1377,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.Pfad,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = true,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["PfadSchilddatenaustausch"] = new KonfigMeta
         {
@@ -1386,7 +1388,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.Pfad,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = true,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["AppDescription"] = new KonfigMeta        
         {
@@ -1397,7 +1399,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["Abschnitt"] = new KonfigMeta
         {
@@ -1408,7 +1410,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.Abschnitt,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = true,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["Abschnittswechsel"] = new KonfigMeta
         {
@@ -1419,7 +1421,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.DateTime,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["AccessPfad"] = new KonfigMeta
         {
@@ -1430,7 +1432,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.Pfad,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["AccessPassword"] = new KonfigMeta
         {
@@ -1441,7 +1443,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["Auswahl"] = new KonfigMeta
         {
@@ -1452,7 +1454,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.Auswahl,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["Betreff"] = new KonfigMeta
         {
@@ -1463,7 +1465,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["BccAdresse"] = new KonfigMeta
         {
@@ -1474,7 +1476,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.Mail,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["Body"] = new KonfigMeta
         {
@@ -1485,18 +1487,18 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["ConnectionStringSchild"] = new KonfigMeta
         {
             Key = "ConnectionStringSchild",
             DefaultValue = "",
             Aufforderung = "ConnectionString für SchILD",
-            Hinweise = "Geben Sie den ConnectionString für SchILD an (optional).",
+            Hinweise = "Geben Sie den ConnectionString für SchILD an.",
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.Schulnummer177659
         },
         ["ConnectionStringWebuntis"] = new KonfigMeta
         {
@@ -1507,18 +1509,18 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernPrivilegiert
         },
         ["ConnectionStringUntis"] = new KonfigMeta
         {
             Key = "ConnectionStringUntis",
-            DefaultValue = "",
-            Aufforderung = "ConnectionStringUntis (optional)",
-            Hinweise = "Bitte geben Sie den ConnectionString für Untis an (optional).",
+            DefaultValue = Environment.GetEnvironmentVariable("UNTIS_CONNECTION_STRING") ?? "",
+            Aufforderung = "ConnectionString für Untis",
+            Hinweise = "Bitte geben Sie den ConnectionString für Untis an.",
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernPrivilegiert
         },
         ["FirstRun"] = new KonfigMeta
         {
@@ -1529,7 +1531,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.FirstRun,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Alle
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["FehlzeitenVorDemAbschnittswechselBeruecksichtigen"] = new KonfigMeta
         {
@@ -1540,7 +1542,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.JaNein,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["InteressierendeUnterrichtsgruppen"] = new KonfigMeta
         {
@@ -1551,7 +1553,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.MultiSelect,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["Klassen"] = new KonfigMeta
         {
@@ -1562,7 +1564,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.Klassen,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["Konferenzdatum"] = new KonfigMeta
         {
@@ -1573,7 +1575,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.DateTime,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["Kursarten"] = new KonfigMeta
         {
@@ -1587,7 +1589,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["Lk1faecher"] = new KonfigMeta
         {
@@ -1598,7 +1600,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.Maildomain,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["LehrkraefteSonderzeiten"] = new KonfigMeta
         {
@@ -1609,7 +1611,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.ListInt,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["MailDomain"] = new KonfigMeta
         {
@@ -1620,7 +1622,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.Maildomain,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["PdfKennwort"] = new KonfigMeta
         {
@@ -1631,7 +1633,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["MaxDateiAlter"] = new KonfigMeta
         {
@@ -1642,7 +1644,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.Int,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = true,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["NurDieseGruende"] = new KonfigMeta
         {
@@ -1653,7 +1655,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.ListInt,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["OffeneFehlstunden"] = new KonfigMeta
         {
@@ -1664,7 +1666,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.JaNein,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },         
         ["PfadDokumentenverwaltung"] = new KonfigMeta
         {
@@ -1675,7 +1677,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.Pfad,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["PfadFotosAusSchILD"] = new KonfigMeta
         {
@@ -1687,7 +1689,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.Pfad,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["PfadLitteraImport"] = new KonfigMeta
         {
@@ -1698,7 +1700,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.Pfad,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["Schlüsselwörter"] = new KonfigMeta
         {
@@ -1709,7 +1711,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.ListString,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["SchipsOderZeugnisseOderAnderePdfs"] = new KonfigMeta
         {
@@ -1720,7 +1722,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.Int,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["Schulnummer"] = new KonfigMeta
         {
@@ -1731,7 +1733,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.Int,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = true,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["SmtpKennwort"] = new KonfigMeta
         {
@@ -1742,7 +1744,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["SmtpPort"] = new KonfigMeta
         {
@@ -1753,7 +1755,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },        
         ["SmtpServer"] = new KonfigMeta
         {
@@ -1764,7 +1766,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["SprechtagsDatum"] = new KonfigMeta
         {
@@ -1775,7 +1777,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.DateTime,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["StatistikDatum"] = new KonfigMeta
         {
@@ -1786,7 +1788,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.DateTime,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["TeamsChatAuswahl"] = new KonfigMeta
         {
@@ -1797,7 +1799,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.Int,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["Teilleistungsarten"] = new KonfigMeta
         {
@@ -1808,8 +1810,8 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.ListString,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
-        },
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
+        },        
         ["VolleStelle"] = new KonfigMeta
         {
             Key = "VolleStelle",
@@ -1819,7 +1821,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.Float,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["WikiUrl"] = new KonfigMeta
         {
@@ -1830,7 +1832,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.Url,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },        
         ["WikiJsonUser"] = new KonfigMeta
         {
@@ -1841,7 +1843,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["WikiJsonUserKennwort"] = new KonfigMeta
         {
@@ -1852,7 +1854,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["WikiSprechtagKleineAenderung"] = new KonfigMeta
         {
@@ -1863,7 +1865,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.JaNein,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["Zeugnisdatum"] = new KonfigMeta
         {
@@ -1874,7 +1876,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.DateTime,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["ZeugnisUrl"] = new KonfigMeta
         {
@@ -1885,7 +1887,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.DateTime,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["ZeugnisPasswort"] = new KonfigMeta
         {
@@ -1896,7 +1898,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.DateTime,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["ZipKennwort"] = new KonfigMeta
         {
@@ -1907,7 +1909,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["ZustimmungLizenz"] = new KonfigMeta
         {
@@ -1925,7 +1927,7 @@ public static class KonfigHelper
             Datentyp = Global.Datentyp.JaNein,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Nur177659
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         }
     };
 }
