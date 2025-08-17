@@ -54,7 +54,7 @@ public static class MenueHelper
                 return new Menue(quelldateien, klassen, lehrers, students, []);
             }
 
-#pragma warning disable CS8601 // Mögliche Nullverweiszuweisung
+            #pragma warning disable CS8601 // Mögliche Nullverweiszuweisung
             //Console.WriteLine("");
             //AnsiConsole.Write(new Rule("").RuleStyle("springgreen2").Centered());
 
@@ -347,10 +347,12 @@ public static class MenueHelper
                     students,
                     klassen,
                     [
-                        "Vor dem Schuljahreswechsel werden alle neuen Klassen von Untis nach SchILD übergeben.",
-                        "Dazu werden die Klassen des kommenden Schuljahres zuerst in Untis angelegt und die Klassen (GPU003.TXT) aus Untis exportiert.",
-                        "Eigenschaften der neuen Klassen werden aus SchILD-Vorjahresklassen entnommen.",
-                        "Bei vorhandenen Klassen werden abweichende Eigenschaften (z.B. Klassenleitung) angepasst.",
+                        $"Für diese Funktion wird angenommen, dass sich der Klassenname während der gesamten Laufbahn einer/eines jeden Schüler*in nicht ändert. Dazu müssen die Klassennamen so gebildet werden, dass",
+                        $"1. das Einschulungsjahr in der Notation JJ im Klassennamen enthalten ist,",
+                        $"2. sie auf einen Buchstaben enden. Mit jeder weiteren Parallelklasse erhöht sich der Buchstabe.",
+                        $"Die exportierten Klassen aus SchILD werden nun ergänzt und gefiltert, um dann nach SchILD reimportiert zu werden.",
+                        $"Bei vorhandenen Klassen werden abweichende Eigenschaften (z.B. Klassenleitung) angepasst.",
+                        $"Stellv. Klassenleitung und Prüfungsordnung müssen ggfs. manuell angepasst werden.",
                     ],
                     m =>
                     {

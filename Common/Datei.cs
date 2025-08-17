@@ -605,9 +605,9 @@ public class Datei : List<dynamic>
                 }
             }
 
-            // Die Tabelle soll auf drei Zeilen begrenzt werden. Falls mehr als zwei Zeilen gefunden werden, wird eine dritte Zeile mit "..." eingefügt.
+            // Die Tabelle soll begrenzt werden. Falls mehr als maxRows Zeilen gefunden werden, wird eine weitere Zeile mit "..." eingefügt.
 
-            var maxRows = 2;
+            var maxRows = 100;
             var rows = 0;
 
             // Für jede neue Zeile ...

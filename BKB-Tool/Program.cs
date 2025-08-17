@@ -26,7 +26,8 @@ Global.ColorFehler = Color.Red; // Zahlen
 Global.ColorInfoBox = Color.Orange1; // Zahlen
 Global.HilfeUrl = "https://github.com/stbaeumer/BKB-Tool";
 
-Global.AppVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0"; // Major.Minor.Build
+var version = Assembly.GetExecutingAssembly().GetName().Version;
+Global.AppVersion = version != null ? $"{version.Major}.{version.Minor}.{version.Build}" : "0.0.0";
 
 Global.SchulnummernGesperrt = new List<string> { "999999" }; // Diese Schulnummern können das Programm nicht verwenden.
 Global.SchulnummernPrivilegiert = new List<string>{ "177659" }; // Diese Schulnummern bekommen alle Jedermann-Punkte plus weitere Menüpunkte angezeigt.
