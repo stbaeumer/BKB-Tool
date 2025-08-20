@@ -213,7 +213,8 @@ public static class MenueHelper
                                     ["Nachname", "Vorname", "Geburtsdatum"],
                                     [],
                                     "|", '\'', new UTF8Encoding(false), false)
-                            ];
+                            ];                            
+                            m.Zieldateien.ExportAusSchildVerschieben(configuration);
                             m.Zieldateien.VergleichenFilternErstellen(quelldateien);
                         },
                         Global.Rubrik.WöchtentlicheArbeiten,
@@ -264,7 +265,7 @@ public static class MenueHelper
                                     [],
                                     "|", '\0', new UTF8Encoding(true), false)
                             ];
-
+                            m.Zieldateien.ExportAusSchildVerschieben(configuration);
                             m.Zieldateien.VergleichenFilternErstellen(quelldateien);
                         },
                         Global.Rubrik.Leistungsdaten,
@@ -297,7 +298,7 @@ public static class MenueHelper
                                     [],
                                     "|", '\0', new UTF8Encoding(true), false),
                             ];
-
+                            m.Zieldateien.ExportAusSchildVerschieben(configuration);
                             m.Zieldateien.VergleichenFilternErstellen(quelldateien);
                         },
                         Global.Rubrik.Allgemein,
@@ -342,7 +343,7 @@ public static class MenueHelper
                         Global.NurBeiDiesenSchulnummern.Nur177659
                     ),
                     new Menüeintrag(
-                    "Klassen: Vor dem Schuljahreswechsel von Untis nach SchILD übergeben",
+                    "Klassen: Neue Klassen von Untis nach SchILD übergeben und Eigenschaften anpassen",
                     quelldateien.Notwendige(configuration, ["klassen,dat", "GPU003,txt"]),
                     students,
                     klassen,
@@ -364,7 +365,7 @@ public static class MenueHelper
                                 ["SonstigeBez", "Folgeklasse"],
                                 "|", '\0', new UTF8Encoding(true), false),
                         ];
-
+                        m.Zieldateien.ExportAusSchildVerschieben(configuration);
                         m.Zieldateien.VergleichenFilternErstellen(quelldateien);
                     },
                     Global.Rubrik.Allgemein,
@@ -372,9 +373,7 @@ public static class MenueHelper
                 ),
                 new Menüeintrag(
                     "Wiki: Diverse SQLite-Dateien (Organigramm, Praktikum etc.) erstellen",
-                    quelldateien.Notwendige(configuration, [
-                        "schuelerzusatzdaten,dat", "absenceperstudent,csv", "exportlesson,csv", "GPU020,txt"
-                    ]),
+                    quelldateien.Notwendige(configuration, ["schuelerzusatzdaten,dat", "absenceperstudent,csv", "exportlesson,csv", "GPU020,txt"]),
                     students,
                     klassen,
                     [
@@ -413,11 +412,20 @@ public static class MenueHelper
                         students,
                         klassen,
                         [
-                            $"Die Kalender müssen mit Copy&Paste aus Outlook in die CSV-Dateien im Download-Ordner kopiert werden.",
-                            $"Falls der Inhalt im Body (Spalte Nachricht) mehrzeilig ist, wird nur die erste Zeile berücksichtigt.",
-                            $"Es werden nur Termine berücksichtigt, die mindestens eine Kategorie haben. Kategorien werden zu Links in Wiki.",
-                            $"Termine aus vergangenen Schuljahren werden nicht mit übertragen.",
-                            $"Die Kalender im Wiki zuerst leeren. Anschließend die neuen CSV als Global importieren."
+                            $"Termine aus Outlook (Kollegium, FHR, Berufliches Gymnasium, Verwaltung) werden nach {Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachWiki-Kalendername.csv")} exportiert.",
+                            $"[{Global.GetColor(Global.ColorActionInMenüs)}]Vorgehen:[/]",
+                            $"[{Global.GetColor(Global.ColorActionInMenüs)}]#1[/] Die Kalender in Listenansicht anzeigen. Notwendige Spalten: [{Global.GetColor(Global.ColorActionInMenüs)}]Beginn, Ende, Betreff, Kategorien, Ressourcen, Ort, Nachricht[/]",
+                            $"[{Global.GetColor(Global.ColorActionInMenüs)}]#2[/] Kalender aufsteigend nach Beginn sortieren.",
+                            $"[{Global.GetColor(Global.ColorActionInMenüs)}]#3[/] Mit Copy&Paste (Strg+A, Strg+C) die Termine aus Outlook in die CSV-Dateien im Download-Ordner kopieren. Codierung UTF8",
+                            $"[{Global.GetColor(Global.ColorActionInMenüs)}]#4[/] Die Kalender im Wiki zuerst leeren ([{Global.GetColor(Global.ColorPfadInProgrammen)}]Admin > Struct Schema Editor > Leeren[/]). Anschließend die neuen CSV als Global importieren.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise:[/]",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#1[/] Falls der Inhalt im Body (Spalte Nachricht) mehrzeilig ist, wird nur die erste Zeile berücksichtigt.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#2[/] Es werden nur Termine berücksichtigt, die mindestens eine Kategorie haben. Kategorien werden zu Links in Wiki.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#3[/] Termine aus vergangenen Schuljahren werden nicht mit übertragen.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#4[/] Falls in der Nachricht ein Link zu bkb.wiki enthalten ist, dann wird der Link zum Seitenlink. Ansonsten wird die erste Kategorie zum Seitenlink.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#5[/] Falls in der Nachricht ein Link zu bkb.wiki enthalten ist, wird der Link zur ersten Kategorie.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#6[/] Die Anzahl der Kategorien ist in Outlook begrenzt. Mehr als 6 Kategorien sind evtl. problematisch.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#7[/] Mehrtägige Termine: Nur bei ganztägigen Terminen wird der erste und letzte Tag richtig angezeigt. Wenn Uhrzeiten angegeben werden, wird nur der erste Tag angezeigt."
                         ],
                         m =>
                         {
@@ -434,7 +442,19 @@ public static class MenueHelper
                         Global.Rubrik.Wiki,
                         Global.NurBeiDiesenSchulnummern.Nur177659
                     ),
-                
+                    new Menüeintrag(
+                        "Schnellmeldung: Relationsgruppen im September aufbereiten",
+                        quelldateien,
+                        students,
+                        klassen,
+                        [
+                            "Dokumentation siehe Schips.webuntis2schildGui.nrw.de",
+                            "Realtionen gemäß §93 SchulG"
+                        ],
+                        _ => { new Relationsgruppen(klassen, students); },
+                        Global.Rubrik.Allgemein,
+                        Global.NurBeiDiesenSchulnummern.Nur177659                        
+                    ),                
                 /*,
                     new Menüeintrag(
                         "Zeugnisse #1: Lernabschnittsdaten: Fehlzeiten von Webuntis nach SchILD importieren",
@@ -453,6 +473,7 @@ public static class MenueHelper
                             m.FilterInteressierendeStudentsUndKlassen(configuration);
                             m.Zieldatei = m.Lernabschnittsdaten(configuration, Global.Zweck.Zeugnis, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLernabschnittsdaten.dat"));
                             m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, configuration, ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt"], []);
+                            m.Zieldateien.ExportAusSchildVerschieben(configuration);
                             m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
                         },
                         Global.Rubrik.Leistungsdaten,
@@ -475,10 +496,12 @@ public static class MenueHelper
 
                             //m.Zieldatei = m.Kurse(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Kurse.dat"));
                             m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, configuration, ["KursBez"], ["Klasse", "Schulnr", "WochenstdPUNKTLEERZEICHENKL"]);
+                            m.Zieldateien.ExportAusSchildVerschieben(configuration);
                             m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
 
                             //m.Zieldatei = m.Leistungsdaten(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat"), Global.Zweck.Zeugnis);
                             m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, configuration, ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach"], ["Jahrgang"]);
+                            m.Zieldateien.ExportAusSchildVerschieben(configuration);
                             m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
                         },
                         Global.Rubrik.Leistungsdaten,
@@ -641,20 +664,6 @@ public static class MenueHelper
                         },
                         Global.Rubrik.Allgemein,
                         Global.NurBeiDiesenSchulnummern.Alle
-                    ),
-                    new Menüeintrag(
-                        "Schnellmeldung: Relationsgruppen im September aufbereiten",
-                        anrechnungen,
-                        quelldateien,
-                        students,
-                        klassen,
-                        [
-                            "Dokumentation siehe Schips.webuntis2schildGui.nrw.de",
-                            "Realtionen gemäß §93 SchulG"
-                        ],
-                        _ => { new Relationsgruppen(klassen, students); },
-                        Global.Rubrik.Allgemein,
-                        Global.NurBeiDiesenSchulnummern.Nur177659                        
                     ),
                     new Menüeintrag(
                         $"Altersermäßigung: berechnen für {int.Parse(Global.AktSj[0])}/{int.Parse(Global.AktSj[0]) + 1} und {int.Parse(Global.AktSj[0]) + 1}/{int.Parse(Global.AktSj[0]) + 2}",

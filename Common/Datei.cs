@@ -439,7 +439,7 @@ public class Datei : List<dynamic>
         {
             // Wenn der Pfad leer ist oder die Liste leer ist, wird die Datei nicht erstellt.
             var panel = new Panel($"{AbsoluterPfad}")
-                .Header($"[red]Datei nicht erstellt, da der Pfad leer ist oder keine Daten vorhanden sind[/]")
+                .Header($"[red]  Datei nicht erstellt, da der Pfad leer ist oder keine Daten vorhanden sind  [/]")
                 .HeaderAlignment(Justify.Left)
                 .SquareBorder()
                 .Expand()

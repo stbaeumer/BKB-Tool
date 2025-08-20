@@ -671,6 +671,8 @@ public class Dateien : List<Datei>
     /// <summary>
     /// Die Exportdateien aus SchILD werden zu den anderen heruntergeladenen Dateien verschoben, um Platz zu machen für neue
     /// Dateien, die dann nach SchILD importiert werden. 
+    /// Die Funktion muss mit jedem Durchlauf und unmittelbar vor dem Erstellen neuer Dateien im Ausgabeverzeichnis
+    /// aufgerufen werden, damit Dateien aus SchILD nicht mit den neuen Dateien gemixt werden.
     /// </summary>
     public void ExportAusSchildVerschieben(IConfiguration configuration)
     {
@@ -709,6 +711,8 @@ public class Dateien : List<Datei>
             ? Directory.GetFiles(configuration["PfadSchilddatenaustausch"], "*.dat").ToList()
             : new List<string>();
 
+        // Wenn mehr als 5 Dateien im Ausgangsordner sind, dann muss es sich um Exportdateien handeln,
+        // da BKB-Tool niemals mehr als 5 Dateien gleichzeitig in das Ausgabeverzeichnis verschiebt.
         if (datFiles.Count > 5)
         {
             // Hole die Erstellungszeiten der Dateien

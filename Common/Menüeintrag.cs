@@ -1904,6 +1904,7 @@ public class Menüeintrag
         if (untisKlassen.Count == 0) return [];
 
         var records = new List<dynamic>();
+        bool neueKlassen = false;
 
         foreach (var untisKlasse in untisKlassen)
         {
@@ -1919,6 +1920,8 @@ public class Menüeintrag
                 }))
             {
                 klasseVonDerKopiertWird = DecreaseNumberInString(dictUntis["Field1"].ToString());
+                Global.ZeileSchreiben("Klasse nicht in SchILD gefunden. Sie wird neu angelegt.", dictUntis["Field1"].ToString());
+                neueKlassen = true;
             }
 
             // Suche die korrespondierende (Vorgänger-)klasse mit allen Schildeigenschaften
@@ -1948,6 +1951,16 @@ public class Menüeintrag
             }
         }
 
+        if (neueKlassen)
+        {
+            // Erstelle ein panel
+            var panel = new Panel("Es werden neue Klassen angelegt. Die Prüfungsordnung und die stellv. Klassenleitung müssen manuell eingetragen werden.")
+                .HeaderAlignment(Justify.Left)
+                .Header($"  Hinweis  ")
+                .SquareBorder()
+                .Expand()
+                .BorderColor(Color.Red);
+        }
         return zieldatei;
     }
 
@@ -2593,6 +2606,7 @@ public class Menüeintrag
         var zieldatei = new Datei(zieldateiname + ".csv", delimiter, quote, encoding, shouldAllQuote, importhinweise);
         
         var kalenderRec = Quelldateien.GetMatchingList(configuration, kalender, Students, Klassen);
+
         if (kalenderRec?.Count != 0)
         {
             var records = new List<dynamic>();
@@ -2671,12 +2685,29 @@ public class Menüeintrag
                         sj = "kommendes";
                     }
 
+                    if(dict["Betreff"].ToString().Contains("QA"))
+                    {
+                        string a = "";
+                    }
+                    // Wenn in der Nachricht ein Hyperlink enthalten ist, der nach bkb.wiki zeigt, dann wird der Hyperlink aus dem Inhalt der Seite isoliert und einer Variablen namen link zugewiesen.
+                    var link = dict["Nachricht"].ToString()!.Split(' ').FirstOrDefault(x => x.Contains("bkb.wiki"));
+
+                    // Vom link wird nur der Teil hinter dem letzten Slash behalten
+                    if (link != null && link.Contains("/"))
+                    {
+                        link = link.Substring(link.LastIndexOf('/') + 1);
+                    }
+                    else
+                    {
+                        link = null;
+                    }
+
                     dynamic record = new ExpandoObject();
                     record.Betreff = dict["Betreff"].ToString()!.Trim();
-                    record.Seite = dict["Kategorien"].ToString().Split(';')[0];
+                    record.Seite = string.IsNullOrEmpty(link) ? dict["Kategorien"].ToString().Split(';')[0] : link;
                     record.Hinweise = "";
                     record.Datum = dat + zeit;
-                    record.Kategorien = GetKategorien(dict["Kategorien"].ToString());
+                    record.Kategorien = GetKategorien(link, dict["Kategorien"].ToString());
                     record.Verantwortlich = "";
                     record.Ort = dict["Ort"].ToString()!.Trim();
                     record.Ressourcen = dict["Ressourcen"].ToString()!.Trim();
@@ -2693,20 +2724,29 @@ public class Menüeintrag
                     zieldatei.Add(record);
                 }
             }
+
+            // Zeige den Link in spectre console            
+            AnsiConsole.MarkupLine($"[link=https://bkb.wiki/start?do=admin&page=struct_schemas&table={kalender}#plugin__struct_delete][{Global.GetColor(Global.ColorHyperlink)}]https://bkb.wiki/start?do=admin&page=struct_schemas&table={kalender}[/][/]");
+
             return zieldatei;
         }
 
         return [];
     }
 
-    private string GetKategorien(string? toString)
+    private string GetKategorien(string? link, string? toString)
     {
         if (string.IsNullOrEmpty(toString))
         {
             return string.Empty;
         }
 
-        var kategorien = toString.Split(';').Aggregate("", (current, str) => current + (str.Trim() + ","));
+        var kategorien = toString.ToLower().Split(';').Aggregate("", (current, str) => current + (str.Trim() + ","));
+
+        if (!string.IsNullOrEmpty(link) && !kategorien.Contains(link.ToLower()))
+        {
+            kategorien = link + "," + kategorien;
+        }
 
         return kategorien.TrimEnd(',');
     }
@@ -3095,9 +3135,20 @@ public class Menüeintrag
         foreach (var schueler in schuelerZusatzdaten)
         {
             var dict = (IDictionary<string, object>)schueler;
+
+            if (dict["Nachname"].ToString() == "Skaloud")
+            {
+                string aaa = "";
+            }
+
             dynamic record = new ExpandoObject();
 
-            if(MehrfachVorhanden(schuelerZusatzdaten, dict["schulische E-Mail"].ToString()))
+            if(MehrfachVorhanden(
+                schuelerZusatzdaten,
+                dict["schulische E-Mail"].ToString(),
+                dict["Nachname"].ToString(),
+                dict["Vorname"].ToString(),
+                dict["Geburtsdatum"].ToString()))
             {
                 mehrfachVorhanden.Add(schueler);
             }
@@ -3139,77 +3190,117 @@ public class Menüeintrag
                         return [];
                     }
 
-                    if (DateTime.TryParse(student.Geburtsdatum, out DateTime gebDatum))
+                    // Wenn es in den Zusatzdaten einen Schüler gibt, mit identischem Namen, Vornamen, Geburtsdatum,
+                    // und bei dem die schulische E-Mail-Adresse ebenfalls übereinstimmt, dann gib die Mail-Adresse aus:
+                    var mail = schuelerZusatzdaten
+                        .Where(s =>
+                        {
+                            var dic = s as IDictionary<string, object>;
+                            return dic != null &&
+                                dic["Nachname"].ToString() == dict["Nachname"].ToString() &&
+                                dic["Vorname"].ToString() == dict["Vorname"].ToString() &&
+                                dic["Geburtsdatum"].ToString() == dict["Geburtsdatum"].ToString() &&
+                                !string.IsNullOrEmpty(dic["schulische E-Mail"].ToString());
+                        })
+                        .Select(s => ((IDictionary<string, object>)s)["schulische E-Mail"].ToString())
+                        .FirstOrDefault();
+
+                    if (!string.IsNullOrEmpty(mail))
                     {
-                        var n = student.Bereinigen(student.Nachname.ToLower()).Substring(0, 1);
-                        var v = student.Bereinigen(student.Vorname.ToLower()).Substring(0, 1);
-                        var geburtsjahr = gebDatum.Year.ToString().Substring(2, 2);
-                        var geburtsmonat = gebDatum.Month.ToString("D2");
-                        var geburtstag = gebDatum.Day.ToString("D2");
-
-                        var schulischeEmail = $"{n}{v}{geburtsjahr}{geburtsmonat}{geburtstag}{mailDomain}";
-                        
-                        // Wenn die E-Mail-Adresse bereits existiert, dann hänge eine Zahl an                            
-                        var counter = 1;
-                        while (schuelerZusatzdaten.Any(s => ((IDictionary<string, object>)s)["schulische E-Mail"].ToString() == schulischeEmail))
+                        ((IDictionary<string, object>)record)["schulische E-Mail"] = mail;
+                    }
+                    else
+                    {
+                        if (DateTime.TryParse(student.Geburtsdatum, out DateTime gebDatum))
                         {
-                            schulischeEmail = $"{n}{v}{geburtsjahr}{geburtsmonat}{geburtstag}{counter}{mailDomain}";                                                                
-                            counter++;
+                            var n = student.Bereinigen(student.Nachname.ToLower()).Substring(0, 1);
+                            var v = student.Bereinigen(student.Vorname.ToLower()).Substring(0, 1);
+                            var geburtsjahr = gebDatum.Year.ToString().Substring(2, 2);
+                            var geburtsmonat = gebDatum.Month.ToString("D2");
+                            var geburtstag = gebDatum.Day.ToString("D2");
+
+                            var schulischeEmail = $"{n}{v}{geburtsjahr}{geburtsmonat}{geburtstag}{mailDomain}";
+
+                            // Wenn die E-Mail-Adresse bereits existiert, dann hänge eine Zahl an                            
+                            var counter = 1;
+                            while (schuelerZusatzdaten.Any(s => ((IDictionary<string, object>)s)["schulische E-Mail"].ToString() == schulischeEmail))
+                            {
+                                schulischeEmail = $"{n}{v}{geburtsjahr}{geburtsmonat}{geburtstag}{counter}{mailDomain}";
+                                counter++;
+                            }
+
+                            // Wenn der Counter größer als 1 ist, dann gib ein Panel aus
+                            if (counter > 1)
+                            {
+                                var panel = new Panel($"Die E-Mail-Adresse für {student.Vorname} {student.Nachname} ({student.Geburtsdatum}) soll neu angelegt werden, wurde aber bereits zuvor in SchILD vergeben. Deswegen schreibt [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] jetzt für {student.Vorname} {student.Nachname} einen Zähler vor das [{Global.GetColor(Global.ColorHinweise)}]@[/]: [{Global.GetColor(Global.ColorZahlen)}]{schulischeEmail}[/]. So wird Eindeutigkeit gewährleistet.\nOptional können Sie nach dem SchILD-Import die E-Mail-Adresse von {student.Vorname} nochmal ändern, wenn Sie anderweitig Eindeutigkeit herstellen wollen (z.B. Buchstabe statt Zähler).\nWeiter mit [{Global.GetColor(Global.ColorActionInMenüs)}]ENTER[/].")
+                                    .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] Hinweis: Doppelung bei E-Mail-Adresse [/]")
+                                    .HeaderAlignment(Justify.Left)
+                                    .SquareBorder()
+                                    .Expand()
+                                    .BorderColor(Global.ColorHinweise);
+                                AnsiConsole.Write(panel);
+                                Console.ReadKey(true);
+                            }
+
+                            student.MailSchulisch = schulischeEmail;
+
+                            ((IDictionary<string, object>)record)[name] = schulischeEmail;
+
+                            if (MehrfachVorhanden(
+                                schuelerZusatzdaten,
+                                dict["schulische E-Mail"].ToString(),
+                                dict["Nachname"].ToString(), dict["Vorname"].ToString(), dict["Geburtsdatum"].ToString()))
+                            {
+                                mehrfachVorhanden.Add(schueler);
+                            }
                         }
-
-                        // Wenn der Counter größer als 1 ist, dann gib ein Panel aus
-                        if (counter > 1)
-                        {
-                            var panel = new Panel($"Die E-Mail-Adresse für {student.Vorname} {student.Nachname} ({student.Geburtsdatum}) soll neu angelegt werden, wurde aber bereits zuvor in SchILD vergeben. Deswegen schreibt [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] jetzt für {student.Vorname} {student.Nachname} einen Zähler vor das [{Global.GetColor(Global.ColorHinweise)}]@[/]: [{Global.GetColor(Global.ColorZahlen)}]{schulischeEmail}[/]. So wird Eindeutigkeit gewährleistet.\nOptional können Sie nach dem SchILD-Import die E-Mail-Adresse von {student.Vorname} nochmal ändern, wenn Sie anderweitig Eindeutigkeit herstellen wollen (z.B. Buchstabe statt Zähler).\nWeiter mit [{Global.GetColor(Global.ColorActionInMenüs)}]ENTER[/].")
-                                .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] Hinweis: Doppelung bei E-Mail-Adresse [/]")
-                                .HeaderAlignment(Justify.Left)
-                                .SquareBorder()
-                                .Expand()
-                                .BorderColor(Global.ColorHinweise);
-                            AnsiConsole.Write(panel);
-                            Console.ReadKey(true);
-                        }
-
-                        student.MailSchulisch = schulischeEmail;
-
-                        ((IDictionary<string, object>)record)[name] = schulischeEmail;
-
-                        if (MehrfachVorhanden(schuelerZusatzdaten, dict["schulische E-Mail"].ToString()))
-                        {
-                            mehrfachVorhanden.Add(schueler);
-                        }
-                        //Global.ZeileSchreiben($"{student.Nachname} {student.Vorname} ({student.Geburtsdatum})", $"NEU: {schulischeEmail}");
                     }
                 }
             }            
+
             zieldatei.Add(record);
         }
 
-        //Global.ZeileSchreiben($"Anzahl Schüler*innen mit neuer schulinterner E-Mail-Adresse:", $"{zieldatei.Count}");
+        // Sortiere mehrfachVorhanden nach Geburtsdatum
+        mehrfachVorhanden = mehrfachVorhanden.OrderBy(s => s.Geburtsdatum).ToList();
 
         if (mehrfachVorhanden.Count > 0)
         {
-            var schüler = string.Join(", ", mehrfachVorhanden.Select(s => $"{s.Nachname} {s.Vorname} ({s.Geburtsdatum})"));
-            var fehler = $"Unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Individualdaten I[/] haben mehrere dieselbe schulinterne Mailadresse: {schüler} \nLösen Sie das Problem, indem Sie in SchILD unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Individualdaten I[/] händisch Eindeutigkeit herstellen. Sie könnten z.B. bei einer/einem Schüler*in händisch eine [{Global.GetColor(Global.ColorZahlen)}]1[/] anhängen.\nAnschließend exportieren Sie alle *.dat-Dateien erneut und kehren hierher zurück.";
+            var schüler = string.Join("\n ", mehrfachVorhanden.Select(s => $"{s.Geburtsdatum} {s.Nachname} {s.Vorname}"));
+            var fehler = $"Unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Individualdaten I[/] haben mehrere dieselbe schulinterne Mailadresse: \n {schüler} \nLösen Sie das Problem, indem Sie in SchILD unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Individualdaten I[/] händisch Eindeutigkeit herstellen. Sie könnten z.B. bei einer/einem Schüler*in händisch eine [{Global.GetColor(Global.ColorZahlen)}]1[/] anhängen.\nAnschließend exportieren Sie alle *.dat-Dateien erneut und kehren hierher zurück.";
             throw new Exception(fehler);
         }
 
         return zieldatei;
     }
 
-    private bool MehrfachVorhanden(List<dynamic> schuelerZusatzdaten, string mail)
+    private bool MehrfachVorhanden(List<dynamic> schuelerZusatzdaten, string mail, string nachname, string vorname, string geburtsdatum)
     {
+        // Prüfe auf doppelte
         var doppelte = schuelerZusatzdaten.Where(rec =>
         {
             var dict = (IDictionary<string, object>)rec;
-            return  mail == dict["schulische E-Mail"].ToString() && mail != "" &&
-                   !string.IsNullOrEmpty(dict["Nachname"].ToString()) &&
-                   !string.IsNullOrEmpty(dict["Vorname"].ToString());
+            return mail == dict["schulische E-Mail"].ToString() && mail != "" &&
+                !string.IsNullOrEmpty(dict["Nachname"].ToString()) &&
+                !string.IsNullOrEmpty(dict["Vorname"].ToString()) &&
+                !string.IsNullOrEmpty(dict["Geburtsdatum"].ToString());
         }).ToList();
 
+        // Wenn mehr als 1 Eintrag existiert, aber alle Felder identisch sind, ist es KEIN Duplikat
         if (doppelte.Count > 1)
         {
-            return true;
+            // Prüfe, ob alle Einträge in Name, Vorname und Geburtsdatum identisch sind
+            bool alleIdentisch = doppelte.All(rec =>
+            {
+                var dict = (IDictionary<string, object>)rec;
+                return dict["Nachname"].ToString() == nachname &&
+                    dict["Vorname"].ToString() == vorname &&
+                    dict["Geburtsdatum"].ToString() == geburtsdatum;
+            });
+
+            if (alleIdentisch)
+                return false; // Kein Duplikat, sondern dieselbe Person
+            return true; // Unterschiedliche Personen mit gleicher Mail
         }
         return false;
     }

@@ -1450,7 +1450,7 @@ public static class KonfigHelper
             Key = "Auswahl",
             DefaultValue = "1",
             Aufforderung = "Auswahl",
-            Hinweise = $"Geben Sie eine [bold {Global.GetColor(Global.ColorTextHervorheben)}]Ziffer[/] ein oder [bold {Global.GetColor(Global.ColorTextHervorheben)}]e[/] für Einstellungen oder [bold {Global.GetColor(Global.ColorTextHervorheben)}]h[/] für Onlinehilfe",
+            Hinweise = $"Geben Sie eine [bold {Global.GetColor(Global.ColorTextHervorheben)}]Zahl[/] ein oder [bold {Global.GetColor(Global.ColorTextHervorheben)}]e[/] für Einstellungen oder [bold {Global.GetColor(Global.ColorTextHervorheben)}]h[/] für Onlinehilfe",
             Datentyp = Global.Datentyp.Auswahl,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
