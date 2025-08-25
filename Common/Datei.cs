@@ -57,8 +57,8 @@ public class Datei : List<dynamic>
     /// <summary>
     /// KeyAttribute, anhand derer die Datei mit anderen Dateien verglichen wird.    
     /// </summary>
-    public string[] AnhandDieserSchlüsselAttributeWirdVerglichen { get; private set; }
-    public string[] DieseAttributeWerdenBeimVergleichIgnoriert { get; private set; }
+    public string[] AnhandDieserSchlüsselAttributeWirdVerglichen { get; set; }
+    public string[] DieseAttributeWerdenBeimVergleichIgnoriert { get; set; }
 
     public Datei(string name, bool vorhanden)
     {
@@ -1097,5 +1097,172 @@ public class Datei : List<dynamic>
     internal List<string> GetFotosAusSchildPfade(IConfiguration configuration, Students students, object webuntis)
     {
         throw new NotImplementedException();
+    }
+
+    internal void Vergleichen(Dateien quelldateien)
+    {
+        var neueDatei = new Datei(AbsoluterPfad);
+        bool skipProcessing = false;
+        
+        AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Vergleichen ...", ctx =>
+        {
+            var dateiendung = Path.GetExtension(AbsoluterPfad);
+            var tableRows = new List<Text>();
+            var table = TableErstellen(AnhandDieserSchlüsselAttributeWirdVerglichen);
+
+            var vorhandeneRec = GetVorhandeneRec(quelldateien);
+            if (vorhandeneRec == null || vorhandeneRec.Count == 0)
+            {
+                skipProcessing = true;
+                return;
+            }
+
+            // Wenn in der vorhandenen eine Spalte namens Nachname existiert und die Dateiendung .dat ist,
+            // dann muss in jeder Zeile der Nachname um #Klasse ergänzt werden.
+            if (AnhandDieserSchlüsselAttributeWirdVerglichen.Contains("Nachname") && dateiendung == ".dat")
+            {
+                // In jeder Zeile den Nachnamen um #Klasse ergänzen
+                foreach (var vRec in vorhandeneRec)
+                {
+                    var vorhandeneDict = (IDictionary<string, object>)vRec;
+                    if (vorhandeneDict.ContainsKey("Nachname"))
+                    {
+                        var nachname = vorhandeneDict["Nachname"].ToString();
+                        if (vorhandeneDict.ContainsKey("Klasse"))
+                        {
+                            nachname += "#" + vorhandeneDict["Klasse"];
+                        }
+                        vorhandeneDict["Nachname"] = nachname;
+                    }
+                }
+            }
+
+            // Die Tabelle soll begrenzt werden. Falls mehr als maxRows Zeilen gefunden werden, wird eine weitere Zeile mit "..." eingefügt.
+
+            var maxRows = 100;
+            var rows = 0;
+
+            // Für jede neue Zeile ...
+            foreach (var neueRec in this)
+            {
+                var neueDict = (IDictionary<string, object>)neueRec;
+
+                // ... wird geprüft, ob es eine vorhandene Zeile gibt, die auf die Schlüsselattribute matcht.
+                var zeileMitIdentischenSchlüsselattributen = GetZeileMitIdentischenSchlüsselattributen(vorhandeneRec, neueDict, AnhandDieserSchlüsselAttributeWirdVerglichen);
+
+                // Fall1: Wenn keine Zeile in den Vergleichsattributen auf die vorhandenen matcht, wird die Zeile neu angelegt.
+                if (zeileMitIdentischenSchlüsselattributen == null) { neueDatei.Add(neueRec); continue; } // und die Schleife übersprungen
+
+                // Fall2: Wenn eine vorhandene Zeile auf die Vergleichsattribute matcht, werden abweichende Nicht-Schlüssel-Attributwerte gesucht, ...
+                var nichtIdentischeSonstigeAttribute = GetNichtIdentischeSonstigeAttribute(zeileMitIdentischenSchlüsselattributen, neueDict);
+
+                // Fall2a: Wenn eine vorhandene Zeile auf die Vergleichsattribute matcht und die sonstigen Attribute nicht abweichen, ...
+                if (nichtIdentischeSonstigeAttribute.Count == 0) continue; // ... überspringe den Rest der Schleife
+
+                // Fall2b: Wenn eine vorhandene Zeile auf die Vergleichsattribute matcht und die sonstigen Attribute nicht identisch sind, ...
+                if (nichtIdentischeSonstigeAttribute.Count <= 0) continue;
+
+                // Für die ersten 2 abweichenden Attribute dieser Zeile wird eine Zeile in der Tabelle erstellt.
+                for (int i = 0; i < nichtIdentischeSonstigeAttribute.Count; i++)
+                {
+                    if (rows > maxRows) break; // Wenn die maximale Anzahl an Zeilen erreicht ist, breche die Schleife ab.                    
+                    if (rows == maxRows)
+                        table.AddRow(new Text("..."), new Text("..."), new Text("..."), new Text("..."));
+                    if (rows < maxRows)
+                        table.AddRow(RenderZeile(neueDict, vorhandeneRec, nichtIdentischeSonstigeAttribute[i], zeileMitIdentischenSchlüsselattributen));
+                    rows++;
+                }
+            }
+
+            if (rows == 0)
+            {
+                table.AddRow(new Text("keine Änderungen, nichts anzuzeigen"), new Text("..."), new Text("..."), new Text("..."));
+            }
+
+            AnsiConsole.Write(table);
+            AnsiConsole.Write(new Align(
+                new Text($"Summe: {neueDatei.Count} "),
+                HorizontalAlignment.Right,
+                VerticalAlignment.Top));
+        });
+    }
+
+    internal Datei? Filtern(Dateien quelldateien)
+    {
+        var neueDatei = new Datei(AbsoluterPfad);
+        bool skipProcessing = false;
+        
+        AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Vergleichen & Filtern ...", ctx =>
+        {
+            var dateiendung = Path.GetExtension(AbsoluterPfad);
+            
+            var vorhandeneRec = GetVorhandeneRec(quelldateien);
+            if (vorhandeneRec == null || vorhandeneRec.Count == 0)
+            {
+                skipProcessing = true;
+                return;
+            }
+
+            // Wenn in der vorhandenen eine Spalte namens Nachname existiert und die Dateiendung .dat ist,
+            // dann muss in jeder Zeile der Nachname um #Klasse ergänzt werden.
+            if (AnhandDieserSchlüsselAttributeWirdVerglichen.Contains("Nachname") && dateiendung == ".dat")
+            {
+                // In jeder Zeile den Nachnamen um #Klasse ergänzen
+                foreach (var vRec in vorhandeneRec)
+                {
+                    var vorhandeneDict = (IDictionary<string, object>)vRec;
+                    if (vorhandeneDict.ContainsKey("Nachname"))
+                    {
+                        var nachname = vorhandeneDict["Nachname"].ToString();
+                        if (vorhandeneDict.ContainsKey("Klasse"))
+                        {
+                            nachname += "#" + vorhandeneDict["Klasse"];
+                        }
+                        vorhandeneDict["Nachname"] = nachname;
+                    }
+                }
+            }
+
+            // Die Tabelle soll begrenzt werden. Falls mehr als maxRows Zeilen gefunden werden, wird eine weitere Zeile mit "..." eingefügt.
+
+            var maxRows = 100;
+            var rows = 0;
+
+            // Für jede neue Zeile ...
+            foreach (var neueRec in this)
+            {
+                var neueDict = (IDictionary<string, object>)neueRec;
+
+                // ... wird geprüft, ob es eine vorhandene Zeile gibt, die auf die Schlüsselattribute matcht.
+                var zeileMitIdentischenSchlüsselattributen = GetZeileMitIdentischenSchlüsselattributen(vorhandeneRec, neueDict, AnhandDieserSchlüsselAttributeWirdVerglichen);
+
+                // Fall1: Wenn keine Zeile in den Vergleichsattributen auf die vorhandenen matcht, wird die Zeile neu angelegt.
+                if (zeileMitIdentischenSchlüsselattributen == null) { neueDatei.Add(neueRec); continue; } // und die Schleife übersprungen
+
+                // Fall2: Wenn eine vorhandene Zeile auf die Vergleichsattribute matcht, werden abweichende Nicht-Schlüssel-Attributwerte gesucht, ...
+                var nichtIdentischeSonstigeAttribute = GetNichtIdentischeSonstigeAttribute(zeileMitIdentischenSchlüsselattributen, neueDict);
+
+                // Fall2a: Wenn eine vorhandene Zeile auf die Vergleichsattribute matcht und die sonstigen Attribute nicht abweichen, ...
+                if (nichtIdentischeSonstigeAttribute.Count == 0) continue; // ... überspringe den Rest der Schleife
+
+                // Fall2b: Wenn eine vorhandene Zeile auf die Vergleichsattribute matcht und die sonstigen Attribute nicht identisch sind, ...
+                if (nichtIdentischeSonstigeAttribute.Count <= 0) continue;
+
+                neueDatei.Add(neueRec);
+            }
+
+            AnsiConsole.Write(new Align(
+                new Text($"Summe: {neueDatei.Count} "),
+                HorizontalAlignment.Right,
+                VerticalAlignment.Top));
+        });
+
+        if (skipProcessing)
+            return this;
+
+        // Entferne alle Zeilen aus this und ersetzte durch neueDatei.
+        Clear();
+        AddRange(neueDatei);
+        return this;
     }
 }

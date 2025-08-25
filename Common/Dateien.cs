@@ -812,7 +812,6 @@ public class Dateien : List<Datei>
                     OrdnerOeffnen();
                     bereitsGeöffnet = true;
                 }
-
                 datei.Erstellen();
             }
             catch (Exception ex)
@@ -855,6 +854,78 @@ public class Dateien : List<Datei>
                     AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything);
                 }
             }
+        }
+    }
+
+    internal void Vergleichen(Dateien quelldateien)
+    {
+        foreach (var datei in this)
+        {
+            datei.Vergleichen(quelldateien);
+        }
+    }
+
+    internal void Filtern(Dateien quelldateien)
+    {
+        foreach (var datei in this)
+        {
+            datei.Filtern(quelldateien);
+        }
+    }
+
+    internal void Erstellen()
+    {
+        foreach (var datei in this)
+        {
+            datei.Erstellen();
+        }
+    }
+
+    internal void OrdnerÖffnen()
+    {
+        var bereitsGeöffnet = false;
+        
+        foreach (var datei in this)
+        {
+            try
+            {   
+                // OrdnerOeffnen wird nur einmal aufgerufen, sobald die erste Datei, die count > 0 hat, erstellt wird.
+                if (datei.Count > 0 && !bereitsGeöffnet)
+                {
+                    OrdnerOeffnen();
+                    bereitsGeöffnet = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything);
+                AnsiConsole.MarkupLine($"[bold {Global.GetColor(Global.ColorFehler)}]Fehler beim Erstellen der Datei [bold {Global.GetColor(Global.ColorPfadInDateien)}]{datei.Dateiname}[/]: {ex.Message}[/]");
+            }
+        }
+    }
+
+    internal void Verschieben(IConfiguration configuration)
+    {
+        foreach (var datei in this)
+        {
+            datei.Verschieben(configuration["PfadLitteraImport"]);
+        }
+    }
+
+    internal void Zippen(string zeitstempel, string? pfadDownloads, IConfiguration configuration)
+    {
+        Global.Konfig("ZipKennwort", Global.Modus.Update, configuration, "Zip-Kennwort");
+        foreach (var datei in this)
+        {
+            datei.Zippen(Path.Combine(pfadDownloads ?? "", zeitstempel + @"-ImportNachNetman.zip"), configuration, configuration["ZipKennwort"].ToString(), 0, new List<string>() { Path.Combine(pfadDownloads ?? "", zeitstempel + @"-ImportNachNetman.csv") });
+        }
+    }
+
+    internal void Mailen(string zeitstempel, string? pfadDownloads, IConfiguration configuration)
+    {
+        foreach (var datei in this)
+        {
+            datei.Mailen(Path.Combine(pfadDownloads ?? "", zeitstempel + @"-ImportNachNetman.zip") ?? "", "Verwaltung", Path.GetFileName(datei.AbsoluterPfad) ?? "", configuration);
         }
     }
 }

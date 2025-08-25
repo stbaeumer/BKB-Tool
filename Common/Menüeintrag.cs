@@ -1486,11 +1486,16 @@ public class Menüeintrag
         lehrers.GetTeamsUrl(mitgliederMail.Split(';'), String.Join(';', IKlassen));
     }
 
-    public Datei WebuntisOderNetmanOderLitteraCsv(IConfiguration configuration, string zieldateiname, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
+    public Datei WebuntisOderNetmanOderLitteraCsv(
+        IConfiguration configuration,
+        string zieldateiname,
+        string[] anhandDieserAttributeWirdVerglichen,
+        string[] dieseAttributeWerdenBeimVergleichIgnoriert,
+        string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
         try
         {
-            var zieldatei = new Datei(zieldateiname, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+            var zieldatei = new Datei(zieldateiname, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
             List<dynamic>? webuntisStudents = Quelldateien.GetMatchingList(configuration, "student_", Students, Klassen);
             if (webuntisStudents == null || webuntisStudents.Count == 0) return [];
@@ -1895,7 +1900,6 @@ public class Menüeintrag
         string defaultwert = "",        
         Global.Modus modus = Global.Modus.Update)
     {
-
         var zieldatei = new Datei(zieldateiname, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         var schildKlassen = Quelldateien.GetMatchingList(configuration, "klassen", Students, Klassen);
@@ -1909,7 +1913,6 @@ public class Menüeintrag
         foreach (var untisKlasse in untisKlassen)
         {
             var dictUntis = (IDictionary<string, object>)untisKlasse;
-
             var klasseVonDerKopiertWird = dictUntis["Field1"].ToString();
 
             // Wenn es die Klasse in Schild nicht gibt
@@ -1920,7 +1923,6 @@ public class Menüeintrag
                 }))
             {
                 klasseVonDerKopiertWird = DecreaseNumberInString(dictUntis["Field1"].ToString());
-                Global.ZeileSchreiben("Klasse nicht in SchILD gefunden. Sie wird neu angelegt.", dictUntis["Field1"].ToString());
                 neueKlassen = true;
             }
 
@@ -1938,7 +1940,7 @@ public class Menüeintrag
                 record.InternBez = dictUntis["Field1"].ToString();
                 record.StatistikBez = dictUntis["Field1"].ToString();
                 record.SonstigeBez = "";
-                record.Jahrgang = s["Jahrgang"].ToString();
+                record.Jahrgang = dictUntis["Field14"].ToString();
                 record.Folgeklasse = dictUntis["Field1"].ToString();
                 record.Klassenlehrer = dictUntis.ContainsKey("Field30") && dictUntis["Field30"] != null
                     ? dictUntis["Field30"].ToString().Split(',').FirstOrDefault() ?? ""
@@ -2513,82 +2515,60 @@ public class Menüeintrag
         string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
         var zieldatei = new Datei(zieldateiname, delimiter, quote, encoding, shouldAllQuote, importhinweise);
-        var exportlessons = Quelldateien.GetMatchingList(configuration, "exportlesson", IStudents, Klassen);
-        if (exportlessons == null || exportlessons.Count == 0) return [];
+        var gpu020 = Quelldateien.GetMatchingList(configuration, "gpu020", IStudents, Klassen);
+        if (gpu020 == null || gpu020.Count == 0) return [];
 
         Gruppen = new Gruppen();
-
-        if(configuration["Schulnummer"] == "177659")
-            Gruppen.AddRange(new Gruppen().GetBildungsgaenge(exportlessons, Klassen, anrechnungen, lehrers));
-
-        if(configuration["Schulnummer"] == "177659")
-            Gruppen.AddRange(new Gruppen().GetSchulformen(exportlessons, Klassen, anrechnungen, lehrers));
-
-        if(configuration["Schulnummer"] == "177659")
-            Gruppen.Add(new Gruppe().Get(exportlessons, Klassen, anrechnungen, lehrers,
+        Gruppen.AddRange(new Gruppen().GetBildungsgaenge(gpu020, Klassen, anrechnungen, lehrers));
+        Gruppen.AddRange(new Gruppen().GetSchulformen(gpu020, Klassen, anrechnungen, lehrers));
+        /*Gruppen.Add(new Gruppe().Get(gpu020, Klassen, anrechnungen, lehrers,
                 "versetzung:blaue_briefe",
                 new List<string>() { "BS", "HBG", "HBT", "HBW", "FS" },
-                new List<int>() { 1 }));
-
-        if (configuration["Schulnummer"] == "177659")
-            Gruppen.Add(new Gruppe().Get(exportlessons, Klassen, anrechnungen, lehrers,
+                new List<int>() { 1 }));*/
+        Gruppen.Add(new Gruppe().Get(gpu020, Klassen, anrechnungen, lehrers,
                 "termine:fhr:start",
                 new List<string>() { "BS", "HBG", "HBT", "HBW", "FS", "FM" },
                 new List<int>() { 2 }));
-        
-        Gruppen.Add(new Gruppe().GetFachschaft(exportlessons, Klassen, anrechnungen, lehrers,
+        Gruppen.Add(new Gruppe().GetFachschaft(gpu020, Klassen, anrechnungen, lehrers,
             ":fachschaften:deutsch_kommunikation",
             new List<string>() { "D", "D FU", "D1", "D2", "D G1", "D G2", "D L1", "D L2", "D L", "DL", "DL1", "DL2" }));
-    
-        Gruppen.Add(new Gruppe().GetFachschaft(exportlessons, Klassen, anrechnungen, lehrers,
+        Gruppen.Add(new Gruppe().GetFachschaft(gpu020, Klassen, anrechnungen, lehrers,
             ":fachschaften:englisch",
             new List<string>() { "E", "E FU", "E1", "E2", "E G1", "E G2", "E L1", "E L2", "E L", "EL", "EL1", "EL2" }));
-
-        Gruppen.Add(new Gruppe().GetFachschaft(exportlessons, Klassen, anrechnungen, lehrers,
+        Gruppen.Add(new Gruppe().GetFachschaft(gpu020, Klassen, anrechnungen, lehrers,
             ":fachschaften:englisch",
             new List<string>() { "E", "E FU", "E1", "E2", "E G1", "E G2", "E L1", "E L2", "E L", "EL", "EL1", "EL2" }));
-
-        Gruppen.Add(new Gruppe().GetFachschaft(exportlessons, Klassen, anrechnungen, lehrers,
+        Gruppen.Add(new Gruppe().GetFachschaft(gpu020, Klassen, anrechnungen, lehrers,
             ":fachschaften:religionslehre",
             new List<string>() { "KR", "KR FU", "KR1", "KR2", "KR G1", "KR G2", "ER", "ER G1" }));
-
-        Gruppen.Add(new Gruppe().GetFachschaft(exportlessons, Klassen, anrechnungen, lehrers,
+        Gruppen.Add(new Gruppe().GetFachschaft(gpu020, Klassen, anrechnungen, lehrers,
             ":fachschaften:mathematik_physik",
             new List<string>() { "M", "M FU", "M1", "M2", "M G1", "M G2", "M L1", "M L2", "M L", "ML", "ML1", "ML2" }));
-
-        Gruppen.Add(new Gruppe().GetFachschaft(exportlessons, Klassen, anrechnungen, lehrers,
+        Gruppen.Add(new Gruppe().GetFachschaft(gpu020, Klassen, anrechnungen, lehrers,
             ":fachschaften:politik_gesellschaftslehre",
             new List<string>() { "PK", "PK FU", "PK1", "PK2", "GG G1", "GG G2" }));
-
-        if(configuration["Schulnummer"] == "177659")
-            Gruppen.Add(new Gruppe().GetFachschaft(exportlessons, Klassen, anrechnungen, lehrers,
+        Gruppen.Add(new Gruppe().GetFachschaft(gpu020, Klassen, anrechnungen, lehrers,
                 ":fachschaften:wirtschaftslehre_in_nicht_kaufm_klassen",
                 new List<string>() { "WL", "WBL" }));
-
-        Gruppen.Add(new Gruppe().GetFachschaft(exportlessons, Klassen, anrechnungen, lehrers,
+        Gruppen.Add(new Gruppe().GetFachschaft(gpu020, Klassen, anrechnungen, lehrers,
             ":fachschaften:sport",
             new List<string>() { "SP", "SP G1", "SP G2" }));
-
-        Gruppen.Add(new Gruppe().GetFachschaft(exportlessons, Klassen, anrechnungen, lehrers,
+        Gruppen.Add(new Gruppe().GetFachschaft(gpu020, Klassen, anrechnungen, lehrers,
             ":fachschaften:biologie",
             new List<string>() { "BI", "Bi", "Bi FU", "Bi1", "Bi G1", "Bi G2", "BI G1", "BI L1" }));
 
-        Gruppen.Add(new Gruppe().GetKollegium(exportlessons, Klassen, anrechnungen, lehrers,
+        Gruppen.Add(new Gruppe().GetKollegium(gpu020, Klassen, anrechnungen, lehrers,
             ":kollegium:start"));
-        Gruppen.Add(new Gruppe().GetLehrerinnen(exportlessons, Klassen, anrechnungen, lehrers,
+        Gruppen.Add(new Gruppe().GetLehrerinnen(gpu020, Klassen, anrechnungen, lehrers,
             "kollegium:lehrerinnen"));
-        Gruppen.Add(new Gruppe().GetRefs(exportlessons, Klassen, anrechnungen, lehrers,
+        Gruppen.Add(new Gruppe().GetRefs(gpu020, Klassen, anrechnungen, lehrers,
             "kollegium:referendar_innen"));
-        Gruppen.Add(new Gruppe().GetKlassenleitungen(exportlessons, Klassen, anrechnungen, lehrers,
+        Gruppen.Add(new Gruppe().GetKlassenleitungen(gpu020, Klassen, anrechnungen, lehrers,
             "kollegium:klassenleitungen"));
-
-        if(configuration["Schulnummer"] == "177659")
-            Gruppen.Add(new Gruppe().GetBildungsgangleitungen(exportlessons, Klassen, anrechnungen, lehrers,
-                "kollegium:bildungsgangleitungen"));
-
-        if(configuration["Schulnummer"] == "177659")
-            Gruppen.Add(new Gruppe().GetByWikilink(exportlessons, Klassen, anrechnungen, lehrers,
-                "kollegium:schulleitung:erweiterte:start"));
+        Gruppen.Add(new Gruppe().GetBildungsgangleitungen(gpu020, Klassen, anrechnungen, lehrers,
+            "kollegium:bildungsgangleitungen"));
+        Gruppen.Add(new Gruppe().GetByWikilink(gpu020, Klassen, anrechnungen, lehrers,
+            "kollegium:schulleitung:erweiterte:start"));
 
         foreach (var gruppe in Gruppen)
         {
@@ -3110,7 +3090,10 @@ public class Menüeintrag
         AnsiConsole.Write(panel3);
     }
 
-    internal Datei SchuelerZusatzdatenUmMailAdresseErgaenzen(IConfiguration configuration, string zieldateiname, string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
+    internal Datei SchuelerZusatzdatenUmMailAdresseErgaenzen(
+        IConfiguration configuration,
+        string zieldateiname,
+        string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
         var schuelerZusatzdaten = Quelldateien.GetMatchingList(configuration, "schuelerzusatzdaten", IStudents, Klassen);
         if (schuelerZusatzdaten == null || !schuelerZusatzdaten.Any()) return [];

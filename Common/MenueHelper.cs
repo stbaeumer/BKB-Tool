@@ -78,14 +78,23 @@ public static class MenueHelper
                             if(m.NichtAlleSusHabenEineEindeutigeMailAdresse(configuration)) return;
                             m.Zieldateien =
                             [
-                                m.WebuntisOderNetmanOderLitteraCsv(configuration, Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") +  @"-ImportNachWebuntis.csv"), ";", '\'', new UTF8Encoding(false), false,
+                                m.WebuntisOderNetmanOderLitteraCsv(
+                                    configuration,
+                                    Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") +  @"-ImportNachWebuntis.csv"),
+                                    ["EMINUSMail"],
+                                    [],
+                                    ";", '\'', new UTF8Encoding(false), false,
                                 [
                                     $"1. In Webuntis als Webuntis-Admin:  [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Stammdaten > Schüler*innen > Import[/]",
                                     $"2. Datei auswählen, UTF8",
                                     $"3. Profil: Schuelerimport, dann Vorschau",
                                     $"Mehr zum Profil Schuelerimport: [{Global.GetColor(Global.ColorHyperlink)}][link=https://github.com/stbaeumer/BKB-Tool/wiki]https://github.com/stbaeumer/BKB-Tool/wiki[/][/]"
                                 ]),
-                            ];
+                            ];                            
+                            m.Zieldateien.Vergleichen(quelldateien);
+                            m.Zieldateien.Filtern(quelldateien);
+                            m.Zieldateien.OrdnerÖffnen();
+                            m.Zieldateien.Erstellen();
                         },
                         Global.Rubrik.WöchtentlicheArbeiten,
                         Global.NurBeiDiesenSchulnummern.Alle
@@ -127,15 +136,18 @@ public static class MenueHelper
                             if(m.NichtAlleSusHabenEineEindeutigeMailAdresse(configuration)) return;
                             m.Zieldateien =
                             [
-                                m.WebuntisOderNetmanOderLitteraCsv(configuration, Path.Combine(configuration["PfadDownloads"] ?? "", DateTime.Now.AddHours(1).ToString("yyyyMMdd-HHmm") + @"-ImportNachLittera.xml"), ",", '\'', new UTF8Encoding(false), false)
+                                m.WebuntisOderNetmanOderLitteraCsv(
+                                    configuration,
+                                    Path.Combine(configuration["PfadDownloads"] ?? "", DateTime.Now.AddHours(1).ToString("yyyyMMdd-HHmm") + @"-ImportNachLittera.xml"),
+                                    [],
+                                    [],
+                                    ",", '\'', new UTF8Encoding(false), false)
                             ];
-
-                            if(configuration["Schulnummer"] != null && configuration["Schulnummer"] == "177659")
-                            {
-                                configuration = Global.Konfig("PfadLitteraImport", Global.Modus.Update, configuration, "Littera-Import-Pfad");
-                                if(m.Zieldateien[0] == null) return;
-                                    m.Zieldatei?.Verschieben(configuration["PfadLitteraImport"]);
-                            }
+                            m.Zieldateien.Vergleichen(quelldateien);
+                            m.Zieldateien.Filtern(quelldateien);
+                            m.Zieldateien.OrdnerÖffnen();
+                            m.Zieldateien.Erstellen();
+                            m.Zieldateien.Verschieben(Global.Konfig("PfadLitteraImport", Global.Modus.Update, configuration, "Littera-Import-Pfad"));
                         },
                         Global.Rubrik.WöchtentlicheArbeiten,
                         Global.NurBeiDiesenSchulnummern.Nur177659
@@ -151,17 +163,24 @@ public static class MenueHelper
                         ],
                         m =>
                         {
-                            m.Zieldateien = new Dateien();
                             var zeitstempel = DateTime.Now.ToString("yyyyMMdd-HHmm");
                             if(m.NichtAlleSusHabenEineEindeutigeMailAdresse(configuration)) return;
-                            m.Zieldatei = m.WebuntisOderNetmanOderLitteraCsv(configuration, Path.Combine(pfadDownloads ?? "", zeitstempel + @"-ImportNachNetman.csv"), ",", '\'', new UTF8Encoding(false), false);
 
-                            if(configuration["Schulnummer"] != null && configuration["Schulnummer"] == "177659")
-                            {
-                                configuration = Global.Konfig("ZipKennwort", Global.Modus.Update, configuration, "Zip-Kennwort");
-                                m.Zieldatei?.Zippen(Path.Combine(pfadDownloads ?? "", zeitstempel + @"-ImportNachNetman.zip"), configuration, configuration["ZipKennwort"].ToString(), 0, new List<string>(){ Path.Combine(pfadDownloads ?? "", zeitstempel + @"-ImportNachNetman.csv") });
-                                m.Zieldatei?.Mailen(Path.Combine(pfadDownloads ?? "", zeitstempel + @"-ImportNachNetman.zip") ?? "", "Verwaltung", Path.GetFileName(m.Zieldatei.AbsoluterPfad) ?? "", configuration);
-                            }
+                            m.Zieldateien =
+                            [
+                                m.WebuntisOderNetmanOderLitteraCsv(
+                                configuration,
+                                Path.Combine(pfadDownloads ?? "", zeitstempel + @"-ImportNachNetman.csv"),
+                                [],
+                                [],
+                                ",", '\'', new UTF8Encoding(false), false)
+                            ];
+                            m.Zieldateien.Vergleichen(quelldateien);
+                            m.Zieldateien.Filtern(quelldateien);
+                            m.Zieldateien.OrdnerÖffnen();
+                            m.Zieldateien.Erstellen();                            
+                            m.Zieldateien.Zippen(zeitstempel, pfadDownloads, configuration);
+                            m.Zieldateien.Mailen(zeitstempel, pfadDownloads, configuration);
                         },
                         Global.Rubrik.WöchtentlicheArbeiten,
                         Global.NurBeiDiesenSchulnummern.Nur177659
@@ -348,12 +367,9 @@ public static class MenueHelper
                     students,
                     klassen,
                     [
-                        $"Für diese Funktion wird angenommen, dass sich der Klassenname während der gesamten Laufbahn einer/eines jeden Schüler*in nicht ändert. Dazu müssen die Klassennamen so gebildet werden, dass",
-                        $"1. das Einschulungsjahr in der Notation JJ im Klassennamen enthalten ist,",
-                        $"2. sie auf einen Buchstaben enden. Mit jeder weiteren Parallelklasse erhöht sich der Buchstabe.",
-                        $"Die exportierten Klassen aus SchILD werden nun ergänzt und gefiltert, um dann nach SchILD reimportiert zu werden.",
-                        $"Bei vorhandenen Klassen werden abweichende Eigenschaften (z.B. Klassenleitung) angepasst.",
-                        $"Stellv. Klassenleitung und Prüfungsordnung müssen ggfs. manuell angepasst werden.",
+                        $"Nachdem die Schule in das neue Schuljahr versetzt worden ist, kann diese Funktion Folgendes:",
+                        $"#1 Fehlende Klassen aus Untis werden in den Schuelerzusatzdaten angelegt. Klassenleitung und Jahrgang werden aus Untis übernommen. Andere Eigenschaften werden aus Klassen des selben Jahrgangs der bisherigen Schuelerzusatzdaten übernommen.",
+                        $"#2 In bestehenden Klassen werden Klassenleitung und Jahrgang aus Untis in die Schuelerzusatzdaten übernommen.", 
                     ],
                     m =>
                     {
@@ -373,7 +389,7 @@ public static class MenueHelper
                 ),
                 new Menüeintrag(
                     "Wiki: Diverse SQLite-Dateien (Organigramm, Praktikum etc.) erstellen",
-                    quelldateien.Notwendige(configuration, ["schuelerzusatzdaten,dat", "absenceperstudent,csv", "exportlesson,csv", "GPU020,txt"]),
+                    quelldateien.Notwendige(configuration, ["schuelerzusatzdaten,dat", "absenceperstudent,csv", "GPU020,txt", "GPU002,txt"]),
                     students,
                     klassen,
                     [

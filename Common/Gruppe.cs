@@ -31,7 +31,7 @@ public class Gruppe
     {
     }
 
-    public Gruppe Get(List<dynamic> exportlessons, Klassen klassen, Anrechnungen anrechnungen,
+    public Gruppe Get(List<dynamic> gpu020, Klassen klassen, Anrechnungen anrechnungen,
         Lehrers lehrers, string wikiLink, List<string> beteiligteKlassen, List<int> jahrgänge)
     {
         var gruppe = new Gruppe(wikiLink);
@@ -47,7 +47,7 @@ public class Gruppe
         var lehrerMail = new List<string>();
         var lehrerName = new List<string>();
 
-        var members = exportlessons.Where(rec =>
+        var members = gpu020.Where(rec =>
         {
             var dict = (IDictionary<string, object>)rec;
             var dictKlassen = dict["klassen"].ToString().Split('~');
