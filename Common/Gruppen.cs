@@ -25,7 +25,7 @@ public class Gruppen : List<Gruppe>
     {
     }
 
-    public Gruppen GetBildungsgaenge(List<dynamic> exportLessons, Klassen klassen, Anrechnungen anrechnungs,
+    public Gruppen GetBildungsgaenge(List<dynamic> gpu002, Anrechnungen anrechnungs,
         Lehrers lehrers)
     {        
         var gruppen = new Gruppen();
@@ -43,7 +43,7 @@ public class Gruppen : List<Gruppe>
             var wikiLink = b;
             var schulform = GetSchulform(b);
 
-            var members = GetMembers(exportLessons, lehrers, new List<int>() { 1, 2, 3, 4 }, kurzname);
+            var members = GetMembers(gpu002, lehrers, new List<int>() { 1, 2, 3, 4 }, kurzname);
             record.Page = wikiLink;
             var enumerable = members.ToList();
             record.Mitglieder = string.Join(',',
@@ -69,7 +69,7 @@ public class Gruppen : List<Gruppe>
         return gruppen;
     }
 
-    public Gruppen GetSchulformen(List<dynamic> exportLessons, Klassen klassen, Anrechnungen anrechnungs,
+    public Gruppen GetSchulformen(List<dynamic> gpu002, Anrechnungen anrechnungs,
         Lehrers lehrers)
     {
         var gruppen = new Gruppen();
@@ -80,8 +80,7 @@ public class Gruppen : List<Gruppe>
                         .Expand()
                         .BorderColor(Global.ColorInfoBox);
 
-                AnsiConsole.Write(panel);
-
+        AnsiConsole.Write(panel);
 
         var schulformen = (from a in anrechnungs
             where a.Text.Contains("Bildungsgangleitung")
@@ -101,7 +100,7 @@ public class Gruppen : List<Gruppe>
                          where GetSchulform(a.Beschr) == schulform
                          select GetKurzname(a.Beschr)).Distinct().ToList())
             {
-                var members = GetMembers(exportLessons, lehrers, new List<int>() { 1, 2, 3, 4 }, kurzname);
+                var members = GetMembers(gpu002, lehrers, new List<int>() { 1, 2, 3, 4 }, kurzname);
 
                 foreach (var member in members)
                 {
@@ -141,17 +140,19 @@ public class Gruppen : List<Gruppe>
     }
 
 
-    public IEnumerable<Lehrer> GetMembers(List<dynamic> exportLessons, Lehrers lehrers, List<int> jahrgänge,
-        string kurzname)
+    public IEnumerable<Lehrer> GetMembers(List<dynamic> gpu002, Lehrers lehrers, List<int> jahrgänge, string kurzname)
     {
         var members = new List<Lehrer>();
 
-        foreach (var recExp in exportLessons)
+        foreach (var recExp in gpu002)
         {
             var dict = (IDictionary<string, object>)recExp;
 
+            //DateTime von = jjjjmmddNachDateTime(dict["Field15"]);
+
+
             var klassenkürzels = new List<string>();
-            klassenkürzels.AddRange(dict["klassen"].ToString().Split('~'));
+            klassenkürzels.AddRange(dict["Field5"].ToString().Split('~'));
 
             foreach (var klassenkürzel in klassenkürzels)
             {
@@ -159,8 +160,7 @@ public class Gruppen : List<Gruppe>
                 {
                     if (JahrgangPasst(klassenkürzel, jahrgänge))
                     {
-                        var leh = (from l in lehrers where l.Kürzel == dict["teacher"].ToString() select l)
-                            .FirstOrDefault();
+                        var leh = (from l in lehrers where l.Kürzel == dict["Field6"].ToString() select l).FirstOrDefault();
 
                         if (leh != null && !(from l in members where l.Mail == leh.Mail select l).Any())
                         {

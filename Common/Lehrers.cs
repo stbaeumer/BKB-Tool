@@ -54,6 +54,11 @@ public class Lehrers : List<Lehrer>
             l.Vorname = dict["Vorname"].ToString();
             l.Mail = dict["dienstl. E-Mail"].ToString();
             l.Titel = dict["Titel"].ToString();
+            l.Geschlecht = dict["Geschlecht"].ToString().ToLower();
+            l.Rechtsverhältnis = dict["Rechtsverhältnis"].ToString();
+            l.Beschäftigungsart = dict["Beschäftigungsart"].ToString();
+            l.Geburtsdatum = DateTime.TryParseExact(dict["Geburtsdatum"].ToString(), "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var dt) ? dt : new DateTime(1, 1, 1);
+
             this.Add(l);
         }
     }

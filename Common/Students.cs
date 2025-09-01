@@ -9,6 +9,8 @@ using Microsoft.Extensions.Configuration;
 using Spectre.Console;
 using ICSharpCode.SharpZipLib.Zip;
 using Common;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
 
 #pragma warning disable CS8602 // Dereferenzierung eines möglicherweise null-Objekts.
 #pragma warning disable CS8604 // Möglicher Null-Verweis-Argument
@@ -62,6 +64,9 @@ public class Students : List<Student>
                 student.Postleitzahl = sb["PLZ"].ToString();
                 student.Straße = sb["Straße"].ToString();
                 student.MailSchulisch = sz["schulische E-Mail"].ToString();
+                student.Fachklasse = sb["Fachklasse"].ToString();
+                student.Jahrgang = sb["Jahrgang"].ToString();
+                student.Schulgliederung = sb["Schulgliederung"].ToString();
                 // Wenn eine externe ID eingetragen ist, wird diese verwendet, ansonsten die schulische E-Mail-Adresse ohne Domain.
                 student.Id = string.IsNullOrEmpty(sz["Externe ID-Nr"].ToString()) ? sz["schulische E-Mail"].ToString().Split('@')[0] : sz["Externe ID-Nr"].ToString();
                 Add(student);
@@ -1086,7 +1091,7 @@ public class Students : List<Student>
         }
     }
 
-    internal void KlassenordnerErstellen(IConfiguration configuration)
+    internal void KlassenordnerErstellenFotosOrdnerÖffnen(IConfiguration configuration)
     {
         var pfadDownloads = configuration["PfadDownloads"];
 
@@ -1106,8 +1111,11 @@ public class Students : List<Student>
             {
                 Global.ZeileSchreiben("Ordner " + pfad, "existiert bereits.", ConsoleColor.Green, ConsoleColor.Black);
             }
-            // Öffne das Verzeichnis im Explorer
-            System.Diagnostics.Process.Start("explorer.exe", pfad);
+            // Öffne das Verzeichnis im Explorer, sofern der Ordner noch nicht geöffnet ist
+            /*if (!Global.IsExplorerOpen(fotosOrdner))
+            {
+                System.Diagnostics.Process.Start("explorer.exe", fotosOrdner);
+            }*/
         }
     }
 
@@ -1158,150 +1166,46 @@ public class Students : List<Student>
         }
     }
 
-    public List<string> KlassenAuswählen(IConfiguration configuration)
+    internal void FotosFürUploadNachSchildAuswählen(IConfiguration configuration)
     {
-        var ausgewählteKlassen = new List<string>();
-        var verschiedeneKlassen = this.Select(x => x.Klasse).Distinct().ToList();
-        var pfadDownloads = configuration["PfadDownloads"];
-        var pfadFotos = Path.Combine(pfadDownloads, "Fotos");
-
-        var tableFoto = new Spectre.Console.Table();
-        tableFoto.Expand();
-        tableFoto.Border(TableBorder.Rounded);
-        tableFoto.BorderColor(Spectre.Console.Color.SpringGreen2);
-        tableFoto.Centered();
-        tableFoto.AddColumn("Nr.");
-        tableFoto.AddColumn("Klasse");
-        tableFoto.AddColumn("Anzahl Schüler*innen");
-        tableFoto.AddColumn("Anzahl Fotos im Ordner");
-        tableFoto.AddColumn("Status");
-
-        List<string> klassen = new List<string>();
-
-        int i = 1;
-        foreach (var klasse in verschiedeneKlassen.OrderBy(x => x))
+        if (this.Count() == 0)
         {
-            if (Path.Exists(Path.Combine(pfadFotos, klasse)))
+            throw new ArgumentException("Es wurden keine Klassen für den Fotoimport ausgewählt.");
+        }
+
+        configuration = Global.Konfig("PfadFotosImSchILD-Ordner", Global.Modus.Update, configuration);
+        configuration = Global.Konfig("PfadFotosAusSchild", Global.Modus.Update, configuration);
+
+        // Alle *.jpg-Dateien aus dem Ordner (und allen Unterordnern) PfadFotosImSchILD-Ordner werden eingelsen.
+        var fotosImSchildOrdner = Directory.GetFiles(configuration["PfadFotosImSchILD-Ordner"], "*.jpg", SearchOption.AllDirectories);
+        Global.ZeileSchreiben("Mögliche neue Fotos für den Upload in SchILD", fotosImSchildOrdner.Count().ToString(), ConsoleColor.Green, ConsoleColor.Black);
+
+        // Alle *.jpg-Dateien aus dem Ordner (und allen Unterordnern) PfadFotosAusSchild werden eingelesen.
+        var fotosAusSchildOrdner = Directory.GetFiles(configuration["PfadFotosAusSchild"], "*.jpg", SearchOption.AllDirectories);
+        Global.ZeileSchreiben("Vorhandene Fotos in SchILD", fotosAusSchildOrdner.Count().ToString(), ConsoleColor.Green, ConsoleColor.Black);
+
+        foreach (var foto in fotosImSchildOrdner)
+        {
+            // Dateiname ohne Endung
+            var dateiName = Path.GetFileNameWithoutExtension(foto);
+
+            if (dateiName == "da158201")
             {
-                /*
-                Geevoo-ID (Interne ID)
-                Identifikationsnummer (z.B: Import-ID aus dem Schulverwaltungsprogramm)
-                E-Mail-Adresse
-                Vorname_Nachname
-                Vorname.Nachname
-                Vorname_Nachname_DDMMYYYY (Formattiert als Geburtsdatum: Max_Mustermann_01012004)
-                */
-
-                var anzahlFotos = Directory.GetFiles(Path.Combine(pfadFotos, klasse), "*.jpg").Count();
-
-                var nichtZugeordneteFotos = Directory.GetFiles(Path.Combine(pfadFotos, klasse), "*.jpg")
-                 .Where(datei =>
-                 {
-                     var dateiname = Path.GetFileNameWithoutExtension(datei).ToLower();
-                     return !this.Any(schueler =>
-                     {
-                         var geburtsdatum = DateTime.ParseExact(schueler.Geburtsdatum, "dd.MM.yyyy", CultureInfo.InvariantCulture)
-                                                 .ToString("ddMMyyyy");
-                         return dateiname.Contains(schueler.Nachname.ToLower()) &&
-                             dateiname.Contains(schueler.Vorname.ToLower()) &&
-                             dateiname.Contains(geburtsdatum);
-                     });
-                 })
-                 .ToList();
-
-                var anzahlSuS = this.Where(x => x.Klasse == klasse).Count();
-
-                var status = "";
-
-                if (nichtZugeordneteFotos.Count() == anzahlSuS)
-                {
-                    status += " Bereit für Weiterverarbeitung.";
-                    klassen.Add(klasse);
-                }else if (nichtZugeordneteFotos.Count() < anzahlSuS){
-                    status += $"[{Global.GetColor(Global.ColorFehler)}] Zu wenige Fotos im Ordner.[/]";
-                }else if (nichtZugeordneteFotos.Count() < anzahlSuS){
-                    status += $"[{Global.GetColor(Global.ColorFehler)}] Zu viele Fotos im Ordner.[/]";
-                }
-
-                tableFoto.AddRow(i.ToString(), klasse, anzahlSuS.ToString(), nichtZugeordneteFotos.Count().ToString(), status);
-                i++;
+                string a = "080916";
             }
-        }
 
-        AnsiConsole.Write(tableFoto);
+            var student = this.FirstOrDefault(s => !string.IsNullOrEmpty(dateiName) && !string.IsNullOrEmpty(s.MailSchulisch) && s.MailSchulisch.StartsWith(dateiName));
 
-        if (klassen.Count() > 0)
-        {
-            // Ask for the user's favorite fruits
-            ausgewählteKlassen = AnsiConsole.Prompt(
-            new MultiSelectionPrompt<string>()
-            .Title("Für welche Klassen sollen die Fotos jetzt nach SchILD übertragen werden?")
-            .PageSize(10)
-            .HighlightStyle(new Style(foreground: Spectre.Console.Color.Yellow, decoration: Decoration.Bold))
-            .InstructionsText("Auswahl mit PFEILTASTEN und LEERTASTE. Dann ENTER.")
-            .AddChoices(klassen)
-            .Required(false)
-            .Select(klassen.First())
-            );
-        }
-        else
-        {
-            var panel = new Panel($"Es sind keine Fotos bereit für den Import nach SchILD2.")
-                            .Header($"[bold springGreen2] Keine Fotos [/]")
-                            .HeaderAlignment(Justify.Left)
-                            .SquareBorder()
-                            .Expand()
-                            .BorderColor(Spectre.Console.Color.SpringGreen2);
+            if (student == null) continue;
 
-            AnsiConsole.Write(panel);
-        }
-        return ausgewählteKlassen;
-    }
+            // Wenn der student schon ein FotoAusSchild-Foto hat, erkennbar daran, 
+            // dass der Dateiname Vorname, Nachname und Geburtsdatum durch Unterstrich getrennt enthält, 
+            // dann wird übersprungen.
+            var fotoBereitsInSchildVorhanden = fotosAusSchildOrdner.FirstOrDefault(f => Path.GetFileNameWithoutExtension(f).Contains(student.Nachname) && Path.GetFileNameWithoutExtension(f).Contains(student.Vorname) && Path.GetFileNameWithoutExtension(f).Contains(student.Geburtsdatum));
+            if (!string.IsNullOrEmpty(fotoBereitsInSchildVorhanden)) continue;
 
-    internal void FotosVerarbeiten(IConfiguration configuration, List<string> klassen)
-    {
-        if (klassen.Count() == 0) return;
-        configuration = Global.Konfig("PfadDownloads", Global.Modus.Read, configuration);
-        configuration = Global.Konfig("PfadDokumentenverwaltung", Global.Modus.Read, configuration);
-
-        var tableFoto = new Spectre.Console.Table();
-        tableFoto.Expand();
-        tableFoto.Border(TableBorder.Rounded);
-        tableFoto.BorderColor(Spectre.Console.Color.SpringGreen2);
-        tableFoto.Centered();
-        tableFoto.AddColumn("Klasse");
-        tableFoto.AddColumn("Name");
-        tableFoto.AddColumn("Stream erstellt");
-        tableFoto.AddColumn("altes Bild gelöscht (sofern vorhanden)");
-        tableFoto.AddColumn("neues Bild in SchILD2 erstellt.");
-        tableFoto.AddColumn("Pfad in die Dokumentenverwaltung erstellt (falls nicht vorhanden)");
-        tableFoto.AddColumn("Bild in die Dokumentenverwaltung kopiert.");
-        tableFoto.AddColumn("Bild im Quellordner umbenannt.");
-
-        DataAccess dataAccess = Global.DataAccessHerstellen(configuration);
-
-        foreach (var klasse in klassen)
-        {
-            var studentsSortiert = this.Where(x => x.Klasse == klasse).OrderBy(x => x.Nachname).ThenBy(x => x.Vorname).ToList();
-            var fotosSortiert = Directory.GetFiles(Path.Combine(configuration["PfadDownloads"], "Fotos", klasse), "*.jpg").OrderBy(x => Path.GetFileNameWithoutExtension(x).ToLower()).ToList();
-
-            for (int i = 0; i < studentsSortiert.Count(); i++)
-            {
-                var student = studentsSortiert[i];
-                var foto = fotosSortiert[i];
-
-                student.IdSchildInt = dataAccess.GetIdSchildInt(student);
-                student.PfadFoto = foto;
-                var fotostreamErstellt = student.Pfad2FotoStream();
-                var erfolgDelete = dataAccess.DeleteImage(student);
-                var erfolgInsert = dataAccess.InsertImage(student);
-                var erfolgPfad = student.ErstellePfadDokumentenverwaltung(configuration);
-                var erfolgKopieren = student.BilderNachPfadDokumentenverwaltungKopieren(configuration);
-                var erfolgQueRename = student.QuellbildUmbenennen(configuration);
-
-                tableFoto.AddRow(student.Klasse, student.Nachname + ", " + student.Vorname, fotostreamErstellt.ToString(), erfolgDelete.ToString(), erfolgInsert.ToString(), erfolgPfad.ToString(), erfolgKopieren.ToString(), erfolgQueRename.ToString());
-            }
-            AnsiConsole.Write(tableFoto);
+            // Wenn der student noch kein Foto hat, wird das aktuelle Foto zugewiesen.
+            student.PfadFoto = foto;
         }
     }
 
@@ -1531,6 +1435,167 @@ public class Students : List<Student>
             }
         }
         return studentsGefiltert;
+    }
+
+    internal void AnzahlPrüfen(IConfiguration configuration)
+    {
+        var pfadDownloads = configuration["PfadDownloads"];
+
+        // Ordner "Fotos" unterhalb von Global.PfadExportdateien
+        var fotosOrdner = Path.Combine(pfadDownloads, "Fotos", this.First().Klasse);
+
+        // Bette das in einer Schleife ein, sodass der Anwender die Fotos anpassen kann und dann erneut die Schleife durchläuft
+        while (true)
+        {
+            // Prüfe in einer Schleife, ob in dem Ordner exakt so viele Fotos wie Schüler vorhanden sind
+            var fotos = Directory.GetFiles(fotosOrdner, "*.jpg");
+            if (fotos.Length != this.Count)
+            {
+                // Mache daraus ein rotes Panel
+                AnsiConsole.MarkupLine($"[red]Es sind {fotos.Length} statt der erwarteten {this.Count} Fotos im Ordner [aqua]{fotosOrdner}[/] vorhanden.[/]");
+                // Der Anwender soll in einem Panel aufgerufen werden die exakte Anzahl in den angezeigten Ordner zu legen. Anschießend soll er ENTER drücken.
+                // Abbruch mit x
+
+                AnsiConsole.MarkupLine($"Bitte legen Sie {this.Count} Fotos in den Ordner. Dann [bold green]ENTER[/] drücken. Abbruch mit [bold red]x[/].");
+
+                var key = Console.ReadKey(true);
+                if (key.Key == ConsoleKey.X)
+                {
+                    throw new OperationCanceledException("Sie haben abgebrochen.");
+                }
+            }
+
+            // Wenn die Anzahl der Fotos jetzt stimmt, breche die Schleife ab
+            if (fotos.Length == this.Count)
+            {
+                break;
+            }
+        }
+    }
+
+    internal void KlassenordnerInSchildErstellenBilderKopierenUndUmbenennenUndZippen(IConfiguration configuration)
+    {
+        var quellpfad = configuration["PfadDownloads"];
+        var zielpfad = configuration["PfadFotosImSchILD-Ordner"];
+
+        var quellpfadZuFotos = Path.Combine(quellpfad, "Fotos", this.First().Klasse);
+        var zielpfadZuFotos = Path.Combine(zielpfad, this.First().Klasse);
+
+        // Lies alle Fotos aus dem Quellpfad, sortiert nach Name aufsteigend
+        var quellFotos = Directory.GetFiles(quellpfadZuFotos, "*.jpg").OrderBy(f => f).ToArray();
+
+        // Falls der Zielordner nicht existiert, erstelle ihn
+        if (!Directory.Exists(zielpfadZuFotos))
+        {
+            Directory.CreateDirectory(zielpfadZuFotos);
+        }
+
+        var webuntisfotostrings = new List<string>();
+        var geevoofotostrings = new List<string>();
+
+        // Durchlaufe alle Students in this. Kopiere das Foto aus dem Quellordner in den Zielordner        
+        for (int i = 0; i < this.Count; i++)
+        {
+            var quellFoto = quellFotos[i];
+            var zielFotoGeevoo = Path.Combine(zielpfadZuFotos, this[i].MailSchulisch + ".jpg");
+            var zielFotoWebuntis = Path.Combine(zielpfadZuFotos, this[i].MailSchulisch.Replace(configuration["MailDomain"], "").Replace("@", "") + ".jpg");
+
+            if (File.Exists(quellFoto))
+            {
+                // Verkleinere das Quellbild auf 160x160
+                using (var image = Image.Load(quellFoto))
+                {
+                    image.Mutate(x => x.Resize(160, 160));
+                    image.Save(zielFotoWebuntis);
+                }
+
+                // Webuntis verarbeitet den Kurznamen
+                //File.Copy(quellFoto, zielFotoWebuntis, true);
+                webuntisfotostrings.Add(zielFotoWebuntis);
+            }
+        }
+
+        var datei = new Datei();
+        datei.Zippen(Path.Combine(zielpfadZuFotos, this.First().Klasse + "-Webuntis-Geevoo.zip"), configuration, "", 0, webuntisfotostrings);        
+    }
+
+    internal void FotosNachSchild2Hochladen(IConfiguration configuration)
+    {
+        // Durchlaufe alle this, deren PfadFoto nicht nulloremptyIst
+        var studentsOhneFotoInSchild = this.Where(x => !string.IsNullOrEmpty(x.PfadFoto)).ToList();
+
+        if (studentsOhneFotoInSchild.Count() == 0)
+        {
+            throw new InvalidOperationException("Keine neuen Fotos für SchILD2");
+        }
+
+        try
+        {
+            DataAccess dataAccess = Global.DataAccessHerstellen(configuration);
+
+            AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Fotos hochladen ...", ctx =>
+            {
+                foreach (var student in studentsOhneFotoInSchild)
+                {
+                    student.IdSchildInt = dataAccess.GetIdSchildInt(student);
+                    var fotostreamErstellt = student.Pfad2FotoStream();
+                    var erfolgDelete = dataAccess.DeleteImage(student);
+                    var erfolgInsert = dataAccess.InsertImage(student);
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+
+        // Erfolgsmeldung im Panel inkl. Anzahl der Fotos
+        var panel = new Panel(new Markup($"Fotos erfolgreich hochgeladen: {studentsOhneFotoInSchild.Count}"))
+                    //.BorderStyle(new Style(Color.Red))
+                    .Expand();
+        AnsiConsole.Write(panel);
+    }
+
+    internal void FotosFürUploadNachSchild2AuflistenUndBestätigen(IConfiguration configuration)
+    {
+        var tableFoto = new Spectre.Console.Table();
+        tableFoto.Expand();
+        tableFoto.Title("Fotos, die bereit für Upload nach SchILD2 sind:");
+        tableFoto.Border(TableBorder.Rounded);
+        tableFoto.BorderColor(Spectre.Console.Color.SpringGreen2);
+        tableFoto.Centered();
+        tableFoto.AddColumn("Nr.");
+        tableFoto.AddColumn("Klasse");
+        tableFoto.AddColumn("Name");
+
+        var studentsSortiert = this.Where(x => !string.IsNullOrEmpty(x.PfadFoto)).OrderBy(x => x.Klasse).ThenBy(x => x.Nachname).ThenBy(x => x.Vorname).ToList();
+
+        for (int i = 0; i < studentsSortiert.Count(); i++)
+        {
+            var student = studentsSortiert[i];
+
+            tableFoto.AddRow((i + 1).ToString(), student.Klasse, student.Nachname + ", " + student.Vorname);
+        }
+        AnsiConsole.Write(tableFoto);
+
+        // Mit Enter soll der Anwender bestätigen, dass die Schüler*innen für den Upload ausgewählt wurden
+        AnsiConsole.MarkupLine($"[]   Drücken Sie [bold green]Enter[/], um den Upload von Fotos für obige Schüler*innen zu bestätigen.[/]");
+        AnsiConsole.MarkupLine($"[]   Drücken Sie [bold red]X[/], um den Upload abzubrechen.[/]");
+
+        var eingabe = Console.ReadKey(true); // true: Zeichen wird nicht angezeigt
+        if (eingabe.Key != ConsoleKey.Enter)
+        {
+            throw new OperationCanceledException("Sie haben den Upload abgebrochen.");
+        }
+    }
+
+    internal Table GetRelationsgruppe(Relationsgruppen relationsgruppen, Table table)
+    {
+        foreach (var student in this.Where(x => x.Status == "2" || x.Status == "6"))
+        {
+            table = student.GetRelationsgruppe(relationsgruppen, table);
+        }
+        return table;
     }
 }
    

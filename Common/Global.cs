@@ -1321,6 +1321,30 @@ public static class Global
         if (string.IsNullOrEmpty(s)) return s;
         return char.ToLowerInvariant(s[0]) + s.Substring(1);
     }
+
+    internal static bool IsExplorerOpen(string pfad)
+    {
+        var letzterTeil = Path.GetFileName(pfad.TrimEnd(Path.DirectorySeparatorChar));
+
+        // Überprüfe, ob der Explorer für den angegebenen Pfad bereits geöffnet ist
+        var processes = System.Diagnostics.Process.GetProcessesByName("explorer");
+        foreach (var process in processes)
+        {
+            try
+            {
+                var mainWindowTitle = process.MainWindowTitle;
+                if (!string.IsNullOrEmpty(mainWindowTitle) && mainWindowTitle.Contains(letzterTeil))
+                {
+                    return true;
+                }
+            }
+            catch
+            {
+                // Ignoriere Prozesse, auf die nicht zugegriffen werden kann
+            }
+        }
+        return false;
+    }
 }    
 
 
@@ -1357,7 +1381,7 @@ public static class KonfigHelper
             //configuration = Konfig("MailDomain", modus, configuration, "Mail-Domain für Schüler*innen", $"Geben Sie die Mail-Domain für Ihre Schüler*innen an. Ihre Eingabe muss mit [{Global.GetColor(Global.ColorZahlen)}]@[/] beginnen und einen [{Global.GetColor(Global.ColorZahlen)}]Punkt[/] enthalten. Beispiel: [springGreen2 bold]@students.meine-schule.de[/]", Datentyp.Mail);
             configuration = Konfig("ConnectionStringUntis", modus, configuration, "ConnectionStringUntis (optional)");
             configuration = Konfig("SmtpUser", modus, configuration, "Mail-Benutzer");
-            configuration = Konfig("SmtpPassword", modus, configuration, "Mail-Kennwort");
+            configuration = Konfig("SmtpKennwort", modus, configuration, "Mail-Kennwort");
             configuration = Konfig("SmtpPort", modus, configuration, "SMTP-Port");
             configuration = Konfig("SmtpServer", modus, configuration, "SMTP-Server");
             configuration = Konfig("NetmanMailReceiver", modus, configuration, "Wem soll die Netman-Mail geschickt werden?");
@@ -1367,29 +1391,7 @@ public static class KonfigHelper
 
 
     public static readonly Dictionary<string, KonfigMeta> KonfigMetadaten = new()
-    {
-        ["PfadDownloads"] = new KonfigMeta
-        {
-            Key = "PfadDownloads",
-            DefaultValue = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"),
-            Aufforderung = "Downloads-Verzeichnis",
-            Hinweise = "Geben Sie den Pfad des Downloads-Verzeichnisses an. In der Regel wird das Verzeichnis bereits richtig vorgeschlagen. Dann einfach [bold springGreen2]ENTER[/] drücken:",
-            Datentyp = Global.Datentyp.Pfad,
-            InGrundeinstellungAbfragen = true,
-            InitialAbfragen = true,
-            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
-        },
-        ["PfadSchilddatenaustausch"] = new KonfigMeta
-        {
-            Key = "PfadSchilddatenaustausch",
-            DefaultValue = $"\\\\fs01\\SchILD-NRW\\Ausgabeverzeichnis",
-            Aufforderung = "SchILD-Ausgabeverzeichnis",
-            Hinweise = $"Geben Sie den Pfad und das Verzeichnis an, das in SchILD eingetragen ist als [{Global.GetColor(Global.ColorPfadInProgrammen)}]Ausgabeverzeichnis[/] unter: \n[{Global.GetColor(Global.ColorPfadInProgrammen)}]Datenaustausch > Schnittstelle SchILD-NRW > Export[/]",
-            Datentyp = Global.Datentyp.Pfad,
-            InGrundeinstellungAbfragen = true,
-            InitialAbfragen = true,
-            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
-        },
+    {        
         ["AppDescription"] = new KonfigMeta        
         {
             Key = "AppDescription",
@@ -1437,7 +1439,7 @@ public static class KonfigHelper
         ["AccessPassword"] = new KonfigMeta
         {
             Key = "AccessPassword",
-            DefaultValue = "",
+            DefaultValue = Environment.GetEnvironmentVariable("ACCESS_PASSWORD") ?? "",
             Aufforderung = "Access-Kennwort",
             Hinweise = $"Geben Sie das Kennwort der Access-Datenbank an. Es geht nicht um Ihr persönliches Kennwort in SchILD, sondern um das Kennwort der Access-Datenbank selbst.",
             Datentyp = Global.Datentyp.String,
@@ -1624,6 +1626,60 @@ public static class KonfigHelper
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
+        ["NetmanMailReceiver"] = new KonfigMeta
+        {
+            Key = "NetmanMailReceiver",
+            DefaultValue = Environment.GetEnvironmentVariable("NETMAN_MAIL_RECEIVER"),
+            Aufforderung = "NetmanMailReceiver",
+            Hinweise = $"Geben Sie dem Empfänger der Netman-Datei an.",
+            Datentyp = Global.Datentyp.Mail,
+            InGrundeinstellungAbfragen = true,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
+        },
+        ["NetmanMailBccReceiver"] = new KonfigMeta
+        {
+            Key = "NetmanMailBccReceiver",
+            DefaultValue = Environment.GetEnvironmentVariable("NETMAN_MAIL_BCC_RECEIVER"),
+            Aufforderung = "NetmanMailBccReceiver",
+            Hinweise = $"Geben Sie dem BCC-Empfänger der Netman-Datei an.",
+            Datentyp = Global.Datentyp.Mail,
+            InGrundeinstellungAbfragen = true,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
+        },
+        ["PfadDownloads"] = new KonfigMeta
+        {
+            Key = "PfadDownloads",
+            DefaultValue = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"),
+            Aufforderung = "Downloads-Verzeichnis",
+            Hinweise = "Geben Sie den Pfad des Downloads-Verzeichnisses an. In der Regel wird das Verzeichnis bereits richtig vorgeschlagen. Dann einfach [bold springGreen2]ENTER[/] drücken:",
+            Datentyp = Global.Datentyp.Pfad,
+            InGrundeinstellungAbfragen = true,
+            InitialAbfragen = true,
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
+        },
+        ["PfadFotosAusSchild"] = new KonfigMeta
+        {
+            Key = "PfadFotosAusSchild",            
+            DefaultValue = $"\\\\fs01\\SchILD-NRW\\Fotos_aus_Schild",
+            Hinweise = $"Geben Sie den Pfad zu den Fotos aus SchILD an. Beispiel: [{Global.GetColor(Global.ColorPfadInProgrammen)}]\\\\fs01\\SchILD-NRW\\Fotos_aus_Schild[/]",
+            Datentyp = Global.Datentyp.Pfad,
+            InGrundeinstellungAbfragen = true,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.Schulnummer177659
+        },
+        ["PfadSchilddatenaustausch"] = new KonfigMeta
+        {
+            Key = "PfadSchilddatenaustausch",
+            DefaultValue = $"\\\\fs01\\SchILD-NRW\\Ausgabeverzeichnis",
+            Aufforderung = "SchILD-Ausgabeverzeichnis",
+            Hinweise = $"Geben Sie den Pfad und das Verzeichnis an, das in SchILD eingetragen ist als [{Global.GetColor(Global.ColorPfadInProgrammen)}]Ausgabeverzeichnis[/] unter: \n[{Global.GetColor(Global.ColorPfadInProgrammen)}]Datenaustausch > Schnittstelle SchILD-NRW > Export[/]",
+            Datentyp = Global.Datentyp.Pfad,
+            InGrundeinstellungAbfragen = true,
+            InitialAbfragen = true,
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
+        },
         ["PdfKennwort"] = new KonfigMeta
         {
             Key = "PdfKennwort",
@@ -1679,13 +1735,12 @@ public static class KonfigHelper
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
-        ["PfadFotosAusSchILD"] = new KonfigMeta
+        ["PfadFotosImSchILD-Ordner"] = new KonfigMeta
         {
-            Key = "PfadFotosAusSchILD",
-            DefaultValue = "",
-            Aufforderung = "Pfad zu den Fotos aus SchILD",
-            Hinweise = $"Exportieren Sie die Schülerfotos aus SchILD ([{Global.GetColor(Global.ColorPfadInProgrammen)}]Datenaustausch > Fotos > Fotos exportieren[/]). Der Dateiname zusammengesetzt sein aus [{Global.GetColor(Global.ColorHinweise)}]Nachname, Vorname, Geburtsdatum[/]. Geben Sie hier an, in welchen Ordner Sie exportiert haben. " +
-                        $"\n[{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] erstellt im Folgenden von jedem SchILD-Foto eine Kopie mit dem von Webuntis geforderten Namen. An den vorhandenen Kopien erkennnt [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/], welche Fotos neu importiert werden müssen. Sie können also einzelne oder alle Fotos erneut für den Import vorsehen, indem Sie einzelne oder alle Fotos im Exportordner löschen.",
+            Key = "PfadFotosImSchILD-Ordner",
+            DefaultValue = "\\\\fs01\\SchILD-NRW\\Fotos",
+            Aufforderung = "Pfad zu den Fotos im SchILD-Ordner",
+            Hinweise = $"Wo liegen die frisch erstellten Fotos? Geben Sie den Pfad zu den Fotos an. Unterordner sind möglich. Beachten Sie, dass die Fotos den Benutzernamen (der Teil vor dem @ der Mail-Adresse) als Namen haben müssen. Beispiel: [aqua]\\\\fs01\\SchILD-NRW\\Fotos[/]",
             Datentyp = Global.Datentyp.Pfad,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
@@ -1738,7 +1793,7 @@ public static class KonfigHelper
         ["SmtpKennwort"] = new KonfigMeta
         {
             Key = "SmtpKennwort",
-            DefaultValue = "",
+            DefaultValue = Environment.GetEnvironmentVariable("SMTP_KENNWORT") ?? "",
             Aufforderung = "SMTP-Kennwort",
             Hinweise = "Geben Sie das SMTP-Kennwort an.",
             Datentyp = Global.Datentyp.String,
@@ -1749,7 +1804,7 @@ public static class KonfigHelper
         ["SmtpPort"] = new KonfigMeta
         {
             Key = "SmtpPort",
-            DefaultValue = "",
+            DefaultValue = Environment.GetEnvironmentVariable("SMTP_PORT") ?? "",
             Aufforderung = "SMTP-Port",
             Hinweise = "Geben Sie den SMTP-Port an.",
             Datentyp = Global.Datentyp.String,
@@ -1760,9 +1815,20 @@ public static class KonfigHelper
         ["SmtpServer"] = new KonfigMeta
         {
             Key = "SmtpServer",
-            DefaultValue = "",
+            DefaultValue = Environment.GetEnvironmentVariable("SMTP_SERVER") ?? "",
             Aufforderung = "SMTP-Server",
             Hinweise = "Geben Sie den SMTP-Server an.",
+            Datentyp = Global.Datentyp.String,
+            InGrundeinstellungAbfragen = true,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
+        },
+        ["SmtpUser"] = new KonfigMeta
+        {
+            Key = "SmtpUser",
+            DefaultValue = Environment.GetEnvironmentVariable("SMTP_USER") ?? "",
+            Aufforderung = "SMTP-Benutzer",
+            Hinweise = "Geben Sie den SMTP-Benutzer an.",
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
@@ -1903,7 +1969,7 @@ public static class KonfigHelper
         ["ZipKennwort"] = new KonfigMeta
         {
             Key = "ZipKennwort",
-            DefaultValue = "Geheim123",
+            DefaultValue = Environment.GetEnvironmentVariable("ZIP_KENNWORT") ?? "",
             Aufforderung = "Zip-Kennwort",
             Hinweise = "Die Datei wird nun gezippt.\nGeben Sie das Kennwort ein, mit dem Sie die Zip-Datei verschlüsseln wollen. Geben Sie ein Leerzeichen ein, wenn kein Kennwort gesetzt werden soll.",
             Datentyp = Global.Datentyp.String,

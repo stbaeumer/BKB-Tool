@@ -61,6 +61,7 @@ public class Menüeintrag
     public List<string> AlleSchildKursBez { get; private set; }
     public Unterrichte Unterrichte { get; set; }
     public Dateien Zieldateien { get; set; }
+    public Relationsgruppen Relationsgruppen { get; internal set; }
 
     public Menüeintrag(string titel, Dateien quelldateien, Students students, Klassen klassen, List<string> beschreibung, Action<Menüeintrag> funktion, Global.Rubrik rubrik = Global.Rubrik.Allgemein, Global.NurBeiDiesenSchulnummern nurbeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Alle)
     {
@@ -1803,6 +1804,9 @@ public class Menüeintrag
                         record.BetriebPlz = sa == null ? "" : sa["PLZ"].ToString();
                         record.BetriebOrt = sa == null ? "" : sa["Ort"].ToString();
                         record.BetriebTelefon = sa == null ? "" : sa["1. Tel.-Nr."].ToString();
+                        record.BetriebTelefon2 = sa == null ? "" : sa["2. Tel.-Nr."].ToString();
+                        record.BetriebMail = sa == null ? "" : sa["E-Mail"].ToString();
+                        record.BetriebBetreuer = sa == null ? "" : (sa["Betreuer Anrede"] == null || sa["Betreuer Anrede"].ToString() == "" ? "" : sa["Betreuer Anrede"].ToString() + " ") + (sa["Betreuer Vorname"] == null || sa["Betreuer Vorname"].ToString() == "" ? "" : sa["Betreuer Vorname"].ToString() + " ") + (sa["Betreuer Nachname"] == null ? "" : sa["Betreuer Nachname"].ToString());
                         record.O365Identität = student.MailSchulisch;
                         record.Benutzername = student.MailSchulisch.Replace("@students.berufskolleg-borken.de", "");
 
@@ -1835,6 +1839,11 @@ public class Menüeintrag
                         record.Passwort = student.Nachname.Substring(0, 1).ToUpper() + student.Geburtsdatum;
                         record.Klasse = student.Klasse;
                         record.Klassenleitung = klassenleitung;
+                        record.BetriebName = sa == null ? "" : sa["Name1"].ToString();
+                        record.BetriebStrasse = sa == null ? "" : sa["Straße"].ToString();
+                        record.BetriebPlz = sa == null ? "" : sa["PLZ"].ToString();
+                        record.BetriebOrt = sa == null ? "" : sa["Ort"].ToString();
+                        record.BetriebTelefon = sa == null ? "" : sa["1. Tel.-Nr."].ToString();
 
                         student.GetLetztesZeugnisdatumInDerKlasse(schuelerLernabschnittsdaten);
 
@@ -1906,6 +1915,8 @@ public class Menüeintrag
         if (schildKlassen.Count == 0) return [];
         var untisKlassen = Quelldateien.GetMatchingList(configuration, "GPU003", Students, Klassen);
         if (untisKlassen.Count == 0) return [];
+        List<dynamic> gpu002 = Quelldateien.GetMatchingList(configuration, "gpu002", IStudents, Klassen);
+        if (gpu002 == null || gpu002.Count == 0) return [];
 
         var records = new List<dynamic>();
         bool neueKlassen = false;
@@ -1913,6 +1924,22 @@ public class Menüeintrag
         foreach (var untisKlasse in untisKlassen)
         {
             var dictUntis = (IDictionary<string, object>)untisKlasse;
+
+            // Prüfe, ob es Unterricht zur Klasse gibt
+            var klasseHatUnterricht = gpu002.Any(rec =>
+                {
+                    if (rec == null) return false;
+                    var dict = (IDictionary<string, object>)rec;
+                    return dict != null && dict["Field5"] != null && dict["Field5"].ToString() == dictUntis["Field1"].ToString();
+                });
+
+            // Wenn die Klasse keinen Unterricht hat, wird sie übersprungen
+            if (!klasseHatUnterricht)
+            {
+                AnsiConsole.MarkupLine($"[red]Klasse {dictUntis["Field1"]} hat keinen Unterricht und wird übersprungen.[/]");
+                continue;
+            }
+               
             var klasseVonDerKopiertWird = dictUntis["Field1"].ToString();
 
             // Wenn es die Klasse in Schild nicht gibt
@@ -2330,27 +2357,31 @@ public class Menüeintrag
         string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
 
-        var faecher = Quelldateien.GetMatchingList(configuration, "faecher", IStudents, Klassen);
+        var faecher = Quelldateien.GetMatchingList(configuration, "gpu006", IStudents, Klassen);
         var zieldatei = new Datei(zieldateiname);
 
         var verschiedeneFaecher = faecher.Select(rec =>
         {
             var dict = (IDictionary<string, object>)rec;
-            return dict["Bezeichnung"];
+            return dict["Field2"];
         }).ToList().Distinct();
 
         foreach (var langname in verschiedeneFaecher)
         {
             var fach = faecher.FirstOrDefault(rec =>
             {
-                var dict = (IDictionary<string, object>)rec;
-                return dict["Bezeichnung"].ToString() == langname.ToString();
+                var dict = rec as IDictionary<string, object>;
+                return dict != null && dict["Field2"].ToString() == langname.ToString();
             });
 
             if (langname == "") continue;
             dynamic record = new ExpandoObject();
-            record.name = langname;
-            record.Kuerzel = fach["InternKrz"].ToString();
+            record.Name = langname;            
+            var dictFach = fach as IDictionary<string, object>;
+            if (dictFach != null && dictFach.ContainsKey("Field1"))
+            {
+                record.Kuerzel = dictFach["Field1"].ToString();
+            }            
             zieldatei.Add(record);
         }
 
@@ -2358,28 +2389,20 @@ public class Menüeintrag
     }
 
     public Datei GetLehrer(
-        IConfiguration configuration,
+        Lehrers lehrers,
         string zieldateiname,
         string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
-        var zieldatei = new Datei(zieldateiname);
-        var lehrkraefte = Quelldateien.GetMatchingList(configuration, "lehrkraefte", IStudents, Klassen);
-        if (lehrkraefte.Count == 0)
-        {
-            return [];
-        }
+        var zieldatei = new Datei(zieldateiname);        
 
-        foreach (var lehrer in lehrkraefte)
+        foreach (var lehrer in lehrers)
         {
-            var dict = (IDictionary<string, object>)lehrer;
-
             dynamic record = new ExpandoObject();
-            record.Kürzel = dict["InternKrz"].ToString();
-            record.Vorname = dict["Vorname"].ToString();
-            record.Nachname = dict["Nachname"].ToString();
-            record.Name = (dict["Titel"].ToString() == "" ? "" : dict["Titel"] + " ") + dict["Vorname"] + " " +
-                          dict["Nachname"];
-            record.Mail = dict["E-Mail"].ToString();
+            record.Kürzel = lehrer.Kürzel;
+            record.Vorname = lehrer.Vorname;
+            record.Nachname = lehrer.Nachname;
+            record.Name = (lehrer.Titel == "" ? "" : lehrer.Titel + " ") + lehrer.Vorname + " " + lehrer.Nachname;
+            record.Mail = lehrer.Mail;
             zieldatei.Add(record);
         }
 
@@ -2391,7 +2414,6 @@ public class Menüeintrag
         string zieldateiname,
         string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
-
         var records = new List<dynamic>();
         var zieldatei = new Datei(zieldateiname);
 
@@ -2439,12 +2461,12 @@ public class Menüeintrag
         var zieldatei = new Datei(zieldateiname);
 
         foreach (var klasse in klassen.OrderBy(x =>
-                 {
-                     var dictKlasse = (Dictionary<string, dynamic>)x;
-                     return x["InternBez"].ToString();
-                 }))
         {
-            var dictKlasse = (Dictionary<string, dynamic>)klasse;
+            var dictKlasse = x as IDictionary<string, object>;
+            return dictKlasse?["InternBez"]?.ToString() ?? "";
+        }))
+        {
+            var dictKlasse = klasse as IDictionary<string, object>;            
 
             dynamic record = new ExpandoObject();
             record.Name = dictKlasse["InternBez"].ToString();
@@ -2515,59 +2537,62 @@ public class Menüeintrag
         string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
         var zieldatei = new Datei(zieldateiname, delimiter, quote, encoding, shouldAllQuote, importhinweise);
-        var gpu020 = Quelldateien.GetMatchingList(configuration, "gpu020", IStudents, Klassen);
-        if (gpu020 == null || gpu020.Count == 0) return [];
+        var gpu002 = Quelldateien.GetMatchingList(configuration, "gpu002", IStudents, Klassen);
+        if (gpu002 == null || gpu002.Count == 0) return [];
+
+        var gpu003 = Quelldateien.GetMatchingList(configuration, "gpu003", IStudents, Klassen);
+        if (gpu003 == null || gpu003.Count == 0) return [];
 
         Gruppen = new Gruppen();
-        Gruppen.AddRange(new Gruppen().GetBildungsgaenge(gpu020, Klassen, anrechnungen, lehrers));
-        Gruppen.AddRange(new Gruppen().GetSchulformen(gpu020, Klassen, anrechnungen, lehrers));
-        /*Gruppen.Add(new Gruppe().Get(gpu020, Klassen, anrechnungen, lehrers,
+        Gruppen.AddRange(new Gruppen().GetBildungsgaenge(gpu002, anrechnungen, lehrers));
+        Gruppen.AddRange(new Gruppen().GetSchulformen(gpu002, anrechnungen, lehrers));
+        Gruppen.Add(new Gruppe().Get(gpu002, lehrers,
                 "versetzung:blaue_briefe",
                 new List<string>() { "BS", "HBG", "HBT", "HBW", "FS" },
-                new List<int>() { 1 }));*/
-        Gruppen.Add(new Gruppe().Get(gpu020, Klassen, anrechnungen, lehrers,
+                new List<int>() { 1 }));
+        Gruppen.Add(new Gruppe().Get(gpu002, lehrers,
                 "termine:fhr:start",
                 new List<string>() { "BS", "HBG", "HBT", "HBW", "FS", "FM" },
                 new List<int>() { 2 }));
-        Gruppen.Add(new Gruppe().GetFachschaft(gpu020, Klassen, anrechnungen, lehrers,
+        Gruppen.Add(new Gruppe().GetFachschaft(gpu002, lehrers,
             ":fachschaften:deutsch_kommunikation",
             new List<string>() { "D", "D FU", "D1", "D2", "D G1", "D G2", "D L1", "D L2", "D L", "DL", "DL1", "DL2" }));
-        Gruppen.Add(new Gruppe().GetFachschaft(gpu020, Klassen, anrechnungen, lehrers,
+        Gruppen.Add(new Gruppe().GetFachschaft(gpu002, lehrers,
             ":fachschaften:englisch",
             new List<string>() { "E", "E FU", "E1", "E2", "E G1", "E G2", "E L1", "E L2", "E L", "EL", "EL1", "EL2" }));
-        Gruppen.Add(new Gruppe().GetFachschaft(gpu020, Klassen, anrechnungen, lehrers,
+        Gruppen.Add(new Gruppe().GetFachschaft(gpu002, lehrers,
             ":fachschaften:englisch",
             new List<string>() { "E", "E FU", "E1", "E2", "E G1", "E G2", "E L1", "E L2", "E L", "EL", "EL1", "EL2" }));
-        Gruppen.Add(new Gruppe().GetFachschaft(gpu020, Klassen, anrechnungen, lehrers,
+        Gruppen.Add(new Gruppe().GetFachschaft(gpu002, lehrers,
             ":fachschaften:religionslehre",
             new List<string>() { "KR", "KR FU", "KR1", "KR2", "KR G1", "KR G2", "ER", "ER G1" }));
-        Gruppen.Add(new Gruppe().GetFachschaft(gpu020, Klassen, anrechnungen, lehrers,
+        Gruppen.Add(new Gruppe().GetFachschaft(gpu002, lehrers,
             ":fachschaften:mathematik_physik",
             new List<string>() { "M", "M FU", "M1", "M2", "M G1", "M G2", "M L1", "M L2", "M L", "ML", "ML1", "ML2" }));
-        Gruppen.Add(new Gruppe().GetFachschaft(gpu020, Klassen, anrechnungen, lehrers,
+        Gruppen.Add(new Gruppe().GetFachschaft(gpu002, lehrers,
             ":fachschaften:politik_gesellschaftslehre",
             new List<string>() { "PK", "PK FU", "PK1", "PK2", "GG G1", "GG G2" }));
-        Gruppen.Add(new Gruppe().GetFachschaft(gpu020, Klassen, anrechnungen, lehrers,
+        Gruppen.Add(new Gruppe().GetFachschaft(gpu002, lehrers,
                 ":fachschaften:wirtschaftslehre_in_nicht_kaufm_klassen",
                 new List<string>() { "WL", "WBL" }));
-        Gruppen.Add(new Gruppe().GetFachschaft(gpu020, Klassen, anrechnungen, lehrers,
+        Gruppen.Add(new Gruppe().GetFachschaft(gpu002, lehrers,
             ":fachschaften:sport",
             new List<string>() { "SP", "SP G1", "SP G2" }));
-        Gruppen.Add(new Gruppe().GetFachschaft(gpu020, Klassen, anrechnungen, lehrers,
+        Gruppen.Add(new Gruppe().GetFachschaft(gpu002, lehrers,
             ":fachschaften:biologie",
             new List<string>() { "BI", "Bi", "Bi FU", "Bi1", "Bi G1", "Bi G2", "BI G1", "BI L1" }));
 
-        Gruppen.Add(new Gruppe().GetKollegium(gpu020, Klassen, anrechnungen, lehrers,
+        Gruppen.Add(new Gruppe().GetKollegium(gpu002, lehrers,
             ":kollegium:start"));
-        Gruppen.Add(new Gruppe().GetLehrerinnen(gpu020, Klassen, anrechnungen, lehrers,
+        Gruppen.Add(new Gruppe().GetLehrerinnen(anrechnungen, lehrers,
             "kollegium:lehrerinnen"));
-        Gruppen.Add(new Gruppe().GetRefs(gpu020, Klassen, anrechnungen, lehrers,
+        Gruppen.Add(new Gruppe().GetRefs(lehrers,
             "kollegium:referendar_innen"));
-        Gruppen.Add(new Gruppe().GetKlassenleitungen(gpu020, Klassen, anrechnungen, lehrers,
+        Gruppen.Add(new Gruppe().GetKlassenleitungen(gpu003, lehrers,
             "kollegium:klassenleitungen"));
-        Gruppen.Add(new Gruppe().GetBildungsgangleitungen(gpu020, Klassen, anrechnungen, lehrers,
+        Gruppen.Add(new Gruppe().GetBildungsgangleitungen(anrechnungen, lehrers,
             "kollegium:bildungsgangleitungen"));
-        Gruppen.Add(new Gruppe().GetByWikilink(gpu020, Klassen, anrechnungen, lehrers,
+        Gruppen.Add(new Gruppe().GetByWikilink(anrechnungen, lehrers,
             "kollegium:schulleitung:erweiterte:start"));
 
         foreach (var gruppe in Gruppen)
@@ -3288,10 +3313,10 @@ public class Menüeintrag
         return false;
     }
 
-    internal bool NichtAlleSusHabenEineEindeutigeMailAdresse(IConfiguration configuration)
+    internal bool NichtAlleSusHabenEineEindeutigeMailAdresse(IConfiguration configuration, Students students)
     {
         var problem = false;
-        var schuelerZusatzdaten = Quelldateien.GetMatchingList(configuration, "schuelerzusatzdaten", Students, Klassen);
+        var schuelerZusatzdaten = Quelldateien.GetMatchingList(configuration, "schuelerzusatzdaten", students, Klassen);
         if (schuelerZusatzdaten == null || schuelerZusatzdaten.Count == 0) return false;
 
         var sz = schuelerZusatzdaten
@@ -3377,10 +3402,11 @@ public class Menüeintrag
             
         var absolutePfade = new List<string>();
 
-        var pfadFotosAusSchILD = configuration["PfadFotosAusSchILD"];
+        var pfadFotosImSchILD = configuration["PfadFotosImSchILD-Ordner"];
 
-        var alleFotos = Directory.GetFiles(pfadFotosAusSchILD, "*.jpg", SearchOption.AllDirectories);
-        
+        // Suche nach allen Fotos im SchILD-Ordner und in Unterordnern        
+        var alleFotos = Directory.GetFiles(pfadFotosImSchILD, "*.jpg", SearchOption.AllDirectories);
+
         var students = Students;
 
         AnsiConsole.Status()

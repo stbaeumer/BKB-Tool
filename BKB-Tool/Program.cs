@@ -99,7 +99,6 @@ do
             AnsiConsole.Write(panel3);
             Global.WeiterMitAnykey(configuration);
             
-
         continue; // Fehler behandeln und zum nächsten Durchlauf springen
     }    
 } while (true);

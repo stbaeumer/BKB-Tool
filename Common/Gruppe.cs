@@ -1,4 +1,5 @@
 using System.Dynamic;
+using Microsoft.Extensions.Configuration;
 
 namespace Common;
 
@@ -31,7 +32,7 @@ public class Gruppe
     {
     }
 
-    public Gruppe Get(List<dynamic> gpu020, Klassen klassen, Anrechnungen anrechnungen,
+    public Gruppe Get(List<dynamic> gpu020,
         Lehrers lehrers, string wikiLink, List<string> beteiligteKlassen, List<int> jahrgänge)
     {
         var gruppe = new Gruppe(wikiLink);
@@ -50,22 +51,22 @@ public class Gruppe
         var members = gpu020.Where(rec =>
         {
             var dict = (IDictionary<string, object>)rec;
-            var dictKlassen = dict["klassen"].ToString().Split('~');
+            var dictKlassen = dict["Field5"].ToString().Split('~');
 
             // Prüfe, ob eine der Klassen in subject mit einem der Präfixe in beteiligteKlassen beginnt.
             return dictKlassen.Any(klasse => beteiligteKlassen.Any(prefix => klasse.Contains(prefix)));
         }).Where(rec =>
         {
             var dict = (IDictionary<string, object>)rec;
-            var dictKlassen = dict["klassen"].ToString().Split('~');
+            var dictKlassen = dict["Field5"].ToString().Split('~');
 
             // Prüfe, ob eine der Klassen die Jahreszahl zum Jahrgang enthält.
-            return !string.IsNullOrEmpty(dict["teacher"].ToString()) &&
+            return !string.IsNullOrEmpty(dict["Field6"].ToString()) &&
                    dictKlassen.Any(subject => jahre.Any(jahr => subject.Contains(jahr)));
         }).Select(rec =>
         {
             var dict = (IDictionary<string, object>)rec;
-            return dict["teacher"].ToString();
+            return dict["Field6"].ToString();
         }).Distinct().OrderBy(x => x);
 
         foreach (var member in members)
@@ -96,7 +97,7 @@ public class Gruppe
 
     public Lehrers Lehrers { get; set; }
 
-    public Gruppe GetFachschaft(List<dynamic> exportlessons, Klassen klassen, Anrechnungen anrechnungen,
+    public Gruppe GetFachschaft(List<dynamic> gpu002,
         Lehrers lehrers,
         string wikiLink, List<string> faecher)
     {
@@ -108,17 +109,17 @@ public class Gruppe
         var lehrerMail = new List<string>();
         var lehrerName = new List<string>();
 
-        var members = exportlessons.Where(rec =>
+        var members = gpu002.Where(rec =>
         {
             var dict = (IDictionary<string, object>)rec;
-            var dictSubject = dict["subject"].ToString().Split('~');
+            var dictSubject = dict["Field7"].ToString().Split('~');
 
             // Prüfe, ob eine der Klassen in subject mit einem der Präfixe in beteiligteKlassen beginnt.
             return dictSubject.Any(fach => faecher.Any(x => fach == x));
         }).Select(rec =>
         {
             var dict = (IDictionary<string, object>)rec;
-            return dict["teacher"].ToString();
+            return dict["Field6"].ToString();
         }).Distinct().OrderBy(x => x);
 
         foreach (var member in members)
@@ -154,7 +155,7 @@ public class Gruppe
         return gruppe;
     }
 
-    public Gruppe GetKollegium(List<dynamic> exportlessons, Klassen klassen, Anrechnungen anrechnungen, Lehrers lehrers,
+    public Gruppe GetKollegium(List<dynamic> gpu002, Lehrers lehrers,
         string wikiLink)
     {
         var gruppe = new Gruppe(wikiLink);
@@ -165,37 +166,41 @@ public class Gruppe
         var lehrerMail = new List<string>();
         var lehrerName = new List<string>();
 
-        var members = exportlessons.Where(rec =>
+        var members = gpu002
+        .Select(rec => ((IDictionary<string, object>)rec)["Field6"]?.ToString())
+        .Where(field6 => !string.IsNullOrEmpty(field6))
+        .Where(field6 => field6 != "?")
+        .Distinct()
+        .OrderBy(field6 => field6)
+        .ToList();
+
+        try
         {
-            var dict = (IDictionary<string, object>)rec;
-            return !string.IsNullOrEmpty(dict["teacher"].ToString());
-        }).Select(rec =>
+            foreach (var member in members)
+            {
+                var leh = lehrers.FirstOrDefault(l => l.Kürzel == member);
+
+                if (leh == null) continue; // Wenn kein Lehrer gefunden, nächsten Eintrag ansehen
+
+                if (!lehrerKürzel.Any(x => x.Contains(leh.Kürzel)))
+                {
+                    lehrerKürzel.Add(leh.Kürzel);
+                }
+
+                if (!lehrerMail.Any(x => x.Contains(leh.Mail)))
+                {
+                    lehrerMail.Add(leh.Mail);
+                }
+
+                if (!lehrerName.Any(x =>x.Contains((leh.Titel == "" ? "" : leh.Titel + " ") + leh.Vorname + " " + leh.Nachname)))
+                {
+                    lehrerName.Add((leh.Titel == "" ? "" : leh.Titel + " ") + leh.Vorname + " " + leh.Nachname);
+                }
+            }
+        }
+        catch
         {
-            var dict = (IDictionary<string, object>)rec;
-            return dict["teacher"].ToString();
-        }).Distinct().OrderBy(x => x);
-
-
-        foreach (var member in members)
-        {
-            var leh = lehrers.FirstOrDefault(l => l.Kürzel == member);
-            if (!lehrerKürzel.Any(x => x.Contains(leh.Kürzel)))
-            {
-                lehrerKürzel.Add(leh.Kürzel);
-            }
-
-            if (!lehrerMail.Any(x => x.Contains(leh.Mail)))
-            {
-                lehrerMail.Add(leh.Mail);
-            }
-
-            if (!lehrerName.Any(x =>
-                    x.Contains((leh.Titel == "" ? "" : leh.Titel + " ") + leh.Vorname + " " +
-                               leh.Nachname)))
-            {
-                lehrerName.Add((leh.Titel == "" ? "" : leh.Titel + " ") + leh.Vorname + " " +
-                               leh.Nachname);
-            }
+            throw new Exception("Fehler beim Verarbeiten der Kollegium-Gruppe");
         }
 
         record.Mitglieder = string.Join(',', lehrerName.OrderBy(name => name));
@@ -205,7 +210,7 @@ public class Gruppe
         return gruppe;
     }
 
-    public Gruppe GetLehrerinnen(List<dynamic> exportlessons, Klassen klassen, Anrechnungen anrechnungen,
+    public Gruppe GetLehrerinnen(Anrechnungen anrechnungen,
         Lehrers lehrers,
         string wikiLink)
     {
@@ -225,6 +230,9 @@ public class Gruppe
             if (lehrers.Any(l => l.Kürzel == member && l.Geschlecht.ToLower() == "w"))
             {
                 var leh = lehrers.FirstOrDefault(l => l.Kürzel == member);
+
+                if (leh == null) continue; // Wenn kein Lehrer gefunden, nächsten Eintrag ansehen
+
                 if (!lehrerKürzel.Any(x => x.Contains(leh.Kürzel)))
                 {
                     lehrerKürzel.Add(leh.Kürzel);
@@ -251,7 +259,7 @@ public class Gruppe
         return gruppe;
     }
 
-    public Gruppe GetRefs(List<dynamic> exportlessons, Klassen klassen, Anrechnungen anrechnungen, Lehrers lehrers,
+    public Gruppe GetRefs(Lehrers lehrers,
         string wikiLink)
     {
         var gruppe = new Gruppe(wikiLink);
@@ -262,13 +270,16 @@ public class Gruppe
         var lehrerMail = new List<string>();
         var lehrerName = new List<string>();
 
-        var members = lehrers.Where(rec => { return rec.Kürzel.StartsWith("Y"); }).Select(rec => { return rec.Kürzel; })
+        var members = lehrers.Where(rec => { return rec.Beschäftigungsart.StartsWith("ST"); }).Select(rec => { return rec.Kürzel; })
             .Distinct();
 
 
         foreach (var member in members)
         {
             var leh = lehrers.FirstOrDefault(l => l.Kürzel == member);
+
+            if (leh == null) continue; // Wenn kein Lehrer gefunden, nächsten Eintrag ansehen
+
             if (!lehrerKürzel.Any(x => x.Contains(leh.Kürzel)))
             {
                 lehrerKürzel.Add(leh.Kürzel);
@@ -279,9 +290,7 @@ public class Gruppe
                 lehrerMail.Add(leh.Mail);
             }
 
-            if (!lehrerName.Any(x =>
-                    x.Contains((leh.Titel == "" ? "" : leh.Titel + " ") + leh.Vorname + " " +
-                               leh.Nachname)))
+            if (!lehrerName.Any(x => x.Contains((leh.Titel == "" ? "" : leh.Titel + " ") + leh.Vorname + " " + leh.Nachname)))
             {
                 lehrerName.Add((leh.Titel == "" ? "" : leh.Titel + " ") + leh.Vorname + " " + leh.Nachname);
             }
@@ -294,7 +303,7 @@ public class Gruppe
         return gruppe;
     }
 
-    public Gruppe GetKlassenleitungen(List<dynamic> exportlessons, Klassen klassen, Anrechnungen anrechnungen,
+    public Gruppe GetKlassenleitungen(List<dynamic> gpu003,
         Lehrers lehrers,
         string wikiLink)
     {
@@ -306,19 +315,22 @@ public class Gruppe
         var lehrerMail = new List<string>();
         var lehrerName = new List<string>();
 
-        var members = klassen
-            .SelectMany(rec => rec.Klassenleitungen) // Alle Lehrer aus allen Klassenleitungen extrahieren
-            .Select(lehrer => lehrer.Kürzel) // Nur das Kürzel jedes Lehrers auswählen
-            .Distinct(); // Doppelte Kürzel entfernen
+        var members = gpu003
+            .Where(rec => rec != null)
+            .Select(rec => ((IDictionary<string, object>)rec)["Field30"]?.ToString())
+            .Where(field30 => !string.IsNullOrEmpty(field30))
+            .Select(field30 => field30.Split(',')[0]) // Nur den Teil vor dem Komma nehmen
+            .Distinct()
+            .OrderBy(field30 => field30)
+            .ToList();
 
         foreach (var member in members)
         {
-if(member == "GV"){
-    string a="";
-}
-
             var leh = lehrers.FirstOrDefault(l => l.Kürzel == member);
-           if (!lehrerKürzel.Any(x => x == leh.Kürzel)) // Exakte Übereinstimmung prüfen
+
+            if (leh == null) continue; // Wenn kein Lehrer gefunden, nächsten Eintrag ansehen
+
+            if (!lehrerKürzel.Any(x => x == leh.Kürzel)) // Exakte Übereinstimmung prüfen
             {
                 lehrerKürzel.Add(leh.Kürzel);
             }
@@ -344,7 +356,7 @@ if(member == "GV"){
     }
 
 
-    public Gruppe GetBildungsgangleitungen(List<dynamic> exportlessons, Klassen klassen, Anrechnungen anrechnungen,
+    public Gruppe GetBildungsgangleitungen(Anrechnungen anrechnungen,
         Lehrers lehrers,
         string wikiLink)
     {
@@ -363,6 +375,9 @@ if(member == "GV"){
         foreach (var member in members)
         {
             var leh = lehrers.FirstOrDefault(l => l.Kürzel == member);
+
+            if (leh == null) continue; // Wenn kein Lehrer gefunden, nächsten Eintrag ansehen
+
             if (!lehrerKürzel.Any(x => x.Contains(leh.Kürzel)))
             {
                 lehrerKürzel.Add(leh.Kürzel);
@@ -388,7 +403,7 @@ if(member == "GV"){
         return gruppe;
     }
 
-    public Gruppe GetByWikilink(List<dynamic> exportlessons, Klassen klassen, Anrechnungen anrechnungen,
+    public Gruppe GetByWikilink(Anrechnungen anrechnungen,
         Lehrers lehrers,
         string wikiLink)
     {
@@ -406,6 +421,9 @@ if(member == "GV"){
         foreach (var member in members)
         {
             var leh = lehrers.FirstOrDefault(l => l.Kürzel == member);
+
+            if (leh == null) continue; // Wenn kein Lehrer gefunden, nächsten Eintrag ansehen
+
             if (!lehrerKürzel.Any(x => x.Contains(leh.Kürzel)))
             {
                 lehrerKürzel.Add(leh.Kürzel);

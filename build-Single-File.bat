@@ -29,6 +29,9 @@ del /Q %ZIEL%*
 
 robocopy %QUELLE% %ZIEL% /XO /E /R:3 /W:5
 
+REM kopiere die Datei .env
+copy /Y ".env" "%ZIEL%"
+
 echo Zielordner öffnen...
 start "" %ZIEL%
 

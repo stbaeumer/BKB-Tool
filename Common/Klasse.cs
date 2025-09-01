@@ -1,4 +1,5 @@
-﻿public class Klasse
+﻿
+public class Klasse
 {
     public int IdUntis { get; set; }
     public string? Name { get; set; }
@@ -11,6 +12,8 @@
     public string? Raum { get; internal set; }
     public string? Jahrgang { get; set; }
     public string? Gliederung { get; set; }
-    public string? Fachklassenschlüssel { get; set; }
+    public string? Fachklasse { get; set; }
     public string? Relationsgruppe { get; set; }
-}
+    public string? OrgForm { get; internal set; }
+
+    }

@@ -214,7 +214,7 @@ WHERE (((Schueler.Geloescht)='-') AND ((Schueler.Status)=2) AND ((Schueler.AktSc
         }
     }
 
-    internal int GetIdSchildInt(Student student)
+    public int GetIdSchildInt(Student student)
     {
         using (OleDbConnection oleDbConnection = new OleDbConnection(ConnectionString))
         {

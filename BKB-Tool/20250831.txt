@@ -1,0 +1,216 @@
+^  Relationsgruppe  ^                      1.Jg  ^2.Jg  ^3.Jg  ^4.Jg  ^Summe  ^  Relation  ^  StellenBS  ^  StellenVZ  ^
+BK BS Fachklasse EQ TZ:502498474147441,64   35,3987
+BK BS Fachklasse EQ TZ (hj. endend):848483,28    1,0086
+BK BS Ausbildungsvorbereitung VZ:464616,18    2,8430
+BK BS Ausbildungsvorbereitung TZ:141441,64    0,3362
+BK BF ber. Kennt. (Vor. HSA) 1-jährig:8816,180,4944
+BK BF ber. Kennt. (Vor. HSA 10) 1-jährig:212116,181,2979
+BK BF ber. Kennt. und FHS 2-jährig:1407521516,1813,2880
+BK BF BA-LRecht und FOS 2-jährig:37124914,343,4170
+BK BF ber. Kennt. und AHR 3-jährig:36394612114,348,4379
+BK FO 12B 1-jährig VZ:0014,340,0000
+BK FO Klasse 11 1-jährig TZ:441,640,0961
+BK FO Klasse 12 1-jährig VZ:2314,341,6039
+|Summe:                                                            2032|||||||       39,5865|   28,6353|
+
+49,47   (= 9 + 50 * 0,7 + (39,5865+28,6353 - 50) * 0,3)  Verordnung zur Ausführung des § 93 Abs. 2 Schulgesetz (VO zu § 93 Abs. 2 SchulG) vom 18.03.2005
+   Anrechnungen: 54,16   (= 39,5865 * 0,5 + 28,6353 * 1,2)
+
+Der Schüler Beil, Pia-Sophie FS24A ist nicht in der Schnellmeldung erfasst. Prüfen!
+Der Schüler Bettermann, Fiona-Maria FS24A ist nicht in der Schnellmeldung erfasst. Prüfen!
+Der Schüler El Harrouck, Malaak FS24A ist nicht in der Schnellmeldung erfasst. Prüfen!
+Der Schüler Ening, Nele FS24A ist nicht in der Schnellmeldung erfasst. Prüfen!
+Der Schüler Evers, Maya FS24A ist nicht in der Schnellmeldung erfasst. Prüfen!
+Der Schüler Faßelt, Ida FS24A ist nicht in der Schnellmeldung erfasst. Prüfen!
+Der Schüler Fungk, Angelina FS24A ist nicht in der Schnellmeldung erfasst. Prüfen!
+Der Schüler Grimmert, Mika FS24A ist nicht in der Schnellmeldung erfasst. Prüfen!
+Der Schüler Henneböhl, Celina FS24A ist nicht in der Schnellmeldung erfasst. Prüfen!
+Der Schüler Hollenborg, Lotta FS24A ist nicht in der Schnellmeldung erfasst. Prüfen!
+Der Schüler Jünck, Johann FS24A ist nicht in der Schnellmeldung erfasst. Prüfen!
+Der Schüler Kiehl, Jaylie Marie FS24A ist nicht in der Schnellmeldung erfasst. Prüfen!
+Der Schüler Kruse, Bruno FS24A ist nicht in der Schnellmeldung erfasst. Prüfen!
+Der Schüler Lanvermann, Larissa FS24A ist nicht in der Schnellmeldung erfasst. Prüfen!
+Der Schüler Mark, Chiara Lea FS24A ist nicht in der Schnellmeldung erfasst. Prüfen!
+Der Schüler Mitulla, Annika FS24A ist nicht in der Schnellmeldung erfasst. Prüfen!
+Der Schüler Mohr, Sophia FS24A ist nicht in der Schnellmeldung erfasst. Prüfen!
+Der Schüler Othold, Marie FS24A ist nicht in der Schnellmeldung erfasst. Prüfen!
+Der Schüler Pekarski, Vincent FS24A ist nicht in der Schnellmeldung erfasst. Prüfen!
+Der Schüler Punsmann, Lana FS24A ist nicht in der Schnellmeldung erfasst. Prüfen!
+Der Schüler Schneider, Diana FS24A ist nicht in der Schnellmeldung erfasst. Prüfen!
+Der Schüler Schulte, Lisa FS24A ist nicht in der Schnellmeldung erfasst. Prüfen!
+Der Schüler Standke, Kaja FS24A ist nicht in der Schnellmeldung erfasst. Prüfen!
+Der Schüler van Rensen, Rachel FS24A ist nicht in der Schnellmeldung erfasst. Prüfen!
+Der Schüler Wienecke, Elisabeth FS24A ist nicht in der Schnellmeldung erfasst. Prüfen!
+Der Schüler Doskach, Viktoria FS25A ist nicht in der Schnellmeldung erfasst. Prüfen!
+Der Schüler Reidick, Leonie FS25A ist nicht in der Schnellmeldung erfasst. Prüfen!
+   Schüler in SchILD insgesamt: 2076
+
+Details
+=======
+
+BK BS Fachklasse EQ TZ
+ 1. AGG23A              18
+ 2. AGG23B              15
+ 3. AGG24A              18
+ 4. AGG24B              21
+ 5. AGG25A              40
+ 6. AGS23A               7
+ 7. AGS24A               3
+ 8. AL23A               30
+ 9. AL23B               21
+10. AL23C               14
+11. AL24A               29
+12. AL24B               17
+13. AL25A               28
+14. BBZ23A              25
+15. BBZ24A              22
+16. BBZ25A              24
+17. BD25A               19
+18. BF22A                1
+19. BF23A                4
+20. BF24A                9
+21. BF25A               10
+22. BM23A               14
+23. BM24A               19
+24. BM25A                9
+25. BZ23A               20
+26. BZ23B               15
+27. BZ24A               22
+28. BZ24B               18
+29. BZ25A               42
+30. EE23A               16
+31. EE24A               24
+32. EE25A               13
+33. HT23A                9
+34. HT23B               10
+35. HT24A               15
+36. HT24B               16
+37. HT25A               36
+38. MA23A               26
+39. MA24A               14
+40. MA25A               19
+41. MF23A               20
+42. MF24A               27
+43. MF25A               14
+44. MK23A               17
+45. MK23B                9
+46. MK24A               19
+47. MK24B               21
+48. MK25A               39
+49. MM23A               25
+50. MM24A               24
+51. MM25A               26
+52. NBK23A               9
+53. NBK24A              14
+54. NBK25A              29
+55. NF23A                8
+56. NF24A                4
+57. NF25A                2
+58. WA23A               17
+59. WA23B               20
+60. WA24A               15
+61. WA24B               16
+62. WA25A               33
+63. WB23A               26
+64. WB24A               25
+65. WB25A               17
+66. WE23A               15
+67. WE24A               24
+68. WE25A               34
+69. WG23A               13
+70. WG24A               15
+71. WG25A               11
+72. WI23A               18
+73. WI23C               16
+74. WI24A               27
+75. WI24B                7
+76. WI25A               23
+77. WI25B                8
+78. WS23A               18
+79. WS24A               13
+80. WS25A               26
+--------------------------
+               Summe: 1476
+
+BK BS Fachklasse EQ TZ (hj. endend)
+ 1. EE22A               19
+ 2. MA22A               18
+ 3. MF22A               12
+ 4. MK22A               27
+ 5. MK23A               17
+ 6. MM22A                7
+--------------------------
+               Summe:  100
+
+BK BS Ausbildungsvorbereitung VZ
+ 1. FFM25A              18
+ 2. IFK25A              14
+ 3. IFK25B              14
+--------------------------
+               Summe:   46
+
+BK BS Ausbildungsvorbereitung TZ
+ 1. AVE25A               5
+ 2. AVT25A               9
+--------------------------
+               Summe:   14
+
+BK BF ber. Kennt. (Vor. HSA) 1-jährig
+ 1. BT25A                8
+--------------------------
+               Summe:    8
+
+BK BF ber. Kennt. (Vor. HSA 10) 1-jährig
+ 1. BW25A               21
+--------------------------
+               Summe:   21
+
+BK BF ber. Kennt. und FHS 2-jährig
+ 1. HBG24A              23
+ 2. HBG25A              21
+ 3. HBG25B              20
+ 4. HBT24A              17
+ 5. HBT25A              24
+ 6. HBW24A              20
+ 7. HBW24B              19
+ 8. HBW25A              24
+ 9. HBW25B              24
+10. HBW25C              23
+--------------------------
+               Summe:  215
+
+BK BF BA-LRecht und FOS 2-jährig
+ 1. BS24A               12
+ 2. BS25A               17
+ 3. BS25B               20
+--------------------------
+               Summe:   49
+
+BK BF ber. Kennt. und AHR 3-jährig
+ 1. GG23A               21
+ 2. GG24A               14
+ 3. GG24B               15
+ 4. GG25A               23
+ 5. GT23A               11
+ 6. GT24A               10
+ 7. GT25A               13
+ 8. GW23A               14
+--------------------------
+               Summe:  121
+
+BK FO 12B 1-jährig VZ
+--------------------------
+               Summe:    0
+
+BK FO Klasse 11 1-jährig TZ
+ 1. FS24A               25
+ 2. FS25A               18
+--------------------------
+               Summe:   43
+
+BK FO Klasse 12 1-jährig VZ
+ 1. FS24A               25
+--------------------------
+               Summe:   25
+
+bm | 31.08.2025 17:28:37

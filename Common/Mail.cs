@@ -116,13 +116,13 @@ private bool IstMailadresseGültig(string email)
             int smtpPort = Convert.ToInt32(configuration["SmtpPort"]);
             string senderEmail = configuration["SmtpUser"];
 
-            if(configuration["SmtpPassword"] == null || configuration["SmtpPassword"].Length <= 3)
+            if(configuration["SmtpKennwort"] == null || configuration["SmtpKennwort"].Length <= 3)
             {
                 Console.WriteLine("Bitte geben Sie das Passwort von " + configuration["SmtpUser"] +" für den E-Mail-Versand ein:");
-                configuration["SmtpPassword"] = Console.ReadLine();
+                configuration["SmtpKennwort"] = Console.ReadLine();
             }
             
-            string senderPassword = configuration["SmtpPassword"];
+            string senderPassword = configuration["SmtpKennwort"];
 
             var email = new MimeMessage();
             email.From.Add(new MailboxAddress(configuration["SmtpUser"], senderEmail));
@@ -256,7 +256,7 @@ private bool IstMailadresseGültig(string email)
         // Füge den Absender als CC hinzu
         mailMessage.CC.Add(configuration["BCCAdresse"]);
 
-        if(configuration["SmtpPassword"]  == null || configuration["SmtpPassword"].Length <= 3)
+        if(configuration["SmtpKennwort"]  == null || configuration["SmtpKennwort"].Length <= 3)
         {
             Console.WriteLine($"Bitte geben Sie das Passwort von {configuration["SmtpUser"]} für den E-Mail-Versand ein:");
             Global.SmtpPassword = Console.ReadLine();
@@ -264,7 +264,7 @@ private bool IstMailadresseGültig(string email)
 
         using (var smtpClient = new System.Net.Mail.SmtpClient(configuration["SmtpServer"], Convert.ToInt32(configuration["SmtpPort"])))
         {
-            smtpClient.Credentials = new NetworkCredential(sender, configuration["SmtpPassword"]);
+            smtpClient.Credentials = new NetworkCredential(sender, configuration["SmtpKennwort"]);
             smtpClient.EnableSsl = true;
             smtpClient.Send(mailMessage);
         }

@@ -141,6 +141,16 @@ public class Dateien : List<Datei>
                 "|"
             ));
             Add(new Datei(
+                "GPU006",
+                "Beschreibung: Fächer",
+                untishinweise,
+                [""],
+                false,
+                d => d.FilternFaecherGPU006(),
+                "*.TXT",
+                "|"
+            ));
+            Add(new Datei(
                 "GPU020",
                 "Beschreibung",
                 untishinweise,

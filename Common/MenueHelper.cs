@@ -34,7 +34,7 @@ public static class MenueHelper
         try
         {
             var students = new Students(configuration, quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "schuelerzusatzdaten,dat"], true));
-            
+            klassen = new Klassen(configuration, quelldateien.Notwendige(configuration, ["klassen,dat"], true), students);
             quelldateien.Meldung.Add(students.GetArtUndZahlen());
 
             var panel = new Panel(string.Join(' ', quelldateien.Meldung))
@@ -75,7 +75,7 @@ public static class MenueHelper
                         ],
                         m =>
                         {
-                            if(m.NichtAlleSusHabenEineEindeutigeMailAdresse(configuration)) return;
+                            if(m.NichtAlleSusHabenEineEindeutigeMailAdresse(configuration, m.Students)) return;
                             m.Zieldateien =
                             [
                                 m.WebuntisOderNetmanOderLitteraCsv(
@@ -99,7 +99,7 @@ public static class MenueHelper
                         Global.Rubrik.WöchtentlicheArbeiten,
                         Global.NurBeiDiesenSchulnummern.Alle
                     ),
-                    new Menüeintrag(
+                    /*new Menüeintrag(
                         "Webuntis-Fotos: Zipdatei mit Fotos für Webuntis erstellen",
                         quelldateien.Notwendige(configuration, ["student_,csv","schuelerlernabschnittsdaten,dat", "schuelerzusatzdaten,dat", "schuelererzieher,dat", "schuelerAdressen,dat", "lehrkraefte,dat", "klassen,dat"]),
                         students,
@@ -110,7 +110,7 @@ public static class MenueHelper
                         ],
                         m =>
                         {
-                            if(m.NichtAlleSusHabenEineEindeutigeMailAdresse(configuration)) return;
+                            if(m.NichtAlleSusHabenEineEindeutigeMailAdresse(configuration, m.Students)) return;
                             m.IStudents = m.Students.OhneWebuntisFoto(configuration, Path.Combine(Directory.GetCurrentDirectory(), "fotos.txt"));
                             m.IStudents.FotosFürWebuntisZippen(configuration, Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") +  @"-ImportNachWebuntis.zip"), Path.Combine(Directory.GetCurrentDirectory(), "fotos.txt"),
                             [
@@ -121,7 +121,7 @@ public static class MenueHelper
                         },
                         Global.Rubrik.WöchtentlicheArbeiten,
                         Global.NurBeiDiesenSchulnummern.Nur000000
-                    ),
+                    ),*/
                     new Menüeintrag(
                         "Littera: Schüler*innen-Importdatei für Littera erstellen",
                         quelldateien.Notwendige(configuration, ["student_,csv","schuelerlernabschnittsdaten,dat", "schuelerzusatzdaten,dat", "schuelererzieher,dat", "schuelerAdressen,dat", "lehrkraefte,dat", "klassen,dat"]),
@@ -133,7 +133,7 @@ public static class MenueHelper
                         m =>
                         {
                             var zeitstempel = DateTime.Now.ToString("yyyyMMdd-HHmm");
-                            if(m.NichtAlleSusHabenEineEindeutigeMailAdresse(configuration)) return;
+                            if(m.NichtAlleSusHabenEineEindeutigeMailAdresse(configuration, m.Students)) return;
                             m.Zieldateien =
                             [
                                 m.WebuntisOderNetmanOderLitteraCsv(
@@ -159,12 +159,13 @@ public static class MenueHelper
                         klassen,
                         [
                             $"Es wird jetzt die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd") + "-ImportNachNetman.csv")}[/] erstellt.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis:[/] Schüler*innen, die bereits abgegangen sind oder einen Abschluss erworben haben, werden erst sechs Wochen später ausgebucht, um den Zugriff auf Teams nicht direkt zu verlieren."
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis:[/] Schüler*innen, die bereits abgegangen sind oder einen Abschluss erworben haben, werden erst sechs Wochen später ausgebucht, um den Zugriff auf Teams nicht direkt zu verlieren.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis:[/] Nur aktive Schüler*innen und Gastschüler*innen exportieren."
                         ],
                         m =>
                         {
                             var zeitstempel = DateTime.Now.ToString("yyyyMMdd-HHmm");
-                            if(m.NichtAlleSusHabenEineEindeutigeMailAdresse(configuration)) return;
+                            if(m.NichtAlleSusHabenEineEindeutigeMailAdresse(configuration, m.Students)) return;
 
                             m.Zieldateien =
                             [
@@ -184,29 +185,7 @@ public static class MenueHelper
                         },
                         Global.Rubrik.WöchtentlicheArbeiten,
                         Global.NurBeiDiesenSchulnummern.Nur177659
-                    ),
-                    new Menüeintrag(
-                        "Fotos aus SchILD: Schüler*innen-Fotos aus SchILD für Webuntis und Geevoo bereitstellen",
-                        quelldateien.Notwendige(configuration, ["schuelerZusatzdaten,dat"]),
-                        students,
-                        klassen,
-                        [
-                            $"Es werden jetzt die Dateien [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachWebuntisFotos.zip")}[/] und [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachGeevooFotos.zip")}[/] erstellt."
-                        ],
-                        m =>
-                        {
-                            if(m.NichtAlleSusHabenEineEindeutigeMailAdresse(configuration)) return;
-                            m.Zieldatei = new Datei();
-                            configuration = Global.Konfig("PfadFotosAusSchILD", Global.Modus.Update, configuration);
-                            configuration = Global.Konfig("MailDomain", Global.Modus.Update, configuration);
-                            var absoluteFotoPfade = m.GetFotosAusSchildPfade(configuration, m.Students, Global.ZipModus.Webuntis);
-                            m.Zieldatei?.Zippen(Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachWebuntisFotos.zip"), configuration, "", 0, absoluteFotoPfade);
-                            absoluteFotoPfade = m.GetFotosAusSchildPfade(configuration, m.Students, Global.ZipModus.Geevoo);
-                            m.Zieldatei?.Zippen(Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachGeevooFotos.zip"), configuration, "", 0, absoluteFotoPfade);
-                        },
-                        Global.Rubrik.WöchtentlicheArbeiten,
-                        Global.NurBeiDiesenSchulnummern.Nur177659
-                    ),
+                    ),                    
                     new Menüeintrag(
                         "Mailadressen: fehlende Schulinterne Mailadressen in den Individualdaten I ergänzen",
                         quelldateien.Notwendige(configuration, ["schuelerzusatzdaten,dat"]),
@@ -232,12 +211,86 @@ public static class MenueHelper
                                     ["Nachname", "Vorname", "Geburtsdatum"],
                                     [],
                                     "|", '\'', new UTF8Encoding(false), false)
-                            ];                            
+                            ];
                             m.Zieldateien.ExportAusSchildVerschieben(configuration);
                             m.Zieldateien.VergleichenFilternErstellen(quelldateien);
                         },
                         Global.Rubrik.WöchtentlicheArbeiten,
                         Global.NurBeiDiesenSchulnummern.Alle
+                    ),
+                    new Menüeintrag(
+                        "Fotos #1: Schüler*innen klassenweise fotografieren, kopieren, umbenennen, zippen",
+                        quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "schuelerzusatzdaten,dat"]),
+                        students,
+                        klassen,
+                        [
+                            $"Am Einschulungstag unterstützt diese Funktion beim klassenweisen Fotografieren der Schüler*innen. Konkret beim Kopieren, Verkleinern (160*160), Umbenennen und Zippen der Fotos.",
+                            $"Erstellen Sie jetzt quadratische Fotos der vor Ihnen stehenden Klasse (z.B. mit dem Handy). Dabei ist die [{Global.GetColor(Global.ColorInfoBox)}]Reihenfolge & Anzahl[/] laut folgender Tabelle exakt einzuhalten. Die Fotos werden in den Schild-Fotoordner kopiert und dabei mit der schulischen E-Mail der SuS umbenannt.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1:[/] Wenn jemand fehlt, dann die weiße Wand fotografieren, damit [{Global.GetColor(Global.ColorInfoBox)}]Reihenfolge & Anzahl[/] stimmen.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #2:[/] Wenn ein Foto nicht gelungen ist, dann löschen und neu erstellen.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #3:[/] Wenn mehr als eine Klasse ausgewählt wird, wird nur die erste Klasse berücksichtigt",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #4:[/] Das Kriterium für die Reihenfolge ist der Dateiname.",
+                        ],
+                        m =>
+                        {
+                            m.FilterInteressierendeStudentsUndKlassen(configuration, "Klasse", "Geben Sie den Namen der Klasse an, die jetzt vor Ihnen steht.");
+                            if(m.NichtAlleSusHabenEineEindeutigeMailAdresse(configuration, m.IStudents)) return;
+                            m.IStudents.KlassenordnerErstellenFotosOrdnerÖffnen(configuration);
+                            m.IStudents.KlassenListenAnzeigen(configuration);
+                            m.IStudents.AnzahlPrüfen(configuration);
+                            configuration = Global.Konfig("PfadFotosImSchILD-Ordner", Global.Modus.ReadSilent, configuration);
+                            m.IStudents.KlassenordnerInSchildErstellenBilderKopierenUndUmbenennenUndZippen(configuration);
+                        },
+                        Global.Rubrik.Allgemein,
+                        Global.NurBeiDiesenSchulnummern.Nur177659
+                    ),
+                    new Menüeintrag(
+                        "Fotos #2: Schüler*innenfotos nach SchILD2 hochladen",
+                        quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "schuelerzusatzdaten,dat"]),
+                        students,
+                        klassen,
+                        [
+                            $"Es werden jetzt die Fotos nach SchILD2 hochgeladen. Wenden Sie diese Funktion an, wenn Sie zuvor klassenweise Fotos mit [bold {Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] erstellt haben.",                            
+                            $"[{Global.GetColor(Global.ColorUnterschrift)}]Voraussetzung #1: [/]Die Fotos müssen aus SchILD exportiert werden: [{Global.GetColor(Global.ColorActionInMenüs)}]Datenaustausch > Fotos > Fotos exportieren[/]. Beachte, dass der Fotodateiname den Nachnamen, Vornamen und das Geburtsdatum enthält.",
+                            $"[{Global.GetColor(Global.ColorUnterschrift)}]Voraussetzung #2: [/]Alle noch nicht zu SchILD hochgeladenen Fotos liegen in einem vorbereiteten Ordner. Beachte: Die Fotos müssen den ersten Teil der E-Mail-Adresse (also alles vor dem @) als Dateinamen haben.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1: [/]Vorhandene Bilder werden nicht überschrieben."
+                        ],
+                        m =>
+                        {
+                            m.FilterInteressierendeStudentsUndKlassen(configuration);
+                            m.IStudents.FotosFürUploadNachSchildAuswählen(configuration);
+                            m.IStudents.FotosFürUploadNachSchild2AuflistenUndBestätigen(configuration);
+                            m.IStudents.FotosNachSchild2Hochladen(configuration);
+                        },
+                        Global.Rubrik.Allgemein,
+                        Global.NurBeiDiesenSchulnummern.Nur177659
+                    ),
+                    new Menüeintrag(
+                        "Fotos #3: Schüler*innen-Fotos aus SchILD für Webuntis und Geevoo bereitstellen",
+                        quelldateien.Notwendige(configuration, ["schuelerZusatzdaten,dat"]),
+                        students,
+                        klassen,
+                        [
+                            $"Es werden jetzt die Dateien [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachWebuntisFotos.zip")}[/] und [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachGeevooFotos.zip")}[/] erstellt."
+                        ],
+                        m =>
+                        {
+                            if(m.NichtAlleSusHabenEineEindeutigeMailAdresse(configuration, m.Students)) return;
+                            configuration = Global.Konfig("PfadFotosImSchILD-Ordner", Global.Modus.Read, configuration);
+                            configuration = Global.Konfig("MailDomain", Global.Modus.Read, configuration);
+                            m.Zieldateien =
+                            [
+                                
+                            ];     
+
+                            m.Zieldatei = new Datei();
+                            var absoluteFotoPfade = m.GetFotosAusSchildPfade(configuration, m.Students, Global.ZipModus.Webuntis);
+                            m.Zieldatei?.Zippen(Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachWebuntisFotos.zip"), configuration, "", 0, absoluteFotoPfade);
+                            absoluteFotoPfade = m.GetFotosAusSchildPfade(configuration, m.Students, Global.ZipModus.Geevoo);
+                            m.Zieldatei?.Zippen(Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachGeevooFotos.zip"), configuration, "", 0, absoluteFotoPfade);
+                        },
+                        Global.Rubrik.WöchtentlicheArbeiten,
+                        Global.NurBeiDiesenSchulnummern.Nur177659
                     ),
                     new Menüeintrag(
                         "Statistik: Unterrichtsverteilung und Anrechnungen nach SchILD importieren",
@@ -322,54 +375,18 @@ public static class MenueHelper
                         },
                         Global.Rubrik.Allgemein,
                         Global.NurBeiDiesenSchulnummern.Nur177659
-                    ),
-                    new Menüeintrag(
-                        "Fotos erstellen: Schüler*innen klassenweise fotografieren",
-                        quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat"]),
-                        students,
-                        klassen,
-                        [
-                            $"Erstellen Sie jetzt Fotos der vor Ihnen stehenden Klasse (z.B. mit dem Handy). Dabei ist die [{Global.GetColor(Global.ColorInfoBox)}]Reihenfolge & Anzahl[/] laut folgender Tabelle exakt einzuhalten. ",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1:[/] Wenn jemand fehlt, dann die weiße Wand fotografieren, damit [{Global.GetColor(Global.ColorInfoBox)}]Reihenfolge & Anzahl[/] stimmen.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #2:[/] Wenn ein Foto nicht gelungen ist, dann löschen und neu erstellen.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #3:[/] Wenn mehr als eine Klasse ausgewählt wird, wird nur die erste Klasse berücksichtigt",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #4:[/] Das Kriterium für die Reihenfolge ist der Dateiname.",
-                        ],
-                        m =>
-                        {
-                            m.FilterInteressierendeStudentsUndKlassen(configuration, "Klasse", "Geben Sie den Namen der Klasse an, die jetzt vor Ihnen steht.");
-                            m.IStudents.KlassenordnerErstellen(configuration);
-                            m.IStudents.KlassenListenAnzeigen(configuration);
-                        },
-                        Global.Rubrik.Allgemein,
-                        Global.NurBeiDiesenSchulnummern.Nur177659
-                    ),
-                    new Menüeintrag(
-                        "Fotos hochladen: Erstellte Schüler*innenfotos nach SchILD2 hochladen",
-                        quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat"]),
-                        students,
-                        klassen,
-                        [
-                            $"Es werden jetzt die Fotos nach SchILD2 hochgeladen.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Vorarbeiten:[/] Fotos aller Schüler wurden bereits erstellt und liegen nun in der richtigen [bold aqua]Reihenfolge[/] und [bold aqua]Anzahl[/] in Unterordnern unter [{Global.GetColor(Global.ColorPfadInDateien)}]" + Path.Combine(configuration["PfadDownloads"], "Fotos") +  "[/]."
-                        ],
-                        m =>
-                        {
-                            m.IKlassen = m.Students.KlassenAuswählen(configuration);
-                            m.Students.FotosVerarbeiten(configuration, m.IKlassen);
-                        },
-                        Global.Rubrik.Allgemein,
-                        Global.NurBeiDiesenSchulnummern.Nur177659
-                    ),
+                    ),                    
                     new Menüeintrag(
                     "Klassen: Neue Klassen von Untis nach SchILD übergeben und Eigenschaften anpassen",
-                    quelldateien.Notwendige(configuration, ["klassen,dat", "GPU003,txt"]),
+                    quelldateien.Notwendige(configuration, ["klassen,dat", "GPU003,txt", "GPU002,txt"]),
                     students,
                     klassen,
                     [
                         $"Nachdem die Schule in das neue Schuljahr versetzt worden ist, kann diese Funktion Folgendes:",
                         $"#1 Fehlende Klassen aus Untis werden in den Schuelerzusatzdaten angelegt. Klassenleitung und Jahrgang werden aus Untis übernommen. Andere Eigenschaften werden aus Klassen des selben Jahrgangs der bisherigen Schuelerzusatzdaten übernommen.",
-                        $"#2 In bestehenden Klassen werden Klassenleitung und Jahrgang aus Untis in die Schuelerzusatzdaten übernommen.", 
+                        $"#2 In bestehenden Klassen werden Klassenleitung und Jahrgang aus Untis in die Schuelerzusatzdaten übernommen.",
+                        $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1:[/] Die stellvertretenden Klassenleitungen und die Prüfungsordnung müssen manuell angepasst werden.",
+                        $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #2:[/] Klassen ohne Unterrichte werden ignoriert.",
                     ],
                     m =>
                     {
@@ -389,13 +406,18 @@ public static class MenueHelper
                 ),
                 new Menüeintrag(
                     "Wiki: Diverse SQLite-Dateien (Organigramm, Praktikum etc.) erstellen",
-                    quelldateien.Notwendige(configuration, ["schuelerzusatzdaten,dat", "absenceperstudent,csv", "GPU020,txt", "GPU002,txt"]),
+                    quelldateien.Notwendige(configuration, ["schuelerzusatzdaten,dat", "absenceperstudent,csv", "GPU006,txt", "GPU002,txt", "GPU003,txt", "klassen,dat"]),
                     students,
                     klassen,
                     [
                         $"Das Organigramm wird aus Untisanrechnungen gebildet. Beispiele: {{...}} > KATEGORIE; [[...]] > HINWEIS, Text ohne Klammern wird zur ROLLE; A14, A15, A16 ohne Klammern > AMT; Untis-Beschreibung > AUFGABE. Im Organigramm wird nach Kategorie, Aufgabe oder Beschreibung gruppiert.",
                         $"Untisanrechnungen: 1.Struct Schema Editor > Untisanrechnungen > Löschen/Leeren > 'untisanrechnungen' eingeben, dann Leeren",
-                        $"Untisanrechnungen: 2.Struct Schema Editor > Untisanrechnungen > Importieren/Exportieren > Importieren von Rohdaten > Global > Durchsuchen"
+                        $"Untisanrechnungen: 2.Struct Schema Editor > Untisanrechnungen > Importieren/Exportieren > Importieren von Rohdaten > Global > Durchsuchen",
+                        $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise zum Text in Anrechnungen:[/]",
+                        $"[{Global.GetColor(Global.ColorHinweise)}]#1[/] Das Beförderungsamt wird ausgelesen. Bsp.: A14",
+                        $"[{Global.GetColor(Global.ColorHinweise)}]#2[/] Hinweise werden aus eckigen Klammern ausgelesen. Bsp.: Fortbildung 2024",
+                        $"[{Global.GetColor(Global.ColorHinweise)}]#3[/] Kategorien werden aus geschweiften Klammern ausgelesen. Bsp.: Technik, Beratung",
+                        $"[{Global.GetColor(Global.ColorHinweise)}]#4[/] Bildungsgänge werden daran identifiziert, dass im Text [aqua]Bildungsgangleitung[/] steht und die Beschreibung mit [aqua]bildunggaenge:[/] beginnt, "
                     ],
                     m =>
                     {
@@ -404,7 +426,7 @@ public static class MenueHelper
                         m.Zieldateien =
                         [
                             m.GetGruppen(configuration, anrechnungen, Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-gruppen.csv"), lehrers, ",", '\"', new UTF8Encoding(false), true),
-                            m.GetLehrer(configuration, Path.Combine(Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-lul-utf8OhneBom-einmalig-vor-SJ-Beginn.csv")), ",", '\'', new UTF8Encoding(false), false),
+                            m.GetLehrer(lehrers, Path.Combine(Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-lul-utf8OhneBom-einmalig-vor-SJ-Beginn.csv")), ",", '\'', new UTF8Encoding(false), false),
                             m.Zieldatei = m.Praktikanten(
                                 [
                                     "BW,1", "BT,1", "BS,1", "BS,2", "HBG,1", "HBT,1", "HBW,1", "GG,1", "GT,1", "GW,1", "IFK,1"
@@ -416,8 +438,7 @@ public static class MenueHelper
                         m.Schulpflichtüberwachung(configuration);
 
                         m.Zieldateien.Add(m.GetFaecher(configuration, Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-faecher.csv"), ",", '\'', new UTF8Encoding(false), false));
-
-                        m.Zieldateien.VergleichenFilternErstellen(quelldateien);
+                        m.Zieldateien.Erstellen();
                     },
                     Global.Rubrik.Wiki,
                     Global.NurBeiDiesenSchulnummern.Nur177659
@@ -460,14 +481,19 @@ public static class MenueHelper
                     ),
                     new Menüeintrag(
                         "Schnellmeldung: Relationsgruppen im September aufbereiten",
-                        quelldateien,
+                        quelldateien.Notwendige(configuration,[]),
                         students,
                         klassen,
                         [
-                            "Dokumentation siehe Schips.webuntis2schildGui.nrw.de",
-                            "Realtionen gemäß §93 SchulG"
+                            "Alle aktiven Schüler*innen werden angezeigt.",
+                            "Bereichsleitungen werden sodann aufgefordert Änderungen zum Stichtag mitzuteilen.",
+                            "Relationen gemäß §93 SchulG",
+                            "Dokumentation siehe schips.nrw.de"
                         ],
-                        _ => { new Relationsgruppen(klassen, students); },
+                        m =>
+                        {
+                            m.Relationsgruppen = new Relationsgruppen(klassen, students);
+                        },
                         Global.Rubrik.Allgemein,
                         Global.NurBeiDiesenSchulnummern.Nur177659                        
                     ),                

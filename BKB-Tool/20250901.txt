@@ -1,0 +1,193 @@
+^  Relationsgruppe  ^                      1.Jg  ^2.Jg  ^3.Jg  ^4.Jg  ^Summe  ^  Relation  ^  StellenBS  ^  StellenVZ  ^
+|BK BS Fachklasse EQ TZ:|512|501|478||1491|41,64|   35,8069|
+|BK BS Fachklasse EQ TZ (hj. endend):||||83|83|83,28|    0,9966|
+|BK BS Ausbildungsvorbereitung VZ:|46||||46|16,18|    2,8430|
+|BK BS Ausbildungsvorbereitung TZ:|14||||14|41,64|    0,3362|
+|BK BF ber. Kennt. (Vor. HSA) 1-jährig:|6||||6|16,18||0,3708|
+|BK BF ber. Kennt. (Vor. HSA 10) 1-jährig:|21||||21|16,18||1,2979|
+|BK BF ber. Kennt. und FHS 2-jährig:|141|75|||216|16,18||13,3498|
+|BK BF BA-LRecht und FOS 2-jährig:|35|12|||47|14,34||3,2775|
+|BK BF ber. Kennt. und AHR 3-jährig:|36|39|46||121|14,34||8,4379|
+|BK FO 12B 1-jährig VZ:|0||||0|14,34||0,0000|
+|BK FO Klasse 11 1-jährig TZ:|19||||19|41,64||0,4563|
+|BK FO Klasse 12 1-jährig VZ:|24||||24|14,34||1,6736|
+|Summe:                                                            2088|||||||       39,9828|   28,8640|
+
+Leitungszeit:49,65   (= 9 + 50 * 0,7 + (39,9828+28,8640 - 50) * 0,3)  Verordnung zur Ausführung des § 93 Abs. 2 Schulgesetz (VO zu § 93 Abs. 2 SchulG) vom 18.03.2005
+
+Anrechnungen: 54,63   (= 39,9828 * 0,5 + 28,8640 * 1,2)
+
+   Schüler in SchILD insgesamt: 2088
+
+Details
+=======
+
+BK BS Fachklasse EQ TZ
+ 1. AGG23A              18
+ 2. AGG23B              15
+ 3. AGG24A              19
+ 4. AGG24B              21
+ 5. AGG25A              40
+ 6. AGS23A               8
+ 7. AGS24A               3
+ 8. AL23A               30
+ 9. AL23B               21
+10. AL23C               14
+11. AL24A               29
+12. AL24B               17
+13. AL25A               28
+14. BBZ23A              25
+15. BBZ24A              22
+16. BBZ25A              24
+17. BD25A               19
+18. BF22A                1
+19. BF23A                5
+20. BF24A                9
+21. BF25A               10
+22. BM23A               14
+23. BM24A               19
+24. BM25A                9
+25. BZ23A               20
+26. BZ23B               17
+27. BZ24A               24
+28. BZ24B               21
+29. BZ25A               20
+30. BZ25B               20
+31. EE23A               16
+32. EE24A               25
+33. EE25A               13
+34. HT23A               10
+35. HT23B               11
+36. HT24A               16
+37. HT24B               16
+38. HT25A               17
+39. HT25B               18
+40. MA23A               26
+41. MA24A               14
+42. MA25A               19
+43. MF23A               20
+44. MF24A               27
+45. MF25A               15
+46. MK23A               17
+47. MK23B                9
+48. MK24A               19
+49. MK24B               21
+50. MK25A               21
+51. MK25B               20
+52. MM23A               25
+53. MM24A               24
+54. MM25A               27
+55. NBK23A               9
+56. NBK24A              14
+57. NBK25A              29
+58. NF23A                8
+59. NF24A                3
+60. NF25A                4
+61. WA23A               17
+62. WA23B               20
+63. WA24A               15
+64. WA24B               16
+65. WA25A               33
+66. WB23A               26
+67. WB24A               23
+68. WB25A               17
+69. WE23A               15
+70. WE24A               24
+71. WE25A               36
+72. WG23A               13
+73. WG24A               15
+74. WG25A               11
+75. WI23A               18
+76. WI23C               16
+77. WI24A               27
+78. WI24B                7
+79. WI25A               25
+80. WI25B                6
+81. WS23A               18
+82. WS24A               13
+83. WS25A               26
+--------------------------
+               Summe: 1492
+
+BK BS Fachklasse EQ TZ (hj. endend)
+ 1. EE22A               19
+ 2. MA22A               18
+ 3. MF22A               11
+ 4. MK22A               27
+ 5. MK23A               17
+ 6. MM22A                7
+--------------------------
+               Summe:   99
+
+BK BS Ausbildungsvorbereitung VZ
+ 1. FFM25A              18
+ 2. IFK25A              15
+ 3. IFK25B              13
+--------------------------
+               Summe:   46
+
+BK BS Ausbildungsvorbereitung TZ
+ 1. AVE25A               5
+ 2. AVT25A               9
+--------------------------
+               Summe:   14
+
+BK BF ber. Kennt. (Vor. HSA) 1-jährig
+ 1. BT25A                6
+--------------------------
+               Summe:    6
+
+BK BF ber. Kennt. (Vor. HSA 10) 1-jährig
+ 1. BW25A               21
+--------------------------
+               Summe:   21
+
+BK BF ber. Kennt. und FHS 2-jährig
+ 1. HBG24A              23
+ 2. HBG25A              22
+ 3. HBG25B              20
+ 4. HBT24A              17
+ 5. HBT25A              24
+ 6. HBW24A              20
+ 7. HBW24B              19
+ 8. HBW25A              24
+ 9. HBW25B              24
+10. HBW25C              23
+--------------------------
+               Summe:  216
+
+BK BF BA-LRecht und FOS 2-jährig
+ 1. BS24A               12
+ 2. BS25A               16
+ 3. BS25B               19
+--------------------------
+               Summe:   47
+
+BK BF ber. Kennt. und AHR 3-jährig
+ 1. GG23A               21
+ 2. GG24A               14
+ 3. GG24B               15
+ 4. GG25A               23
+ 5. GT23A               11
+ 6. GT24A               10
+ 7. GT25A               13
+ 8. GW23A               14
+--------------------------
+               Summe:  121
+
+BK FO 12B 1-jährig VZ
+--------------------------
+               Summe:    0
+
+BK FO Klasse 11 1-jährig TZ
+ 1. FS24A               25
+ 2. FS25A               18
+--------------------------
+               Summe:   43
+
+BK FO Klasse 12 1-jährig VZ
+ 1. FS24A               25
+--------------------------
+               Summe:   25
+
+bm | 01.09.2025 16:10:41

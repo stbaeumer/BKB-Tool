@@ -18,7 +18,7 @@ public partial class Anrechnungen : List<Anrechnung>
 
     public Anrechnungen(Lehrers lehrers, IConfiguration configuration)
     {
-        configuration = Global.Konfig("ConnectionStringUntis", Global.Modus.Update, configuration);
+        configuration = Global.Konfig("ConnectionStringUntis", Global.Modus.ReadSilent, configuration);
 
         using var odbcConnection = new SqlConnection(configuration["ConnectionStringUntis"]);
         var beschreibungs = new Beschreibungs();
@@ -91,18 +91,21 @@ WHERE (SCHOOLYEAR_ID={Global.AktSj[0]}{Global.AktSj[1]});";
 
         try
         {
-            var queryString = $@"SELECT 
-CountValue.TEACHER_ID,  
-DESCRIPTION_ID, 
-CountValue.Text,
-CountValue.Value,
-CountValue.DateFrom,
-CountValue.DateTo,
-CountValue.CV_REASON_ID
-
-FROM CountValue
-WHERE (((CountValue.SCHOOLYEAR_ID)={Global.AktSj[0]}{Global.AktSj[1]}) AND ((CountValue.Deleted)='false') AND ((CountValue.Deleted)='false'))
-ORDER BY CountValue.TEACHER_ID;
+            var queryString = $@"SELECT DISTINCT
+    cv.TEACHER_ID,
+    cv.DESCRIPTION_ID,
+    cv.Text,
+    cv.Value,
+    cv.DateFrom,
+    cv.DateTo,
+    cv.CV_REASON_ID,
+    t.Name
+FROM
+    CountValue AS cv
+    LEFT JOIN Teacher AS t ON cv.TEACHER_ID = t.TEACHER_ID
+WHERE 
+(((cv.SCHOOLYEAR_ID)={Global.AktSj[0]}{Global.AktSj[1]}) AND ((cv.Deleted)='false') AND ((cv.Deleted)='false'))
+ORDER BY t.Name;
 ";
 
             var sqlCommand = new SqlCommand(queryString, odbcConnection);
@@ -117,7 +120,7 @@ ORDER BY CountValue.TEACHER_ID;
                     Grund = Convert.ToInt32((from c in cvreasons where c.Id == sqlDataReader.GetInt32(6) select c.Name)
                         .FirstOrDefault()),
                     Wert = Convert.ToDouble(sqlDataReader.GetInt32(3)) / 100000,
-                    Lehrer = (from l in lehrers where l.IdUntis == sqlDataReader.GetInt32(0) select l).FirstOrDefault(),
+                    Lehrer = (from l in lehrers where l.Kürzel == Global.SafeGetString(sqlDataReader, 7) select l).FirstOrDefault(),
                     // Die Beschr muss auf eine Wiki-Seite matchen. Beschr entspricht einem Thema oder einem Gremium
                     Beschr = (from b in beschreibungs where b.BeschreibungId == sqlDataReader.GetInt32(1) select b.Name)
                         .FirstOrDefault() == null
@@ -160,7 +163,6 @@ ORDER BY CountValue.TEACHER_ID;
                     ? DateTime.ParseExact((sqlDataReader.GetInt32(5)).ToString(), "yyyyMMdd",
                         CultureInfo.InvariantCulture)
                     : new DateTime();
-
 
                 if (anrechnung.TeacherIdUntis == 0) continue;
                 if (anrechnung.Grund != 0 && anrechnung.Grund <= 210 && anrechnung.Grund != 200 &&

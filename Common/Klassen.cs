@@ -18,7 +18,7 @@ using Microsoft.Extensions.Configuration;
 #pragma warning disable NU1902 // Möglicher Null-Verweis-Argument
 
 public class Klassen : List<Klasse>
-{
+{    
     public List<Lehrer> Klassenleitungen { get; private set; }
 
     public Klassen(int periode, Lehrers lehrers, Raums raums, IConfiguration configuration)
@@ -104,6 +104,32 @@ FROM Class LEFT JOIN Teacher ON Class.TEACHER_ID = Teacher.TEACHER_ID WHERE (((C
     public Klassen()
     {
      }
+
+    public Klassen(IConfiguration configuration, Dateien quelldateien, Students students)
+    {
+        var klassen = quelldateien.GetMatchingList(configuration, "klassen", students, null);
+        if (klassen == null || klassen.Count == 0) return;
+
+        for (int j = 0; j < klassen.Count; j++)
+        {
+            var klasse = new Klasse();
+            try
+            {
+                var k = (IDictionary<string, object>)klassen[j];
+
+                klasse.Name = k["InternBez"].ToString();
+                klasse.Jahrgang = k["Jahrgang"].ToString();
+                klasse.Gliederung = k["Gliederung"].ToString();
+                klasse.OrgForm = k["OrgForm"].ToString();
+                klasse.Fachklasse = k["Fachklasse"].ToString();                
+                Add(klasse);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+    }
 
     private static bool IstVollzeitKlasse(string? klassenname)
     {
@@ -323,30 +349,6 @@ FROM Class LEFT JOIN Teacher ON Class.TEACHER_ID = Teacher.TEACHER_ID WHERE (((C
 
         // Falls keine Zahl gefunden wurde, wird der ursprüngliche String zurückgegeben
         return input;
-    }
-
-    
-
-    public void Relationsgruppen(Relationsgruppen relationsgruppen)
-    {
-        foreach (var klasse in this)
-        {
-            foreach (var r in relationsgruppen)
-            {
-                if (r.Gliederungen.Contains(klasse.Gliederung))
-                {
-                    if ((r.Fachklassenschlüssel.Count == 0 ||
-                         r.Fachklassenschlüssel.Contains(klasse.Fachklassenschlüssel)))
-                    {
-                        if (r.Jahrgänge.Contains(klasse.Jahrgang) && klasse.Name != "Z" &&
-                            klasse.Name != "Abgang")
-                        {
-                            klasse.Relationsgruppe = r.BeschreibungSchulministerium;
-                        }
-                    }
-                }
-            }
-        }
     }
 
     public void KlasseOhneRelationsgruppe(Students students)

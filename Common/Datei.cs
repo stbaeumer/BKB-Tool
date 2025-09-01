@@ -931,7 +931,7 @@ public class Datei : List<dynamic>
 
         if (zuZippendeDateien != null && zuZippendeDateien.Count > 0)
         {
-            Global.ZeileSchreiben("Es werden jetzt Dateien gezippt:", zuZippendeDateien.Count().ToString(), ConsoleColor.White, ConsoleColor.Blue);
+            //Global.ZeileSchreiben("Es werden jetzt Dateien gezippt:", zuZippendeDateien.Count().ToString(), ConsoleColor.White, ConsoleColor.Blue);
         }
         else
         {
@@ -1003,10 +1003,12 @@ public class Datei : List<dynamic>
         }
 
         configuration = Global.Konfig("SmtpUser", Global.Modus.Update, configuration);
-        configuration = Global.Konfig("SmtpPassword", Global.Modus.Update, configuration);
+        configuration = Global.Konfig("SmtpKennwort", Global.Modus.Update, configuration);
         configuration = Global.Konfig("SmtpPort", Global.Modus.Update, configuration);
         configuration = Global.Konfig("SmtpServer", Global.Modus.Update, configuration);
-        configuration = Global.Konfig("BCC-Adresse", Global.Modus.Update, configuration);
+        //configuration = Global.Konfig("BccAdresse", Global.Modus.Update, configuration);
+        configuration = Global.Konfig("NetmanMailReceiver", Global.Modus.Update, configuration);
+        configuration = Global.Konfig("NetmanMailBccReceiver", Global.Modus.Update, configuration);
         
         var mail = new Mail();
         mail.Senden(subject,configuration,body,ZipPfad, configuration["NetmanMailReceiver"], "", configuration["NetmanMailBccReceiver"]);
@@ -1263,6 +1265,11 @@ public class Datei : List<dynamic>
         // Entferne alle Zeilen aus this und ersetzte durch neueDatei.
         Clear();
         AddRange(neueDatei);
+        return this;
+    }
+
+    internal List<dynamic> FilternFaecherGPU006()
+    {
         return this;
     }
 }

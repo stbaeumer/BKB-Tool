@@ -6,8 +6,9 @@ using PdfSharp.Pdf.IO;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
 using Microsoft.Extensions.Configuration;
-using Spectre.Console;
 using DocumentFormat.OpenXml.Office2010.Excel;
+using Table = Spectre.Console.Table;
+using Spectre.Console;
 
 #pragma warning disable CS8603 // Mögliche Null-Verweis-Rückgabe
 #pragma warning disable CS8602 // Dereferenzierung eines möglicherweise null-Objekts.
@@ -80,6 +81,9 @@ public partial class Student
     public string PfadDokumentenverwaltung { get; private set; } = string.Empty;
     public DateTime ZeugnisdatumLetztesZeugnisInDieserKlasse { get; private set; }
     public string Id { get; internal set; }
+    public string? Fachklasse { get; internal set; }
+    public string? Schulgliederung { get; internal set; }
+    public string? Relationsgruppe { get; private set; }
 
     public string GetFehlstd(List<dynamic>? absencesPerStudent, IConfiguration configuration)
     {
@@ -1329,5 +1333,54 @@ public partial class Student
         { 
             ZeugnisdatumLetztesZeugnisInDieserKlasse = new DateTime(Convert.ToInt32(Global.AktSj[0]), 8, 1);
         }
+    }
+
+    internal Table GetRelationsgruppe(Relationsgruppen relationsgruppen, Table table)
+    {
+        if (string.IsNullOrEmpty(Schulgliederung))
+        {
+            table.AddRow(Nachname + ", " + Vorname + ", " + Klasse, Schulgliederung, Jahrgang, Fachklasse, "Schulgliederung fehlt.");
+            return table;
+        }
+        if (string.IsNullOrEmpty(Jahrgang))
+        {
+            table.AddRow(Nachname + ", " + Vorname + ", " + Klasse, Schulgliederung, Jahrgang, Fachklasse, "Jahrgang fehlt.");
+            return table;
+        }
+        if (string.IsNullOrEmpty(Fachklasse))
+        {
+            table.AddRow(Nachname + ", " + Vorname + ", " + Klasse, Schulgliederung, Jahrgang, Fachklasse, "Fachklasse fehlt.");
+            return table;
+        }
+        foreach (var r in relationsgruppen)
+        {
+            if (r.Gliederungen.Contains(Schulgliederung))
+            {
+                var fachklasse = Fachklasse.Replace("-", "");
+
+                try
+                {
+                    fachklasse = fachklasse.Substring(fachklasse.Length - 5);
+                }
+                catch
+                {
+                    table.AddRow(Nachname + ", " + Vorname + ", " + Klasse, Schulgliederung, Jahrgang, Fachklasse, "Die Fachklasse ist nicht korrekt.");
+                }
+
+                if ((r.Fachklassenschlüssel.Count == 0 || r.Fachklassenschlüssel.Contains(fachklasse)))
+                {
+                    if (r.Jahrgänge.Contains(Jahrgang.Split('-').Last()) || r.Jahrgänge.Count == 0)
+                    {
+                        Relationsgruppe = r.BeschreibungSchulministerium;
+                        return table;
+                    }
+                }
+            }
+        }
+        if (string.IsNullOrEmpty(Relationsgruppe))
+        {
+            table.AddRow(Nachname + ", " + Vorname + ", " + Klasse, Schulgliederung, Jahrgang, Fachklasse, "Keine Relationsgruppe gefunden.");
+        }
+        return table;
     }
 }
