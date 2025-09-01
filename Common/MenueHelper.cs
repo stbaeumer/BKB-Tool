@@ -427,7 +427,7 @@ public static class MenueHelper
                         [
                             m.GetGruppen(configuration, anrechnungen, Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-gruppen.csv"), lehrers, ",", '\"', new UTF8Encoding(false), true),
                             m.GetLehrer(lehrers, Path.Combine(Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-lul-utf8OhneBom-einmalig-vor-SJ-Beginn.csv")), ",", '\'', new UTF8Encoding(false), false),
-                            m.Zieldatei = m.Praktikanten(
+                            m.Praktikanten(
                                 [
                                     "BW,1", "BT,1", "BS,1", "BS,2", "HBG,1", "HBT,1", "HBW,1", "GG,1", "GT,1", "GW,1", "IFK,1"
                                 ],
@@ -492,7 +492,7 @@ public static class MenueHelper
                         ],
                         m =>
                         {
-                            m.Relationsgruppen = new Relationsgruppen(klassen, students);
+                            m.Relationsgruppen = new Relationsgruppen(klassen, students, configuration);
                         },
                         Global.Rubrik.Allgemein,
                         Global.NurBeiDiesenSchulnummern.Nur177659                        

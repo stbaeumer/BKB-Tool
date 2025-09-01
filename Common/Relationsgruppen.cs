@@ -22,7 +22,7 @@ public class Relationsgruppen : List<Relationsgruppe>
     private IConfiguration configuration;
     private Students students;
 
-    public Relationsgruppen(Klassen klassen, Students students)
+    public Relationsgruppen(Klassen klassen, Students students, IConfiguration configuration)
     {
         // Dokumentation siehe schips.nrw.de/
 
@@ -262,7 +262,7 @@ public class Relationsgruppen : List<Relationsgruppe>
 
         datei.Add(Environment.UserName + " | " + DateTime.Now);
 
-        string pfad = DateTime.Now.ToString("yyyyMMdd") + ".txt";
+        string pfad = Path.Combine(configuration["PfadDownloads"], DateTime.Now.ToString("yyyyMMdd") + ".txt");
 
         using (StreamWriter outputFile = new StreamWriter(pfad))
         {

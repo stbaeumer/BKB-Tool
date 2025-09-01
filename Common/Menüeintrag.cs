@@ -2358,7 +2358,7 @@ public class Menüeintrag
     {
 
         var faecher = Quelldateien.GetMatchingList(configuration, "gpu006", IStudents, Klassen);
-        var zieldatei = new Datei(zieldateiname);
+        var zieldatei = new Datei(zieldateiname, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         var verschiedeneFaecher = faecher.Select(rec =>
         {
@@ -2393,7 +2393,7 @@ public class Menüeintrag
         string zieldateiname,
         string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
-        var zieldatei = new Datei(zieldateiname);        
+        var zieldatei = new Datei(zieldateiname, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         foreach (var lehrer in lehrers)
         {
@@ -2415,7 +2415,7 @@ public class Menüeintrag
         string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
         var records = new List<dynamic>();
-        var zieldatei = new Datei(zieldateiname);
+        var zieldatei = new Datei(zieldateiname, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         var praktikanten = new List<Student>();
 
@@ -2458,7 +2458,7 @@ public class Menüeintrag
 
         var records = new List<dynamic>();
 
-        var zieldatei = new Datei(zieldateiname);
+        var zieldatei = new Datei(zieldateiname, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         foreach (var klasse in klassen.OrderBy(x =>
         {
@@ -2876,11 +2876,9 @@ public class Menüeintrag
         string defaultwert = "",        
         Global.Modus modus = Global.Modus.Update)
     {
-        if (defaultwert != "200")
-            configuration = Global.Konfig("NurDieseGruende", modus, configuration, "", -1, -1, null, defaultwert);
-        var nurDieseGründe = configuration["NurDieseGruende"].ToString().Trim();
-
+        configuration = Global.Konfig("NurDieseGruende", modus, configuration, "", -1, -1, null, defaultwert);
         
+        var nurDieseGründe = configuration["NurDieseGruende"].ToString().Trim();       
 
         var akt = int.Parse(Global.AktSj[0]);
 
