@@ -1012,13 +1012,11 @@ public class Datei : List<dynamic>
 
     public void Zippen(IConfiguration configuration, string kennwort = "", int kompressionsLevel = 0, List<string> zuZippendeDateien = null!)
     {
-        configuration = Global.Konfig("RotateFotos", Global.Modus.Update, configuration);
-
         try
         {
             AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start($"Fotos zippen ...", ctx =>
             {
-                using (FileStream zipStream = File.Create(AbsoluterPfad))
+                using (FileStream zipStream = File.Create(AbsoluterPfad.Replace(".csv", ".zip")))
                 using (ZipOutputStream zip = new ZipOutputStream(zipStream))
                 {
                     zip.SetLevel(kompressionsLevel); // Kompressionslevel (0-9, 9 = beste Kompression)
@@ -1061,7 +1059,7 @@ public class Datei : List<dynamic>
                     zip.IsStreamOwner = true;
                 }
             });
-            Global.ZeileSchreiben("Fotos gezippt", AbsoluterPfad, ConsoleColor.Green, ConsoleColor.White);
+            Global.ZeileSchreiben("Datei gezippt", AbsoluterPfad, ConsoleColor.Green, ConsoleColor.White);
         }
         catch (Exception ex)
         {

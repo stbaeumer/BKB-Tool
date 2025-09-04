@@ -1472,16 +1472,9 @@ public class Students : List<Student>
     internal void KlassenordnerInZielPfadErstellen(IConfiguration configuration)
     {
         configuration = Global.Konfig("PfadFotosImSchILD-Ordner", Global.Modus.ReadSilent, configuration);
-
-        var quellpfad = configuration["PfadDownloads"];
-        var zielpfad = configuration["PfadFotosImSchILD-Ordner"];
-
-        var quellpfadZuFotos = Path.Combine(quellpfad, "Fotos", this.First().Klasse);
-        var zielpfadZuFotos = Path.Combine(zielpfad, this.First().Klasse);
-
-        // Lies alle Fotos aus dem Quellpfad, sortiert nach Name aufsteigend
-        var quellFotos = Directory.GetFiles(quellpfadZuFotos, "*.jpg").OrderBy(f => f).ToArray();
-
+        
+        var zielpfadZuFotos = configuration["PfadFotosImSchILD-Ordner"];
+        
         // Falls der Zielordner nicht existiert, erstelle ihn
         if (!Directory.Exists(zielpfadZuFotos))
         {
@@ -1578,7 +1571,7 @@ public class Students : List<Student>
         var zielpfad = configuration["PfadFotosImSchILD-Ordner"];
 
         var quellpfadZuFotos = Path.Combine(quellpfad, "Fotos", this.First().Klasse);
-        var zielpfadZuFotos = Path.Combine(zielpfad, this.First().Klasse);
+        var zielpfadZuFotos = zielpfad;
 
         var webuntisfotostrings = new List<string>();
         var geevoofotostrings = new List<string>();
@@ -1702,7 +1695,7 @@ public class Students : List<Student>
 
         configuration = Global.Konfig("NurNeueFotosExportieren", Global.Modus.Update, configuration);
 
-        if (configuration["NurNeueFotosExportieren"] == "Ja")
+        if (configuration["NurNeueFotosExportieren"].ToString().ToLower() == "ja")
         {           
             var studentsMitNeuenFotos = new Students();
             studentsMitNeuenFotos.AddRange(this.Where(x => !string.IsNullOrEmpty(x.ZielFotoPfad))); 

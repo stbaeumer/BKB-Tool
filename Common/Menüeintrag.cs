@@ -3556,9 +3556,21 @@ public class Menüeintrag
         var ordnername = new DirectoryInfo(pfadFotosAusSchILD).Name;
         var übergeordneterOrdner = Directory.GetParent(pfadFotosAusSchILD)?.FullName;
 
-        // Erstelle neuen Ordner mit aktuellem Datum
         var neuerOrdnername = $"{ordnername}_{DateTime.Now:yyyyMMdd_HHmmss}";
         var neuerOrdnerPfad = Path.Combine(übergeordneterOrdner ?? "", neuerOrdnername);
+        
+        var panel = new Panel(
+            $"Nach dem erfolgreichen Zippen werden nun die Fotos aus [{Global.GetColor(Global.ColorPfadInDateien)}]{pfadFotosAusSchILD}[/] nach [{Global.GetColor(Global.ColorPfadInDateien)}]{neuerOrdnerPfad}[/] verschoben. Das ist notwendig, damit BKB-Tool beim nächsten Mal aus dem Vergleich der neuen und alten Fotos die Zipdatei passend erstellen kann." +
+            $"\n\nWeiter mit [{Global.GetColor(Global.ColorActionInMenüs)}]ENTER[/].");
+        panel.Header($"[bold {Global.GetColor(Global.ColorHinweise)}] Hinweis: Fotos-Ordner wird verschoben [/]")
+            .HeaderAlignment(Justify.Left)
+            .SquareBorder()
+            .Expand()
+            .BorderColor(Global.ColorHinweise);
+        AnsiConsole.Write(panel);
+        Console.ReadKey(true);
+
+        // Erstelle neuen Ordner mit aktuellem Datum
         Directory.CreateDirectory(neuerOrdnerPfad);
 
         // Verschiebe alle jpg-Dateien aus dem alten Ordner in den neuen Ordner
