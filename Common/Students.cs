@@ -1613,8 +1613,8 @@ public class Students : List<Student>
         configuration = Global.Konfig("PfadFotosAusSchILD", Global.Modus.Read, configuration);
         var pfadFotosAusSchILD = configuration["PfadFotosAusSchILD"];
 
-        // Prüfe, ob Bilder im Quellverzeichnis vorhanden sind
-        if (!Directory.Exists(pfadFotosAusSchILD) || Directory.GetFiles(pfadFotosAusSchILD).Length == 0)
+        // Prüfe, ob Bilder im Quellverzeichnis vorhanden sind und ob jpg enthalten sind.
+        if (!Directory.Exists(pfadFotosAusSchILD) || Directory.GetFiles(pfadFotosAusSchILD, "*.jpg").Length == 0)
         {
             throw new Exception(
                 $"Keine Fotos für den Export nach Webuntis gefunden. " +
@@ -1636,43 +1636,65 @@ public class Students : List<Student>
 
         if (unterordner != null)
         {
+            var table = new Table();
+            table.Expand();
+            table.Border(TableBorder.Rounded);
+            //table.Title = new TableTitle($"Fotos");
+            table.Expand();
+            table.AddColumn("Schüler*in");
+            table.AddColumn("alt");
+            table.AddColumn("neu oder verändert & bereit für Webuntis-Zip");
+
+            var maxAnzahlZeilen = 10;
+            var alleMöglichenFotos = 0;
             AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start($"Neue und veränderte Fotos an SuS zuweisen ...", ctx =>
             {
                 foreach (var student in this)
                 {
-                    var fotoDiesesSchuelersInOrdner = Directory.GetFiles(pfadFotosAusSchILD, $"{student.Nachname}_{student.Vorname}_{student.Geburtsdatum}*.jpg").FirstOrDefault();
-                    if (fotoDiesesSchuelersInOrdner == null) continue;
-                    var fotoDiesesSchuelersImUnterordner = unterordner != null ? Directory.GetFiles(unterordner, $"{student.Nachname}_{student.Vorname}_{student.Geburtsdatum}*.jpg").FirstOrDefault() : null;
+                    var schuelerfotoNeu = Directory.GetFiles(pfadFotosAusSchILD, $"{student.Nachname}_{student.Vorname}_{student.Geburtsdatum}*.jpg").FirstOrDefault();
+                    if (schuelerfotoNeu == null) continue;
+                    alleMöglichenFotos++;
+
+                    var schuelerfotoAlt = unterordner != null ? Directory.GetFiles(unterordner, $"{student.Nachname}_{student.Vorname}_{student.Geburtsdatum}*.jpg").FirstOrDefault() : null;
 
                     // Wenn das Foto im Unterordner nicht vorhanden ist, dann wird das Foto für den Export nach Webuntis vorgesehen
-                    if (fotoDiesesSchuelersImUnterordner == null)
+                    if (schuelerfotoAlt == null)
                     {
-                        student.ZielFotoPfad = fotoDiesesSchuelersInOrdner;
+                        student.ZielFotoPfad = schuelerfotoNeu;
+                        if (maxAnzahlZeilen > 0)
+                            table.AddRow(student.Nachname + "," + student.Vorname + ", " + student.Klasse + "(" + student.Geburtsdatum.ToString() + ")", string.IsNullOrEmpty(schuelerfotoAlt) ? "-" : Path.GetFileName(schuelerfotoAlt), Path.GetFileName(schuelerfotoNeu));
+                        maxAnzahlZeilen--;
                     }
                     else
                     {
                         // Wenn das Foto im Unterordner zwar vorhanden ist, aber
                         // Eigenschaften abweichen, dann wird das Foto für den Export nach Webuntis vorgesehen
-                        var infoInOrdner = new FileInfo(fotoDiesesSchuelersInOrdner);
-                        var infoImUnterordner = new FileInfo(fotoDiesesSchuelersImUnterordner);
-                        if (infoInOrdner.Length != infoImUnterordner.Length)
+                        var infoNeu = new FileInfo(schuelerfotoNeu);
+                        var infoAlt = new FileInfo(schuelerfotoAlt);
+                        if (infoNeu.Length != infoAlt.Length)
                         {
-                            student.ZielFotoPfad = fotoDiesesSchuelersInOrdner;
+                            student.ZielFotoPfad = schuelerfotoNeu;
+                            if (maxAnzahlZeilen > 0)
+                                table.AddRow(student.Nachname + "," + student.Vorname + ", " + student.Klasse + "(" + student.Geburtsdatum.ToString() + ")", string.IsNullOrEmpty(schuelerfotoAlt) ? "-" : Path.GetFileName(schuelerfotoAlt), Path.GetFileName(schuelerfotoNeu));
+                            maxAnzahlZeilen--;
                         }
                     }
+                    if (maxAnzahlZeilen == 0)
+                    {
+                        table.AddRow("...", "...", "...");
+                        maxAnzahlZeilen--;
+                    }
                 }
-            });            
+            });
 
             var anzahl = this.Count(x => !string.IsNullOrEmpty(x.ZielFotoPfad));
-            Global.ZeileSchreiben("Neue Fotos und veränderte Fotos an SuS zugewiesen:", anzahl.ToString(), ConsoleColor.Green, ConsoleColor.Black);
+            //Global.ZeileSchreiben("Neue Fotos und veränderte Fotos an SuS zugewiesen:", anzahl.ToString(), ConsoleColor.Green, ConsoleColor.Black);
 
-            var panel = new Panel(
-            new Markup($"Es wurden [{Global.GetColor(Global.ColorZahlen)}]{anzahl}[/] Fotos gefunden, die sich im aktuellen SchILD-Foto-Export ([{Global.GetColor(Global.ColorPfadInDateien)}]{pfadFotosAusSchILD}[/]) befinden, aber nicht im neuesten Unterordner [{Global.GetColor(Global.ColorPfadInDateien)}]{unterordner}[/]. Es werden auch solche Fotos berücksichtigt, die sich in der Größe geändert haben."))
-                        .Expand();
-            panel.Header = new PanelHeader($"[]  Seit dem letzten Schild-Fotoexport haben sich Änderungen ergeben:  [/]");
+            table.AddRow($"Summe: [{Global.GetColor(Global.ColorZahlen)}]{anzahl}[/]", "");
+            AnsiConsole.Write(table);
 
-            if(anzahl > 0)
-                AnsiConsole.Write(panel);
+            Global.ZeileSchreiben("Alle Fotos im Ordner " + pfadFotosAusSchILD, alleMöglichenFotos.ToString(), ConsoleColor.Green, ConsoleColor.Black);
+            Global.ZeileSchreiben("Neue oder veränderte Fotos im Ordner", anzahl.ToString(), ConsoleColor.Green, ConsoleColor.Black);
         }
 
         // Frage den Anwender, ob er die gefundenen Differenzen zwischen den Ordnern nach Webuntis exportieren möchte,

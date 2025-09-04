@@ -1664,7 +1664,7 @@ public static class KonfigHelper
             Key = "PfadFotosAusSchILD",
             DefaultValue = $"\\\\fs01\\SchILD-NRW\\Fotos_aus_SchILD",
             Aufforderung = "Pfad zu den Fotos aus SchILD",
-            Hinweise = $"Wo liegen die Fotos, die Sie aus SchILD exportiert haben ([{Global.GetColor(Global.ColorPfadInProgrammen)}]Datenaustausch > Fotos > Fotos exportieren[/])? Der Export ist wichtig, um nur fehlende Fotos an SchILD zu übergeben. Geben Sie den Pfad zu den Fotos aus SchILD an. Beispiel: [{Global.GetColor(Global.ColorPfadInProgrammen)}]\\\\fs01\\SchILD-NRW\\Fotos_aus_Schild[/]",
+            Hinweise = $"Wo liegen die Fotos, die Sie aus SchILD exportiert haben ([{Global.GetColor(Global.ColorPfadInProgrammen)}]Datenaustausch > Fotos > Fotos exportieren[/])? Der Export ist wichtig, um nur fehlende Fotos an SchILD zu übergeben. Geben Sie den Pfad zu den Fotos aus SchILD an. Beispiel: [{Global.GetColor(Global.ColorPfadInProgrammen)}]\\\\fs01\\SchILD-NRW\\Fotos_aus_SchILD[/]",
             Datentyp = Global.Datentyp.Pfad,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,

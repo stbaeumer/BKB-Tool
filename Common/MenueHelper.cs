@@ -281,7 +281,7 @@ public static class MenueHelper
                             $"[{Global.GetColor(Global.ColorUnterschrift)}]Voraussetzung: [/]Die Fotos müssen zuvor aus SchILD exportiert werden: ([{Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadFotosAusSchILD"]}[/].",
                             $"Dazu in SchILD den Weg gehen: [{Global.GetColor(Global.ColorActionInMenüs)}]Datenaustausch > Fotos > Fotos exportieren[/]",
                             $"Wahlweise können alle Fotos bereitgestellt werden oder nur diejenigen, die in SchILD seit dem letzten Fotoexport hinzugefügt wurden.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1: [/]Nach dem Start dieser Funktion werden alle Fotos aus {configuration["PfadFotosAusSchILD"]} nach {Path.Combine(configuration["PfadFotosAusSchILD"], DateTime.Now.ToString("yyyyMMdd-HHmm"))} verschoben. Somit können die verschiedenen Fotoexporte verglichen werden, um die Differenz für Webuntis zu ermitteln."
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1: [/]Nach dem Start dieser Funktion werden alle aus SchILD exportierten Fotos nach PfadFotosAusSchILD-{DateTime.Now.ToString("yyyyMMdd-HHmm")} verschoben. Somit können die verschiedenen Fotoexporte verglichen werden, um die Differenz für Webuntis zu ermitteln."
                         ],
                         m =>
                         {
@@ -291,7 +291,7 @@ public static class MenueHelper
                             m.Zieldatei = new Datei(Path.Combine(configuration["PfadDownloads"] ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-" + (string.Join("-", m.IKlassen).Substring(0, Math.Min(25, string.Join("-", m.IKlassen).Length)) + "-Fotos.zip")));
                             m.Zieldatei?.Zippen(configuration, "", 0, m.IStudents);
                             m.Zieldatei.OrdnerOeffnen();
-                            m.NeuenFotosAusSchildOrdnerErstellenUndAlteFotosVerschieben(configuration);
+                            m.NeueFotosAusSchildOrdnerErstellenUndAlteFotosVerschieben(configuration);
                         },
                         Global.Rubrik.WöchtentlicheArbeiten,
                         Global.NurBeiDiesenSchulnummern.Nur177659

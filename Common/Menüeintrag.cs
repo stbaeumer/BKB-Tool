@@ -65,26 +65,33 @@ public class Menüeintrag
 
     public Menüeintrag(string titel, Dateien quelldateien, Students students, Klassen klassen, List<string> beschreibung, Action<Menüeintrag> funktion, Global.Rubrik rubrik = Global.Rubrik.Allgemein, Global.NurBeiDiesenSchulnummern nurbeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Alle)
     {
-        if (titel == null) throw new ArgumentNullException(nameof(titel));
-        if (quelldateien == null) throw new ArgumentNullException(nameof(quelldateien));
-        if (students == null) throw new ArgumentNullException(nameof(students));
-        if (klassen == null) throw new ArgumentNullException(nameof(klassen));
-        if (beschreibung == null) throw new ArgumentNullException(nameof(beschreibung));
+        try
         {
-            Titel = titel;
-            Quelldateien = quelldateien;
-            Students = students;
-            Klassen = klassen;
-            DateienFehlenOderSindLeer = false;
-            Beschreibung = beschreibung;
-            Funktion = funktion;
-            Gruppen = new Gruppen();
-            IKlassen = new List<string>();
-            IStudents = new Students();
-            Rubrik = rubrik;
-            NurBeiDiesenSchulnummern = nurbeiDiesenSchulnummern;
-            Unterrichte = new Unterrichte();
-            Zieldateien = new Dateien();
+            if (titel == null) throw new ArgumentNullException(nameof(titel));
+            if (quelldateien == null) throw new ArgumentNullException(nameof(quelldateien));
+            if (students == null) throw new ArgumentNullException(nameof(students));
+            if (klassen == null) throw new ArgumentNullException(nameof(klassen));
+            if (beschreibung == null) throw new ArgumentNullException(nameof(beschreibung));
+            {
+                Titel = titel;
+                Quelldateien = quelldateien;
+                Students = students;
+                Klassen = klassen;
+                DateienFehlenOderSindLeer = false;
+                Beschreibung = beschreibung;
+                Funktion = funktion;
+                Gruppen = new Gruppen();
+                IKlassen = new List<string>();
+                IStudents = new Students();
+                Rubrik = rubrik;
+                NurBeiDiesenSchulnummern = nurbeiDiesenSchulnummern;
+                Unterrichte = new Unterrichte();
+                Zieldateien = new Dateien();
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Fehler beim Erstellen des Menüeintrags '{titel}': {ex.Message}", ex);
         }
     }
 
@@ -3543,7 +3550,7 @@ public class Menüeintrag
         return zieldatei;
     }
 
-    internal void NeuenFotosAusSchildOrdnerErstellenUndAlteFotosVerschieben(IConfiguration configuration)
+    internal void NeueFotosAusSchildOrdnerErstellenUndAlteFotosVerschieben(IConfiguration configuration)
     {
         var pfadFotosAusSchILD = configuration["PfadFotosAusSchILD"];
         var ordnername = new DirectoryInfo(pfadFotosAusSchILD).Name;
