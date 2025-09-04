@@ -75,8 +75,7 @@ public partial class Student
     public bool FotoBinary { get; set; }
     public int IdSchildInt { get; set; }
     public string KlasseString { get; set; } = string.Empty;
-    public string? KlasseWebuntis { get; set; }
-    public string PfadFoto { get; set; } = string.Empty;
+    public string? KlasseWebuntis { get; set; }    
     public int SchulnrEigner { get; set; }
     public string PfadDokumentenverwaltung { get; private set; } = string.Empty;
     public DateTime ZeugnisdatumLetztesZeugnisInDieserKlasse { get; private set; }
@@ -84,6 +83,8 @@ public partial class Student
     public string? Fachklasse { get; internal set; }
     public string? Schulgliederung { get; internal set; }
     public string? Relationsgruppe { get; private set; }
+    public string QuellFotoPfad { get; set; }
+    public string ZielFotoPfad { get; set; }
 
     public string GetFehlstd(List<dynamic>? absencesPerStudent, IConfiguration configuration)
     {
@@ -1170,11 +1171,11 @@ public partial class Student
 
     internal string Pfad2FotoStream()
     {
-        if (!string.IsNullOrEmpty(PfadFoto))
+        if (!string.IsNullOrEmpty(ZielFotoPfad))
         {
             try
             {
-                using (var image = Image.Load(PfadFoto))
+                using (var image = Image.Load(ZielFotoPfad))
                 {
                     using (var ms = new MemoryStream())
                     {
@@ -1251,10 +1252,10 @@ public partial class Student
         if (!File.Exists(zielPfad))
         {
             // Prüfen, ob das Quellbild existiert
-            if (!string.IsNullOrEmpty(PfadFoto) && File.Exists(PfadFoto))
+            if (!string.IsNullOrEmpty(ZielFotoPfad) && File.Exists(ZielFotoPfad))
             {
                 // Bild kopieren
-                File.Copy(PfadFoto, zielPfad, true);
+                File.Copy(ZielFotoPfad, zielPfad, true);
                 return "ok";
 
             }
@@ -1302,7 +1303,7 @@ public partial class Student
             var quellPfad = Path.Combine(configuration["PfadDownloads"], "Fotos", Klasse);
             
             // Das Originalfoto wird umbenannt, damit es bei einem späteren Durchlauf nicht erneut kopiert wird.
-            File.Move(PfadFoto, Path.Combine(quellPfad,zieldateiname), true);
+            File.Move(ZielFotoPfad, Path.Combine(quellPfad,zieldateiname), true);
             return "ok";
         }
         catch (Exception ex)
@@ -1330,8 +1331,9 @@ public partial class Student
             ZeugnisdatumLetztesZeugnisInDieserKlasse = zeugnisdatumParsed;
         }
         else
-        { 
-            ZeugnisdatumLetztesZeugnisInDieserKlasse = new DateTime(Convert.ToInt32(Global.AktSj[0]), 8, 1);
+        {
+            // Wenn kein Zeugnisdatum vorhanden ist, dann wird angenommen, dass das letzte Zeugnis mehr als 42 Tage her ist.
+            ZeugnisdatumLetztesZeugnisInDieserKlasse = DateTime.Now.AddDays(-43);
         }
     }
 

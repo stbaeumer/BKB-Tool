@@ -229,7 +229,10 @@ public class Menüeintrag
         var interessierendeKlassen = configuration["Klassen"].ToString().Split(",").ToList();
 
         IStudents = new Students();
-        IStudents.AddRange(from t in Students where interessierendeKlassen.Contains(t.Klasse) select t);
+        IStudents.AddRange(from s in Students
+                           where interessierendeKlassen.Contains(s.Klasse)
+                        where s.Status == "2" || s.Status == "6"
+                           select s);
         IKlassen = interessierendeKlassen;
 
         var linkeSeite = (string.Join(",", interessierendeKlassen.Order()));
@@ -1772,9 +1775,9 @@ public class Menüeintrag
                     {
                         if (configuration["Schulnummer"] == "177659")
                         {
-                            record.Schlüssel = string.IsNullOrEmpty(sz["Externe ID-Nr"].ToString())
-                            ? sz["schulische E-Mail"].ToString().Split('@')[0]
-                            : sz["Externe ID-Nr"].ToString();
+                            record.Schlüssel = !string.IsNullOrEmpty(sz["Externe ID-Nr"].ToString()) && sz["Externe ID-Nr"].ToString().Length == 6 && sz["Externe ID-Nr"].ToString().StartsWith("15")   
+                            ? sz["Externe ID-Nr"].ToString()
+                            : sz["schulische E-Mail"].ToString().Split('@')[0];
                         }
                         else
                         {
@@ -1821,15 +1824,21 @@ public class Menüeintrag
                     {
                         // Netman
                         // ed123456	Dagobert	Eggemann	ed123456@students.berufskolleg-borken.de	E01.07.1992	BZ22A	Stappert, Markus
+
                         if (configuration["Schulnummer"] == "177659")
                         {
-                            record.Schlüssel = string.IsNullOrEmpty(sz["Externe ID-Nr"].ToString())
-                            ? sz["schulische E-Mail"].ToString().Split('@')[0]
-                            : sz["Externe ID-Nr"].ToString().PadLeft(6, '0');
+                            record.Schlüssel = !string.IsNullOrEmpty(sz["Externe ID-Nr"].ToString()) && sz["Externe ID-Nr"].ToString().Length == 6 && sz["Externe ID-Nr"].ToString().StartsWith("15")   
+                            ? sz["Externe ID-Nr"].ToString()
+                            : sz["schulische E-Mail"].ToString().Split('@')[0];
                         }
                         else
                         {
                             record.Schlüssel = sz["schulische E-Mail"].ToString().Split('@')[0];
+                        }
+
+                        if (student.Nachname == "Boulos")
+                        {
+                            string aa = "";
                         }
 
                         record.Kurzname = sz["schulische E-Mail"].ToString().Replace("@students.berufskolleg-borken.de", "");
@@ -1873,7 +1882,15 @@ public class Menüeintrag
                         record.Bemerkung = "";
                         record.Geschlecht = student.Geschlecht.ToString().ToUpper();
 
-                        if (student.Status is "2" or "6")
+                        if (student.Nachname == "Boulos")
+                        {
+                            string aa = "";
+                        }
+
+                        student.GetLetztesZeugnisdatumInDerKlasse(schuelerLernabschnittsdaten);
+
+                        // Aktive SuS oder Schüler mit Abschluss/Abgang, deren letztes Zeugnis noch keine 42 Tage zurückliegt.
+                        if (new List<string>() { "2", "6" }.Contains(student.Status) || (new List<string>() { "8", "9" }.Contains(student.Status) && student.ZeugnisdatumLetztesZeugnisInDieserKlasse.AddDays(42) >= DateTime.Now))
                         {
                             zieldatei.Add(record);
                         }
@@ -1881,6 +1898,26 @@ public class Menüeintrag
                 }
 
                 Global.ZeileSchreiben("SchILD-Schüler*innen verarbeitet:", zieldatei.Count().ToString());
+
+                // Wenn der Pfad "webuntis" enthält, dann wird geprüft, ob es in webuntis einen Schüler gibt, den es in Schülerbasisdaten nicht gibt.
+                // Das kann passieren, wenn ein Schüler sich z.B. einmal mit Zweitem Vornamen angeleldet hat und einmal ohne.
+                if (zieldateiname.ToLower().Contains("webuntis"))
+                {
+                    foreach (var rec in webuntisStudents)
+                    {
+                        var dict = (IDictionary<string, object>)rec;
+
+                        if(dict["longName"].ToString() == "Sachse")
+                        {
+                            string aa = "";
+                        }
+
+                        if (!Students.Any(x => x.Nachname == dict["longName"].ToString() && x.Vorname == dict["foreName"].ToString() && x.Geburtsdatum == dict["birthDate"].ToString()))
+                        {
+                            Console.WriteLine($"Schüler {dict["longName"]} {dict["foreName"]} ({dict["birthDate"]}) ist in Webuntis vorhanden, aber nicht in Schülerbasisdaten.");
+                        }
+                    }
+                }
             });
 
             Thread.Sleep(1000);
@@ -3382,7 +3419,10 @@ public class Menüeintrag
                 AnsiConsole.Write(panel);
                 problem = true;
             }
-            Global.ZeileSchreiben($"Doppelt vergebene Mailadressen:", $"{doppelteMitAbweichung.Count}");
+            if (doppelteMitAbweichung.Count > 0)
+            {
+                Global.ZeileSchreiben($"Doppelt vergebene Mailadressen:", $"{doppelteMitAbweichung.Count}");
+            }
         });
 
         if (problem)
@@ -3502,6 +3542,36 @@ public class Menüeintrag
         });
         return zieldatei;
     }
+
+    internal void NeuenFotosAusSchildOrdnerErstellenUndAlteFotosVerschieben(IConfiguration configuration)
+    {
+        var pfadFotosAusSchILD = configuration["PfadFotosAusSchILD"];
+        var ordnername = new DirectoryInfo(pfadFotosAusSchILD).Name;
+        var übergeordneterOrdner = Directory.GetParent(pfadFotosAusSchILD)?.FullName;
+
+        // Erstelle neuen Ordner mit aktuellem Datum
+        var neuerOrdnername = $"{ordnername}_{DateTime.Now:yyyyMMdd_HHmmss}";
+        var neuerOrdnerPfad = Path.Combine(übergeordneterOrdner ?? "", neuerOrdnername);
+        Directory.CreateDirectory(neuerOrdnerPfad);
+
+        // Verschiebe alle jpg-Dateien aus dem alten Ordner in den neuen Ordner
+        var dateien = Directory.GetFiles(pfadFotosAusSchILD, "*.jpg");
+        Global.ZeileSchreiben($"Neuer Ordner erstellt:", neuerOrdnername);
+
+        AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start($"Alte Fotos verschieben ...", ctx =>
+        {
+            foreach (var datei in dateien)
+            {
+                var dateiname = Path.GetFileName(datei);
+                var neuerDateipfad = Path.Combine(neuerOrdnerPfad, dateiname);
+                File.Move(datei, neuerDateipfad);
+            }
+        });
+        
+        Global.ZeileSchreiben($"Alte Fotos verschoben:", dateien.Length.ToString());
+    }
+
+
 
     /*internal Datei? Leistungsdaten(IConfiguration configuration, string zieldateiname, Unterrichte kurse, Global.Zweck art)
     {

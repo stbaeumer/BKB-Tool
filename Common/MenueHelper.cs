@@ -71,7 +71,8 @@ public static class MenueHelper
                         klassen,
                         [
                             $"Es wird jetzt die Datei [bold {Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd") + "-ImportNachWebuntis.csv")}[/] erstellt.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis:[/] Das Zeugnisdatum des letzten Zeugnisses in einer Klasse wird zum Webuntis-Austrittsdatum bei Schüler*innen, deren Status weder aktiv noch extern ist."
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1:[/] Das Zeugnisdatum des letzten Zeugnisses in einer Klasse wird zum Webuntis-Austrittsdatum bei Schüler*innen, deren Status weder aktiv noch extern ist.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #2:[/] Damit korrekt ausgeschult wird, muss auch Abgang und Abschluss beim SchILD-Export angehakt werden."
                         ],
                         m =>
                         {
@@ -129,6 +130,8 @@ public static class MenueHelper
                         klassen,
                         [
                             $"Es wird jetzt die Datei [bold {Global.GetColor(Global.ColorPfadInDateien)}]" + Path.Combine(configuration["PfadDownloads"] ?? "", DateTime.Now.ToString("yyyyMMdd-") + "****" +  @"-ImportNachLittera.csv") + "[/] erstellt.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #2:[/] Auch Abschluss und Abgang muss beim SchILD-Export angehakt werden.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #3:[/] Schüler*innen werden 42 Tage nach dem Abgangszeugnis/Abschlusszeugnis ausgeschult. Wenn kein letztes Zeugnisdatum bei Abgängern/Abgeschlossenen ermittelt werden kann, dann wird sofort ausgeschult."
                         ],
                         m =>
                         {
@@ -159,8 +162,9 @@ public static class MenueHelper
                         klassen,
                         [
                             $"Es wird jetzt die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd") + "-ImportNachNetman.csv")}[/] erstellt.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis:[/] Schüler*innen, die bereits abgegangen sind oder einen Abschluss erworben haben, werden erst sechs Wochen später ausgebucht, um den Zugriff auf Teams nicht direkt zu verlieren.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis:[/] Nur aktive Schüler*innen und Gastschüler*innen exportieren."
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1:[/] Schüler*innen, die bereits abgegangen sind oder einen Abschluss erworben haben, werden erst sechs Wochen später ausgebucht, um den Zugriff auf Teams nicht direkt zu verlieren.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #2:[/] Auch Abschluss und Abgang muss beim SchILD-Export angehakt werden.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #3:[/] Schüler*innen werden 42 Tage nach dem Abgangszeugnis/Abschlusszeugnis ausgeschult. Wenn kein letztes Zeugnisdatum bei Abgängern/Abgeschlossenen ermittelt werden kann, dann wird sofort ausgeschult."
                         ],
                         m =>
                         {
@@ -219,7 +223,7 @@ public static class MenueHelper
                         Global.NurBeiDiesenSchulnummern.Alle
                     ),
                     new Menüeintrag(
-                        "Fotos #1: Schüler*innen klassenweise fotografieren, kopieren, umbenennen, zippen",
+                        "Fotos #1: Schüler*innen klassenweise fotografieren, kopieren, umbenennen, ablegen",
                         quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "schuelerzusatzdaten,dat"]),
                         students,
                         klassen,
@@ -238,8 +242,9 @@ public static class MenueHelper
                             m.IStudents.KlassenordnerErstellenFotosOrdnerÖffnen(configuration);
                             m.IStudents.KlassenListenAnzeigen(configuration);
                             m.IStudents.AnzahlPrüfen(configuration);
-                            configuration = Global.Konfig("PfadFotosImSchILD-Ordner", Global.Modus.ReadSilent, configuration);
-                            m.IStudents.KlassenordnerInSchildErstellenBilderKopierenUndUmbenennenUndZippen(configuration);
+                            m.IStudents.KlassenordnerInZielPfadErstellen(configuration);
+                            m.IStudents.FotosZuStudentsZuweisen(configuration);
+                            m.IStudents.FotosNachZielordnerKopieren(configuration);                            
                         },
                         Global.Rubrik.Allgemein,
                         Global.NurBeiDiesenSchulnummern.Nur177659
@@ -253,12 +258,13 @@ public static class MenueHelper
                             $"Es werden jetzt die Fotos nach SchILD2 hochgeladen. Wenden Sie diese Funktion an, wenn Sie zuvor klassenweise Fotos mit [bold {Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] erstellt haben.",                            
                             $"[{Global.GetColor(Global.ColorUnterschrift)}]Voraussetzung #1: [/]Die Fotos müssen aus SchILD exportiert werden: [{Global.GetColor(Global.ColorActionInMenüs)}]Datenaustausch > Fotos > Fotos exportieren[/]. Beachte, dass der Fotodateiname den Nachnamen, Vornamen und das Geburtsdatum enthält.",
                             $"[{Global.GetColor(Global.ColorUnterschrift)}]Voraussetzung #2: [/]Alle noch nicht zu SchILD hochgeladenen Fotos liegen in einem vorbereiteten Ordner. Beachte: Die Fotos müssen den ersten Teil der E-Mail-Adresse (also alles vor dem @) als Dateinamen haben.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1: [/]Vorhandene Bilder werden nicht überschrieben."
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1: [/]Vorhandene Bilder werden nicht überschrieben, sofern der Export aus SchILD zuvor getätigt wurde."
                         ],
                         m =>
                         {
                             m.FilterInteressierendeStudentsUndKlassen(configuration);
                             m.IStudents.FotosFürUploadNachSchildAuswählen(configuration);
+                            m.IStudents.FotosRotieren(configuration);                            
                             m.IStudents.FotosFürUploadNachSchild2AuflistenUndBestätigen(configuration);
                             m.IStudents.FotosNachSchild2Hochladen(configuration);
                         },
@@ -266,28 +272,26 @@ public static class MenueHelper
                         Global.NurBeiDiesenSchulnummern.Nur177659
                     ),
                     new Menüeintrag(
-                        "Fotos #3: Schüler*innen-Fotos aus SchILD für Webuntis und Geevoo bereitstellen",
+                        "Fotos #3: Schüler*innenfotos aus SchILD für Webuntis und Geevoo bereitstellen",
                         quelldateien.Notwendige(configuration, ["schuelerZusatzdaten,dat"]),
                         students,
                         klassen,
                         [
-                            $"Es werden jetzt die Dateien [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachWebuntisFotos.zip")}[/] und [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachGeevooFotos.zip")}[/] erstellt."
+                            $"Es wird die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(configuration["PfadDownloads"] ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-Import-Fotos.zip")}[/] erstellt.",
+                            $"[{Global.GetColor(Global.ColorUnterschrift)}]Voraussetzung: [/]Die Fotos müssen zuvor aus SchILD exportiert werden: ([{Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadFotosAusSchILD"]}[/].",
+                            $"Dazu in SchILD den Weg gehen: [{Global.GetColor(Global.ColorActionInMenüs)}]Datenaustausch > Fotos > Fotos exportieren[/]",
+                            $"Wahlweise können alle Fotos bereitgestellt werden oder nur diejenigen, die in SchILD seit dem letzten Fotoexport hinzugefügt wurden.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1: [/]Nach dem Start dieser Funktion werden alle Fotos aus {configuration["PfadFotosAusSchILD"]} nach {Path.Combine(configuration["PfadFotosAusSchILD"], DateTime.Now.ToString("yyyyMMdd-HHmm"))} verschoben. Somit können die verschiedenen Fotoexporte verglichen werden, um die Differenz für Webuntis zu ermitteln."
                         ],
                         m =>
                         {
                             if(m.NichtAlleSusHabenEineEindeutigeMailAdresse(configuration, m.Students)) return;
-                            configuration = Global.Konfig("PfadFotosImSchILD-Ordner", Global.Modus.Read, configuration);
-                            configuration = Global.Konfig("MailDomain", Global.Modus.Read, configuration);
-                            m.Zieldateien =
-                            [
-                                
-                            ];     
-
-                            m.Zieldatei = new Datei();
-                            var absoluteFotoPfade = m.GetFotosAusSchildPfade(configuration, m.Students, Global.ZipModus.Webuntis);
-                            m.Zieldatei?.Zippen(Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachWebuntisFotos.zip"), configuration, "", 0, absoluteFotoPfade);
-                            absoluteFotoPfade = m.GetFotosAusSchildPfade(configuration, m.Students, Global.ZipModus.Geevoo);
-                            m.Zieldatei?.Zippen(Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachGeevooFotos.zip"), configuration, "", 0, absoluteFotoPfade);
+                            m.FilterInteressierendeStudentsUndKlassen(configuration);
+                            m.IStudents = m.IStudents.AlleOderNeueFotopfadeAnStudentsZuweisen(configuration);
+                            m.Zieldatei = new Datei(Path.Combine(configuration["PfadDownloads"] ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-" + (string.Join("-", m.IKlassen).Substring(0, Math.Min(25, string.Join("-", m.IKlassen).Length)) + "-Fotos.zip")));
+                            m.Zieldatei?.Zippen(configuration, "", 0, m.IStudents);
+                            m.Zieldatei.OrdnerOeffnen();
+                            m.NeuenFotosAusSchildOrdnerErstellenUndAlteFotosVerschieben(configuration);
                         },
                         Global.Rubrik.WöchtentlicheArbeiten,
                         Global.NurBeiDiesenSchulnummern.Nur177659

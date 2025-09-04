@@ -7,6 +7,10 @@ using Microsoft.Extensions.Configuration;
 using Spectre.Console;
 using System.Xml;
 using Spectre.Console.Rendering;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
+using Color = Spectre.Console.Color;
+using System.Diagnostics;
 
 namespace Common;
 
@@ -922,72 +926,142 @@ public class Datei : List<dynamic>
         return AbsoluterPfad;
     }
 
-    public void Zippen(string absoluterPfadUndDateiNameZipDatei, IConfiguration configuration, string kennwort = "", int kompressionsLevel = 0, List<string> zuZippendeDateien = null)
+    public void Zippen(IConfiguration configuration, string kennwort = "", int kompressionsLevel = 0, Students students = null!)
     {
-        if (this.Count == 0 && (zuZippendeDateien == null || zuZippendeDateien.Count == 0))
-        {
-            return;
-        }
+        configuration = Global.Konfig("RotateFotos", Global.Modus.Update, configuration);
 
-        if (zuZippendeDateien != null && zuZippendeDateien.Count > 0)
-        {
-            //Global.ZeileSchreiben("Es werden jetzt Dateien gezippt:", zuZippendeDateien.Count().ToString(), ConsoleColor.White, ConsoleColor.Blue);
-        }
-        else
-        {
-            zuZippendeDateien = new List<string>();
-            zuZippendeDateien.Add(absoluterPfadUndDateiNameZipDatei);
-        }
-        
         try
         {
-            using (FileStream zipStream = File.Create(absoluterPfadUndDateiNameZipDatei))
-            using (ZipOutputStream zip = new ZipOutputStream(zipStream))
+            AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start($"Fotos zippen ...", ctx =>
             {
-                zip.SetLevel(kompressionsLevel); // Kompressionslevel (0-9, 9 = beste Kompression)
+                using (FileStream zipStream = File.Create(AbsoluterPfad))
+                using (ZipOutputStream zip = new ZipOutputStream(zipStream))
+                {
+                    zip.SetLevel(kompressionsLevel); // Kompressionslevel (0-9, 9 = beste Kompression)
 
-                if (!string.IsNullOrEmpty(kennwort) && kennwort != " ")
-                {
-                    zip.Password = kennwort; // Passwort setzen
-                }
-                
-                foreach (var zuZippendeDatei in zuZippendeDateien)
-                {
-                    if (!File.Exists(zuZippendeDatei))
+                    if (!string.IsNullOrEmpty(kennwort) && kennwort != " ")
                     {
-                        Console.WriteLine($"Die Datei {zuZippendeDateien} existiert nicht und wird übersprungen.");
-                        continue; // Überspringe Dateien, die nicht existieren
+                        zip.Password = kennwort; // Passwort setzen
                     }
 
-                    byte[] buffer = new byte[4096];
-                    string dateiName = Path.GetFileName(zuZippendeDatei);
-
-                    ZipEntry entry = new ZipEntry(dateiName)
+                    var studentsMitNeuenFotos = students.Where(s => !string.IsNullOrEmpty(s.ZielFotoPfad) && File.Exists(s.ZielFotoPfad)).ToList();
+                    if(studentsMitNeuenFotos.Count == 0)
                     {
-                        DateTime = DateTime.Now,
-                        CompressionMethod = CompressionMethod.Deflated
-                    };
+                        throw new Exception("Es wurden keine Fotos gefunden, die gezippt werden können.");
+                    }
 
-                    zip.PutNextEntry(entry);
-
-                    using (FileStream dateiStream = File.OpenRead(zuZippendeDatei))
+                    foreach (var student in studentsMitNeuenFotos)
                     {
-                        int bytesRead;
-                        while ((bytesRead = dateiStream.Read(buffer, 0, buffer.Length)) > 0)
+                        var tempDatei = Path.Combine(Path.GetTempPath(), student.MailSchulisch.Split('@')[0] + ".jpg");
+
+                        // Verkleinere jedes zu zippende Bild auf 160x160px. Das Bild im Original soll aber unverändert bleiben.
+
+                        using (var image = Image.Load(student.ZielFotoPfad))
                         {
-                            zip.Write(buffer, 0, bytesRead);
+                            image.Mutate(x => x.Resize(160, 160));
+                            image.Mutate(x => x.Rotate(Convert.ToInt32(configuration["RotateFotos"])));
+                            // Speichere die Datei im temporären Verzeichnis
+                            image.Save(tempDatei);
                         }
+
+                        byte[] buffer = new byte[4096];
+                        string dateiName = Path.GetFileName(tempDatei);
+
+                        // Füge die thumb-datei hinzu, wobei der Name ohne _thumb im Zipfile liegen soll.
+                        // Zippe ohne Komprimierung
+                        ZipEntry entry = new ZipEntry(dateiName)
+                        {
+                            DateTime = DateTime.Now,
+                            CompressionMethod = CompressionMethod.Stored // Keine Komprimierung
+                        };
+
+                        zip.PutNextEntry(entry);
+
+                        using (FileStream dateiStream = File.OpenRead(tempDatei))
+                        {
+                            int bytesRead;
+                            while ((bytesRead = dateiStream.Read(buffer, 0, buffer.Length)) > 0)
+                            {
+                                zip.Write(buffer, 0, bytesRead);
+                            }
+                        }
+                        // Lösche die temporäre Datei
+                        File.Delete(tempDatei);
                     }
-                }                
 
-                // Durchlaufe die Liste der absoluten Pfade und füge sie dem Zip-Archiv hinzu
-                
-                zip.CloseEntry();
-                zip.IsStreamOwner = true;
-            }
+                    // Durchlaufe die Liste der absoluten Pfade und füge sie dem Zip-Archiv hinzu
+                    try
+                    {
+                        zip.CloseEntry();                        
+                    }
+                    catch
+                    {
+                        throw new Exception("Fehler beim Erstellen des Zip-Archivs. Möglicherweise wurden keine Fotos gefunden.");
+                    }
+                    
+                    zip.IsStreamOwner = true;
+                }
+            });
+            Global.ZeileSchreiben("Fotos gezippt", AbsoluterPfad, ConsoleColor.Green, ConsoleColor.White);
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
 
-            Global.ZeileSchreiben(absoluterPfadUndDateiNameZipDatei, "", ConsoleColor.Green, ConsoleColor.White);
-            ZipPfad = absoluterPfadUndDateiNameZipDatei;
+    public void Zippen(IConfiguration configuration, string kennwort = "", int kompressionsLevel = 0, List<string> zuZippendeDateien = null!)
+    {
+        configuration = Global.Konfig("RotateFotos", Global.Modus.Update, configuration);
+
+        try
+        {
+            AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start($"Fotos zippen ...", ctx =>
+            {
+                using (FileStream zipStream = File.Create(AbsoluterPfad))
+                using (ZipOutputStream zip = new ZipOutputStream(zipStream))
+                {
+                    zip.SetLevel(kompressionsLevel); // Kompressionslevel (0-9, 9 = beste Kompression)
+
+                    if (!string.IsNullOrEmpty(kennwort) && kennwort != " ")
+                    {
+                        zip.Password = kennwort; // Passwort setzen
+                    }
+
+                    foreach (var zuZippendeDatei in zuZippendeDateien)
+                    {
+                        byte[] buffer = new byte[4096];
+                        string dateiName = Path.GetFileName(zuZippendeDatei);
+
+                        // Füge die thumb-datei hinzu, wobei der Name ohne _thumb im Zipfile liegen soll.
+                        // Zippe ohne Komprimierung
+                        ZipEntry entry = new ZipEntry(dateiName)
+                        {
+                            DateTime = DateTime.Now,
+                            CompressionMethod = CompressionMethod.Stored // Keine Komprimierung
+                        };
+
+                        zip.PutNextEntry(entry);
+
+                        using (FileStream dateiStream = File.OpenRead(zuZippendeDatei))
+                        {
+                            int bytesRead;
+                            while ((bytesRead = dateiStream.Read(buffer, 0, buffer.Length)) > 0)
+                            {
+                                zip.Write(buffer, 0, bytesRead);
+                            }
+                        }
+                        // Lösche die temporäre Datei
+                        File.Delete(zuZippendeDatei);
+                    }
+
+                    // Durchlaufe die Liste der absoluten Pfade und füge sie dem Zip-Archiv hinzu
+
+                    zip.CloseEntry();
+                    zip.IsStreamOwner = true;
+                }
+            });
+            Global.ZeileSchreiben("Fotos gezippt", AbsoluterPfad, ConsoleColor.Green, ConsoleColor.White);
         }
         catch (Exception ex)
         {
@@ -997,7 +1071,7 @@ public class Datei : List<dynamic>
 
     internal void Mailen(string subject, string absendername, string body, IConfiguration configuration)
     {
-        if(this.Count == 0)
+        if (this.Count == 0)
         {
             return;
         }
@@ -1009,9 +1083,9 @@ public class Datei : List<dynamic>
         //configuration = Global.Konfig("BccAdresse", Global.Modus.Update, configuration);
         configuration = Global.Konfig("NetmanMailReceiver", Global.Modus.Update, configuration);
         configuration = Global.Konfig("NetmanMailBccReceiver", Global.Modus.Update, configuration);
-        
+
         var mail = new Mail();
-        mail.Senden(subject,configuration,body,ZipPfad, configuration["NetmanMailReceiver"], "", configuration["NetmanMailBccReceiver"]);
+        mail.Senden(subject, configuration, body, ZipPfad, configuration["NetmanMailReceiver"], "", configuration["NetmanMailBccReceiver"]);
     }
 
     internal List<dynamic> FilterOpenPeriod()
@@ -1271,5 +1345,14 @@ public class Datei : List<dynamic>
     internal List<dynamic> FilternFaecherGPU006()
     {
         return this;
+    }
+
+    internal void OrdnerOeffnen()
+    {
+        Process.Start(new ProcessStartInfo
+        {
+            FileName = Path.GetDirectoryName(AbsoluterPfad),
+            UseShellExecute = true
+        });
     }
 }

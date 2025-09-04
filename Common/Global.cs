@@ -433,7 +433,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;
                 if (modus != Modus.ReadSilent)
-                    ZeileSchreiben($"[]  {aufforderung}[/]", defaultValue);
+                    ZeileSchreiben(aufforderung, defaultValue);
                 return configuration;
             }
 
@@ -459,7 +459,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;                
                 if(modus != Modus.ReadSilent)
-                    ZeileSchreiben($"[]  {aufforderung}[/]", defaultValue);
+                    ZeileSchreiben(aufforderung, defaultValue);
                 return configuration;
             }
 
@@ -487,7 +487,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;
                 if(modus != Modus.ReadSilent)
-                    ZeileSchreiben($"[]  {aufforderung}[/]", defaultValue);
+                    ZeileSchreiben(aufforderung, defaultValue);
                 return configuration;
             }
 
@@ -495,7 +495,7 @@ public static class Global
             AnsiConsole.Write(panel);
 
             userInput = AnsiConsole.Prompt(
-                new TextPrompt<string>($"[] {aufforderung}[/]")
+                new TextPrompt<string>($"[] {aufforderung}[/]")                
                 .PromptStyle(Global.GetColor(Global.ColorActionInMenüs))
                     .ShowDefaultValue(true)
                     .Validate(n =>
@@ -515,7 +515,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;
                 if(modus != Modus.ReadSilent)
-                    ZeileSchreiben($"[]  {aufforderung}[/]", defaultValue);
+                    ZeileSchreiben(aufforderung, defaultValue);
                 return configuration;
             }
 
@@ -538,7 +538,7 @@ public static class Global
         }
         if (datentyp == Datentyp.Klassen)
         {
-            var verschiedeneKlassen = students.Select(s => s.Klasse).Distinct().ToList();
+            var verschiedeneKlassen = students.Where(s => s.Status == "2" || s.Status == "6").Select(s => s.Klasse).Distinct().ToList();
             var interessierendeKlassen = new List<string>();
 
             // Wenn der Wert abgefragt wird, dann wird ein Panel mit dem Hinweis angezeigt
@@ -629,7 +629,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;
                 if(modus != Modus.ReadSilent)
-                    ZeileSchreiben($"[]  {aufforderung}[/]", defaultValue);
+                    ZeileSchreiben(aufforderung, defaultValue);
                 return configuration;
             }
 
@@ -655,7 +655,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;
                 if(modus != Modus.ReadSilent)
-                    ZeileSchreiben($"[]  {aufforderung}[/]", defaultValue);
+                    ZeileSchreiben(aufforderung, defaultValue);
                 return configuration;
             }
 
@@ -685,7 +685,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;
                 if(modus != Modus.ReadSilent)
-                    ZeileSchreiben($"[]  {aufforderung}[/]", defaultValue);
+                    ZeileSchreiben(aufforderung, defaultValue);
                 return configuration;
             }
 
@@ -713,7 +713,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;
                 if(modus != Modus.ReadSilent)
-                    ZeileSchreiben($"[]  {aufforderung}[/]", defaultValue);
+                    ZeileSchreiben(aufforderung, defaultValue);
                 return configuration;
             }
             // Wenn der Wert abgefragt wird, dann wird ein Panel mit dem Hinweis angezeigt
@@ -739,7 +739,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;
                 if(modus != Modus.ReadSilent)
-                    ZeileSchreiben($"[]  {aufforderung}[/]", defaultValue);
+                    ZeileSchreiben(aufforderung, defaultValue);
                 return configuration;
             }
 
@@ -772,7 +772,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;
                 if(modus != Modus.ReadSilent)
-                    ZeileSchreiben($"[]  {aufforderung}[/]", defaultValue);
+                    ZeileSchreiben(aufforderung, defaultValue);
                 return configuration;
             }
 
@@ -798,7 +798,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;
                 if(modus != Modus.ReadSilent)
-                    ZeileSchreiben($"[]  {aufforderung}[/]", defaultValue);
+                    ZeileSchreiben(aufforderung, defaultValue);
                 return configuration;
             }
 
@@ -825,7 +825,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;
                 if(modus != Modus.ReadSilent)
-                    ZeileSchreiben($"[]  {aufforderung}[/]", defaultValue);
+                    ZeileSchreiben(aufforderung, defaultValue);
                 return configuration;
             }
 
@@ -869,7 +869,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;
                 if(modus != Modus.ReadSilent)
-                    ZeileSchreiben($"[]  {aufforderung}[/]", defaultValue);
+                    ZeileSchreiben(aufforderung, defaultValue);
                 return configuration;
             }
 
@@ -903,7 +903,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;
                 if(modus != Modus.ReadSilent)
-                    ZeileSchreiben($"[]  {aufforderung}[/]", defaultValue);
+                    ZeileSchreiben(aufforderung, defaultValue);
                 return configuration;
             }
 
@@ -1659,11 +1659,12 @@ public static class KonfigHelper
             InitialAbfragen = true,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
-        ["PfadFotosAusSchild"] = new KonfigMeta
+        ["PfadFotosAusSchILD"] = new KonfigMeta
         {
-            Key = "PfadFotosAusSchild",            
-            DefaultValue = $"\\\\fs01\\SchILD-NRW\\Fotos_aus_Schild",
-            Hinweise = $"Geben Sie den Pfad zu den Fotos aus SchILD an. Beispiel: [{Global.GetColor(Global.ColorPfadInProgrammen)}]\\\\fs01\\SchILD-NRW\\Fotos_aus_Schild[/]",
+            Key = "PfadFotosAusSchILD",
+            DefaultValue = $"\\\\fs01\\SchILD-NRW\\Fotos_aus_SchILD",
+            Aufforderung = "Pfad zu den Fotos aus SchILD",
+            Hinweise = $"Wo liegen die Fotos, die Sie aus SchILD exportiert haben ([{Global.GetColor(Global.ColorPfadInProgrammen)}]Datenaustausch > Fotos > Fotos exportieren[/])? Der Export ist wichtig, um nur fehlende Fotos an SchILD zu übergeben. Geben Sie den Pfad zu den Fotos aus SchILD an. Beispiel: [{Global.GetColor(Global.ColorPfadInProgrammen)}]\\\\fs01\\SchILD-NRW\\Fotos_aus_Schild[/]",
             Datentyp = Global.Datentyp.Pfad,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
@@ -1713,6 +1714,17 @@ public static class KonfigHelper
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
+        ["NurNeueFotosExportieren"] = new KonfigMeta
+        {
+            Key = "NurNeueFotosExportieren",
+            DefaultValue = "Ja",
+            Aufforderung = "Nur neue und veränderte Fotos nach Webuntis & Co. exportieren?",
+            Hinweise = $"Sie können auswählen, ob alle Fotos exportiert werden sollen oder nur neue und veränderte.",
+            Datentyp = Global.Datentyp.JaNein,
+            InGrundeinstellungAbfragen = true,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
+        },
         ["OffeneFehlstunden"] = new KonfigMeta
         {
             Key = "OffeneFehlstunden",
@@ -1739,8 +1751,8 @@ public static class KonfigHelper
         {
             Key = "PfadFotosImSchILD-Ordner",
             DefaultValue = "\\\\fs01\\SchILD-NRW\\Fotos",
-            Aufforderung = "Pfad zu den Fotos im SchILD-Ordner",
-            Hinweise = $"Wo liegen die frisch erstellten Fotos? Geben Sie den Pfad zu den Fotos an. Unterordner sind möglich. Beachten Sie, dass die Fotos den Benutzernamen (der Teil vor dem @ der Mail-Adresse) als Namen haben müssen. Beispiel: [aqua]\\\\fs01\\SchILD-NRW\\Fotos[/]",
+            Aufforderung = "Pfad zu den Schülerfotos",
+            Hinweise = $"Wo werden die aufbereiteten Schüler*innenfotos in Klassenordnern gespeichert? Geben Sie den Pfad an! Beispiel: [aqua]\\\\fs01\\SchILD-NRW\\Fotos[/]. Beachten Sie, dass alle Fotos im Zielordner den Benutzernamen (der Teil vor dem @ der Mail-Adresse) als Namen haben müssen.",
             Datentyp = Global.Datentyp.Pfad,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
@@ -1753,6 +1765,17 @@ public static class KonfigHelper
             Aufforderung = "Pfad des Littera-Imports",
             Hinweise = $"Wohin soll die neue Datei nach dem Erstellen verschoben werden?",
             Datentyp = Global.Datentyp.Pfad,
+            InGrundeinstellungAbfragen = true,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
+        },
+        ["RotateFotos"] = new KonfigMeta
+        {
+            Key = "RotateFotos",
+            DefaultValue = "0",
+            Aufforderung = "Rotation des Fotos",
+            Hinweise = $"Sie können die Fotos vor dem Hochladen drehen. Geben Sie den Drehwinkel in Grad an. Beispiel: [{Global.GetColor(Global.ColorZahlen)}]90[/] für 90 Grad im Uhrzeigersinn. [{Global.GetColor(Global.ColorZahlen)}]0[/] bedeutet keine Drehung.",
+            Datentyp = Global.Datentyp.Int,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann

@@ -4,6 +4,7 @@ using MailKit.Net.Smtp;
 using Microsoft.Extensions.Configuration;
 using MimeKit;
 using MimeKit.Utils;
+using Spectre.Console;
 
 #pragma warning disable CS8603 // Mögliche Null-Verweis-Rückgabe
 #pragma warning disable CS8602 // Dereferenzierung eines möglicherweise null-Objekts.
@@ -112,68 +113,73 @@ private bool IstMailadresseGültig(string email)
     {
         try
         {
-            string smtpServer = configuration["SmtpServer"];
-            int smtpPort = Convert.ToInt32(configuration["SmtpPort"]);
-            string senderEmail = configuration["SmtpUser"];
-
-            if(configuration["SmtpKennwort"] == null || configuration["SmtpKennwort"].Length <= 3)
+            AnsiConsole.Status()
+            .Spinner(Spinner.Known.Dots)
+            .Start("Mails senden ...", ctx =>
             {
-                Console.WriteLine("Bitte geben Sie das Passwort von " + configuration["SmtpUser"] +" für den E-Mail-Versand ein:");
-                configuration["SmtpKennwort"] = Console.ReadLine();
-            }
-            
-            string senderPassword = configuration["SmtpKennwort"];
+                string smtpServer = configuration["SmtpServer"];
+                int smtpPort = Convert.ToInt32(configuration["SmtpPort"]);
+                string senderEmail = configuration["SmtpUser"];
 
-            var email = new MimeMessage();
-            email.From.Add(new MailboxAddress(configuration["SmtpUser"], senderEmail));
-            email.To.Add(new MailboxAddress("Empfänger", receiverEmail));
-            //email.To.Add(new MailboxAddress("Empfänger", "stefan.baeumer@berufskolleg-borken.de"));
-            
-            email.Subject = subject;
-
-            if(!string.IsNullOrEmpty(cc))
-            {
-                email.Cc.Add(new MailboxAddress("Empfänger", cc));
-            }
-            
-            if(!    string.IsNullOrEmpty(bcc))
-            {
-                email.Bcc.Add(new MailboxAddress("Empfänger", bcc));
-            }
-            
-            // 1️⃣ Erstelle den Haupttext der E-Mail
-            var textPart = new TextPart("plain") { Text = body };
-
-            // 2️⃣ Falls eine Datei angegeben wurde, erstelle den Anhang
-            var multipart = new Multipart("mixed");
-            multipart.Add(textPart); // Erst den Text hinzufügen
-
-            if (!string.IsNullOrEmpty(attachment) && System.IO.File.Exists(attachment))
-            {
-                var attachmentPart = new MimePart()
+                if (configuration["SmtpKennwort"] == null || configuration["SmtpKennwort"].Length <= 3)
                 {
-                    Content = new MimeContent(System.IO.File.OpenRead(attachment)),
-                    ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
-                    ContentTransferEncoding = ContentEncoding.Base64,
-                    FileName = System.IO.Path.GetFileName(attachment)
-                };
+                    Console.WriteLine("Bitte geben Sie das Passwort von " + configuration["SmtpUser"] + " für den E-Mail-Versand ein:");
+                    configuration["SmtpKennwort"] = Console.ReadLine();
+                }
 
-                multipart.Add(attachmentPart);
-            }
+                string senderPassword = configuration["SmtpKennwort"];
 
-            // 3️⃣ Setze den E-Mail-Body auf multipart (Text + Anhang)
-            email.Body = multipart;
+                var email = new MimeMessage();
+                email.From.Add(new MailboxAddress(configuration["SmtpUser"], senderEmail));
+                email.To.Add(new MailboxAddress("Empfänger", receiverEmail));
+                //email.To.Add(new MailboxAddress("Empfänger", "stefan.baeumer@berufskolleg-borken.de"));
 
-            using (var smtpClient = new MailKit.Net.Smtp.SmtpClient())
-            {
-                smtpClient.ServerCertificateValidationCallback = (s, c, h, e) => true; // SSL-Zertifikatsvalidierung deaktivieren
-                smtpClient.Connect(smtpServer, smtpPort, MailKit.Security.SecureSocketOptions.StartTls);
-                smtpClient.Authenticate(senderEmail, senderPassword);
-                smtpClient.Send(email);
-                smtpClient.Disconnect(true);
-            }
+                email.Subject = subject;
 
-            Global.ZeileSchreiben(receiverEmail, $"Mail gesendet");        
+                if (!string.IsNullOrEmpty(cc))
+                {
+                    email.Cc.Add(new MailboxAddress("Empfänger", cc));
+                }
+
+                if (!string.IsNullOrEmpty(bcc))
+                {
+                    email.Bcc.Add(new MailboxAddress("Empfänger", bcc));
+                }
+
+                // 1️⃣ Erstelle den Haupttext der E-Mail
+                var textPart = new TextPart("plain") { Text = body };
+
+                // 2️⃣ Falls eine Datei angegeben wurde, erstelle den Anhang
+                var multipart = new Multipart("mixed");
+                multipart.Add(textPart); // Erst den Text hinzufügen
+
+                if (!string.IsNullOrEmpty(attachment) && System.IO.File.Exists(attachment))
+                {
+                    var attachmentPart = new MimePart()
+                    {
+                        Content = new MimeContent(System.IO.File.OpenRead(attachment)),
+                        ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
+                        ContentTransferEncoding = ContentEncoding.Base64,
+                        FileName = System.IO.Path.GetFileName(attachment)
+                    };
+
+                    multipart.Add(attachmentPart);
+                }
+
+                // 3️⃣ Setze den E-Mail-Body auf multipart (Text + Anhang)
+                email.Body = multipart;
+
+                using (var smtpClient = new MailKit.Net.Smtp.SmtpClient())
+                {
+                    smtpClient.ServerCertificateValidationCallback = (s, c, h, e) => true; // SSL-Zertifikatsvalidierung deaktivieren
+                    smtpClient.Connect(smtpServer, smtpPort, MailKit.Security.SecureSocketOptions.StartTls);
+                    smtpClient.Authenticate(senderEmail, senderPassword);
+                    smtpClient.Send(email);
+                    smtpClient.Disconnect(true);
+                }
+            });
+
+            Global.ZeileSchreiben($"Mail gesendet:", receiverEmail);        
         }
         catch(Exception ex)
         {

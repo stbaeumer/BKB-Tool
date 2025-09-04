@@ -28,6 +28,7 @@ public class Students : List<Student>
     private DateTime Erstelldatum { get; }
     public string Klasse { get; }
     public string? Schuelergruppe { get; }
+    public string QuellFoto { get; private set; }
 
     public Students()
     {
@@ -973,7 +974,7 @@ public class Students : List<Student>
             if (!string.IsNullOrEmpty(passendeDatei))
             {
                 // Setze die AtlantisFotoUrl-Eigenschaft
-                student.PfadFoto = passendeDatei;
+                student.ZielFotoPfad = passendeDatei;
             }
         }
     }
@@ -1032,12 +1033,12 @@ public class Students : List<Student>
     {
         foreach (var student in this)
         {
-            if (!string.IsNullOrEmpty(student.PfadFoto))
+            if (!string.IsNullOrEmpty(student.ZielFotoPfad))
             {
                 student.Pfad2FotoStream();
             }
         }
-        Global.ZeileSchreiben("Fotos in Stream umgewandelt", this.Where(x => x.PfadFoto != null).Count().ToString(), ConsoleColor.Green, ConsoleColor.Black);
+        Global.ZeileSchreiben("Fotos in Stream umgewandelt", this.Where(x => x.ZielFotoPfad != null).Count().ToString(), ConsoleColor.Green, ConsoleColor.Black);
     }
 
     internal void PdfDateienVerarbeiten(IConfiguration configuration)
@@ -1176,7 +1177,7 @@ public class Students : List<Student>
         configuration = Global.Konfig("PfadFotosImSchILD-Ordner", Global.Modus.Update, configuration);
         configuration = Global.Konfig("PfadFotosAusSchild", Global.Modus.Update, configuration);
 
-        // Alle *.jpg-Dateien aus dem Ordner (und allen Unterordnern) PfadFotosImSchILD-Ordner werden eingelsen.
+        // Alle *.jpg-Dateien aus dem Ordner (und allen Unterordnern) PfadFotosImSchILD-Ordner werden eingelesen.
         var fotosImSchildOrdner = Directory.GetFiles(configuration["PfadFotosImSchILD-Ordner"], "*.jpg", SearchOption.AllDirectories);
         Global.ZeileSchreiben("Mögliche neue Fotos für den Upload in SchILD", fotosImSchildOrdner.Count().ToString(), ConsoleColor.Green, ConsoleColor.Black);
 
@@ -1188,12 +1189,6 @@ public class Students : List<Student>
         {
             // Dateiname ohne Endung
             var dateiName = Path.GetFileNameWithoutExtension(foto);
-
-            if (dateiName == "da158201")
-            {
-                string a = "080916";
-            }
-
             var student = this.FirstOrDefault(s => !string.IsNullOrEmpty(dateiName) && !string.IsNullOrEmpty(s.MailSchulisch) && s.MailSchulisch.StartsWith(dateiName));
 
             if (student == null) continue;
@@ -1205,7 +1200,7 @@ public class Students : List<Student>
             if (!string.IsNullOrEmpty(fotoBereitsInSchildVorhanden)) continue;
 
             // Wenn der student noch kein Foto hat, wird das aktuelle Foto zugewiesen.
-            student.PfadFoto = foto;
+            student.ZielFotoPfad = foto;
         }
     }
 
@@ -1345,17 +1340,17 @@ public class Students : List<Student>
         return statusstring.TrimEnd(' ').TrimEnd(',').TrimEnd(' ').TrimEnd(',');
     }
 
-/// <summary>
-/// Wenn sich die Belegung durch den Schüler mit dem Zeitraum von-bis überschneidet, wird der Schüler zurückgegeben.
-/// Wenn beide Zeiträume sich nicht überschneiden, wird der Schüler nicht zurückgegeben.
-/// Wenn es um die Statistik geht, fallen von und bis auf einen einzigen Tag.
-/// </summary>
-/// <param name="von"></param>
-/// <param name="bis"></param>
-/// <param name="klasse"></param>
-/// <param name="schuelergruppe"></param>
-/// <param name="studentgroupStudents"></param>
-/// <returns></returns>
+    /// <summary>
+    /// Wenn sich die Belegung durch den Schüler mit dem Zeitraum von-bis überschneidet, wird der Schüler zurückgegeben.
+    /// Wenn beide Zeiträume sich nicht überschneiden, wird der Schüler nicht zurückgegeben.
+    /// Wenn es um die Statistik geht, fallen von und bis auf einen einzigen Tag.
+    /// </summary>
+    /// <param name="von"></param>
+    /// <param name="bis"></param>
+    /// <param name="klasse"></param>
+    /// <param name="schuelergruppe"></param>
+    /// <param name="studentgroupStudents"></param>
+    /// <returns></returns>
     internal Students Filter(IConfiguration configuration, Global.Zweck zweck, string klasse, string? schuelergruppe = null, List<dynamic> studentgroupStudents = null)
     {
         var studentsGefiltert = new Students();
@@ -1372,7 +1367,7 @@ public class Students : List<Student>
                     studentsGefiltert.Add(student);
                 }
             }
-        }        
+        }
 
         // Fall 2: Schülergruppe angegeben        
         if (!string.IsNullOrEmpty(schuelergruppe))
@@ -1409,7 +1404,7 @@ public class Students : List<Student>
                             von = DateTime.ParseExact(configuration["StatistikDatum"], "dd.MM.yyyy", CultureInfo.InvariantCulture);
                             bis = von;
                         }
-                        
+
                         // Wenn startDate leer ist, nehme ersten Schultag
                         DateTime belegungVon = ersterSchultag;
                         DateTime belegungBis = letzterSchultag;
@@ -1468,13 +1463,16 @@ public class Students : List<Student>
             // Wenn die Anzahl der Fotos jetzt stimmt, breche die Schleife ab
             if (fotos.Length == this.Count)
             {
+                AnsiConsole.MarkupLine($"[green]Es liegen jetzt {fotos.Length} Fotos im Ordner [aqua]{fotosOrdner}[/]. Die Verarbeitung wird fortgesetzt ...[/]");
                 break;
             }
         }
     }
 
-    internal void KlassenordnerInSchildErstellenBilderKopierenUndUmbenennenUndZippen(IConfiguration configuration)
+    internal void KlassenordnerInZielPfadErstellen(IConfiguration configuration)
     {
+        configuration = Global.Konfig("PfadFotosImSchILD-Ordner", Global.Modus.ReadSilent, configuration);
+
         var quellpfad = configuration["PfadDownloads"];
         var zielpfad = configuration["PfadFotosImSchILD-Ordner"];
 
@@ -1488,41 +1486,14 @@ public class Students : List<Student>
         if (!Directory.Exists(zielpfadZuFotos))
         {
             Directory.CreateDirectory(zielpfadZuFotos);
+            Global.ZeileSchreiben("Ordner erstellt:", zielpfadZuFotos, ConsoleColor.Green, ConsoleColor.Black);
         }
-
-        var webuntisfotostrings = new List<string>();
-        var geevoofotostrings = new List<string>();
-
-        // Durchlaufe alle Students in this. Kopiere das Foto aus dem Quellordner in den Zielordner        
-        for (int i = 0; i < this.Count; i++)
-        {
-            var quellFoto = quellFotos[i];
-            var zielFotoGeevoo = Path.Combine(zielpfadZuFotos, this[i].MailSchulisch + ".jpg");
-            var zielFotoWebuntis = Path.Combine(zielpfadZuFotos, this[i].MailSchulisch.Replace(configuration["MailDomain"], "").Replace("@", "") + ".jpg");
-
-            if (File.Exists(quellFoto))
-            {
-                // Verkleinere das Quellbild auf 160x160
-                using (var image = Image.Load(quellFoto))
-                {
-                    image.Mutate(x => x.Resize(160, 160));
-                    image.Save(zielFotoWebuntis);
-                }
-
-                // Webuntis verarbeitet den Kurznamen
-                //File.Copy(quellFoto, zielFotoWebuntis, true);
-                webuntisfotostrings.Add(zielFotoWebuntis);
-            }
-        }
-
-        var datei = new Datei();
-        datei.Zippen(Path.Combine(zielpfadZuFotos, this.First().Klasse + "-Webuntis-Geevoo.zip"), configuration, "", 0, webuntisfotostrings);        
     }
 
     internal void FotosNachSchild2Hochladen(IConfiguration configuration)
     {
         // Durchlaufe alle this, deren PfadFoto nicht nulloremptyIst
-        var studentsOhneFotoInSchild = this.Where(x => !string.IsNullOrEmpty(x.PfadFoto)).ToList();
+        var studentsOhneFotoInSchild = this.Where(x => !string.IsNullOrEmpty(x.ZielFotoPfad)).ToList();
 
         if (studentsOhneFotoInSchild.Count() == 0)
         {
@@ -1567,14 +1538,15 @@ public class Students : List<Student>
         tableFoto.AddColumn("Nr.");
         tableFoto.AddColumn("Klasse");
         tableFoto.AddColumn("Name");
+        tableFoto.AddColumn("Foto");
 
-        var studentsSortiert = this.Where(x => !string.IsNullOrEmpty(x.PfadFoto)).OrderBy(x => x.Klasse).ThenBy(x => x.Nachname).ThenBy(x => x.Vorname).ToList();
+        var studentsSortiert = this.Where(x => !string.IsNullOrEmpty(x.ZielFotoPfad)).OrderBy(x => x.Klasse).ThenBy(x => x.Nachname).ThenBy(x => x.Vorname).ToList();
 
         for (int i = 0; i < studentsSortiert.Count(); i++)
         {
             var student = studentsSortiert[i];
 
-            tableFoto.AddRow((i + 1).ToString(), student.Klasse, student.Nachname + ", " + student.Vorname);
+            tableFoto.AddRow((i + 1).ToString(), student.Klasse, student.Nachname + ", " + student.Vorname, Path.GetFileName(student.ZielFotoPfad));
         }
         AnsiConsole.Write(tableFoto);
 
@@ -1597,5 +1569,172 @@ public class Students : List<Student>
         }
         return table;
     }
+
+    internal void FotosZuStudentsZuweisen(IConfiguration configuration)
+    {
+        configuration = Global.Konfig("PfadFotosImSchILD-Ordner", Global.Modus.ReadSilent, configuration);
+
+        var quellpfad = configuration["PfadDownloads"];
+        var zielpfad = configuration["PfadFotosImSchILD-Ordner"];
+
+        var quellpfadZuFotos = Path.Combine(quellpfad, "Fotos", this.First().Klasse);
+        var zielpfadZuFotos = Path.Combine(zielpfad, this.First().Klasse);
+
+        var webuntisfotostrings = new List<string>();
+        var geevoofotostrings = new List<string>();
+
+        var quellFotos = Directory.GetFiles(quellpfadZuFotos, "*.jpg").OrderBy(f => f).ToArray();
+
+        for (int i = 0; i < this.Count; i++)
+        {
+            this[i].QuellFotoPfad = quellFotos[i];
+            this[i].ZielFotoPfad = Path.Combine(zielpfadZuFotos, this[i].MailSchulisch.Replace(configuration["MailDomain"], "").Replace("@", "") + ".jpg");
+        }
+    }
+
+    internal void FotosNachZielordnerKopieren(IConfiguration configuration)
+    {
+        for (int i = 0; i < this.Count; i++)
+        {
+            if (File.Exists(this[i].QuellFotoPfad))
+            {
+                // Kopiere die Datei 
+                File.Copy(this[i].QuellFotoPfad, this[i].ZielFotoPfad, true);
+            }
+        }
+        if (this.Count > 0)
+        {
+            Global.ZeileSchreiben($"Fotos verkleinert nach {Path.GetDirectoryName(this[0].ZielFotoPfad)} kopiert", this.Count().ToString(), ConsoleColor.Green, ConsoleColor.Black);
+        }
+    }
+    internal Students AlleOderNeueFotopfadeAnStudentsZuweisen(IConfiguration configuration)
+    {
+        configuration = Global.Konfig("MailDomain", Global.Modus.Read, configuration);
+        configuration = Global.Konfig("PfadFotosAusSchILD", Global.Modus.Read, configuration);
+        var pfadFotosAusSchILD = configuration["PfadFotosAusSchILD"];
+
+        // Prüfe, ob Bilder im Quellverzeichnis vorhanden sind
+        if (!Directory.Exists(pfadFotosAusSchILD) || Directory.GetFiles(pfadFotosAusSchILD).Length == 0)
+        {
+            throw new Exception(
+                $"Keine Fotos für den Export nach Webuntis gefunden. " +
+                $"Bitte exportieren Sie zuerst die Fotos aus SchILD ([{Global.GetColor(Global.ColorPfadInDateien)}]Datenaustausch > Fotos > Fotos exportieren[/]) in den Ordner [{Global.GetColor(Global.ColorPfadInDateien)}]{pfadFotosAusSchILD}[/]. " +
+                $"Die Dateinamen müssen Nachname, Vorname und Geburtsdatum enthalten. " +
+                $"Anschließend starten Sie diese Funktion erneut.");
+        }
+
+        // Falls Bilder vorhanden sind, wird als erstes ein Vergleich zwischen pfadFotosAusSchild und seinem neuesten
+        // Klonordner versucht. Der Klon liegt im selben Ordner wie pfadFotosAusSchild. Der Name des Ordners heißt identisch,
+        // hat aber das Erstelldatum als Suffix im Namen.
+        var ordnername = new DirectoryInfo(pfadFotosAusSchILD).Name;
+        var übergeordneterOrdner = Directory.GetParent(pfadFotosAusSchILD)?.FullName;
+        var unterordner = Directory.GetDirectories(übergeordneterOrdner ?? "", ordnername + "*")
+            .Select(d => new DirectoryInfo(d))
+            .Where(di => di.FullName != pfadFotosAusSchILD)
+            .OrderByDescending(di => di.CreationTime)
+            .FirstOrDefault()?.FullName;
+
+        if (unterordner != null)
+        {
+            AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start($"Neue und veränderte Fotos an SuS zuweisen ...", ctx =>
+            {
+                foreach (var student in this)
+                {
+                    var fotoDiesesSchuelersInOrdner = Directory.GetFiles(pfadFotosAusSchILD, $"{student.Nachname}_{student.Vorname}_{student.Geburtsdatum}*.jpg").FirstOrDefault();
+                    if (fotoDiesesSchuelersInOrdner == null) continue;
+                    var fotoDiesesSchuelersImUnterordner = unterordner != null ? Directory.GetFiles(unterordner, $"{student.Nachname}_{student.Vorname}_{student.Geburtsdatum}*.jpg").FirstOrDefault() : null;
+
+                    // Wenn das Foto im Unterordner nicht vorhanden ist, dann wird das Foto für den Export nach Webuntis vorgesehen
+                    if (fotoDiesesSchuelersImUnterordner == null)
+                    {
+                        student.ZielFotoPfad = fotoDiesesSchuelersInOrdner;
+                    }
+                    else
+                    {
+                        // Wenn das Foto im Unterordner zwar vorhanden ist, aber
+                        // Eigenschaften abweichen, dann wird das Foto für den Export nach Webuntis vorgesehen
+                        var infoInOrdner = new FileInfo(fotoDiesesSchuelersInOrdner);
+                        var infoImUnterordner = new FileInfo(fotoDiesesSchuelersImUnterordner);
+                        if (infoInOrdner.Length != infoImUnterordner.Length)
+                        {
+                            student.ZielFotoPfad = fotoDiesesSchuelersInOrdner;
+                        }
+                    }
+                }
+            });            
+
+            var anzahl = this.Count(x => !string.IsNullOrEmpty(x.ZielFotoPfad));
+            Global.ZeileSchreiben("Neue Fotos und veränderte Fotos an SuS zugewiesen:", anzahl.ToString(), ConsoleColor.Green, ConsoleColor.Black);
+
+            var panel = new Panel(
+            new Markup($"Es wurden [{Global.GetColor(Global.ColorZahlen)}]{anzahl}[/] Fotos gefunden, die sich im aktuellen SchILD-Foto-Export ([{Global.GetColor(Global.ColorPfadInDateien)}]{pfadFotosAusSchILD}[/]) befinden, aber nicht im neuesten Unterordner [{Global.GetColor(Global.ColorPfadInDateien)}]{unterordner}[/]. Es werden auch solche Fotos berücksichtigt, die sich in der Größe geändert haben."))
+                        .Expand();
+            panel.Header = new PanelHeader($"[]  Seit dem letzten Schild-Fotoexport haben sich Änderungen ergeben:  [/]");
+
+            if(anzahl > 0)
+                AnsiConsole.Write(panel);
+        }
+
+        // Frage den Anwender, ob er die gefundenen Differenzen zwischen den Ordnern nach Webuntis exportieren möchte,
+        // oder ob er alle Fotos exportieren möchte.   
+
+        configuration = Global.Konfig("NurNeueFotosExportieren", Global.Modus.Update, configuration);
+
+        if (configuration["NurNeueFotosExportieren"] == "Ja")
+        {           
+            var studentsMitNeuenFotos = new Students();
+            studentsMitNeuenFotos.AddRange(this.Where(x => !string.IsNullOrEmpty(x.ZielFotoPfad))); 
+            return studentsMitNeuenFotos;
+        }   
+
+        // Wenn der Anwender alle Fotos exportieren möchte, dann wird jedem Schüler das Foto aus dem Ordner pfadFotosAusSchILD zugewiesen.
+
+        AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start($"Fotos an SuS zuweisen ...", ctx =>
+        {
+            foreach (var student in this)
+            {
+                var fotoDiesesSchuelersInOrdner = Directory.GetFiles(pfadFotosAusSchILD, $"{student.Nachname}_{student.Vorname}_{student.Geburtsdatum}*.jpg").FirstOrDefault();
+                if (fotoDiesesSchuelersInOrdner == null)
+                    continue;
+
+                student.ZielFotoPfad = fotoDiesesSchuelersInOrdner;
+            }
+        });
+
+        var anzahlAlle = this.Count(x => !string.IsNullOrEmpty(x.ZielFotoPfad));
+        Global.ZeileSchreiben($"Fotos an SuS zugewiesen", anzahlAlle.ToString(), ConsoleColor.Green, ConsoleColor.Black);
+
+        return this;
+    }
+
+    internal void FotosRotieren(IConfiguration configuration)
+    {
+        configuration = Global.Konfig("RotateFotos", Global.Modus.Update, configuration);
+
+        if (configuration["RotateFotos"] == "0")
+        {
+            return;
+        }
+        AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Fotos drehen ...", ctx =>
+        {
+            foreach (var student in this)
+            {
+                if (File.Exists(student.ZielFotoPfad))
+                {
+                    string inputPath = student.ZielFotoPfad;
+                    string tempPath = Path.Combine(Path.GetTempPath(), Path.GetFileName(student.ZielFotoPfad));
+
+                    using (var img = Image.Load(inputPath))
+                    {
+                        // Entfernt alle Metadaten (inkl. EXIF)
+                        //img.Metadata.ExifProfile = null;
+
+                        // Optional: Bildbearbeitung
+                        img.Mutate(x => x.Rotate(Convert.ToInt32(configuration["RotateFotos"])));
+                        img.Save(student.ZielFotoPfad);
+                    }
+                }
+            }
+        });
+    }
 }
-   

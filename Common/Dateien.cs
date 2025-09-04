@@ -832,7 +832,7 @@ public class Dateien : List<Datei>
         }
     }
 
-    private void OrdnerOeffnen()
+    public void OrdnerOeffnen()
     {
         var verschiedeneOrdner = this.Select(datei => Path.GetDirectoryName(datei.AbsoluterPfad))
             .Distinct()
@@ -927,7 +927,7 @@ public class Dateien : List<Datei>
         Global.Konfig("ZipKennwort", Global.Modus.Update, configuration, "Zip-Kennwort");
         foreach (var datei in this)
         {
-            datei.Zippen(Path.Combine(pfadDownloads ?? "", zeitstempel + @"-ImportNachNetman.zip"), configuration, configuration["ZipKennwort"].ToString(), 0, new List<string>() { Path.Combine(pfadDownloads ?? "", zeitstempel + @"-ImportNachNetman.csv") });
+            datei.Zippen(configuration, configuration["ZipKennwort"].ToString(), 0, new List<string>() { Path.Combine(pfadDownloads ?? "", zeitstempel + @"-ImportNachNetman.csv") });
         }
     }
 

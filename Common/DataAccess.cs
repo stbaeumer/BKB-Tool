@@ -223,8 +223,8 @@ WHERE (((Schueler.Geloescht)='-') AND ((Schueler.Status)=2) AND ((Schueler.AktSc
                 oleDbConnection.Open();
                 OleDbCommand oleDbCommand = new OleDbCommand();
                 oleDbCommand = oleDbConnection.CreateCommand();
-                oleDbCommand.CommandText = "SELECT ID FROM Schueler WHERE Nachname = @nachname AND Vorname = @vorname AND Klasse = @klasse";
-                oleDbCommand.Parameters.AddWithValue("@nachname", student.Nachname);
+                oleDbCommand.CommandText = "SELECT ID FROM Schueler WHERE Name = @name AND Vorname = @vorname AND Klasse = @klasse";
+                oleDbCommand.Parameters.AddWithValue("@name", student.Nachname);
                 oleDbCommand.Parameters.AddWithValue("@vorname", student.Vorname);
                 oleDbCommand.Parameters.AddWithValue("@klasse", student.Klasse);
 
