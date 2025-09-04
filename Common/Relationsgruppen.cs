@@ -25,7 +25,6 @@ public class Relationsgruppen : List<Relationsgruppe>
     public Relationsgruppen(Klassen klassen, Students students, IConfiguration configuration)
     {
         // Dokumentation siehe schips.nrw.de/
-
         // Relationen gemäß §93 SchulG
 
         this.Add(new Relationsgruppe("BK BS Fachklasse EQ TZ",
@@ -96,13 +95,15 @@ public class Relationsgruppen : List<Relationsgruppe>
         table1.AddColumn("StellenBS");
         table1.AddColumn("StellenVZ");
         // alle Spaten rechtsbündig
-        table1.Columns[1].Alignment = Justify.Left;
+        table1.Columns[0].Alignment = Justify.Left;
+        table1.Columns[1].Alignment = Justify.Right;
         table1.Columns[2].Alignment = Justify.Right;
         table1.Columns[3].Alignment = Justify.Right;
         table1.Columns[4].Alignment = Justify.Right;
         table1.Columns[5].Alignment = Justify.Right;
         table1.Columns[6].Alignment = Justify.Right;
         table1.Columns[7].Alignment = Justify.Right;
+        table1.Columns[8].Alignment = Justify.Right;
 
         int summe = 0;
         double stellenBs = 0;
@@ -135,7 +136,7 @@ public class Relationsgruppen : List<Relationsgruppe>
                      where s.Relationsgruppe == relationsgruppe.BeschreibungSchulministerium
                      select s).Count();
 
-            zeile.Add(t.ToString());
+            zeile.Add($"[{Global.GetColor(Global.ColorHinweise)}]{t.ToString()}[/]");
 
             // Relation:
 
@@ -143,7 +144,7 @@ public class Relationsgruppen : List<Relationsgruppe>
 
             // Stellen:
 
-            if (relationsgruppe.BeschreibungSchulministerium.StartsWith("BK BS"))
+            if (relationsgruppe.BeschreibungSchulministerium.Contains("TZ"))
             {
                 zeile.Add((t / relationsgruppe.Relation).ToString("0.0000").PadLeft(10));
                 zeile.Add("");
@@ -167,7 +168,7 @@ public class Relationsgruppen : List<Relationsgruppe>
             studentsFiltered.Where(s=>s.Jahrgang.EndsWith("02")).Count().ToString(),
             studentsFiltered.Where(s=>s.Jahrgang.EndsWith("03")).Count().ToString(),
             studentsFiltered.Where(s=>s.Jahrgang.EndsWith("04")).Count().ToString(),
-            summe.ToString(),
+            $"[{Global.GetColor(Global.ColorHinweise)}]{summe.ToString()}[/]",
             studentsFiltered.Count().ToString(),
             stellenBs.ToString("0.0000"),
             stellenVz.ToString("0.0000")
@@ -210,7 +211,7 @@ public class Relationsgruppen : List<Relationsgruppe>
                     stellenBs.ToString("0.0000") + " * 0,5 + " + stellenVz.ToString("0.0000") + " * 1,2)");
         datei.Add("");
 
-        foreach (var student in students)
+        foreach (var student in studentsFiltered)
         {
             if (!(from s in schuelerSchnellmeldung where s.Id == student.Id select s).Any())
             {
@@ -219,7 +220,7 @@ public class Relationsgruppen : List<Relationsgruppe>
             }
         }
 
-        datei.Add("   Schüler in SchILD insgesamt: " + students.Count());
+        datei.Add("   Schüler in SchILD insgesamt: " + studentsFiltered.Count());
         datei.Add("");
 
         datei.Add("Details");
@@ -238,6 +239,7 @@ public class Relationsgruppen : List<Relationsgruppe>
             table1.AddColumn(relationsgruppe.BeschreibungSchulministerium);
         }
 
+        int summeUeberAlle = 0;
         foreach (var relationsgruppe in this)
         {
             int sum = 0;
@@ -248,17 +250,27 @@ public class Relationsgruppen : List<Relationsgruppe>
                                     where k.Relationsgruppe == relationsgruppe.BeschreibungSchulministerium
                                     select k.Klasse).Distinct().OrderBy(s => s).ToList())
             {
-                int d = (from s in studentsFiltered where s.Klasse == klasse select s).Count();
+                int d = (from s in studentsFiltered
+                         where s.Klasse == klasse
+                         where s.Relationsgruppe == relationsgruppe.BeschreibungSchulministerium
+                         select s).Count();
                 sum += d;
-                datei.Add(i.ToString().PadLeft(2) + ". " + klasse.PadRight(20) + d.ToString().PadLeft(2));
+                summeUeberAlle += d;
+                datei.Add(i.ToString().PadLeft(2) + ". " + klasse.PadRight(12) + d.ToString().PadLeft(2));
                 //Console.WriteLine(" " + i.ToString().PadLeft(2) + " " + klasse.PadRight(18) + ": " + studentsFiltered.Where(s => (s.Status == "2" || s.Status == "6") && s.Klasse == klasse).Count().ToString().PadLeft(4));
                 i++;
             }
 
-            datei.Add("--------------------------");
-            datei.Add("".PadRight(15) + "Summe: " + sum.ToString().PadLeft(4));
+            datei.Add("-".PadRight(56, '-'));
+            datei.Add("".PadRight(45) + "Summe: " + sum.ToString().PadLeft(4));
             datei.Add("");
         }
+
+        //datei.Add("Gesamtsumme: " + summeUeberAlle.ToString().PadLeft(4));
+        //datei.Add("");
+
+        datei.Add("-".PadRight(56, '-'));
+        datei.Add("".PadRight(39) + "Gesamtsumme: " + summeUeberAlle.ToString().PadLeft(4));
 
         datei.Add(Environment.UserName + " | " + DateTime.Now);
 

@@ -223,7 +223,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                 "    timeout /t 1 >nul\n" +
                 "    set /a counter+=1\n" +
                 "    if %counter%==7 (\n" +
-                "        echo Das Beenden dauert auffällig lang. Versuchen Sie BKB-Tool im Taskmanager zu beenden oder starten Sie den Rechner neu.\n" +
+                "        echo Das Beenden dauert zu lange. Versuchen Sie BKB-Tool im Taskmanager zu beenden oder starten Sie den Rechner neu.\n" +
                 "    )\n" +
                 "    goto waitforend\n" +
                 ")\n" +

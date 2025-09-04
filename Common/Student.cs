@@ -1354,31 +1354,36 @@ public partial class Student
             table.AddRow(Nachname + ", " + Vorname + ", " + Klasse, Schulgliederung, Jahrgang, Fachklasse, "Fachklasse fehlt.");
             return table;
         }
-        foreach (var r in relationsgruppen)
+
+        if(MailSchulisch.StartsWith("bp157569"))
         {
-            if (r.Gliederungen.Contains(Schulgliederung))
+            var debug = 1;
+        }
+        foreach (var r in relationsgruppen)
             {
-                var fachklasse = Fachklasse.Replace("-", "");
+                if (r.Gliederungen.Contains(Schulgliederung))
+                {
+                    var fachklasse = Fachklasse.Replace("-", "");
 
-                try
-                {
-                    fachklasse = fachklasse.Substring(fachklasse.Length - 5);
-                }
-                catch
-                {
-                    table.AddRow(Nachname + ", " + Vorname + ", " + Klasse, Schulgliederung, Jahrgang, Fachklasse, "Die Fachklasse ist nicht korrekt.");
-                }
-
-                if ((r.Fachklassenschlüssel.Count == 0 || r.Fachklassenschlüssel.Contains(fachklasse)))
-                {
-                    if (r.Jahrgänge.Contains(Jahrgang.Split('-').Last()) || r.Jahrgänge.Count == 0)
+                    try
                     {
-                        Relationsgruppe = r.BeschreibungSchulministerium;
-                        return table;
+                        fachklasse = fachklasse.Substring(fachklasse.Length - 5);
+                    }
+                    catch
+                    {
+                        table.AddRow(Nachname + ", " + Vorname + ", " + Klasse, Schulgliederung, Jahrgang, Fachklasse, "Die Fachklasse ist nicht korrekt.");
+                    }
+
+                    if ((r.Fachklassenschlüssel.Count == 0 || r.Fachklassenschlüssel.Contains(fachklasse)))
+                    {
+                        if (r.Jahrgänge.Contains(Jahrgang.Split('-').Last()) || r.Jahrgänge.Count == 0)
+                        {
+                            Relationsgruppe = r.BeschreibungSchulministerium;
+                            return table;
+                        }
                     }
                 }
             }
-        }
         if (string.IsNullOrEmpty(Relationsgruppe))
         {
             table.AddRow(Nachname + ", " + Vorname + ", " + Klasse, Schulgliederung, Jahrgang, Fachklasse, "Keine Relationsgruppe gefunden.");

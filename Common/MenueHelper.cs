@@ -489,8 +489,8 @@ public static class MenueHelper
                         students,
                         klassen,
                         [
-                            "Alle aktiven Schüler*innen werden angezeigt.",
-                            "Bereichsleitungen werden sodann aufgefordert Änderungen zum Stichtag mitzuteilen.",
+                            "Alle aktiven Schüler*innen und Gastschüler*innen werden angezeigt.",
+                            "Weiterleitung der Zahlen die Bereichsleitungen zur Prüfung. Bereichsleitungen werden sodann aufgefordert Änderungen zum Stichtag mitzuteilen.",
                             "Relationen gemäß §93 SchulG",
                             "Dokumentation siehe schips.nrw.de"
                         ],
