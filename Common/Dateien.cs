@@ -922,20 +922,20 @@ public class Dateien : List<Datei>
         }
     }
 
-    internal void Zippen(string zeitstempel, string? pfadDownloads, IConfiguration configuration)
+    internal void ZippenMitKennwort(string zeitstempel, string? pfadDownloads, IConfiguration configuration)
     {
         Global.Konfig("ZipKennwort", Global.Modus.Update, configuration, "Zip-Kennwort");
         foreach (var datei in this)
         {
-            datei.Zippen(configuration, configuration["ZipKennwort"].ToString(), 0, new List<string>() { Path.Combine(pfadDownloads ?? "", zeitstempel + @"-ImportNachNetman.csv") });
+            datei.ZippenMitKennwort(configuration);
         }
     }
 
-    internal void Mailen(string zeitstempel, string? pfadDownloads, IConfiguration configuration)
+    internal void Mailen(IConfiguration configuration)
     {
         foreach (var datei in this)
         {
-            datei.Mailen(Path.Combine(pfadDownloads ?? "", zeitstempel + @"-ImportNachNetman.zip") ?? "", "Verwaltung", Path.GetFileName(datei.AbsoluterPfad) ?? "", configuration);
+            datei.Mailen(datei.ZipPfad, datei.ZipPfad, configuration, datei.ZipPfad);
         }
     }
 }

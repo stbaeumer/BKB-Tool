@@ -7,6 +7,8 @@ using CookComputing.XmlRpc;
 using Spectre.Console;
 using Color = Spectre.Console.Color;
 using System.Text;
+using System.Diagnostics;
+using Spectre.Console.Rendering;
 
 namespace Common;
 
@@ -1550,9 +1552,25 @@ public class Menüeintrag
             AnsiConsole.Status()
             .Spinner(Spinner.Known.Dots)
             .Start("Webuntis-Schüler*innen verarbeiten ...", ctx =>
+             /*AnsiConsole.Progress()
+            .AutoClear(false)
+            .HideCompleted(false)
+            .Columns(new ProgressColumn[]
             {
+                new TaskDescriptionColumn(),
+                new ProgressBarColumn(),
+                new CountColumn(),
+                //new RemainingTimeColumn(),
+                //new SpinnerColumn(),
+            })
+            .Start(ctx =>*/
+            {
+                //var task = ctx.AddTask("[ ]Webuntis-Schüler*innen verarbeiten[/]", 
+                //maxValue: webuntisStudents.Count());
+
                 foreach (var rec in webuntisStudents)
                 {
+                    //task.Increment(1);
                     if (rec is not IDictionary<string, object> webuntisStudent) continue;
 
                     // Ein Abgänger oder Absolvent, der als Externer oder Gast wiederkommt, hat in seiner aktiven Rolle den niedrigeren Status.
@@ -1672,17 +1690,29 @@ public class Menüeintrag
                 .ThenBy(s => s.Nachname)
                 .ThenBy(s => s.Vorname);
 
-
             AnsiConsole.Status()
             .Spinner(Spinner.Known.Dots)
             .Start("SchILD-Schüler*innen verarbeiten ...", ctx =>
+
+            /*AnsiConsole.Progress()
+            .AutoClear(true)
+            .HideCompleted(true)
+            .Columns(new ProgressColumn[]
             {
+                new TaskDescriptionColumn(),
+                new ProgressBarColumn(),
+                new CountColumn(),
+                //new RemainingTimeColumn(),
+                //new SpinnerColumn(),
+            })
+            .Start(ctx =>*/
+            {
+                //var task = ctx.AddTask("[]SchILD-Schüler*innen verarbeiten[/]", 
+                //maxValue: uniqueStudents.Count());
+
                 foreach (var studen in uniqueStudents)
                 {
-                    if (studen.Nachname == "Beckmann" && studen.Vorname.StartsWith("Da"))
-                    {
-                        string a = "a";
-                    }
+                    //task.Increment(1);
 
                     // Ein Abgänger oder Absolvent, der als Externer oder Gast wiederkommt, hat in seiner aktiven Rolle den niedrigeren Status.
                     // Also wird bei mehrfach vorkommenden Schülern immer der mit dem niedrigsten Status genommen.                 
@@ -1782,7 +1812,7 @@ public class Menüeintrag
                     {
                         if (configuration["Schulnummer"] == "177659")
                         {
-                            record.Schlüssel = !string.IsNullOrEmpty(sz["Externe ID-Nr"].ToString()) && sz["Externe ID-Nr"].ToString().Length == 6 && sz["Externe ID-Nr"].ToString().StartsWith("15")   
+                            record.Schlüssel = !string.IsNullOrEmpty(sz["Externe ID-Nr"].ToString()) && sz["Externe ID-Nr"].ToString().Length == 6 && sz["Externe ID-Nr"].ToString().StartsWith("15")
                             ? sz["Externe ID-Nr"].ToString()
                             : sz["schulische E-Mail"].ToString().Split('@')[0];
                         }
@@ -1834,7 +1864,7 @@ public class Menüeintrag
 
                         if (configuration["Schulnummer"] == "177659")
                         {
-                            record.Schlüssel = !string.IsNullOrEmpty(sz["Externe ID-Nr"].ToString()) && sz["Externe ID-Nr"].ToString().Length == 6 && sz["Externe ID-Nr"].ToString().StartsWith("15")   
+                            record.Schlüssel = !string.IsNullOrEmpty(sz["Externe ID-Nr"].ToString()) && sz["Externe ID-Nr"].ToString().Length == 6 && sz["Externe ID-Nr"].ToString().StartsWith("15")
                             ? sz["Externe ID-Nr"].ToString()
                             : sz["schulische E-Mail"].ToString().Split('@')[0];
                         }
@@ -1888,12 +1918,6 @@ public class Menüeintrag
                         record.ZusatzInfo = "";
                         record.Bemerkung = "";
                         record.Geschlecht = student.Geschlecht.ToString().ToUpper();
-
-                        if (student.Nachname == "Boulos")
-                        {
-                            string aa = "";
-                        }
-
                         student.GetLetztesZeugnisdatumInDerKlasse(schuelerLernabschnittsdaten);
 
                         // Aktive SuS oder Schüler mit Abschluss/Abgang, deren letztes Zeugnis noch keine 42 Tage zurückliegt.
@@ -1913,11 +1937,6 @@ public class Menüeintrag
                     foreach (var rec in webuntisStudents)
                     {
                         var dict = (IDictionary<string, object>)rec;
-
-                        if(dict["longName"].ToString() == "Sachse")
-                        {
-                            string aa = "";
-                        }
 
                         if (!Students.Any(x => x.Nachname == dict["longName"].ToString() && x.Vorname == dict["foreName"].ToString() && x.Geburtsdatum == dict["birthDate"].ToString()))
                         {
@@ -2777,6 +2796,7 @@ public class Menüeintrag
             // Zeige den Link in spectre console            
             AnsiConsole.MarkupLine($"[link=https://bkb.wiki/start?do=admin&page=struct_schemas&table={kalender}#plugin__struct_delete][{Global.GetColor(Global.ColorHyperlink)}]https://bkb.wiki/start?do=admin&page=struct_schemas&table={kalender}[/][/]");
 
+
             return zieldatei;
         }
 
@@ -3595,6 +3615,69 @@ public class Menüeintrag
         Global.ZeileSchreiben($"Alte Fotos verschoben:", dateien.Length.ToString());
     }
 
+   internal void OeffneDateienInDownloadsInNotepadPlusPlus(IConfiguration configuration, List<string> dateien)
+    {
+        try
+        {
+            var notepadPlusPlusPath = @"C:\Program Files\Notepad++\notepad++.exe";
+            var pfadDownloads = configuration["PfadDownloads"];
+            if (string.IsNullOrEmpty(pfadDownloads) || !Directory.Exists(pfadDownloads))
+            {
+                AnsiConsole.MarkupLine($"[red]Der Ordner {pfadDownloads} existiert nicht.[/]");
+                return;
+            }
+
+            // Baue die vollständigen Pfade zusammen
+            var vollstaendigeDateien = dateien
+                .Select(datei => Path.Combine(pfadDownloads, datei))
+                .Where(File.Exists)
+                .ToList();
+
+            if (vollstaendigeDateien.Count == 0)
+            {
+                AnsiConsole.MarkupLine($"[yellow]Keine der angegebenen Dateien wurde im Ordner {pfadDownloads} gefunden.[/]");
+                return;
+            }
+
+            if (File.Exists(notepadPlusPlusPath))
+            {
+                foreach (var datei in vollstaendigeDateien)
+                {
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = notepadPlusPlusPath,
+                        Arguments = $"\"{datei}\"",
+                        UseShellExecute = false
+                    });
+                }
+            }
+            else
+            {
+                AnsiConsole.MarkupLine($"[red]Notepad++ wurde nicht gefunden unter {notepadPlusPlusPath}. Bitte installieren Sie Notepad++ oder passen Sie den Pfad im Code an.[/]");
+            }
+        }
+        catch (Exception ex)
+        {
+            AnsiConsole.MarkupLine($"[red]Fehler beim Starten von Notepad++: {ex.Message}[/]");
+        }
+    }
+
+    internal void OeffneWebseite(string url)
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = url,
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            AnsiConsole.MarkupLine($"[red]Fehler beim Öffnen der Webseite: {ex.Message}[/]");
+        }
+    }
+
 
 
     /*internal Datei? Leistungsdaten(IConfiguration configuration, string zieldateiname, Unterrichte kurse, Global.Zweck art)
@@ -3844,6 +3927,14 @@ public class Menüeintrag
             int hashNachname = obj.Nachname?.ToLowerInvariant().GetHashCode() ?? 0;
             return hashVorname ^ hashNachname;
         }
+    }
+}
+
+public class CountColumn : ProgressColumn
+{
+    public override IRenderable Render(RenderOptions options, ProgressTask task, TimeSpan deltaTime)
+    {
+        return new Markup($"[yellow]{task.Value:N0}/{task.MaxValue:N0}[/]");
     }
 }
 

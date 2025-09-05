@@ -447,8 +447,10 @@ public static class Global
                 .ShowDefaultValue(true)
                 .Validate(n =>
                 {
+                    if(n == "x")
+                        throw new Exception("Sie haben abgebrochen.");
                     if (n.ToLower() != "j" && n.ToLower() != "n" && n.ToLower() != "ja" && n.ToLower() != "nein")
-                        return ValidationResult.Error($"  Sie müssen [{Global.GetColor(Global.ColorActionInMenüs)}]ja[/] oder [{Global.GetColor(Global.ColorFehler)}]nein[/] eintippen.");
+                        return ValidationResult.Error($"  Sie müssen [{Global.GetColor(Global.ColorActionInMenüs)}]ja[/] oder [{Global.GetColor(Global.ColorFehler)}]nein[/] eintippen.");                    
                     return ValidationResult.Success();
                 }));
         }
@@ -475,8 +477,10 @@ public static class Global
                 .ShowDefaultValue(true)
                 .Validate(n =>
                 {
+                    if(n == "x")
+                        throw new Exception("Sie haben abgebrochen.");
                     if (!zulässigeAuswahlOptionen.Split(",").Contains(n))
-                        return ValidationResult.Error($"[]  Zulässige Auswahl: [bold aqua]{zulässigeAuswahlOptionen}[/][/]");
+                        return ValidationResult.Error($"[]  Zulässige Auswahl: [bold aqua]{zulässigeAuswahlOptionen}[/][/]");                    
                     return ValidationResult.Success();
                 }));
         }
@@ -500,6 +504,8 @@ public static class Global
                     .ShowDefaultValue(true)
                     .Validate(n =>
                     {
+                        if(n == "x")
+                            throw new Exception("Sie haben abgebrochen.");
                         if (string.IsNullOrEmpty(n))
                             return ValidationResult.Error("[]  Eingabe darf nicht leer sein.[/]");
                         return ValidationResult.Success();
@@ -528,6 +534,8 @@ public static class Global
                     .PromptStyle(Global.GetColor(Global.ColorActionInMenüs))
                     .Validate(n =>
                     {
+                        if(n == "x")
+                            throw new Exception("Sie haben abgebrochen.");
                         if (string.IsNullOrEmpty(n))
                             return ValidationResult.Error("[]  Eingabe darf nicht leer sein.[/]");
                         if (!File.Exists(n))
@@ -550,6 +558,8 @@ public static class Global
                     .ShowDefaultValue(true)
                     .Validate(n =>
                     {
+                        if(n == "x")
+                            throw new Exception("Sie haben abgebrochen.");
                         if (!string.IsNullOrEmpty(n) && n.ToLower() == "alle")
                             return ValidationResult.Success();
                         if (n.Split(',').Any(teil => verschiedeneKlassen.Any(klasse => klasse.ToLower().Contains(teil.Trim().ToLower()))))
@@ -642,6 +652,8 @@ public static class Global
                     .PromptStyle(Global.GetColor(Global.ColorActionInMenüs))
                     .Validate(n =>
                     {
+                        if(n == "x")
+                            throw new Exception("Sie haben abgebrochen.");
                         if (!n.StartsWith("https://") && !string.IsNullOrEmpty(n))
                             return ValidationResult.Error("[]  Eingabe muss mit https:// beginnen.[/]");
                         return ValidationResult.Success();
@@ -668,6 +680,8 @@ public static class Global
                     .PromptStyle(Global.GetColor(Global.ColorActionInMenüs))
                     .Validate(n =>
                     {
+                        if(n == "x")
+                            throw new Exception("Sie haben abgebrochen.");
                         if (!n.Contains("@") && !string.IsNullOrEmpty(n))
                             return ValidationResult.Error("[]  Eingabe muss mit @ beginnen und einen Punkt enthalten.[/]");
                         if (!n.Contains(".") && !string.IsNullOrEmpty(n))
@@ -698,6 +712,8 @@ public static class Global
                     .PromptStyle(Global.GetColor(Global.ColorActionInMenüs))
                     .Validate(n =>
                     {
+                        if(n == "x")
+                            throw new Exception("Sie haben abgebrochen.");
                         if (!n.StartsWith("@") && !string.IsNullOrEmpty(n))
                             return ValidationResult.Error("[]  Eingabe muss mit @ beginnen und einen Punkt enthalten.[/]");
                         if (!n.Contains(".") && !string.IsNullOrEmpty(n))
@@ -725,8 +741,10 @@ public static class Global
                     .PromptStyle(Global.GetColor(Global.ColorActionInMenüs))
                     .Validate(n =>
                     {
+                        if(n == "x")
+                            throw new Exception("Sie haben abgebrochen.");
                         if (!Path.Exists(n.TrimEnd(Path.DirectorySeparatorChar)))
-                            return ValidationResult.Error($" Der Pfad [{Global.GetColor(Global.ColorFehler)}]{n}[/] existiert nicht.");
+                            return ValidationResult.Error($" Der Pfad [{Global.GetColor(Global.ColorFehler)}]{n}[/] existiert nicht.");                        
                         return ValidationResult.Success();
                     })
                 .DefaultValue<string>(string.IsNullOrEmpty(defaultValue) || !Path.Exists(defaultValue) ? Environment.CurrentDirectory : defaultValue));
@@ -752,6 +770,8 @@ public static class Global
                     .PromptStyle(Global.GetColor(Global.ColorActionInMenüs))
                     .Validate(n =>
                     {
+                        if(n == "x")
+                            throw new Exception("Sie haben abgebrochen.");
                         if (!int.TryParse(n.ToString(), out _))
                         {
                             return ValidationResult.Error($"[{Global.GetColor(Global.ColorFehler)}]  {n}[/] ist keine zulässige Zahl. Bitte eine Zahl eingeben.");
@@ -785,8 +805,10 @@ public static class Global
                     .ShowDefaultValue(true)
                     .Validate(n =>
                     {
+                        if(n == "x")
+                            throw new Exception("Sie haben abgebrochen.");
                         if (!float.TryParse(n.ToString(), out _))
-                            return ValidationResult.Error($"  [{Global.GetColor(Global.ColorFehler)}]  {n}[/] ist keine zulässige Zahl.");
+                            return ValidationResult.Error($"  [{Global.GetColor(Global.ColorFehler)}]  {n}[/] ist keine zulässige Zahl.");                        
                         return ValidationResult.Success();
                     })
                 .DefaultValue<string>(defaultValue.ToString()));
@@ -811,6 +833,8 @@ public static class Global
                     .ShowDefaultValue(true)
                     .Validate(n =>
                     {
+                        if(n == "x")
+                            throw new Exception("Sie haben abgebrochen.");
                         var teile = n.ToString().Split(',');
                         if (!teile.All(t => int.TryParse(t.Trim(), out _)))
                             return ValidationResult.Error($"[]  {n} ist keine Liste aus Zahlen[/]");
@@ -853,11 +877,14 @@ public static class Global
                     .ShowDefaultValue(true)
                     .Validate(n =>
                     {
+                        if(n == "x")
+                            throw new Exception("Sie haben abgebrochen.");
                         var teile = n.ToString().Trim().Split(',');
                         if (!teile.All(t => zulässigeAuswahlOptionen.Split(',').Contains(t.Trim())))
                         {
                             return ValidationResult.Error($"[{Global.GetColor(Global.ColorFehler)}]  {n}[/] ist keine kommagetrennte Liste aus zulässigen Werten. Zulässige Werte: [{Global.GetColor(Global.ColorActionInMenüs)}]{zulässigeAuswahlOptionen}[/]");
                         }
+                        
                         return ValidationResult.Success();
                     })
                 .DefaultValue<string>(default1.ToString().TrimEnd(',')));
@@ -882,6 +909,8 @@ public static class Global
                     .ShowDefaultValue(true)
                     .Validate(n =>
                     {
+                        if(n == "x")
+                            throw new Exception("Sie haben abgebrochen.");
                         if (!int.TryParse(n.ToString(), out _))
                         {
                             return ValidationResult.Error($"[{Global.GetColor(Global.ColorFehler)}]  {n}[/] ist keine zulässige Zahl. Bitte eine Zahl eingeben.");
@@ -916,6 +945,8 @@ public static class Global
                     .ShowDefaultValue(true)
                     .Validate(n =>
                     {
+                        if(n == "x")
+                            throw new Exception("Sie haben abgebrochen.");
                         if (!DateTime.TryParse(n.ToString(), out _))
                         {
                             return ValidationResult.Error($"[]  {n} ist kein Datum (TT.MM.JJJJ)[/]");
@@ -1015,8 +1046,8 @@ public static class Global
             e.Value.InitialAbfragen == true || // nur solche, die initial abgefragt werden sollen
             (
                 e.Value.InGrundeinstellungAbfragen == true && // nur solche, die in Grundeinstellung abgefragt werden sollen
-                e.Value.NurBeiDiesenSchulnummern != null && // nur solche, die für bestimmte Schulnummern abgefragt werden sollen
-                e.Value.NurBeiDiesenSchulnummern.Contains(configuration["Schulnummer"]) &&
+                //e.Value.NurBeiDiesenSchulnummern != null && // nur solche, die für bestimmte Schulnummern abgefragt werden sollen
+                //e.Value.NurBeiDiesenSchulnummern.Contains(configuration["Schulnummer"]) &&
                 configuration[e.Key] != null && // nur solche, die in der Konfiguration gespeichert sind
                 configuration[e.Key] != ""
             )).ToList();
@@ -1396,7 +1427,7 @@ public static class KonfigHelper
         {
             Key = "AppDescription",
             DefaultValue = "BKB-Tool - Ein Werkzeug an der Schnittstelle zwischen SchILD und Webuntis.",
-            Aufforderung = "Beschreibung der App",
+            Aufforderung = "",
             Hinweise = "Kurze Beschreibung der Anwendung.",
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = false,
@@ -1407,8 +1438,8 @@ public static class KonfigHelper
         {
             Key = "Abschnitt",
             DefaultValue = "1",
-            Aufforderung = "Lernabschnitt",
-            Hinweise = $"Geben Sie den Lernabschnitt an. Das Schuljahr beginnt immer mit Abschnitt [{Global.GetColor(Global.ColorZahlen)}]1[/]. \nI.d.R. wechselt der Abschnitt nach den Halbjahreszeugnissen auf Abschnitt [{Global.GetColor(Global.ColorZahlen)}]2[/].",
+            Aufforderung = "",
+            Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]Lernabschnitt[/] an. Das Schuljahr beginnt immer mit Abschnitt [{Global.GetColor(Global.ColorZahlen)}]1[/]. \nI.d.R. wechselt der Abschnitt nach den Halbjahreszeugnissen auf Abschnitt [{Global.GetColor(Global.ColorZahlen)}]2[/].",
             Datentyp = Global.Datentyp.Abschnitt,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = true,
@@ -1418,8 +1449,8 @@ public static class KonfigHelper
         {
             Key = "Abschnittswechsel",
             DefaultValue = new DateTime(DateTime.Now.Month > 7 ? DateTime.Now.Year + 1 : DateTime.Now.Year, 2, 1).ToShortDateString(),
-            Aufforderung = "Abschnittswechsel",
-            Hinweise = $"Geben Sie das Datum des Abschnittswechsels an. I.d.R. ist der [{Global.GetColor(Global.ColorZahlen)}]{new DateTime(DateTime.Now.Month > 7 ? DateTime.Now.Year + 1 : DateTime.Now.Year, 2, 1).ToShortDateString()}[/] (oder ein anderes Datum im Februar) der richtige Wert.",
+            Aufforderung = "",
+            Hinweise = $"Geben Sie das [{Global.GetColor(Global.ColorInfoBox)}]Datum des Abschnittswechsels[/] an. I.d.R. ist der [{Global.GetColor(Global.ColorZahlen)}]{new DateTime(DateTime.Now.Month > 7 ? DateTime.Now.Year + 1 : DateTime.Now.Year, 2, 1).ToShortDateString()}[/] (oder ein anderes Datum im Februar) der richtige Wert.",
             Datentyp = Global.Datentyp.DateTime,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
@@ -1429,8 +1460,8 @@ public static class KonfigHelper
         {
             Key = "AccessPfad",
             DefaultValue = @"\\fs01\SchILD-NRW\DB\Test.mdb",
-            Aufforderung = "Access-Pfad",
-            Hinweise = $"Geben Sie den Pfad zur Access-Datenbank an. Beispiel:[{Global.GetColor(Global.ColorPfadInProgrammen)}]{@"\\fs01\SchILD-NRW\DB\Test.mdb"}[/]\nGeben Sie stets den kompletten Pfad inklusive Dateinname an.",
+            Aufforderung = "",
+            Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]Pfad zur Access-Datenbank[/] an. Beispiel:[{Global.GetColor(Global.ColorPfadInProgrammen)}]{@"\\fs01\SchILD-NRW\DB\Test.mdb"}[/]\nGeben Sie stets den kompletten Pfad inklusive Dateinname an.",
             Datentyp = Global.Datentyp.Pfad,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
@@ -1440,8 +1471,8 @@ public static class KonfigHelper
         {
             Key = "AccessPassword",
             DefaultValue = Environment.GetEnvironmentVariable("ACCESS_PASSWORD") ?? "",
-            Aufforderung = "Access-Kennwort",
-            Hinweise = $"Geben Sie das Kennwort der Access-Datenbank an. Es geht nicht um Ihr persönliches Kennwort in SchILD, sondern um das Kennwort der Access-Datenbank selbst.",
+            Aufforderung = "",
+            Hinweise = $"Geben Sie das [{Global.GetColor(Global.ColorInfoBox)}]Kennwort[/] der Access-Datenbank an. Es geht nicht um Ihr persönliches Kennwort in SchILD, sondern um das Kennwort der Access-Datenbank selbst.",
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
@@ -1451,7 +1482,7 @@ public static class KonfigHelper
         {
             Key = "Auswahl",
             DefaultValue = "1",
-            Aufforderung = "Auswahl",
+            Aufforderung = "Ihre Auswahl bitte",
             Hinweise = $"Geben Sie eine [bold {Global.GetColor(Global.ColorTextHervorheben)}]Zahl[/] ein oder [bold {Global.GetColor(Global.ColorTextHervorheben)}]e[/] für Einstellungen oder [bold {Global.GetColor(Global.ColorTextHervorheben)}]h[/] für Onlinehilfe",
             Datentyp = Global.Datentyp.Auswahl,
             InGrundeinstellungAbfragen = false,
@@ -1462,8 +1493,8 @@ public static class KonfigHelper
         {
             Key = "Betreff",
             DefaultValue = "Betreff",
-            Aufforderung = "Betreff",
-            Hinweise = $"Geben Sie den Betreff an.",
+            Aufforderung = "",
+            Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]Betreff[/] an.",
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
@@ -1473,8 +1504,8 @@ public static class KonfigHelper
         {
             Key = "BccAdresse",
             DefaultValue = "",
-            Aufforderung = "BCC-Adresse",
-            Hinweise = $"Geben Sie BCC-Adresse an. Geben Sie ein Leerzeichen ein, wenn Sie keine BCC-Adresse wünschen.",
+            Aufforderung = "",
+            Hinweise = $"Geben Sie [{Global.GetColor(Global.ColorInfoBox)}]BCC-Adresse[/] an. Geben Sie ein Leerzeichen ein, wenn Sie keine BCC-Adresse wünschen.",
             Datentyp = Global.Datentyp.Mail,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
@@ -1484,8 +1515,8 @@ public static class KonfigHelper
         {
             Key = "Body",
             DefaultValue = $"Guten Morgen,\n\n...",
-            Aufforderung = "Geben Sie Nachricht ein.",
-            Hinweise = $"Geben Sie Nachricht ein. Geben Sie \\n ein, um einen Zeilenumbruch zu erzeugen. geben Sie #Lehrer# als Platzhalter für den Namen des Lehrers ein. Der Name wird dann automatisch ersetzt.",
+            Aufforderung = "",
+            Hinweise = $"Geben Sie [{Global.GetColor(Global.ColorInfoBox)}]Nachricht[/] ein. Geben Sie \\n ein, um einen Zeilenumbruch zu erzeugen. geben Sie #Lehrer# als Platzhalter für den Namen des Lehrers ein. Der Name wird dann automatisch ersetzt.",
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
@@ -1495,8 +1526,8 @@ public static class KonfigHelper
         {
             Key = "ConnectionStringSchild",
             DefaultValue = "",
-            Aufforderung = "ConnectionString für SchILD",
-            Hinweise = "Geben Sie den ConnectionString für SchILD an.",
+            Aufforderung = "",
+            Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]ConnectionString[/] für SchILD an.",
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
@@ -1506,8 +1537,8 @@ public static class KonfigHelper
         {
             Key = "ConnectionStringWebuntis",
             DefaultValue = "",
-            Aufforderung = "ConnectionString für Webuntis",
-            Hinweise = "Geben Sie den ConnectionString für Webuntis an (optional).",
+            Aufforderung = "",
+            Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]ConnectionString[/] für Webuntis an (optional).",
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
@@ -1517,8 +1548,8 @@ public static class KonfigHelper
         {
             Key = "ConnectionStringUntis",
             DefaultValue = Environment.GetEnvironmentVariable("UNTIS_CONNECTION_STRING") ?? "",
-            Aufforderung = "ConnectionString für Untis",
-            Hinweise = "Bitte geben Sie den ConnectionString für Untis an.",
+            Aufforderung = "",
+            Hinweise = $"Bitte geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]ConnectionString[/] für Untis an.",
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
@@ -1528,7 +1559,7 @@ public static class KonfigHelper
         {
             Key = "FirstRun",
             DefaultValue = "",
-            Aufforderung = "Mit ENTER bestätigen",
+            Aufforderung = "",
             Hinweise = "",
             Datentyp = Global.Datentyp.FirstRun,
             InGrundeinstellungAbfragen = false,
@@ -1539,8 +1570,8 @@ public static class KonfigHelper
         {
             Key = "FehlzeitenVorDemAbschnittswechselBeruecksichtigen",
             DefaultValue = "Nein",
-            Aufforderung = $"Fehlzeiten vor dem Abschnittswechsel auf das Zeugnis? (j/n)",
-            Hinweise = $"Sollen die Fehlzeiten vor dem Abschnittswechsel auf dem Zeugnis hinzugefügt werden?",
+            Aufforderung = "",
+            Hinweise = $"Sollen die [{Global.GetColor(Global.ColorInfoBox)}]Fehlzeiten[/] vor dem Abschnittswechsel auf dem Zeugnis hinzugefügt werden?",
             Datentyp = Global.Datentyp.JaNein,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
@@ -1550,8 +1581,8 @@ public static class KonfigHelper
         {
             Key = "InteressierendeUnterrichtsgruppen",
             DefaultValue = "1.HJ,U",
-            Aufforderung = "Interessierende Unterrichtsgruppen",
-            Hinweise = $"Geben Sie alle Unterrichtsgruppen an, die am Stichtag anwesend sein werden. Unterrichte ohne Unterrichtsgrupe werden immer berücksichtigt.\nGroß- und Kleinschreibung beachten!\nWenn Sie alle Unterrichtsgruppen berücksichtigen wollen, schreiben wie das Wort [{Global.GetColor(Global.ColorActionInMenüs)}]alle[/] gewählt.",
+            Aufforderung = "",
+            Hinweise = $"Geben Sie alle [{Global.GetColor(Global.ColorInfoBox)}]Unterrichtsgruppen[/] an, die am Stichtag anwesend sein werden. Unterrichte ohne Unterrichtsgrupe werden immer berücksichtigt.\nGroß- und Kleinschreibung beachten!\nWenn Sie alle Unterrichtsgruppen berücksichtigen wollen, schreiben wie das Wort [{Global.GetColor(Global.ColorActionInMenüs)}]alle[/] gewählt.",
             Datentyp = Global.Datentyp.MultiSelect,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
@@ -1561,8 +1592,8 @@ public static class KonfigHelper
         {
             Key = "Klassen",
             DefaultValue = "",
-            Aufforderung = "Interessierende Klasse(n)",
-            Hinweise = $"Geben Sie die interessierende(n) Klasse(n) an. Mehrere Klassen sind mit Komma zu trennen. Es können auch Namensteile von Klassen angegeben werden, wordurch alle Klassen gewählt werden, deren Klassenname den Namensteil enthält. Alle Klassen werden mit dem Wort [bold springGreen2]alle[/] gewählt.",
+            Aufforderung = "",
+            Hinweise = $"Geben Sie die [{Global.GetColor(Global.ColorInfoBox)}]interessierende(n) Klasse(n)[/] an. Mehrere Klassen sind mit Komma zu trennen. Es können auch Namensteile von Klassen angegeben werden, wordurch alle Klassen gewählt werden, deren Klassenname den Namensteil enthält. Alle Klassen werden mit dem Wort [bold springGreen2]alle[/] gewählt.",
             Datentyp = Global.Datentyp.Klassen,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
@@ -1572,8 +1603,8 @@ public static class KonfigHelper
         {
             Key = "Konferenzdatum",
             DefaultValue = "",
-            Aufforderung = "Konferenzdatum",
-            Hinweise = $"Geben Sie das Konferenzdatum an. Das kann später in SchILD (mit einem Gruppenprozess) erneut geändert werden.",
+            Aufforderung = "",
+            Hinweise = $"Geben Sie das [{Global.GetColor(Global.ColorInfoBox)}]Konferenzdatum[/] an. Das kann später in SchILD (mit einem Gruppenprozess) erneut geändert werden.",
             Datentyp = Global.Datentyp.DateTime,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
@@ -1583,8 +1614,8 @@ public static class KonfigHelper
         {
             Key = "Kursarten",
             DefaultValue = " G, L, A, Z, V, P",
-            Aufforderung = "Kursarten",
-            Hinweise = $"Geben Sie im Folgenden an, wie sich bei Ihnen die Kursarten aus den Fächern ableiten lassen. Wenn Ihre LKs beispielsweise so aussehen: [{Global.GetColor(Global.ColorHinweise)}]M L1, D L2, E L1[/], dann geben Sie hier für LKs (inkl. führendes Leerzeichen) '[{Global.GetColor(Global.ColorHinweise)}] L[/]' an." +
+            Aufforderung = "",
+            Hinweise = $"Geben Sie im Folgenden an, wie sich bei Ihnen die [{Global.GetColor(Global.ColorInfoBox)}]Kursarten[/] aus den Fächern ableiten lassen. Wenn Ihre LKs beispielsweise so aussehen: [{Global.GetColor(Global.ColorHinweise)}]M L1, D L2, E L1[/], dann geben Sie hier für LKs (inkl. führendes Leerzeichen) '[{Global.GetColor(Global.ColorHinweise)}] L[/]' an." +
             $"\nDie Kursarten in SchILD sind: [{Global.GetColor(Global.ColorHinweise)}]GK, LK, AB, ZK, VTF, PJK[/]" +
             $"\nIhre vollständige Eingabe könnte also so aussehen: [{Global.GetColor(Global.ColorActionInMenüs)}] G, L, A, Z, V, P[/]." +
             $"\nWenn Sie die automatische Zuordnung nicht nutzen möchten, weil Sie z.B. keine Kurse nutzen, geben Sie weniger als 5 Kommas ein.",
@@ -1597,8 +1628,8 @@ public static class KonfigHelper
         {
             Key = "Lk1faecher",
             DefaultValue = "D,BI,M,E",
-            Aufforderung = "Fächer des 1.LKs",
-            Hinweise = $"Geben Sie kommasepariert die möglichen Fächer des 1.LKs an. Bitte nur die Fächer angeben, ohne 'LK' etc. Beispiel: [{Global.GetColor(Global.ColorActionInMenüs)}]D,BI,M,E[/]",
+            Aufforderung = "",
+            Hinweise = $"Geben Sie kommasepariert die möglichen [{Global.GetColor(Global.ColorInfoBox)}]Fächer des 1.LKs[/] an. Bitte nur die Fächer angeben, ohne 'LK' etc. Beispiel: [{Global.GetColor(Global.ColorActionInMenüs)}]D,BI,M,E[/]",
             Datentyp = Global.Datentyp.Maildomain,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
@@ -1608,8 +1639,8 @@ public static class KonfigHelper
         {
             Key = "LehrkraefteSonderzeiten",
             DefaultValue = "098,099,007,360,160",
-            Aufforderung = "Gründe",
-            Hinweise = "Welche Anrechnungsgründe sollen ignoriert bzw. auf 0 gesetzt werden?",
+            Aufforderung = "",
+            Hinweise = "Welche [{Global.GetColor(Global.ColorInfoBox)}]Anrechnungsgründe[/] sollen ignoriert bzw. auf 0 gesetzt werden?",
             Datentyp = Global.Datentyp.ListInt,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
@@ -1619,8 +1650,8 @@ public static class KonfigHelper
         {
             Key = "MailDomain",
             DefaultValue = "@students.berufskolleg-borken.de",
-            Aufforderung = "Mail-Domain",
-            Hinweise = $"Geben Sie die schulische Mail-Domain für Mailadressen der Schüler*innen an. Bsp: [{Global.GetColor(Global.ColorHyperlink)}]@students.berufskolleg-borken.de[/]. Ihre Eingabe muss mit [{Global.GetColor(Global.ColorHyperlink)}]@[/] beginnen und mit [{Global.GetColor(Global.ColorHyperlink)}].de[/] etc. enden.",
+            Aufforderung = "",
+            Hinweise = $"Geben Sie die schulische [{Global.GetColor(Global.ColorInfoBox)}]Mail-Domain[/] für Mailadressen der Schüler*innen an. Bsp: [{Global.GetColor(Global.ColorHyperlink)}]@students.berufskolleg-borken.de[/]. Ihre Eingabe muss mit [{Global.GetColor(Global.ColorHyperlink)}]@[/] beginnen und mit [{Global.GetColor(Global.ColorHyperlink)}].de[/] etc. enden.",
             Datentyp = Global.Datentyp.Maildomain,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
@@ -1628,10 +1659,10 @@ public static class KonfigHelper
         },
         ["NetmanMailReceiver"] = new KonfigMeta
         {
-            Key = "NetmanMailReceiver",
+            Key = "",
             DefaultValue = Environment.GetEnvironmentVariable("NETMAN_MAIL_RECEIVER"),
             Aufforderung = "NetmanMailReceiver",
-            Hinweise = $"Geben Sie dem Empfänger der Netman-Datei an.",
+            Hinweise = $"Geben Sie die [{Global.GetColor(Global.ColorInfoBox)}]Empfänger-E-Mail-Adresse[/] der Netman-Datei an.",
             Datentyp = Global.Datentyp.Mail,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
@@ -1641,8 +1672,8 @@ public static class KonfigHelper
         {
             Key = "NetmanMailBccReceiver",
             DefaultValue = Environment.GetEnvironmentVariable("NETMAN_MAIL_BCC_RECEIVER"),
-            Aufforderung = "NetmanMailBccReceiver",
-            Hinweise = $"Geben Sie dem BCC-Empfänger der Netman-Datei an.",
+            Aufforderung = "",
+            Hinweise = $"Geben Sie die [{Global.GetColor(Global.ColorInfoBox)}]BCC-Empfänger-E-Mail-Adresse[/] der Netman-Datei an.",
             Datentyp = Global.Datentyp.Mail,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
@@ -1652,8 +1683,8 @@ public static class KonfigHelper
         {
             Key = "PfadDownloads",
             DefaultValue = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"),
-            Aufforderung = "Downloads-Verzeichnis",
-            Hinweise = "Geben Sie den Pfad des Downloads-Verzeichnisses an. In der Regel wird das Verzeichnis bereits richtig vorgeschlagen. Dann einfach [bold springGreen2]ENTER[/] drücken:",
+            Aufforderung = "",
+            Hinweise = $"Geben Sie den Pfad des [{Global.GetColor(Global.ColorInfoBox)}]Downloads-Verzeichnisses[/] an. In der Regel wird das Verzeichnis bereits richtig vorgeschlagen. Dann einfach [bold springGreen2]ENTER[/] drücken:",
             Datentyp = Global.Datentyp.Pfad,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = true,
@@ -1663,8 +1694,8 @@ public static class KonfigHelper
         {
             Key = "PfadFotosAusSchILD",
             DefaultValue = $"\\\\fs01\\SchILD-NRW\\Fotos_aus_SchILD",
-            Aufforderung = "Pfad zu den Fotos aus SchILD",
-            Hinweise = $"Wo liegen die Fotos, die Sie aus SchILD exportiert haben ([{Global.GetColor(Global.ColorPfadInProgrammen)}]Datenaustausch > Fotos > Fotos exportieren[/])? Der Export ist wichtig, um nur fehlende Fotos an SchILD zu übergeben. Geben Sie den Pfad zu den Fotos aus SchILD an. Beispiel: [{Global.GetColor(Global.ColorPfadInProgrammen)}]\\\\fs01\\SchILD-NRW\\Fotos_aus_SchILD[/]",
+            Aufforderung = "",
+            Hinweise = $"Wo liegen die [{Global.GetColor(Global.ColorInfoBox)}]Fotos[/], die Sie aus SchILD exportiert haben ([{Global.GetColor(Global.ColorPfadInProgrammen)}]Datenaustausch > Fotos > Fotos exportieren[/])? Der Export ist wichtig, um nur fehlende Fotos an SchILD zu übergeben. Geben Sie den Pfad zu den Fotos aus SchILD an. Beispiel: [{Global.GetColor(Global.ColorPfadInProgrammen)}]\\\\fs01\\SchILD-NRW\\Fotos_aus_SchILD[/]",
             Datentyp = Global.Datentyp.Pfad,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
@@ -1674,8 +1705,8 @@ public static class KonfigHelper
         {
             Key = "PfadSchilddatenaustausch",
             DefaultValue = $"\\\\fs01\\SchILD-NRW\\Ausgabeverzeichnis",
-            Aufforderung = "SchILD-Ausgabeverzeichnis",
-            Hinweise = $"Geben Sie den Pfad und das Verzeichnis an, das in SchILD eingetragen ist als [{Global.GetColor(Global.ColorPfadInProgrammen)}]Ausgabeverzeichnis[/] unter: \n[{Global.GetColor(Global.ColorPfadInProgrammen)}]Datenaustausch > Schnittstelle SchILD-NRW > Export[/]",
+            Aufforderung = "",
+            Hinweise = $"Geben Sie den Pfad und das Verzeichnis an, das in SchILD eingetragen ist als [{Global.GetColor(Global.ColorInfoBox)}]Ausgabeverzeichnis[/] unter: \n[{Global.GetColor(Global.ColorPfadInProgrammen)}]Datenaustausch > Schnittstelle SchILD-NRW > Export[/]",
             Datentyp = Global.Datentyp.Pfad,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = true,
@@ -1685,8 +1716,8 @@ public static class KonfigHelper
         {
             Key = "PdfKennwort",
             DefaultValue = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"),
-            Aufforderung = "PDF-Kennwort",
-            Hinweise = $"Geben Sie optional ein Kennwort für PDF-Dateien an, die Sie mit [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] erstellen möchten. Das Kennwort wird für alle PDF-Dateien verwendet, die Sie mit [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] erstellen. Wenn Sie kein Kennwort wünschen, dann ein Leerzeichen eingeben.",
+            Aufforderung = "",
+            Hinweise = $"Geben Sie optional ein [{Global.GetColor(Global.ColorInfoBox)}]Kennwort[/] für PDF-Dateien an, die Sie mit [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] erstellen möchten. Das Kennwort wird für alle PDF-Dateien verwendet, die Sie mit [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] erstellen. Wenn Sie kein Kennwort wünschen, dann ein Leerzeichen eingeben.",
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
@@ -1696,8 +1727,8 @@ public static class KonfigHelper
         {
             Key = "MaxDateiAlter",
             DefaultValue = "3",
-            Aufforderung = "Wie viele Tage dürfen Dateien höchstens alt sein?",
-            Hinweise = $"Geben Sie an, wie viele Tage Dateien höchstens alt sein dürfen, um vom [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] für das Einlesen akzeptiert zu werden. Die Angabe einer (möglichst niedrigen) Zahl soll sicherstellen, dass nicht versehentlich veraltete Dateien eingelesen werden.",
+            Aufforderung = "",
+            Hinweise = $"Geben Sie an, [{Global.GetColor(Global.ColorInfoBox)}]wie viele Tage[/] Dateien höchstens alt sein dürfen, um vom BKB-Tool für das Einlesen akzeptiert zu werden. Die Angabe einer (möglichst niedrigen) Zahl soll sicherstellen, dass nicht versehentlich veraltete Dateien eingelesen werden.",
             Datentyp = Global.Datentyp.Int,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = true,
@@ -1707,8 +1738,8 @@ public static class KonfigHelper
         {
             Key = "NurDieseGruende",
             DefaultValue = "200",
-            Aufforderung = "Nur diese Gründe",
-            Hinweise = $"Geben Sie die interessierenden Gründe an.",
+            Aufforderung = "",
+            Hinweise = $"Geben Sie die [{Global.GetColor(Global.ColorInfoBox)}]interessierenden Gründe[/] an.",
             Datentyp = Global.Datentyp.ListInt,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
@@ -1719,7 +1750,7 @@ public static class KonfigHelper
             Key = "NurNeueFotosExportieren",
             DefaultValue = "Ja",
             Aufforderung = "Nur neue und veränderte Fotos nach Webuntis & Co. exportieren?",
-            Hinweise = $"Sie können auswählen, ob alle Fotos exportiert werden sollen oder nur neue und veränderte.",
+            Hinweise = $"Sie können auswählen, ob alle [{Global.GetColor(Global.ColorInfoBox)}]Fotos[/] exportiert werden sollen oder nur neue und veränderte.",
             Datentyp = Global.Datentyp.JaNein,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
@@ -1729,8 +1760,8 @@ public static class KonfigHelper
         {
             Key = "OffeneFehlstunden",
             DefaultValue = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"),
-            Aufforderung = "Downloads-Verzeichnis",
-            Hinweise = $"Es gibt offene Fehlstunden. Offene Fehlstunden sind weder entschuldigt noch unentschuldigt und werden im Zeugnis nicht berücksichtigt. Mit [{Global.GetColor(Global.ColorActionInMenüs)}]ENTER[/] geht es ohne Berücksichtigung der offenen Fehlstunden weiter. Abbruch mit [{Global.GetColor(Global.ColorFehler)}]ANYKEY[/].",
+            Aufforderung = "",
+            Hinweise = $"Es gibt [{Global.GetColor(Global.ColorInfoBox)}]offene Fehlstunden[/]. Offene Fehlstunden sind weder entschuldigt noch unentschuldigt und werden im Zeugnis nicht berücksichtigt. Mit [{Global.GetColor(Global.ColorActionInMenüs)}]ENTER[/] geht es ohne Berücksichtigung der offenen Fehlstunden weiter. Abbruch mit [{Global.GetColor(Global.ColorFehler)}]ANYKEY[/].",
             Datentyp = Global.Datentyp.JaNein,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
@@ -1740,8 +1771,8 @@ public static class KonfigHelper
         {
             Key = "PfadDokumentenverwaltung",
             DefaultValue = @"\\fs01\SchILD-NRW\Dokumentenverwaltung",
-            Aufforderung = "Pfad zur Dokumentenverwaltung",
-            Hinweise = $"Geben Sie das Verzeichnis an, das in SchILD unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Extras > Programmeinstellungen > Globale Einstellungen > Dokumentenverwaltung[/] als [{Global.GetColor(Global.ColorPfadInProgrammen)}]Dokumentenverzeichnis[/] eingetragen ist.",
+            Aufforderung = "",
+            Hinweise = $"Geben Sie das [{Global.GetColor(Global.ColorInfoBox)}]Verzeichnis[/] an, das in SchILD unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Extras > Programmeinstellungen > Globale Einstellungen > Dokumentenverwaltung[/] als [{Global.GetColor(Global.ColorPfadInProgrammen)}]Dokumentenverzeichnis[/] eingetragen ist.",
             Datentyp = Global.Datentyp.Pfad,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
@@ -1751,8 +1782,8 @@ public static class KonfigHelper
         {
             Key = "PfadFotosImSchILD-Ordner",
             DefaultValue = "\\\\fs01\\SchILD-NRW\\Fotos",
-            Aufforderung = "Pfad zu den Schülerfotos",
-            Hinweise = $"Wo werden die aufbereiteten Schüler*innenfotos in Klassenordnern gespeichert? Geben Sie den Pfad an! Beispiel: [aqua]\\\\fs01\\SchILD-NRW\\Fotos[/]. Beachten Sie, dass alle Fotos im Zielordner den Benutzernamen (der Teil vor dem @ der Mail-Adresse) als Namen haben müssen.",
+            Aufforderung = "",
+            Hinweise = $"Wo werden die aufbereiteten Schüler*innenfotos in Klassenordnern gespeichert? Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]Pfad[/] an! Beispiel: [aqua]\\\\fs01\\SchILD-NRW\\Fotos[/]. Beachten Sie, dass alle Fotos im Zielordner den Benutzernamen (der Teil vor dem @ der Mail-Adresse) als Namen haben müssen.",
             Datentyp = Global.Datentyp.Pfad,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
@@ -1762,8 +1793,8 @@ public static class KonfigHelper
         {
             Key = "PfadLitteraImport",
             DefaultValue = @"\\fs01\Littera\Atlantis Import Daten",
-            Aufforderung = "Pfad des Littera-Imports",
-            Hinweise = $"Wohin soll die neue Datei nach dem Erstellen verschoben werden?",
+            Aufforderung = "",
+            Hinweise = $"Wohin soll die neue Datei nach dem Erstellen verschoben werden?Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]Pfad[/] an.",
             Datentyp = Global.Datentyp.Pfad,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
@@ -1773,8 +1804,8 @@ public static class KonfigHelper
         {
             Key = "RotateFotos",
             DefaultValue = "0",
-            Aufforderung = "Rotation des Fotos",
-            Hinweise = $"Sie können die Fotos vor dem Hochladen drehen. Geben Sie den Drehwinkel in Grad an. Beispiel: [{Global.GetColor(Global.ColorZahlen)}]90[/] für 90 Grad im Uhrzeigersinn. [{Global.GetColor(Global.ColorZahlen)}]0[/] bedeutet keine Drehung.",
+            Aufforderung = "",
+            Hinweise = $"Sie können vor dem Hochladen die Fotos drehen. Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]Drehwinkel in Grad[/] an. Beispiel: [{Global.GetColor(Global.ColorZahlen)}]90[/] für 90 Grad im Uhrzeigersinn. [{Global.GetColor(Global.ColorZahlen)}]0[/] bedeutet keine Drehung.",
             Datentyp = Global.Datentyp.Int,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
@@ -1784,8 +1815,8 @@ public static class KonfigHelper
         {
             Key = "Schlüsselwörter",
             DefaultValue = "Jahreeszeugnis, Abschlusszeugnis, Abgangszeugnis, Zeugnis",
-            Aufforderung = "Schlüsselwörter",
-            Hinweise = "Geben Sie kommagetrennt interessierende Schlüsselwörter an (z.B. Abgangszeugnis, Abschlusszeugnis, Jahreszeugnis). BKB-Tool durchsucht die PDF-Dateien im Ordner nach den Wörtern. Sobald ein Schlüsselwort matcht, wird die Datei in das Dokumentenverzeichnis kopiert.",
+            Aufforderung = "",
+            Hinweise = $"Geben Sie kommagetrennt interessierende [{Global.GetColor(Global.ColorInfoBox)}]Schlüsselwörter[/] an (z.B. Abgangszeugnis, Abschlusszeugnis, Jahreszeugnis). BKB-Tool durchsucht die PDF-Dateien im Ordner nach den Wörtern. Sobald ein Schlüsselwort matcht, wird die Datei in das Dokumentenverzeichnis kopiert.",
             Datentyp = Global.Datentyp.ListString,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
@@ -1795,8 +1826,8 @@ public static class KonfigHelper
         {
             Key = "SchipsOderZeugnisseOderAnderePdfs",
             DefaultValue = "",
-            Aufforderung = "Was wollen Sie verschlüsseln?",
-            Hinweise = "Wählen Sie zwischen den Optionen:\n1: Schips\n2: Notenlisten\n3: andere PDFs",
+            Aufforderung = "",
+            Hinweise = $"Wählen Sie zwischen den [{Global.GetColor(Global.ColorInfoBox)}]Optionen[/]:\n1: Schips\n2: Notenlisten\n3: andere PDFs",
             Datentyp = Global.Datentyp.Int,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
@@ -1806,8 +1837,8 @@ public static class KonfigHelper
         {
             Key = "Schulnummer",
             DefaultValue = "177659",
-            Aufforderung = "Schulnummer",
-            Hinweise = "Geben Sie Ihre Schulnummer an. Je nach Schulnummer werden evtl. unterschiedliche Funktionen angeboten.",
+            Aufforderung = "",
+            Hinweise = $"Geben Sie Ihre [{Global.GetColor(Global.ColorInfoBox)}]Schulnummer[/] an. Je nach Schulnummer werden evtl. unterschiedliche Funktionen angeboten.",
             Datentyp = Global.Datentyp.Int,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = true,
@@ -1817,8 +1848,8 @@ public static class KonfigHelper
         {
             Key = "SmtpKennwort",
             DefaultValue = Environment.GetEnvironmentVariable("SMTP_KENNWORT") ?? "",
-            Aufforderung = "SMTP-Kennwort",
-            Hinweise = "Geben Sie das SMTP-Kennwort an.",
+            Aufforderung = "",
+            Hinweise = $"Geben Sie das [{Global.GetColor(Global.ColorInfoBox)}]SMTP-Kennwort[/] an.",
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
@@ -1828,8 +1859,8 @@ public static class KonfigHelper
         {
             Key = "SmtpPort",
             DefaultValue = Environment.GetEnvironmentVariable("SMTP_PORT") ?? "",
-            Aufforderung = "SMTP-Port",
-            Hinweise = "Geben Sie den SMTP-Port an.",
+            Aufforderung = "",
+            Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]SMTP-Port[/] an.",
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
@@ -1839,8 +1870,8 @@ public static class KonfigHelper
         {
             Key = "SmtpServer",
             DefaultValue = Environment.GetEnvironmentVariable("SMTP_SERVER") ?? "",
-            Aufforderung = "SMTP-Server",
-            Hinweise = "Geben Sie den SMTP-Server an.",
+            Aufforderung = "",
+            Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]SMTP-Server[/] an.",
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
@@ -1850,8 +1881,8 @@ public static class KonfigHelper
         {
             Key = "SmtpUser",
             DefaultValue = Environment.GetEnvironmentVariable("SMTP_USER") ?? "",
-            Aufforderung = "SMTP-Benutzer",
-            Hinweise = "Geben Sie den SMTP-Benutzer an.",
+            Aufforderung = "",
+            Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]SMTP-Benutzer[/] an.",
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
@@ -1861,8 +1892,8 @@ public static class KonfigHelper
         {
             Key = "SprechtagsDatum",
             DefaultValue = $"01.09.{DateTime.Now.Year}",
-            Aufforderung = "Sprechtag am",
-            Hinweise = "Geben Sie das Datum des Sprechtags an (tt.mm.jjjj).",
+            Aufforderung = "",
+            Hinweise = $"Geben Sie das [{Global.GetColor(Global.ColorInfoBox)}]Datum des Sprechtags[/] an (tt.mm.jjjj).",
             Datentyp = Global.Datentyp.DateTime,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
@@ -1872,8 +1903,8 @@ public static class KonfigHelper
         {
             Key = "StatistikDatum",
             DefaultValue = $"01.09.{DateTime.Now.Year}",
-            Aufforderung = "Abgabedatum der Statistik",
-            Hinweise = "Geben Sie das Datum der Abgabe an. Das ist wichtig, um diejenigen Unterrichte auszuschließen, die befristet sind und nicht am Stichtag stattfinden.",
+            Aufforderung = "",
+            Hinweise = $"Geben Sie das [{Global.GetColor(Global.ColorInfoBox)}]Datum der Abgabe[/] an. Das ist wichtig, um diejenigen Unterrichte auszuschließen, die befristet sind und nicht am Stichtag stattfinden.",
             Datentyp = Global.Datentyp.DateTime,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
@@ -1883,8 +1914,8 @@ public static class KonfigHelper
         {
             Key = "TeamsChatAuswahl",
             DefaultValue = "1",
-            Aufforderung = "Teams-Chat-Auswahl",
-            Hinweise = "Bitte eine Zahl auswählen:",
+            Aufforderung = "",
+            Hinweise = $"Bitte eine [{Global.GetColor(Global.ColorInfoBox)}]Zahl[/] auswählen:",
             Datentyp = Global.Datentyp.Int,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
@@ -1895,7 +1926,7 @@ public static class KonfigHelper
             Key = "Teilleistungsarten",
             DefaultValue = "Vornote,Abschluss-Schriftl.,Abschluss-Mündl.",
             Aufforderung = "Welche Teilleistungsarten (kommagetrennt) sollen gezogen werden?",
-            Hinweise = "Die Teilleistungsart(en) in Webuntis und in SchILD müssen identisch heißen. Ansonsten werden keine Teilleistungen nach SchILD importiert.",
+            Hinweise = $"Die [{Global.GetColor(Global.ColorInfoBox)}]Teilleistungsart(en)[/] in Webuntis und in SchILD müssen identisch heißen. Ansonsten werden keine Teilleistungen nach SchILD importiert.",
             Datentyp = Global.Datentyp.ListString,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
@@ -1905,8 +1936,8 @@ public static class KonfigHelper
         {
             Key = "VolleStelle",
             DefaultValue = "25,5",
-            Aufforderung = "Volle Stelle",
-            Hinweise = $"Geben Sie an, wie viele Stunden einer vollen Stelle entsprechen. Das ist wichtig, um die Altersermäßigung berechnen zu können. Beispiel: [{Global.GetColor(Global.ColorZahlen)}]25,5[/].",
+            Aufforderung = "",
+            Hinweise = $"Geben Sie an, wie viele Stunden einer [{Global.GetColor(Global.ColorInfoBox)}]vollen Stelle[/] entsprechen. Das ist wichtig, um die Altersermäßigung berechnen zu können. Beispiel: [{Global.GetColor(Global.ColorZahlen)}]25,5[/].",
             Datentyp = Global.Datentyp.Float,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
@@ -1916,8 +1947,8 @@ public static class KonfigHelper
         {
             Key = "WikiUrl",
             DefaultValue = "https://wiki.berufskolleg-borken.de/xmlrpc.php",
-            Aufforderung = "URL zum dokuwiki xmlrpc",
-            Hinweise = "Geben Sie die URL zum dokuwiki xmlrpc an.",
+            Aufforderung = "",
+            Hinweise = $"Geben Sie die [{Global.GetColor(Global.ColorInfoBox)}]URL[/] zum dokuwiki xmlrpc an.",
             Datentyp = Global.Datentyp.Url,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
@@ -1927,8 +1958,8 @@ public static class KonfigHelper
         {
             Key = "WikiJsonUser",
             DefaultValue = "",
-            Aufforderung = "Benutzer für Wiki JSON Zugriff",
-            Hinweise = "Geben Sie den Benutzernamen für den Zugriff auf das Wiki JSON an.",
+            Aufforderung = "",
+            Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]Benutzernamen[/] für den Zugriff auf das Wiki JSON an.",
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
@@ -1938,8 +1969,8 @@ public static class KonfigHelper
         {
             Key = "WikiJsonUserKennwort",
             DefaultValue = "",
-            Aufforderung = "Kennwort für Wiki JSON Zugriff",
-            Hinweise = "Geben Sie das Kennwort für den Zugriff auf das Wiki JSON an.",
+            Aufforderung = "",
+            Hinweise = $"Geben Sie das [{Global.GetColor(Global.ColorInfoBox)}]Kennwort[/] für den Zugriff auf das Wiki JSON an.",
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
@@ -1949,8 +1980,8 @@ public static class KonfigHelper
         {
             Key = "WikiSprechtagKleineAenderung",
             DefaultValue = "",
-            Aufforderung = "Kleine Änderung",
-            Hinweise = "Handelt es sich um eine kleine Änderung? Kleine Änderungen erzeugen keine neue Version (j/n)",
+            Aufforderung = "",
+            Hinweise = $"Handelt es sich um eine [{Global.GetColor(Global.ColorInfoBox)}]kleine Änderung[/]? Kleine Änderungen erzeugen keine neue Version (j/n)",
             Datentyp = Global.Datentyp.JaNein,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
@@ -1960,8 +1991,8 @@ public static class KonfigHelper
         {
             Key = "Zeugnisdatum",
             DefaultValue = "",
-            Aufforderung = "Zeugnisdatum",
-            Hinweise = $"Geben Sie das Zeugnisdatum an. Das kann später in SchILD (mit einem Gruppenprozess) erneut geändert werden.",
+            Aufforderung = "",
+            Hinweise = $"Geben Sie das [{Global.GetColor(Global.ColorInfoBox)}]Zeugnisdatum[/] an. Das kann später in SchILD (mit einem Gruppenprozess) erneut geändert werden.",
             Datentyp = Global.Datentyp.DateTime,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
@@ -1971,8 +2002,8 @@ public static class KonfigHelper
         {
             Key = "ZeugnisUrl",
             DefaultValue = "",
-            Aufforderung = "Zeugnis-URL",
-            Hinweise = $"Soll eine bestimmte Webseite geöffnet werden, um die verschlüsselte(n) Datei(en) dort hochzuladen?\nFalls Sie keine Seite öffnen wollen, geben Sie ein Leerzeichen ein.",
+            Aufforderung = "",
+            Hinweise = $"Soll eine [{Global.GetColor(Global.ColorInfoBox)}]bestimmte Webseite[/] geöffnet werden, um die verschlüsselte(n) Datei(en) dort hochzuladen?\nFalls Sie keine Seite öffnen wollen, geben Sie ein Leerzeichen ein.",
             Datentyp = Global.Datentyp.DateTime,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
@@ -1982,8 +2013,8 @@ public static class KonfigHelper
         {
             Key = "ZeugnisPasswort",
             DefaultValue = "",
-            Aufforderung = "Kennwort festlegen",
-            Hinweise = "Mit welchem Kennwort sollen die Dateien verschlüsselt werden?",
+            Aufforderung = "",
+            Hinweise = $"Mit welchem [{Global.GetColor(Global.ColorInfoBox)}]Kennwort[/] sollen die Dateien verschlüsselt werden?",
             Datentyp = Global.Datentyp.DateTime,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
@@ -1993,8 +2024,8 @@ public static class KonfigHelper
         {
             Key = "ZipKennwort",
             DefaultValue = Environment.GetEnvironmentVariable("ZIP_KENNWORT") ?? "",
-            Aufforderung = "Zip-Kennwort",
-            Hinweise = "Die Datei wird nun gezippt.\nGeben Sie das Kennwort ein, mit dem Sie die Zip-Datei verschlüsseln wollen. Geben Sie ein Leerzeichen ein, wenn kein Kennwort gesetzt werden soll.",
+            Aufforderung = "",
+            Hinweise = $"Die Datei wird nun gezippt.\nGeben Sie das [{Global.GetColor(Global.ColorInfoBox)}]Kennwort[/] ein, mit dem Sie die Zip-Datei verschlüsseln wollen. Geben Sie ein Leerzeichen ein, wenn kein Kennwort gesetzt werden soll.",
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,

@@ -91,11 +91,12 @@ public static class MenueHelper
                                     $"3. Profil: Schuelerimport, dann Vorschau",
                                     $"Mehr zum Profil Schuelerimport: [{Global.GetColor(Global.ColorHyperlink)}][link=https://github.com/stbaeumer/BKB-Tool/wiki]https://github.com/stbaeumer/BKB-Tool/wiki[/][/]"
                                 ]),
-                            ];                            
+                            ];
                             m.Zieldateien.Vergleichen(quelldateien);
                             m.Zieldateien.Filtern(quelldateien);
                             m.Zieldateien.OrdnerÖffnen();
                             m.Zieldateien.Erstellen();
+                            m.OeffneWebseite("https://nessa.webuntis.com/students");
                         },
                         Global.Rubrik.WöchtentlicheArbeiten,
                         Global.NurBeiDiesenSchulnummern.Alle
@@ -184,8 +185,8 @@ public static class MenueHelper
                             m.Zieldateien.Filtern(quelldateien);
                             m.Zieldateien.OrdnerÖffnen();
                             m.Zieldateien.Erstellen();                            
-                            m.Zieldateien.Zippen(zeitstempel, pfadDownloads, configuration);
-                            m.Zieldateien.Mailen(zeitstempel, pfadDownloads, configuration);
+                            m.Zieldateien.ZippenMitKennwort(zeitstempel, pfadDownloads, configuration);
+                            m.Zieldateien.Mailen(configuration);
                         },
                         Global.Rubrik.WöchtentlicheArbeiten,
                         Global.NurBeiDiesenSchulnummern.Nur177659
@@ -289,7 +290,7 @@ public static class MenueHelper
                             m.FilterInteressierendeStudentsUndKlassen(configuration);
                             m.IStudents = m.IStudents.AlleOderNeueFotopfadeAnStudentsZuweisen(configuration);
                             m.Zieldatei = new Datei(Path.Combine(configuration["PfadDownloads"] ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-" + (string.Join("-", m.IKlassen).Substring(0, Math.Min(25, string.Join("-", m.IKlassen).Length)) + "-Fotos.zip")));
-                            m.Zieldatei?.Zippen(configuration, "", 0, m.IStudents);
+                            m.Zieldatei?.FotosZippen(configuration, "", 0, m.IStudents);
                             m.Zieldatei.OrdnerOeffnen();
                             m.NeueFotosAusSchildOrdnerErstellenUndAlteFotosVerschieben(configuration);
                         },
@@ -470,6 +471,8 @@ public static class MenueHelper
                         ],
                         m =>
                         {
+                            m.OeffneDateienInDownloadsInNotepadPlusPlus(configuration, ["termine_fhr.csv", "termine_verwaltung.csv", "termine_berufliches_gymnasium.csv", "termine_kollegium.csv"]);
+                            m.OeffneWebseite("https://bkb.wiki/start?do=admin&page=struct_schemas&table=termine_kollegium");
                             foreach (var kalender in new List<string>(){"termine_berufliches_gymnasium", "termine_kollegium", "termine_verwaltung", "termine_fhr" })
                             {
                                 m.Zieldateien =

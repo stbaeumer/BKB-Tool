@@ -129,6 +129,7 @@ public class Datei : List<dynamic>
 
     public Datei(string absoluterPfad, string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise) : this(absoluterPfad)
     {
+        AbsoluterPfad = absoluterPfad;
         AnhandDieserSchlüsselAttributeWirdVerglichen = anhandDieserAttributeWirdVerglichen;
         DieseAttributeWerdenBeimVergleichIgnoriert = dieseAttributeWerdenBeimVergleichIgnoriert;
         Delimiter = delimiter;
@@ -926,7 +927,7 @@ public class Datei : List<dynamic>
         return AbsoluterPfad;
     }
 
-    public void Zippen(IConfiguration configuration, string kennwort = "", int kompressionsLevel = 0, Students students = null!)
+    public void FotosZippen(IConfiguration configuration, string kennwort = "", int kompressionsLevel = 0, Students students = null!)
     {
         configuration = Global.Konfig("RotateFotos", Global.Modus.Update, configuration);
 
@@ -1010,47 +1011,43 @@ public class Datei : List<dynamic>
         }
     }
 
-    public void Zippen(IConfiguration configuration, string kennwort = "", int kompressionsLevel = 0, List<string> zuZippendeDateien = null!)
+    public void ZippenMitKennwort(IConfiguration configuration)
     {
+        ZipPfad = Path.Combine(AbsoluterPfad + ".zip");
+
         try
         {
-            AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start($"Fotos zippen ...", ctx =>
+            AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start($"Zippen ...", ctx =>
             {
-                using (FileStream zipStream = File.Create(AbsoluterPfad.Replace(".csv", ".zip")))
+                using (FileStream zipStream = File.Create(ZipPfad))
                 using (ZipOutputStream zip = new ZipOutputStream(zipStream))
                 {
-                    zip.SetLevel(kompressionsLevel); // Kompressionslevel (0-9, 9 = beste Kompression)
+                    zip.SetLevel(0); // Kompressionslevel (0-9, 9 = beste Kompression)
 
-                    if (!string.IsNullOrEmpty(kennwort) && kennwort != " ")
+                    if (!string.IsNullOrEmpty(configuration["ZipKennwort"]) && configuration["ZipKennwort"] != " ")
                     {
-                        zip.Password = kennwort; // Passwort setzen
+                        zip.Password = configuration["ZipKennwort"]; // Passwort setzen
                     }
 
-                    foreach (var zuZippendeDatei in zuZippendeDateien)
+                    byte[] buffer = new byte[4096];
+                    string dateiName = Path.GetFileName(AbsoluterPfad);
+
+                    // Zippe ohne Komprimierung
+                    ZipEntry entry = new ZipEntry(dateiName)
                     {
-                        byte[] buffer = new byte[4096];
-                        string dateiName = Path.GetFileName(zuZippendeDatei);
+                        DateTime = DateTime.Now,
+                        CompressionMethod = CompressionMethod.Stored // Keine Komprimierung
+                    };
 
-                        // Füge die thumb-datei hinzu, wobei der Name ohne _thumb im Zipfile liegen soll.
-                        // Zippe ohne Komprimierung
-                        ZipEntry entry = new ZipEntry(dateiName)
+                    zip.PutNextEntry(entry);
+
+                    using (FileStream dateiStream = File.OpenRead(AbsoluterPfad))
+                    {
+                        int bytesRead;
+                        while ((bytesRead = dateiStream.Read(buffer, 0, buffer.Length)) > 0)
                         {
-                            DateTime = DateTime.Now,
-                            CompressionMethod = CompressionMethod.Stored // Keine Komprimierung
-                        };
-
-                        zip.PutNextEntry(entry);
-
-                        using (FileStream dateiStream = File.OpenRead(zuZippendeDatei))
-                        {
-                            int bytesRead;
-                            while ((bytesRead = dateiStream.Read(buffer, 0, buffer.Length)) > 0)
-                            {
-                                zip.Write(buffer, 0, bytesRead);
-                            }
+                            zip.Write(buffer, 0, bytesRead);
                         }
-                        // Lösche die temporäre Datei
-                        File.Delete(zuZippendeDatei);
                     }
 
                     // Durchlaufe die Liste der absoluten Pfade und füge sie dem Zip-Archiv hinzu
@@ -1067,7 +1064,7 @@ public class Datei : List<dynamic>
         }
     }
 
-    internal void Mailen(string subject, string absendername, string body, IConfiguration configuration)
+    internal void Mailen(string subject, string body, IConfiguration configuration, string attachment = "")
     {
         if (this.Count == 0)
         {
@@ -1083,7 +1080,7 @@ public class Datei : List<dynamic>
         configuration = Global.Konfig("NetmanMailBccReceiver", Global.Modus.Update, configuration);
 
         var mail = new Mail();
-        mail.Senden(subject, configuration, body, ZipPfad, configuration["NetmanMailReceiver"], "", configuration["NetmanMailBccReceiver"]);
+        mail.Senden(subject, configuration, body, attachment, configuration["NetmanMailReceiver"], "", configuration["NetmanMailBccReceiver"]);
     }
 
     internal List<dynamic> FilterOpenPeriod()
