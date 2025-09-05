@@ -3400,8 +3400,8 @@ public class Menüeintrag
                     var dict = (IDictionary<string, object>)s;
                     var panel = new Panel(
                                 $"Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]Schuelerzusatzdaten.dat[/] enthält keine schulische E-Mail-Adresse für {dict["Vorname"]} {dict["Nachname"]}. " +
-                                $"\n[{Global.GetColor(Global.ColorHinweise)}]Option 1:[/] Ergänzen Sie die schulische E-Mail-Adresse manuell in SchILD unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Individualdaten I[/]." +
-                                $"\n[{Global.GetColor(Global.ColorHinweise)}]Option 2:[/] [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] erstellt automatisch alle Mailadressen in [{Global.GetColor(Global.ColorPfadInDateien)}]Schuelerzusatzdaten.dat[/].")
+                                $"\nNutzen Sie [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/], um automatisch alle Mailadressen in [{Global.GetColor(Global.ColorPfadInDateien)}]Schuelerzusatzdaten.dat[/] zu erstellen." +
+                                $"\nAnschließend kehren Sie hierher zurück.")
                             .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] !? [/]")
                             .HeaderAlignment(Justify.Left)
                             .SquareBorder()

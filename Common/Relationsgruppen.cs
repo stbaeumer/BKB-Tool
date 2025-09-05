@@ -185,9 +185,9 @@ public class Relationsgruppen : List<Relationsgruppe>
                     "   (= 9 + 50 * 0,7 + (" + stellenBs.ToString("0.0000") + "+" + stellenVz.ToString("0.0000") +
                     " - 50) * 0,3) Verordnung zur Ausführung des § 93 Abs. 2 Schulgesetz (VO zu § 93 Abs. 2 SchulG) vom 18.03.2005"))
         {
-            Header = new PanelHeader("Leitungszeit", Justify.Left),
+            Header = new PanelHeader("  Leitungszeit  ", Justify.Left),
             Border = BoxBorder.Rounded,
-            Padding = new Padding(1, 1),
+            //Padding = new Padding(1, 1),
             Expand = true
         };
         AnsiConsole.Write(panel);
@@ -200,9 +200,9 @@ public class Relationsgruppen : List<Relationsgruppe>
             new Markup((stellenBs * 0.5 + stellenVz * 1.2).ToString("00.00") + "   (= " +
                     stellenBs.ToString("0.0000") + " * 0,5 + " + stellenVz.ToString("0.0000") + " * 1,2)"))
         {
-            Header = new PanelHeader("Anrechnungen", Justify.Left),
+            Header = new PanelHeader("  Anrechnungen  ", Justify.Left),
             Border = BoxBorder.Rounded,
-            Padding = new Padding(1, 1),
+            //Padding = new Padding(1, 1),
             Expand = true
         };
         AnsiConsole.Write(panel);

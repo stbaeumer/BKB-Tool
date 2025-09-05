@@ -65,6 +65,38 @@ public static class MenueHelper
                 students,
                 [
                     new Menüeintrag(
+                        "Mailadressen: fehlende Schulinterne Mailadressen in den Individualdaten I ergänzen",
+                        quelldateien.Notwendige(configuration, ["schuelerzusatzdaten,dat"]),
+                        students,
+                        klassen,
+                        [
+                            $"Es wird jetzt die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", "SchuelerZusatzdaten.dat")}[/] um schulinterne Mailadressen ergänzt und in [{Global.GetColor(Global.ColorPfadInDateien)}]{pfadSchilddatenaustausch}[/] für den Re-Import nach SchILD bereitgestellt.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1:[/] BKB-Tool bildet die schulinterne Mailadressen wie folgt: [{Global.GetColor(Global.ColorTextHervorheben)}]nv061231@meine-schule.de[/], wobei gilt:",
+                            $"[{Global.GetColor(Global.ColorTextHervorheben)}]            n[/]      : Erster Buchstabe des Nachnamens. Umlaute werden aufgelöst. Bsp.: [{Global.GetColor(Global.ColorTextHervorheben)}]Ü[/] wird zu [{Global.GetColor(Global.ColorTextHervorheben)}]u[/] usw.",
+                            $"[{Global.GetColor(Global.ColorTextHervorheben)}]            v[/]      : Erster Buchstabe des Vornamens. Umlaute werden aufgelöst.",
+                            $"[{Global.GetColor(Global.ColorTextHervorheben)}]            061231[/] : Geburtsdatum in der Notation: JJMMTT.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #2:[/] Vorhandene schulinterne SchILD-Mailadressen in [{Global.GetColor(Global.ColorPfadInProgrammen)}]Individualdaten I[/] bleiben unangetastet.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #3:[/] Doppelungen werden angezeigt und müssen nach Vorgabe behandelt werden."
+                        ],
+                        m =>
+                        {
+                            configuration = Global.Konfig("MailDomain", Global.Modus.Read, configuration);
+
+                            m.Zieldateien =
+                            [
+                                m.SchuelerZusatzdatenUmMailAdresseErgaenzen(
+                                    configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerZusatzdaten.dat"),
+                                    ["Nachname", "Vorname", "Geburtsdatum"],
+                                    [],
+                                    "|", '\'', new UTF8Encoding(false), false)
+                            ];
+                            m.Zieldateien.ExportAusSchildVerschieben(configuration);
+                            m.Zieldateien.VergleichenFilternErstellen(quelldateien);
+                        },
+                        Global.Rubrik.WöchtentlicheArbeiten,
+                        Global.NurBeiDiesenSchulnummern.Alle
+                    ),
+                    new Menüeintrag(
                         "Webuntis: Schüler*innen-Importdatei für Webuntis erstellen",
                         quelldateien.Notwendige(configuration, ["student_,csv","schuelerlernabschnittsdaten,dat", "schuelerzusatzdaten,dat", "schuelererzieher,dat", "schuelerAdressen,dat", "lehrkraefte,dat", "klassen,dat"]),
                         students,
@@ -131,8 +163,8 @@ public static class MenueHelper
                         klassen,
                         [
                             $"Es wird jetzt die Datei [bold {Global.GetColor(Global.ColorPfadInDateien)}]" + Path.Combine(configuration["PfadDownloads"] ?? "", DateTime.Now.ToString("yyyyMMdd-") + "****" +  @"-ImportNachLittera.csv") + "[/] erstellt.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #2:[/] Auch Abschluss und Abgang muss beim SchILD-Export angehakt werden.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #3:[/] Schüler*innen werden 42 Tage nach dem Abgangszeugnis/Abschlusszeugnis ausgeschult. Wenn kein letztes Zeugnisdatum bei Abgängern/Abgeschlossenen ermittelt werden kann, dann wird sofort ausgeschult."
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1:[/] Auch Abschluss und Abgang muss beim SchILD-Export angehakt werden.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #2:[/] Schüler*innen werden 42 Tage nach dem Abgangszeugnis/Abschlusszeugnis ausgeschult. Wenn kein letztes Zeugnisdatum bei Abgängern/Abgeschlossenen ermittelt werden kann, dann wird sofort ausgeschult."
                         ],
                         m =>
                         {
@@ -151,7 +183,7 @@ public static class MenueHelper
                             m.Zieldateien.Filtern(quelldateien);
                             m.Zieldateien.OrdnerÖffnen();
                             m.Zieldateien.Erstellen();
-                            m.Zieldateien.Verschieben(Global.Konfig("PfadLitteraImport", Global.Modus.Update, configuration, "Littera-Import-Pfad"));
+                            m.Zieldateien.Verschieben(Global.Konfig("PfadLitteraImport", Global.Modus.Update, configuration));
                         },
                         Global.Rubrik.WöchtentlicheArbeiten,
                         Global.NurBeiDiesenSchulnummern.Nur177659
@@ -190,39 +222,7 @@ public static class MenueHelper
                         },
                         Global.Rubrik.WöchtentlicheArbeiten,
                         Global.NurBeiDiesenSchulnummern.Nur177659
-                    ),                    
-                    new Menüeintrag(
-                        "Mailadressen: fehlende Schulinterne Mailadressen in den Individualdaten I ergänzen",
-                        quelldateien.Notwendige(configuration, ["schuelerzusatzdaten,dat"]),
-                        students,
-                        klassen,
-                        [
-                            $"Es wird jetzt die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", "SchuelerZusatzdaten.dat")}[/] um schulinterne Mailadressen ergänzt und in [{Global.GetColor(Global.ColorPfadInDateien)}]{pfadSchilddatenaustausch}[/] für den Re-Import nach SchILD bereitgestellt.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1:[/] BKB-Tool bildet die schulinterne Mailadressen wie folgt: [{Global.GetColor(Global.ColorTextHervorheben)}]nv061231@meine-schule.de[/], wobei gilt:",
-                            $"[{Global.GetColor(Global.ColorTextHervorheben)}]            n[/]      : Erster Buchstabe des Nachnamens. Umlaute werden aufgelöst. Bsp.: [{Global.GetColor(Global.ColorTextHervorheben)}]Ü[/] wird zu [{Global.GetColor(Global.ColorTextHervorheben)}]u[/] usw.",
-                            $"[{Global.GetColor(Global.ColorTextHervorheben)}]            v[/]      : Erster Buchstabe des Vornamens. Umlaute werden aufgelöst.",
-                            $"[{Global.GetColor(Global.ColorTextHervorheben)}]            061231[/] : Geburtsdatum in der Notation: JJMMTT.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #2:[/] Vorhandene schulinterne SchILD-Mailadressen in [{Global.GetColor(Global.ColorPfadInProgrammen)}]Individualdaten I[/] bleiben unangetastet.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #3:[/] Doppelungen werden angezeigt und müssen nach Vorgabe behandelt werden."
-                        ],
-                        m =>
-                        {
-                            configuration = Global.Konfig("MailDomain", Global.Modus.Read, configuration);
-
-                            m.Zieldateien =
-                            [
-                                m.SchuelerZusatzdatenUmMailAdresseErgaenzen(
-                                    configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerZusatzdaten.dat"),
-                                    ["Nachname", "Vorname", "Geburtsdatum"],
-                                    [],
-                                    "|", '\'', new UTF8Encoding(false), false)
-                            ];
-                            m.Zieldateien.ExportAusSchildVerschieben(configuration);
-                            m.Zieldateien.VergleichenFilternErstellen(quelldateien);
-                        },
-                        Global.Rubrik.WöchtentlicheArbeiten,
-                        Global.NurBeiDiesenSchulnummern.Alle
-                    ),
+                    ),                                        
                     new Menüeintrag(
                         "Fotos #1: Schüler*innen klassenweise fotografieren, kopieren, umbenennen, ablegen",
                         quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "schuelerzusatzdaten,dat"]),
@@ -292,6 +292,8 @@ public static class MenueHelper
                             m.Zieldatei = new Datei(Path.Combine(configuration["PfadDownloads"] ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-" + (string.Join("-", m.IKlassen).Substring(0, Math.Min(25, string.Join("-", m.IKlassen).Length)) + "-Fotos.zip")));
                             m.Zieldatei?.FotosZippen(configuration, "", 0, m.IStudents);
                             m.Zieldatei.OrdnerOeffnen();
+                            m.OeffneWebseite("https://nessa.webuntis.com/students");
+                            m.OeffneWebseite("https://management.geevoo.de/import/");
                             m.NeueFotosAusSchildOrdnerErstellenUndAlteFotosVerschieben(configuration);
                         },
                         Global.Rubrik.WöchtentlicheArbeiten,

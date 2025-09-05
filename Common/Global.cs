@@ -663,7 +663,7 @@ public static class Global
         if (datentyp == Datentyp.Mail)
         {
             // Der Wert wird im Read-Modus nicht erneut abgefragt, wenn der Wert plausibel ist und schon ein Wert in der configuration existiert.
-            if ((modus == Modus.ReadSilent || modus == Modus.Read) && (!string.IsNullOrEmpty(defaultValue) && defaultValue.StartsWith("@") && defaultValue.Contains("."))  && !string.IsNullOrEmpty(configuration[parameter]))
+            if (modus == Modus.ReadSilent || (modus == Modus.Read && (!string.IsNullOrEmpty(defaultValue) && defaultValue.StartsWith("@") && defaultValue.Contains("."))  && !string.IsNullOrEmpty(configuration[parameter])))
             {
                 configuration[parameter] = defaultValue;
                 if(modus != Modus.ReadSilent)
@@ -1055,6 +1055,8 @@ public static class Global
         // Durchlaufe alle Einstellungen gemäß KonfigHelper
         for (var i = 0; i < kon.Count(); i++)
         {   
+            if(modus == Modus.ReadSilent && !string.IsNullOrEmpty(configuration[kon[i].Key]))
+                continue; // Im Silent-Modus werden nur die Einstellungen abgefragt, die noch keinen Wert haben.
             DisplayHeader(configuration);         
             configuration = Konfig(kon[i].Key, modus, configuration, kon[i].Value.Aufforderung, i + 1, kon.Count(), kon[i].Value.Hinweise, kon[i].Value.DefaultValue);
         }
@@ -1427,7 +1429,7 @@ public static class KonfigHelper
         {
             Key = "AppDescription",
             DefaultValue = "BKB-Tool - Ein Werkzeug an der Schnittstelle zwischen SchILD und Webuntis.",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = "Kurze Beschreibung der Anwendung.",
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = false,
@@ -1438,7 +1440,7 @@ public static class KonfigHelper
         {
             Key = "Abschnitt",
             DefaultValue = "1",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]Lernabschnitt[/] an. Das Schuljahr beginnt immer mit Abschnitt [{Global.GetColor(Global.ColorZahlen)}]1[/]. \nI.d.R. wechselt der Abschnitt nach den Halbjahreszeugnissen auf Abschnitt [{Global.GetColor(Global.ColorZahlen)}]2[/].",
             Datentyp = Global.Datentyp.Abschnitt,
             InGrundeinstellungAbfragen = true,
@@ -1449,7 +1451,7 @@ public static class KonfigHelper
         {
             Key = "Abschnittswechsel",
             DefaultValue = new DateTime(DateTime.Now.Month > 7 ? DateTime.Now.Year + 1 : DateTime.Now.Year, 2, 1).ToShortDateString(),
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie das [{Global.GetColor(Global.ColorInfoBox)}]Datum des Abschnittswechsels[/] an. I.d.R. ist der [{Global.GetColor(Global.ColorZahlen)}]{new DateTime(DateTime.Now.Month > 7 ? DateTime.Now.Year + 1 : DateTime.Now.Year, 2, 1).ToShortDateString()}[/] (oder ein anderes Datum im Februar) der richtige Wert.",
             Datentyp = Global.Datentyp.DateTime,
             InGrundeinstellungAbfragen = true,
@@ -1460,7 +1462,7 @@ public static class KonfigHelper
         {
             Key = "AccessPfad",
             DefaultValue = @"\\fs01\SchILD-NRW\DB\Test.mdb",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]Pfad zur Access-Datenbank[/] an. Beispiel:[{Global.GetColor(Global.ColorPfadInProgrammen)}]{@"\\fs01\SchILD-NRW\DB\Test.mdb"}[/]\nGeben Sie stets den kompletten Pfad inklusive Dateinname an.",
             Datentyp = Global.Datentyp.Pfad,
             InGrundeinstellungAbfragen = true,
@@ -1471,7 +1473,7 @@ public static class KonfigHelper
         {
             Key = "AccessPassword",
             DefaultValue = Environment.GetEnvironmentVariable("ACCESS_PASSWORD") ?? "",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie das [{Global.GetColor(Global.ColorInfoBox)}]Kennwort[/] der Access-Datenbank an. Es geht nicht um Ihr persönliches Kennwort in SchILD, sondern um das Kennwort der Access-Datenbank selbst.",
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
@@ -1493,7 +1495,7 @@ public static class KonfigHelper
         {
             Key = "Betreff",
             DefaultValue = "Betreff",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]Betreff[/] an.",
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = false,
@@ -1504,7 +1506,7 @@ public static class KonfigHelper
         {
             Key = "BccAdresse",
             DefaultValue = "",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie [{Global.GetColor(Global.ColorInfoBox)}]BCC-Adresse[/] an. Geben Sie ein Leerzeichen ein, wenn Sie keine BCC-Adresse wünschen.",
             Datentyp = Global.Datentyp.Mail,
             InGrundeinstellungAbfragen = false,
@@ -1515,7 +1517,7 @@ public static class KonfigHelper
         {
             Key = "Body",
             DefaultValue = $"Guten Morgen,\n\n...",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie [{Global.GetColor(Global.ColorInfoBox)}]Nachricht[/] ein. Geben Sie \\n ein, um einen Zeilenumbruch zu erzeugen. geben Sie #Lehrer# als Platzhalter für den Namen des Lehrers ein. Der Name wird dann automatisch ersetzt.",
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
@@ -1526,7 +1528,7 @@ public static class KonfigHelper
         {
             Key = "ConnectionStringSchild",
             DefaultValue = "",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]ConnectionString[/] für SchILD an.",
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
@@ -1537,7 +1539,7 @@ public static class KonfigHelper
         {
             Key = "ConnectionStringWebuntis",
             DefaultValue = "",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]ConnectionString[/] für Webuntis an (optional).",
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
@@ -1548,7 +1550,7 @@ public static class KonfigHelper
         {
             Key = "ConnectionStringUntis",
             DefaultValue = Environment.GetEnvironmentVariable("UNTIS_CONNECTION_STRING") ?? "",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Bitte geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]ConnectionString[/] für Untis an.",
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
@@ -1559,7 +1561,7 @@ public static class KonfigHelper
         {
             Key = "FirstRun",
             DefaultValue = "",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = "",
             Datentyp = Global.Datentyp.FirstRun,
             InGrundeinstellungAbfragen = false,
@@ -1570,7 +1572,7 @@ public static class KonfigHelper
         {
             Key = "FehlzeitenVorDemAbschnittswechselBeruecksichtigen",
             DefaultValue = "Nein",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Sollen die [{Global.GetColor(Global.ColorInfoBox)}]Fehlzeiten[/] vor dem Abschnittswechsel auf dem Zeugnis hinzugefügt werden?",
             Datentyp = Global.Datentyp.JaNein,
             InGrundeinstellungAbfragen = false,
@@ -1581,7 +1583,7 @@ public static class KonfigHelper
         {
             Key = "InteressierendeUnterrichtsgruppen",
             DefaultValue = "1.HJ,U",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie alle [{Global.GetColor(Global.ColorInfoBox)}]Unterrichtsgruppen[/] an, die am Stichtag anwesend sein werden. Unterrichte ohne Unterrichtsgrupe werden immer berücksichtigt.\nGroß- und Kleinschreibung beachten!\nWenn Sie alle Unterrichtsgruppen berücksichtigen wollen, schreiben wie das Wort [{Global.GetColor(Global.ColorActionInMenüs)}]alle[/] gewählt.",
             Datentyp = Global.Datentyp.MultiSelect,
             InGrundeinstellungAbfragen = false,
@@ -1592,7 +1594,7 @@ public static class KonfigHelper
         {
             Key = "Klassen",
             DefaultValue = "",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie die [{Global.GetColor(Global.ColorInfoBox)}]interessierende(n) Klasse(n)[/] an. Mehrere Klassen sind mit Komma zu trennen. Es können auch Namensteile von Klassen angegeben werden, wordurch alle Klassen gewählt werden, deren Klassenname den Namensteil enthält. Alle Klassen werden mit dem Wort [bold springGreen2]alle[/] gewählt.",
             Datentyp = Global.Datentyp.Klassen,
             InGrundeinstellungAbfragen = false,
@@ -1603,7 +1605,7 @@ public static class KonfigHelper
         {
             Key = "Konferenzdatum",
             DefaultValue = "",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie das [{Global.GetColor(Global.ColorInfoBox)}]Konferenzdatum[/] an. Das kann später in SchILD (mit einem Gruppenprozess) erneut geändert werden.",
             Datentyp = Global.Datentyp.DateTime,
             InGrundeinstellungAbfragen = false,
@@ -1614,7 +1616,7 @@ public static class KonfigHelper
         {
             Key = "Kursarten",
             DefaultValue = " G, L, A, Z, V, P",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie im Folgenden an, wie sich bei Ihnen die [{Global.GetColor(Global.ColorInfoBox)}]Kursarten[/] aus den Fächern ableiten lassen. Wenn Ihre LKs beispielsweise so aussehen: [{Global.GetColor(Global.ColorHinweise)}]M L1, D L2, E L1[/], dann geben Sie hier für LKs (inkl. führendes Leerzeichen) '[{Global.GetColor(Global.ColorHinweise)}] L[/]' an." +
             $"\nDie Kursarten in SchILD sind: [{Global.GetColor(Global.ColorHinweise)}]GK, LK, AB, ZK, VTF, PJK[/]" +
             $"\nIhre vollständige Eingabe könnte also so aussehen: [{Global.GetColor(Global.ColorActionInMenüs)}] G, L, A, Z, V, P[/]." +
@@ -1628,7 +1630,7 @@ public static class KonfigHelper
         {
             Key = "Lk1faecher",
             DefaultValue = "D,BI,M,E",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie kommasepariert die möglichen [{Global.GetColor(Global.ColorInfoBox)}]Fächer des 1.LKs[/] an. Bitte nur die Fächer angeben, ohne 'LK' etc. Beispiel: [{Global.GetColor(Global.ColorActionInMenüs)}]D,BI,M,E[/]",
             Datentyp = Global.Datentyp.Maildomain,
             InGrundeinstellungAbfragen = false,
@@ -1639,7 +1641,7 @@ public static class KonfigHelper
         {
             Key = "LehrkraefteSonderzeiten",
             DefaultValue = "098,099,007,360,160",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = "Welche [{Global.GetColor(Global.ColorInfoBox)}]Anrechnungsgründe[/] sollen ignoriert bzw. auf 0 gesetzt werden?",
             Datentyp = Global.Datentyp.ListInt,
             InGrundeinstellungAbfragen = false,
@@ -1650,7 +1652,7 @@ public static class KonfigHelper
         {
             Key = "MailDomain",
             DefaultValue = "@students.berufskolleg-borken.de",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie die schulische [{Global.GetColor(Global.ColorInfoBox)}]Mail-Domain[/] für Mailadressen der Schüler*innen an. Bsp: [{Global.GetColor(Global.ColorHyperlink)}]@students.berufskolleg-borken.de[/]. Ihre Eingabe muss mit [{Global.GetColor(Global.ColorHyperlink)}]@[/] beginnen und mit [{Global.GetColor(Global.ColorHyperlink)}].de[/] etc. enden.",
             Datentyp = Global.Datentyp.Maildomain,
             InGrundeinstellungAbfragen = true,
@@ -1661,7 +1663,7 @@ public static class KonfigHelper
         {
             Key = "",
             DefaultValue = Environment.GetEnvironmentVariable("NETMAN_MAIL_RECEIVER"),
-            Aufforderung = "NetmanMailReceiver",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie die [{Global.GetColor(Global.ColorInfoBox)}]Empfänger-E-Mail-Adresse[/] der Netman-Datei an.",
             Datentyp = Global.Datentyp.Mail,
             InGrundeinstellungAbfragen = true,
@@ -1672,7 +1674,7 @@ public static class KonfigHelper
         {
             Key = "NetmanMailBccReceiver",
             DefaultValue = Environment.GetEnvironmentVariable("NETMAN_MAIL_BCC_RECEIVER"),
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie die [{Global.GetColor(Global.ColorInfoBox)}]BCC-Empfänger-E-Mail-Adresse[/] der Netman-Datei an.",
             Datentyp = Global.Datentyp.Mail,
             InGrundeinstellungAbfragen = true,
@@ -1683,7 +1685,7 @@ public static class KonfigHelper
         {
             Key = "PfadDownloads",
             DefaultValue = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"),
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie den Pfad des [{Global.GetColor(Global.ColorInfoBox)}]Downloads-Verzeichnisses[/] an. In der Regel wird das Verzeichnis bereits richtig vorgeschlagen. Dann einfach [bold springGreen2]ENTER[/] drücken:",
             Datentyp = Global.Datentyp.Pfad,
             InGrundeinstellungAbfragen = true,
@@ -1694,7 +1696,7 @@ public static class KonfigHelper
         {
             Key = "PfadFotosAusSchILD",
             DefaultValue = $"\\\\fs01\\SchILD-NRW\\Fotos_aus_SchILD",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Wo liegen die [{Global.GetColor(Global.ColorInfoBox)}]Fotos[/], die Sie aus SchILD exportiert haben ([{Global.GetColor(Global.ColorPfadInProgrammen)}]Datenaustausch > Fotos > Fotos exportieren[/])? Der Export ist wichtig, um nur fehlende Fotos an SchILD zu übergeben. Geben Sie den Pfad zu den Fotos aus SchILD an. Beispiel: [{Global.GetColor(Global.ColorPfadInProgrammen)}]\\\\fs01\\SchILD-NRW\\Fotos_aus_SchILD[/]",
             Datentyp = Global.Datentyp.Pfad,
             InGrundeinstellungAbfragen = true,
@@ -1705,8 +1707,8 @@ public static class KonfigHelper
         {
             Key = "PfadSchilddatenaustausch",
             DefaultValue = $"\\\\fs01\\SchILD-NRW\\Ausgabeverzeichnis",
-            Aufforderung = "",
-            Hinweise = $"Geben Sie den Pfad und das Verzeichnis an, das in SchILD eingetragen ist als [{Global.GetColor(Global.ColorInfoBox)}]Ausgabeverzeichnis[/] unter: \n[{Global.GetColor(Global.ColorPfadInProgrammen)}]Datenaustausch > Schnittstelle SchILD-NRW > Export[/]",
+            Aufforderung = $"[green]■[/]",
+            Hinweise = $"Geben Sie das [{Global.GetColor(Global.ColorInfoBox)}]Ausgabeverzeichnis[/] an. Das ist in SchILD eingetragen unter: \n[{Global.GetColor(Global.ColorPfadInProgrammen)}]Datenaustausch > Schnittstelle SchILD-NRW > Export[/]",
             Datentyp = Global.Datentyp.Pfad,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = true,
@@ -1716,7 +1718,7 @@ public static class KonfigHelper
         {
             Key = "PdfKennwort",
             DefaultValue = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"),
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie optional ein [{Global.GetColor(Global.ColorInfoBox)}]Kennwort[/] für PDF-Dateien an, die Sie mit [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] erstellen möchten. Das Kennwort wird für alle PDF-Dateien verwendet, die Sie mit [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] erstellen. Wenn Sie kein Kennwort wünschen, dann ein Leerzeichen eingeben.",
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
@@ -1727,8 +1729,8 @@ public static class KonfigHelper
         {
             Key = "MaxDateiAlter",
             DefaultValue = "3",
-            Aufforderung = "",
-            Hinweise = $"Geben Sie an, [{Global.GetColor(Global.ColorInfoBox)}]wie viele Tage[/] Dateien höchstens alt sein dürfen, um vom BKB-Tool für das Einlesen akzeptiert zu werden. Die Angabe einer (möglichst niedrigen) Zahl soll sicherstellen, dass nicht versehentlich veraltete Dateien eingelesen werden.",
+            Aufforderung = $"[green]■[/]",
+            Hinweise = $"Geben Sie das [{Global.GetColor(Global.ColorInfoBox)}]Höchstalter[/] in Tagen für eingelesene Dateien an. Ältere Dateien werden von BKB-Tool nicht mehr für das Einlesen akzeptiert. Die Angabe einer (möglichst niedrigen) Zahl soll sicherstellen, dass nicht versehentlich veraltete Dateien eingelesen werden.",
             Datentyp = Global.Datentyp.Int,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = true,
@@ -1738,7 +1740,7 @@ public static class KonfigHelper
         {
             Key = "NurDieseGruende",
             DefaultValue = "200",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie die [{Global.GetColor(Global.ColorInfoBox)}]interessierenden Gründe[/] an.",
             Datentyp = Global.Datentyp.ListInt,
             InGrundeinstellungAbfragen = false,
@@ -1760,7 +1762,7 @@ public static class KonfigHelper
         {
             Key = "OffeneFehlstunden",
             DefaultValue = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"),
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Es gibt [{Global.GetColor(Global.ColorInfoBox)}]offene Fehlstunden[/]. Offene Fehlstunden sind weder entschuldigt noch unentschuldigt und werden im Zeugnis nicht berücksichtigt. Mit [{Global.GetColor(Global.ColorActionInMenüs)}]ENTER[/] geht es ohne Berücksichtigung der offenen Fehlstunden weiter. Abbruch mit [{Global.GetColor(Global.ColorFehler)}]ANYKEY[/].",
             Datentyp = Global.Datentyp.JaNein,
             InGrundeinstellungAbfragen = false,
@@ -1771,7 +1773,7 @@ public static class KonfigHelper
         {
             Key = "PfadDokumentenverwaltung",
             DefaultValue = @"\\fs01\SchILD-NRW\Dokumentenverwaltung",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie das [{Global.GetColor(Global.ColorInfoBox)}]Verzeichnis[/] an, das in SchILD unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Extras > Programmeinstellungen > Globale Einstellungen > Dokumentenverwaltung[/] als [{Global.GetColor(Global.ColorPfadInProgrammen)}]Dokumentenverzeichnis[/] eingetragen ist.",
             Datentyp = Global.Datentyp.Pfad,
             InGrundeinstellungAbfragen = true,
@@ -1782,7 +1784,7 @@ public static class KonfigHelper
         {
             Key = "PfadFotosImSchILD-Ordner",
             DefaultValue = "\\\\fs01\\SchILD-NRW\\Fotos",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Wo werden die aufbereiteten Schüler*innenfotos in Klassenordnern gespeichert? Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]Pfad[/] an! Beispiel: [aqua]\\\\fs01\\SchILD-NRW\\Fotos[/]. Beachten Sie, dass alle Fotos im Zielordner den Benutzernamen (der Teil vor dem @ der Mail-Adresse) als Namen haben müssen.",
             Datentyp = Global.Datentyp.Pfad,
             InGrundeinstellungAbfragen = true,
@@ -1793,8 +1795,8 @@ public static class KonfigHelper
         {
             Key = "PfadLitteraImport",
             DefaultValue = @"\\fs01\Littera\Atlantis Import Daten",
-            Aufforderung = "",
-            Hinweise = $"Wohin soll die neue Datei nach dem Erstellen verschoben werden?Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]Pfad[/] an.",
+            Aufforderung = $"[green]■[/]",
+            Hinweise = $"Wohin soll die neue Datei nach dem Erstellen verschoben werden? Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]Pfad[/] an.",
             Datentyp = Global.Datentyp.Pfad,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
@@ -1804,7 +1806,7 @@ public static class KonfigHelper
         {
             Key = "RotateFotos",
             DefaultValue = "0",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Sie können vor dem Hochladen die Fotos drehen. Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]Drehwinkel in Grad[/] an. Beispiel: [{Global.GetColor(Global.ColorZahlen)}]90[/] für 90 Grad im Uhrzeigersinn. [{Global.GetColor(Global.ColorZahlen)}]0[/] bedeutet keine Drehung.",
             Datentyp = Global.Datentyp.Int,
             InGrundeinstellungAbfragen = true,
@@ -1815,7 +1817,7 @@ public static class KonfigHelper
         {
             Key = "Schlüsselwörter",
             DefaultValue = "Jahreeszeugnis, Abschlusszeugnis, Abgangszeugnis, Zeugnis",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie kommagetrennt interessierende [{Global.GetColor(Global.ColorInfoBox)}]Schlüsselwörter[/] an (z.B. Abgangszeugnis, Abschlusszeugnis, Jahreszeugnis). BKB-Tool durchsucht die PDF-Dateien im Ordner nach den Wörtern. Sobald ein Schlüsselwort matcht, wird die Datei in das Dokumentenverzeichnis kopiert.",
             Datentyp = Global.Datentyp.ListString,
             InGrundeinstellungAbfragen = false,
@@ -1826,7 +1828,7 @@ public static class KonfigHelper
         {
             Key = "SchipsOderZeugnisseOderAnderePdfs",
             DefaultValue = "",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Wählen Sie zwischen den [{Global.GetColor(Global.ColorInfoBox)}]Optionen[/]:\n1: Schips\n2: Notenlisten\n3: andere PDFs",
             Datentyp = Global.Datentyp.Int,
             InGrundeinstellungAbfragen = false,
@@ -1837,7 +1839,7 @@ public static class KonfigHelper
         {
             Key = "Schulnummer",
             DefaultValue = "177659",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie Ihre [{Global.GetColor(Global.ColorInfoBox)}]Schulnummer[/] an. Je nach Schulnummer werden evtl. unterschiedliche Funktionen angeboten.",
             Datentyp = Global.Datentyp.Int,
             InGrundeinstellungAbfragen = true,
@@ -1848,7 +1850,7 @@ public static class KonfigHelper
         {
             Key = "SmtpKennwort",
             DefaultValue = Environment.GetEnvironmentVariable("SMTP_KENNWORT") ?? "",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie das [{Global.GetColor(Global.ColorInfoBox)}]SMTP-Kennwort[/] an.",
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
@@ -1859,7 +1861,7 @@ public static class KonfigHelper
         {
             Key = "SmtpPort",
             DefaultValue = Environment.GetEnvironmentVariable("SMTP_PORT") ?? "",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]SMTP-Port[/] an.",
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
@@ -1870,7 +1872,7 @@ public static class KonfigHelper
         {
             Key = "SmtpServer",
             DefaultValue = Environment.GetEnvironmentVariable("SMTP_SERVER") ?? "",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]SMTP-Server[/] an.",
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
@@ -1881,7 +1883,7 @@ public static class KonfigHelper
         {
             Key = "SmtpUser",
             DefaultValue = Environment.GetEnvironmentVariable("SMTP_USER") ?? "",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]SMTP-Benutzer[/] an.",
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
@@ -1892,7 +1894,7 @@ public static class KonfigHelper
         {
             Key = "SprechtagsDatum",
             DefaultValue = $"01.09.{DateTime.Now.Year}",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie das [{Global.GetColor(Global.ColorInfoBox)}]Datum des Sprechtags[/] an (tt.mm.jjjj).",
             Datentyp = Global.Datentyp.DateTime,
             InGrundeinstellungAbfragen = true,
@@ -1903,7 +1905,7 @@ public static class KonfigHelper
         {
             Key = "StatistikDatum",
             DefaultValue = $"01.09.{DateTime.Now.Year}",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie das [{Global.GetColor(Global.ColorInfoBox)}]Datum der Abgabe[/] an. Das ist wichtig, um diejenigen Unterrichte auszuschließen, die befristet sind und nicht am Stichtag stattfinden.",
             Datentyp = Global.Datentyp.DateTime,
             InGrundeinstellungAbfragen = true,
@@ -1914,7 +1916,7 @@ public static class KonfigHelper
         {
             Key = "TeamsChatAuswahl",
             DefaultValue = "1",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Bitte eine [{Global.GetColor(Global.ColorInfoBox)}]Zahl[/] auswählen:",
             Datentyp = Global.Datentyp.Int,
             InGrundeinstellungAbfragen = true,
@@ -1936,7 +1938,7 @@ public static class KonfigHelper
         {
             Key = "VolleStelle",
             DefaultValue = "25,5",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie an, wie viele Stunden einer [{Global.GetColor(Global.ColorInfoBox)}]vollen Stelle[/] entsprechen. Das ist wichtig, um die Altersermäßigung berechnen zu können. Beispiel: [{Global.GetColor(Global.ColorZahlen)}]25,5[/].",
             Datentyp = Global.Datentyp.Float,
             InGrundeinstellungAbfragen = true,
@@ -1947,7 +1949,7 @@ public static class KonfigHelper
         {
             Key = "WikiUrl",
             DefaultValue = "https://wiki.berufskolleg-borken.de/xmlrpc.php",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie die [{Global.GetColor(Global.ColorInfoBox)}]URL[/] zum dokuwiki xmlrpc an.",
             Datentyp = Global.Datentyp.Url,
             InGrundeinstellungAbfragen = true,
@@ -1958,7 +1960,7 @@ public static class KonfigHelper
         {
             Key = "WikiJsonUser",
             DefaultValue = "",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]Benutzernamen[/] für den Zugriff auf das Wiki JSON an.",
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
@@ -1969,7 +1971,7 @@ public static class KonfigHelper
         {
             Key = "WikiJsonUserKennwort",
             DefaultValue = "",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie das [{Global.GetColor(Global.ColorInfoBox)}]Kennwort[/] für den Zugriff auf das Wiki JSON an.",
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
@@ -1980,7 +1982,7 @@ public static class KonfigHelper
         {
             Key = "WikiSprechtagKleineAenderung",
             DefaultValue = "",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Handelt es sich um eine [{Global.GetColor(Global.ColorInfoBox)}]kleine Änderung[/]? Kleine Änderungen erzeugen keine neue Version (j/n)",
             Datentyp = Global.Datentyp.JaNein,
             InGrundeinstellungAbfragen = false,
@@ -1991,7 +1993,7 @@ public static class KonfigHelper
         {
             Key = "Zeugnisdatum",
             DefaultValue = "",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie das [{Global.GetColor(Global.ColorInfoBox)}]Zeugnisdatum[/] an. Das kann später in SchILD (mit einem Gruppenprozess) erneut geändert werden.",
             Datentyp = Global.Datentyp.DateTime,
             InGrundeinstellungAbfragen = false,
@@ -2002,7 +2004,7 @@ public static class KonfigHelper
         {
             Key = "ZeugnisUrl",
             DefaultValue = "",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Soll eine [{Global.GetColor(Global.ColorInfoBox)}]bestimmte Webseite[/] geöffnet werden, um die verschlüsselte(n) Datei(en) dort hochzuladen?\nFalls Sie keine Seite öffnen wollen, geben Sie ein Leerzeichen ein.",
             Datentyp = Global.Datentyp.DateTime,
             InGrundeinstellungAbfragen = false,
@@ -2013,7 +2015,7 @@ public static class KonfigHelper
         {
             Key = "ZeugnisPasswort",
             DefaultValue = "",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Mit welchem [{Global.GetColor(Global.ColorInfoBox)}]Kennwort[/] sollen die Dateien verschlüsselt werden?",
             Datentyp = Global.Datentyp.DateTime,
             InGrundeinstellungAbfragen = false,
@@ -2024,7 +2026,7 @@ public static class KonfigHelper
         {
             Key = "ZipKennwort",
             DefaultValue = Environment.GetEnvironmentVariable("ZIP_KENNWORT") ?? "",
-            Aufforderung = "",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Die Datei wird nun gezippt.\nGeben Sie das [{Global.GetColor(Global.ColorInfoBox)}]Kennwort[/] ein, mit dem Sie die Zip-Datei verschlüsseln wollen. Geben Sie ein Leerzeichen ein, wenn kein Kennwort gesetzt werden soll.",
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,

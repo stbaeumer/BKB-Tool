@@ -179,7 +179,14 @@ private bool IstMailadresseGültig(string email)
                 }
             });
 
-            Global.ZeileSchreiben($"Mail gesendet:", receiverEmail);        
+                var panel = new Panel($"[green]{receiverEmail + (cc.Length > 0 ? $" (CC: {string.Join(", ", cc)})" : "") + (bcc.Length > 0 ? $" (BCC: {string.Join(", ", bcc)})" : "")}[/]")
+                .Header("[bold green]  Mail gesendet  [/]")
+                .HeaderAlignment(Justify.Left)
+                .SquareBorder()
+                .Expand()
+                .BorderColor(Color.Green);
+            
+            AnsiConsole.Write(panel);
         }
         catch(Exception ex)
         {
