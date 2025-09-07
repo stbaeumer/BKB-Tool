@@ -66,17 +66,18 @@ public static class MenueHelper
                 [
                     new Menüeintrag(
                         "Mailadressen: fehlende Schulinterne Mailadressen in den Individualdaten I ergänzen",
-                        quelldateien.Notwendige(configuration, ["schuelerzusatzdaten,dat"]),
+                        quelldateien.Notwendige(configuration, ["schuelerzusatzdaten,dat", "schueleradressen,dat", "adressen,dat", "schuelertelefonnummern,dat"]),
                         students,
                         klassen,
                         [
-                            $"Es wird jetzt die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", "SchuelerZusatzdaten.dat")}[/] um schulinterne Mailadressen ergänzt und in [{Global.GetColor(Global.ColorPfadInDateien)}]{pfadSchilddatenaustausch}[/] für den Re-Import nach SchILD bereitgestellt.",
+                            $"Es wird jetzt die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", "SchuelerZusatzdaten.dat")}[/] um schulinterne Mailadressen ergänzt und in [{Global.GetColor(Global.ColorPfadInDateien)}]{pfadSchilddatenaustausch}[/] für den Re-Import nach SchILD bereitgestellt. Weitere Dateien mit Telefonnummern angepasst.",
                             $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1:[/] BKB-Tool bildet die schulinterne Mailadressen wie folgt: [{Global.GetColor(Global.ColorTextHervorheben)}]nv061231@meine-schule.de[/], wobei gilt:",
-                            $"[{Global.GetColor(Global.ColorTextHervorheben)}]            n[/]      : Erster Buchstabe des Nachnamens. Umlaute werden aufgelöst. Bsp.: [{Global.GetColor(Global.ColorTextHervorheben)}]Ü[/] wird zu [{Global.GetColor(Global.ColorTextHervorheben)}]u[/] usw.",
-                            $"[{Global.GetColor(Global.ColorTextHervorheben)}]            v[/]      : Erster Buchstabe des Vornamens. Umlaute werden aufgelöst.",
-                            $"[{Global.GetColor(Global.ColorTextHervorheben)}]            061231[/] : Geburtsdatum in der Notation: JJMMTT.",
+                            $"[{Global.GetColor(Global.ColorTextHervorheben)}]      n[/]      : Erster Buchstabe des Nachnamens. Umlaute werden aufgelöst. Bsp.: [{Global.GetColor(Global.ColorTextHervorheben)}]Ü[/] wird zu [{Global.GetColor(Global.ColorTextHervorheben)}]u[/] usw.",
+                            $"[{Global.GetColor(Global.ColorTextHervorheben)}]      v[/]      : Erster Buchstabe des Vornamens. Umlaute werden aufgelöst.",
+                            $"[{Global.GetColor(Global.ColorTextHervorheben)}]      061231[/] : Geburtsdatum in der Notation: JJMMTT.",
                             $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #2:[/] Vorhandene schulinterne SchILD-Mailadressen in [{Global.GetColor(Global.ColorPfadInProgrammen)}]Individualdaten I[/] bleiben unangetastet.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #3:[/] Doppelungen werden angezeigt und müssen nach Vorgabe behandelt werden."
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #3:[/] Doppelungen werden angezeigt und müssen nach Vorgabe behandelt werden.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #4:[/] Als Bonus werden die Telefonnummern vereinheitlicht im Format 01245 6789."
                         ],
                         m =>
                         {
@@ -84,11 +85,26 @@ public static class MenueHelper
 
                             m.Zieldateien =
                             [
-                                m.SchuelerZusatzdatenUmMailAdresseErgaenzen(
+                                m.SchuelerZusatzdatenUmMailAdresseErgaenzenTelefonFormatieren(
                                     configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerZusatzdaten.dat"),
                                     ["Nachname", "Vorname", "Geburtsdatum"],
                                     [],
-                                    "|", '\'', new UTF8Encoding(false), false)
+                                    "|", '\'', new UTF8Encoding(false), false),
+                                /*m.SchueleradresseTelefonFormatieren(
+                                    configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerAdressen.dat"),
+                                    ["Nachname", "Vorname", "Geburtsdatum"],
+                                    [],
+                                    "|", '\'', new UTF8Encoding(false), false),
+                                m.AdresseTelefonFormatieren(
+                                    configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Adressen.dat"),
+                                    ["Nachname", "Vorname", "Geburtsdatum"],
+                                    [],
+                                    "|", '\'', new UTF8Encoding(false), false),
+                                m.SchuelerTelefonnummernFormatieren(
+                                    configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerTelefonnummern.dat"),
+                                    ["Nachname", "Vorname", "Geburtsdatum","Art"],
+                                    [],
+                                    "|", '\'', new UTF8Encoding(false), false)*/
                             ];
                             m.Zieldateien.ExportAusSchildVerschieben(configuration);
                             m.Zieldateien.VergleichenFilternErstellen(quelldateien);
@@ -133,29 +149,6 @@ public static class MenueHelper
                         Global.Rubrik.WöchtentlicheArbeiten,
                         Global.NurBeiDiesenSchulnummern.Alle
                     ),
-                    /*new Menüeintrag(
-                        "Webuntis-Fotos: Zipdatei mit Fotos für Webuntis erstellen",
-                        quelldateien.Notwendige(configuration, ["student_,csv","schuelerlernabschnittsdaten,dat", "schuelerzusatzdaten,dat", "schuelererzieher,dat", "schuelerAdressen,dat", "lehrkraefte,dat", "klassen,dat"]),
-                        students,
-                        klassen,
-                        [
-                            $"Es wird jetzt die Datei [aqua]{Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd") + "-ImportNachWebuntis.zip")}[/] erstellt.",
-                            "[pink3]Hinweis:[/] Schüler*innen, deren Foto hochgeladen wurden, werden in der Datei [aqua]fotos.txt[/] gespeichert, um ein erneutes Hochladen zu vermeiden."
-                        ],
-                        m =>
-                        {
-                            if(m.NichtAlleSusHabenEineEindeutigeMailAdresse(configuration, m.Students)) return;
-                            m.IStudents = m.Students.OhneWebuntisFoto(configuration, Path.Combine(Directory.GetCurrentDirectory(), "fotos.txt"));
-                            m.IStudents.FotosFürWebuntisZippen(configuration, Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") +  @"-ImportNachWebuntis.zip"), Path.Combine(Directory.GetCurrentDirectory(), "fotos.txt"),
-                            [
-                                "1. [bold yellow]Stammdaten > Schüler*innen > Bildimport[/]",
-                                "2. Identifizierung Fremdschlüssel",
-                                "3. [springGreen2]Datei auswählen[/]"
-                            ]);
-                        },
-                        Global.Rubrik.WöchtentlicheArbeiten,
-                        Global.NurBeiDiesenSchulnummern.Nur000000
-                    ),*/
                     new Menüeintrag(
                         "Littera: Schüler*innen-Importdatei für Littera erstellen",
                         quelldateien.Notwendige(configuration, ["student_,csv","schuelerlernabschnittsdaten,dat", "schuelerzusatzdaten,dat", "schuelererzieher,dat", "schuelerAdressen,dat", "lehrkraefte,dat", "klassen,dat"]),
@@ -216,13 +209,13 @@ public static class MenueHelper
                             m.Zieldateien.Vergleichen(quelldateien);
                             m.Zieldateien.Filtern(quelldateien);
                             m.Zieldateien.OrdnerÖffnen();
-                            m.Zieldateien.Erstellen();                            
+                            m.Zieldateien.Erstellen();
                             m.Zieldateien.ZippenMitKennwort(zeitstempel, pfadDownloads, configuration);
                             m.Zieldateien.Mailen(configuration);
                         },
                         Global.Rubrik.WöchtentlicheArbeiten,
                         Global.NurBeiDiesenSchulnummern.Nur177659
-                    ),                                        
+                    ),
                     new Menüeintrag(
                         "Fotos #1: Schüler*innen klassenweise fotografieren, kopieren, umbenennen, ablegen",
                         quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "schuelerzusatzdaten,dat"]),
@@ -245,7 +238,7 @@ public static class MenueHelper
                             m.IStudents.AnzahlPrüfen(configuration);
                             m.IStudents.KlassenordnerInZielPfadErstellen(configuration);
                             m.IStudents.FotosZuStudentsZuweisen(configuration);
-                            m.IStudents.FotosNachZielordnerKopieren(configuration);                            
+                            m.IStudents.FotosNachZielordnerKopieren(configuration);
                         },
                         Global.Rubrik.Allgemein,
                         Global.NurBeiDiesenSchulnummern.Nur177659
@@ -256,7 +249,7 @@ public static class MenueHelper
                         students,
                         klassen,
                         [
-                            $"Es werden jetzt die Fotos nach SchILD2 hochgeladen. Wenden Sie diese Funktion an, wenn Sie zuvor klassenweise Fotos mit [bold {Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] erstellt haben.",                            
+                            $"Es werden jetzt die Fotos nach SchILD2 hochgeladen. Wenden Sie diese Funktion an, wenn Sie zuvor klassenweise Fotos mit [bold {Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] erstellt haben.",
                             $"[{Global.GetColor(Global.ColorUnterschrift)}]Voraussetzung #1: [/]Die Fotos müssen aus SchILD exportiert werden: [{Global.GetColor(Global.ColorActionInMenüs)}]Datenaustausch > Fotos > Fotos exportieren[/]. Beachte, dass der Fotodateiname den Nachnamen, Vornamen und das Geburtsdatum enthält.",
                             $"[{Global.GetColor(Global.ColorUnterschrift)}]Voraussetzung #2: [/]Alle noch nicht zu SchILD hochgeladenen Fotos liegen in einem vorbereiteten Ordner. Beachte: Die Fotos müssen den ersten Teil der E-Mail-Adresse (also alles vor dem @) als Dateinamen haben.",
                             $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1: [/]Vorhandene Bilder werden nicht überschrieben, sofern der Export aus SchILD zuvor getätigt wurde."
@@ -265,7 +258,7 @@ public static class MenueHelper
                         {
                             m.FilterInteressierendeStudentsUndKlassen(configuration);
                             m.IStudents.FotosFürUploadNachSchildAuswählen(configuration);
-                            m.IStudents.FotosRotieren(configuration);                            
+                            m.IStudents.FotosRotieren(configuration);
                             m.IStudents.FotosFürUploadNachSchild2AuflistenUndBestätigen(configuration);
                             m.IStudents.FotosNachSchild2Hochladen(configuration);
                         },
@@ -300,57 +293,6 @@ public static class MenueHelper
                         Global.NurBeiDiesenSchulnummern.Nur177659
                     ),
                     new Menüeintrag(
-                        "Statistik: Unterrichtsverteilung und Anrechnungen nach SchILD importieren",
-                        quelldateien.Notwendige(configuration, ["studentgroupstudents,csv", "klassen,dat", "schuelerlernabschnitt,dat", "schuelerleistungsdaten,dat", "schuelerbasis,dat", "lehrkraefte,dat", "kurse,dat", "lehrkraeftesonderzeiten,dat", "schuelerbasisdaten,dat", "GPU002,txt"]),
-                        students,
-                        klassen,
-                        [
-                            $"Es werden jetzt folgende Dateien für den Import nach SchILD erstellt: \n[{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "Lernabschnitte.dat")}[/] \n[{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "Leistungsdaten.dat")}[/] \n[{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "LehrkraefteSonderzeiten.dat")}[/]",
-                            $"Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]LehrkraefteSonderzeiten.dat[/] wird nicht komplett neu erstellt. Die exportierte Datei wird lediglich für den Re-Import aufbereitet.",
-                            $"Die Kursbezeichnungen setzen sich zusammen aus dem Kursleiterkürzel plus alle beteiligten Untis-Unterrichtsnummern.",
-                            $"Zähler im Anschluss an Fächer (M1, M2, ...) werden abgeschnitten (also zu M).",
-                            $"Bei mehreren beteiligten Lehrkräften wird das alphabetisch erste Lehrkraftkürzel zum Kursleiter.",
-                            $"Team-Teaching ist daran erkennbar, dass die Summe der Kurs-Wochenstunden kleiner ist als die Summe der Lehrkräfte-Wochenstunden.",
-                        ],
-                        m =>
-                        {
-                            m.FilterInteressierendeStudentsUndKlassen(configuration);
-                            configuration = Global.Konfig("Abschnitt", Global.Modus.Read, configuration);
-                            configuration = Global.Konfig("Schulnummer", Global.Modus.Read, configuration);
-                            configuration = Global.Konfig("StatistikDatum", Global.Modus.Read, configuration);
-                            configuration = Global.Konfig("Kursarten", Global.Modus.Read, configuration);
-
-                            m.Unterrichte = new Unterrichte(configuration, m, Global.Zweck.Statistik, Global.Art.Kurse);
-                            m.Unterrichte.AddRange(new Unterrichte(configuration, m, Global.Zweck.Statistik, Global.Art.NichtKursUnterrichte));
-
-                            m.Zieldateien =
-                            [
-                                m.Lernabschnittsdaten(configuration, Global.Zweck.Statistik, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLernabschnittsdaten.dat"), "|", '\0', new UTF8Encoding(true), false),
-                                m.Kurse(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Kurse.dat"), "|", '\0', new UTF8Encoding(true), false),
-                                m.LeistungsdatenStatistik(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat"), Global.Zweck.Statistik),
-                                m.LehrkraefteSonderzeiten(
-                                    configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "LehrkraefteSonderzeiten.dat"),
-                                    ["Lehrkraft", "Zeitart", "Grund"],
-                                    [],
-                                    "|", '\0', new UTF8Encoding(true), false),
-                                m.Lehrkraefte(
-                                    configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Lehrkraefte.dat"),
-                                    ["InternKrz"],
-                                    [],
-                                    "|", '\0', new UTF8Encoding(true), false),
-                                m.Faecher(
-                                    configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Faecher.dat"),
-                                    ["InternKrz"],
-                                    [],
-                                    "|", '\0', new UTF8Encoding(true), false)
-                            ];
-                            m.Zieldateien.ExportAusSchildVerschieben(configuration);
-                            m.Zieldateien.VergleichenFilternErstellen(quelldateien);
-                        },
-                        Global.Rubrik.Leistungsdaten,
-                        Global.NurBeiDiesenSchulnummern.Alle
-                    ),
-                    new Menüeintrag(
                         $"Altersermäßigung: berechnen für {int.Parse(Global.AktSj[0])}/{int.Parse(Global.AktSj[0]) + 1} und {int.Parse(Global.AktSj[0]) + 1}/{int.Parse(Global.AktSj[0]) + 2}",
                         quelldateien.Notwendige(configuration, ["lehrkraefte,dat", "lehrkraeftesonderzeiten,dat,optional", "GPU020,txt,optional", "GPU004,txt,optional"]),
                         students,
@@ -382,7 +324,7 @@ public static class MenueHelper
                         },
                         Global.Rubrik.Allgemein,
                         Global.NurBeiDiesenSchulnummern.Nur177659
-                    ),                    
+                    ),
                     new Menüeintrag(
                     "Klassen: Neue Klassen von Untis nach SchILD übergeben und Eigenschaften anpassen",
                     quelldateien.Notwendige(configuration, ["klassen,dat", "GPU003,txt", "GPU002,txt"]),
@@ -504,7 +446,58 @@ public static class MenueHelper
                             m.Relationsgruppen = new Relationsgruppen(klassen, students, configuration);
                         },
                         Global.Rubrik.Allgemein,
-                        Global.NurBeiDiesenSchulnummern.Nur177659                        
+                        Global.NurBeiDiesenSchulnummern.Nur177659
+                    ),
+                    new Menüeintrag(
+                        "Statistik: Unterrichtsverteilung und Anrechnungen nach SchILD importieren",
+                        quelldateien.Notwendige(configuration, ["studentgroupstudents,csv", "klassen,dat", "schuelerlernabschnitt,dat", "schuelerleistungsdaten,dat", "schuelerbasis,dat", "lehrkraefte,dat", "kurse,dat", "lehrkraeftesonderzeiten,dat", "schuelerbasisdaten,dat", "GPU002,txt"]),
+                        students,
+                        klassen,
+                        [
+                            $"Es werden jetzt folgende Dateien für den Import nach SchILD erstellt: \n[{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "Lernabschnitte.dat")}[/] \n[{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "Leistungsdaten.dat")}[/] \n[{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "LehrkraefteSonderzeiten.dat")}[/]",
+                            $"Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]LehrkraefteSonderzeiten.dat[/] wird nicht komplett neu erstellt. Die exportierte Datei wird lediglich für den Re-Import aufbereitet.",
+                            $"Die Kursbezeichnungen setzen sich zusammen aus dem Kursleiterkürzel plus alle beteiligten Untis-Unterrichtsnummern.",
+                            $"Zähler im Anschluss an Fächer (M1, M2, ...) werden abgeschnitten (also zu M).",
+                            $"Bei mehreren beteiligten Lehrkräften wird das alphabetisch erste Lehrkraftkürzel zum Kursleiter.",
+                            $"Team-Teaching ist daran erkennbar, dass die Summe der Kurs-Wochenstunden kleiner ist als die Summe der Lehrkräfte-Wochenstunden.",
+                        ],
+                        m =>
+                        {
+                            m.FilterInteressierendeStudentsUndKlassen(configuration);
+                            configuration = Global.Konfig("Abschnitt", Global.Modus.Read, configuration);
+                            configuration = Global.Konfig("Schulnummer", Global.Modus.Read, configuration);
+                            configuration = Global.Konfig("StatistikDatum", Global.Modus.Read, configuration);
+                            configuration = Global.Konfig("Kursarten", Global.Modus.Read, configuration);
+
+                            m.Unterrichte = new Unterrichte(configuration, m, Global.Zweck.Statistik, Global.Art.Kurse);
+                            m.Unterrichte.AddRange(new Unterrichte(configuration, m, Global.Zweck.Statistik, Global.Art.NichtKursUnterrichte));
+
+                            m.Zieldateien =
+                            [
+                                m.Lernabschnittsdaten(configuration, Global.Zweck.Statistik, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLernabschnittsdaten.dat"), "|", '\0', new UTF8Encoding(true), false),
+                                m.Kurse(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Kurse.dat"), "|", '\0', new UTF8Encoding(true), false),
+                                m.LeistungsdatenStatistik(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat"), Global.Zweck.Statistik),
+                                m.LehrkraefteSonderzeiten(
+                                    configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "LehrkraefteSonderzeiten.dat"),
+                                    ["Lehrkraft", "Zeitart", "Grund"],
+                                    [],
+                                    "|", '\0', new UTF8Encoding(true), false),
+                                m.Lehrkraefte(
+                                    configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Lehrkraefte.dat"),
+                                    ["InternKrz"],
+                                    [],
+                                    "|", '\0', new UTF8Encoding(true), false),
+                                m.Faecher(
+                                    configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Faecher.dat"),
+                                    ["InternKrz"],
+                                    [],
+                                    "|", '\0', new UTF8Encoding(true), false)
+                            ];
+                            m.Zieldateien.ExportAusSchildVerschieben(configuration);
+                            m.Zieldateien.VergleichenFilternErstellen(quelldateien);
+                        },
+                        Global.Rubrik.Leistungsdaten,
+                        Global.NurBeiDiesenSchulnummern.Alle
                     ),                
                 /*,
                     new Menüeintrag(

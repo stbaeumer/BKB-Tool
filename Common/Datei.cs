@@ -101,10 +101,6 @@ public class Datei : List<dynamic>
     public Datei(string name, string beschreibung, string[] hinweise, string[] zuIgnorierendeEigenschaften,
         bool hasHeader, Func<Datei, List<dynamic>> funktion, string endung = "*.dat", string delimiter = "|", bool darfLeerSein = false)
     {
-        if (name.Contains("onder"))
-        {
-            string a = "";
-        }
         Name = name;
         Dateiname = Path.GetFileName(name);
         Beschreibung = beschreibung;

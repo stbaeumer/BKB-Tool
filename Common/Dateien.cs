@@ -206,7 +206,10 @@ public class Dateien : List<Datei>
                 schildhinweise,
                 [""],
                 true,
-                d => d.FilterKurse()
+                d => d.FilterKurse(),
+                "*.dat",
+                "|",
+                true
             ));
             Add(new Datei(
                 @"DatumsAusAtlantis.csv",
@@ -359,6 +362,14 @@ public class Dateien : List<Datei>
                 d => d.FilternDatDatei()
             ));
             Add(new Datei(
+                "Adressen",
+                "Beschreibung",
+                schildhinweise,
+                [""],
+                true,
+                d => d.FilternDatDatei()
+            ));
+            Add(new Datei(
                 "Klassen",
                 "Beschreibung",
                 schildhinweise,
@@ -368,6 +379,14 @@ public class Dateien : List<Datei>
             ));
             Add(new Datei(
                 "SchuelerZusatzdaten",
+                "Beschreibung",
+                schildhinweise,
+                [""],
+                true,
+                d => d.FilternDatDatei()
+            ));
+            Add(new Datei(
+                "SchuelerTelefonnummern",
                 "Beschreibung",
                 schildhinweise,
                 [""],
@@ -443,7 +462,7 @@ public class Dateien : List<Datei>
 
     public List<dynamic>? GetMatchingList(IConfiguration configuration, string pattern, Students students = null, Klassen klassen = null)
     {
-        var datei = this.FirstOrDefault(datei => !string.IsNullOrEmpty(datei.Dateiname) && datei.Dateiname.ToLower().Contains(pattern, StringComparison.CurrentCultureIgnoreCase));
+        var datei = this.FirstOrDefault(datei => !string.IsNullOrEmpty(datei.Dateiname) && datei.Dateiname.ToLower().StartsWith(pattern, StringComparison.CurrentCultureIgnoreCase));
 
         // Mögliche Meldungen werden ausgegeben, wenn die Datei nicht gefunden wurde oder veraltet ist.
 
@@ -495,11 +514,6 @@ public class Dateien : List<Datei>
 
             datei.IstOptional = dateinameNotwendig.Split(',').Length > 2 && dateinameNotwendig.Split(',')[2].ToLower().Contains("opt") ? true : false;
             datei.Nur177659 = dateinameNotwendig.Split(',').Length > 2 && dateinameNotwendig.ToLower().Contains("177659") ? true : false;
-
-            if (datei.Nur177659)
-            {
-                string aaa = "";
-            }
 
             var absoluterPfad = this.First(datei => !string.IsNullOrEmpty(datei.Dateiname)
             && !datei.Dateiname.ToLower().Contains("-kennwort")

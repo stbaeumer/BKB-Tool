@@ -3,7 +3,6 @@ using System.Reflection;
 using Common;
 using Microsoft.Extensions.Configuration;
 using Spectre.Console;
-#pragma warning disable CS8600 // Möglicher Null-Verweis-Argument
 
 try{ Console.WindowHeight = 33;} catch { }
 
@@ -42,9 +41,9 @@ do
 {
     try
     {
-        dateien = new Dateien();        
+        dateien = new Dateien();
         configuration = Global.EinstellungenDurchlaufen(configuration, Global.Modus.ReadSilent);
-        
+
         CheckForUpdate(configuration);
         var table = new Table().Centered();
 

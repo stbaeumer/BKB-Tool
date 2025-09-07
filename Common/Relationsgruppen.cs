@@ -192,7 +192,7 @@ public class Relationsgruppen : List<Relationsgruppe>
         };
         AnsiConsole.Write(panel);
 
-        datei.Add("Leitungszeit:" + (9 + 50 * 0.7 + ((stellenBs + stellenVz) - 50) * 0.3).ToString("0.00") +
+        datei.Add("Leitungszeit: " + (9 + 50 * 0.7 + ((stellenBs + stellenVz) - 50) * 0.3).ToString("0.00") +
                     "   (= 9 + 50 * 0,7 + (" + stellenBs.ToString("0.0000") + "+" + stellenVz.ToString("0.0000") +
                     " - 50) * 0,3)  Verordnung zur Ausführung des § 93 Abs. 2 Schulgesetz (VO zu § 93 Abs. 2 SchulG) vom 18.03.2005");
 

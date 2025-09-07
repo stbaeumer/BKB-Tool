@@ -3177,7 +3177,7 @@ public class Menüeintrag
         AnsiConsole.Write(panel3);
     }
 
-    internal Datei SchuelerZusatzdatenUmMailAdresseErgaenzen(
+    internal Datei SchuelerZusatzdatenUmMailAdresseErgaenzenTelefonFormatieren(
         IConfiguration configuration,
         string zieldateiname,
         string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
@@ -3202,40 +3202,29 @@ public class Menüeintrag
         var mailDomain = configuration["MailDomain"].Trim();        
         var mehrfachVorhanden = new List<dynamic>();
 
-        foreach (var schueler in schuelerZusatzdaten)
+        AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Schuelerzusatzdaten: Mails und Telefonnummern anpassen ...", ctx =>
         {
-            var dict = (IDictionary<string, object>)schueler;
-
-            if (dict["Nachname"].ToString() == "Skaloud")
+            foreach (var schueler in schuelerZusatzdaten)
             {
-                string aaa = "";
-            }
+                var dict = (IDictionary<string, object>)schueler;
 
-            dynamic record = new ExpandoObject();
+                dynamic record = new ExpandoObject();
 
-            if(MehrfachVorhanden(
-                schuelerZusatzdaten,
-                dict["schulische E-Mail"].ToString(),
-                dict["Nachname"].ToString(),
-                dict["Vorname"].ToString(),
-                dict["Geburtsdatum"].ToString()))
-            {
-                mehrfachVorhanden.Add(schueler);
-            }
-
-            // Schüler mit vorhandener Mail überspringen
-            if (dict.TryGetValue("schulische E-Mail", out var email) && !string.IsNullOrEmpty(email?.ToString()))
-            {
-                continue;
-            }
-
-            foreach (var prop in dict)
-            {
-                var name = prop.Key;
-                var value = prop.Value;
-
-                if (name != "schulische E-Mail")
+                if (MehrfachVorhanden(
+                    schuelerZusatzdaten,
+                    dict["schulische E-Mail"].ToString(),
+                    dict["Nachname"].ToString(),
+                    dict["Vorname"].ToString(),
+                    dict["Geburtsdatum"].ToString()))
                 {
+                    mehrfachVorhanden.Add(schueler);
+                }
+
+                foreach (var prop in dict)
+                {
+                    var name = prop.Key;
+                    var value = prop.Value;
+
                     if (name == "Nachname")
                     {
                         var student = Students.LastOrDefault(s =>
@@ -3245,91 +3234,108 @@ public class Menüeintrag
 
                         ((IDictionary<string, object>)record)[name] = $"{value}#{student.Klasse}";
                     }
+                    else if (name == "schulische E-Mail")
+                    {
+                        // Schüler mit vorhandener Mail überspringen
+                        if (!string.IsNullOrEmpty(value.ToString()))
+                        {    
+                            ((IDictionary<string, object>)record)[name] = value;                         
+                        }
+                        else
+                        {
+                            var student = Students.FirstOrDefault(s => s.Nachname == dict["Nachname"].ToString() && s.Vorname == dict["Vorname"].ToString() && s.Geburtsdatum == dict["Geburtsdatum"].ToString());
+
+                            if (student == null)
+                            {
+                                // Wenn der Schüler nicht gefunden wurde, überspringe diese Zeile
+                                ((IDictionary<string, object>)record)[name] = value;
+                                continue;
+                            }
+                            else
+                            { 
+                                // Wenn es in den Zusatzdaten einen Schüler gibt, mit identischem Namen, Vornamen, Geburtsdatum,
+                            // und bei dem die schulische E-Mail-Adresse ebenfalls übereinstimmt, dann gib die Mail-Adresse aus:
+                            var mail = schuelerZusatzdaten
+                                .Where(s =>
+                                {
+                                    var dic = s as IDictionary<string, object>;
+                                    return dic != null &&
+                                        dic["Nachname"].ToString() == dict["Nachname"].ToString() &&
+                                        dic["Vorname"].ToString() == dict["Vorname"].ToString() &&
+                                        dic["Geburtsdatum"].ToString() == dict["Geburtsdatum"].ToString() &&
+                                        !string.IsNullOrEmpty(dic["schulische E-Mail"].ToString());
+                                })
+                                .Select(s => ((IDictionary<string, object>)s)["schulische E-Mail"].ToString())
+                                .FirstOrDefault();
+
+                                if (!string.IsNullOrEmpty(mail))
+                                {
+                                    ((IDictionary<string, object>)record)["schulische E-Mail"] = mail;
+                                }
+                                else
+                                {
+                                    if (DateTime.TryParse(student.Geburtsdatum, out DateTime gebDatum))
+                                    {
+                                        var n = student.Bereinigen(student.Nachname.ToLower()).Substring(0, 1);
+                                        var v = student.Bereinigen(student.Vorname.ToLower()).Substring(0, 1);
+                                        var geburtsjahr = gebDatum.Year.ToString().Substring(2, 2);
+                                        var geburtsmonat = gebDatum.Month.ToString("D2");
+                                        var geburtstag = gebDatum.Day.ToString("D2");
+
+                                        var schulischeEmail = $"{n}{v}{geburtsjahr}{geburtsmonat}{geburtstag}{mailDomain}";
+
+                                        // Wenn die E-Mail-Adresse bereits existiert, dann hänge eine Zahl an                            
+                                        var counter = 1;
+                                        while (schuelerZusatzdaten.Any(s => ((IDictionary<string, object>)s)["schulische E-Mail"].ToString() == schulischeEmail))
+                                        {
+                                            schulischeEmail = $"{n}{v}{geburtsjahr}{geburtsmonat}{geburtstag}{counter}{mailDomain}";
+                                            counter++;
+                                        }
+
+                                        // Wenn der Counter größer als 1 ist, dann gib ein Panel aus
+                                        if (counter > 1)
+                                        {
+                                            var panel = new Panel($"Die E-Mail-Adresse für {student.Vorname} {student.Nachname} ({student.Geburtsdatum}) soll neu angelegt werden, wurde aber bereits zuvor in SchILD vergeben. Deswegen schreibt [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] jetzt für {student.Vorname} {student.Nachname} einen Zähler vor das [{Global.GetColor(Global.ColorHinweise)}]@[/]: [{Global.GetColor(Global.ColorZahlen)}]{schulischeEmail}[/]. So wird Eindeutigkeit gewährleistet.\nOptional können Sie nach dem SchILD-Import die E-Mail-Adresse von {student.Vorname} nochmal ändern, wenn Sie anderweitig Eindeutigkeit herstellen wollen (z.B. Buchstabe statt Zähler).\nWeiter mit [{Global.GetColor(Global.ColorActionInMenüs)}]ENTER[/].")
+                                                .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] Hinweis: Doppelung bei E-Mail-Adresse [/]")
+                                                .HeaderAlignment(Justify.Left)
+                                                .SquareBorder()
+                                                .Expand()
+                                                .BorderColor(Global.ColorHinweise);
+                                            AnsiConsole.Write(panel);
+                                            Console.ReadKey(true);
+                                        }
+
+                                        student.MailSchulisch = schulischeEmail;
+
+                                        ((IDictionary<string, object>)record)[name] = schulischeEmail;
+
+                                        if (MehrfachVorhanden(
+                                            schuelerZusatzdaten,
+                                            dict["schulische E-Mail"].ToString(),
+                                            dict["Nachname"].ToString(), dict["Vorname"].ToString(), dict["Geburtsdatum"].ToString()))
+                                        {
+                                            mehrfachVorhanden.Add(schueler);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else if ((name == "Telefon-Nr." || name == "Fax/Mobilnr") && value != null && value.ToString() != "")
+                    {
+                        var tel = TelefonNummerFormatieren(value.ToString());
+                        ((IDictionary<string, object>)record)[name] = tel;
+                    }
                     else
                     {
                         ((IDictionary<string, object>)record)[name] = value;
                     }
                 }
 
-                if (name == "schulische E-Mail")
-                {
-                    var student = Students.FirstOrDefault(s => s.Nachname == dict["Nachname"].ToString() && s.Vorname == dict["Vorname"].ToString() && s.Geburtsdatum == dict["Geburtsdatum"].ToString());
-                    if (student == null)
-                    {
-                        // Wenn der Schüler nicht gefunden wurde, überspringe diese Zeile
-                        return [];
-                    }
-
-                    // Wenn es in den Zusatzdaten einen Schüler gibt, mit identischem Namen, Vornamen, Geburtsdatum,
-                    // und bei dem die schulische E-Mail-Adresse ebenfalls übereinstimmt, dann gib die Mail-Adresse aus:
-                    var mail = schuelerZusatzdaten
-                        .Where(s =>
-                        {
-                            var dic = s as IDictionary<string, object>;
-                            return dic != null &&
-                                dic["Nachname"].ToString() == dict["Nachname"].ToString() &&
-                                dic["Vorname"].ToString() == dict["Vorname"].ToString() &&
-                                dic["Geburtsdatum"].ToString() == dict["Geburtsdatum"].ToString() &&
-                                !string.IsNullOrEmpty(dic["schulische E-Mail"].ToString());
-                        })
-                        .Select(s => ((IDictionary<string, object>)s)["schulische E-Mail"].ToString())
-                        .FirstOrDefault();
-
-                    if (!string.IsNullOrEmpty(mail))
-                    {
-                        ((IDictionary<string, object>)record)["schulische E-Mail"] = mail;
-                    }
-                    else
-                    {
-                        if (DateTime.TryParse(student.Geburtsdatum, out DateTime gebDatum))
-                        {
-                            var n = student.Bereinigen(student.Nachname.ToLower()).Substring(0, 1);
-                            var v = student.Bereinigen(student.Vorname.ToLower()).Substring(0, 1);
-                            var geburtsjahr = gebDatum.Year.ToString().Substring(2, 2);
-                            var geburtsmonat = gebDatum.Month.ToString("D2");
-                            var geburtstag = gebDatum.Day.ToString("D2");
-
-                            var schulischeEmail = $"{n}{v}{geburtsjahr}{geburtsmonat}{geburtstag}{mailDomain}";
-
-                            // Wenn die E-Mail-Adresse bereits existiert, dann hänge eine Zahl an                            
-                            var counter = 1;
-                            while (schuelerZusatzdaten.Any(s => ((IDictionary<string, object>)s)["schulische E-Mail"].ToString() == schulischeEmail))
-                            {
-                                schulischeEmail = $"{n}{v}{geburtsjahr}{geburtsmonat}{geburtstag}{counter}{mailDomain}";
-                                counter++;
-                            }
-
-                            // Wenn der Counter größer als 1 ist, dann gib ein Panel aus
-                            if (counter > 1)
-                            {
-                                var panel = new Panel($"Die E-Mail-Adresse für {student.Vorname} {student.Nachname} ({student.Geburtsdatum}) soll neu angelegt werden, wurde aber bereits zuvor in SchILD vergeben. Deswegen schreibt [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] jetzt für {student.Vorname} {student.Nachname} einen Zähler vor das [{Global.GetColor(Global.ColorHinweise)}]@[/]: [{Global.GetColor(Global.ColorZahlen)}]{schulischeEmail}[/]. So wird Eindeutigkeit gewährleistet.\nOptional können Sie nach dem SchILD-Import die E-Mail-Adresse von {student.Vorname} nochmal ändern, wenn Sie anderweitig Eindeutigkeit herstellen wollen (z.B. Buchstabe statt Zähler).\nWeiter mit [{Global.GetColor(Global.ColorActionInMenüs)}]ENTER[/].")
-                                    .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] Hinweis: Doppelung bei E-Mail-Adresse [/]")
-                                    .HeaderAlignment(Justify.Left)
-                                    .SquareBorder()
-                                    .Expand()
-                                    .BorderColor(Global.ColorHinweise);
-                                AnsiConsole.Write(panel);
-                                Console.ReadKey(true);
-                            }
-
-                            student.MailSchulisch = schulischeEmail;
-
-                            ((IDictionary<string, object>)record)[name] = schulischeEmail;
-
-                            if (MehrfachVorhanden(
-                                schuelerZusatzdaten,
-                                dict["schulische E-Mail"].ToString(),
-                                dict["Nachname"].ToString(), dict["Vorname"].ToString(), dict["Geburtsdatum"].ToString()))
-                            {
-                                mehrfachVorhanden.Add(schueler);
-                            }
-                        }
-                    }
-                }
-            }            
-
-            zieldatei.Add(record);
-        }
+                zieldatei.Add(record);
+            }        
+        });
+        Global.ZeileSchreiben("Schuelerzusatzdaten: Mails und Telefonnummern angepasst", zieldatei.Count.ToString());
 
         // Sortiere mehrfachVorhanden nach Geburtsdatum
         mehrfachVorhanden = mehrfachVorhanden.OrderBy(s => s.Geburtsdatum).ToList();
@@ -3342,6 +3348,75 @@ public class Menüeintrag
         }
 
         return zieldatei;
+    }
+
+    private string TelefonNummerFormatieren(string? v)
+    {
+        var telefon = v.ToString();
+
+        // Leere Telefonnummern werden ignoriert
+        if (string.IsNullOrEmpty(telefon))
+        {
+            return telefon;
+        }
+
+        // Ausländische Telefonnummern werden ignoriert
+        if (
+            !string.IsNullOrEmpty(telefon) &&
+            (telefon.StartsWith("00") || telefon.StartsWith("+")) &&
+            !(telefon.StartsWith("0049") || telefon.StartsWith("+49"))
+            )
+        {
+            return telefon;
+        }
+
+        // Manchmal ist eine Mailadresse als Telefonnummer eingetragen. Diese wird ignoriert.
+        if (!string.IsNullOrEmpty(telefon) && (telefon.Contains("@")))
+        {
+            return telefon;
+        }
+
+        // Bei Deutschen Telefonnummern wird das Ländervorwahl-Präfix +49 entfernt, wenn es vorhanden ist.                    
+        if (telefon.StartsWith("+49"))
+        {
+            telefon = telefon.Replace("+49 ", "0");
+        }
+        if (telefon.StartsWith("+49"))
+        {
+            telefon = telefon.Replace("+49", "0");
+        }
+
+        if (telefon.StartsWith("0049"))
+        {
+            telefon = telefon.Replace("0049", "0");
+        }
+        if (telefon.StartsWith("0049 "))
+        {
+            telefon = telefon.Replace("0049 ", "0");
+        }
+
+        // Alle Bindestriche, Schrägstriche, Klammern werden entfernt.
+        var tel = telefon.Replace(" ", "").Replace("-", " ").Replace("/", " ").Replace("(", "").Replace(")", " ").Trim();
+
+        // Doppelte Leerzeichen werden entfernt
+        while (tel.Contains("  "))
+        {
+            tel = tel.Replace("  ", " ");
+        }
+
+        // Mit vorwahlen abgleichen und die Leerstelle entsprechend gesetzt
+        foreach (var vorwahl in Global.Vorwahlen)
+        {
+            if (tel.StartsWith(vorwahl) && tel.Length > vorwahl.Length)
+            {
+                // Entferne zuerst alle Leerstellen
+                tel = tel.Replace(" ", "");
+                // Füge dann eine Leerstelle nach der Vorwahl ein
+                tel = tel.Insert(vorwahl.Length, " ");
+                break;
+            }
+        }
+        return tel;
     }
 
     private bool MehrfachVorhanden(List<dynamic> schuelerZusatzdaten, string mail, string nachname, string vorname, string geburtsdatum)
@@ -3678,6 +3753,159 @@ public class Menüeintrag
         }
     }
 
+    internal Datei SchueleradresseTelefonFormatieren(
+        IConfiguration configuration,
+        string zieldateiname,
+        string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
+    {
+        var schuelerAdressen = Quelldateien.GetMatchingList(configuration, "schueleradressen", IStudents, Klassen);
+        if (schuelerAdressen == null || !schuelerAdressen.Any()) return [];
+
+        var zieldatei = new Datei(zieldateiname, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+
+        AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Schueleradressen: Mails und Telefonnummern anpassen ...", ctx =>
+        {
+            foreach (var schueler in schuelerAdressen)
+            {
+                var dict = (IDictionary<string, object>)schueler;
+
+                dynamic record = new ExpandoObject();
+
+                foreach (var prop in dict)
+                {
+                    var name = prop.Key;
+                    var value = prop.Value;
+
+                    if (name == "Nachname")
+                    {
+                        var student = Students.LastOrDefault(s =>
+                            s.Nachname == dict["Nachname"].ToString() &&
+                            s.Vorname == dict["Vorname"].ToString() &&
+                            s.Geburtsdatum == dict["Geburtsdatum"].ToString());
+
+                        ((IDictionary<string, object>)record)[name] = value.ToString();
+                    }
+                    else if (name.Contains(". Tel.-Nr."))
+                    {
+                        var tel = TelefonNummerFormatieren(value.ToString());
+                        ((IDictionary<string, object>)record)[name] = tel;
+                    }
+                    else
+                    {
+                        ((IDictionary<string, object>)record)[name] = value;
+                    }
+                }
+                zieldatei.Add(record);
+            }
+        });
+        Global.ZeileSchreiben("Schueleradressen: Mails und Telefonnummern angepasst", zieldatei.Count.ToString());
+
+        return zieldatei;
+    }
+
+    internal Datei AdresseTelefonFormatieren(
+        IConfiguration configuration,
+        string zieldateiname,
+        string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
+    {
+        var adressen = Quelldateien.GetMatchingList(configuration, "adressen", IStudents, Klassen);
+        if (adressen == null || !adressen.Any()) return [];
+
+        var zieldatei = new Datei(zieldateiname, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+
+        AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Adressen: Mails und Telefonnummern anpassen ...", ctx =>
+        {
+            foreach (var schueler in adressen)
+            {
+                var dict = (IDictionary<string, object>)schueler;
+
+                dynamic record = new ExpandoObject();
+
+                foreach (var prop in dict)
+                {
+                    var name = prop.Key;
+                    var value = prop.Value;
+
+                    if (name == "Nachname")
+                    {
+                        var student = Students.LastOrDefault(s =>
+                            s.Nachname == dict["Nachname"].ToString() &&
+                            s.Vorname == dict["Vorname"].ToString() &&
+                            s.Geburtsdatum == dict["Geburtsdatum"].ToString());
+
+                        ((IDictionary<string, object>)record)[name] = $"{value}#{student.Klasse}";
+                    }
+                    else if (name.Contains("Telefonnr. ") || name.Contains("Fax"))
+                    {
+                        var tel = TelefonNummerFormatieren(value.ToString());
+                        ((IDictionary<string, object>)record)[name] = tel;
+                    }
+                    else
+                    {
+                        ((IDictionary<string, object>)record)[name] = value;
+                    }
+                }
+                zieldatei.Add(record);
+            }
+        });
+        Global.ZeileSchreiben("Adressen: Mails und Telefonnummern angepasst", zieldatei.Count.ToString());
+
+        return zieldatei;
+    }
+
+    /// <summary>
+    /// Achtung: Telefonnummern sind immer additiv.
+    /// </summary>
+    /// <param name="configuration"></param>
+    /// <param name="zieldateiname"></param>
+    /// <param name="anhandDieserAttributeWirdVerglichen"></param>
+    /// <param name="dieseAttributeWerdenBeimVergleichIgnoriert"></param>
+    /// <param name="delimiter"></param>
+    /// <param name="quote"></param>
+    /// <param name="encoding"></param>
+    /// <param name="shouldAllQuote"></param>
+    /// <param name="importhinweise"></param>
+    /// <returns></returns>
+    internal Datei SchuelerTelefonnummernFormatieren(
+        IConfiguration configuration,
+        string zieldateiname,
+        string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
+    {
+        var schuelertelefonnummern = Quelldateien.GetMatchingList(configuration, "schuelertelefonnummern", IStudents, Klassen);
+        if (schuelertelefonnummern == null || !schuelertelefonnummern.Any()) return [];
+
+        var zieldatei = new Datei(zieldateiname, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+
+        AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("SchuelerTelefonnummern: Telefonnummern anpassen ...", ctx =>
+        {
+            foreach (var schueler in schuelertelefonnummern)
+            {
+                var dict = (IDictionary<string, object>)schueler;
+
+                dynamic record = new ExpandoObject();
+
+                foreach (var prop in dict)
+                {
+                    var name = prop.Key;
+                    var value = prop.Value;
+
+                    if (name.Contains("Telefonnr."))
+                    {
+                        var tel = TelefonNummerFormatieren(value.ToString());
+                        ((IDictionary<string, object>)record)[name] = tel;
+                    }
+                    else
+                    {
+                        ((IDictionary<string, object>)record)[name] = value;
+                    }
+                }
+                zieldatei.Add(record);
+            }
+        });
+        Global.ZeileSchreiben("SchuelerTelefonnummern: Telefonnummern angepasst", zieldatei.Count.ToString());
+
+        return zieldatei;
+    }
 
 
     /*internal Datei? Leistungsdaten(IConfiguration configuration, string zieldateiname, Unterrichte kurse, Global.Zweck art)
