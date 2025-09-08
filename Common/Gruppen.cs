@@ -160,6 +160,11 @@ public class Gruppen : List<Gruppe>
                 {
                     if (JahrgangPasst(klassenkürzel, jahrgänge))
                     {
+                        if(klassenkürzel.ToUpper().Contains("AVT25"))
+                        {
+                            string aa = "";
+                        }
+
                         var leh = (from l in lehrers where l.Kürzel == dict["Field6"].ToString() select l).FirstOrDefault();
 
                         if (leh != null && !(from l in members where l.Mail == leh.Mail select l).Any())

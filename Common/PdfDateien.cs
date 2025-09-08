@@ -38,11 +38,11 @@ public class PdfDateien : List<PdfDatei>
         {
             var fileGroupPdf =
                 (from f in Directory.GetFiles(configuration["PfadDownloads"], "*.pdf")
-                    where !f.Contains("-Kennwort")
-                    select f).ToList();
+                 where !f.Contains("-Kennwort")
+                 select f).ToList();
 
             Global.ZeileSchreiben("Dateien bereit für die Verschlüsselung:", fileGroupPdf.Count == 0 ? "keine gefunden" : fileGroupPdf.Count.ToString());
-            
+
             foreach (var file in fileGroupPdf)
             {
                 //Console.WriteLine(" "  + file);
@@ -55,66 +55,91 @@ public class PdfDateien : List<PdfDatei>
                 return;
             }
 
-            configuration = Global.Konfig("SchipsOderZeugnisseOderAnderePdfs",Global.Modus.Update, configuration);
+            configuration = Global.Konfig("Verschluesselungsart", Global.Modus.Update, configuration, "Art der PDF-Dateien auswählen");
 
             var passwort = "";
             var url = "";
-            List<string> regex = new List<string>(); 
+            List<string> regex = new List<string>();
 
-            if (configuration["SchipsOderZeugnisseOderAnderePdfs"] == "1")
-            {   
-                configuration = Global.Konfig("SchipsUrl", Global.Modus.Update, configuration, "Schips-Url angeben");
-                configuration = Global.Konfig("SchipsPasswort", Global.Modus.Update, configuration, "Schips-Kennwort festlegen");    
-                passwort = configuration["SchipsPasswort"];
-                url = Global.SchipsUrl;
-                regex.Add("schips");                
+            if (configuration["Verschluesselungsart"] == "1")
+            {
+                configuration = Global.Konfig("SchipsUrl", Global.Modus.Update, configuration, "SchipsUrl angeben");
+                configuration = Global.Konfig("SchipsKennwort", Global.Modus.Update, configuration, "Schips-Kennwort festlegen");
+                passwort = configuration["SchipsKennwort"];
+                url = configuration["SchipsUrl"];
+                //regex.Add("schips");                
             }
-            else if (configuration["SchipsOderZeugnisseOderAnderePdfs"] == "2")
+            else if (configuration["Verschluesselungsart"] == "2")
             {
                 configuration = Global.Konfig("ZeugnisUrl", Global.Modus.Update, configuration);
-                configuration = Global.Konfig("ZeugnisPasswort", Global.Modus.Update, configuration);    
-                passwort = configuration["ZeugnisPasswort"];
+                configuration = Global.Konfig("ZeugnisKennwort", Global.Modus.Update, configuration);
+                passwort = configuration["ZeugnisKennwort"];
                 url = configuration["ZeugnisUrl"];
             }
-            else if (configuration["SchipsOderZeugnisseOderAnderePdfs"] == "3")
+            else if (configuration["Verschluesselungsart"] == "3")
             {
                 passwort = configuration["PdfKennwort"];
             }
-                
+
             foreach (string fileName in fileGroupPdf)
             {
-                // Nurt wenn der Dateiname den Regex groß oder klein enthält.
+                // Nur wenn der Dateiname den Regex groß oder klein enthält.
                 // Falls kein Regex, dann alle Dateien
                 if (regex.Count == 0 || regex.Any(r => fileName.IndexOf(r, StringComparison.OrdinalIgnoreCase) >= 0))
                 {
                     var neueDatei = fileName.Replace(Path.GetFileNameWithoutExtension(fileName),
             Path.GetFileNameWithoutExtension(fileName) + "-Kennwort");
 
-        // Writer mit Verschlüsselung konfigurieren
-        WriterProperties writerProperties = new WriterProperties()
-            .SetStandardEncryption(
-                Encoding.UTF8.GetBytes(passwort),         // Benutzerpasswort
-                Encoding.UTF8.GetBytes(passwort),        // Besitzerpasswort
-                EncryptionConstants.ALLOW_PRINTING |          // Rechte: Nur Drucken erlaubt
-                EncryptionConstants.ALLOW_COPY,               // Kopieren erlaubt
-                EncryptionConstants.STANDARD_ENCRYPTION_40);      // Verschlüsselung: AES-256
+                    // Writer mit Verschlüsselung konfigurieren
+                    WriterProperties writerProperties = new WriterProperties()
+                        .SetStandardEncryption(
+                            Encoding.UTF8.GetBytes(passwort),         // Benutzerpasswort
+                            Encoding.UTF8.GetBytes(passwort),        // Besitzerpasswort
+                            EncryptionConstants.ALLOW_PRINTING |          // Rechte: Nur Drucken erlaubt
+                            EncryptionConstants.ALLOW_COPY,               // Kopieren erlaubt
+                            EncryptionConstants.STANDARD_ENCRYPTION_40);      // Verschlüsselung: AES-256
 
-                // PDF-Dokument schreiben
-                PdfWriter writer = new PdfWriter(neueDatei, writerProperties);
-                PdfDocument pdfDoc = new PdfDocument(new PdfReader(fileName), writer);
-                Document document = new Document(pdfDoc);
-                document.Close();
-                pdfDoc.Close();
+                    // PDF-Dokument schreiben
+                    PdfWriter writer = new PdfWriter(neueDatei, writerProperties);
+                    PdfDocument pdfDoc = new PdfDocument(new PdfReader(fileName), writer);
+                    Document document = new Document(pdfDoc);
+                    document.Close();
+                    pdfDoc.Close();
 
-                    Global.ZeileSchreiben(neueDatei, "", ConsoleColor.Blue,ConsoleColor.Black);
-                }                
+                    Global.ZeileSchreiben(neueDatei, "", ConsoleColor.Blue, ConsoleColor.Black);
+                }
             }
-            Global.OpenWebseite(url);
-
+            if (!string.IsNullOrEmpty(url))
+            {
+                Global.OpenWebseite(url);
+            }
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.ToString());
+        }
+    }
+
+    internal void OrdnerOeffnen()
+    {
+        var bereitsGeöffnet = false;
+        
+        foreach (var datei in this)
+        {
+            try
+            {   
+                // OrdnerOeffnen wird nur einmal aufgerufen, sobald die erste Datei, die count > 0 hat, erstellt wird.
+                if (!bereitsGeöffnet)
+                {
+                    OrdnerOeffnen();
+                    bereitsGeöffnet = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything);
+                AnsiConsole.MarkupLine($"[bold {Global.GetColor(Global.ColorFehler)}]Fehler beim Erstellen der Datei [bold {Global.GetColor(Global.ColorPfadInDateien)}]{datei}[/]: {ex.Message}[/]");
+            }
         }
     }
 }

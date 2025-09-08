@@ -514,7 +514,7 @@ public static class Global
             AnsiConsole.Write(panel);
 
             userInput = AnsiConsole.Prompt(
-                new TextPrompt<string>($"[] {aufforderung}[/]")                
+                new TextPrompt<string>($"[] {aufforderung}[/]")
                 .PromptStyle(Global.GetColor(Global.ColorActionInMenüs))
                     .ShowDefaultValue(true)
                     .Validate(n =>
@@ -1086,84 +1086,6 @@ public static class Global
         return new
         {
             ZustimmungLizenz = "nein",
-/*
-                        ConnectionStringUntis = Verschluesseln(Environment.GetEnvironmentVariable("UNTIS_CONNECTION_STRING") ?? ""),
-                        Dokumentenverwaltung = Verschluesseln(@"\\fs01\SchILD-NRW\Dokumentenverwaltung"),
-                        Schulnummer = Verschluesseln("177659" ?? ""),
-                        SchipsPasswort = Verschluesseln(Environment.GetEnvironmentVariable("SCHIPS_PASSWORD") ?? ""),
-                        ZeugnisPasswort = Verschluesseln(Environment.GetEnvironmentVariable("ZEUGNIS_PASSWORD") ?? ""),
-                        SmtpPassword = Verschluesseln(Environment.GetEnvironmentVariable("SMTP_PASSWORD") ?? ""),
-                        AccessPassword = Verschluesseln(Environment.GetEnvironmentVariable("ACCESS_PASSWORD") ?? ""),
-                        SmtpPasswordMassenmail = Verschluesseln(Environment.GetEnvironmentVariable("SMTP_PASSWORD_MASSENMAIL") ?? ""),
-                        ZeugnisUrl = Verschluesseln("https://bkb.wiki/notenlisten:start"),
-                        SchipsUrl = Verschluesseln("https://bkb.wiki/statistik:schips:start"),
-                        PdfKennwort = Verschluesseln(Environment.GetEnvironmentVariable("PDF_PASSWORD") ?? ""),
-                        SchipsOderZeugnisseOderAnderePdfs = Verschluesseln("1"),
-                        PfadDownloads = Verschluesseln(Environment.GetEnvironmentVariable("DOWNLOADS_PATH") ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads")),
-                        PfadSchilddatenaustausch,
-                        PfadFotosAusSchILD = "",
-                        Kalenderfilter = Verschluesseln(""),
-                        Auswahl = "e",
-                        OnlineHilfeURL = Verschluesseln("https://github.com/stbaeumer/BKB-Tool/wiki"),
-
-                        AppName = Verschluesseln("BKB-Tool"),
-                        AppVersion = Verschluesseln("1.0.0"),
-                        AppDescription = Verschluesseln("BKB-Tool - Ein Werkzeug an der Schnittstelle zwischen SchILD und Webuntis."),
-                        Klassen = Verschluesseln("HBG"),
-                        Vergleich = Verschluesseln("n"),
-                        Kennwort = Verschluesseln(""),
-                        InputFolder = Verschluesseln(""),
-                        OutputFolder = Verschluesseln(""),
-                        Halbjahreszeugnisdatum = Verschluesseln(new DateTime(Convert.ToInt32(Global.AktSj[1]), 02, 01).ToString("dd.MM.yyyy")),
-                        Halbjahreskonferenzdatum = Verschluesseln(new DateTime(Convert.ToInt32(Global.AktSj[1]), 02, 01).ToString("dd.MM.yyyy")),
-                        Abschnittswechsel = Verschluesseln(new DateTime(Convert.ToInt32(Global.AktSj[1]), 02, 01).ToString("dd.MM.yyyy")),
-                        Jahreszeugnisdatum = Verschluesseln(DateTime.Now.ToString("dd.MM.yyyy")),
-                        Jahreskonferenzdatum = Verschluesseln(DateTime.Now.ToString("dd.MM.yyyy")),
-                        Sprechtagsdatum = Verschluesseln(DateTime.Now.ToString("dd.MM.yyyy")),
-                        WikiUrl = Verschluesseln("http://192.168.134.10/lib/exe/xmlrpc.php"),
-                        WikiJsonUser = Verschluesseln("root"),
-                        WikiJsonUserKennwort = Verschluesseln(""),
-                        WikiSprechtagKleineAenderung = Verschluesseln(""),
-                        Zaehlerfach = Verschluesseln("j"),
-                        MariaUser = Verschluesseln(""),
-                        MariaIp = Verschluesseln(""),
-                        MariaPort = Verschluesseln(""),
-                        MariaDb = Verschluesseln(""),
-                        MariaPw = Verschluesseln(""),
-                        FehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt = Verschluesseln("3"),
-                        MaximaleAnzahlFehlstundenProTag = Verschluesseln("8"),
-                        Abschnitt = Verschluesseln("1"),
-                        Chat = Verschluesseln(""),
-                        AusbuchenNachWievielTagen = Verschluesseln(""),
-                        DatenimportLetztesDatum = Verschluesseln(DateTime.Now.ToString("dd.MM.yyyy")),
-                        MaxDateiAlter = Verschluesseln("3"),
-                        AktSj = Verschluesseln(""),
-                        Klasse = Verschluesseln(""),
-                        MailDomain = Verschluesseln("@students.berufskolleg-borken.de"),
-                        ZipKennwort = Verschluesseln("Geheim123"),
-                        EinstellungenVorgenommen = Verschluesseln("n"),
-                        SmtpServer = Verschluesseln("smtp.office365.com"),
-                        SmtpUser = Verschluesseln("webuntis@berufskolleg-borken.de"),
-                        SmtpPort = Verschluesseln("587"),
-                        NetmanMailReceiver = Verschluesseln("stefan.baeumer@berufskolleg-borken.de"),
-                        NetmanMailBccReceiver = Verschluesseln("catrin.stakenkoetter@berufskolleg-borken.de"),
-                        Betreff = Verschluesseln("Betreff"),
-                        Body = Verschluesseln("Guten Morgen #Lehrer#,\n\nbitte beachten Sie den Anhang.\n\nErläuterungen dazu finden Sie hier: https://bkb.wiki/konzepte:stundenplanungskonzept#information_aller_lehrkraefte_per_mail \n\nViele Grüße aus der Schulverwaltung"),
-                        AccessPfad = Verschluesseln(@"\\fs01\SchILD-NRW\DB\Test.mdb"),
-                        PdfInputFolder = Verschluesseln(@"PDF-Input"),
-                        PdfOutputFolder = Verschluesseln(@"PDF-Output"),
-                        PfadDokumentenverwaltung = Verschluesseln(@"\\fs01\SchILD-NRW\Dokumentenverwaltung"),
-                        BodyMassenmail = Verschluesseln("Guten Morgen #Lehrer#,\n\nbitte beachten Sie den Anhang.\n\nErläuterungen dazu finden Sie hier: https://bkb.wiki/konzepte:stundenplanungskonzept#information_aller_lehrkraefte_per_mail \n\nViele Grüße aus der Schulverwaltung"),
-                        Verbose = Verschluesseln("false"),
-                        SmtpUserMassenmail = Verschluesseln("campusfest@berufskolleg-borken.de"),
-                        SmtpServerMassenmail = Verschluesseln("smtp-hve.office365.com"),
-                        BetreffMassenmail = Verschluesseln("Save the date: Campusfest am Berufskolleg Borken"),
-                        Schlüsselwörter = Verschluesseln("Jahreszeugnis, Abschlusszeugnis, Abgangszeugnis, Zeugnis"),
-                        Teilleistungsarten = Verschluesseln("Vornote,Abschluss-Schriftl."),
-                        LehrkraefteSonderzeiten = Verschluesseln(""),
-                        VolleStelle = Verschluesseln("25,5"),
-                        Lk1faecher = Verschluesseln("D,BI,M,E")
-              */
         };
     }
 
@@ -1231,7 +1153,7 @@ public static class Global
         do
         {
             configuration = Global.Konfig("AccessPfad", Global.Modus.Read, configuration);
-            configuration = Global.Konfig("AccessPassword", Global.Modus.Read, configuration);
+            configuration = Global.Konfig("AccessKennwort", Global.Modus.Read, configuration);
 
             DateTime[] releases =
             {
@@ -1247,7 +1169,7 @@ public static class Global
 
             var SchildVersionExpected = releases;
 
-            var dataAccess = new DataAccess(@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + configuration["AccessPfad"] + "; Persist Security Info = False;Jet OLEDB:Database Password = " + configuration["AccessPassword"] + ";");
+            var dataAccess = new DataAccess(@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + configuration["AccessPfad"] + "; Persist Security Info = False;Jet OLEDB:Database Password = " + configuration["AccessKennwort"] + ";");
 
             var schildVersionActual = dataAccess.GetSchildVersion();
 
@@ -1476,7 +1398,7 @@ public static class KonfigHelper
         ["AccessPfad"] = new KonfigMeta
         {
             Key = "AccessPfad",
-            DefaultValue = @"\\fs01\SchILD-NRW\DB\Test.mdb",
+            DefaultValue = Environment.GetEnvironmentVariable("AccessPfad") ?? "",
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]Pfad zur Access-Datenbank[/] an. Beispiel:[{Global.GetColor(Global.ColorPfadInProgrammen)}]{@"\\fs01\SchILD-NRW\DB\Test.mdb"}[/]\nGeben Sie stets den kompletten Pfad inklusive Dateinname an.",
             Datentyp = Global.Datentyp.Pfad,
@@ -1484,10 +1406,10 @@ public static class KonfigHelper
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
-        ["AccessPassword"] = new KonfigMeta
+        ["AccessKennwort"] = new KonfigMeta
         {
-            Key = "AccessPassword",
-            DefaultValue = Environment.GetEnvironmentVariable("ACCESS_PASSWORD") ?? "",
+            Key = "AccessKennwort",
+            DefaultValue = Environment.GetEnvironmentVariable("AccessKennwort") ?? "",
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie das [{Global.GetColor(Global.ColorInfoBox)}]Kennwort[/] der Access-Datenbank an. Es geht nicht um Ihr persönliches Kennwort in SchILD, sondern um das Kennwort der Access-Datenbank selbst.",
             Datentyp = Global.Datentyp.String,
@@ -1542,29 +1464,18 @@ public static class KonfigHelper
         ["ConnectionStringSchild"] = new KonfigMeta
         {
             Key = "ConnectionStringSchild",
-            DefaultValue = "",
+            DefaultValue = Environment.GetEnvironmentVariable("ConnectionStringSchild") ?? "",
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]ConnectionString[/] für SchILD an.",
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.Schulnummer177659
-        },
-        ["ConnectionStringWebuntis"] = new KonfigMeta
-        {
-            Key = "ConnectionStringWebuntis",
-            DefaultValue = "",
-            Aufforderung = $"[green]■[/]",
-            Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]ConnectionString[/] für Webuntis an (optional).",
-            Datentyp = Global.Datentyp.String,
-            InGrundeinstellungAbfragen = true,
-            InitialAbfragen = false,
-            NurBeiDiesenSchulnummern = Global.SchulnummernPrivilegiert
-        },
+        },        
         ["ConnectionStringUntis"] = new KonfigMeta
         {
             Key = "ConnectionStringUntis",
-            DefaultValue = Environment.GetEnvironmentVariable("UNTIS_CONNECTION_STRING") ?? "",
+            DefaultValue = Environment.GetEnvironmentVariable("ConnectionStringUntis") ?? "",
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Bitte geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]ConnectionString[/] für Untis an.",
             Datentyp = Global.Datentyp.String,
@@ -1677,7 +1588,7 @@ public static class KonfigHelper
         ["NetmanMailReceiver"] = new KonfigMeta
         {
             Key = "",
-            DefaultValue = Environment.GetEnvironmentVariable("NETMAN_MAIL_RECEIVER"),
+            DefaultValue = Environment.GetEnvironmentVariable("NetmanMailReceiver"),
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie die [{Global.GetColor(Global.ColorInfoBox)}]Empfänger-E-Mail-Adresse[/] der Netman-Datei an.",
             Datentyp = Global.Datentyp.Mail,
@@ -1688,7 +1599,7 @@ public static class KonfigHelper
         ["NetmanMailBccReceiver"] = new KonfigMeta
         {
             Key = "NetmanMailBccReceiver",
-            DefaultValue = Environment.GetEnvironmentVariable("NETMAN_MAIL_BCC_RECEIVER"),
+            DefaultValue = Environment.GetEnvironmentVariable("NetmanMailBccReceiver"),
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie die [{Global.GetColor(Global.ColorInfoBox)}]BCC-Empfänger-E-Mail-Adresse[/] der Netman-Datei an.",
             Datentyp = Global.Datentyp.Mail,
@@ -1732,7 +1643,7 @@ public static class KonfigHelper
         ["PdfKennwort"] = new KonfigMeta
         {
             Key = "PdfKennwort",
-            DefaultValue = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"),
+            DefaultValue = Environment.GetEnvironmentVariable("PdfKennwort") ?? "",
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie optional ein [{Global.GetColor(Global.ColorInfoBox)}]Kennwort[/] für PDF-Dateien an, die Sie mit [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] erstellen möchten. Das Kennwort wird für alle PDF-Dateien verwendet, die Sie mit [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] erstellen. Wenn Sie kein Kennwort wünschen, dann ein Leerzeichen eingeben.",
             Datentyp = Global.Datentyp.String,
@@ -1839,13 +1750,35 @@ public static class KonfigHelper
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
-        ["SchipsOderZeugnisseOderAnderePdfs"] = new KonfigMeta
+        ["Verschluesselungsart"] = new KonfigMeta
         {
-            Key = "SchipsOderZeugnisseOderAnderePdfs",
-            DefaultValue = "",
+            Key = "Verschluesselungsart",
+            DefaultValue = "2",
             Aufforderung = $"[green]■[/]",
-            Hinweise = $"Wählen Sie zwischen den [{Global.GetColor(Global.ColorInfoBox)}]Optionen[/]:\n1: Schips\n2: Notenlisten\n3: andere PDFs",
+            Hinweise = $"Wählen Sie die [{Global.GetColor(Global.ColorInfoBox)}]Verschlüsselungsart[/]:\n1: Schips (oder andere sensible Dateien)\n2: Notenlisten\n3: andere PDFs",
             Datentyp = Global.Datentyp.Int,
+            InGrundeinstellungAbfragen = false,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
+        },
+        ["SchipsUrl"] = new KonfigMeta
+        {
+            Key = "SchipsUrl",
+            DefaultValue = Environment.GetEnvironmentVariable("SchipsUrl") ?? "",
+            Aufforderung = $"[green]■[/]",
+            Hinweise = $"Geben Sie die URL für die Schips-Daten an.",
+            Datentyp = Global.Datentyp.Url,
+            InGrundeinstellungAbfragen = false,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
+        },
+        ["SchipsKennwort"] = new KonfigMeta
+        {
+            Key = "SchipsKennwort",
+            DefaultValue = Environment.GetEnvironmentVariable("SchipsKennwort") ?? "",
+            Aufforderung = $"[green]■[/]",
+            Hinweise = $"Geben Sie das Passwort für die Schips-Daten an.",
+            Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
@@ -1864,7 +1797,7 @@ public static class KonfigHelper
         ["SmtpKennwort"] = new KonfigMeta
         {
             Key = "SmtpKennwort",
-            DefaultValue = Environment.GetEnvironmentVariable("SMTP_KENNWORT") ?? "",
+            DefaultValue = Environment.GetEnvironmentVariable("SmtpKennwort") ?? "",
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie das [{Global.GetColor(Global.ColorInfoBox)}]SMTP-Kennwort[/] an.",
             Datentyp = Global.Datentyp.String,
@@ -1875,7 +1808,7 @@ public static class KonfigHelper
         ["SmtpPort"] = new KonfigMeta
         {
             Key = "SmtpPort",
-            DefaultValue = Environment.GetEnvironmentVariable("SMTP_PORT") ?? "",
+            DefaultValue = Environment.GetEnvironmentVariable("SmtpPort") ?? "",
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]SMTP-Port[/] an.",
             Datentyp = Global.Datentyp.String,
@@ -1886,7 +1819,7 @@ public static class KonfigHelper
         ["SmtpServer"] = new KonfigMeta
         {
             Key = "SmtpServer",
-            DefaultValue = Environment.GetEnvironmentVariable("SMTP_SERVER") ?? "",
+            DefaultValue = Environment.GetEnvironmentVariable("SmtpServer") ?? "",
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]SMTP-Server[/] an.",
             Datentyp = Global.Datentyp.String,
@@ -1897,7 +1830,7 @@ public static class KonfigHelper
         ["SmtpUser"] = new KonfigMeta
         {
             Key = "SmtpUser",
-            DefaultValue = Environment.GetEnvironmentVariable("SMTP_USER") ?? "",
+            DefaultValue = Environment.GetEnvironmentVariable("SmtpUser") ?? "",
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]SMTP-Benutzer[/] an.",
             Datentyp = Global.Datentyp.String,
@@ -1963,7 +1896,7 @@ public static class KonfigHelper
         ["WikiUrl"] = new KonfigMeta
         {
             Key = "WikiUrl",
-            DefaultValue = "https://wiki.berufskolleg-borken.de/xmlrpc.php",
+            DefaultValue =  Environment.GetEnvironmentVariable("WikiUrl") ?? "",
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie die [{Global.GetColor(Global.ColorInfoBox)}]URL[/] zum dokuwiki xmlrpc an.",
             Datentyp = Global.Datentyp.Url,
@@ -1974,7 +1907,7 @@ public static class KonfigHelper
         ["WikiJsonUser"] = new KonfigMeta
         {
             Key = "WikiJsonUser",
-            DefaultValue = "",
+            DefaultValue = Environment.GetEnvironmentVariable("WikiJsonUser") ?? "",
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]Benutzernamen[/] für den Zugriff auf das Wiki JSON an.",
             Datentyp = Global.Datentyp.String,
@@ -1985,7 +1918,7 @@ public static class KonfigHelper
         ["WikiJsonUserKennwort"] = new KonfigMeta
         {
             Key = "WikiJsonUserKennwort",
-            DefaultValue = "",
+            DefaultValue = Environment.GetEnvironmentVariable("WikiJsonUserKennwort") ?? "",
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie das [{Global.GetColor(Global.ColorInfoBox)}]Kennwort[/] für den Zugriff auf das Wiki JSON an.",
             Datentyp = Global.Datentyp.String,
@@ -2018,7 +1951,7 @@ public static class KonfigHelper
         ["ZeugnisUrl"] = new KonfigMeta
         {
             Key = "ZeugnisUrl",
-            DefaultValue = "",
+            DefaultValue = Environment.GetEnvironmentVariable("ZeugnisUrl") ?? "",
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Soll eine [{Global.GetColor(Global.ColorInfoBox)}]bestimmte Webseite[/] geöffnet werden, um die verschlüsselte(n) Datei(en) dort hochzuladen?\nFalls Sie keine Seite öffnen wollen, geben Sie ein Leerzeichen ein.",
             Datentyp = Global.Datentyp.DateTime,
@@ -2026,13 +1959,13 @@ public static class KonfigHelper
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
-        ["ZeugnisPasswort"] = new KonfigMeta
+        ["ZeugnisKennwort"] = new KonfigMeta
         {
-            Key = "ZeugnisPasswort",
-            DefaultValue = "",
+            Key = "ZeugnisKennwort",
+            DefaultValue = Environment.GetEnvironmentVariable("ZeugnisKennwort") ?? "",
             Aufforderung = $"[green]■[/]",
-            Hinweise = $"Mit welchem [{Global.GetColor(Global.ColorInfoBox)}]Kennwort[/] sollen die Dateien verschlüsselt werden?",
-            Datentyp = Global.Datentyp.DateTime,
+            Hinweise = $"Mit welchem [{Global.GetColor(Global.ColorInfoBox)}]Zeugnis-Kennwort[/] sollen die Dateien verschlüsselt werden?",
+            Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
@@ -2040,7 +1973,7 @@ public static class KonfigHelper
         ["ZipKennwort"] = new KonfigMeta
         {
             Key = "ZipKennwort",
-            DefaultValue = Environment.GetEnvironmentVariable("ZIP_KENNWORT") ?? "",
+            DefaultValue = Environment.GetEnvironmentVariable("ZipKennwort") ?? "",
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Die Datei wird nun gezippt.\nGeben Sie das [{Global.GetColor(Global.ColorInfoBox)}]Kennwort[/] ein, mit dem Sie die Zip-Datei verschlüsseln wollen. Geben Sie ein Leerzeichen ein, wenn kein Kennwort gesetzt werden soll.",
             Datentyp = Global.Datentyp.String,

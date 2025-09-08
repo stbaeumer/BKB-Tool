@@ -1808,7 +1808,7 @@ public class Menüeintrag
 
                     dynamic record = new ExpandoObject();
 
-                    if (Path.GetFileName(zieldateiname).ToLower().Contains("webuntis"))
+                    if (Path.GetFileName(zieldateiname).ToLower().Contains("webuntis."))
                     {
                         if (configuration["Schulnummer"] == "177659")
                         {
@@ -1847,6 +1847,7 @@ public class Menüeintrag
                         record.BetriebTelefon2 = sa == null ? "" : sa["2. Tel.-Nr."].ToString();
                         record.BetriebMail = sa == null ? "" : sa["E-Mail"].ToString();
                         record.BetriebBetreuer = sa == null ? "" : (sa["Betreuer Anrede"] == null || sa["Betreuer Anrede"].ToString() == "" ? "" : sa["Betreuer Anrede"].ToString() + " ") + (sa["Betreuer Vorname"] == null || sa["Betreuer Vorname"].ToString() == "" ? "" : sa["Betreuer Vorname"].ToString() + " ") + (sa["Betreuer Nachname"] == null ? "" : sa["Betreuer Nachname"].ToString());
+                        record.SchildAdressId = sa == null ? "" : sa["SchILD-Adress-ID"].ToString();
                         record.O365Identität = student.MailSchulisch;
                         record.Benutzername = student.MailSchulisch.Replace("@students.berufskolleg-borken.de", "");
 
@@ -1855,6 +1856,101 @@ public class Menüeintrag
                         if (student.Status == "2" || student.Status == "6" || student.NochKeineAnzahlWochenHer(6))
                         {
                             zieldatei.Add(record);
+                        }
+                    }
+                    else if (Path.GetFileName(zieldateiname).ToLower().Contains("webuntiserzieher"))
+                    {
+                        if (configuration["Schulnummer"] == "177659")
+                        {
+                            record.Schlüssel = !string.IsNullOrEmpty(sz["Externe ID-Nr"].ToString()) && sz["Externe ID-Nr"].ToString().Length == 6 && sz["Externe ID-Nr"].ToString().StartsWith("15")
+                            ? sz["Externe ID-Nr"].ToString()
+                            : sz["schulische E-Mail"].ToString().Split('@')[0];
+                        }
+                        else
+                        {
+                            record.Schlüssel = sz["schulische E-Mail"].ToString().Split('@')[0];
+                        }
+
+                        record.EMINUSMail = sz["schulische E-Mail"].ToString();
+                        record.Familienname = student.Nachname;
+                        record.Vorname = student.Vorname;
+                        record.Klasse = student.Klasse;
+                        record.Kurzname = sz["schulische E-Mail"].ToString().Split('@')[0];
+                        record.Geschlecht = student.Geschlecht?.ToString()?.ToUpper() ?? string.Empty;
+                        record.Geburtsdatum = student.Geburtsdatum;
+                        record.Eintrittsdatum = "";
+                        record.Austrittsdatum = student.Status == "2" || student.Status == "6" ? "31.07." + Global.AktSj[1] : student.ZeugnisdatumLetztesZeugnisInDieserKlasse != null ? student.ZeugnisdatumLetztesZeugnisInDieserKlasse.ToShortDateString() : sz?["Entlassdatum"].ToString();
+                        record.Telefon = sz?["Telefon-Nr."].ToString();
+                        record.Mobil = "";
+                        record.Strasse = alter >= 18 ? student.Straße.ToString() : se?["Straße"].ToString();
+                        record.PLZ = alter >= 18 ? student.Postleitzahl.ToString() : se?["PLZ"].ToString();
+                        record.Ort = alter >= 18 ? student.Ort.ToString() : se?["Ort"].ToString();
+                        record.ErzName = alter >= 18 ? "" : se?["Vorname 1.Person"].ToString() + " " + se?["Nachname 1.Person"].ToString();
+                        record.ErzMobil = alter >= 18 ? "" : sa["1. Tel.-Nr."].ToString();
+                        record.ErzTelefon = alter >= 18 ? "" : sa["2. Tel.-Nr."].ToString();
+                        record.Volljährig = alter >= 18 ? "1" : "0";
+                        record.SchildAdressId = sa == null ? "" : sa["SchILD-Adress-ID"].ToString();
+                        record.O365Identität = student.MailSchulisch;
+                        record.Benutzername = student.MailSchulisch.Replace("@students.berufskolleg-borken.de", "");
+
+                        // Es werden nur diejenigen Schüler exportiert die aktiv oder Gast sind, 
+                        // und alle anderen, deren Entlassdatum heute oder in den letzten sechs Wochen war.                                         
+                        if (student.Status == "2" || student.Status == "6" || student.NochKeineAnzahlWochenHer(6))
+                        {
+                            if(alter < 18)
+                                zieldatei.Add(record);
+                        }
+                    }
+                    else if (Path.GetFileName(zieldateiname).ToLower().Contains("webuntisbetrieb"))
+                    {
+                        if (configuration["Schulnummer"] == "177659")
+                        {
+                            record.Schlüssel = !string.IsNullOrEmpty(sz["Externe ID-Nr"].ToString()) && sz["Externe ID-Nr"].ToString().Length == 6 && sz["Externe ID-Nr"].ToString().StartsWith("15")
+                            ? sz["Externe ID-Nr"].ToString()
+                            : sz["schulische E-Mail"].ToString().Split('@')[0];
+                        }
+                        else
+                        {
+                            record.Schlüssel = sz["schulische E-Mail"].ToString().Split('@')[0];
+                        }
+
+                        record.EMINUSMail = sz["schulische E-Mail"].ToString();
+                        record.Familienname = student.Nachname;
+                        record.Vorname = student.Vorname;
+                        record.Klasse = student.Klasse;
+                        record.Kurzname = sz["schulische E-Mail"].ToString().Split('@')[0];
+                        record.Geschlecht = student.Geschlecht?.ToString()?.ToUpper() ?? string.Empty;
+                        record.Geburtsdatum = student.Geburtsdatum;
+                        record.Eintrittsdatum = "";
+                        record.Austrittsdatum = student.Status == "2" || student.Status == "6" ? "31.07." + Global.AktSj[1] : student.ZeugnisdatumLetztesZeugnisInDieserKlasse != null ? student.ZeugnisdatumLetztesZeugnisInDieserKlasse.ToShortDateString() : sz?["Entlassdatum"].ToString();
+                        record.Telefon = sz?["Telefon-Nr."].ToString();
+                        record.Mobil = "";
+                        record.Strasse = alter >= 18 ? student.Straße.ToString() : se?["Straße"].ToString();
+                        record.PLZ = alter >= 18 ? student.Postleitzahl.ToString() : se?["PLZ"].ToString();
+                        record.Ort = alter >= 18 ? student.Ort.ToString() : se?["Ort"].ToString();
+                        record.ErzName = alter >= 18 ? "" : se?["Vorname 1.Person"].ToString() + " " + se?["Nachname 1.Person"].ToString();
+                        record.ErzMobil = alter >= 18 ? "" : "";
+                        record.ErzTelefon = alter >= 18 ? "" : "";
+                        record.Volljährig = alter >= 18 ? "1" : "0";
+                        record.BetriebName = sa == null ? "" : sa["Name1"].ToString() + ", " + (sa["Straße"] == null ? "" : sa["Straße"].ToString() + ", ") + (sa["PLZ"] == null ? "" : sa["PLZ"].ToString() + " ") + (sa["Ort"] == null ? "" : sa["Ort"].ToString());
+                        record.BetriebStrasse = sa == null ? "" : sa["Straße"].ToString();
+                        record.BetriebPlz = sa == null ? "" : sa["PLZ"].ToString();
+                        record.BetriebOrt = sa == null ? "" : sa["Ort"].ToString();
+                        record.BetriebTelefon = sa == null ? "" : sa["1. Tel.-Nr."].ToString();
+                        record.BetriebTelefon2 = sa == null ? "" : sa["2. Tel.-Nr."].ToString();
+                        record.BetriebMail = sa == null ? "" : sa["E-Mail"].ToString();
+                        record.BetriebBetreuer = sa == null ? "" : (sa["Betreuer Anrede"] == null || sa["Betreuer Anrede"].ToString() == "" ? "" : sa["Betreuer Anrede"].ToString() + " ") + (sa["Betreuer Vorname"] == null || sa["Betreuer Vorname"].ToString() == "" ? "" : sa["Betreuer Vorname"].ToString() + " ") + (sa["Betreuer Nachname"] == null ? "" : sa["Betreuer Nachname"].ToString());
+                        record.SchildAdressId = sa == null ? "" : sa["SchILD-Adress-ID"].ToString();
+                        record.O365Identität = student.MailSchulisch;
+                        record.Benutzername = student.MailSchulisch.Replace("@students.berufskolleg-borken.de", "");
+
+                        // Es werden nur diejenigen Schüler exportiert die aktiv oder Gast sind, 
+                        // und alle anderen, deren Entlassdatum heute oder in den letzten sechs Wochen war.                                         
+                        if (student.Status == "2" || student.Status == "6" || student.NochKeineAnzahlWochenHer(6))
+                        {
+                            // Nur wenn es einen Betrieb gibt
+                            if (!string.IsNullOrEmpty(record.BetriebName))
+                                zieldatei.Add(record);
                         }
                     }
                     else if (Path.GetFileName(zieldateiname).ToLower().Contains("netman"))
@@ -3208,6 +3304,15 @@ public class Menüeintrag
             {
                 var dict = (IDictionary<string, object>)schueler;
 
+                // nur aktive und Gastschüler
+                var akt = Students.Any(s =>
+                            s.Nachname == dict["Nachname"].ToString() &&
+                            s.Vorname == dict["Vorname"].ToString() &&
+                            s.Geburtsdatum == dict["Geburtsdatum"].ToString() &&
+                            (s.Status == "2" || s.Status == "6"));
+                if (!akt)
+                    continue;
+
                 dynamic record = new ExpandoObject();
 
                 if (MehrfachVorhanden(
@@ -3238,12 +3343,12 @@ public class Menüeintrag
                     {
                         // Schüler mit vorhandener Mail überspringen
                         if (!string.IsNullOrEmpty(value.ToString()))
-                        {    
-                            ((IDictionary<string, object>)record)[name] = value;                         
+                        {
+                            ((IDictionary<string, object>)record)[name] = value;
                         }
                         else
                         {
-                            var student = Students.FirstOrDefault(s => s.Nachname == dict["Nachname"].ToString() && s.Vorname == dict["Vorname"].ToString() && s.Geburtsdatum == dict["Geburtsdatum"].ToString());
+                            var student = Students.FirstOrDefault(s => (s.Status == "2" || s.Status == "6") && s.Nachname == dict["Nachname"].ToString() && s.Vorname == dict["Vorname"].ToString() && s.Geburtsdatum == dict["Geburtsdatum"].ToString());
 
                             if (student == null)
                             {
@@ -3252,21 +3357,21 @@ public class Menüeintrag
                                 continue;
                             }
                             else
-                            { 
+                            {
                                 // Wenn es in den Zusatzdaten einen Schüler gibt, mit identischem Namen, Vornamen, Geburtsdatum,
-                            // und bei dem die schulische E-Mail-Adresse ebenfalls übereinstimmt, dann gib die Mail-Adresse aus:
-                            var mail = schuelerZusatzdaten
-                                .Where(s =>
-                                {
-                                    var dic = s as IDictionary<string, object>;
-                                    return dic != null &&
-                                        dic["Nachname"].ToString() == dict["Nachname"].ToString() &&
-                                        dic["Vorname"].ToString() == dict["Vorname"].ToString() &&
-                                        dic["Geburtsdatum"].ToString() == dict["Geburtsdatum"].ToString() &&
-                                        !string.IsNullOrEmpty(dic["schulische E-Mail"].ToString());
-                                })
-                                .Select(s => ((IDictionary<string, object>)s)["schulische E-Mail"].ToString())
-                                .FirstOrDefault();
+                                // und bei dem die schulische E-Mail-Adresse ebenfalls übereinstimmt, dann gib die Mail-Adresse aus:
+                                var mail = schuelerZusatzdaten
+                                    .Where(s =>
+                                    {
+                                        var dic = s as IDictionary<string, object>;
+                                        return dic != null &&
+                                            dic["Nachname"].ToString() == dict["Nachname"].ToString() &&
+                                            dic["Vorname"].ToString() == dict["Vorname"].ToString() &&
+                                            dic["Geburtsdatum"].ToString() == dict["Geburtsdatum"].ToString() &&
+                                            !string.IsNullOrEmpty(dic["schulische E-Mail"].ToString());
+                                    })
+                                    .Select(s => ((IDictionary<string, object>)s)["schulische E-Mail"].ToString())
+                                    .FirstOrDefault();
 
                                 if (!string.IsNullOrEmpty(mail))
                                 {
