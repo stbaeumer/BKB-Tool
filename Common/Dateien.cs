@@ -462,7 +462,7 @@ public class Dateien : List<Datei>
 
     public List<dynamic>? GetMatchingList(IConfiguration configuration, string pattern, Students students = null, Klassen klassen = null)
     {
-        var datei = this.FirstOrDefault(datei => !string.IsNullOrEmpty(datei.Dateiname) && datei.Dateiname.ToLower().StartsWith(pattern, StringComparison.CurrentCultureIgnoreCase));
+        Datei datei = this.FirstOrDefault(datei => !string.IsNullOrEmpty(datei.Dateiname) && datei.Dateiname.ToLower().StartsWith(pattern, StringComparison.CurrentCultureIgnoreCase));
 
         // Mögliche Meldungen werden ausgegeben, wenn die Datei nicht gefunden wurde oder veraltet ist.
 
@@ -932,16 +932,19 @@ public class Dateien : List<Datei>
     {
         foreach (var datei in this)
         {
-            datei.Verschieben(configuration["PfadLitteraImport"]);
+            if(datei.AbsoluterPfad.ToLower().Contains("littera"))
+                datei.Verschieben(configuration["PfadLitteraImport"]);
         }
     }
 
-    internal void ZippenMitKennwort(string zeitstempel, string? pfadDownloads, IConfiguration configuration)
+    internal void ZippenMitKennwort(IConfiguration configuration)
     {
-        Global.Konfig("ZipKennwort", Global.Modus.Update, configuration, "Zip-Kennwort");
+        configuration = Global.Konfig("ZipKennwort", Global.Modus.Update, configuration, "Zip-Kennwort");
+
         foreach (var datei in this)
         {
-            datei.ZippenMitKennwort(configuration);
+            if(datei.AbsoluterPfad.ToLower().Contains("netman"))
+                datei.ZippenMitKennwort(configuration);
         }
     }
 
@@ -949,7 +952,8 @@ public class Dateien : List<Datei>
     {
         foreach (var datei in this)
         {
-            datei.Mailen(datei.ZipPfad, datei.ZipPfad, configuration, datei.ZipPfad);
+            if(datei.AbsoluterPfad.ToLower().Contains("netman"))
+                datei.Mailen(datei.ZipPfad, datei.ZipPfad, configuration, datei.ZipPfad);
         }
     }
 }

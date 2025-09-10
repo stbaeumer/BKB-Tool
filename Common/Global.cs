@@ -1587,7 +1587,7 @@ public static class KonfigHelper
         },
         ["NetmanMailReceiver"] = new KonfigMeta
         {
-            Key = "",
+            Key = "NetmanMailReceiver",
             DefaultValue = Environment.GetEnvironmentVariable("NetmanMailReceiver"),
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie die [{Global.GetColor(Global.ColorInfoBox)}]Empfänger-E-Mail-Adresse[/] der Netman-Datei an.",

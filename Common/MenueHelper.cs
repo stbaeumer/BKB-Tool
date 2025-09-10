@@ -112,67 +112,81 @@ public static class MenueHelper
                         Global.NurBeiDiesenSchulnummern.Alle
                     ),
                     new Menüeintrag(
-                        "Webuntis & Co.: Schüler*innen-Importdatei für Webuntis, Littera, Netman erstellen",
-                        quelldateien.Notwendige(configuration, ["student_,csv","schuelerlernabschnittsdaten,dat", "schuelerzusatzdaten,dat", "schuelererzieher,dat", "schuelerAdressen,dat", "lehrkraefte,dat", "klassen,dat"]),
+                        "Webuntis & Co.: Importdateien für Webuntis, Littera, Netman erstellen",
+                        quelldateien.Notwendige(configuration, ["student_,csv","schuelerlernabschnittsdaten,dat", "schuelerzusatzdaten,dat", "schuelererzieher,dat", "schuelerAdressen,dat", "lehrkraefte,dat", "klassen,dat", "schuelerTelefonnummern,dat"]),
                         students,
                         klassen,
                         [
-                            $"Es werden jetzt die Dateien [bold {Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd") + "-ImportNachWebuntis.csv")}[/] und [bold {Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd") + "-ImportNachWebuntisBetriebe.csv")}[/] erstellt.",
+                            $"Es werden jetzt verschiedene Dateien in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{pfadDownloads}[/] erstellt:" +
+                            $"[bold {Global.GetColor(Global.ColorPfadInDateien)}]Webuntis-Stammdaten-Schueler.csv[/], [bold {Global.GetColor(Global.ColorPfadInDateien)}]Webuntis-Stammdaten-Betriebe.csv[/], [bold {Global.GetColor(Global.ColorPfadInDateien)}]Webuntis-Stammdaten-Erzieher.csv[/], [bold {Global.GetColor(Global.ColorPfadInDateien)}]-ImportNachLittera.xml[/], [bold {Global.GetColor(Global.ColorPfadInDateien)}]-ImportNachNetman.csv[/]",
                             $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1:[/] Das Zeugnisdatum des letzten Zeugnisses in einer Klasse wird zum Webuntis-Austrittsdatum bei Schüler*innen, deren Status weder aktiv noch extern ist.",
                             $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #2:[/] Damit korrekt ausgeschult wird, muss auch Abgang und Abschluss beim SchILD-Export angehakt werden.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #3:[/] Für den Betriebeimport sollte die SchildAdressId auf Schlüssel (externe) matchen."
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #3:[/] Für den Betriebe- und Erzieherimport sollte die SchildAdressId auf Schlüssel (externe) matchen."
                         ],
                         m =>
                         {
                             if(m.NichtAlleSusHabenEineEindeutigeMailAdresse(configuration, m.Students)) return;
-                            m.Zieldateien =
-                            [
-                                m.WebuntisOderNetmanOderLitteraCsv(
-                                    configuration,
-                                    Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") +  @"-ImportNachWebuntis.csv"),
-                                    ["EMINUSMail"],
-                                    [],
-                                    ";", '\'', new UTF8Encoding(false), false,
+                            m.Zieldateien.AddRange(m.WebuntisOderNetmanOderLitteraCsv(configuration,
                                 [
-                                    $"1. In Webuntis als Webuntis-Admin:  [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Stammdaten > Schüler*innen > Import[/]",
-                                    $"2. Datei auswählen, UTF8",
-                                    $"3. Profil: Schuelerimport, dann Vorschau",
-                                    $"Mehr zum Profil Schuelerimport: [{Global.GetColor(Global.ColorHyperlink)}][link=https://github.com/stbaeumer/BKB-Tool/wiki]https://github.com/stbaeumer/BKB-Tool/wiki[/][/]"
-                                ]),
-                                m.WebuntisOderNetmanOderLitteraCsv(
-                                    configuration,
-                                    Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") +  @"-ImportNachWebuntisBetriebe.csv"),
-                                    ["EMINUSMail"],
-                                    [],
-                                    ";", '\'', new UTF8Encoding(false), false,
-                                [
-                                    $"1. In Webuntis als Webuntis-Admin:  [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Stammdaten > Ausbildungsbeauftragter > Import[/]",
-                                    $"2. Datei auswählen, UTF8",
-                                    $"3. Profil: Schuelerimport, dann Vorschau",
-                                    $"Mehr zum Profil Schuelerimport: [{Global.GetColor(Global.ColorHyperlink)}][link=https://github.com/stbaeumer/BKB-Tool/wiki]https://github.com/stbaeumer/BKB-Tool/wiki[/][/]"
-                                ]),
-                                m.WebuntisOderNetmanOderLitteraCsv(
-                                    configuration,
-                                    Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") +  @"-ImportNachWebuntisErzieher.csv"),
-                                    ["EMINUSMail"],
-                                    [],
-                                    ";", '\'', new UTF8Encoding(false), false,
-                                [
-                                    $"1. In Webuntis als Webuntis-Admin:  [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Stammdaten > Erziehungsberechtigte > Import[/]",
-                                    $"2. Datei auswählen, UTF8",
-                                    $"3. Profil: Schuelerimport, dann Vorschau",
-                                    $"Mehr zum Profil Schuelerimport: [{Global.GetColor(Global.ColorHyperlink)}][link=https://github.com/stbaeumer/BKB-Tool/wiki]https://github.com/stbaeumer/BKB-Tool/wiki[/][/]"
-                                ]),
-                            ];
+                                    new Datei(
+                                        "Webuntis-Stammdaten-Schueler.csv", new string[] { "EMINUSMail" }, new string[] { }, ";", '\'', new UTF8Encoding(false), false,
+                                        new List<string>(){
+                                            $"1. In Webuntis als Webuntis-Admin:  [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Stammdaten > Schüler*innen > Import[/]",
+                                            $"2. Datei auswählen, UTF8",
+                                            $"3. Profil: Schuelerimport, dann Vorschau",
+                                            $"Mehr zum Profil Schuelerimport: [{Global.GetColor(Global.ColorHyperlink)}][link=https://github.com/stbaeumer/BKB-Tool/wiki]https://github.com/stbaeumer/BKB-Tool/wiki[/][/]"
+                                        }
+                                    ),
+                                    new Datei(
+                                        "Webuntis-Stammdaten-Ausbildungsbeauftragte.csv", new string[] { "EMINUSMail" }, new string[] { }, ";", '\'', new UTF8Encoding(false), false,
+                                        new List<string>(){
+                                            $"1. In Webuntis als Webuntis-Admin:  [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Stammdaten > Ausbildungsbeauftragte > Import[/]",
+                                            $"2. Datei auswählen, UTF8",
+                                            $"3. Profil: Schuelerimport, dann Vorschau",
+                                            $"Mehr zum Profil Schuelerimport: [{Global.GetColor(Global.ColorHyperlink)}][link=https://github.com/stbaeumer/BKB-Tool/wiki]https://github.com/stbaeumer/BKB-Tool/wiki[/][/]"
+                                        }
+                                    ),
+                                    new Datei(
+                                        "Webuntis-Stammdaten-Erziehungsberechtigte.csv", new string[] { "EMINUSMail" }, new string[] { }, ";", '\'', new UTF8Encoding(false), false,
+                                        new List<string>(){
+                                            $"1. In Webuntis als Webuntis-Admin:  [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Stammdaten > Erziehungsberechtigte > Import[/]",
+                                            $"2. Datei auswählen, UTF8",
+                                            $"3. Profil: Schuelerimport, dann Vorschau",
+                                            $"Mehr zum Profil Schuelerimport: [{Global.GetColor(Global.ColorHyperlink)}][link=https://github.com/stbaeumer/BKB-Tool/wiki]https://github.com/stbaeumer/BKB-Tool/wiki[/][/]"
+                                        }
+                                    ),
+                                    new Datei(
+                                        "ImportNachNetman.csv", new string[] { }, new string[] { }, ",", '\'', new UTF8Encoding(false), false,
+                                        new List<string>(){
+                                            $"Es wird jetzt die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd") + "-ImportNachNetman.csv")}[/] erstellt.",
+                                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1:[/] Schüler*innen, die bereits abgegangen sind oder einen Abschluss erworben haben, werden erst sechs Wochen später ausgebucht, um den Zugriff auf Teams nicht direkt zu verlieren.",
+                                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #2:[/] Auch Abschluss und Abgang muss beim SchILD-Export angehakt werden.",
+                                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #3:[/] Schüler*innen werden 42 Tage nach dem Abgangszeugnis/Abschlusszeugnis ausgeschult. Wenn kein letztes Zeugnisdatum bei Abgängern/Abgeschlossenen ermittelt werden kann, dann wird sofort ausgeschult."
+                                        }
+                                    ),
+                                    new Datei(
+                                        "ImportNachLittera.xml", new string[] { }, new string[] { }, ",", '\'', new UTF8Encoding(false), false,
+                                        new List<string>(){
+                                            $"Es wird jetzt die Datei [bold {Global.GetColor(Global.ColorPfadInDateien)}]" + Path.Combine(configuration["PfadDownloads"] ?? "", DateTime.Now.ToString("yyyyMMdd-") + @"-ImportNachLittera.csv") + "[/] erstellt.",
+                                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1:[/] Auch Abschluss und Abgang muss beim SchILD-Export angehakt werden.",
+                                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #2:[/] Schüler*innen werden 42 Tage nach dem Abgangszeugnis/Abschlusszeugnis ausgeschult. Wenn kein letztes Zeugnisdatum bei Abgängern/Abgeschlossenen ermittelt werden kann, dann wird sofort ausgeschult."
+                                        }
+                                    )
+                                ]
+                            ));
+
                             m.Zieldateien.Vergleichen(quelldateien);
                             m.Zieldateien.Filtern(quelldateien);
                             m.Zieldateien.OrdnerÖffnen();
                             m.Zieldateien.Erstellen();
                             m.OeffneWebseite("https://nessa.webuntis.com/students");
+                            m.Zieldateien.Verschieben(Global.Konfig("PfadLitteraImport", Global.Modus.Update, configuration));
+                            m.Zieldateien.ZippenMitKennwort(configuration);
+                            m.Zieldateien.Mailen(configuration);
                         },
                         Global.Rubrik.WöchtentlicheArbeiten,
                         Global.NurBeiDiesenSchulnummern.Alle
-                    ),
+                    ),/*
                     new Menüeintrag(
                         "Littera: Schüler*innen-Importdatei für Littera erstellen",
                         quelldateien.Notwendige(configuration, ["student_,csv","schuelerlernabschnittsdaten,dat", "schuelerzusatzdaten,dat", "schuelererzieher,dat", "schuelerAdressen,dat", "lehrkraefte,dat", "klassen,dat"]),
@@ -239,7 +253,7 @@ public static class MenueHelper
                         },
                         Global.Rubrik.WöchtentlicheArbeiten,
                         Global.NurBeiDiesenSchulnummern.Nur177659
-                    ),
+                    ),*/
                     new Menüeintrag(
                         "Fotos #1: Schüler*innen klassenweise fotografieren, kopieren, umbenennen, ablegen",
                         quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "schuelerzusatzdaten,dat"]),
@@ -474,16 +488,17 @@ public static class MenueHelper
                     ),
                     new Menüeintrag(
                         "Statistik: Unterrichtsverteilung und Anrechnungen nach SchILD importieren",
-                        quelldateien.Notwendige(configuration, ["studentgroupstudents,csv", "klassen,dat", "schuelerlernabschnitt,dat", "schuelerleistungsdaten,dat", "schuelerbasis,dat", "lehrkraefte,dat", "kurse,dat", "lehrkraeftesonderzeiten,dat", "schuelerbasisdaten,dat", "GPU002,txt"]),
+                        quelldateien.Notwendige(configuration, ["studentgroupstudents,csv", "klassen,dat", "schuelerlernabschnitt,dat,optional", "schuelerleistungsdaten,dat", "schuelerbasis,dat", "lehrkraefte,dat", "kurse,dat", "lehrkraeftesonderzeiten,dat", "schuelerbasisdaten,dat", "GPU002,txt"]),
                         students,
                         klassen,
                         [
                             $"Es werden jetzt folgende Dateien für den Import nach SchILD erstellt: \n[{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "Lernabschnitte.dat")}[/] \n[{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "Leistungsdaten.dat")}[/] \n[{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "LehrkraefteSonderzeiten.dat")}[/]",
-                            $"Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]LehrkraefteSonderzeiten.dat[/] wird nicht komplett neu erstellt. Die exportierte Datei wird lediglich für den Re-Import aufbereitet.",
-                            $"Die Kursbezeichnungen setzen sich zusammen aus dem Kursleiterkürzel plus alle beteiligten Untis-Unterrichtsnummern.",
-                            $"Zähler im Anschluss an Fächer (M1, M2, ...) werden abgeschnitten (also zu M).",
-                            $"Bei mehreren beteiligten Lehrkräften wird das alphabetisch erste Lehrkraftkürzel zum Kursleiter.",
-                            $"Team-Teaching ist daran erkennbar, dass die Summe der Kurs-Wochenstunden kleiner ist als die Summe der Lehrkräfte-Wochenstunden.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise:[/]",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#1[/] Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]LehrkraefteSonderzeiten.dat[/] wird nicht komplett neu erstellt. Die exportierte Datei wird lediglich für den Re-Import aufbereitet.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#2[/] Die Kursbezeichnungen setzen sich zusammen aus dem Kursleiterkürzel plus alle beteiligten Untis-Unterrichtsnummern.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#3[/] Zähler im Anschluss an Fächer (M1, M2, ...) werden abgeschnitten (also zu M).",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#4[/] Bei mehreren beteiligten Lehrkräften wird das alphabetisch erste Lehrkraftkürzel zum Kursleiter.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#5[/] Team-Teaching ist daran erkennbar, dass die Summe der Kurs-Wochenstunden kleiner ist als die Summe der Lehrkräfte-Wochenstunden.",
                         ],
                         m =>
                         {

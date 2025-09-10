@@ -63,6 +63,12 @@ public class Datei : List<dynamic>
     /// </summary>
     public string[] AnhandDieserSchlüsselAttributeWirdVerglichen { get; set; }
     public string[] DieseAttributeWerdenBeimVergleichIgnoriert { get; set; }
+    public object Value1 { get; }
+    public string V1 { get; }
+    public char V2 { get; }
+    public UTF8Encoding UTF8Encoding { get; }
+    public bool V3 { get; }
+    public object Value2 { get; }
 
     public Datei(string name, bool vorhanden)
     {
@@ -134,7 +140,7 @@ public class Datei : List<dynamic>
         ShouldAllQuote = shouldAllQuote;
         Importhinweise = importhinweise;
     }
-
+    
     public List<dynamic> Filtern(Students students, Klassen klassen)
     {
         IStudents = students;
@@ -371,14 +377,17 @@ public class Datei : List<dynamic>
         foreach (var rec in this)
         {
             var dict = (IDictionary<string, object>)rec;
-            if (IStudents.Where(student =>
+            if(true)
+            /*if (IStudents.Where(student =>
                     student.Nachname == dict["longName"].ToString() &&
                     student.Vorname == dict["foreName"].ToString() &&
                     student.Geburtsdatum == dict["birthDate"].ToString())
-                .Any())
+                .Any())*/
             {
                 liste.Add(rec);
-            }else{
+            }
+            else
+            {
                 string s = "";
             }   
         }
