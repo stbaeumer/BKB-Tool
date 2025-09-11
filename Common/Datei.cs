@@ -70,10 +70,13 @@ public class Datei : List<dynamic>
     public bool V3 { get; }
     public object Value2 { get; }
 
-    public Datei(string name, bool vorhanden)
+    public Datei(string name, string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert)
     {
+        Name = name;
+        Dateiname = Path.GetFileName(name);
+        AnhandDieserSchlüsselAttributeWirdVerglichen = anhandDieserAttributeWirdVerglichen;
+        DieseAttributeWerdenBeimVergleichIgnoriert = dieseAttributeWerdenBeimVergleichIgnoriert;
         UnterordnerUndDateiname = name;
-        Vorhanden = vorhanden;
     }
 
     public Datei(string zieldateiname, Datei vergleichsdatei)

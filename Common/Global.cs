@@ -32,7 +32,7 @@ public static class Global
     public static string? NetmanMailReceiver { get; set; }
     public static string? SmtpServer { get; set; }
     public static string? SmtpPort { get; set; }
-    public static string? SmtpPassword { get; set; }
+    public static string? SmtpKennwort { get; set; }
     public static string? SmtpUser { get; set; }
     public static DateTime Sprechtagsdatum { get; set; }
     public static string? AktuellerPfad { get; set; }
@@ -91,7 +91,8 @@ public static class Global
         EnterOderAbbrechen,
         ListString,
         MultiSelect,
-        FirstRun
+        FirstRun,
+        Kennwort
     }
 
     public enum ZipModus
@@ -377,12 +378,14 @@ public static class Global
     {
         object userInput = "";
         Datentyp datentyp = Datentyp.String;
+        var metakey = "";
 
         if (KonfigMetadaten.TryGetValue(parameter, out var meta))
         {
-            if (string.IsNullOrWhiteSpace(aufforderung)) aufforderung = meta.Key;
+            if (string.IsNullOrWhiteSpace(aufforderung)) aufforderung = meta.Aufforderung;
             if (string.IsNullOrWhiteSpace(hinweise)) hinweise = meta.Hinweise;
             if (string.IsNullOrWhiteSpace(defaultValue) || defaultValue == "") defaultValue = meta.DefaultValue;
+            metakey = meta.Key;
             // Der Datentyp wird aus der KonfigMeta entnommen
             datentyp = meta.Datentyp;
         }
@@ -448,7 +451,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;
                 if (modus != Modus.ReadSilent)
-                    ZeileSchreiben(aufforderung, defaultValue);
+                    ZeileSchreiben(metakey, defaultValue);
                 return configuration;
             }
 
@@ -476,7 +479,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;                
                 if(modus != Modus.ReadSilent)
-                    ZeileSchreiben(aufforderung, defaultValue);
+                    ZeileSchreiben(metakey, defaultValue);
                 return configuration;
             }
 
@@ -506,7 +509,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;
                 if(modus != Modus.ReadSilent)
-                    ZeileSchreiben(aufforderung, defaultValue);
+                    ZeileSchreiben(metakey, defaultValue);
                 return configuration;
             }
 
@@ -527,16 +530,46 @@ public static class Global
                     })
                 .DefaultValue<string>(defaultValue));
         }
+        if (datentyp == Datentyp.Kennwort)
+        {
+            // Der Wert wird im Read-Modus nicht erneut abgefragt, wenn der Wert plausibel ist und schon ein Wert in der configuration existiert.
+            if ((modus == Modus.ReadSilent || modus == Modus.Read) && !string.IsNullOrEmpty(defaultValue) && !string.IsNullOrEmpty(configuration[parameter]))
+            {
+                configuration[parameter] = defaultValue;
+                if(modus != Modus.ReadSilent)
+                    ZeileSchreiben(metakey, defaultValue);
+                return configuration;
+            }
+
+            // Wenn der Wert abgefragt wird, dann wird ein Panel mit dem Hinweis angezeigt
+            AnsiConsole.Write(panel);
+
+            userInput = AnsiConsole.Prompt(
+                new TextPrompt<string>($"[] {aufforderung}[/]")
+                .PromptStyle(Global.GetColor(Global.ColorActionInMenüs))
+                    .ShowDefaultValue(true)
+                    .Validate(n =>
+                    {
+                        if(n == "x")
+                            throw new Exception("Sie haben abgebrochen.");
+                        if (n == "" || n.Length < 3)
+                            return ValidationResult.Error("[]  Das Kennwort muss mindestens 3 Zeichen lang sein.[/]");
+                        if (string.IsNullOrEmpty(n))
+                            return ValidationResult.Error("[]  Eingabe darf nicht leer sein.[/]");                        
+                        return ValidationResult.Success();
+                    })
+                .DefaultValue<string>(defaultValue));
+        }
         if (datentyp == Datentyp.Datei)
         {
             defaultValue = File.Exists(defaultValue) ? defaultValue : string.Empty;
 
             // Der Wert wird im Read-Modus nicht erneut abgefragt, wenn der Wert plausibel ist und schon ein Wert in der configuration existiert.
-            if ((modus == Modus.ReadSilent || modus == Modus.Read) && !string.IsNullOrEmpty(defaultValue) && File.Exists(defaultValue)  && !string.IsNullOrEmpty(configuration[parameter]))
+            if ((modus == Modus.ReadSilent || modus == Modus.Read) && !string.IsNullOrEmpty(defaultValue) && File.Exists(defaultValue) && !string.IsNullOrEmpty(configuration[parameter]))
             {
                 configuration[parameter] = defaultValue;
-                if(modus != Modus.ReadSilent)
-                    ZeileSchreiben(aufforderung, defaultValue);
+                if (modus != Modus.ReadSilent)
+                    ZeileSchreiben(metakey, defaultValue);
                 return configuration;
             }
 
@@ -549,7 +582,7 @@ public static class Global
                     .PromptStyle(Global.GetColor(Global.ColorActionInMenüs))
                     .Validate(n =>
                     {
-                        if(n == "x")
+                        if (n == "x")
                             throw new Exception("Sie haben abgebrochen.");
                         if (string.IsNullOrEmpty(n))
                             return ValidationResult.Error("[]  Eingabe darf nicht leer sein.[/]");
@@ -654,7 +687,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;
                 if(modus != Modus.ReadSilent)
-                    ZeileSchreiben(aufforderung, defaultValue);
+                    ZeileSchreiben(metakey, defaultValue);
                 return configuration;
             }
 
@@ -682,7 +715,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;
                 if(modus != Modus.ReadSilent)
-                    ZeileSchreiben(aufforderung, defaultValue);
+                    ZeileSchreiben(metakey, defaultValue);
                 return configuration;
             }
 
@@ -714,7 +747,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;
                 if(modus != Modus.ReadSilent)
-                    ZeileSchreiben(aufforderung, defaultValue);
+                    ZeileSchreiben(metakey, defaultValue);
                 return configuration;
             }
 
@@ -744,7 +777,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;
                 if(modus != Modus.ReadSilent)
-                    ZeileSchreiben(aufforderung, defaultValue);
+                    ZeileSchreiben(metakey, defaultValue);
                 return configuration;
             }
             // Wenn der Wert abgefragt wird, dann wird ein Panel mit dem Hinweis angezeigt
@@ -772,7 +805,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;
                 if(modus != Modus.ReadSilent)
-                    ZeileSchreiben(aufforderung, defaultValue);
+                    ZeileSchreiben(metakey, defaultValue);
                 return configuration;
             }
 
@@ -807,7 +840,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;
                 if(modus != Modus.ReadSilent)
-                    ZeileSchreiben(aufforderung, defaultValue);
+                    ZeileSchreiben(metakey, defaultValue);
                 return configuration;
             }
 
@@ -835,7 +868,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;
                 if(modus != Modus.ReadSilent)
-                    ZeileSchreiben(aufforderung, defaultValue);
+                    ZeileSchreiben(metakey, defaultValue);
                 return configuration;
             }
 
@@ -864,7 +897,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;
                 if(modus != Modus.ReadSilent)
-                    ZeileSchreiben(aufforderung, defaultValue);
+                    ZeileSchreiben(metakey, defaultValue);
                 return configuration;
             }
 
@@ -887,13 +920,21 @@ public static class Global
                 AnsiConsole.Write(panel);
 
             userInput = AnsiConsole.Prompt(
-                new TextPrompt<string>($"[] {aufforderung} ({zulässigeAuswahlOptionen}) [/]")
+                new TextPrompt<string>($"[] {aufforderung} { (string.IsNullOrEmpty(zulässigeAuswahlOptionen) ? "" : "(Zulässige Optionen: " + zulässigeAuswahlOptionen + ")") } [/]")
                 .PromptStyle(Global.GetColor(Global.ColorActionInMenüs))
                     .ShowDefaultValue(true)
                     .Validate(n =>
                     {
                         if(n == "x")
                             throw new Exception("Sie haben abgebrochen.");
+                        if (!string.IsNullOrEmpty(n) && n.ToLower() == "alle")
+                        {
+                            if (string.IsNullOrEmpty(zulässigeAuswahlOptionen))
+                                return ValidationResult.Error("[]  Es sind keine zulässigen Auswahloptionen definiert.[/]");
+                            userInput = zulässigeAuswahlOptionen;            
+                            return ValidationResult.Success();
+                        }
+                         
                         var teile = n.ToString().Trim().Split(',');
                         if (!teile.All(t => zulässigeAuswahlOptionen.Split(',').Contains(t.Trim())))
                         {
@@ -911,7 +952,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;
                 if(modus != Modus.ReadSilent)
-                    ZeileSchreiben(aufforderung, defaultValue);
+                    ZeileSchreiben(metakey, defaultValue);
                 return configuration;
             }
 
@@ -947,7 +988,7 @@ public static class Global
             {
                 configuration[parameter] = defaultValue;
                 if(modus != Modus.ReadSilent)
-                    ZeileSchreiben(aufforderung, defaultValue);
+                    ZeileSchreiben(metakey, defaultValue);
                 return configuration;
             }
 
@@ -1412,7 +1453,7 @@ public static class KonfigHelper
             DefaultValue = Environment.GetEnvironmentVariable("AccessKennwort") ?? "",
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie das [{Global.GetColor(Global.ColorInfoBox)}]Kennwort[/] der Access-Datenbank an. Es geht nicht um Ihr persönliches Kennwort in SchILD, sondern um das Kennwort der Access-Datenbank selbst.",
-            Datentyp = Global.Datentyp.String,
+            Datentyp = Global.Datentyp.Kennwort,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
@@ -1511,7 +1552,7 @@ public static class KonfigHelper
             DefaultValue = "1.HJ,U",
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie alle [{Global.GetColor(Global.ColorInfoBox)}]Unterrichtsgruppen[/] an, die am Stichtag anwesend sein werden. Unterrichte ohne Unterrichtsgrupe werden immer berücksichtigt.\nGroß- und Kleinschreibung beachten!\nWenn Sie alle Unterrichtsgruppen berücksichtigen wollen, schreiben wie das Wort [{Global.GetColor(Global.ColorActionInMenüs)}]alle[/] gewählt.",
-            Datentyp = Global.Datentyp.MultiSelect,
+            Datentyp = Global.Datentyp.ListString,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
@@ -1568,7 +1609,7 @@ public static class KonfigHelper
             Key = "LehrkraefteSonderzeiten",
             DefaultValue = "098,099,007,360,160",
             Aufforderung = $"[green]■[/]",
-            Hinweise = "Welche [{Global.GetColor(Global.ColorInfoBox)}]Anrechnungsgründe[/] sollen ignoriert bzw. auf 0 gesetzt werden?",
+            Hinweise = $"Welche [{Global.GetColor(Global.ColorInfoBox)}]Anrechnungsgründe[/] sollen ignoriert bzw. auf 0 gesetzt werden? Hier geben Sie eigene Gründe an und auch 160 und 360.",
             Datentyp = Global.Datentyp.ListInt,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
@@ -1646,7 +1687,7 @@ public static class KonfigHelper
             DefaultValue = Environment.GetEnvironmentVariable("PdfKennwort") ?? "",
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie optional ein [{Global.GetColor(Global.ColorInfoBox)}]Kennwort[/] für PDF-Dateien an, die Sie mit [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] erstellen möchten. Das Kennwort wird für alle PDF-Dateien verwendet, die Sie mit [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] erstellen. Wenn Sie kein Kennwort wünschen, dann ein Leerzeichen eingeben.",
-            Datentyp = Global.Datentyp.String,
+            Datentyp = Global.Datentyp.Kennwort,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
@@ -1667,8 +1708,19 @@ public static class KonfigHelper
             Key = "NurDieseGruende",
             DefaultValue = "200",
             Aufforderung = $"[green]■[/]",
-            Hinweise = $"Geben Sie die [{Global.GetColor(Global.ColorInfoBox)}]interessierenden Gründe[/] an.",
+            Hinweise = $"Geben Sie die [{Global.GetColor(Global.ColorInfoBox)}]interessierenden Gründe[/] an. Sie können die Auswahl mit Komma trennen. Beispiel: [{Global.GetColor(Global.ColorActionInMenüs)}]100,200,300[/]. Wenn Sie alle Gründe berücksichtigen wollen, schreiben wie das Wort [{Global.GetColor(Global.ColorActionInMenüs)}]alle[/] gewählt.",
             Datentyp = Global.Datentyp.ListInt,
+            InGrundeinstellungAbfragen = false,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
+        },
+        ["NurDieseLehrer"] = new KonfigMeta
+        {
+            Key = "NurDieseLehrer",
+            DefaultValue = "alle",
+            Aufforderung = $"[green]■[/]",
+            Hinweise = $"Geben Sie die [{Global.GetColor(Global.ColorInfoBox)}]interessierenden Lehrer[/] an. Sie können die Auswahl mit Komma trennen. Wenn Sie alle Lehrer berücksichtigen wollen, schreiben wie das Wort [{Global.GetColor(Global.ColorActionInMenüs)}]alle[/] gewählt.",
+            Datentyp = Global.Datentyp.ListString,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
@@ -1777,8 +1829,8 @@ public static class KonfigHelper
             Key = "SchipsKennwort",
             DefaultValue = Environment.GetEnvironmentVariable("SchipsKennwort") ?? "",
             Aufforderung = $"[green]■[/]",
-            Hinweise = $"Geben Sie das Passwort für die Schips-Daten an.",
-            Datentyp = Global.Datentyp.String,
+            Hinweise = $"Geben Sie das Kennwort für die Schips-Daten an.",
+            Datentyp = Global.Datentyp.Kennwort,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
@@ -1800,7 +1852,7 @@ public static class KonfigHelper
             DefaultValue = Environment.GetEnvironmentVariable("SmtpKennwort") ?? "",
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie das [{Global.GetColor(Global.ColorInfoBox)}]SMTP-Kennwort[/] an.",
-            Datentyp = Global.Datentyp.String,
+            Datentyp = Global.Datentyp.Kennwort,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
@@ -1921,7 +1973,7 @@ public static class KonfigHelper
             DefaultValue = Environment.GetEnvironmentVariable("WikiJsonUserKennwort") ?? "",
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie das [{Global.GetColor(Global.ColorInfoBox)}]Kennwort[/] für den Zugriff auf das Wiki JSON an.",
-            Datentyp = Global.Datentyp.String,
+            Datentyp = Global.Datentyp.Kennwort,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
@@ -1948,24 +2000,24 @@ public static class KonfigHelper
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
-        ["ZeugnisUrl"] = new KonfigMeta
+        ["NotenlistenUrl"] = new KonfigMeta
         {
-            Key = "ZeugnisUrl",
-            DefaultValue = Environment.GetEnvironmentVariable("ZeugnisUrl") ?? "",
+            Key = "NotenlistenUrl",
+            DefaultValue = Environment.GetEnvironmentVariable("NotenlistenUrl") ?? "",
             Aufforderung = $"[green]■[/]",
-            Hinweise = $"Soll eine [{Global.GetColor(Global.ColorInfoBox)}]bestimmte Webseite[/] geöffnet werden, um die verschlüsselte(n) Datei(en) dort hochzuladen?\nFalls Sie keine Seite öffnen wollen, geben Sie ein Leerzeichen ein.",
+            Hinweise = $"Soll eine [{Global.GetColor(Global.ColorInfoBox)}]bestimmte Webseite[/] geöffnet werden, um die verschlüsselte(n) Datei(en) dort hochzuladen?\nFalls Sie keine Seite öffnen wollen, lassen Sie die Eingabe leer oder überschreiben Sie den bisherigen Wert mit einem Leerzeichen.",
             Datentyp = Global.Datentyp.DateTime,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
-        ["ZeugnisKennwort"] = new KonfigMeta
+        ["NotenlistenKennwort"] = new KonfigMeta
         {
-            Key = "ZeugnisKennwort",
-            DefaultValue = Environment.GetEnvironmentVariable("ZeugnisKennwort") ?? "",
+            Key = "NotenlistenKennwort",
+            DefaultValue = Environment.GetEnvironmentVariable("NotenlistenKennwort") ?? "",
             Aufforderung = $"[green]■[/]",
-            Hinweise = $"Mit welchem [{Global.GetColor(Global.ColorInfoBox)}]Zeugnis-Kennwort[/] sollen die Dateien verschlüsselt werden?",
-            Datentyp = Global.Datentyp.String,
+            Hinweise = $"Mit welchem [{Global.GetColor(Global.ColorInfoBox)}]Notenlisten-Kennwort[/] sollen die Dateien verschlüsselt werden?",
+            Datentyp = Global.Datentyp.Kennwort,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
@@ -1976,7 +2028,7 @@ public static class KonfigHelper
             DefaultValue = Environment.GetEnvironmentVariable("ZipKennwort") ?? "",
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Die Datei wird nun gezippt.\nGeben Sie das [{Global.GetColor(Global.ColorInfoBox)}]Kennwort[/] ein, mit dem Sie die Zip-Datei verschlüsseln wollen. Geben Sie ein Leerzeichen ein, wenn kein Kennwort gesetzt werden soll.",
-            Datentyp = Global.Datentyp.String,
+            Datentyp = Global.Datentyp.Kennwort,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann

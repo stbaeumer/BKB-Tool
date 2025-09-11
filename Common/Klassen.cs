@@ -121,7 +121,8 @@ FROM Class LEFT JOIN Teacher ON Class.TEACHER_ID = Teacher.TEACHER_ID WHERE (((C
                 klasse.Jahrgang = k["Jahrgang"].ToString();
                 klasse.Gliederung = k["Gliederung"].ToString();
                 klasse.OrgForm = k["OrgForm"].ToString();
-                klasse.Fachklasse = k["Fachklasse"].ToString();                
+                klasse.Fachklasse = k["Fachklasse"].ToString();
+                klasse.Klassenlehrer = k["Klassenlehrer"].ToString();
                 Add(klasse);
             }
             catch (Exception ex)

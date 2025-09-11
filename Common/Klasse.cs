@@ -15,5 +15,5 @@ public class Klasse
     public string? Fachklasse { get; set; }
     public string? Relationsgruppe { get; set; }
     public string? OrgForm { get; internal set; }
-
-    }
+    public string? Klassenlehrer { get; internal set; }
+}

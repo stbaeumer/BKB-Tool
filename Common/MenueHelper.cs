@@ -488,7 +488,7 @@ public static class MenueHelper
                     ),
                     new Menüeintrag(
                         "Statistik: Unterrichtsverteilung und Anrechnungen nach SchILD importieren",
-                        quelldateien.Notwendige(configuration, ["studentgroupstudents,csv", "klassen,dat", "schuelerlernabschnitt,dat,optional", "schuelerleistungsdaten,dat", "schuelerbasis,dat", "lehrkraefte,dat", "kurse,dat", "lehrkraeftesonderzeiten,dat", "schuelerbasisdaten,dat", "GPU002,txt"]),
+                        quelldateien.Notwendige(configuration, ["studentgroupstudents,csv", "klassen,dat", "schuelerlernabschnitt,dat,optional", "schuelerleistungsdaten,dat", "schuelerbasis,dat", "lehrkraefte,dat", "kurse,dat", "lehrkraeftesonderzeiten,dat", "schuelerbasisdaten,dat", "GPU002,txt", "GPU020,txt", "GPU004,txt", "faecher,dat"]),
                         students,
                         klassen,
                         [
@@ -513,14 +513,26 @@ public static class MenueHelper
 
                             m.Zieldateien =
                             [
-                                m.Lernabschnittsdaten(configuration, Global.Zweck.Statistik, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLernabschnittsdaten.dat"), "|", '\0', new UTF8Encoding(true), false),
-                                m.Kurse(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Kurse.dat"), "|", '\0', new UTF8Encoding(true), false),
-                                m.LeistungsdatenStatistik(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat"), Global.Zweck.Statistik),
+                                m.Lernabschnittsdaten(
+                                    configuration, Global.Zweck.Statistik, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLernabschnittsdaten.dat"),
+                                    ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt"],
+                                    [],
+                                    "|", '\0', new UTF8Encoding(true), false),
+                                m.Kurse(
+                                    configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Kurse.dat"),
+                                    ["KursBez", "Klasse", "Jahr", "Abschnitt"],
+                                    [],
+                                    "|", '\0', new UTF8Encoding(true), false),
+                                m.LeistungsdatenStatistik(
+                                    configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat"),
+                                    ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach"],
+                                    [],
+                                    Global.Zweck.Statistik),
                                 m.LehrkraefteSonderzeiten(
                                     configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "LehrkraefteSonderzeiten.dat"),
                                     ["Lehrkraft", "Zeitart", "Grund"],
                                     [],
-                                    "|", '\0', new UTF8Encoding(true), false),
+                                    "|", '\0', new UTF8Encoding(true), false)/*,
                                 m.Lehrkraefte(
                                     configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Lehrkraefte.dat"),
                                     ["InternKrz"],
@@ -530,16 +542,54 @@ public static class MenueHelper
                                     configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Faecher.dat"),
                                     ["InternKrz"],
                                     [],
-                                    "|", '\0', new UTF8Encoding(true), false)
+                                    "|", '\0', new UTF8Encoding(true), false)*/
                             ];
-                            m.Zieldateien.ExportAusSchildVerschieben(configuration);
-                            m.Zieldateien.VergleichenFilternErstellen(quelldateien);
+                            m.Zieldateien.Vergleichen(quelldateien);
+                            //m.Zieldateien.Filtern(quelldateien);
+                            m.Zieldateien.OrdnerÖffnen();
+                            m.Zieldateien.Erstellen();
+                            //m.Zieldateien.ExportAusSchildVerschieben(configuration);
+                            //m.Zieldateien.VergleichenFilternErstellen(quelldateien);
                         },
                         Global.Rubrik.Leistungsdaten,
                         Global.NurBeiDiesenSchulnummern.Alle
                     ),  
                     new Menüeintrag(
-                        $"PDF verschlüsseln: Von PDF-Dateien in {configuration["PfadDownloads"]} verschlüsselte Kopien erstellen",                      
+                        "Sonderzeiten: Lehrkräftesonderzeiten nach SchILD importieren",
+                        quelldateien.Notwendige(configuration, ["studentgroupstudents,csv", "klassen,dat", "schuelerlernabschnitt,dat,optional", "schuelerleistungsdaten,dat", "schuelerbasis,dat", "lehrkraefte,dat", "kurse,dat", "lehrkraeftesonderzeiten,dat", "schuelerbasisdaten,dat", "GPU002,txt", "GPU020,txt", "GPU004,txt", "faecher,dat"]),
+                        students,
+                        klassen,
+                        [
+                            $"Es werden jetzt folgende Dateien für den Import nach SchILD erstellt: [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "LehrkraefteSonderzeiten.dat")}[/], [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "Lehrkraefte.dat")}[/]",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise:[/]",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#1[/] Da die Sonderzeiten nur in Kombination mit den Lehrkräften importiert werden, wird eine leere Lehrkraefte.dat erzeugt. Der Import der leeren Lehrkraefte.dat ist unschädlich.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#2[/] Die Gründe können gleichzeitig oder nach und nach sukzessive angegeben werden.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#3[/] In der LehrkraefteSonderzeiten.dat wird jeder Grund jede Lehrkraft aufgeführt. Bsp.: Auch Lehrkräfte ohne Altersermäßigung werden mit dem Grund 200 und dem Wert 0 erfasst. Nur so werden Änderungen in SchILD angenommen.",
+                        ],
+                        m =>
+                        {
+                            m.Zieldateien =
+                            [
+                                m.LehrkraefteSonderzeiten(
+                                    configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "LehrkraefteSonderzeiten.dat"),
+                                    ["Lehrkraft", "Zeitart", "Grund"],
+                                    [],
+                                    "|", '\0', new UTF8Encoding(true), false),
+                                    m.Lehrkraefte(
+                                    configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Lehrkraefte.dat"),
+                                    ["InternKrz"],
+                                    [],
+                                    "|", '\0', new UTF8Encoding(true), false)
+                            ];
+                            m.Zieldateien.Vergleichen(quelldateien);
+                            m.Zieldateien.OrdnerÖffnen();
+                            m.Zieldateien.Erstellen();
+                        },
+                        Global.Rubrik.Leistungsdaten,
+                        Global.NurBeiDiesenSchulnummern.Alle
+                    ),  
+                    new Menüeintrag(
+                        $"PDF verschlüsseln: Von PDF-Dateien in {configuration["PfadDownloads"]} verschlüsselte Kopien erstellen",
                         new Dateien(),
                         students,
                         klassen,

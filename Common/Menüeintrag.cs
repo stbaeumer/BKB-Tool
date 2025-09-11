@@ -391,9 +391,17 @@ public class Menüeintrag
         return lk1faecher.Contains(linkerTeil) ? "LK1" : "LK2";
     }
 
-    public Datei Lernabschnittsdaten(IConfiguration configuration, Global.Zweck art, string zieldateiname, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
+    public Datei Lernabschnittsdaten(
+        IConfiguration configuration,
+        Global.Zweck art,
+        string zieldateiname,
+        string[] anhandDieserAttributeWirdVerglichen,
+        string[] dieseAttributeWerdenBeimVergleichIgnoriert,
+        string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
-        var schuelerLernab = Quelldateien.GetMatchingList(configuration, "lernabschnittsdat", IStudents, Klassen);
+        var zieldatei = new Datei(zieldateiname, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+
+        var schuelerLernab = Quelldateien.GetMatchingList(configuration, "schuelerlernabschnittsdaten", IStudents, Klassen);
         if (schuelerLernab == null || !schuelerLernab.Any()) return [];
 
         var schuelerBasisd = Quelldateien.GetMatchingList(configuration, "schuelerbasisdate", IStudents, Klassen);
@@ -407,13 +415,6 @@ public class Menüeintrag
         configuration = Global.Konfig("Abschnitt", Global.Modus.Read, configuration);
         configuration = Global.Konfig("Abschnittswechsel", Global.Modus.Read, configuration);
 
-        var zielDatei = new Datei(zieldateiname, new Datei(schuelerLernab));
-        zielDatei.Delimiter = delimiter;
-        zielDatei.Quote = quote;
-        zielDatei.Encoding = encoding;
-        zielDatei.ShouldQuote = shouldAllQuote;
-        zielDatei.Importhinweise = importhinweise;
-        
         if (art != Global.Zweck.Statistik)
         {
             absencePerStud = Quelldateien.GetMatchingList(configuration, "absenceperstudent", IStudents, Klassen);
@@ -517,7 +518,7 @@ public class Menüeintrag
                             var versetzung = "";
                             var abschluss = "";
                             var klassenlehrer = Klassen.Where(rec => rec.Name == student.Klasse)
-                                .Select(rec => rec.Klassenleitungen[0].Kürzel).FirstOrDefault();
+                                .Select(rec => rec.Klassenlehrer).FirstOrDefault();
                             var jahrgang = string.IsNullOrEmpty(dictBasisdaten!["Jahrgang"].ToString())
                                 ? ""
                                 : dictBasisdaten["Jahrgang"].ToString();
@@ -658,8 +659,8 @@ public class Menüeintrag
                 Global.ZeileSchreiben("Lernabschnittsdaten.dat verarbeitet:", records.Count().ToString());
             });
 
-            zielDatei.AddRange(records);
-            return zielDatei;
+            zieldatei.AddRange(records);
+            return zieldatei;
         }
         catch (Exception ex)
         {
@@ -671,10 +672,15 @@ public class Menüeintrag
         }
     }
 
-    public Datei LeistungsdatenStatistik(IConfiguration configuration, string zieldateiname, Global.Zweck art)
+    public Datei LeistungsdatenStatistik(
+        IConfiguration configuration,
+        string zieldateiname,
+        string[] anhandDieserAttributeWirdVerglichen,
+        string[] dieseAttributeWerdenBeimVergleichIgnoriert,
+        Global.Zweck art)
     {
         var unterrichte = this.Unterrichte;
-        var zieldatei = new Datei(zieldateiname);
+        var zieldatei = new Datei(zieldateiname, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert);
         var records = new List<dynamic>();
         
         AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start($"{zieldateiname} ...", ctx =>
@@ -959,10 +965,15 @@ public class Menüeintrag
     }
     */
 
-    public Datei Kurse(IConfiguration configuration, string zieldateiname, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
+    public Datei Kurse(
+        IConfiguration configuration,
+        string zieldateiname,
+        string[] anhandDieserAttributeWirdVerglichen,
+        string[] dieseAttributeWerdenBeimVergleichIgnoriert,
+        string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
-        var kurse = this.Unterrichte;
-        var zieldatei = new Datei(zieldateiname, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+        var zieldatei = new Datei(zieldateiname, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+        var kurse = this.Unterrichte.Where(x => !string.IsNullOrEmpty(x.KursBez)).ToList();        
 
         AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Kurse bilden: ...", ctx =>
         {
@@ -985,7 +996,7 @@ public class Menüeintrag
                 record.Kursleiter = kurs.Kursleiter;
                 record.Epochenunterricht = "";
                 record.Schulnr = "";
-                // Falls es eine Zsatzkraft gibt
+                // Falls es eine Zusatzkraft gibt
                 if (kurs.Lehrkraefte.Count > 0)
                 {
                     record.WochenstdPUNKTLEERZEICHENZK = kurs.LehrkraefteWochenstunden[0];
@@ -1293,8 +1304,8 @@ public class Menüeintrag
         var zieldatei = new Datei(zieldateiname, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         var records = new List<dynamic>();
-        var exportLessons = Quelldateien.GetMatchingList(configuration, "exportlessons", IStudents, Klassen);
-        if (!exportLessons.Any())
+        var gpu002 = Quelldateien.GetMatchingList(configuration, "gpu002", IStudents, Klassen);
+        if (!gpu002.Any())
         {
             return [];
         }
@@ -1305,14 +1316,14 @@ public class Menüeintrag
             return [];
         }
 
-        foreach (var recExp in exportLessons)
+        foreach (var recExp in gpu002)
         {
             var dictExp = (IDictionary<string, object>)recExp;
 
             var schildFach = schildFaecher.Where(rec =>
             {
                 var dict = (IDictionary<string, object>)rec;
-                return dict["InternKrz"].ToString() == dictExp["subject"].ToString();
+                return dict["InternKrz"].ToString() == dictExp["Field7"].ToString();
             }).FirstOrDefault();
 
             // Wenn es das Fach in SchILD nicht gibt, ...
@@ -1321,7 +1332,7 @@ public class Menüeintrag
             {
                 // ... wird bei Fächern mit Suffix geprüft, ob es bereits ein Schildfach ohne Suffix gibt.
 
-                var subject = dictExp["subject"].ToString();
+                var subject = dictExp["Field7"].ToString();
                 var endetMitZiffer = subject.Length > 0 && char.IsDigit(subject[^1]);
 
                 if (endetMitZiffer)
@@ -1337,7 +1348,7 @@ public class Menüeintrag
                     // Wenn es ein Mutterfach gibt, wird es mit neuem Namen hinzugefügt
                     if (mutterfach != null)
                     {
-                        if (records.Any(x => x.InternKrz == dictExp["subject"].ToString())) continue;
+                        if (records.Any(x => x.InternKrz == dictExp["Field7"].ToString())) continue;
                         var dictMutterfach = (IDictionary<string, object>)mutterfach;
                         dynamic record = new ExpandoObject();
                         record.InternKrz = subject;
@@ -3620,11 +3631,20 @@ public class Menüeintrag
         var gpu004 = Quelldateien.GetMatchingList(configuration, "gpu004", IStudents, Klassen); // Lehrkraefte
         if (gpu004 == null) return [];
 
-        configuration = Global.Konfig("LehrkraefteSonderzeiten", Global.Modus.ReadSilent, configuration, "", -1, -1, null, "000");
+        configuration = Global.Konfig("LehrkraefteSonderzeiten", Global.Modus.Update, configuration);
 
         var lehrers = lehrkraefte
             .Where(rec => ((IDictionary<string, object>)rec)["statistik-relevant"].ToString() == "J")
             .ToList();
+
+        var lehrerString = lehrers
+            .Select(rec => ((IDictionary<string, object>)rec)["InternKrz"].ToString())
+            .Aggregate("", (current, str) => current + (str + ","))
+            .TrimEnd(',');
+
+        configuration = Global.Konfig("NurDieseLehrer", Global.Modus.Update, configuration, "", -1, -1, null, "", null, lehrerString);
+
+        var nurDieseLehrer = configuration["NurDieseLehrer"].ToString().Trim();
 
         var verschiedeneGründe = gpu020
             .Where(rec => ((IDictionary<string, object>)rec)["Field13"].ToString() != "0")
@@ -3677,117 +3697,123 @@ public class Menüeintrag
         
         var table = new Table();
 
-        if (nurDieseGründe == "")
+        AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Lehrkraefte prüfen ...", ctx =>
         {
-            //table.AddColumn("Nr.");
-            table.AddColumn("Lehrkraft");
-            table.AddColumn("Grund");
-            table.AddColumn("bisher");
-            table.AddColumn("neu");
-        }
-
-        if (nurDieseGründe == "200")
-        {
-            //table.AddColumn(new TableColumn("Nr."));
-            table.AddColumn(new TableColumn("LuL"));
-            table.AddColumn(new TableColumn("Geb.dat."));
-            table.AddColumn(new TableColumn("Deput. lt. Sch/Unt"));            
-            table.AddColumn(new TableColumn("Stelle in %"));
-            table.AddColumn(new TableColumn($"Alter am 31.7.{akt}"));
-            table.AddColumn(new TableColumn($"Alter am 31.7.{akt + 1}"));            
-            table.AddColumn(new TableColumn($"IST laut Sch/Unt"));
-            table.AddColumn(new TableColumn($"SOLL {akt}/ {akt + 1} lt. SchILD"));
-            table.AddColumn(new TableColumn($"SOLL {akt + 1}/ {akt + 2} lt.SchILD"));
-        }
-
-        foreach (var lehrerDyn in lehrers)
-        {
-            var lehrer = new Lehrer();
-            // Spalte 2
-            lehrer.Kürzel = ((IDictionary<string, object>)lehrerDyn)["InternKrz"].ToString();
-            // Spalte 3
-            lehrer.Geburtsdatum = lehrer.GetGeburtsdatum(((IDictionary<string, object>)lehrerDyn)["Geburtsdatum"].ToString());
-            // Spalte 4
-            lehrer.DeputatLautSchild = lehrer.GetDeputatSchild(((IDictionary<string, object>)lehrerDyn)["Pflichtstunden-Soll"].ToString());
-
-            foreach (var grund in verschiedeneGründe)
+            if (nurDieseGründe == "")
             {
-                var istWertSonderzeitLautSchild = lehrer.GetWertSonderzeiten(grund, lehrkraefteSonderzeiten);
-                var istWertGpu020LautUntis = lehrer.GetAnrechnungswertGPU020Soll(gpu020, grund);
-                lehrer.DeputatLautUntis = lehrer.GetDeputatLautUntis(gpu004);
-
-                if (nurDieseGründe == "200")
-                {
-                    // Spalte 4      
-                    lehrer.ProzentStelleInSchild = lehrer.GetProzentStelle(configuration);
-                    // Spalte 5
-                    lehrer.AlterAmErstenSchultagDesJahres = lehrer.GetAlterAmErstenSchultagDesSchuljahres(akt);
-                    // Spalte 6
-                    lehrer.AlterAmErstenSchultagDesKommendenJahres = lehrer.GetAlterAmErstenSchultagDesSchuljahres(akt + 1);
-                    // Spalte 7
-                    lehrer.AltersermäßigungSoll = lehrer.CheckAltersermäßigungSoll(lehrer.AlterAmErstenSchultagDesJahres);
-                    // Spalte 8
-                    lehrer.AltersermäßigungSollKommendes = lehrer.CheckAltersermäßigungSoll(lehrer.AlterAmErstenSchultagDesKommendenJahres);
-
-                    // Wenn der Lehrer spätestens am 31.7. des kommenden SJ 55 Jahre alt ist, erscheint er in der Liste
-                    if (lehrer.AlterAmErstenSchultagDesKommendenJahres >= 55)
-                    {
-                        var deputatLautSchildUndUntis = (lehrer.DeputatLautSchild == 0 ? "-" : lehrer.DeputatLautSchild % 1 == 0
-                            ? ((int)lehrer.DeputatLautSchild).ToString()
-                            : lehrer.DeputatLautSchild.ToString("0.##", CultureInfo.InvariantCulture)) + "/" + (lehrer.DeputatLautUntis == 0 ? "-" : lehrer.DeputatLautUntis % 1 == 0
-                            ? ((int)lehrer.DeputatLautUntis).ToString()
-                            : lehrer.DeputatLautUntis.ToString("0.##", CultureInfo.InvariantCulture));
-
-                        var istSchildUndUntis = (istWertSonderzeitLautSchild == 0 ? "-" : istWertSonderzeitLautSchild.ToString("0.##", CultureInfo.InvariantCulture)) + "/" +
-                            (istWertGpu020LautUntis == 0 ? "-" : istWertGpu020LautUntis.ToString("0.##", CultureInfo.InvariantCulture));
-
-                        table.AddRow(
-                            lehrer.Kürzel,
-                            lehrer.Geburtsdatum.ToString("dd.MM.yy"),
-                            deputatLautSchildUndUntis,
-                            lehrer.ProzentStelleInSchild == 0 ? "-" : lehrer.ProzentStelleInSchild.ToString("0.##", CultureInfo.InvariantCulture),
-                            lehrer.AlterAmErstenSchultagDesJahres == 0 ? "-" : lehrer.AlterAmErstenSchultagDesJahres.ToString(),
-                            lehrer.AlterAmErstenSchultagDesKommendenJahres == 0 ? "-" : lehrer.AlterAmErstenSchultagDesKommendenJahres.ToString(),
-                            istSchildUndUntis,
-                            lehrer.AltersermäßigungSoll == 0 ? "-" : lehrer.AltersermäßigungSoll.ToString("0.##", CultureInfo.InvariantCulture),
-                            lehrer.AltersermäßigungSollKommendes == 0 ? "-" : lehrer.AltersermäßigungSollKommendes.ToString("0.##", CultureInfo.InvariantCulture));
-                    }
-                }
-
-                var wertDerAnrechnung = 0.0;
-                if (nurDieseGründe == "")
-                {
-                    var wertIst = lehrkraefteSonderzeiten
-                    .Where(rec => ((IDictionary<string, object>)rec)["Lehrkraft"].ToString() == lehrer.Kürzel)
-                    .Where(rec => ((IDictionary<string, object>)rec)["Grund"].ToString() == grund)
-                    .Select(rec => ((IDictionary<string, object>)rec)["Anzahl Stunden"].ToString())
-                    .FirstOrDefault();
-
-                    if (string.IsNullOrWhiteSpace(wertIst))
-                        wertIst = "0";
-                    else
-                        wertIst = wertIst.Replace(',', '.');
-
-                    wertDerAnrechnung = lehrer.GetAnrechnungswertGPU020Soll(gpu020, grund);
-
-                    if (wertIst != wertDerAnrechnung.ToString().Replace(',', '.'))
-                    {
-                        table.AddRow(
-                            lehrer.Kürzel,
-                            grund,
-                            wertIst.ToString().ToString().Replace(",00", ""),
-                            wertDerAnrechnung.ToString("0.##", CultureInfo.InvariantCulture));
-                    }
-                }
-
-                dynamic record = new ExpandoObject();
-                record.Lehrkraft = lehrer.Kürzel;
-                record.Zeitart = grund.ToString().StartsWith("1") ? "MEHRLEISTUNG" : grund.ToString().StartsWith("2") ? "MINDERLEISTUNG" : "ANRECHNUNG";
-                record.Grund = grund;
-                record.AnzahlLEERZEICHENStunden = nurDieseGründe == "" ? wertDerAnrechnung.ToString().Replace('.', ',') : lehrer.AltersermäßigungSoll.ToString("F2", CultureInfo.InvariantCulture).Replace('.', ',');
-                zieldatei.Add(record);
+                //table.AddColumn("Nr.");
+                table.AddColumn("Lehrkraft");
+                table.AddColumn("Grund");
+                table.AddColumn("bisher");
+                table.AddColumn("neu");
             }
-        }
+
+            if (nurDieseGründe == "200")
+            {
+                //table.AddColumn(new TableColumn("Nr."));
+                table.AddColumn(new TableColumn("LuL"));
+                table.AddColumn(new TableColumn("Geb.dat."));
+                table.AddColumn(new TableColumn("Deput. lt. Sch/Unt"));
+                table.AddColumn(new TableColumn("Stelle in %"));
+                table.AddColumn(new TableColumn($"Alter am 31.7.{akt}"));
+                table.AddColumn(new TableColumn($"Alter am 31.7.{akt + 1}"));
+                table.AddColumn(new TableColumn($"IST laut Sch/Unt"));
+                table.AddColumn(new TableColumn($"SOLL {akt}/ {akt + 1} lt. SchILD"));
+                table.AddColumn(new TableColumn($"SOLL {akt + 1}/ {akt + 2} lt.SchILD"));
+            }
+
+            foreach (var lehrerDyn in lehrers)
+            {
+                var lehrer = new Lehrer();
+                // Spalte 2
+                lehrer.Kürzel = ((IDictionary<string, object>)lehrerDyn)["InternKrz"].ToString();
+
+                if (nurDieseLehrer != "" && !nurDieseLehrer.Split(',').ToList().Contains(lehrer.Kürzel)) continue;
+
+                // Spalte 3
+                lehrer.Geburtsdatum = lehrer.GetGeburtsdatum(((IDictionary<string, object>)lehrerDyn)["Geburtsdatum"].ToString());
+                // Spalte 4
+                lehrer.DeputatLautSchild = lehrer.GetDeputatSchild(((IDictionary<string, object>)lehrerDyn)["Pflichtstunden-Soll"].ToString());
+
+                foreach (var grund in verschiedeneGründe)
+                {
+                    var istWertSonderzeitLautSchild = lehrer.GetWertSonderzeiten(grund, lehrkraefteSonderzeiten);
+                    var istWertGpu020LautUntis = lehrer.GetAnrechnungswertGPU020Soll(gpu020, grund);
+                    lehrer.DeputatLautUntis = lehrer.GetDeputatLautUntis(gpu004);
+
+                    if (nurDieseGründe == "200")
+                    {
+                        // Spalte 4      
+                        lehrer.ProzentStelleInSchild = lehrer.GetProzentStelle(configuration);
+                        // Spalte 5
+                        lehrer.AlterAmErstenSchultagDesJahres = lehrer.GetAlterAmErstenSchultagDesSchuljahres(akt);
+                        // Spalte 6
+                        lehrer.AlterAmErstenSchultagDesKommendenJahres = lehrer.GetAlterAmErstenSchultagDesSchuljahres(akt + 1);
+                        // Spalte 7
+                        lehrer.AltersermäßigungSoll = lehrer.CheckAltersermäßigungSoll(lehrer.AlterAmErstenSchultagDesJahres);
+                        // Spalte 8
+                        lehrer.AltersermäßigungSollKommendes = lehrer.CheckAltersermäßigungSoll(lehrer.AlterAmErstenSchultagDesKommendenJahres);
+
+                        // Wenn der Lehrer spätestens am 31.7. des kommenden SJ 55 Jahre alt ist, erscheint er in der Liste
+                        if (lehrer.AlterAmErstenSchultagDesKommendenJahres >= 55)
+                        {
+                            var deputatLautSchildUndUntis = (lehrer.DeputatLautSchild == 0 ? "-" : lehrer.DeputatLautSchild % 1 == 0
+                                ? ((int)lehrer.DeputatLautSchild).ToString()
+                                : lehrer.DeputatLautSchild.ToString("0.##", CultureInfo.InvariantCulture)) + "/" + (lehrer.DeputatLautUntis == 0 ? "-" : lehrer.DeputatLautUntis % 1 == 0
+                                ? ((int)lehrer.DeputatLautUntis).ToString()
+                                : lehrer.DeputatLautUntis.ToString("0.##", CultureInfo.InvariantCulture));
+
+                            var istSchildUndUntis = (istWertSonderzeitLautSchild == 0 ? "-" : istWertSonderzeitLautSchild.ToString("0.##", CultureInfo.InvariantCulture)) + "/" +
+                                (istWertGpu020LautUntis == 0 ? "-" : istWertGpu020LautUntis.ToString("0.##", CultureInfo.InvariantCulture));
+
+                            table.AddRow(
+                                lehrer.Kürzel,
+                                lehrer.Geburtsdatum.ToString("dd.MM.yy"),
+                                deputatLautSchildUndUntis,
+                                lehrer.ProzentStelleInSchild == 0 ? "-" : lehrer.ProzentStelleInSchild.ToString("0.##", CultureInfo.InvariantCulture),
+                                lehrer.AlterAmErstenSchultagDesJahres == 0 ? "-" : lehrer.AlterAmErstenSchultagDesJahres.ToString(),
+                                lehrer.AlterAmErstenSchultagDesKommendenJahres == 0 ? "-" : lehrer.AlterAmErstenSchultagDesKommendenJahres.ToString(),
+                                istSchildUndUntis,
+                                lehrer.AltersermäßigungSoll == 0 ? "-" : lehrer.AltersermäßigungSoll.ToString("0.##", CultureInfo.InvariantCulture),
+                                lehrer.AltersermäßigungSollKommendes == 0 ? "-" : lehrer.AltersermäßigungSollKommendes.ToString("0.##", CultureInfo.InvariantCulture));
+                        }
+                    }
+
+                    var wertDerAnrechnung = 0.0;
+                    if (nurDieseGründe == "")
+                    {
+                        var wertIst = lehrkraefteSonderzeiten
+                        .Where(rec => ((IDictionary<string, object>)rec)["Lehrkraft"].ToString() == lehrer.Kürzel)
+                        .Where(rec => ((IDictionary<string, object>)rec)["Grund"].ToString() == grund)
+                        .Select(rec => ((IDictionary<string, object>)rec)["Anzahl Stunden"].ToString())
+                        .FirstOrDefault();
+
+                        if (string.IsNullOrWhiteSpace(wertIst))
+                            wertIst = "0";
+                        else
+                            wertIst = wertIst.Replace(',', '.');
+
+                        wertDerAnrechnung = lehrer.GetAnrechnungswertGPU020Soll(gpu020, grund);
+
+                        if (wertIst != wertDerAnrechnung.ToString().Replace(',', '.'))
+                        {
+                            table.AddRow(
+                                lehrer.Kürzel,
+                                grund,
+                                wertIst.ToString().ToString().Replace(",00", ""),
+                                wertDerAnrechnung.ToString("0.##", CultureInfo.InvariantCulture));
+                        }
+                    }
+
+                    dynamic record = new ExpandoObject();
+                    record.Lehrkraft = lehrer.Kürzel;
+                    record.Zeitart = grund.ToString().StartsWith("1") ? "MEHRLEISTUNG" : grund.ToString().StartsWith("2") ? "MINDERLEISTUNG" : "ANRECHNUNG";
+                    record.Grund = grund;
+                    record.AnzahlLEERZEICHENStunden = nurDieseGründe == "" ? wertDerAnrechnung.ToString().Replace('.', ',') : lehrer.AltersermäßigungSoll.ToString("F2", CultureInfo.InvariantCulture).Replace('.', ',');
+                    zieldatei.Add(record);
+                }
+            }
+        });
         AnsiConsole.Write(table);
 
         return zieldatei;

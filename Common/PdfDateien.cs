@@ -55,7 +55,7 @@ public class PdfDateien : List<PdfDatei>
                 return;
             }
 
-            configuration = Global.Konfig("Verschluesselungsart", Global.Modus.Update, configuration, "Art der PDF-Dateien auswählen");
+            configuration = Global.Konfig("Verschluesselungsart", Global.Modus.Update, configuration);
 
             var passwort = "";
             var url = "";
@@ -71,10 +71,10 @@ public class PdfDateien : List<PdfDatei>
             }
             else if (configuration["Verschluesselungsart"] == "2")
             {
-                configuration = Global.Konfig("ZeugnisUrl", Global.Modus.Update, configuration);
-                configuration = Global.Konfig("ZeugnisKennwort", Global.Modus.Update, configuration);
-                passwort = configuration["ZeugnisKennwort"];
-                url = configuration["ZeugnisUrl"];
+                configuration = Global.Konfig("NotenlistenUrl", Global.Modus.Update, configuration);
+                configuration = Global.Konfig("NotenlistenKennwort", Global.Modus.Update, configuration);
+                passwort = configuration["NotenlistenKennwort"];
+                url = configuration["NotenlistenUrl"];
             }
             else if (configuration["Verschluesselungsart"] == "3")
             {

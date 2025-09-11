@@ -272,7 +272,7 @@ private bool IstMailadresseGültig(string email)
         if(configuration["SmtpKennwort"]  == null || configuration["SmtpKennwort"].Length <= 3)
         {
             Console.WriteLine($"Bitte geben Sie das Passwort von {configuration["SmtpUser"]} für den E-Mail-Versand ein:");
-            Global.SmtpPassword = Console.ReadLine();
+            Global.SmtpKennwort = Console.ReadLine();
         }
 
         using (var smtpClient = new System.Net.Mail.SmtpClient(configuration["SmtpServer"], Convert.ToInt32(configuration["SmtpPort"])))
