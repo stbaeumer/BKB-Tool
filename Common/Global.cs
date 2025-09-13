@@ -896,13 +896,13 @@ public static class Global
             if ((modus == Modus.ReadSilent || modus == Modus.Read) && !string.IsNullOrEmpty(defaultValue) && !string.IsNullOrEmpty(configuration[parameter]))
             {
                 configuration[parameter] = defaultValue;
-                if(modus != Modus.ReadSilent)
+                if (modus != Modus.ReadSilent)
                     ZeileSchreiben(metakey, defaultValue);
                 return configuration;
             }
 
             // Nur die zulässigen Auswahloptionen werden als Defaultwert verwendet
-            string default1 = "";                        
+            string default1 = "";
             foreach (var z in zulässigeAuswahlOptionen.Split(','))
             {
                 if (!string.IsNullOrEmpty(z) && defaultValue.Split(",").Contains(z))
@@ -917,33 +917,38 @@ public static class Global
             }
 
             // Wenn der Wert abgefragt wird, dann wird ein Panel mit dem Hinweis angezeigt
-                AnsiConsole.Write(panel);
+            AnsiConsole.Write(panel);
 
             userInput = AnsiConsole.Prompt(
-                new TextPrompt<string>($"[] {aufforderung} { (string.IsNullOrEmpty(zulässigeAuswahlOptionen) ? "" : "(Zulässige Optionen: " + zulässigeAuswahlOptionen + ")") } [/]")
+                new TextPrompt<string>($"[] {aufforderung} {(string.IsNullOrEmpty(zulässigeAuswahlOptionen) ? "" : "(Zulässige Optionen: " + zulässigeAuswahlOptionen + ")")} [/]")
                 .PromptStyle(Global.GetColor(Global.ColorActionInMenüs))
                     .ShowDefaultValue(true)
                     .Validate(n =>
                     {
-                        if(n == "x")
+                        if (n == "x")
                             throw new Exception("Sie haben abgebrochen.");
                         if (!string.IsNullOrEmpty(n) && n.ToLower() == "alle")
                         {
                             if (string.IsNullOrEmpty(zulässigeAuswahlOptionen))
                                 return ValidationResult.Error("[]  Es sind keine zulässigen Auswahloptionen definiert.[/]");
-                            userInput = zulässigeAuswahlOptionen;            
+                            userInput = zulässigeAuswahlOptionen;
                             return ValidationResult.Success();
                         }
-                         
+
                         var teile = n.ToString().Trim().Split(',');
                         if (!teile.All(t => zulässigeAuswahlOptionen.Split(',').Contains(t.Trim())))
                         {
                             return ValidationResult.Error($"[{Global.GetColor(Global.ColorFehler)}]  {n}[/] ist keine kommagetrennte Liste aus zulässigen Werten. Zulässige Werte: [{Global.GetColor(Global.ColorActionInMenüs)}]{zulässigeAuswahlOptionen}[/]");
                         }
-                        
+
                         return ValidationResult.Success();
                     })
                 .DefaultValue<string>(default1.ToString().TrimEnd(',')));
+                
+                if(userInput.ToString() == "alle")
+                {
+                    userInput = zulässigeAuswahlOptionen;
+                }
         }
         if (datentyp == Datentyp.Abschnitt)
         {
@@ -1604,13 +1609,13 @@ public static class KonfigHelper
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
-        ["LehrkraefteSonderzeiten"] = new KonfigMeta
+        ["DieseGruendeIgnorieren"] = new KonfigMeta
         {
-            Key = "LehrkraefteSonderzeiten",
-            DefaultValue = "098,099,007,360,160",
+            Key = "DieseGruendeIgnorieren",
+            DefaultValue = "98,99,7,360,160",
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Welche [{Global.GetColor(Global.ColorInfoBox)}]Anrechnungsgründe[/] sollen ignoriert bzw. auf 0 gesetzt werden? Hier geben Sie eigene Gründe an und auch 160 und 360.",
-            Datentyp = Global.Datentyp.ListInt,
+            Datentyp = Global.Datentyp.ListString,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
@@ -1706,10 +1711,10 @@ public static class KonfigHelper
         ["NurDieseGruende"] = new KonfigMeta
         {
             Key = "NurDieseGruende",
-            DefaultValue = "200",
+            DefaultValue = "alle",
             Aufforderung = $"[green]■[/]",
-            Hinweise = $"Geben Sie die [{Global.GetColor(Global.ColorInfoBox)}]interessierenden Gründe[/] an. Sie können die Auswahl mit Komma trennen. Beispiel: [{Global.GetColor(Global.ColorActionInMenüs)}]100,200,300[/]. Wenn Sie alle Gründe berücksichtigen wollen, schreiben wie das Wort [{Global.GetColor(Global.ColorActionInMenüs)}]alle[/] gewählt.",
-            Datentyp = Global.Datentyp.ListInt,
+            Hinweise = $"Geben Sie die [{Global.GetColor(Global.ColorInfoBox)}]interessierenden Gründe[/] an. Sie können die Auswahl mit Komma trennen. Beispiel: [{Global.GetColor(Global.ColorActionInMenüs)}]100,200,300[/]. Wenn Sie alle Gründe berücksichtigen wollen, schreiben wie das Wort [{Global.GetColor(Global.ColorActionInMenüs)}]alle[/]. 100er-Gründe sind Mehrleistungen, 200er-Gründe sind Minderleistungen.",
+            Datentyp = Global.Datentyp.ListString,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann

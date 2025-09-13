@@ -66,15 +66,15 @@ public static class MenueHelper
                 [
                     new Menüeintrag(
                         "Mailadressen: fehlende Schulinterne Mailadressen in den Individualdaten I ergänzen",
-                        quelldateien.Notwendige(configuration, ["schuelerzusatzdaten,dat", "schueleradressen,dat", "adressen,dat", "schuelertelefonnummern,dat"]),
+                        quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat","schuelerzusatzdaten,dat", "schueleradressen,dat", "adressen,dat", "schuelertelefonnummern,dat"]),
                         students,
                         klassen,
                         [
                             $"Es wird jetzt die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", "SchuelerZusatzdaten.dat")}[/] um schulinterne Mailadressen ergänzt und in [{Global.GetColor(Global.ColorPfadInDateien)}]{pfadSchilddatenaustausch}[/] für den Re-Import nach SchILD bereitgestellt. Weitere Dateien mit Telefonnummern angepasst.",
                             $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1:[/] BKB-Tool bildet die schulinterne Mailadressen wie folgt: [{Global.GetColor(Global.ColorTextHervorheben)}]nv061231@meine-schule.de[/], wobei gilt:",
-                            $"[{Global.GetColor(Global.ColorTextHervorheben)}]      n[/]      : Erster Buchstabe des Nachnamens. Umlaute werden aufgelöst. Bsp.: [{Global.GetColor(Global.ColorTextHervorheben)}]Ü[/] wird zu [{Global.GetColor(Global.ColorTextHervorheben)}]u[/] usw.",
-                            $"[{Global.GetColor(Global.ColorTextHervorheben)}]      v[/]      : Erster Buchstabe des Vornamens. Umlaute werden aufgelöst.",
-                            $"[{Global.GetColor(Global.ColorTextHervorheben)}]      061231[/] : Geburtsdatum in der Notation: JJMMTT.",
+                            $"[{Global.GetColor(Global.ColorTextHervorheben)}]    n[/]      : Erster Buchstabe des Nachnamens. Umlaute werden aufgelöst. Bsp.: [{Global.GetColor(Global.ColorTextHervorheben)}]Ü[/] wird zu [{Global.GetColor(Global.ColorTextHervorheben)}]u[/] usw.",
+                            $"[{Global.GetColor(Global.ColorTextHervorheben)}]    v[/]      : Erster Buchstabe des Vornamens. Umlaute werden aufgelöst.",
+                            $"[{Global.GetColor(Global.ColorTextHervorheben)}]    061231[/] : Geburtsdatum in der Notation: JJMMTT.",
                             $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #2:[/] Vorhandene schulinterne SchILD-Mailadressen in [{Global.GetColor(Global.ColorPfadInProgrammen)}]Individualdaten I[/] bleiben unangetastet.",
                             $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #3:[/] Doppelungen werden angezeigt und müssen nach Vorgabe behandelt werden.",
                             $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #4:[/] Als Bonus werden die Telefonnummern vereinheitlicht im Format 01245 6789."
@@ -329,40 +329,7 @@ public static class MenueHelper
                         },
                         Global.Rubrik.WöchtentlicheArbeiten,
                         Global.NurBeiDiesenSchulnummern.Nur177659
-                    ),
-                    new Menüeintrag(
-                        $"Altersermäßigung: berechnen für {int.Parse(Global.AktSj[0])}/{int.Parse(Global.AktSj[0]) + 1} und {int.Parse(Global.AktSj[0]) + 1}/{int.Parse(Global.AktSj[0]) + 2}",
-                        quelldateien.Notwendige(configuration, ["lehrkraefte,dat", "lehrkraeftesonderzeiten,dat,optional", "GPU020,txt,optional", "GPU004,txt,optional"]),
-                        students,
-                        klassen,
-                        [
-                            $"Die Altersermäßigung wird aus der Datei [aqua]{Path.Combine(configuration["PfadDownloads"] ?? "", "Lehrkraefte.dat")}[/] berechnet und mit der [aqua]{Path.Combine(configuration["PfadDownloads"] ?? "", "LehrkraefteSonderzeiten.dat")}[/] und optional [aqua]{Path.Combine(configuration["PfadDownloads"] ?? "", "GPU020.TXT")}[/] abgeglichen.",
-                            "Alle Lehrkräfte (angestellt, verbeamtet und auch Werkstattlehrer) erhalten die erste Altersermäßigung ab dem Schuljahr, das auf die Vollendung des 55. Lebensjahres folgt. Pech hat also, wer z.B. am 1. August 55 Jahre alt wird. Dann gibt es die Altersermäßigung erst ab dem kommenden Schuljahr.",
-                            "Ab dem 55. Lebensjahr erhalten Vollzeitbeschäftigte 1 Stunde Altersermäßigung, Teilzeitbeschäftigte (mindestens 50%) erhalten 0,5 Stunden.",
-                            "Lehrkräfte, die ihre Stundenzahl nur um 1 Stunde verringert haben, erhalten ebenfalls die komplette Altersermäßigung.",
-                            "Ab dem 60. Lebensjahr beträgt die Altersermäßigung 3 Stunden für Vollzeitbeschäftigte, 2 Stunden für Teilzeitbeschäftigte mit mindestens 75% und 1,5 Stunden für Teilzeitbeschäftigte mit mindestens 50%."
-                        ],
-                        m =>
-                        {
-                            m.Zieldateien =
-                            [
-                                m.LehrkraefteSonderzeiten(
-                                    configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "LehrkraefteSonderzeiten.dat"),
-                                    ["Lehrkraft", "Zeitart", "Grund"],
-                                    [],
-                                    "|", '\0', new UTF8Encoding(true), false, null, "200", Global.Modus.ReadSilent),
-                                m.Lehrkraefte(
-                                    configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Lehrkraefte.dat"),
-                                    ["InternKrz"],
-                                    [],
-                                    "|", '\0', new UTF8Encoding(true), false),
-                            ];
-                            m.Zieldateien.ExportAusSchildVerschieben(configuration);
-                            m.Zieldateien.VergleichenFilternErstellen(quelldateien);
-                        },
-                        Global.Rubrik.Allgemein,
-                        Global.NurBeiDiesenSchulnummern.Nur177659
-                    ),
+                    ),                    
                     new Menüeintrag(
                     "Klassen: Neue Klassen von Untis nach SchILD übergeben und Eigenschaften anpassen",
                     quelldateien.Notwendige(configuration, ["klassen,dat", "GPU003,txt", "GPU002,txt"]),
@@ -553,6 +520,39 @@ public static class MenueHelper
                         },
                         Global.Rubrik.Leistungsdaten,
                         Global.NurBeiDiesenSchulnummern.Alle
+                    ),
+                    new Menüeintrag(
+                        $"Altersermäßigung: berechnen für {int.Parse(Global.AktSj[0])}/{int.Parse(Global.AktSj[0]) + 1} und {int.Parse(Global.AktSj[0]) + 1}/{int.Parse(Global.AktSj[0]) + 2}",
+                        quelldateien.Notwendige(configuration, ["lehrkraefte,dat", "lehrkraeftesonderzeiten,dat,optional", "GPU020,txt,optional", "GPU004,txt,optional"]),
+                        students,
+                        klassen,
+                        [
+                            $"Die Altersermäßigung wird aus der Datei [aqua]{Path.Combine(configuration["PfadDownloads"] ?? "", "Lehrkraefte.dat")}[/] berechnet und mit der [aqua]{Path.Combine(configuration["PfadDownloads"] ?? "", "LehrkraefteSonderzeiten.dat")}[/] und optional [aqua]{Path.Combine(configuration["PfadDownloads"] ?? "", "GPU020.TXT")}[/] abgeglichen.",
+                            "Alle Lehrkräfte (angestellt, verbeamtet und auch Werkstattlehrer) erhalten die erste Altersermäßigung ab dem Schuljahr, das auf die Vollendung des 55. Lebensjahres folgt. Pech hat also, wer z.B. am 1. August 55 Jahre alt wird. Dann gibt es die Altersermäßigung erst ab dem kommenden Schuljahr.",
+                            "Ab dem 55. Lebensjahr erhalten Vollzeitbeschäftigte 1 Stunde Altersermäßigung, Teilzeitbeschäftigte (mindestens 50%) erhalten 0,5 Stunden.",
+                            "Lehrkräfte, die ihre Stundenzahl nur um 1 Stunde verringert haben, erhalten ebenfalls die komplette Altersermäßigung.",
+                            "Ab dem 60. Lebensjahr beträgt die Altersermäßigung 3 Stunden für Vollzeitbeschäftigte, 2 Stunden für Teilzeitbeschäftigte mit mindestens 75% und 1,5 Stunden für Teilzeitbeschäftigte mit mindestens 50%."
+                        ],
+                        m =>
+                        {
+                            m.Zieldateien =
+                            [
+                                m.LehrkraefteSonderzeiten(
+                                    configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "LehrkraefteSonderzeiten.dat"),
+                                    ["Lehrkraft", "Zeitart", "Grund"],
+                                    [],
+                                    "|", '\0', new UTF8Encoding(true), false, null, "200", Global.Modus.ReadSilent),
+                                m.Lehrkraefte(
+                                    configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Lehrkraefte.dat"),
+                                    ["InternKrz"],
+                                    [],
+                                    "|", '\0', new UTF8Encoding(true), false),
+                            ];
+                            m.Zieldateien.ExportAusSchildVerschieben(configuration);
+                            m.Zieldateien.VergleichenFilternErstellen(quelldateien);
+                        },
+                        Global.Rubrik.Allgemein,
+                        Global.NurBeiDiesenSchulnummern.Nur177659
                     ),  
                     new Menüeintrag(
                         "Sonderzeiten: Lehrkräftesonderzeiten nach SchILD importieren",
@@ -575,7 +575,7 @@ public static class MenueHelper
                                     ["Lehrkraft", "Zeitart", "Grund"],
                                     [],
                                     "|", '\0', new UTF8Encoding(true), false),
-                                    m.Lehrkraefte(
+                                m.Lehrkraefte(
                                     configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Lehrkraefte.dat"),
                                     ["InternKrz"],
                                     [],

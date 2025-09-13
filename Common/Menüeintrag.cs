@@ -3611,10 +3611,6 @@ public class Menüeintrag
         string defaultwert = "",        
         Global.Modus modus = Global.Modus.Update)
     {
-        configuration = Global.Konfig("NurDieseGruende", modus, configuration, "", -1, -1, null, defaultwert);
-        
-        var nurDieseGründe = configuration["NurDieseGruende"].ToString().Trim();       
-
         var akt = int.Parse(Global.AktSj[0]);
 
         var zieldatei = new Datei(zieldateiname, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
@@ -3631,8 +3627,6 @@ public class Menüeintrag
         var gpu004 = Quelldateien.GetMatchingList(configuration, "gpu004", IStudents, Klassen); // Lehrkraefte
         if (gpu004 == null) return [];
 
-        configuration = Global.Konfig("LehrkraefteSonderzeiten", Global.Modus.Update, configuration);
-
         var lehrers = lehrkraefte
             .Where(rec => ((IDictionary<string, object>)rec)["statistik-relevant"].ToString() == "J")
             .ToList();
@@ -3640,50 +3634,68 @@ public class Menüeintrag
         var lehrerString = lehrers
             .Select(rec => ((IDictionary<string, object>)rec)["InternKrz"].ToString())
             .Aggregate("", (current, str) => current + (str + ","))
-            .TrimEnd(',');
+            .TrimEnd(',');        
 
-        configuration = Global.Konfig("NurDieseLehrer", Global.Modus.Update, configuration, "", -1, -1, null, "", null, lehrerString);
+        configuration = Global.Konfig("NurDieseLehrer", modus, configuration, "", -1, -1, null, "", null, lehrerString);
 
         var nurDieseLehrer = configuration["NurDieseLehrer"].ToString().Trim();
 
-        var verschiedeneGründe = gpu020
-            .Where(rec => ((IDictionary<string, object>)rec)["Field13"].ToString() != "0")
-            .Select(rec => ((IDictionary<string, object>)rec)["Field5"].ToString())
-            .Distinct()
-            .OrderBy(x => x)
-            .ToList();
+        // Wenn die "Altersermäßigung"-Funktion aufgerufen wird (200), werden alle Lehrkräfte als Default hinzugefügt.
+        if (defaultwert == "200")
+            nurDieseLehrer = lehrerString;
+        
+        var alleMöglichenVerschiedenenGründe = gpu020
+                    .Where(rec => ((IDictionary<string, object>)rec)["Field13"].ToString() != "0")
+                    .Where(rec => ((IDictionary<string, object>)rec)["Field5"].ToString().Length != 0)
+                    .Select(rec => ((IDictionary<string, object>)rec)["Field5"].ToString().Trim().TrimStart('0'))
+                    .Distinct()
+                    .OrderBy(x => x)
+                    .ToList();
 
-        if (nurDieseGründe == "")
-            verschiedeneGründe = gpu020
-                .Where(rec => ((IDictionary<string, object>)rec)["Field13"].ToString() != "0" &&
-                !configuration["LehrkraefteSonderzeiten"].ToString().Trim().Split(',').ToList().Contains(((IDictionary<string, object>)rec)["Field5"].ToString()) && ((IDictionary<string, object>)rec)["Field5"].ToString() != "")
-                .Select(rec => ((IDictionary<string, object>)rec)["Field5"].ToString())
-                .Distinct()
-                .OrderBy(x => x)
+        // Wenn die Sonderzeitenfunktion aufgerufen wird, besteht Wahlfreiheit
+        if (defaultwert != "200")
+            configuration = Global.Konfig("NurDieseGruende", modus, configuration, "", -1, -1, null, "", null, string.Join(',', alleMöglichenVerschiedenenGründe));
+
+        var interessierendeGründe = configuration["NurDieseGruende"].ToString().Trim();
+
+        // Wenn die "Altersermäßigung"-Funktion aufgerufen wird (200), wird nur dieser Grund gesetzt.
+        if (defaultwert == "200")
+            interessierendeGründe = "200";
+
+        // Wenn die Sonderzeitenfunktion aufgerufen wird, besteht Wahlfreiheit
+        if (defaultwert != "200")
+            configuration = Global.Konfig("DieseGruendeIgnorieren", Global.Modus.Update, configuration, "", -1, -1, null, "", null, string.Join(',', alleMöglichenVerschiedenenGründe));
+
+        var ignorierteGründe = configuration["DieseGruendeIgnorieren"].ToString().Trim();
+        
+        if (defaultwert == "200")
+            ignorierteGründe = "";
+
+        // Alle interessierenden Gründe minus ignorierte Gründe
+        var interessierendeMinusIgnorierte = interessierendeGründe
+                .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Where(gr => !ignorierteGründe.Split(',', StringSplitOptions.RemoveEmptyEntries).Contains(gr))
                 .ToList();
-
-        if (nurDieseGründe != "")
-            verschiedeneGründe = nurDieseGründe.Split(',').ToList();
-
-        if (nurDieseGründe == "200")
+                
+        // Wenn die Altersermäßigung (auch) interessiert, dann wird die Stelle abgefragt
+        if (interessierendeMinusIgnorierte.Contains("200"))
             configuration = Global.Konfig("VolleStelle", Global.Modus.Update, configuration);
 
-        if (nurDieseGründe != "200")
-            configuration["LehrkraefteSonderzeiten"] = "200";
+        var panel1 = new Panel($"Die Anrechnungen aus der Untis-Datei [aqua]GPU020.txt[/] werden mit der SchILD-Datei [aqua]LehrkraefteSonderzeiten.dat[/] abgeglichen." +
+                        $"\nDie Datei [aqua]{zieldateiname}[/] wird neu erstellt und kann nach ScHILD importiert werden." +
+                        $"\nAnrechnungsgründe [aqua]...........................[/] werden ignoriert und auf 0 gesetzt.")
+                        .Header($"[bold springGreen2] Anrechnungen [/]")
+                        .HeaderAlignment(Justify.Left)
+                        .SquareBorder()
+                        .Expand()
+                        .BorderColor(Spectre.Console.Color.SpringGreen2);
 
-            var panel = new Panel($"Die Anrechnungen aus der Untis-Datei [aqua]GPU020.txt[/] werden mit der SchILD-Datei [aqua]LehrkraefteSonderzeiten.dat[/] abgeglichen." +
-                            $"\nDie Datei [aqua]{zieldateiname}[/] wird neu erstellt und kann nach ScHILD importiert werden." +
-                            $"\nAnrechnungsgründe [aqua]...........................[/] werden ignoriert und auf 0 gesetzt.")
-                            .Header($"[bold springGreen2] Anrechnungen [/]")
-                            .HeaderAlignment(Justify.Left)
-                            .SquareBorder()
-                            .Expand()
-                            .BorderColor(Spectre.Console.Color.SpringGreen2);
-
-        if (nurDieseGründe == "200")
-            panel = new Panel($"Im Folgenden werden alle Lehrkräfte mit Altersermäßigung und alle mit fehlendem Deputat bzw. fehlendem Geburtsdatum angezeigt. " +
+        // Wenn die Altersermäßigung (auch) interessiert, dann wird das Panel mit den Hinweisen angezeigt
+        if (interessierendeMinusIgnorierte.Contains("200"))
+        {
+            var panel = new Panel($"Im Folgenden werden alle Lehrkräfte mit Altersermäßigung und alle mit fehlendem Deputat bzw. fehlendem Geburtsdatum angezeigt. " +
                                 "Ohne Angabe des Deputats und Geburtsdatums in SchILD, findet keine Berechnung statt. " +
-                                "Sch/Unt zeigt (möglicherweise) abweichende Werte in SchILD und in Untis. " +                                
+                                "Sch/Unt zeigt (möglicherweise) abweichende Werte in SchILD und in Untis. " +
                                 $"Die Datei [aqua]{zieldateiname}[/] wird neu erstellt und kann nach ScHILD importiert werden. " +
                                 "Auch wenn der Wert eines Anrechnungsgrunds bei einer Lehrkraft 0 ist, wird er in die Datei übernommen, um möglicherweise veraltete Werte zu überschreiben. " +
                                 $"Da die Datei nur zusammen mit einer (leeren) lehrkraefte.dat importiert werden kann, wird eine leere lehrkraefte.dat ebenfalls erzeugt. " +
@@ -3693,55 +3705,54 @@ public class Menüeintrag
                     .Expand()
                     .BorderColor(Color.Grey);
 
-        AnsiConsole.Write(panel);
-        
+            AnsiConsole.Write(panel);
+        }
+                    
         var table = new Table();
+        var tableAltersermäßigung = new Table();
 
         AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Lehrkraefte prüfen ...", ctx =>
         {
-            if (nurDieseGründe == "")
-            {
-                //table.AddColumn("Nr.");
-                table.AddColumn("Lehrkraft");
-                table.AddColumn("Grund");
-                table.AddColumn("bisher");
-                table.AddColumn("neu");
-            }
+            //table.AddColumn("Nr.");
+            table.AddColumn("Lehrkraft");
+            table.AddColumn("Grund");
+            table.AddColumn("bisher");
+            table.AddColumn("neu");
 
-            if (nurDieseGründe == "200")
+            if (interessierendeMinusIgnorierte.Contains("200"))
             {
                 //table.AddColumn(new TableColumn("Nr."));
-                table.AddColumn(new TableColumn("LuL"));
-                table.AddColumn(new TableColumn("Geb.dat."));
-                table.AddColumn(new TableColumn("Deput. lt. Sch/Unt"));
-                table.AddColumn(new TableColumn("Stelle in %"));
-                table.AddColumn(new TableColumn($"Alter am 31.7.{akt}"));
-                table.AddColumn(new TableColumn($"Alter am 31.7.{akt + 1}"));
-                table.AddColumn(new TableColumn($"IST laut Sch/Unt"));
-                table.AddColumn(new TableColumn($"SOLL {akt}/ {akt + 1} lt. SchILD"));
-                table.AddColumn(new TableColumn($"SOLL {akt + 1}/ {akt + 2} lt.SchILD"));
+                tableAltersermäßigung.AddColumn(new TableColumn("LuL"));
+                tableAltersermäßigung.AddColumn(new TableColumn("Geb.dat."));
+                tableAltersermäßigung.AddColumn(new TableColumn("Deput. lt. Sch/Unt"));
+                tableAltersermäßigung.AddColumn(new TableColumn("Stelle in %"));
+                tableAltersermäßigung.AddColumn(new TableColumn($"Alter am 31.7.{akt}"));
+                tableAltersermäßigung.AddColumn(new TableColumn($"Alter am 31.7.{akt + 1}"));
+                tableAltersermäßigung.AddColumn(new TableColumn($"IST laut Sch/Unt"));
+                tableAltersermäßigung.AddColumn(new TableColumn($"SOLL {akt}/ {akt + 1} lt. SchILD"));
+                tableAltersermäßigung.AddColumn(new TableColumn($"SOLL {akt + 1}/ {akt + 2} lt.SchILD"));
             }
 
-            foreach (var lehrerDyn in lehrers)
+            foreach (var lehrerRec in lehrers)
             {
                 var lehrer = new Lehrer();
                 // Spalte 2
-                lehrer.Kürzel = ((IDictionary<string, object>)lehrerDyn)["InternKrz"].ToString();
+                lehrer.Kürzel = ((IDictionary<string, object>)lehrerRec)["InternKrz"].ToString();
 
                 if (nurDieseLehrer != "" && !nurDieseLehrer.Split(',').ToList().Contains(lehrer.Kürzel)) continue;
 
                 // Spalte 3
-                lehrer.Geburtsdatum = lehrer.GetGeburtsdatum(((IDictionary<string, object>)lehrerDyn)["Geburtsdatum"].ToString());
+                lehrer.Geburtsdatum = lehrer.GetGeburtsdatum(((IDictionary<string, object>)lehrerRec)["Geburtsdatum"].ToString());
                 // Spalte 4
-                lehrer.DeputatLautSchild = lehrer.GetDeputatSchild(((IDictionary<string, object>)lehrerDyn)["Pflichtstunden-Soll"].ToString());
+                lehrer.DeputatLautSchild = lehrer.GetDeputatSchild(((IDictionary<string, object>)lehrerRec)["Pflichtstunden-Soll"].ToString());
 
-                foreach (var grund in verschiedeneGründe)
+                foreach (var grund in interessierendeMinusIgnorierte)
                 {
                     var istWertSonderzeitLautSchild = lehrer.GetWertSonderzeiten(grund, lehrkraefteSonderzeiten);
                     var istWertGpu020LautUntis = lehrer.GetAnrechnungswertGPU020Soll(gpu020, grund);
                     lehrer.DeputatLautUntis = lehrer.GetDeputatLautUntis(gpu004);
 
-                    if (nurDieseGründe == "200")
+                    if (interessierendeGründe.Contains("200"))
                     {
                         // Spalte 4      
                         lehrer.ProzentStelleInSchild = lehrer.GetProzentStelle(configuration);
@@ -3766,7 +3777,7 @@ public class Menüeintrag
                             var istSchildUndUntis = (istWertSonderzeitLautSchild == 0 ? "-" : istWertSonderzeitLautSchild.ToString("0.##", CultureInfo.InvariantCulture)) + "/" +
                                 (istWertGpu020LautUntis == 0 ? "-" : istWertGpu020LautUntis.ToString("0.##", CultureInfo.InvariantCulture));
 
-                            table.AddRow(
+                            tableAltersermäßigung.AddRow(
                                 lehrer.Kürzel,
                                 lehrer.Geburtsdatum.ToString("dd.MM.yy"),
                                 deputatLautSchildUndUntis,
@@ -3780,40 +3791,43 @@ public class Menüeintrag
                     }
 
                     var wertDerAnrechnung = 0.0;
-                    if (nurDieseGründe == "")
+                    
+                    var wertIst = lehrkraefteSonderzeiten
+                    .Where(rec => ((IDictionary<string, object>)rec)["Lehrkraft"].ToString() == lehrer.Kürzel)
+                    .Where(rec => ((IDictionary<string, object>)rec)["Grund"].ToString() == grund)
+                    .Select(rec => ((IDictionary<string, object>)rec)["Anzahl Stunden"].ToString())
+                    .FirstOrDefault();
+
+                    if (string.IsNullOrWhiteSpace(wertIst))
+                        wertIst = "0";
+                    else
+                        wertIst = wertIst.Replace(',', '.');
+
+                    wertDerAnrechnung = lehrer.GetAnrechnungswertGPU020Soll(gpu020, grund);
+
+                    // Zeige nur die neuen Anrechnungen an, die von den bisherigen abweichen
+                    if (wertIst != wertDerAnrechnung.ToString().Replace(',', '.'))
                     {
-                        var wertIst = lehrkraefteSonderzeiten
-                        .Where(rec => ((IDictionary<string, object>)rec)["Lehrkraft"].ToString() == lehrer.Kürzel)
-                        .Where(rec => ((IDictionary<string, object>)rec)["Grund"].ToString() == grund)
-                        .Select(rec => ((IDictionary<string, object>)rec)["Anzahl Stunden"].ToString())
-                        .FirstOrDefault();
-
-                        if (string.IsNullOrWhiteSpace(wertIst))
-                            wertIst = "0";
-                        else
-                            wertIst = wertIst.Replace(',', '.');
-
-                        wertDerAnrechnung = lehrer.GetAnrechnungswertGPU020Soll(gpu020, grund);
-
-                        if (wertIst != wertDerAnrechnung.ToString().Replace(',', '.'))
-                        {
-                            table.AddRow(
-                                lehrer.Kürzel,
-                                grund,
-                                wertIst.ToString().ToString().Replace(",00", ""),
-                                wertDerAnrechnung.ToString("0.##", CultureInfo.InvariantCulture));
-                        }
-                    }
+                        table.AddRow(
+                            lehrer.Kürzel,
+                            grund,
+                            wertIst.ToString().ToString().Replace(",00", ""),
+                            wertDerAnrechnung.ToString("0.##", CultureInfo.InvariantCulture));
+                    }                    
 
                     dynamic record = new ExpandoObject();
                     record.Lehrkraft = lehrer.Kürzel;
                     record.Zeitart = grund.ToString().StartsWith("1") ? "MEHRLEISTUNG" : grund.ToString().StartsWith("2") ? "MINDERLEISTUNG" : "ANRECHNUNG";
                     record.Grund = grund;
-                    record.AnzahlLEERZEICHENStunden = nurDieseGründe == "" ? wertDerAnrechnung.ToString().Replace('.', ',') : lehrer.AltersermäßigungSoll.ToString("F2", CultureInfo.InvariantCulture).Replace('.', ',');
+                    record.AnzahlLEERZEICHENStunden = interessierendeGründe != "200" ? wertDerAnrechnung.ToString().Replace('.', ',') : lehrer.AltersermäßigungSoll.ToString("F2", CultureInfo.InvariantCulture).Replace('.', ',');
                     zieldatei.Add(record);
                 }
             }
         });
+
+        if(interessierendeGründe.Contains("200"))
+            AnsiConsole.Write(tableAltersermäßigung);
+
         AnsiConsole.Write(table);
 
         return zieldatei;
@@ -3871,6 +3885,9 @@ public class Menüeintrag
         var schuelerZusatzdaten = Quelldateien.GetMatchingList(configuration, "schuelerzusatzdaten", IStudents, Klassen);
         if (schuelerZusatzdaten == null || !schuelerZusatzdaten.Any()) return [];
 
+        var schuelerBasisdaten = Quelldateien.GetMatchingList(configuration, "schuelerbasisdaten", IStudents, Klassen);
+        if (schuelerBasisdaten == null || !schuelerBasisdaten.Any()) return [];
+
         var zieldatei = new Datei(zieldateiname, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         if (schuelerZusatzdaten.Count != Students.Count)
@@ -3890,44 +3907,39 @@ public class Menüeintrag
 
         AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Schuelerzusatzdaten: Mails und Telefonnummern anpassen ...", ctx =>
         {
-            foreach (var schueler in schuelerZusatzdaten)
+            for (int i = 0; i < schuelerZusatzdaten.Count; i++)
             {
-                var dict = (IDictionary<string, object>)schueler;
+                
+                var dictSz = (IDictionary<string, object>)schuelerZusatzdaten[i];
+                var dictSb = (IDictionary<string, object>)schuelerBasisdaten[i];
 
-                // nur aktive und Gastschüler
-                var akt = Students.Any(s =>
-                            s.Nachname == dict["Nachname"].ToString() &&
-                            s.Vorname == dict["Vorname"].ToString() &&
-                            s.Geburtsdatum == dict["Geburtsdatum"].ToString() &&
-                            (s.Status == "2" || s.Status == "6"));
-                if (!akt)
-                    continue;
+                if (dictSz["Nachname"].ToString().StartsWith("S") && dictSz["Vorname"].ToString().StartsWith("Faridon"))
+                {
+                    string a = "";
+                }
 
                 dynamic record = new ExpandoObject();
 
                 if (MehrfachVorhanden(
                     schuelerZusatzdaten,
-                    dict["schulische E-Mail"].ToString(),
-                    dict["Nachname"].ToString(),
-                    dict["Vorname"].ToString(),
-                    dict["Geburtsdatum"].ToString()))
+                    dictSz["schulische E-Mail"].ToString(),
+                    dictSz["Nachname"].ToString(),
+                    dictSz["Vorname"].ToString(),
+                    dictSz["Geburtsdatum"].ToString()))
                 {
-                    mehrfachVorhanden.Add(schueler);
+                    mehrfachVorhanden.Add(schuelerZusatzdaten[i]);
                 }
 
-                foreach (var prop in dict)
+                foreach (var prop in dictSz)
                 {
                     var name = prop.Key;
                     var value = prop.Value;
 
                     if (name == "Nachname")
                     {
-                        var student = Students.LastOrDefault(s =>
-                            s.Nachname == dict["Nachname"].ToString() &&
-                            s.Vorname == dict["Vorname"].ToString() &&
-                            s.Geburtsdatum == dict["Geburtsdatum"].ToString());
+                        var klasse = dictSb["Klasse"].ToString();
 
-                        ((IDictionary<string, object>)record)[name] = $"{value}#{student.Klasse}";
+                        ((IDictionary<string, object>)record)[name] = $"{value}#{klasse}";
                     }
                     else if (name == "schulische E-Mail")
                     {
@@ -3937,8 +3949,8 @@ public class Menüeintrag
                             ((IDictionary<string, object>)record)[name] = value;
                         }
                         else
-                        {
-                            var student = Students.FirstOrDefault(s => (s.Status == "2" || s.Status == "6") && s.Nachname == dict["Nachname"].ToString() && s.Vorname == dict["Vorname"].ToString() && s.Geburtsdatum == dict["Geburtsdatum"].ToString());
+                        {   
+                            var student = Students.FirstOrDefault(s => (s.Status == "2" || s.Status == "6") && s.Nachname == dictSz["Nachname"].ToString() && s.Vorname == dictSz["Vorname"].ToString() && s.Geburtsdatum == dictSz["Geburtsdatum"].ToString());
 
                             if (student == null)
                             {
@@ -3955,9 +3967,9 @@ public class Menüeintrag
                                     {
                                         var dic = s as IDictionary<string, object>;
                                         return dic != null &&
-                                            dic["Nachname"].ToString() == dict["Nachname"].ToString() &&
-                                            dic["Vorname"].ToString() == dict["Vorname"].ToString() &&
-                                            dic["Geburtsdatum"].ToString() == dict["Geburtsdatum"].ToString() &&
+                                            dic["Nachname"].ToString() == dictSz["Nachname"].ToString() &&
+                                            dic["Vorname"].ToString() == dictSz["Vorname"].ToString() &&
+                                            dic["Geburtsdatum"].ToString() == dictSz["Geburtsdatum"].ToString() &&
                                             !string.IsNullOrEmpty(dic["schulische E-Mail"].ToString());
                                     })
                                     .Select(s => ((IDictionary<string, object>)s)["schulische E-Mail"].ToString())
@@ -4006,10 +4018,10 @@ public class Menüeintrag
 
                                         if (MehrfachVorhanden(
                                             schuelerZusatzdaten,
-                                            dict["schulische E-Mail"].ToString(),
-                                            dict["Nachname"].ToString(), dict["Vorname"].ToString(), dict["Geburtsdatum"].ToString()))
+                                            dictSz["schulische E-Mail"].ToString(),
+                                            dictSz["Nachname"].ToString(), dictSz["Vorname"].ToString(), dictSz["Geburtsdatum"].ToString()))
                                         {
-                                            mehrfachVorhanden.Add(schueler);
+                                            mehrfachVorhanden.Add(schuelerZusatzdaten[i]);
                                         }
                                     }
                                 }
