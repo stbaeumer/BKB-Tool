@@ -2654,6 +2654,7 @@ public class Menüeintrag
 
         var records = new List<dynamic>();
         bool neueKlassen = false;
+        var klassenOhneUnterricht = "";
 
         foreach (var untisKlasse in untisKlassen)
         {
@@ -2670,10 +2671,10 @@ public class Menüeintrag
             // Wenn die Klasse keinen Unterricht hat, wird sie übersprungen
             if (!klasseHatUnterricht)
             {
-                AnsiConsole.MarkupLine($"[red]Klasse {dictUntis["Field1"]} hat keinen Unterricht und wird übersprungen.[/]");
+                klassenOhneUnterricht += $"{dictUntis["Field1"]}, ";
                 continue;
             }
-               
+
             var klasseVonDerKopiertWird = dictUntis["Field1"].ToString();
 
             // Wenn es die Klasse in Schild nicht gibt
@@ -2724,6 +2725,19 @@ public class Menüeintrag
                 .Expand()
                 .BorderColor(Color.Red);
         }
+
+        if (klassenOhneUnterricht != "")
+        {
+            klassenOhneUnterricht = klassenOhneUnterricht.TrimEnd(' ', ',');
+            var panel = new Panel($"Die folgenden Klassen bleiben unberücksichtigt, da sie keinen Unterricht haben: {klassenOhneUnterricht}.")
+                .HeaderAlignment(Justify.Left)
+                .Header($"  Hinweis  ")
+                .SquareBorder()
+                .Expand()
+                .BorderColor(Color.Red);
+            AnsiConsole.Write(panel);
+        }
+
         return zieldatei;
     }
 
@@ -3699,7 +3713,7 @@ public class Menüeintrag
                                 $"Die Datei [aqua]{zieldateiname}[/] wird neu erstellt und kann nach ScHILD importiert werden. " +
                                 "Auch wenn der Wert eines Anrechnungsgrunds bei einer Lehrkraft 0 ist, wird er in die Datei übernommen, um möglicherweise veraltete Werte zu überschreiben. " +
                                 $"Da die Datei nur zusammen mit einer (leeren) lehrkraefte.dat importiert werden kann, wird eine leere lehrkraefte.dat ebenfalls erzeugt. " +
-                                $"Wenn in der Spalte [bold springGreen2]Alter am 31.7. {akt + 1}[/] die Zahl 55 oder 60 steht, dann ändern sich die Werte im kommenden Jahr. ")
+                                $"Wenn in der Spalte [bold springGreen2]Alter am 31.7.{akt + 1}[/] die Zahl 55 oder 60 steht, dann ändern sich die Werte im kommenden Jahr. ")
                     .HeaderAlignment(Justify.Left)
                     .SquareBorder()
                     .Expand()
@@ -3888,6 +3902,8 @@ public class Menüeintrag
         var schuelerBasisdaten = Quelldateien.GetMatchingList(configuration, "schuelerbasisdaten", IStudents, Klassen);
         if (schuelerBasisdaten == null || !schuelerBasisdaten.Any()) return [];
 
+        bool problem = false;
+
         var zieldatei = new Datei(zieldateiname, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         if (schuelerZusatzdaten.Count != Students.Count)
@@ -3908,14 +3924,21 @@ public class Menüeintrag
         AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Schuelerzusatzdaten: Mails und Telefonnummern anpassen ...", ctx =>
         {
             for (int i = 0; i < schuelerZusatzdaten.Count; i++)
-            {
-                
+            {                
                 var dictSz = (IDictionary<string, object>)schuelerZusatzdaten[i];
                 var dictSb = (IDictionary<string, object>)schuelerBasisdaten[i];
 
-                if (dictSz["Nachname"].ToString().StartsWith("S") && dictSz["Vorname"].ToString().StartsWith("Faridon"))
+                if (string.IsNullOrEmpty(dictSb["Geburtsdatum"].ToString()))
                 {
-                    string a = "";
+                    var panel = new Panel($"Der Schüler {dictSz["Nachname"]} {dictSz["Vorname"]} hat kein Geburtsdatum in den Individualdaten I hinterlegt. Bitte ergänzen Sie das Geburtsdatum in SchILD, damit eine schulische E-Mail-Adresse generiert werden kann.")
+                            .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] !? [/]")
+                            .HeaderAlignment(Justify.Left)
+                            .SquareBorder()
+                            .Expand()
+                            .BorderColor(Global.ColorFehler);
+                    AnsiConsole.Write(panel);
+                    problem = true;
+                    continue;
                 }
 
                 dynamic record = new ExpandoObject();
@@ -4052,6 +4075,11 @@ public class Menüeintrag
             var schüler = string.Join("\n ", mehrfachVorhanden.Select(s => $"{s.Geburtsdatum} {s.Nachname} {s.Vorname}"));
             var fehler = $"Unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Individualdaten I[/] haben mehrere dieselbe schulinterne Mailadresse: \n {schüler} \nLösen Sie das Problem, indem Sie in SchILD unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Individualdaten I[/] händisch Eindeutigkeit herstellen. Sie könnten z.B. bei einer/einem Schüler*in händisch eine [{Global.GetColor(Global.ColorZahlen)}]1[/] anhängen.\nAnschließend exportieren Sie alle *.dat-Dateien erneut und kehren hierher zurück.";
             throw new Exception(fehler);
+        }
+
+        if (problem)
+        {
+            throw new Exception($"[grey]  Zuerst die Hinweise [/][bold red]!?[/][grey] bearbeiten, dann hierher zurückkehren![/]");
         }
 
         return zieldatei;
@@ -4235,8 +4263,9 @@ public class Menüeintrag
         });
 
         if (problem)
-            {
-                AnsiConsole.MarkupLine($"[grey]  Zuerst die Hinweise [/][bold red]!?[/][grey] bearbeiten, dann hierher zurückkehren.[/]");
+        {
+            //AnsiConsole.MarkupLine($"[grey]  Zuerst die Hinweise [/][bold red]!?[/][grey] bearbeiten, dann hierher zurückkehren.[/]");
+                throw new Exception($"[grey]  Zuerst die Hinweise [/][bold red]!?[/][grey] bearbeiten, dann hierher zurückkehren![/]");
             }
 
         return problem;

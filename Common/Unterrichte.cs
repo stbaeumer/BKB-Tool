@@ -216,7 +216,7 @@ public class Unterrichte : List<Unterricht>
         }
 
         // Ein Kurs ist definiert, wenn dasselbe Fach (Field7) und dieselbe Klasse (Field5) mehrfach vorkommen, auch wenn Field42 leer ist.
-        // Ein Zähler am Ende des Fachs wird nicht berücksichtigt. Bsp: M1 wird zu M., M G1 bleibt M G1, weil M das Fach ist und G1 der Grundkurs.
+        // Ein Zähler am Ende des Fachs wird nicht berücksichtigt. Bsp.: M1 wird zu M., M G1 bleibt M G1, weil M das Fach ist und G1 der Grundkurs.
 
         var count1 = gpu002.Count(record =>
         {

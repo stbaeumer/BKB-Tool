@@ -939,7 +939,7 @@ public class Dateien : List<Datei>
 
     internal void ZippenMitKennwort(IConfiguration configuration)
     {
-        configuration = Global.Konfig("ZipKennwort", Global.Modus.Update, configuration, "Zip-Kennwort");
+        configuration = Global.Konfig("ZipKennwort", Global.Modus.Update, configuration);
 
         foreach (var datei in this)
         {

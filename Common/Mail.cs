@@ -263,23 +263,38 @@ private bool IstMailadresseGültig(string email)
 
     public void Senden(IConfiguration configuration, string subject, string sender, string body, Stream attachmentStream, string attachmentName, string receiver)
     {
-        var mailMessage = new MailMessage(sender, receiver, subject, body);
-        mailMessage.Attachments.Add(new Attachment(attachmentStream, attachmentName));
+        try
+        { 
+            var mailMessage = new MailMessage(sender, receiver, subject, body);
+            mailMessage.Attachments.Add(new Attachment(attachmentStream, attachmentName));
 
-        // Füge den Absender als CC hinzu
-        mailMessage.CC.Add(configuration["BCCAdresse"]);
+            if(!string.IsNullOrEmpty(configuration["BCCAdresse"]) && configuration["BCCAdresse"].Contains("@"))
+            {
+                mailMessage.Bcc.Add(configuration["BCCAdresse"]);
+            }
+            
+            if(configuration["SmtpKennwort"]  == null || configuration["SmtpKennwort"].Length <= 3)
+            {
+                Console.WriteLine($"Bitte geben Sie das Passwort von {configuration["SmtpUser"]} für den E-Mail-Versand ein:");
+                Global.SmtpKennwort = Console.ReadLine();
+            }
 
-        if(configuration["SmtpKennwort"]  == null || configuration["SmtpKennwort"].Length <= 3)
-        {
-            Console.WriteLine($"Bitte geben Sie das Passwort von {configuration["SmtpUser"]} für den E-Mail-Versand ein:");
-            Global.SmtpKennwort = Console.ReadLine();
+            using (var smtpClient = new System.Net.Mail.SmtpClient(configuration["SmtpServer"], Convert.ToInt32(configuration["SmtpPort"])))
+            {
+                smtpClient.Credentials = new NetworkCredential(sender, configuration["SmtpKennwort"]);
+                smtpClient.EnableSsl = true;
+                smtpClient.Send(mailMessage);
+                smtpClient.Dispose();
+                mailMessage.Dispose();                
+                AnsiConsole.Write(new Panel($"[bold green]  Mail gesendet  [/]: [green]{receiver}[/]")
+                    .SquareBorder()
+                    .Expand()
+                    .BorderColor(Color.Green));
+            }
         }
-
-        using (var smtpClient = new System.Net.Mail.SmtpClient(configuration["SmtpServer"], Convert.ToInt32(configuration["SmtpPort"])))
+        catch (Exception ex)
         {
-            smtpClient.Credentials = new NetworkCredential(sender, configuration["SmtpKennwort"]);
-            smtpClient.EnableSsl = true;
-            smtpClient.Send(mailMessage);
+            throw new Exception($"Fehler beim Senden der E-Mail an {receiver}: {ex.Message}");
         }
     }
 }

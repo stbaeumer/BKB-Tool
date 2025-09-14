@@ -223,15 +223,40 @@ public partial class PdfSeite
             body = body.Replace("\\n", Environment.NewLine);
             if (PdfDocument != null)
             {
-                using (var memoryStream = new MemoryStream())
+                try
                 {
-                    // Speichern des PDF-Dokuments in den MemoryStream
-                    PdfDocument.Save(memoryStream, false);
-                    memoryStream.Position = 0; // Zurücksetzen des Streams auf den Anfang
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        try
+                        {
+                            var passwort = configuration["PdfKennwort"];
+                            if (!string.IsNullOrEmpty(passwort))
+                            {
+                                PdfDocumentEncrypt(passwort);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine("Fehler bei der Verschlüsselung: " + ex.Message);
+                        }
+                        try
+                        {
+                            // Speichern des PDF-Dokuments in den MemoryStream
+                            PdfDocument.Save(memoryStream, false);
+                            memoryStream.Position = 0; // Zurücksetzen des Streams auf den Anfang    
+                        } catch (Exception ex)
+                        {
+                            Console.WriteLine("Fehler beim Speichern des PDF-Dokuments. Ist das PDF-Dokument noch geöffnet?: " + ex.Message);
+                        }                        
 
-                    // Erstellen und Senden der E-Mail
-                    var mail = new Mail();
-                    mail.Senden(configuration, subject, configuration["SmtpUser"], body, memoryStream, this.DateiName, receiverEmail);
+                        // Erstellen und Senden der E-Mail
+                        var mail = new Mail();
+                        mail.Senden(configuration, subject, configuration["SmtpUser"], body, memoryStream, this.DateiName, receiverEmail);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Fehler beim Senden der E-Mail: " + ex.Message);
                 }
             }
         }

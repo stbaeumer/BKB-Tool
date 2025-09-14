@@ -63,8 +63,8 @@ public class PdfDateien : List<PdfDatei>
 
             if (configuration["Verschluesselungsart"] == "1")
             {
-                configuration = Global.Konfig("SchipsUrl", Global.Modus.Update, configuration, "SchipsUrl angeben");
-                configuration = Global.Konfig("SchipsKennwort", Global.Modus.Update, configuration, "Schips-Kennwort festlegen");
+                configuration = Global.Konfig("SchipsUrl", Global.Modus.Update, configuration);
+                configuration = Global.Konfig("SchipsKennwort", Global.Modus.Update, configuration);
                 passwort = configuration["SchipsKennwort"];
                 url = configuration["SchipsUrl"];
                 //regex.Add("schips");                

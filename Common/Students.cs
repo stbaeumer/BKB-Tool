@@ -128,6 +128,10 @@ public class Students : List<Student>
 
     public Students GetStudentsVonAtlantisCsv(IConfiguration configuration)
     {
+        configuration = Global.Konfig("PfadDownloads", Global.Modus.Read, configuration);
+        configuration = Global.Konfig("PfadDokumentenverwaltung", Global.Modus.Read, configuration);
+        configuration = Global.Konfig("Schluesselwoerter", Global.Modus.Update, configuration);
+
         //var students = new Students();
         var inputFolder = Path.Combine(configuration["PfadDownloads"], "PDF-Input");
 
@@ -142,7 +146,7 @@ public class Students : List<Student>
             path.LeafStyle = new Style(foreground: Spectre.Console.Color.Yellow);
 
             var panel = new Panel(path)
-                .Header("[bold greenYellow] Neu: [/]")
+                .Header("[bold greenYellow] Neuer Ordner für PDF-Dateien: [/]")
                 .HeaderAlignment(Justify.Left)
                 .SquareBorder()
                 .Expand()
@@ -187,45 +191,43 @@ public class Students : List<Student>
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Fehler beim Einlesen der CSV-Datei: {ex.Message}");
+                        throw new Exception($"Fehler beim Einlesen der CSV-Datei: {ex.Message}");
                     }
                 }
                 else
                 {
-                    AnsiConsole.Write(new Panel("Die Datei 'atlantisschueler.csv' wurde nicht gefunden. Bitte erstellen Sie die Datei im UTF8-Format.")
-                        .Header($"[bold springGreen2] Hinweis [/]")
-                        .HeaderAlignment(Justify.Left)
-                        .SquareBorder()
-                        .Expand()
-                        .BorderColor(Spectre.Console.Color.HotPink3_1));
+                    var panel = new Panel("Die Datei 'schueler.csv' wurde nicht gefunden. Bitte erstellen Sie die Datei im UTF8-Format.")
+                            .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] !? [/]")
+                            .HeaderAlignment(Justify.Left)
+                            .SquareBorder()
+                            .Expand()
+                            .BorderColor(Global.ColorFehler);
+                    AnsiConsole.Write(panel);
+                    throw new Exception($"[grey]  Zuerst die Hinweise [/][bold red]!?[/][grey] bearbeiten, dann hierher zurückkehren![/]");
                 }
             }
             else if (Directory.GetFiles(inputFolder, "*.csv").Length == 0)
             {
-                AnsiConsole.Write(new Panel($"{Path.Combine(inputFolder, "atlantisschueler.csv")} existiert nicht. Bitte erstellen Sie die Datei im UTF8-Format.")
-                        .Header($"[bold hotpink3_1] Hinweis [/]")
-                        .HeaderAlignment(Justify.Left)
-                        .SquareBorder()
-                        .Expand()
-                        .BorderColor(Spectre.Console.Color.HotPink3_1));
+                var panel = new Panel($"{Path.Combine(inputFolder, "schueler.csv")} existiert nicht. Bitte erstellen Sie die Datei im UTF8-Format.\nFolgende Spalten sind Pflicht: Vorname, Nachname, Geburtsdatum (DD-MM-YYYY), Klasse")
+                            .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] !? [/]")
+                            .HeaderAlignment(Justify.Left)
+                            .SquareBorder()
+                            .Expand()
+                            .BorderColor(Global.ColorFehler);
+                AnsiConsole.Write(panel);
+                throw new Exception($"[grey]  Zuerst die Hinweise [/][bold red]!?[/][grey] bearbeiten, dann hierher zurückkehren![/]");
             }
             else if (Directory.GetFiles(inputFolder, "*.csv").Length > 1)
             {
-                AnsiConsole.Write(new Panel($"Es gibt mehrere CSV-Dateien in {inputFolder}. Es darf nur eine CSV-Datei vorhanden sein.")
-                        .Header($" [bold hotpink3_1] Hinweis [/]")
-                        .HeaderAlignment(Justify.Left)
-                        .SquareBorder()
-                        .Expand()
-                        .BorderColor(Spectre.Console.Color.HotPink3_1));
-
+                var panel = new Panel($"Es gibt mehrere CSV-Dateien in {inputFolder}. Es darf nur eine CSV-Datei vorhanden sein.")
+                            .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] !? [/]")
+                            .HeaderAlignment(Justify.Left)
+                            .SquareBorder()
+                            .Expand()
+                            .BorderColor(Global.ColorFehler);
+                AnsiConsole.Write(panel);
+                throw new Exception($"[grey]  Zuerst die Hinweise [/][bold red]!?[/][grey] bearbeiten, dann hierher zurückkehren![/]");
             }
-            AnsiConsole.Write(new Panel("Lösen Sie das Problem, dann ENTER.")
-                        .Header($" [bold springGreen2] Hinweis [/]")
-                        .HeaderAlignment(Justify.Left)
-                        .SquareBorder()
-                        .Expand()
-                        .BorderColor(Spectre.Console.Color.SpringGreen2));
-            Console.ReadKey();
         }
         while (this.Count == 0);
         return this;

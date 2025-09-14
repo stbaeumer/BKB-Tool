@@ -400,13 +400,13 @@ public static class Global
             panel.Header($"[bold]  {lfdNrVon} von {bis}  [/]");
 
         if (parameter == "Auswahl")
-            {
-                panel.BorderColor(Global.ColorÜberschrift);
-            }
-            else
-            {
-                panel.BorderColor(Global.ColorActionInMenüs);
-            }
+        {
+            panel.BorderColor(Global.ColorÜberschrift);
+        }
+        else
+        {
+            panel.BorderColor(Global.ColorActionInMenüs);
+        }
 
         // Der Wert aus der JSON hat Vorrang vor dem defaultwert. Nur wenn die JSON keinen Wert enthält oder der Wert nicht zulässig ist, wird der defaultwert verwendet.
         
@@ -536,7 +536,7 @@ public static class Global
             if ((modus == Modus.ReadSilent || modus == Modus.Read) && !string.IsNullOrEmpty(defaultValue) && !string.IsNullOrEmpty(configuration[parameter]))
             {
                 configuration[parameter] = defaultValue;
-                if(modus != Modus.ReadSilent)
+                if (modus != Modus.ReadSilent)
                     ZeileSchreiben(metakey, defaultValue);
                 return configuration;
             }
@@ -550,15 +550,20 @@ public static class Global
                     .ShowDefaultValue(true)
                     .Validate(n =>
                     {
-                        if(n == "x")
+                        if (n == "x")
                             throw new Exception("Sie haben abgebrochen.");
+                        if (n == "-") // Sonderzeichen für „leer“
+                            return ValidationResult.Success();
                         if (n == "" || n.Length < 3)
                             return ValidationResult.Error("[]  Das Kennwort muss mindestens 3 Zeichen lang sein.[/]");
                         if (string.IsNullOrEmpty(n))
-                            return ValidationResult.Error("[]  Eingabe darf nicht leer sein.[/]");                        
+                            return ValidationResult.Error("[]  Eingabe darf nicht leer sein.[/]");
                         return ValidationResult.Success();
                     })
                 .DefaultValue<string>(defaultValue));
+            // Wenn der Benutzer nur ein "-" eingibt, wird das als leere Eingabe interpretiert.
+            if (userInput.ToString() == "-")
+                userInput = "";
         }
         if (datentyp == Datentyp.Datei)
         {
@@ -711,10 +716,10 @@ public static class Global
         if (datentyp == Datentyp.Mail)
         {
             // Der Wert wird im Read-Modus nicht erneut abgefragt, wenn der Wert plausibel ist und schon ein Wert in der configuration existiert.
-            if (modus == Modus.ReadSilent || (modus == Modus.Read && (!string.IsNullOrEmpty(defaultValue) && defaultValue.StartsWith("@") && defaultValue.Contains("."))  && !string.IsNullOrEmpty(configuration[parameter])))
+            if (modus == Modus.ReadSilent || (modus == Modus.Read && (!string.IsNullOrEmpty(defaultValue) && defaultValue.StartsWith("@") && defaultValue.Contains(".")) && !string.IsNullOrEmpty(configuration[parameter])))
             {
                 configuration[parameter] = defaultValue;
-                if(modus != Modus.ReadSilent)
+                if (modus != Modus.ReadSilent)
                     ZeileSchreiben(metakey, defaultValue);
                 return configuration;
             }
@@ -728,17 +733,24 @@ public static class Global
                     .PromptStyle(Global.GetColor(Global.ColorActionInMenüs))
                     .Validate(n =>
                     {
-                        if(n == "x")
+                        if (n == "x")
                             throw new Exception("Sie haben abgebrochen.");
-                        if (!n.Contains("@") && !string.IsNullOrEmpty(n))
-                            return ValidationResult.Error("[]  Eingabe muss mit @ beginnen und einen Punkt enthalten.[/]");
-                        if (!n.Contains(".") && !string.IsNullOrEmpty(n))
-                            return ValidationResult.Error("[]  Eingabe muss mit @ beginnen und einen Punkt enthalten.[/]");
-                        if (!(n.Contains(".de") || !n.Contains(".org")))
+                        if (n == "-") // Sonderzeichen für „leer“
+                            return ValidationResult.Success();
+                        if (!string.IsNullOrEmpty(n) && !n.Contains("@") && !string.IsNullOrWhiteSpace(n))
+                            return ValidationResult.Error("[]  Eingabe muss @ enthalten und einen Punkt enthalten.[/]");
+                        if (!string.IsNullOrEmpty(n) && !n.Contains(".") && !string.IsNullOrWhiteSpace(n))
+                            return ValidationResult.Error("[]  Eingabe muss @ enthalten und einen Punkt enthalten.[/]");
+                        if (!string.IsNullOrWhiteSpace(n) && !(n.Contains(".de") || n.Contains(".org")))
                             return ValidationResult.Error("[]  Zulässige TLDs: .de und .org.[/]");
                         return ValidationResult.Success();
                     })
-                .DefaultValue<string>(defaultValue));
+                .DefaultValue<string>(defaultValue)
+            );            
+
+            // Wenn der Benutzer nur ein "-" eingibt, wird das als leere Eingabe interpretiert.
+            if (userInput.ToString() == "-")
+                userInput = "";
         }
         if (datentyp == Datentyp.Maildomain)
         {
@@ -902,7 +914,8 @@ public static class Global
             }
 
             // Nur die zulässigen Auswahloptionen werden als Defaultwert verwendet
-            string default1 = "";
+            string default1 = defaultValue.Replace(" ", ""); 
+
             foreach (var z in zulässigeAuswahlOptionen.Split(','))
             {
                 if (!string.IsNullOrEmpty(z) && defaultValue.Split(",").Contains(z))
@@ -910,7 +923,7 @@ public static class Global
                     default1 += z + ",";
                 }
             }
-            // Wennaus dem Defaultwert nichts matcht, dann werden die zulässigen Werte übernommen.
+            // Wenn aus dem Defaultwert nichts matcht, dann werden die zulässigen Werte übernommen.
             if (default1.Length == 0)
             {
                 default1 = zulässigeAuswahlOptionen;
@@ -934,6 +947,9 @@ public static class Global
                             userInput = zulässigeAuswahlOptionen;
                             return ValidationResult.Success();
                         }
+
+                        if(string.IsNullOrEmpty(zulässigeAuswahlOptionen))
+                            return ValidationResult.Success();
 
                         var teile = n.ToString().Trim().Split(',');
                         if (!teile.All(t => zulässigeAuswahlOptionen.Split(',').Contains(t.Trim())))
@@ -992,7 +1008,7 @@ public static class Global
             if ((modus == Modus.ReadSilent || modus == Modus.Read) && DateTime.TryParse(defaultValue, out _) && !string.IsNullOrEmpty(configuration[parameter]))
             {
                 configuration[parameter] = defaultValue;
-                if(modus != Modus.ReadSilent)
+                if (modus != Modus.ReadSilent)
                     ZeileSchreiben(metakey, defaultValue);
                 return configuration;
             }
@@ -1006,8 +1022,10 @@ public static class Global
                     .ShowDefaultValue(true)
                     .Validate(n =>
                     {
-                        if(n == "x")
+                        if (n == "x")
                             throw new Exception("Sie haben abgebrochen.");
+                        if (n == "-")
+                            return ValidationResult.Success();
                         if (!DateTime.TryParse(n.ToString(), out _))
                         {
                             return ValidationResult.Error($"[]  {n} ist kein Datum (TT.MM.JJJJ)[/]");
@@ -1016,6 +1034,9 @@ public static class Global
                         return ValidationResult.Success();
                     })
                 .DefaultValue<string>(defaultValue.ToString()));
+                // Wenn der Benutzer nur ein "-" eingibt, wird das als leere Eingabe interpretiert.
+            if (userInput.ToString() == "-")
+                userInput = "";
         }
 
         // Speichern des Klartextwerts in der Konfiguration
@@ -1424,7 +1445,7 @@ public static class KonfigHelper
             Key = "Abschnitt",
             DefaultValue = "1",
             Aufforderung = $"[green]■[/]",
-            Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]Lernabschnitt[/] an. Das Schuljahr beginnt immer mit Abschnitt [{Global.GetColor(Global.ColorZahlen)}]1[/]. \nI.d.R. wechselt der Abschnitt nach den Halbjahreszeugnissen auf Abschnitt [{Global.GetColor(Global.ColorZahlen)}]2[/].",
+            Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]Lernabschnitt[/] an. \nDas Schuljahr beginnt immer mit Abschnitt [{Global.GetColor(Global.ColorZahlen)}]1[/]. \nI.d.R. wechselt der Abschnitt nach den Halbjahreszeugnissen auf Abschnitt [{Global.GetColor(Global.ColorZahlen)}]2[/].",
             Datentyp = Global.Datentyp.Abschnitt,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = true,
@@ -1490,7 +1511,7 @@ public static class KonfigHelper
             Key = "BccAdresse",
             DefaultValue = "",
             Aufforderung = $"[green]■[/]",
-            Hinweise = $"Geben Sie [{Global.GetColor(Global.ColorInfoBox)}]BCC-Adresse[/] an. Geben Sie ein Leerzeichen ein, wenn Sie keine BCC-Adresse wünschen.",
+            Hinweise = $"Geben Sie optional eine [{Global.GetColor(Global.ColorInfoBox)}]BCC-Adresse[/] an. Geben Sie \"-\" ein, wenn Sie keine BCC-Adresse wünschen und einen vorherigen Wert löschen möchten.",
             Datentyp = Global.Datentyp.Mail,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
@@ -1625,7 +1646,7 @@ public static class KonfigHelper
             Key = "MailDomain",
             DefaultValue = "@students.berufskolleg-borken.de",
             Aufforderung = $"[green]■[/]",
-            Hinweise = $"Geben Sie die [{Global.GetColor(Global.ColorInfoBox)}]schulische Mail-Domain[/] für Mailadressen der Schüler*innen an. Bsp: [{Global.GetColor(Global.ColorHyperlink)}]@students.berufskolleg-borken.de[/]. Ihre Eingabe muss mit [{Global.GetColor(Global.ColorHyperlink)}]@[/] beginnen und mit [{Global.GetColor(Global.ColorHyperlink)}].de[/] etc. enden.",
+            Hinweise = $"Geben Sie die [{Global.GetColor(Global.ColorInfoBox)}]schulische Mail-Domain[/] für Mailadressen der Schüler*innen an. Bsp.: [{Global.GetColor(Global.ColorHyperlink)}]@students.berufskolleg-borken.de[/]. Ihre Eingabe muss mit [{Global.GetColor(Global.ColorHyperlink)}]@[/] beginnen und mit [{Global.GetColor(Global.ColorHyperlink)}].de[/] etc. enden.",
             Datentyp = Global.Datentyp.Maildomain,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
@@ -1658,7 +1679,7 @@ public static class KonfigHelper
             Key = "PfadDownloads",
             DefaultValue = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"),
             Aufforderung = $"[green]■[/]",
-            Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]Downloads-Verzeichnis-Pfad[/] an. In der Regel wird das Verzeichnis bereits richtig vorgeschlagen. Dann einfach [bold springGreen2]ENTER[/] drücken:",
+            Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]Downloads-Verzeichnis-Pfad[/] an.\nIn der Regel wird das Verzeichnis bereits richtig vorgeschlagen. \nDann einfach [bold springGreen2]ENTER[/] drücken:",
             Datentyp = Global.Datentyp.Pfad,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = true,
@@ -1680,7 +1701,7 @@ public static class KonfigHelper
             Key = "PfadSchilddatenaustausch",
             DefaultValue = $"\\\\fs01\\SchILD-NRW\\Ausgabeverzeichnis",
             Aufforderung = $"[green]■[/]",
-            Hinweise = $"Geben Sie das [{Global.GetColor(Global.ColorInfoBox)}]Ausgabeverzeichnis[/] an. Das ist in SchILD eingetragen unter: \n[{Global.GetColor(Global.ColorPfadInProgrammen)}]Datenaustausch > Schnittstelle SchILD-NRW > Export[/]",
+            Hinweise = $"Geben Sie das [{Global.GetColor(Global.ColorInfoBox)}]Ausgabeverzeichnis[/] an. \nDas ist in SchILD eingetragen unter: \n[{Global.GetColor(Global.ColorPfadInProgrammen)}]Datenaustausch > Schnittstelle SchILD-NRW > Export[/]",
             Datentyp = Global.Datentyp.Pfad,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = true,
@@ -1691,7 +1712,7 @@ public static class KonfigHelper
             Key = "PdfKennwort",
             DefaultValue = Environment.GetEnvironmentVariable("PdfKennwort") ?? "",
             Aufforderung = $"[green]■[/]",
-            Hinweise = $"Geben Sie optional ein [{Global.GetColor(Global.ColorInfoBox)}]Kennwort[/] für PDF-Dateien an, die Sie mit [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] erstellen möchten. Das Kennwort wird für alle PDF-Dateien verwendet, die Sie mit [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] erstellen. Wenn Sie kein Kennwort wünschen, dann ein Leerzeichen eingeben.",
+            Hinweise = $"Geben Sie optional ein [{Global.GetColor(Global.ColorInfoBox)}]Kennwort[/] an, mit dem Sie die PDF-Dateien verschlüsseln möchten. Wenn Sie kein Kennwort wünschen, dann ein \"-\" eingeben, um einen vorherigen Wert zu löschen.",
             Datentyp = Global.Datentyp.Kennwort,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
@@ -1796,12 +1817,12 @@ public static class KonfigHelper
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
-        ["Schlüsselwörter"] = new KonfigMeta
+        ["Schluesselwoerter"] = new KonfigMeta
         {
-            Key = "Schlüsselwörter",
+            Key = "Schluesselwoerter",
             DefaultValue = "Jahreeszeugnis, Abschlusszeugnis, Abgangszeugnis, Zeugnis",
             Aufforderung = $"[green]■[/]",
-            Hinweise = $"Geben Sie kommagetrennt interessierende [{Global.GetColor(Global.ColorInfoBox)}]Schlüsselwörter[/] an (z.B. Abgangszeugnis, Abschlusszeugnis, Jahreszeugnis). BKB-Tool durchsucht die PDF-Dateien im Ordner nach den Wörtern. Sobald ein Schlüsselwort matcht, wird die Datei in das Dokumentenverzeichnis kopiert.",
+            Hinweise = $"Geben Sie kommagetrennt interessierende [{Global.GetColor(Global.ColorInfoBox)}]Schluesselwoerter[/] an (z.B. Abgangszeugnis, Abschlusszeugnis, Jahreszeugnis). BKB-Tool durchsucht die PDF-Dateien im Ordner nach den Wörtern. Sobald ein Schlüsselwort matcht, wird die Datei in das Dokumentenverzeichnis kopiert.",
             Datentyp = Global.Datentyp.ListString,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
@@ -1845,7 +1866,7 @@ public static class KonfigHelper
             Key = "Schulnummer",
             DefaultValue = "177659",
             Aufforderung = $"[green]■[/]",
-            Hinweise = $"Geben Sie Ihre [{Global.GetColor(Global.ColorInfoBox)}]Schulnummer[/] an. Je nach Schulnummer werden evtl. unterschiedliche Funktionen angeboten.",
+            Hinweise = $"Geben Sie Ihre [{Global.GetColor(Global.ColorInfoBox)}]Schulnummer[/] an. \nJe nach Schulnummer werden evtl. unterschiedliche Funktionen angeboten.",
             Datentyp = Global.Datentyp.Int,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = true,
@@ -1865,7 +1886,7 @@ public static class KonfigHelper
         ["SmtpPort"] = new KonfigMeta
         {
             Key = "SmtpPort",
-            DefaultValue = Environment.GetEnvironmentVariable("SmtpPort") ?? "",
+            DefaultValue = "587",
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]SMTP-Port[/] an.",
             Datentyp = Global.Datentyp.String,
@@ -1876,7 +1897,7 @@ public static class KonfigHelper
         ["SmtpServer"] = new KonfigMeta
         {
             Key = "SmtpServer",
-            DefaultValue = Environment.GetEnvironmentVariable("SmtpServer") ?? "",
+            DefaultValue = "smtp.office365.com",
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]SMTP-Server[/] an.",
             Datentyp = Global.Datentyp.String,
@@ -1889,7 +1910,7 @@ public static class KonfigHelper
             Key = "SmtpUser",
             DefaultValue = Environment.GetEnvironmentVariable("SmtpUser") ?? "",
             Aufforderung = $"[green]■[/]",
-            Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]SMTP-Benutzer[/] an.",
+            Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]SMTP-Benutzer[/] (Absender-E-Mail-Adresse) an.",
             Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
@@ -2010,7 +2031,7 @@ public static class KonfigHelper
             Key = "NotenlistenUrl",
             DefaultValue = Environment.GetEnvironmentVariable("NotenlistenUrl") ?? "",
             Aufforderung = $"[green]■[/]",
-            Hinweise = $"Soll eine [{Global.GetColor(Global.ColorInfoBox)}]bestimmte Webseite[/] geöffnet werden, um die verschlüsselte(n) Datei(en) dort hochzuladen?\nFalls Sie keine Seite öffnen wollen, lassen Sie die Eingabe leer oder überschreiben Sie den bisherigen Wert mit einem Leerzeichen.",
+            Hinweise = $"Soll eine [{Global.GetColor(Global.ColorInfoBox)}]bestimmte Webseite[/] geöffnet werden, um die verschlüsselte(n) Datei(en) dort hochzuladen?\nFalls Sie keine Seite öffnen wollen, lassen Sie die Eingabe leer oder überschreiben Sie den bisherigen Wert mit einem \"-\".",
             Datentyp = Global.Datentyp.DateTime,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
@@ -2032,7 +2053,7 @@ public static class KonfigHelper
             Key = "ZipKennwort",
             DefaultValue = Environment.GetEnvironmentVariable("ZipKennwort") ?? "",
             Aufforderung = $"[green]■[/]",
-            Hinweise = $"Die Datei wird nun gezippt.\nGeben Sie das [{Global.GetColor(Global.ColorInfoBox)}]Kennwort[/] ein, mit dem Sie die Zip-Datei verschlüsseln wollen. Geben Sie ein Leerzeichen ein, wenn kein Kennwort gesetzt werden soll.",
+            Hinweise = $"Die Datei wird nun gezippt.\nGeben Sie das [{Global.GetColor(Global.ColorInfoBox)}]Kennwort[/] ein, mit dem Sie die Zip-Datei verschlüsseln wollen. Geben Sie ein \"-\" ein, wenn kein Kennwort gesetzt werden soll.",
             Datentyp = Global.Datentyp.Kennwort,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
