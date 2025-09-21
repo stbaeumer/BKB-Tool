@@ -1273,13 +1273,18 @@ public class Datei : List<dynamic>
             foreach (var neueRec in this)
             {
                 var neueDict = (IDictionary<string, object>)neueRec;
-                var ersteSpalte = neueDict[AnhandDieserSchlüsselAttributeWirdVerglichen[0]].ToString();
-                var zweiteSpalte = AnhandDieserSchlüsselAttributeWirdVerglichen.Length > 1 ? neueDict[AnhandDieserSchlüsselAttributeWirdVerglichen[1]].ToString() : "";
-                var dritteSpalte = AnhandDieserSchlüsselAttributeWirdVerglichen.Length > 2 ? neueDict[AnhandDieserSchlüsselAttributeWirdVerglichen[2]].ToString() : "";
-                var vierteSpalte = AnhandDieserSchlüsselAttributeWirdVerglichen.Length > 3 ? neueDict[AnhandDieserSchlüsselAttributeWirdVerglichen[3]].ToString() : "";
-                var fünfteSpalte = AnhandDieserSchlüsselAttributeWirdVerglichen.Length > 4 ? neueDict[AnhandDieserSchlüsselAttributeWirdVerglichen[4]].ToString() : "";
-                var anhandDieserSchlüsselAttributeWirdVerglichenString = ersteSpalte + (zweiteSpalte.Length > 0 ? ", " + zweiteSpalte : "") + (dritteSpalte.Length > 0 ? ", " + dritteSpalte : "") + (vierteSpalte.Length > 0 ? ", " + vierteSpalte : "") + (fünfteSpalte.Length > 0 ? ", " + fünfteSpalte : "");
-                //anhandDieserSchlüsselAttributeWirdVerglichenString = anhandDieserSchlüsselAttributeWirdVerglichenString.Length > 60 ? anhandDieserSchlüsselAttributeWirdVerglichenString.Substring(0, 57) + "..." : anhandDieserSchlüsselAttributeWirdVerglichenString;
+
+                var anhandDieserSchlüsselAttributeWirdVerglichenString = "";
+                
+                foreach (var key in AnhandDieserSchlüsselAttributeWirdVerglichen)
+                {
+                    if (neueDict.TryGetValue(key, out var value) && value != null && !string.IsNullOrEmpty(value.ToString()))
+                    {
+                        if (anhandDieserSchlüsselAttributeWirdVerglichenString.Length > 0)
+                            anhandDieserSchlüsselAttributeWirdVerglichenString += ", ";
+                        anhandDieserSchlüsselAttributeWirdVerglichenString += value.ToString();
+                    }
+                }
 
                 if(neueDict.ContainsKey("Fach") && neueDict["Fach"].ToString() == "BWR")
                 {
