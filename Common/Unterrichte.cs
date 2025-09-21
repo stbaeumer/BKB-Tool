@@ -36,7 +36,7 @@ public class Unterrichte : List<Unterricht>
                 var Klassen = new Klassen();
                 var dict = (IDictionary<string, object>)record;
 
-                if (dict["Field1"]?.ToString() == "3280")
+                if (dict["Field1"]?.ToString() == "2262")
                 {
                     string aa = "Test"; // Debugging purpose
                 }

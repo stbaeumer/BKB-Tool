@@ -428,7 +428,7 @@ public static class MenueHelper
                                     "|", '\0', new UTF8Encoding(true), false),
                                 m.LeistungsdatenStatistik(
                                     configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat"),
-                                    ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach"],                                    
+                                    ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach", "Kurs"],
                                     [],
                                     "|", '\0', new UTF8Encoding(true), false, null,
                                     Global.Zweck.Statistik),                                    

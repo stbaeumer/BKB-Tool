@@ -838,12 +838,27 @@ public class Datei : List<dynamic>
     {
         foreach (var vorhDict in vorhandene.Select(vorhRec => (IDictionary<string, object>)vorhRec))
         {
-            var match = anhandDieserAttributeWirdVerglichen.All(key =>
-                neueDict.ContainsKey(key) &&
-                vorhDict.ContainsKey(key) &&
-                // Vergleiche nur die Zeichen vor dem ersten #-Zeichen                    
-                neueDict[key].ToString().Split('#')[0].Equals(vorhDict[key].ToString().Split('#')[0])
-            );
+            bool match = true;
+            foreach (var key in anhandDieserAttributeWirdVerglichen)
+            {
+                var neueDictWert = "";
+                if ((neueDict.ContainsKey(key)) && (neueDict[key] != null))
+                {
+                    neueDictWert = neueDict[key].ToString().Split('#')[0];
+                }
+
+                var vorhDictWert = "";
+                if (vorhDict.ContainsKey(key) && vorhDict[key] != null)
+                {
+                    vorhDictWert = vorhDict[key].ToString().Split('#')[0];
+                }
+
+                if (neueDictWert != vorhDictWert)
+                {
+                    match = false;
+                    break;
+                }
+            }
             if (match)
             {
                 return vorhDict;
@@ -1265,6 +1280,14 @@ public class Datei : List<dynamic>
                 var fünfteSpalte = AnhandDieserSchlüsselAttributeWirdVerglichen.Length > 4 ? neueDict[AnhandDieserSchlüsselAttributeWirdVerglichen[4]].ToString() : "";
                 var anhandDieserSchlüsselAttributeWirdVerglichenString = ersteSpalte + (zweiteSpalte.Length > 0 ? ", " + zweiteSpalte : "") + (dritteSpalte.Length > 0 ? ", " + dritteSpalte : "") + (vierteSpalte.Length > 0 ? ", " + vierteSpalte : "") + (fünfteSpalte.Length > 0 ? ", " + fünfteSpalte : "");
                 //anhandDieserSchlüsselAttributeWirdVerglichenString = anhandDieserSchlüsselAttributeWirdVerglichenString.Length > 60 ? anhandDieserSchlüsselAttributeWirdVerglichenString.Substring(0, 57) + "..." : anhandDieserSchlüsselAttributeWirdVerglichenString;
+
+                if(neueDict.ContainsKey("Fach") && neueDict["Fach"].ToString() == "BWR")
+                {
+                    if (neueDict.ContainsKey("KursBez") && !neueDict["KursBez"].ToString().StartsWith("ES"))
+                    {
+                        var x = 1;
+                    }
+                }
 
                 var dieseAttributeWerdenBeimVergleichIgnoriert = DieseAttributeWerdenBeimVergleichIgnoriert;
 
