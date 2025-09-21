@@ -151,7 +151,7 @@ public class Datei : List<dynamic>
         {
             KlassenNamen = klassen.Where(x => !string.IsNullOrEmpty(x.Name)).Select(x => x.Name).ToList();
         }
-        
+
         return Funktion?.Invoke(this) ?? new List<dynamic>(); // Falls `Funktion` null ist, leere Liste zurückgeben
     }
 
@@ -448,11 +448,21 @@ public class Datei : List<dynamic>
 
     public void Erstellen()
     {
-        if (string.IsNullOrEmpty(AbsoluterPfad) || Count == 0)
+        if (AbsoluterPfad == null)
         {
             // Wenn der Pfad leer ist oder die Liste leer ist, wird die Datei nicht erstellt.
-            var panel = new Panel($"{AbsoluterPfad}")
-                .Header($"[red]  Datei nicht erstellt, da der Pfad leer ist oder keine Daten vorhanden sind  [/]")
+            var panel = new Panel($"[red]Datei nicht erstellt: Pfad leer: [/]{AbsoluterPfad}")
+                .HeaderAlignment(Justify.Left)
+                .SquareBorder()
+                .Expand()
+                .BorderColor(Color.Red);
+            
+            AnsiConsole.Write(panel);
+            return;
+        }else if (Count == 0)
+        {
+            // Wenn der Pfad leer ist oder die Liste leer ist, wird die Datei nicht erstellt.
+            var panel = new Panel($"[red]Datei nicht erstellt (0 Zeilen): [/]{AbsoluterPfad}")
                 .HeaderAlignment(Justify.Left)
                 .SquareBorder()
                 .Expand()
@@ -589,7 +599,9 @@ public class Datei : List<dynamic>
         {
             var dateiendung = Path.GetExtension(AbsoluterPfad);
             var tableRows = new List<Text>();
-            var table = TableErstellen(AnhandDieserSchlüsselAttributeWirdVerglichen);
+            var table = TableErstellen(
+                $"Vergleich von [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.GetFileName(AbsoluterPfad)}[/] mit [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.GetFileName(AbsoluterPfad)}[/]",
+                AnhandDieserSchlüsselAttributeWirdVerglichen);
 
             var vorhandeneRec = GetVorhandeneRec(quelldateien);
             if (vorhandeneRec == null || vorhandeneRec.Count == 0)
@@ -692,19 +704,24 @@ public class Datei : List<dynamic>
     private string GetAlterWert(IDictionary<string, object> zeileMitIdentischenVergleichsattributen, string nichtIdentischesSonstigesAttribut)
     {
         // Suche aus allen Spalten aus zeileMitIdentischenVergleichsattributen denjenigen Spaltenwert, dessen Spaltenname nichtIdentischesSonstigesAttribut entspricht.
-        if (zeileMitIdentischenVergleichsattributen != null && zeileMitIdentischenVergleichsattributen.TryGetValue(nichtIdentischesSonstigesAttribut, out var value))
+        if (
+            zeileMitIdentischenVergleichsattributen != null &&
+            zeileMitIdentischenVergleichsattributen.TryGetValue(nichtIdentischesSonstigesAttribut, out var value)
+            )
         {
             return value?.ToString() ?? string.Empty;
         }
         return string.Empty;
     }
 
-    private Table TableErstellen(string[] anhandDieserSchlüsselAttributeWirdVerglichen)
+    private Table TableErstellen(string title, string[] anhandDieserSchlüsselAttributeWirdVerglichen)
     {
         var table = new Table();
         table.Expand();
         table.Border(TableBorder.Rounded);
-        table.Title = new TableTitle($"Vergleich von [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.GetFileName(AbsoluterPfad)}[/] alt & neu");
+        if (!string.IsNullOrEmpty(title))
+            table.Title = new TableTitle(title);
+        
         table.Expand();
         table.AddColumn(string.Join(", ", anhandDieserSchlüsselAttributeWirdVerglichen));
         table.AddColumn("Attribut");
@@ -758,6 +775,8 @@ public class Datei : List<dynamic>
 
     private string GetNeuerWert(IDictionary<string, object> neueDict, string nichtIdentischesSonstigesAttribut)
     {
+        nichtIdentischesSonstigesAttribut = nichtIdentischesSonstigesAttribut.Replace(".","PUNKT").Replace(" ","LEERZEICHEN").Replace("-","MINUS").Replace("_","UNTERSTRICH").Replace("/","SLASH");
+
         return neueDict.TryGetValue(nichtIdentischesSonstigesAttribut, out var neuerWert)
             ? (neuerWert?.ToString()?.Length > 20
                 ? neuerWert.ToString().Substring(0, 17) + "..."
@@ -774,7 +793,7 @@ public class Datei : List<dynamic>
             var wert = Global.PrüfeAufNullOrEmpty(neueDict, anhandDieserAttributeWirdVerglichen[i]);
             if (wert.Length > 0)
             {
-                linkeSeite += wert + ",";
+                linkeSeite += wert + ", ";
                 if (linkeSeite.Length > 30)
                 {
                     linkeSeite = linkeSeite.Substring(0, 27) + "...";
@@ -796,8 +815,13 @@ public class Datei : List<dynamic>
             // Die Felder, die mit Field beginnen, sind nicht relevant
             if (DieseAttributeWerdenBeimVergleichIgnoriert.Contains(key)) continue;
             if (AnhandDieserSchlüsselAttributeWirdVerglichen.Contains(key)) continue; // Die Vergleichsattribute werden nicht berücksichtigt
-            if (!neueDict.TryGetValue(key, out var value)) continue;
-            if (vorhDict[key].Equals(value)) continue;
+
+            // Es wird geprüft, ob das Dictionary neueDict einen Eintrag mit dem Schlüssel key enthält.
+            // Falls nicht (!), wird die aktuelle Iteration der Schleife übersprungen (continue).
+            // Falls doch, wird der Wert zu diesem Schlüssel in die Variable value geschrieben und der Code läuft weiter.            
+            if (!neueDict.TryGetValue(k, out var value)) continue;
+            // Wenn die Werte identisch sind, wird die aktuelle Iteration der Schleife übersprungen (continue).
+            if (vorhDict[key].Equals(value?.ToString())) continue;
             // Z.B. bei Fehlstunden bleibt die neue Zelle leer. In der alten steht 0
             if (vorhDict[key].ToString() == "0" && neueDict[k].ToString() == "") continue;
             nichtIdentischeSonstige.Add(key);
@@ -956,7 +980,7 @@ public class Datei : List<dynamic>
                     var studentsMitNeuenFotos = students.Where(s => !string.IsNullOrEmpty(s.ZielFotoPfad) && File.Exists(s.ZielFotoPfad)).ToList();
                     if(studentsMitNeuenFotos.Count == 0)
                     {
-                        throw new Exception("Es wurden keine Fotos gefunden, die gezippt werden können.");
+                        throw new Exception("Es wurden keine Fotos gefunden, die gezippt werden könnten.");
                     }
 
                     foreach (var student in studentsMitNeuenFotos)
@@ -1178,17 +1202,26 @@ public class Datei : List<dynamic>
         throw new NotImplementedException();
     }
 
-    internal void Vergleichen(Dateien quelldateien)
+    internal Datei Verarbeiten(Dateien quelldateien, Global.Modus modus)
     {
+        var modusString = "Vergleichen";
+
+        if (modus == Global.Modus.Filtern)
+            modusString = "Filtern";        
+
         var neueDatei = new Datei(AbsoluterPfad);
         bool skipProcessing = false;
-        
-        AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Vergleichen ...", ctx =>
+
+        var vorhandeneDatei = GetVorhandeneDatei(quelldateien);
+        var table = TableErstellen(
+                $"Veränderungen von alt ([{Global.GetColor(Global.ColorPfadInDateien)}]{vorhandeneDatei}[/]) nach neu:",
+                AnhandDieserSchlüsselAttributeWirdVerglichen);
+
+        AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start($" {modusString} ...", ctx =>
         {
             var dateiendung = Path.GetExtension(AbsoluterPfad);
             var tableRows = new List<Text>();
-            var table = TableErstellen(AnhandDieserSchlüsselAttributeWirdVerglichen);
-
+            
             var vorhandeneRec = GetVorhandeneRec(quelldateien);
             if (vorhandeneRec == null || vorhandeneRec.Count == 0)
             {
@@ -1225,12 +1258,30 @@ public class Datei : List<dynamic>
             foreach (var neueRec in this)
             {
                 var neueDict = (IDictionary<string, object>)neueRec;
+                var ersteSpalte = neueDict[AnhandDieserSchlüsselAttributeWirdVerglichen[0]].ToString();
+                var zweiteSpalte = AnhandDieserSchlüsselAttributeWirdVerglichen.Length > 1 ? neueDict[AnhandDieserSchlüsselAttributeWirdVerglichen[1]].ToString() : "";
+                var dritteSpalte = AnhandDieserSchlüsselAttributeWirdVerglichen.Length > 2 ? neueDict[AnhandDieserSchlüsselAttributeWirdVerglichen[2]].ToString() : "";
+                var vierteSpalte = AnhandDieserSchlüsselAttributeWirdVerglichen.Length > 3 ? neueDict[AnhandDieserSchlüsselAttributeWirdVerglichen[3]].ToString() : "";
+                var fünfteSpalte = AnhandDieserSchlüsselAttributeWirdVerglichen.Length > 4 ? neueDict[AnhandDieserSchlüsselAttributeWirdVerglichen[4]].ToString() : "";
+                var anhandDieserSchlüsselAttributeWirdVerglichenString = ersteSpalte + (zweiteSpalte.Length > 0 ? ", " + zweiteSpalte : "") + (dritteSpalte.Length > 0 ? ", " + dritteSpalte : "") + (vierteSpalte.Length > 0 ? ", " + vierteSpalte : "") + (fünfteSpalte.Length > 0 ? ", " + fünfteSpalte : "");
+                //anhandDieserSchlüsselAttributeWirdVerglichenString = anhandDieserSchlüsselAttributeWirdVerglichenString.Length > 60 ? anhandDieserSchlüsselAttributeWirdVerglichenString.Substring(0, 57) + "..." : anhandDieserSchlüsselAttributeWirdVerglichenString;
+
+                var dieseAttributeWerdenBeimVergleichIgnoriert = DieseAttributeWerdenBeimVergleichIgnoriert;
 
                 // ... wird geprüft, ob es eine vorhandene Zeile gibt, die auf die Schlüsselattribute matcht.
                 var zeileMitIdentischenSchlüsselattributen = GetZeileMitIdentischenSchlüsselattributen(vorhandeneRec, neueDict, AnhandDieserSchlüsselAttributeWirdVerglichen);
 
                 // Fall1: Wenn keine Zeile in den Vergleichsattributen auf die vorhandenen matcht, wird die Zeile neu angelegt.
-                if (zeileMitIdentischenSchlüsselattributen == null) { neueDatei.Add(neueRec); continue; } // und die Schleife übersprungen
+                if (zeileMitIdentischenSchlüsselattributen == null)
+                {
+                    neueDatei.Add(neueRec);
+                    if (rows > maxRows) break; // Wenn die maximale Anzahl an Zeilen erreicht ist, breche die Schleife ab.                                        
+                    if (!string.IsNullOrEmpty(anhandDieserSchlüsselAttributeWirdVerglichenString))
+                        table.AddRow(new Text(
+                            $"{anhandDieserSchlüsselAttributeWirdVerglichenString}"
+                            ), new Text($"  neue Zeile  "), new Text(""), new Text(""));
+                    continue;
+                } // und die Schleife übersprungen
 
                 // Fall2: Wenn eine vorhandene Zeile auf die Vergleichsattribute matcht, werden abweichende Nicht-Schlüssel-Attributwerte gesucht, ...
                 var nichtIdentischeSonstigeAttribute = GetNichtIdentischeSonstigeAttribute(zeileMitIdentischenSchlüsselattributen, neueDict);
@@ -1248,22 +1299,47 @@ public class Datei : List<dynamic>
                     if (rows == maxRows)
                         table.AddRow(new Text("..."), new Text("..."), new Text("..."), new Text("..."));
                     if (rows < maxRows)
-                        table.AddRow(RenderZeile(neueDict, vorhandeneRec, nichtIdentischeSonstigeAttribute[i], zeileMitIdentischenSchlüsselattributen));
+                        table.AddRow(
+                            RenderZeile(
+                                neueDict,
+                                vorhandeneRec,
+                                nichtIdentischeSonstigeAttribute[i],
+                                zeileMitIdentischenSchlüsselattributen));
                     rows++;
+                    neueDatei.Add(neueRec);
                 }
             }
 
-            if (rows == 0)
-            {
+            if (table.Rows.Count == 0)
                 table.AddRow(new Text("keine Änderungen, nichts anzuzeigen"), new Text("..."), new Text("..."), new Text("..."));
-            }
-
-            AnsiConsole.Write(table);
-            AnsiConsole.Write(new Align(
-                new Text($"Summe: {neueDatei.Count} "),
-                HorizontalAlignment.Right,
-                VerticalAlignment.Top));
         });
+
+        // Im Vergleichsmodus wird die originale Datei nicht verändert.
+        if (Global.Modus.Vergleichen == modus)
+        {
+            AnsiConsole.Write(table);
+            return this;
+        }            
+
+        // Im Updatemodus wird die originale Datei mit der neuen Datei überschrieben.
+        Clear();
+        AddRange(neueDatei);
+        return this;
+    }
+
+    private string GetVorhandeneDatei(Dateien quelldateien)
+    {
+        var vorhandeneRec = new List<dynamic>();
+
+        foreach (var vorhandeneDatei in quelldateien)
+        {
+            if (Path.GetFileName(vorhandeneDatei.AbsoluterPfad) == Path.GetFileName(AbsoluterPfad))
+            {
+                return vorhandeneDatei.AbsoluterPfad;
+                break; // Schleife abbrechen, wenn die Datei gefunden wurde
+            }
+        }
+        return string.Empty; // Rückgabe der gefundenen Datei oder leere Liste, wenn keine Datei gefunden wurde
     }
 
     internal Datei? Filtern(Dateien quelldateien)
@@ -1271,7 +1347,7 @@ public class Datei : List<dynamic>
         var neueDatei = new Datei(AbsoluterPfad);
         bool skipProcessing = false;
         
-        AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Vergleichen & Filtern ...", ctx =>
+        AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Filtern ...", ctx =>
         {
             var dateiendung = Path.GetExtension(AbsoluterPfad);
             
@@ -1329,11 +1405,6 @@ public class Datei : List<dynamic>
 
                 neueDatei.Add(neueRec);
             }
-
-            AnsiConsole.Write(new Align(
-                new Text($"Summe: {neueDatei.Count} "),
-                HorizontalAlignment.Right,
-                VerticalAlignment.Top));
         });
 
         if (skipProcessing)
@@ -1357,5 +1428,20 @@ public class Datei : List<dynamic>
             FileName = Path.GetDirectoryName(AbsoluterPfad),
             UseShellExecute = true
         });
+    }
+
+    internal List<dynamic>? FilternStudentgroupStudents(Students? students, Klassen klassen)
+    {
+        // Entferne alle Zeilen, die in der Eigenschaft studentId nicht auf einen Schüler in der Liste students matchen.
+        var liste = new List<dynamic>();
+        foreach (var rec in this)
+        {
+            var dict = (IDictionary<string, object>)rec;
+            if (dict.ContainsKey("studentId") && students != null && students.Any(s => s.Id.ToString() == dict["studentId"].ToString()))
+            {
+                liste.Add(rec);
+            }
+        }
+        return liste;
     }
 }

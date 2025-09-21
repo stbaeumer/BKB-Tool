@@ -906,7 +906,7 @@ public class Students : List<Student>
         return records;
     }
 
-    public Klassen GetKlassen(Klassen klassen)
+    public Klassen GetKlassen()
     {
         Klassen gefilterteklassen = new Klassen();
 
@@ -1379,17 +1379,16 @@ public class Students : List<Student>
                 .Select(x => x as IDictionary<string, object>)
                 .Where(dict =>
                     dict != null &&
-                    dict.ContainsKey("Schuelergruppe") &&
-                    dict["Schuelergruppe"]?.ToString() == schuelergruppe)
+                    dict["studentgroup.name"]?.ToString() == schuelergruppe)
                 .ToList();
 
             foreach (var student in schuelerDieserGruppe)
             {
                 // Wenn es den Schüler mit der Schülergruppe in den IStudents gibt ...
-                if (!this.Any(x => x.Id == student["studentId"]))
+                if (this.Any(x => x.Id == student["studentId"].ToString()))
                 {
                     // ... wird er hinzugefügt. 
-                    var stu = this.Where(x => x.Id == student["studentId"]).FirstOrDefault();
+                    var stu = this.Where(x => x.Id == student["studentId"].ToString()).FirstOrDefault();
                     if (stu != null)
                     {
                         // Nur Kursbelegungen, die sich mit dem Zeitraum von-bis überschneiden, werden zurückgegeben.
@@ -1412,11 +1411,11 @@ public class Students : List<Student>
                         DateTime belegungBis = letzterSchultag;
 
                         if (!string.IsNullOrEmpty(student["startDate"].ToString()))
-                            belegungVon = DateTime.ParseExact(student["startDate"].ToString(), "dd-MM-yyyy", CultureInfo.InvariantCulture);
+                            belegungVon = DateTime.ParseExact(student["startDate"].ToString(), "dd.MM.yyyy", CultureInfo.InvariantCulture);
 
                         // Wenn endDate leer ist, nehme letzten Schultag
                         if (!string.IsNullOrEmpty(student["endDate"].ToString()))
-                            belegungBis = DateTime.ParseExact(student["endDate"].ToString(), "dd-MM-yyyy", CultureInfo.InvariantCulture);
+                            belegungBis = DateTime.ParseExact(student["endDate"].ToString(), "dd.MM.yyyy", CultureInfo.InvariantCulture);
 
 
                         if ((belegungVon <= bis && belegungBis >= von) || (belegungVon == von && belegungBis == bis))

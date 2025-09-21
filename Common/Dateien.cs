@@ -487,8 +487,10 @@ public class Dateien : List<Datei>
             return datei.ToList();        
         else if (datei.IstOptional)
             return datei.ToList();
+        else if (datei.AbsoluterPfad.ToLower().Contains("studentgroupstudents") && students != null && students.Count > 0)
+            return datei.FilternStudentgroupStudents(students, students.GetKlassen());
         else if (students != null && students.Count > 0)
-            return datei.Filtern(students, students.GetKlassen(klassen));
+            return datei.Filtern(students, students.GetKlassen());
         else if (datei.AbsoluterPfad.ToLower().Contains("lehrkraefte"))
             return datei.ToList();
 
@@ -737,7 +739,7 @@ public class Dateien : List<Datei>
 
         // Wenn mehr als 5 Dateien im Ausgangsordner sind, dann muss es sich um Exportdateien handeln,
         // da BKB-Tool niemals mehr als 5 Dateien gleichzeitig in das Ausgabeverzeichnis verschiebt.
-        if (datFiles.Count > 5)
+        if (datFiles.Count > 7)
         {
             // Hole die Erstellungszeiten der Dateien
             var creationTimes = datFiles
@@ -881,19 +883,11 @@ public class Dateien : List<Datei>
         }
     }
 
-    internal void Vergleichen(Dateien quelldateien)
+    internal void Verarbeiten(Dateien quelldateien, Global.Modus modus)
     {
         foreach (var datei in this)
         {
-            datei.Vergleichen(quelldateien);
-        }
-    }
-
-    internal void Filtern(Dateien quelldateien)
-    {
-        foreach (var datei in this)
-        {
-            datei.Filtern(quelldateien);
+            datei.Verarbeiten(quelldateien, modus);
         }
     }
 

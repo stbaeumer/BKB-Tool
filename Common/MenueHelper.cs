@@ -78,7 +78,7 @@ public static class MenueHelper
                             $"[{Global.GetColor(Global.ColorTextHervorheben)}]    061231[/] : Geburtsdatum in der Notation: JJMMTT.",
                             $"[{Global.GetColor(Global.ColorHinweise)}]#2:[/] Vorhandene schulinterne SchILD-Mailadressen in [{Global.GetColor(Global.ColorPfadInProgrammen)}]Individualdaten I[/] bleiben unangetastet.",
                             $"[{Global.GetColor(Global.ColorHinweise)}]#3:[/] Doppelungen werden angezeigt und müssen nach Vorgabe behandelt werden.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]#4:[/] Als Bonus werden die Telefonnummern vereinheitlicht im Format 01245 6789."
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#4:[/] Als Bonus werden die Telefonnummern in den Individualdaten I vereinheitlicht im Format 01245 6789."
                         ],
                         m =>
                         {
@@ -176,8 +176,8 @@ public static class MenueHelper
                                 ]
                             ));
 
-                            m.Zieldateien.Vergleichen(quelldateien);
-                            m.Zieldateien.Filtern(quelldateien);
+                            m.Zieldateien.Verarbeiten(quelldateien, Global.Modus.Vergleichen);
+                            m.Zieldateien.Verarbeiten(quelldateien, Global.Modus.Filtern);
                             m.Zieldateien.OrdnerÖffnen();
                             m.Zieldateien.Erstellen();
                             m.OeffneWebseite("https://nessa.webuntis.com/students");
@@ -393,13 +393,15 @@ public static class MenueHelper
                         students,
                         klassen,
                         [
-                            $"Es werden jetzt folgende Dateien für den Import nach SchILD erstellt: \n[{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "Lernabschnitte.dat")}[/] \n[{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "Leistungsdaten.dat")}[/] \n[{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "LehrkraefteSonderzeiten.dat")}[/]",
+                            $"Es werden jetzt folgende Dateien für den Import nach SchILD erstellt: \n[{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "Lernabschnitte.dat")}[/] \n[{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "Leistungsdaten.dat")}[/] \n[{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "Kurse.dat")}[/]\n[{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "Faecher.dat")}[/]",
                             $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise:[/]",
                             $"[{Global.GetColor(Global.ColorHinweise)}]#1[/] Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]LehrkraefteSonderzeiten.dat[/] wird nicht komplett neu erstellt. Die exportierte Datei wird lediglich für den Re-Import aufbereitet.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]#2[/] Die Kursbezeichnungen setzen sich zusammen aus dem Kursleiterkürzel plus alle beteiligten Untis-Unterrichtsnummern.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]#3[/] Zähler im Anschluss an Fächer (M1, M2, ...) werden abgeschnitten (also zu M).",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]#4[/] Bei mehreren beteiligten Lehrkräften wird das alphabetisch erste Lehrkraftkürzel zum Kursleiter.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]#5[/] Team-Teaching ist daran erkennbar, dass die Summe der Kurs-Wochenstunden kleiner ist als die Summe der Lehrkräfte-Wochenstunden.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#2[/] Die Kursbezeichnungen setzen sich zusammen aus dem Kursleiterkürzel plus alle beteiligten Untis-Unterrichtsnummern (bis maximal 20 Zeichen).",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#3[/] Kurse werden gebildet aus: Kopplungen in Untis, Schülergruppen in Untis, identischen Fächern mit unterschiedliche LuL",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#4[/] Zähler im Anschluss an Fächer (M1, M2, ...) werden abgeschnitten (also zu M).",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#5[/] Bei mehreren beteiligten Lehrkräften wird das alphabetisch erste Lehrkraftkürzel zum Kursleiter.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#6[/] Team-Teaching ist daran erkennbar, dass die Summe der Kurs-Wochenstunden kleiner ist als die Summe der Lehrkräfte-Wochenstunden.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#7[/] Wenn zwei ansonsten identische Unterrichte einmal mit und einmal ohne Schülergruppe vorliegen, werden zwei unterschiedliche Einträge erstellt."
                         ],
                         m =>
                         {
@@ -409,7 +411,7 @@ public static class MenueHelper
                             configuration = Global.Konfig("StatistikDatum", Global.Modus.Read, configuration);
                             configuration = Global.Konfig("Kursarten", Global.Modus.Read, configuration);
 
-                            m.Unterrichte = new Unterrichte(configuration, m, Global.Zweck.Statistik, Global.Art.Kurse);
+                            m.Unterrichte = new Unterrichte(configuration, m, Global.Zweck.Statistik, Global.Art.KursUnterrichte);
                             m.Unterrichte.AddRange(new Unterrichte(configuration, m, Global.Zweck.Statistik, Global.Art.NichtKursUnterrichte));
 
                             m.Zieldateien =
@@ -421,32 +423,23 @@ public static class MenueHelper
                                     "|", '\0', new UTF8Encoding(true), false),
                                 m.Kurse(
                                     configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Kurse.dat"),
-                                    ["KursBez", "Klasse", "Jahr", "Abschnitt"],
+                                    ["KursBez", "Jahr", "Abschnitt"],
                                     [],
                                     "|", '\0', new UTF8Encoding(true), false),
                                 m.LeistungsdatenStatistik(
                                     configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat"),
-                                    ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach"],
+                                    ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach"],                                    
                                     [],
-                                    Global.Zweck.Statistik),
-                                m.LehrkraefteSonderzeiten(
-                                    configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "LehrkraefteSonderzeiten.dat"),
-                                    ["Lehrkraft", "Zeitart", "Grund"],
-                                    [],
-                                    "|", '\0', new UTF8Encoding(true), false)/*,
-                                m.Lehrkraefte(
-                                    configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Lehrkraefte.dat"),
-                                    ["InternKrz"],
-                                    [],
-                                    "|", '\0', new UTF8Encoding(true), false),
+                                    "|", '\0', new UTF8Encoding(true), false, null,
+                                    Global.Zweck.Statistik),                                    
                                 m.Faecher(
                                     configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Faecher.dat"),
                                     ["InternKrz"],
                                     [],
-                                    "|", '\0', new UTF8Encoding(true), false)*/
+                                    "|", '\0', new UTF8Encoding(true), false)
                             ];
-                            m.Zieldateien.Vergleichen(quelldateien);
-                            //m.Zieldateien.Filtern(quelldateien);
+                            m.Zieldateien.Verarbeiten(quelldateien, Global.Modus.Vergleichen);
+                            m.Zieldateien.Verarbeiten(quelldateien, Global.Modus.Filtern);
                             m.Zieldateien.OrdnerÖffnen();
                             m.Zieldateien.Erstellen();
                             //m.Zieldateien.ExportAusSchildVerschieben(configuration);
@@ -498,7 +491,7 @@ public static class MenueHelper
                             $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise:[/]",
                             $"[{Global.GetColor(Global.ColorHinweise)}]#1[/] Da die Sonderzeiten nur in Kombination mit den Lehrkräften importiert werden, wird eine leere Lehrkraefte.dat erzeugt. Der Import der leeren Lehrkraefte.dat ist unschädlich.",
                             $"[{Global.GetColor(Global.ColorHinweise)}]#2[/] Die Gründe können gleichzeitig oder nach und nach sukzessive angegeben werden.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]#3[/] In der LehrkraefteSonderzeiten.dat wird jeder Grund jede Lehrkraft aufgeführt. Bsp.: Auch Lehrkräfte ohne Altersermäßigung werden mit dem Grund 200 und dem Wert 0 erfasst. Nur so werden Änderungen in SchILD angenommen.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#3[/] Wenn ein Grund bei einer Lehrkraft wegfällt (also Wert = 0), dann wird das im Folgenden angezeigt. Die Zeile muss dann händisch in SchILD gelöscht werden. Neue und veränderte Werte werden in der LehrkräfteSonderzeiten.dat hinzugefügt.",
                         ],
                         m =>
                         {
@@ -515,7 +508,8 @@ public static class MenueHelper
                                     [],
                                     "|", '\0', new UTF8Encoding(true), false)
                             ];
-                            m.Zieldateien.Vergleichen(quelldateien);
+                            m.Zieldateien.Verarbeiten(quelldateien, Global.Modus.Vergleichen);
+                            m.Zieldateien.Verarbeiten(quelldateien, Global.Modus.Filtern);
                             m.Zieldateien.OrdnerÖffnen();
                             m.Zieldateien.Erstellen();
                         },

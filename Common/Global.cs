@@ -51,7 +51,7 @@ public static class Global
 
     public enum Art
     {
-        Kurse,
+        KursUnterrichte,
         NichtKursUnterrichte,
     }
 
@@ -106,7 +106,9 @@ public static class Global
         Create,
         Update,
         Read, // Wird verwendet, um Einstellungen zu lesen und den Benutzer zu fragen
-        ReadSilent // Wird verwendet, um Einstellungen zu lesen, ohne den Benutzer zu fragen
+        ReadSilent, // Wird verwendet, um Einstellungen zu lesen, ohne den Benutzer zu fragen     
+        Vergleichen,
+        Filtern
     }
 
     public static List<string> Vorwahlen =new List<string>()
@@ -246,8 +248,7 @@ public static class Global
                 s = $"[{Global.GetColor(Global.ColorPfadInDateien)}]{s}[/]\n\n[{Global.GetColor(Global.ColorHinweise)}]Importhinweise:  [/]\n" + rechteSeite;
             }
 
-            var panel = new Panel(s)
-                .Header($"[bold {Global.GetColor(ColorInfoBox)}] Bereit für den Import [/]")
+            var panel = new Panel($"[bold {Global.GetColor(ColorInfoBox)}] Bereit: [/]{s}")
                 .HeaderAlignment(Justify.Left)
                 .SquareBorder()
                 .Expand()
@@ -913,16 +914,26 @@ public static class Global
                 return configuration;
             }
 
-            // Nur die zulässigen Auswahloptionen werden als Defaultwert verwendet
-            string default1 = defaultValue.Replace(" ", ""); 
+            
+            string default1 = "";//defaultValue.Replace(" ", ""); 
 
-            foreach (var z in zulässigeAuswahlOptionen.Split(','))
+            // Wenn keine zulässigen Auswahloptionen definiert sind, wird der Defaultwert komplett übernommen.
+            if (string.IsNullOrEmpty(zulässigeAuswahlOptionen))
             {
-                if (!string.IsNullOrEmpty(z) && defaultValue.Split(",").Contains(z))
-                {
-                    default1 += z + ",";
-                }
+                default1 = defaultValue;
             }
+            else
+            {
+                // Nur die zulässigen Auswahloptionen werden als Defaultwert verwendet
+                foreach (var z in zulässigeAuswahlOptionen.Split(','))
+                {
+                    if (!string.IsNullOrEmpty(z) && defaultValue.Split(",").Contains(z))
+                    {
+                        default1 += z + ",";
+                    }
+                }    
+            }
+
             // Wenn aus dem Defaultwert nichts matcht, dann werden die zulässigen Werte übernommen.
             if (default1.Length == 0)
             {
@@ -1575,7 +1586,7 @@ public static class KonfigHelper
         ["InteressierendeUnterrichtsgruppen"] = new KonfigMeta
         {
             Key = "InteressierendeUnterrichtsgruppen",
-            DefaultValue = "1.HJ,U",
+            DefaultValue = Environment.GetEnvironmentVariable("InteressierendeUnterrichtsgruppen") ?? "",
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie alle [{Global.GetColor(Global.ColorInfoBox)}]Unterrichtsgruppen[/] an, die am Stichtag anwesend sein werden. Unterrichte ohne Unterrichtsgrupe werden immer berücksichtigt.\nGroß- und Kleinschreibung beachten!\nWenn Sie alle Unterrichtsgruppen berücksichtigen wollen, schreiben wie das Wort [{Global.GetColor(Global.ColorActionInMenüs)}]alle[/] gewählt.",
             Datentyp = Global.Datentyp.ListString,
@@ -1932,7 +1943,7 @@ public static class KonfigHelper
             Key = "StatistikDatum",
             DefaultValue = $"01.09.{DateTime.Now.Year}",
             Aufforderung = $"[green]■[/]",
-            Hinweise = $"Geben Sie das [{Global.GetColor(Global.ColorInfoBox)}]Datum der Abgabe[/] an. Das ist wichtig, um diejenigen Unterrichte auszuschließen, die befristet sind und nicht am Stichtag stattfinden.",
+            Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]Stichtag zur Abgabe der Statistik[/] an. Das ist wichtig, um diejenigen Unterrichte auszuschließen, die befristet sind und nicht am Stichtag stattfinden.",
             Datentyp = Global.Datentyp.DateTime,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,

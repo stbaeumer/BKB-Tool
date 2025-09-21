@@ -3,46 +3,48 @@ using Microsoft.Extensions.Configuration;
 using Spectre.Console;
 
 public class Unterrichte : List<Unterricht>
-{    
+{
     public Unterrichte(IConfiguration configuration, Menüeintrag m, Global.Zweck zweck, Global.Art art)
     {
         // Aus der Kurse.dat wird die Kursart ermittelt. Wenn die Kursart in SchILD einmal gesetzt ist, wird sie nicht mehr geändert.
-        List<dynamic> kurseDat = m.Quelldateien.GetMatchingList(configuration, "kurse.", m.IStudents, m.Klassen);        
-        if (kurseDat == null)
-        {
-            AnsiConsole.MarkupLine($"[grey]Keine Kurse.dat gefunden. Bitte exportieren Sie die Datei erneut.[/]");
-            return;
-        }
+        List<dynamic> kurseDat = m.Quelldateien.GetMatchingList(configuration, "kurse.", m.IStudents, m.Klassen);
+        if (kurseDat == null)        
+            throw new FileNotFoundException($"[grey]Keine Kurse.dat gefunden. Bitte exportieren Sie die Datei erneut.[/]");
 
         List<dynamic> gpu002 = m.Quelldateien.GetMatchingList(configuration, "gpu002", m.IStudents, m.Klassen);
-        if (gpu002 == null || gpu002.Count == 0)
-        {
-            AnsiConsole.MarkupLine($"[grey]Keine GPU002-Daten gefunden. Bitte exportieren Sie die Datei erneut.[/]");
-            return;
-        }
-
+        if (gpu002 == null)
+            throw new FileNotFoundException($"[grey]Keine GPU002-Daten gefunden. Bitte exportieren Sie die Datei erneut.[/]");
+        
         List<dynamic> studentgroupStudents = m.Quelldateien.GetMatchingList(configuration, "studentgroupstudents", m.IStudents, m.Klassen);
-        if (studentgroupStudents == null || studentgroupStudents.Count == 0)
-        {
-            AnsiConsole.MarkupLine($"[grey]Keine studentgroupStudents gefunden. Bitte exportieren Sie die Datei erneut.[/]");
-            return;
-        }
-
+        if (studentgroupStudents == null)
+            throw new FileNotFoundException($"[grey]Keine Kurse instudentgroupStudents gefunden. Bitte exportieren Sie die Datei erneut.[/]");
+        if (studentgroupStudents.Count == 0)
+            AnsiConsole.MarkupLine($"[grey] Keine Zeilen in studentgroupStudents gefunden. Ist das korrekt?.[/]");
+        
         var zulässigeAuswahlOptionen = GetZulässigeUnterrichtsgruppen(configuration, gpu002);
 
-        if (Global.Art.Kurse == art)
-            configuration = Global.Konfig("InteressierendeUnterrichtsgruppen", Global.Modus.Update, configuration); // wird immer abgefragt
+        if (Global.Art.KursUnterrichte == art)
+            configuration = Global.Konfig("InteressierendeUnterrichtsgruppen", Global.Modus.Update, configuration, null, -1, -1, null, null, null, zulässigeAuswahlOptionen + ",_"); // wird immer abgefragt
 
         AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start($"{art} aus GPU002.TXT einlesen ...", ctx =>
         {
-            // Ordne die GPU002 aufsteigend nach Field6. Dadurch wird erreicht, dass die erste Lehrkrft im Alphabet Kursleiter ist.
-            gpu002 = gpu002.OrderBy(record => {var dict = (IDictionary<string, object>)record; return dict.ContainsKey("Field6") ? dict["Field6"]?.ToString() : string.Empty; }).ToList();
+            // Ordne die GPU002 aufsteigend nach Field6. Dadurch wird erreicht, dass die erste Lehrkraft im Alphabet Kursleiter wird.
+            gpu002 = gpu002.OrderBy(record => { var dict = (IDictionary<string, object>)record; return dict.ContainsKey("Field6") ? dict["Field6"]?.ToString() : string.Empty; }).ToList();
 
             foreach (var record in gpu002)
             {
                 var Klassen = new Klassen();
                 var dict = (IDictionary<string, object>)record;
 
+                if (dict["Field1"]?.ToString() == "3280")
+                {
+                    string aa = "Test"; // Debugging purpose
+                }
+
+                // ohne eingetragenen Lehrer wird die Zeile übersprungen
+                if (!dict.ContainsKey("Field6") || string.IsNullOrEmpty(dict["Field6"]?.ToString()))
+                    continue; // Ohne Lehrer wird die Zeile übersprungen.
+           
                 if (nichtInteressierdendeUnterrichtsgruppe(configuration, dict))
                     continue; // Diese Gruppe ist nicht interessant, also überspringen.                
 
@@ -65,41 +67,104 @@ public class Unterrichte : List<Unterricht>
                 int wochentundenLehrkraft = int.TryParse(dict["Field2"]?.ToString(), out int ws) ? ws : 0;
                 int wochenstundenKurs = 0;
 
-                if (unterrichtsId == "587")
-                {
-                    string test = "Test"; // Debugging purpose
-                }
-
-                if (wochentundenLehrkraft == 0) return;
+                if (wochentundenLehrkraft == 0) continue; // Unterricht mit 0 Wochenstunden werden nicht berücksichtigt.
 
                 // Wenn es um Kurse geht und die Zeile ein Kurs ist oder zu einem Kurs gehört
-                if (art == Global.Art.Kurse && zeileIstKursOderGehörtZuKurs(gpu002, dict))
+                if (art == Global.Art.KursUnterrichte && zeileIstKursOderGehörtZuKurs(gpu002, dict))
                 {
-                    var kurs = this.FirstOrDefault(k =>
+                    // Suche nach einem bestehenden Kurs mit identischer UntisID
+                    var kurs = this.FirstOrDefault(k => k.UnterrichtsIds.Contains(Convert.ToInt32(unterrichtsId)));
+
+                    // Wenn kein passender Kurs gefunden wurde, s
+                    if (kurs == null)
+                    {
+                        kurs = this.FirstOrDefault(k =>
                         Bereinigen(k.Fach) == Bereinigen(fach) &&
                         k.Schülergruppe == schuelergruppe &&
                         (k.Klassen.Contains(klasse) ||
                             (k.KursBez.StartsWith(lehrer) && k.KursBez.Contains(unterrichtsId) // Kopplung von zwei Klassen in Untis
                         )));
+                    }
 
                     if (kurs == null)
-                    {
-                        Add(new Unterricht(zweck, m, unterrichtsId, fach, schuelergruppe, klasse, lehrer, wochentundenLehrkraft, kurseDat, configuration, studentgroupStudents));
-                    }
-                    else
-                    {
-                        // Wochenstunden werden bei Bedarf erhöht usw.
-                        kurs.Updaten(zweck, m, configuration, fach, lehrer, unterrichtsId, schuelergruppe, klasse, wochentundenLehrkraft, studentgroupStudents);
-                    }
+                        {
+                            var kursBez = $"{lehrer}-{unterrichtsId}";
+                            Add(new Unterricht(kursBez, zweck, m, unterrichtsId, fach, schuelergruppe, klasse, lehrer, wochentundenLehrkraft, kurseDat, configuration, studentgroupStudents));
+                        }
+                        else
+                        {
+                            // Wochenstunden werden bei Bedarf erhöht usw.
+                            var kursBez = kurs.Updaten(zweck, m, configuration, fach, lehrer, unterrichtsId, schuelergruppe, klasse, wochentundenLehrkraft, studentgroupStudents);
+                        }
                 }
                 else if (art == Global.Art.NichtKursUnterrichte && !zeileIstKursOderGehörtZuKurs(gpu002, dict))
                 {
-                    Add(new Unterricht(zweck, m, configuration, unterrichtsId, fach, schuelergruppe, klasse, lehrer, wochentundenLehrkraft, studentgroupStudents));
+                    var nichtKursUnterricht = this.FirstOrDefault(u =>
+                        Bereinigen(u.Fach) == Bereinigen(fach) &&
+                        u.Kursleiter == lehrer &&
+                        u.Schülergruppe == schuelergruppe &&
+                        u.Klassen.Contains(klasse));
+
+                    if (nichtKursUnterricht == null)
+                    {
+                        Add(new Unterricht(zweck, m, configuration, unterrichtsId, fach, schuelergruppe, klasse, lehrer, wochentundenLehrkraft, studentgroupStudents));
+                    }
+                    else
+                    {
+                        // Wochenstunden werden bei Bedarf erhöht usw.                        
+                        nichtKursUnterricht.Updaten(zweck, m, configuration, fach, lehrer, unterrichtsId, schuelergruppe, klasse, wochentundenLehrkraft, studentgroupStudents);
+                    }
                 }
             }
-
-            Global.ZeileSchreiben($"{art} aus GPU002.TXT eingelesen:", this.Count().ToString());
         });
+
+        // Pro Klasse wird eine Tabelle ausgegeben
+        // distincte Liste aller Klassen aus this:
+        var alleKlassen = this.SelectMany(u => u.Klassen).Distinct().ToList();
+
+        foreach (var klasse in alleKlassen)
+        {
+            var table = new Table();
+            table.Border = TableBorder.Rounded;
+            table.Expand();
+            table.Title = new TableTitle($"{art} der Klasse {klasse} aus GPU002", new Style(foreground: Color.Grey, decoration: Decoration.Bold));
+            if (art == Global.Art.KursUnterrichte)
+                table.AddColumn("Kursbezeichnung");
+            if (art == Global.Art.NichtKursUnterrichte)
+                table.AddColumn("Unterrichtsnummern");            
+            table.AddColumn("Fach");
+            table.AddColumn("WStd");
+            table.AddColumn("Kursleiter(Wstd)");
+            if (art == Global.Art.KursUnterrichte)
+                table.AddColumn($"LuL(WStd)");
+            table.Columns[2].Alignment = Justify.Right;
+
+            foreach (var unterricht in this.Where(u => u.Klassen.Contains(klasse)).OrderBy(u => u.Fach).ThenBy(u => u.Kursleiter))
+            {
+                var kursleiter = $"{unterricht.Kursleiter}({unterricht.KursleiterWochenstunden})";                
+
+                if (art == Global.Art.KursUnterrichte)
+                    table.AddRow(
+                        new Markup($"{unterricht.Kursleiter}-{string.Join('-', unterricht.UnterrichtsIds)}"),                        
+                        new Markup(unterricht.Fach),
+                        new Markup(unterricht.Wochenstunden.ToString()),
+                        new Markup(kursleiter),
+                        new Markup($"{string.Join(" ", unterricht.Lehrkraefte.Select((lk, index) => $"{lk}({unterricht.LehrkraefteWochenstunden[index]})"))}")
+                    );
+                    
+                if(art == Global.Art.NichtKursUnterrichte)
+                    table.AddRow(
+                        new Markup($"{string.Join(' ', unterricht.UnterrichtsIds)}"),
+                        new Markup(unterricht.Fach),
+                        new Markup(unterricht.KursleiterWochenstunden.ToString()),
+                        new Markup(kursleiter)
+                    );
+            }
+            int wochenstunden = this.Sum(u => u.Wochenstunden);
+
+            table.AddRow("", "", $"[{Global.GetColor(Global.ColorZahlen)}]{wochenstunden}[/]", "");
+            AnsiConsole.Write(table);
+        }   
     }
 
     private DateTime tt_mm_jjjjNachDateTime(string? v)
@@ -137,7 +202,7 @@ public class Unterrichte : List<Unterricht>
             .ToList();
         if (x.Count == 0)
         {
-            AnsiConsole.MarkupLine($"[grey]Keine Unterrichtsgruppen gefunden. Bitte exportieren Sie die Datei erneut.[/]");
+            AnsiConsole.MarkupLine($"[grey]      Keine Unterrichtsgruppen gefunden.[/]");
             return string.Empty;
         }
         return string.Join(",", x);
@@ -193,6 +258,11 @@ public class Unterrichte : List<Unterricht>
 
     private bool zeileIstKursOderGehörtZuKurs(List<dynamic> gpu002, IDictionary<string, object> dict)
     {
+        if (dict["Field1"]?.ToString() == "1397" || dict["Field1"]?.ToString() == "1410")
+        {
+            string aa = "Test"; // Debugging purpose
+        }
+
         // Ein Kurs ist definiert, wenn Field42 nicht leer ist.
         if (dict.ContainsKey("Field42") && !string.IsNullOrEmpty(dict["Field42"]?.ToString()))
         {
@@ -216,19 +286,28 @@ public class Unterrichte : List<Unterricht>
         }
 
         // Ein Kurs ist definiert, wenn dasselbe Fach (Field7) und dieselbe Klasse (Field5) mehrfach vorkommen, auch wenn Field42 leer ist.
+        // Wenn allerdings der Lehrer (Field6) immer identisch ist, dann ist es kein Kurs.
         // Ein Zähler am Ende des Fachs wird nicht berücksichtigt. Bsp.: M1 wird zu M., M G1 bleibt M G1, weil M das Fach ist und G1 der Grundkurs.
 
-        var count1 = gpu002.Count(record =>
+        var count1 = gpu002.FirstOrDefault(record =>
         {
             var recDict = (IDictionary<string, object>)record;
+
+            if(recDict["Field1"].ToString() == "1410")
+            {
+                string aa = "Test"; // Debugging purpose
+            }
+
             return Bereinigen(recDict["Field7"].ToString()) == Bereinigen(dict["Field7"].ToString()) &&
             recDict["Field5"].ToString() == dict["Field5"].ToString() &&
-            recDict["Field42"].ToString() == dict["Field42"].ToString();
+            recDict["Field42"].ToString() == dict["Field42"].ToString() &&
+            recDict["Field6"].ToString() != dict["Field6"].ToString();
         });
 
-        if (count1 > 1)
+        // Es ist ein Kurs, wenn dasselbe Fach und dieselbe Klasse mit einem anderen Lehrer nochmal vorkommen.
+        if (count1 != null)
         {
-            return true; // Es ist ein Kurs, wenn dasselbe Fach und dieselbe Klasse mehrfach vorkommen.
+            return true;
         }
 
         return false;

@@ -13,6 +13,7 @@ public class Unterricht
     public List<string> Lehrkraefte { get; internal set; }
     public List<int> LehrkraefteWochenstunden { get; internal set; }
     public string KursBez { get; internal set; }
+    public string KursBezUngekürzt { get; private set; }
     public string Kursart { get; internal set; }
     public int Wochenstunden { get; internal set; }
     public List<string> Jahrgaenge { get; internal set; }
@@ -26,17 +27,18 @@ public class Unterricht
         Kursleiter = lehrer;
         KursleiterWochenstunden = wochentundenLehrkraft;
         UnterrichtsIds = new List<int> { int.Parse(unterrichtsId) };
+        Schülergruppe = schuelergruppe;
         Students = m.IStudents.Filter(configuration, zweck, klasse, schuelergruppe, studentgroupStudents);
-        Global.ZeileSchreiben($"{klasse} {fach} {lehrer}", $"Schüler*innen: {Students.Count}");                    
+        //Global.ZeileSchreiben($"{klasse} {fach} {lehrer}", $"Schüler*innen: {Students.Count}");                    
     }
 
-    public Unterricht(Global.Zweck zweck, Menüeintrag m, string? unterrichtsId, string fach, string? schuelergruppe, string? klasse, string? lehrer, int wochentundenLehrkraft, List<dynamic> kurseDat, IConfiguration configuration, List<dynamic> studentgroupStudents)         
+    public Unterricht(string kursBez, Global.Zweck zweck, Menüeintrag m, string? unterrichtsId, string fach, string? schuelergruppe, string? klasse, string? lehrer, int wochentundenLehrkraft, List<dynamic> kurseDat, IConfiguration configuration, List<dynamic> studentgroupStudents)         
     {
         // Klassen nicht leer -> Alle bekommen den Kurs zugewiesen
         //                       KursBez darf leer bleiben
         // Klassen       leer -> Zuweisung aus StudentgroupStudents
 
-        KursBez = $"{lehrer}-{unterrichtsId}";
+        KursBez = kursBez;
         Fach = Bereinigen(fach);
         Klassen = new List<string>() { klasse };
         // Die Kursart wird aus der Kurse.dat ermittelt, wenn sie dort einmal gesetzt ist. Sie steckt in "Kursart" des Dictionaries.
@@ -44,12 +46,12 @@ public class Unterricht
         Wochenstunden = wochentundenLehrkraft;
         Kursleiter = lehrer;
         KursleiterWochenstunden = wochentundenLehrkraft;
+        // Der Kursleiter wird nicht zu den Lehrkräften hinzugefügt
         Lehrkraefte = new List<string>();
         LehrkraefteWochenstunden = new List<int>();
         Schülergruppe = schuelergruppe;
         UnterrichtsIds = new List<int> { int.Parse(unterrichtsId) };
-        Students = m.IStudents.Filter(configuration, zweck, klasse, schuelergruppe, studentgroupStudents);
-        Global.ZeileSchreiben($"{KursBez}", $"");
+        Students = m.IStudents.Filter(configuration, zweck, klasse, schuelergruppe, studentgroupStudents);        
     }
 
     private string GetKursart(IConfiguration configuration, List<dynamic> kurseDat, string fach, string? kursleiter, string? unterrichtsId)
@@ -104,10 +106,22 @@ public class Unterricht
         return fachBereinigt;
     }
 
-    internal void Updaten(Global.Zweck zweck, Menüeintrag m, IConfiguration configuration, string fach, string lehrer, string unterrichtsId, string schuelergruppe, string klasse, int wochentundenLehrkraft, List<dynamic> studentgroupStudents)
+    internal string Updaten(Global.Zweck zweck, Menüeintrag m, IConfiguration configuration, string fach, string lehrer, string unterrichtsId, string schuelergruppe, string klasse, int wochentundenLehrkraft, List<dynamic> studentgroupStudents)
     {
+        //Lehrkraefte.Add(lehrer);
+        //LehrkraefteWochenstunden.Add(wochentundenLehrkraft);
+
+        // Bei NichtKursUnterrichten wird die wochenstundenzahl erhöht
+        if (KursBez == null)
+        {
+            Wochenstunden += wochentundenLehrkraft;
+            KursleiterWochenstunden += wochentundenLehrkraft;
+            UnterrichtsIds.Add(int.Parse(unterrichtsId));
+            return "";
+        }
+
         // Wenn der Kurs bereits existiert und in einer zweiten Zeile eine weitere Klasse hinzugefügt wird
-        if (KursBez.StartsWith(lehrer) && KursBez.Contains(unterrichtsId) && Schülergruppe == schuelergruppe && Bereinigen(Fach) == Bereinigen(fach))
+        if (KursBez != null && KursBez.StartsWith(lehrer) && KursBez.Contains(unterrichtsId) && Schülergruppe == schuelergruppe && Bereinigen(Fach) == Bereinigen(fach))
         {
             if (!Klassen.Contains(klasse))
             {
@@ -117,7 +131,7 @@ public class Unterricht
             }
 
             // Die Anzahl der Wochenstunden wird nicht erhöht.
-            return;
+            return KursBez;
         }
 
         // Wenn UnterrichtsId nicht in der Liste der UnterrichtsIds des Kurses enthalten ist, wird sie hinzugefügt
@@ -126,6 +140,13 @@ public class Unterricht
             UnterrichtsIds.Add(int.Parse(unterrichtsId));
             // Eine weitere UterrichtsId verändert die Kursbezeichnung                            
             KursBez = $"{Kursleiter}-{string.Join('-', UnterrichtsIds)}";
+            
+            // Die Kursbezeichnung muss auf max. 20 Zeichen begrenzt werden. Mehr kann SchILD nicht.
+            if (KursBez.Length > 20)
+            {
+                KursBez = KursBez.Substring(0, 20);
+            }
+
             // Die Wochenstunden des Kurses erhöhen sich nur, wenn die UnterrichtsId neu ist
             Wochenstunden += wochentundenLehrkraft;
         }
@@ -153,5 +174,6 @@ public class Unterricht
                 }
             }
         }
+        return KursBez;
     }
 }

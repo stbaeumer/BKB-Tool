@@ -486,8 +486,6 @@ public class Menüeintrag
             configuration = Global.Konfig("FehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt", Global.Modus.Read, configuration);
         }
 
-        var records = new List<dynamic>();
-
         try
         {
             AnsiConsole.Status()
@@ -652,14 +650,13 @@ public class Menüeintrag
                             record.FehlstundenMINUSGrenzwert = "";
                             record.DatumLEERZEICHENvon = "";
                             record.DatumLEERZEICHENbis = "";
-                            records.Add(record);
+                            zieldatei.Add(record);
                         }
                     }   
                 }
-                Global.ZeileSchreiben("Lernabschnittsdaten.dat verarbeitet:", records.Count().ToString());
+                Global.ZeileSchreiben("Lernabschnittsdaten.dat", zieldatei.Count().ToString());
             });
 
-            zieldatei.AddRange(records);
             return zieldatei;
         }
         catch (Exception ex)
@@ -677,11 +674,10 @@ public class Menüeintrag
         string zieldateiname,
         string[] anhandDieserAttributeWirdVerglichen,
         string[] dieseAttributeWerdenBeimVergleichIgnoriert,
-        Global.Zweck art)
+        string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null, Global.Zweck art = Global.Zweck.Statistik)
     {
         var unterrichte = this.Unterrichte;
-        var zieldatei = new Datei(zieldateiname, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert);
-        var records = new List<dynamic>();
+        var zieldatei = new Datei(zieldateiname, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);        
         
         AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start($"{zieldateiname} ...", ctx =>
         {
@@ -709,13 +705,12 @@ public class Menüeintrag
                     record.Jahrgänge = "";
                     record.FehlstdPUNKT = "";
                     record.unentschPUNKTLEERZEICHENFehlstdPUNKT = "";
-                    records.Add(record);
+                    zieldatei.Add(record);
                 }
             }
-            Global.ZeileSchreiben("SchuelerLeistungsdaten.dat verarbeitet:", records.Count().ToString());
+            Global.ZeileSchreiben("SchuelerLeistungsdaten.dat", zieldatei.Count().ToString());
         });
 
-        zieldatei.AddRange(records);
         return zieldatei;
     }
 
@@ -957,7 +952,7 @@ public class Menüeintrag
                     }
                 }
             }
-            Global.ZeileSchreiben("SchuelerLeistungsdaten.dat verarbeitet:", records.Count().ToString());
+            Global.ZeileSchreiben("SchuelerLeistungsdaten.dat", records.Count().ToString());
         });
 
         zieldatei.AddRange(records);
@@ -984,7 +979,7 @@ public class Menüeintrag
 
                 // record.Klasse muss leer bleiben, wenn Schülergruppe verwendet werden.
                 // Anderenfalls werden alle SuS aller Klassen zugewiesen.
-                record.Klasse = string.IsNullOrEmpty(kurs.Schülergruppe) ? string.Join(",", kurs.Klassen) : "";
+                record.Klasse = ""; //string.IsNullOrEmpty(kurs.Schülergruppe) ? string.Join(",", kurs.Klassen) : "";
 
                 record.Jahr = Global.AktSj[0];
                 record.Abschnitt = configuration["Abschnitt"].ToString();
@@ -1013,7 +1008,7 @@ public class Menüeintrag
                 zieldatei.Add(record);
             }
 
-            Global.ZeileSchreiben("Kurse bilden:", zieldatei.Count().ToString());
+            Global.ZeileSchreiben("Kurse", zieldatei.Count().ToString());
         });
 
         return zieldatei;
@@ -1258,7 +1253,7 @@ public class Menüeintrag
                     }
                 }
             }
-            Global.ZeileSchreiben("SchuelerLeistungsdaten.dat verarbeitet:", records.Count().ToString());
+            Global.ZeileSchreiben("SchuelerLeistungsdaten.dat", records.Count().ToString());
         });
 
         zieldatei.AddRange(records);
@@ -1301,9 +1296,8 @@ public class Menüeintrag
 
     public Datei? Faecher(IConfiguration configuration, string zieldateiname, string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
-        var zieldatei = new Datei(zieldateiname, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+        var zieldatei = new Datei(zieldateiname, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
-        var records = new List<dynamic>();
         var gpu002 = Quelldateien.GetMatchingList(configuration, "gpu002", IStudents, Klassen);
         if (!gpu002.Any())
         {
@@ -1315,68 +1309,108 @@ public class Menüeintrag
         {
             return [];
         }
-
-        foreach (var recExp in gpu002)
+        AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Fächer ...", ctx =>
         {
-            var dictExp = (IDictionary<string, object>)recExp;
-
-            var schildFach = schildFaecher.Where(rec =>
+            foreach (var recExp in gpu002)
             {
-                var dict = (IDictionary<string, object>)rec;
-                return dict["InternKrz"].ToString() == dictExp["Field7"].ToString();
-            }).FirstOrDefault();
+                var dictExp = (IDictionary<string, object>)recExp;
 
-            // Wenn es das Fach in SchILD nicht gibt, ...
-
-            if (schildFach != null) continue;
-            {
-                // ... wird bei Fächern mit Suffix geprüft, ob es bereits ein Schildfach ohne Suffix gibt.
-
-                var subject = dictExp["Field7"].ToString();
-                var endetMitZiffer = subject.Length > 0 && char.IsDigit(subject[^1]);
-
-                if (endetMitZiffer)
+                // Leere Fächer überspringen
+                if (string.IsNullOrEmpty(dictExp["Field7"].ToString()))
                 {
-                    var subjectOhneSuffix = subject.Substring(0, subject.Length - 1);
-                    // Die Eigenschaften vom Mutterfach werden übernommen
-                    var mutterfach = schildFaecher.Where(rec =>
-                    {
-                        var dict = (IDictionary<string, object>)rec;
-                        return dict["InternKrz"].ToString() == subjectOhneSuffix;
-                    }).FirstOrDefault();
+                    var panel = new Panel($"[red]In Untis ist in der Unterrichtsnummer {dictExp["Field1"]} kein Fach eingetragen. Diese Zeile wird übersprungen.[/]");
+                    panel.Border = BoxBorder.Double;
+                    AnsiConsole.Write(panel);
+                    continue;
+                }
 
-                    // Wenn es ein Mutterfach gibt, wird es mit neuem Namen hinzugefügt
-                    if (mutterfach != null)
-                    {
-                        if (records.Any(x => x.InternKrz == dictExp["Field7"].ToString())) continue;
-                        var dictMutterfach = (IDictionary<string, object>)mutterfach;
-                        dynamic record = new ExpandoObject();
-                        record.InternKrz = subject;
-                        record.StatistikKrz = dictMutterfach["StatistikKrz"].ToString();
-                        record.Bezeichnung = dictMutterfach["Bezeichnung"].ToString();
-                        record.BezeichnungZeugnis = dictMutterfach["BezeichnungZeugnis"].ToString();
-                        record.BezeichnungÜZeugnis = dictMutterfach["BezeichnungÜZeugnis"].ToString();
-                        record.Unterrichtssprache = dictMutterfach["Unterrichtsprache"].ToString();
-                        record.SortierungLEERZEICHENS1 = dictMutterfach["Sortierung S1"].ToString();
-                        record.SortierungLEERZEICHENS2 = dictMutterfach["Sortierung S2"].ToString();
-                        record.Gewichtung = dictMutterfach["Gewichtung"].ToString();
+                var schildFach = schildFaecher.Where(rec =>
+                {
+                    var dict = (IDictionary<string, object>)rec;
+                    return dict["InternKrz"].ToString() == dictExp["Field7"].ToString();
+                }).FirstOrDefault();
 
-                        var gibtEsSchon = records.Any(rec =>
+                // Wenn es das Fach in SchILD nicht gibt, ...
+
+                if (schildFach != null) continue;
+                {
+                    // ... wird bei Fächern mit Suffix geprüft, ob es bereits ein Schildfach ohne Suffix gibt.
+
+                    var subject = dictExp["Field7"].ToString();
+                    var endetMitZiffer = subject.Length > 0 && char.IsDigit(subject[^1]);
+
+                    if (endetMitZiffer)
+                    {
+                        var subjectOhneSuffix = subject.Substring(0, subject.Length - 1);
+                        // Die Eigenschaften vom Mutterfach werden übernommen
+                        var mutterfach = schildFaecher.Where(rec =>
                         {
                             var dict = (IDictionary<string, object>)rec;
-                            return dict["InternKrz"].ToString() == subject;
-                        });
+                            return dict["InternKrz"].ToString() == subjectOhneSuffix;
+                        }).FirstOrDefault();
 
-                        if (!gibtEsSchon)
+                        // Wenn es ein Mutterfach gibt, wird es mit neuem Namen hinzugefügt
+                        if (mutterfach != null)
                         {
-                            records.Add(record);
+                            if (zieldatei.Any(x => x.InternKrz == dictExp["Field7"].ToString())) continue;
+                            var dictMutterfach = (IDictionary<string, object>)mutterfach;
+                            dynamic record = new ExpandoObject();
+                            record.InternKrz = subject;
+                            record.StatistikKrz = dictMutterfach["StatistikKrz"].ToString();
+                            record.Bezeichnung = dictMutterfach["Bezeichnung"].ToString();
+                            record.BezeichnungZeugnis = dictMutterfach["BezeichnungZeugnis"].ToString();
+                            record.BezeichnungÜZeugnis = dictMutterfach["BezeichnungÜZeugnis"].ToString();
+                            record.Unterrichtssprache = dictMutterfach["Unterrichtsprache"].ToString();
+                            record.SortierungLEERZEICHENS1 = dictMutterfach["Sortierung S1"].ToString();
+                            record.SortierungLEERZEICHENS2 = dictMutterfach["Sortierung S2"].ToString();
+                            record.Gewichtung = dictMutterfach["Gewichtung"].ToString();
+
+                            var gibtEsSchon = zieldatei.Any(rec =>
+                            {
+                                var dict = (IDictionary<string, object>)rec;
+                                return dict["InternKrz"].ToString() == subject;
+                            });
+
+                            if (!gibtEsSchon)
+                            {
+                                zieldatei.Add(record);
+                            }
+                        }
+                        else
+                        {
+                            Console.ForegroundColor = ConsoleColor.Cyan;
+                            Console.WriteLine("  Das Fach " + subject +
+                                            " nicht gefunden. Es wird in SchILD angelegt. Bitte prüfen!");
+
+
+                            dynamic record = new ExpandoObject();
+                            record.InternKrz = subject;
+                            record.StatistikKrz = "FB";
+                            record.Bezeichnung = subject;
+                            record.BezeichnungZeugnis = "";
+                            record.BezeichnungÜZeugnis = "";
+                            record.Unterrichtssprache = "";
+                            record.SortierungLEERZEICHENS1 = "";
+                            record.SortierungLEERZEICHENS2 = "";
+                            record.Gewichtung = "";
+
+                            var gibtEsSchon = zieldatei.Any(rec =>
+                            {
+                                var dict = (IDictionary<string, object>)rec;
+                                return dict["InternKrz"].ToString() == subject;
+                            });
+
+                            if (!gibtEsSchon)
+                            {
+                                zieldatei.Add(record);
+                            }
                         }
                     }
                     else
                     {
                         Console.ForegroundColor = ConsoleColor.Cyan;
                         Console.WriteLine("  Das Fach " + subject +
-                                          " nicht gefunden. Es wird in SchILD angelegt. Bitte prüfen!");
+                                        " nicht gefunden. Es wird in SchILD angelegt. Bitte prüfen!");
 
 
                         dynamic record = new ExpandoObject();
@@ -1390,7 +1424,7 @@ public class Menüeintrag
                         record.SortierungLEERZEICHENS2 = "";
                         record.Gewichtung = "";
 
-                        var gibtEsSchon = records.Any(rec =>
+                        var gibtEsSchon = zieldatei.Any(rec =>
                         {
                             var dict = (IDictionary<string, object>)rec;
                             return dict["InternKrz"].ToString() == subject;
@@ -1402,37 +1436,9 @@ public class Menüeintrag
                         }
                     }
                 }
-                else
-                {
-                    Console.ForegroundColor = ConsoleColor.Cyan;
-                    Console.WriteLine("  Das Fach " + subject +
-                                      " nicht gefunden. Es wird in SchILD angelegt. Bitte prüfen!");
-
-
-                    dynamic record = new ExpandoObject();
-                    record.InternKrz = subject;
-                    record.StatistikKrz = "FB";
-                    record.Bezeichnung = subject;
-                    record.BezeichnungZeugnis = "";
-                    record.BezeichnungÜZeugnis = "";
-                    record.Unterrichtssprache = "";
-                    record.SortierungLEERZEICHENS1 = "";
-                    record.SortierungLEERZEICHENS2 = "";
-                    record.Gewichtung = "";
-
-                    var gibtEsSchon = records.Any(rec =>
-                    {
-                        var dict = (IDictionary<string, object>)rec;
-                        return dict["InternKrz"].ToString() == subject;
-                    });
-
-                    if (!gibtEsSchon)
-                    {
-                        records.Add(record);
-                    }
-                }
             }
-        }
+        });
+        //Global.ZeileSchreiben("Neue Fächer:", zieldatei.Count().ToString());
 
         return zieldatei;
     }
@@ -1499,7 +1505,7 @@ public class Menüeintrag
             {
                 Console.WriteLine("  Es fehlen keine Noten. Gut so.");
             }
-            Global.ZeileSchreiben("Lehrkräfte verarbeitet:", i.ToString());
+            Global.ZeileSchreiben("Lehrkräfte", i.ToString());
         });
         return String.Join(',', lul);
     }
@@ -1681,8 +1687,8 @@ public class Menüeintrag
                     foreach (var dict in gelöschteSchüler)
                     {
                         dynamic record = new ExpandoObject();
-                        record.Schlüssel = dict["name"].ToString().Split('@')[0];
-                        record.EMINUSMail = dict["address.email"].ToString();
+                        record.Schlüssel = dict["externKey"].ToString().Split('@')[0];
+                        record.EMINUSMail = dict["externKey"].ToString();
                         record.Familienname = dict["longName"].ToString();
                         record.Vorname = dict["foreName"].ToString();
                         record.Klasse = dict["klasse.name"].ToString();
@@ -3721,18 +3727,11 @@ public class Menüeintrag
 
             AnsiConsole.Write(panel);
         }
-                    
-        var table = new Table();
+        
         var tableAltersermäßigung = new Table();
 
         AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Lehrkraefte prüfen ...", ctx =>
-        {
-            //table.AddColumn("Nr.");
-            table.AddColumn("Lehrkraft");
-            table.AddColumn("Grund");
-            table.AddColumn("bisher");
-            table.AddColumn("neu");
-
+        {            
             if (interessierendeMinusIgnorierte.Contains("200"))
             {
                 //table.AddColumn(new TableColumn("Nr."));
@@ -3819,16 +3818,6 @@ public class Menüeintrag
 
                     wertDerAnrechnung = lehrer.GetAnrechnungswertGPU020Soll(gpu020, grund);
 
-                    // Zeige nur die neuen Anrechnungen an, die von den bisherigen abweichen
-                    if (wertIst != wertDerAnrechnung.ToString().Replace(',', '.'))
-                    {
-                        table.AddRow(
-                            lehrer.Kürzel,
-                            grund,
-                            wertIst.ToString().ToString().Replace(",00", ""),
-                            wertDerAnrechnung.ToString("0.##", CultureInfo.InvariantCulture));
-                    }                    
-
                     dynamic record = new ExpandoObject();
                     record.Lehrkraft = lehrer.Kürzel;
                     record.Zeitart = grund.ToString().StartsWith("1") ? "MEHRLEISTUNG" : grund.ToString().StartsWith("2") ? "MINDERLEISTUNG" : "ANRECHNUNG";
@@ -3840,9 +3829,8 @@ public class Menüeintrag
         });
 
         if(interessierendeGründe.Contains("200"))
-            AnsiConsole.Write(tableAltersermäßigung);
-
-        AnsiConsole.Write(table);
+            if(tableAltersermäßigung.Rows.Count > 0)
+                AnsiConsole.Write(tableAltersermäßigung);
 
         return zieldatei;
     }
@@ -3927,6 +3915,15 @@ public class Menüeintrag
             {                
                 var dictSz = (IDictionary<string, object>)schuelerZusatzdaten[i];
                 var dictSb = (IDictionary<string, object>)schuelerBasisdaten[i];
+
+                // Wenn es keinen aktiven oder externen Schüler gibt, überspringe diese Zeile
+                if (!(dictSb["Status"].ToString() == "2" || dictSb["Status"].ToString() == "6")) continue;
+
+                // Wenn der Nachname fehlt, überspringe diese Zeile
+                if (dictSz["Nachname"].ToString().StartsWith("Majer"))
+                { 
+                    string a = "";
+                }
 
                 if (string.IsNullOrEmpty(dictSb["Geburtsdatum"].ToString()))
                 {
@@ -4339,7 +4336,7 @@ public class Menüeintrag
                     }
                 }
             }
-            Global.ZeileSchreiben($"Fotos aus SchILD für {zipModus} verarbeitet:", $"{absolutePfade.Count}");
+            Global.ZeileSchreiben($"Fotos aus SchILD für {zipModus}", $"{absolutePfade.Count}");
         });
 
         if (absolutePfade.Count == 0)
@@ -4869,7 +4866,7 @@ public class Menüeintrag
                     }
                 }
             }
-            Global.ZeileSchreiben("SchuelerLeistungsdaten.dat verarbeitet:", records.Count().ToString());
+            Global.ZeileSchreiben("SchuelerLeistungsdaten.dat", records.Count().ToString());
         });
 
         zieldatei.AddRange(records);
