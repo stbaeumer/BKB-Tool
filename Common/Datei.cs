@@ -1274,6 +1274,11 @@ public class Datei : List<dynamic>
             {
                 var neueDict = (IDictionary<string, object>)neueRec;
 
+                if (neueDict.ContainsKey("Nachname") && neueDict["Nachname"].ToString() == "Krois")
+                {
+                    var x = 1;
+                }
+
                 var anhandDieserSchlüsselAttributeWirdVerglichenString = "";
                 
                 foreach (var key in AnhandDieserSchlüsselAttributeWirdVerglichen)

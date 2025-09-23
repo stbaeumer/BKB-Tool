@@ -175,11 +175,8 @@ public static class MenueHelper
                                     )
                                 ]
                             ));
-
-                            m.Zieldateien.Verarbeiten(quelldateien, Global.Modus.Vergleichen);
-                            m.Zieldateien.Verarbeiten(quelldateien, Global.Modus.Filtern);
-                            m.Zieldateien.OrdnerÖffnen();
                             m.Zieldateien.Erstellen();
+                            m.Zieldateien.OrdnerÖffnen();                            
                             m.OeffneWebseite("https://nessa.webuntis.com/students");
                             m.Zieldateien.Verschieben(Global.Konfig("PfadLitteraImport", Global.Modus.Update, configuration));
                             m.Zieldateien.ZippenMitKennwort(configuration);
@@ -438,8 +435,8 @@ public static class MenueHelper
                                     [],
                                     "|", '\0', new UTF8Encoding(true), false)
                             ];
-                            m.Zieldateien.Verarbeiten(quelldateien, Global.Modus.Vergleichen);
-                            m.Zieldateien.Verarbeiten(quelldateien, Global.Modus.Filtern);
+                            //m.Zieldateien.Verarbeiten(quelldateien, Global.Modus.Vergleichen);
+                            //m.Zieldateien.Verarbeiten(quelldateien, Global.Modus.Filtern);
                             m.Zieldateien.OrdnerÖffnen();
                             m.Zieldateien.Erstellen();
                             //m.Zieldateien.ExportAusSchildVerschieben(configuration);

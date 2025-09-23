@@ -545,7 +545,7 @@ public class Dateien : List<Datei>
                     {
                         if (!datei.DarfLeerSein)
                         {
-                            datei.Fehlermeldung = $"Die Datei [bold aqua]{absoluterPfad}[/] existiert, ist aber leer. Ist die Datei evtl. vorher in Excel o.ä. geöffnet worden? Oder stimmt der Delimiter nicht? Der korrekte Delimiter ist: '[bold aqua]{datei.Delimiter}[/]'";
+                            //datei.Fehlermeldung = $"Die Datei [bold aqua]{absoluterPfad}[/] existiert, ist aber leer. Ist die Datei evtl. vorher in Excel o.ä. geöffnet worden? Oder stimmt der Delimiter nicht? Der korrekte Delimiter ist: '[bold aqua]{datei.Delimiter}[/]'";
                             if (meldungAnzeigen && !datei.IstOptional)
                                 datei.FehlermeldungRendern(configuration);
                         }
@@ -558,6 +558,7 @@ public class Dateien : List<Datei>
                         datei.Fehlermeldung = $"Die Datei [bold {Global.GetColor(Global.ColorPfadInDateien)}]{absoluterPfad}[/] hat nur eine einzige Spalte. Das korrekte Trennzeichen ist: [{Global.GetColor(Global.ColorZahlen)}]'{datei.Delimiter}'[/].";
                         if (meldungAnzeigen && !datei.IstOptional)
                             datei.FehlermeldungRendern(configuration);
+                        
                     }
 
 

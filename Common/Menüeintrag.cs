@@ -3765,7 +3765,7 @@ public class Menüeintrag
                     var istWertGpu020LautUntis = lehrer.GetAnrechnungswertGPU020Soll(gpu020, grund);
                     lehrer.DeputatLautUntis = lehrer.GetDeputatLautUntis(gpu004);
 
-                    if (interessierendeGründe.Contains("200"))
+                    if (interessierendeGründe.Contains("200") && grund == "200")
                     {
                         // Spalte 4      
                         lehrer.ProzentStelleInSchild = lehrer.GetProzentStelle(configuration);
@@ -3823,7 +3823,9 @@ public class Menüeintrag
                     record.Zeitart = grund.ToString().StartsWith("1") ? "MEHRLEISTUNG" : grund.ToString().StartsWith("2") ? "MINDERLEISTUNG" : "ANRECHNUNG";
                     record.Grund = grund;
                     record.AnzahlLEERZEICHENStunden = interessierendeGründe != "200" ? wertDerAnrechnung.ToString().Replace('.', ',') : lehrer.AltersermäßigungSoll.ToString("F2", CultureInfo.InvariantCulture).Replace('.', ',');
-                    zieldatei.Add(record);
+                    // Nullwerte werden nicht exportiert, weil das in ASDPC zu Fehlermeldungen führt.
+                    if (record.AnzahlLEERZEICHENStunden != "0,00" && record.AnzahlLEERZEICHENStunden != "0")
+                        zieldatei.Add(record);
                 }
             }
         });

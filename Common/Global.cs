@@ -497,6 +497,7 @@ public static class Global
                 .Validate(n =>
                 {
                     if(n == "x")
+
                         throw new Exception("Sie haben abgebrochen.");
                     if (!zulässigeAuswahlOptionen.Split(",").Contains(n))
                         return ValidationResult.Error($"[]  Zulässige Auswahl: [bold aqua]{zulässigeAuswahlOptionen}[/][/]");                    
