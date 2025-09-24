@@ -78,14 +78,14 @@ public static class MenueHelper
                             $"[{Global.GetColor(Global.ColorTextHervorheben)}]    061231[/] : Geburtsdatum in der Notation: JJMMTT.",
                             $"[{Global.GetColor(Global.ColorHinweise)}]#2:[/] Vorhandene schulinterne SchILD-Mailadressen in [{Global.GetColor(Global.ColorPfadInProgrammen)}]Individualdaten I[/] bleiben unangetastet.",
                             $"[{Global.GetColor(Global.ColorHinweise)}]#3:[/] Doppelungen werden angezeigt und müssen nach Vorgabe behandelt werden.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]#4:[/] Als Bonus werden die Telefonnummern in den Individualdaten I vereinheitlicht im Format 01245 6789."
+                            //$"[{Global.GetColor(Global.ColorHinweise)}]#4:[/] Als Bonus werden die Telefonnummern in den Individualdaten I vereinheitlicht im Format 01245 6789."
                         ],
                         m =>
                         {
                             configuration = Global.Konfig("MailDomain", Global.Modus.Read, configuration);
                             m.Zieldateien =
                             [
-                                m.SchuelerZusatzdatenUmMailAdresseErgaenzenTelefonFormatieren(
+                                m.SchuelerZusatzdatenUmMailAdresseErgaenzen(
                                     configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerZusatzdaten.dat"),
                                     ["Nachname", "Vorname", "Geburtsdatum"],
                                     [],
@@ -105,9 +105,11 @@ public static class MenueHelper
                                     ["Nachname", "Vorname", "Geburtsdatum","Art"],
                                     [],
                                     "|", '\'', new UTF8Encoding(false), false)*/
-                            ];
-                            m.Zieldateien.ExportAusSchildVerschieben(configuration);
-                            m.Zieldateien.VergleichenFilternErstellen(quelldateien);
+                            ];                           
+                            m.Zieldateien.Verarbeiten(quelldateien, Global.Modus.Vergleichen);
+                            m.Zieldateien.Verarbeiten(quelldateien, Global.Modus.Filtern); 
+                            m.Zieldateien.Erstellen();
+                            m.Zieldateien.OrdnerÖffnen();                            
                         },
                         Global.Rubrik.WöchtentlicheArbeiten,
                         Global.NurBeiDiesenSchulnummern.Alle
@@ -295,7 +297,7 @@ public static class MenueHelper
                     students,
                     klassen,
                     [
-                        $"Das Organigramm wird aus Untisanrechnungen gebildet. Beispiele: {{...}} > KATEGORIE; [[...]] > HINWEIS, Text ohne Klammern wird zur ROLLE; A14, A15, A16 ohne Klammern > AMT; Untis-Beschreibung > AUFGABE. Im Organigramm wird nach Kategorie, Aufgabe oder Beschreibung gruppiert.",
+                        $"Das Organigramm wird aus Untisanrechnungen gebildet. Beispiele: {{...}} = KATEGORIE; [[...]] = HINWEIS, Text ohne Klammern wird zur ROLLE; A14, A15, A16 ohne Klammern > AMT; Untis-Beschreibung > AUFGABE. Im Organigramm wird nach Kategorie, Aufgabe oder Beschreibung gruppiert.",
                         $"Untisanrechnungen: 1.Struct Schema Editor > Untisanrechnungen > Löschen/Leeren > 'untisanrechnungen' eingeben, dann Leeren",
                         $"Untisanrechnungen: 2.Struct Schema Editor > Untisanrechnungen > Importieren/Exportieren > Importieren von Rohdaten > Global > Durchsuchen",
                         $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise zum Text in Anrechnungen:[/]",
@@ -311,12 +313,13 @@ public static class MenueHelper
                         m.Zieldateien =
                         [
                             m.GetGruppen(configuration, anrechnungen, Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-gruppen.csv"), lehrers, ",", '\"', new UTF8Encoding(false), true),
+                            anrechnungen.Anlegen(Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-untisanrechnungen.csv") ,[500, 510, 530, 590, 900], [500, 510, 530, 590], ["PLA", "BM"], ",", '\"', new UTF8Encoding(false), true),
                             m.GetLehrer(lehrers, Path.Combine(Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-lul-utf8OhneBom-einmalig-vor-SJ-Beginn.csv")), ",", '\'', new UTF8Encoding(false), false),
                             m.Praktikanten(
                                 [
-                                    "BW,1", "BT,1", "BS,1", "BS,2", "HBG,1", "HBT,1", "HBW,1", "GG,1", "GT,1", "GW,1", "IFK,1"
+                                    "BW,1,2", "BT,1,2", "BS,1,2", "BS,2,2", "HBG,1,2", "HBT,1,2", "HBT,2,2", "HBW,1,1", "GG,1,1", "GT,1,1", "GW,1,1", "IFK,1,2" // Klasse, Jg, Anzahl Praktika
                                 ],
-                                Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + @"-praktikanten-utf8OhneBom-einmalig-vor-SJ-Beginn.csv"), ",", '\'', new UTF8Encoding(false), false),
+                                Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + @"-praktikanten-utf8OhneBom-einmalig-vor-SJ-Beginn.csv"), ",", '\"', new UTF8Encoding(false), true),
                             m.KlassenAnlegen(configuration, Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + @"-klassen-utf8OhneBom-einmalig-vor-SJ-Beginn.csv"), ",", '\"', new UTF8Encoding(false), true)
                         ];
 
@@ -611,7 +614,7 @@ public static class MenueHelper
                                 m.ChatErzeugen(configuration, lul);
                             },
                             Global.Rubrik.Leistungsdaten,
-                            Global.NurBeiDiesenSchulnummern.Alle
+                            Global.NurBeiDiesenSchulnummern.Nur177659
                         ),
                         new Menüeintrag(
                             "Teams-Chat: Teams-Chat mit Gruppe von Lehrkräften beginnen",

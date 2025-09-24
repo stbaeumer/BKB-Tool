@@ -3175,23 +3175,29 @@ public class Menüeintrag
 
         foreach (var item in interessierendeKlassenUndJg)
         {
-            praktikanten.AddRange((from s in Students
-                                   where s.Klasse.StartsWith(item.Split(',')[0])
-                                   select s).ToList());
-        }
+            var anzahlStr = item.Split(',')[2];
+            int anzahl = 0;
+            int.TryParse(anzahlStr, out anzahl);
 
-        foreach (var praktikant in praktikanten)
-        {
-            if (praktikant == null) continue;
-            dynamic record = new ExpandoObject();
-            record.Name = praktikant.Nachname + ", " + praktikant.Vorname;
-            record.Klasse = praktikant.Klasse;
-            record.Jahrgang = praktikant.Jahrgang;
-            record.Betrieb = "";
-            record.Betreuung = "";
-            zieldatei.Add(record);
+            for (int i = 1; i <= anzahl; i++)
+            {
+                foreach (var praktikant in (from s in Students
+                                       where s.Klasse.StartsWith(item.Split(',')[0])
+                                       where s.Jahrgang.EndsWith(item.Split(',')[1])
+                                       where s.Status == "2" || s.Status == "6"
+                                       select s).ToList())
+                                       {
+                                            dynamic record = new ExpandoObject();
+                                            record.Name = praktikant.Nachname + ", " + praktikant.Vorname;
+                                            record.Klasse = praktikant.Klasse;
+                                            record.Jahrgang = praktikant.Jahrgang;
+                                            record.Betrieb = "";
+                                            record.Betreuung = "";
+                                            record.LaufendeNummer = i;
+                                            zieldatei.Add(record);
+                                       }
+            }
         }
-
         return zieldatei;
     }
 
@@ -3348,6 +3354,8 @@ public class Menüeintrag
             "kollegium:bildungsgangleitungen"));
         Gruppen.Add(new Gruppe().GetByWikilink(anrechnungen, lehrers,
             "kollegium:schulleitung:erweiterte:start"));
+        Gruppen.Add(new Gruppe().GetByWikilink(anrechnungen, lehrers,
+            "kollegium:lehrerrat"));
 
         foreach (var gruppe in Gruppen)
         {
@@ -3881,7 +3889,7 @@ public class Menüeintrag
         AnsiConsole.Write(panel3);
     }
 
-    internal Datei SchuelerZusatzdatenUmMailAdresseErgaenzenTelefonFormatieren(
+    internal Datei SchuelerZusatzdatenUmMailAdresseErgaenzen(
         IConfiguration configuration,
         string zieldateiname,
         string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
@@ -3911,7 +3919,7 @@ public class Menüeintrag
         var mailDomain = configuration["MailDomain"].Trim();        
         var mehrfachVorhanden = new List<dynamic>();
 
-        AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Schuelerzusatzdaten: Mails und Telefonnummern anpassen ...", ctx =>
+        AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Schuelerzusatzdaten: Mails anpassen ...", ctx =>
         {
             for (int i = 0; i < schuelerZusatzdaten.Count; i++)
             {                
@@ -3922,7 +3930,7 @@ public class Menüeintrag
                 if (!(dictSb["Status"].ToString() == "2" || dictSb["Status"].ToString() == "6")) continue;
 
                 // Wenn der Nachname fehlt, überspringe diese Zeile
-                if (dictSz["Nachname"].ToString().StartsWith("Majer"))
+                if (dictSz["Nachname"].ToString().StartsWith("Cuber"))
                 { 
                     string a = "";
                 }
@@ -4050,11 +4058,6 @@ public class Menüeintrag
                             }
                         }
                     }
-                    else if ((name == "Telefon-Nr." || name == "Fax/Mobilnr") && value != null && value.ToString() != "")
-                    {
-                        var tel = TelefonNummerFormatieren(value.ToString());
-                        ((IDictionary<string, object>)record)[name] = tel;
-                    }
                     else
                     {
                         ((IDictionary<string, object>)record)[name] = value;
@@ -4064,7 +4067,7 @@ public class Menüeintrag
                 zieldatei.Add(record);
             }        
         });
-        Global.ZeileSchreiben("Schuelerzusatzdaten: Mails und Telefonnummern angepasst", zieldatei.Count.ToString());
+        Global.ZeileSchreiben("Schuelerzusatzdaten: Mails überprüft", zieldatei.Count.ToString());
 
         // Sortiere mehrfachVorhanden nach Geburtsdatum
         mehrfachVorhanden = mehrfachVorhanden.OrderBy(s => s.Geburtsdatum).ToList();

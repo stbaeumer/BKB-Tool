@@ -211,13 +211,13 @@ ORDER BY t.Name;
     }
 
     public Datei Anlegen(
-        string dateiname,
+        string zieldateiname,
         List<int> nurDieseGrunde,
         List<int> furDieseGrundeKeinenWert,
         List<string?> furDieseLehrerKeineWerte,
         string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
-        var zieldatei = new Datei(dateiname);
+        var zieldatei = new Datei(zieldateiname, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         try
         {

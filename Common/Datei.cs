@@ -775,13 +775,29 @@ public class Datei : List<dynamic>
 
     private string GetNeuerWert(IDictionary<string, object> neueDict, string nichtIdentischesSonstigesAttribut)
     {
-        nichtIdentischesSonstigesAttribut = nichtIdentischesSonstigesAttribut.Replace(".","PUNKT").Replace(" ","LEERZEICHEN").Replace("-","MINUS").Replace("_","UNTERSTRICH").Replace("/","SLASH");
+        var x = "";
 
-        return neueDict.TryGetValue(nichtIdentischesSonstigesAttribut, out var neuerWert)
+        x = neueDict.TryGetValue(nichtIdentischesSonstigesAttribut, out var neuerWert)
             ? (neuerWert?.ToString()?.Length > 20
                 ? neuerWert.ToString().Substring(0, 17) + "..."
                 : neuerWert?.ToString() ?? string.Empty)
             : string.Empty;
+
+        if (x.Length > 0)
+            return x;
+
+        // Wenn nichts matcht, versuche nochmal mit ersetzten Sonderzeichen
+
+        nichtIdentischesSonstigesAttribut = nichtIdentischesSonstigesAttribut.Replace(".", "PUNKT").Replace(" ", "LEERZEICHEN").Replace("-", "MINUS").Replace("_", "UNTERSTRICH").Replace("/", "SLASH");
+
+        return neueDict.TryGetValue(nichtIdentischesSonstigesAttribut, out var neuerWert1)
+            ? (neuerWert1?.ToString()?.Length > 20
+                ? neuerWert1.ToString().Substring(0, 17) + "..."
+                : neuerWert1?.ToString() ?? string.Empty)
+            : string.Empty;
+            
+
+
     }
 
     private string GetLinkeSeite(IDictionary<string, object> neueDict, string[] anhandDieserAttributeWirdVerglichen)
@@ -808,10 +824,25 @@ public class Datei : List<dynamic>
     private List<string> GetNichtIdentischeSonstigeAttribute(IDictionary<string, object> vorhDict,
         IDictionary<string, object> neueDict)
     {
+        var sonderzeichen = false;
+        // Es wird sichergestellt, dass in neueDict und vorhandeneDict die gleichen Schlüssel verwendet werden.
+        foreach (var key in neueDict.Keys)
+        {
+            if(key.Contains(".") || key.Contains(" ") || key.Contains("-") || key.Contains("_") || key.Contains("/"))
+            {
+                sonderzeichen = true;
+                break;
+            }
+        }
+
         List<string> nichtIdentischeSonstige = new List<string>();
         foreach (var key in vorhDict.Keys)
         {
-            var k = key.Replace(".", "PUNKT").Replace(" ", "LEERZEICHEN").Replace("-", "MINUS").Replace("_", "UNTERSTRICH").Replace("/", "SCHRÄGSTRICH");
+            var k = key;
+            // Wenn die neueDict keine Sonderzeichen enthält, dann wird auch bei vorhandeneDict die Sonderzeichen ersetzt.
+            if (!sonderzeichen)
+                k = key.Replace(".", "PUNKT").Replace(" ", "LEERZEICHEN").Replace("-", "MINUS").Replace("_", "UNTERSTRICH").Replace("/", "SCHRÄGSTRICH");
+
             // Die Felder, die mit Field beginnen, sind nicht relevant
             if (DieseAttributeWerdenBeimVergleichIgnoriert.Contains(key)) continue;
             if (AnhandDieserSchlüsselAttributeWirdVerglichen.Contains(key)) continue; // Die Vergleichsattribute werden nicht berücksichtigt
@@ -1274,7 +1305,7 @@ public class Datei : List<dynamic>
             {
                 var neueDict = (IDictionary<string, object>)neueRec;
 
-                if (neueDict.ContainsKey("Nachname") && neueDict["Nachname"].ToString() == "Krois")
+                if (neueDict.ContainsKey("Nachname") && neueDict["Nachname"].ToString().StartsWith("Cuber"))
                 {
                     var x = 1;
                 }

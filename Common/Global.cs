@@ -1671,7 +1671,7 @@ public static class KonfigHelper
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie die [{Global.GetColor(Global.ColorInfoBox)}]Empfänger-E-Mail-Adresse[/] der Netman-Datei an.",
             Datentyp = Global.Datentyp.Mail,
-            InGrundeinstellungAbfragen = true,
+            InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
@@ -1682,7 +1682,7 @@ public static class KonfigHelper
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie die [{Global.GetColor(Global.ColorInfoBox)}]BCC-Empfänger-E-Mail-Adresse[/] der Netman-Datei an.",
             Datentyp = Global.Datentyp.Mail,
-            InGrundeinstellungAbfragen = true,
+            InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
@@ -1704,7 +1704,7 @@ public static class KonfigHelper
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Wo liegen die [{Global.GetColor(Global.ColorInfoBox)}]Fotos[/], die Sie aus SchILD exportiert haben ([{Global.GetColor(Global.ColorPfadInProgrammen)}]Datenaustausch > Fotos > Fotos exportieren[/])? Der Export ist wichtig, um nur fehlende Fotos an SchILD zu übergeben. Geben Sie den Pfad zu den Fotos aus SchILD an. Beispiel: [{Global.GetColor(Global.ColorPfadInProgrammen)}]\\\\fs01\\SchILD-NRW\\Fotos_aus_SchILD[/]",
             Datentyp = Global.Datentyp.Pfad,
-            InGrundeinstellungAbfragen = true,
+            InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.Schulnummer177659
         },
@@ -1770,7 +1770,7 @@ public static class KonfigHelper
             Aufforderung = "Nur neue und veränderte Fotos nach Webuntis & Co. exportieren?",
             Hinweise = $"Sie können auswählen, ob alle [{Global.GetColor(Global.ColorInfoBox)}]Fotos[/] exportiert werden sollen oder nur neue und veränderte.",
             Datentyp = Global.Datentyp.JaNein,
-            InGrundeinstellungAbfragen = true,
+            InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
@@ -1814,7 +1814,7 @@ public static class KonfigHelper
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]Ziel-Pfad[/] an, wohin die neue Datei nach dem Erstellen verschoben werden soll.",
             Datentyp = Global.Datentyp.Pfad,
-            InGrundeinstellungAbfragen = true,
+            InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
@@ -1825,7 +1825,7 @@ public static class KonfigHelper
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Sie können vor dem Hochladen die Fotos drehen. Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]Drehwinkel in Grad[/] an. Beispiel: [{Global.GetColor(Global.ColorZahlen)}]90[/] für 90 Grad im Uhrzeigersinn. [{Global.GetColor(Global.ColorZahlen)}]0[/] bedeutet keine Drehung.",
             Datentyp = Global.Datentyp.Int,
-            InGrundeinstellungAbfragen = true,
+            InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
@@ -1891,7 +1891,7 @@ public static class KonfigHelper
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie das [{Global.GetColor(Global.ColorInfoBox)}]SMTP-Kennwort[/] an.",
             Datentyp = Global.Datentyp.Kennwort,
-            InGrundeinstellungAbfragen = true,
+            InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
@@ -1902,7 +1902,7 @@ public static class KonfigHelper
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]SMTP-Port[/] an.",
             Datentyp = Global.Datentyp.String,
-            InGrundeinstellungAbfragen = true,
+            InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },        
@@ -1913,7 +1913,7 @@ public static class KonfigHelper
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]SMTP-Server[/] an.",
             Datentyp = Global.Datentyp.String,
-            InGrundeinstellungAbfragen = true,
+            InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
@@ -1924,7 +1924,7 @@ public static class KonfigHelper
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]SMTP-Benutzer[/] (Absender-E-Mail-Adresse) an.",
             Datentyp = Global.Datentyp.String,
-            InGrundeinstellungAbfragen = true,
+            InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
@@ -2067,7 +2067,7 @@ public static class KonfigHelper
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Die Datei wird nun gezippt.\nGeben Sie das [{Global.GetColor(Global.ColorInfoBox)}]Kennwort[/] ein, mit dem Sie die Zip-Datei verschlüsseln wollen. Geben Sie ein \"-\" ein, wenn kein Kennwort gesetzt werden soll.",
             Datentyp = Global.Datentyp.Kennwort,
-            InGrundeinstellungAbfragen = true,
+            InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
