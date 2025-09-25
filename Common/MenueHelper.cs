@@ -29,7 +29,7 @@ public static class MenueHelper
         var pdfKennwort = configuration["PdfKennwort"];
         var betreffMassenmail = configuration["BetreffMassenmail"];
         var inputFolder = configuration["InputFolder"];
-        var outputFolder = configuration["OutputFolder"];        
+        var outputFolder = configuration["OutputFolder"];
 
         try
         {
@@ -48,13 +48,13 @@ public static class MenueHelper
             Global.DisplayHeader(configuration, quelldateien.Meldung);
 
             lehrers = new Lehrers(configuration, quelldateien.Notwendige(configuration, ["lehrkraefte,dat"], true));
-            
+
             if (students.Count == 0 || lehrers.Count == 0)
             {
                 return new Menue(quelldateien, klassen, lehrers, students, []);
             }
 
-            #pragma warning disable CS8601 // Mögliche Nullverweiszuweisung
+#pragma warning disable CS8601 // Mögliche Nullverweiszuweisung
             //Console.WriteLine("");
             //AnsiConsole.Write(new Rule("").RuleStyle("springgreen2").Centered());
 
@@ -105,11 +105,11 @@ public static class MenueHelper
                                     ["Nachname", "Vorname", "Geburtsdatum","Art"],
                                     [],
                                     "|", '\'', new UTF8Encoding(false), false)*/
-                            ];                           
+                            ];
                             m.Zieldateien.Verarbeiten(quelldateien, Global.Modus.Vergleichen);
-                            m.Zieldateien.Verarbeiten(quelldateien, Global.Modus.Filtern); 
+                            m.Zieldateien.Verarbeiten(quelldateien, Global.Modus.Filtern);
                             m.Zieldateien.Erstellen();
-                            m.Zieldateien.OrdnerÖffnen();                            
+                            m.Zieldateien.OrdnerÖffnen();
                         },
                         Global.Rubrik.WöchtentlicheArbeiten,
                         Global.NurBeiDiesenSchulnummern.Alle
@@ -178,7 +178,7 @@ public static class MenueHelper
                                 ]
                             ));
                             m.Zieldateien.Erstellen();
-                            m.Zieldateien.OrdnerÖffnen();                            
+                            m.Zieldateien.OrdnerÖffnen();
                             m.OeffneWebseite("https://nessa.webuntis.com/students");
                             m.Zieldateien.Verschieben(Global.Konfig("PfadLitteraImport", Global.Modus.Update, configuration));
                             m.Zieldateien.ZippenMitKennwort(configuration);
@@ -431,7 +431,7 @@ public static class MenueHelper
                                     ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach", "Kurs"],
                                     [],
                                     "|", '\0', new UTF8Encoding(true), false, null,
-                                    Global.Zweck.Statistik),                                    
+                                    Global.Zweck.Statistik),
                                 m.Faecher(
                                     configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Faecher.dat"),
                                     ["InternKrz"],
@@ -589,7 +589,7 @@ public static class MenueHelper
                                 $"[{Global.GetColor(Global.ColorTextHervorheben)}]Durchführung #2[/]: Geben Sie die Schlüsselwörter an, um die interessierenden PDF-Dateien einzugrenzen.",
                             ],
                             m =>
-                            {                                
+                            {
                                 m.IStudents.GetStudentsVonAtlantisCsv(configuration);
                                 m.IStudents.PdfDateienVerarbeiten(configuration);
                             },
@@ -630,7 +630,7 @@ public static class MenueHelper
                             {
                                 var anrechnungen = new Anrechnungen(lehrers, configuration);
                                 var datei = m.GetGruppen(configuration, anrechnungen, Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-gruppen.csv"), lehrers, ",", '\"', new UTF8Encoding(false), true);
-                                
+
                                 var table = new Table();
                                 table.AddColumn("Nr.");
                                 table.AddColumn("Gruppe");
@@ -668,126 +668,8 @@ public static class MenueHelper
                             Global.Rubrik.Allgemein,
                             Global.NurBeiDiesenSchulnummern.Nur177659
                         ),
-                /*,
-                            new Menüeintrag(
-                                "Zeugnisse #1: Lernabschnittsdaten: Fehlzeiten von Webuntis nach SchILD importieren",
-                                anrechnungen,
-                                quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "absenceperstudent,csv", "schuelerlernabschnitt,dat"]),
-                                students,
-                                klassen,
-                                [
-                                    $"Die Fehlzeiten aktiver Schüler*innen aus Webuntis werden in der [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLernabschnittsdaten.dat")}[/] für den Import nach SchILD vorbereitet.",
-                                    $"[{Global.GetColor(Global.ColorHinweise)}]Vorbereitung 1:[/] Lernabschnitte in SchILD anlegen.",
-                                    $"[{Global.GetColor(Global.ColorHinweise)}]Vorbereitung 2:[/] Klassenleitungen müssen offene Fehlstunden auf [{Global.GetColor(Global.ColorHinweise)}](nicht) entschuldigt[/] setzen. Anderenfalls bleiben die Fehlzeiten auf dem Zeugnis unberücksichtigt. ",
-                                    $"[{Global.GetColor(Global.ColorHinweise)}]Vorbereitung 3:[/] Alle *.dat-Dateien aus SchILD exportieren. "
-                                ],
-                                m =>
-                                {
-                                    m.FilterInteressierendeStudentsUndKlassen(configuration);
-                                    m.Zieldatei = m.Lernabschnittsdaten(configuration, Global.Zweck.Zeugnis, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLernabschnittsdaten.dat"));
-                                    m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, configuration, ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt"], []);
-                                    m.Zieldateien.ExportAusSchildVerschieben(configuration);
-                                    m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
-                                },
-                                Global.Rubrik.Leistungsdaten,
-                                Global.NurBeiDiesenSchulnummern.Alle
-                            ),                    
-                            new Menüeintrag(
-                                "Zeugnisse #2: Kurse, Unterrichte und Gesamtnoten von Webuntis nach SchILD importieren",
-                                anrechnungen,
-                                quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "absenceperstudent,csv", "schuelerlernabschnitt,dat", "schuelerleistungsdaten,dat", "schuelerbasis,dat", "exportlessons,csv", "studentgroupstudents,csv", "marksperlesson,csv", "klassen,dat"]),
-                                students,
-                                klassen,
-                                [
-                                    $"Die Kurse und Unterrichte (mit Noten) werden in [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat")}[/] und [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat")}[/] vorbereitet.",
-                                    $"[{Global.GetColor(Global.ColorHinweise)}]Vorbereitung:[/] Lernabschnitte in SchILD anlegen und dann alle *.dat-Dateien frisch exportieren. ",                            
-                                    $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis:[/] Falls mehrere Kollegen dasselbe Fach zeitgleich unterrichten, dann muss ein Zähler an das Fach angehangen werden. Bsp.: Zwei LuL unterrichten Mathe: Dann M und M1. Beide Fächer müssen in SchILD existieren. Damit M1 in den Leistungsdaten erscheint, aber nicht auf dem Zeugnis gedruckt wird, muss die Eigenschaft 'Nicht auf Zeugnis drucken' in SchILD gesetzt werden.",                            
-                                ],
-                                m =>
-                                {
-                                    m.FilterInteressierendeStudentsUndKlassen(configuration);
-
-                                    //m.Zieldatei = m.Kurse(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Kurse.dat"));
-                                    m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, configuration, ["KursBez"], ["Klasse", "Schulnr", "WochenstdPUNKTLEERZEICHENKL"]);
-                                    m.Zieldateien.ExportAusSchildVerschieben(configuration);
-                                    m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
-
-                                    //m.Zieldatei = m.Leistungsdaten(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat"), Global.Zweck.Zeugnis);
-                                    m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, configuration, ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach"], ["Jahrgang"]);
-                                    m.Zieldateien.ExportAusSchildVerschieben(configuration);
-                                    m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
-                                },
-                                Global.Rubrik.Leistungsdaten,
-                                Global.NurBeiDiesenSchulnummern.Alle
-                            ),
-
-                            new Menüeintrag(
-                                "Mahnungen: Gem. §50(4) SchulG erstellen",
-                                anrechnungen,
-                                quelldateien.Notwendige(configuration, ["marksperlesson,csv", "schuelerleistungsdaten,dat", "exportlessons,csv", "studentgroupstudents,csv", "schuelerleistungsdaten,dat", "schuelerbasisdaten,dat"]),
-                                students,
-                                klassen,
-                                [
-                                    "Die Datei SchuelerLeistungsdaten wird erstellt.",
-                                    "Die Datei SchuelerLeistungsdaten kann dann nach SchILD importiert werden.",
-                                ],
-                                m =>
-                                {
-                                    m.FilterInteressierendeStudentsUndKlassen(configuration);
-                                    //m.Zieldatei = m.Leistungsdaten(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat"), Global.Zweck.Mahnung);
-                                    m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
-                                },
-                                Global.Rubrik.Leistungsdaten,
-                                Global.NurBeiDiesenSchulnummern.Nur000000
-                            ),                        
-                            new Menüeintrag(
-                                "Kursbelegung: Vorbereiten",
-                                anrechnungen,
-                                quelldateien,
-                                students,
-                                klassen,
-                                [
-                                    " 1. Alle Gymklassen der Jahrgangsstufen 12 und 13 aus SchILD exportieren.",
-                                    " 2. Alle Dateien in die Exceldatei namens Kursbelegung.xlsx importieren. Siehe LiesMich.",
-                                    " 3. Nachdem die Datei Kursbelegung.xlsx gefüllt wurde, die Datei nach SchILD importieren."
-                                ],
-                                m =>
-                                {
-                                    //dateien.Kursbelegung(dateien.Benötigte([]));
-                                },
-                                Global.Rubrik.Allgemein,
-                                Global.NurBeiDiesenSchulnummern.Nur000000
-                            ),                    
-                            new Menüeintrag(
-                                "Atlantis-Fotos: Fotos der Schüler*innen aus Atlantis in die SchILD2-Datenbank (und in die Schild-Dokumentenverwaltung) hochladen",
-                                anrechnungen,
-                                quelldateien.Notwendige(configuration,["schuelerbasisdaten,dat"]),
-                                students,
-                                klassen,
-                                [
-                                    "Ablauf in 5 Schritten:",
-                                    "#1 Vorbereitung: Atlantis-Fotos nach " + Path.Combine(pfadDownloads, "Fotos") + " kopieren.",
-                                    "#2 Klasse auswählen.",
-                                    "#3 Die Atlantis-Schülerfotos werden aus " + Path.Combine(pfadDownloads, "Fotos") + " herausgesucht.",
-                                    "#4 Die Atlantis-Schülerfotos werden in die Dokumentenverwaltung kopiert.",
-                                    "#5 Geben Sie die Access-Zugangsdaten ein und bestätigen Sie Import."
-                                ],
-                                m =>
-                                {
-                                    m.FilterInteressierendeStudentsUndKlassen(configuration);
-                                    m.IStudents.GetPfadAtlantisFotos(configuration);
-                                    m.IStudents.GetPfadDokumentenverwaltung(configuration);
-                                    m.IStudents.ErstellenPfadDokumentenverwaltung(configuration);
-                                    m.IStudents.BilderNachPfadDokumentenverwaltungKopieren(configuration);
-                                    m.IStudents.Pfad2FotoStream();
-                                    //m.IStudents.FotosNachSchild2Schreiben(m.Klassen, configuration);
-                                },
-                                Global.Rubrik.Allgemein,
-                                Global.NurBeiDiesenSchulnummern.Nur000000
-                            ),
-                            new Menüeintrag(
-                                "Teilleistungen: SchuelerTeilleistungen.dat für SchILD erstellen",
-                                anrechnungen,
+                        new Menüeintrag(
+                                "Teilleistungen: SchuelerTeilleistungen.dat erstellen",
                                 quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "exportlessons,csv", "marksperlesson,csv"]),
                                 students,
                                 klassen,
@@ -799,36 +681,41 @@ public static class MenueHelper
                                 m =>
                                 {
                                     m.FilterInteressierendeStudentsUndKlassen(configuration);
-                                    m.Zieldatei = m.Teilleistungen(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerTeilleistungen.dat"));
-                                    //m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, configuration, ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt"], []);
-                                    m.Zieldatei.Erstellen("|", '\0', new UTF8Encoding(true), false);
+
+                                    m.Zieldateien =
+                                    [
+                                        m.Zieldatei = m.Teilleistungen(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerTeilleistungen.dat"),
+                                        ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach", "Datum"],
+                                        [],
+                                        "|", '\0', new UTF8Encoding(true), false)
+                                    ];
+                                    m.Zieldateien.Verarbeiten(quelldateien, Global.Modus.Vergleichen);
+                                    m.Zieldateien.Verarbeiten(quelldateien, Global.Modus.Filtern);
+                                    m.Zieldateien.OrdnerÖffnen();
+                                    m.Zieldateien.Erstellen();
                                 },
                                 Global.Rubrik.Allgemein,
                                 Global.NurBeiDiesenSchulnummern.Alle
-                            ),                        
+                            ),
                             new Menüeintrag(
-                                "Lernabschnittsdaten: Lernabschnitts- & Leistungsdaten alter Abschnitte",
-                                anrechnungen,
+                                "Sprechtag: Lehrerübersichtsseite im Wiki veröffentlichen",
                                 quelldateien,
                                 students,
                                 klassen,
                                 [
-                                    "Die Lernabschnittsdaten (ohne Fehlzeiten und ohne Zeugnisdatum) und die Leistungsdaten alter Abschnitte werden für SchILD bereitgestellt."
+                                    "Die Wiki-Datei sprechtag.txt wird angepasst. Die Wunschräume werden in den Untis-Stammdaten beim Lehrer eingetragen. Dazu die Fenstergruppe Sprechtag in Untis öffnen. Bei Abwesenheiten die Räume für kommendes Jahr stehen lassen, wenn im Betreff 'außer Haus' steht, dann wird der Raum nicht angezeigt. Fußnoten werden als Text2 in den Untis-Stammdaten eingetragen. Beispiel für eine Fußnote: 'außer Haus; bitte Termin vereinbaren;'",
+                                    "Lehrkräfte ohne Raum werden in der Liste ignoriert. Lehrkräfte ohne eigenen Unterricht bleiben unberücksichtigt"
                                 ],
                                 m =>
                                 {
-                                    m.Zieldatei = m.LernabschnittsdatenAlt(@"DatenaustauschSchild/SchuelerLernabschnittsdaten.dat", configuration);
-                                    m.Zieldatei.Erstellen("|", '\0', new UTF8Encoding(true), false);
-
-                                    m.Zieldatei = m.LeistungsdatenAlt(configuration, @"DatenaustauschSchild/SchuelerLeistungsdaten.dat");
-                                    m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
+                                    m.Sprechtag(lehrers, raums, configuration,
+                                        "Zum jährlichen Sprechtag laden wir sehr herzlich am Mittwoch nach der Zeugnisausgabe in der Zeit von 13:30 bis 17:30 Uhr ein. Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
                                 },
-                                Global.Rubrik.Allgemein,
-                                Global.NurBeiDiesenSchulnummern.Nur000000
+                                Global.Rubrik.Wiki,
+                                Global.NurBeiDiesenSchulnummern.Nur177659
                             ),
                             new Menüeintrag(
                                 "Klassenbucheinträge: Säumige Lehrer*innen erinnern",
-                                anrechnungen,
                                 quelldateien.Notwendige(configuration, ["lehrkraefte,dat", "openperiod,pdf"]),
                                 students,
                                 klassen,
@@ -845,126 +732,98 @@ public static class MenueHelper
                                 },
                                 Global.Rubrik.Allgemein,
                                 Global.NurBeiDiesenSchulnummern.Nur177659
-                            ),                                                
-                            new Menüeintrag(
-                                "Outlook: CSV-Terminexporte für Wiki aufbereiten",
-                                anrechnungen,
-                                quelldateien.Notwendige(configuration,["termine_fhr,csv", "termine_verwaltung,csv", "termine_berufliches_gymnasium,csv", "termine_kollegium,csv"]),
-                                students,
-                                klassen,
-                                [
-                                    "Die Kalender müssen mit Copy&Paste aus Outlook in die CSV-Dateien im Download-Ordner kopiert werden.",
-                                    "Falls der Inhalt im Body (Spalte Nachricht) mehrzeilig ist, wird nur die erste Zeile berücksichtigt.",
-                                    "Es werden nur Termine berücksichtigt, die mindestens eine Kategorie haben. Kategorien werden zu Links in Wiki.",
-                                    "Termine aus vergangenen Schuljahren werden nicht mit übertragen.",
-                                    "Die Kalender im Wiki zuerst leeren. Anschließend die neuen CSV als Global importieren."
-                                ],
-                                m =>
-                                {
-                                    foreach (var kalender in new List<string>(){"termine_berufliches_gymnasium", "termine_kollegium", "termine_verwaltung", "termine_fhr" })
+                            )
+                /*,
+                                new Menüeintrag(
+                                    "Zeugnisse #1: Lernabschnittsdaten: Fehlzeiten von Webuntis nach SchILD importieren",
+                                    anrechnungen,
+                                    quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "absenceperstudent,csv", "schuelerlernabschnitt,dat"]),
+                                    students,
+                                    klassen,
+                                    [
+                                        $"Die Fehlzeiten aktiver Schüler*innen aus Webuntis werden in der [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLernabschnittsdaten.dat")}[/] für den Import nach SchILD vorbereitet.",
+                                        $"[{Global.GetColor(Global.ColorHinweise)}]Vorbereitung 1:[/] Lernabschnitte in SchILD anlegen.",
+                                        $"[{Global.GetColor(Global.ColorHinweise)}]Vorbereitung 2:[/] Klassenleitungen müssen offene Fehlstunden auf [{Global.GetColor(Global.ColorHinweise)}](nicht) entschuldigt[/] setzen. Anderenfalls bleiben die Fehlzeiten auf dem Zeugnis unberücksichtigt. ",
+                                        $"[{Global.GetColor(Global.ColorHinweise)}]Vorbereitung 3:[/] Alle *.dat-Dateien aus SchILD exportieren. "
+                                    ],
+                                    m =>
                                     {
-                                        m.Zieldatei = m.Kalender2Wiki(configuration, kalender, Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachWiki-" + kalender));
-                                        m.Zieldatei.Erstellen(",", '\"', new UTF8Encoding(false), true);
-                                    }
-                                },
-                                Global.Rubrik.Wiki,
-                                Global.NurBeiDiesenSchulnummern.Nur000000
-                            ),
-                            new Menüeintrag(
-                                "Sprechtag: Lehrerübersichtsseite im Wiki veröffentlichen",
-                                anrechnungen,
-                                quelldateien,
-                                students,
-                                klassen,
-                                [
-                                    "Die Wiki-Datei sprechtag.txt wird angepasst. Die Wunschräume werden in den Untis-Stammdaten beim Lehrer eingetragen. Dazu die Fenstergruppe Sprechtag in Untis öffnen. Bei Abwesenheiten die Räume für kommendes Jahr stehen lassen, wenn im Betreff 'außer Haus' steht, dann wird der Raum nicht angezeigt. Fußnoten werden als Text2 in den Untis-Stammdaten eingetragen. Beispiel für eine Fußnote: 'außer Haus; bitte Termin vereinbaren;'",
-                                    "Lehrkräfte ohne Raum werden in der Liste ignoriert. Lehrkräfte ohne eigenen Unterricht bleiben unberücksichtigt"
-                                ],
-                                m =>
-                                {
-                                    m.Sprechtag(lehrers, raums, configuration,
-                                        "Zum jährlichen Sprechtag laden wir sehr herzlich am Mittwoch nach der Zeugnisausgabe in der Zeit von 13:30 bis 17:30 Uhr ein. Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
-                                },
-                                Global.Rubrik.Wiki,
-                                Global.NurBeiDiesenSchulnummern.Nur000000
-                            ),
-                            new Menüeintrag(
-                                "Wiki: Diverse SQLite-Dateien (Organigramm, Praktikum etc.) erstellen",
-                                anrechnungen,
-                                quelldateien.Notwendige(configuration, [
-                                    "schuelerzusatzdaten,dat", "absenceperstudent,csv", "exportlesson,csv"
-                                ]),
-                                students,
-                                klassen,
-                                [
-                                    "Das Organigramm wird aus Untisanrechnungen gebildet. Beispiele: {...} > KATEGORIE; [...] > HINWEIS, Text ohne Klammern wird zur ROLLE; A14, A15, A16 ohne Klammern > AMT; Untis-Beschreibung > AUFGABE. Im Organigramm wird nach Kategorie, Aufgabe oder Beschreibung gruppiert.",
-                                    "Untisanrechnungen: 1.Struct Schema Editor > Untisanrechnungen > Löschen/Leeren > 'untisanrechnungen' eingeben, dann Leeren",
-                                    "Untisanrechnungen: 2.Struct Schema Editor > Untisanrechnungen > Importieren/Exportieren > Importieren von Rohdaten > Global > Durchsuchen"
-                                ],
-                                m =>
-                                {
-                                    m.Zieldatei = m.GetGruppen(configuration, Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-gruppen.csv"), anrechnungen, lehrers);
-                                    m.Zieldatei.Erstellen(",", '\"', new UTF8Encoding(false), true);
-                                    m.Zieldatei = anrechnungen.Anlegen(Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-untisanrechnungen.csv") ,[500, 510, 530, 590, 900], [500, 510, 530, 590], ["PLA", "BM"]);
-                                    m.Zieldatei.Erstellen(",", '\"', new UTF8Encoding(false), true);
-
-                                    m.Zieldatei = m.GetLehrer(configuration, Path.Combine(Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-lul-utf8OhneBom-einmalig-vor-SJ-Beginn.csv")));
-                                    m.Zieldatei.Erstellen(",", '\'', new UTF8Encoding(false), false);
-
-                                    m.Zieldatei = m.Praktikanten(
-                                        [
-                                            "BW,1", "BT,1", "BS,1", "BS,2", "HBG,1", "HBT,1", "HBW,1", "GG,1", "GT,1", "GW,1", "IFK,1"
-                                        ],
-                                        Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + @"-praktikanten-utf8OhneBom-einmalig-vor-SJ-Beginn.csv"));
-                                    m.Zieldatei?.Erstellen(",", '\'', new UTF8Encoding(false), false);
-
-                                    m.Zieldatei = m.KlassenAnlegen(configuration, Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + @"-klassen-utf8OhneBom-einmalig-vor-SJ-Beginn.csv"));
-                                    m.Zieldatei?.Erstellen(",", '\'', new UTF8Encoding(false), false);
-
-                                    m.Schulpflichtüberwachung(configuration);
-
-                                    m.Zieldatei = m.GetFaecher(configuration, Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-faecher.csv"));
-                                    m.Zieldatei?.Erstellen(",", '\'', new UTF8Encoding(false), false);
-                                },
-                                Global.Rubrik.Wiki,
-                                Global.NurBeiDiesenSchulnummern.Nur000000
-                            ),
-                            new Menüeintrag(
-                                "Massen-Mail: Senden",
-                                anrechnungen,
-                                quelldateien.Notwendige(configuration,["lehrkraefte,dat"]),
-                                students,
-                                klassen,
-                                [
-                                    $"Es wird die Datei [aqua]{Path.Combine(pfadDownloads, "mailadressen.txt")}[/] eingelesen.",
-                                    "Es werden immer genau 49 Empfänger in BCC angeschrieben.",
-                                    "Als Inhalt wird das Bild Campusfest_Berufskolleg_Borken.jpg angehängt.",
-                                    "Die bereits angeschriebenen Empfänger werden in der Datei mailadressen.txt gelöscht und nicht wieder ausgewählt."
-                                ],
-                                m =>
-                                {
-                                    configuration = Global.Konfig("BetreffMassenmail", Global.Modus.Update, configuration, "Betreff angeben");
-                                    configuration = Global.Konfig("SmtpServer", Global.Modus.Update, configuration, "Server angeben");
-                                    configuration = Global.Konfig("SmtpUserMassenmail", Global.Modus.Update, configuration, "Benutzer angeben");
-                                    configuration = Global.Konfig("SmtpPasswordMassenmail", Global.Modus.Update, configuration, "Passwort angeben");
-                                    configuration = Global.Konfig("SmtpPort", Global.Modus.Update, configuration, "Port angeben");
-
-                                    for(int i = 0; i < 50; i++)
+                                        m.FilterInteressierendeStudentsUndKlassen(configuration);
+                                        m.Zieldatei = m.Lernabschnittsdaten(configuration, Global.Zweck.Zeugnis, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLernabschnittsdaten.dat"));
+                                        m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, configuration, ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt"], []);
+                                        m.Zieldateien.ExportAusSchildVerschieben(configuration);
+                                        m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
+                                    },
+                                    Global.Rubrik.Leistungsdaten,
+                                    Global.NurBeiDiesenSchulnummern.Alle
+                                ),                    
+                                new Menüeintrag(
+                                    "Zeugnisse #2: Kurse, Unterrichte und Gesamtnoten von Webuntis nach SchILD importieren",
+                                    anrechnungen,
+                                    quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "absenceperstudent,csv", "schuelerlernabschnitt,dat", "schuelerleistungsdaten,dat", "schuelerbasis,dat", "exportlessons,csv", "studentgroupstudents,csv", "marksperlesson,csv", "klassen,dat"]),
+                                    students,
+                                    klassen,
+                                    [
+                                        $"Die Kurse und Unterrichte (mit Noten) werden in [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat")}[/] und [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat")}[/] vorbereitet.",
+                                        $"[{Global.GetColor(Global.ColorHinweise)}]Vorbereitung:[/] Lernabschnitte in SchILD anlegen und dann alle *.dat-Dateien frisch exportieren. ",                            
+                                        $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis:[/] Falls mehrere Kollegen dasselbe Fach zeitgleich unterrichten, dann muss ein Zähler an das Fach angehangen werden. Bsp.: Zwei LuL unterrichten Mathe: Dann M und M1. Beide Fächer müssen in SchILD existieren. Damit M1 in den Leistungsdaten erscheint, aber nicht auf dem Zeugnis gedruckt wird, muss die Eigenschaft 'Nicht auf Zeugnis drucken' in SchILD gesetzt werden.",                            
+                                    ],
+                                    m =>
                                     {
-                                        var Mail = new Mail(
-                                        Path.Combine(Directory.GetCurrentDirectory() ?? "", "mailadressen.txt"),
-                                        Path.Combine(Directory.GetCurrentDirectory() ?? "", "Campusfest_Berufskolleg_Borken.jpg"),
-                                        betreffMassenmail,
-                                        configuration,
-                                        29 // Anzahl der Mailempfänger in BCC
-                                    );
-                                        Console.WriteLine("Warte 60 Sekunden...");
-                                        Thread.Sleep(60000);
-                                    }
-                                },
-                                Global.Rubrik.Allgemein,
-                                Global.NurBeiDiesenSchulnummern.Nur000000
-                            )*/
+                                        m.FilterInteressierendeStudentsUndKlassen(configuration);
+
+                                        //m.Zieldatei = m.Kurse(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Kurse.dat"));
+                                        m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, configuration, ["KursBez"], ["Klasse", "Schulnr", "WochenstdPUNKTLEERZEICHENKL"]);
+                                        m.Zieldateien.ExportAusSchildVerschieben(configuration);
+                                        m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
+
+                                        //m.Zieldatei = m.Leistungsdaten(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat"), Global.Zweck.Zeugnis);
+                                        m.Zieldatei = m.Zieldatei.VergleichenUndFiltern(quelldateien, configuration, ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach"], ["Jahrgang"]);
+                                        m.Zieldateien.ExportAusSchildVerschieben(configuration);
+                                        m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
+                                    },
+                                    Global.Rubrik.Leistungsdaten,
+                                    Global.NurBeiDiesenSchulnummern.Alle
+                                ),
+
+                                new Menüeintrag(
+                                    "Mahnungen: Gem. §50(4) SchulG erstellen",
+                                    anrechnungen,
+                                    quelldateien.Notwendige(configuration, ["marksperlesson,csv", "schuelerleistungsdaten,dat", "exportlessons,csv", "studentgroupstudents,csv", "schuelerleistungsdaten,dat", "schuelerbasisdaten,dat"]),
+                                    students,
+                                    klassen,
+                                    [
+                                        "Die Datei SchuelerLeistungsdaten wird erstellt.",
+                                        "Die Datei SchuelerLeistungsdaten kann dann nach SchILD importiert werden.",
+                                    ],
+                                    m =>
+                                    {
+                                        m.FilterInteressierendeStudentsUndKlassen(configuration);
+                                        //m.Zieldatei = m.Leistungsdaten(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat"), Global.Zweck.Mahnung);
+                                        m.Zieldatei?.Erstellen("|", '\0', new UTF8Encoding(true), false);
+                                    },
+                                    Global.Rubrik.Leistungsdaten,
+                                    Global.NurBeiDiesenSchulnummern.Nur000000
+                                ),                        
+                                new Menüeintrag(
+                                    "Kursbelegung: Vorbereiten",
+                                    anrechnungen,
+                                    quelldateien,
+                                    students,
+                                    klassen,
+                                    [
+                                        " 1. Alle Gymklassen der Jahrgangsstufen 12 und 13 aus SchILD exportieren.",
+                                        " 2. Alle Dateien in die Exceldatei namens Kursbelegung.xlsx importieren. Siehe LiesMich.",
+                                        " 3. Nachdem die Datei Kursbelegung.xlsx gefüllt wurde, die Datei nach SchILD importieren."
+                                    ],
+                                    m =>
+                                    {
+                                        //dateien.Kursbelegung(dateien.Benötigte([]));
+                                    },
+                                    Global.Rubrik.Allgemein,
+                                    Global.NurBeiDiesenSchulnummern.Nur000000
+                                )
+                                                                       */
                 ]
             );
         }

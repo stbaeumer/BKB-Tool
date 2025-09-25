@@ -2773,8 +2773,9 @@ public class Menüeintrag
     }
 
 
-    public void Sprechtag(Lehrers lehrers, Raums raums, IConfiguration configuration, string hinweis)
+    public Datei Sprechtag(Lehrers lehrers, Raums raums, IConfiguration configuration, string hinweis)
     {
+
         var dokuwikiZugriff = new DokuwikiZugriff(configuration);
 
         Global.Konfig("WikiSprechtagKleineAenderung", Global.Modus.Update, configuration);
@@ -2788,7 +2789,7 @@ public class Menüeintrag
         var content = new List<string>();
 
         var exportLessons = Quelldateien.GetMatchingList(configuration, "exportlessons", IStudents, Klassen);
-        if (exportLessons == null || !exportLessons.Any()) return;
+        if (exportLessons == null || !exportLessons.Any()) return [];
 
         Global.Konfig("Sprechtagsdatum", Global.Modus.Update, configuration);
         //Global.Konfig("wikiSprechtagSeite", true, "Seite eingeben, die manipuliert werden soll.");
@@ -2894,13 +2895,15 @@ public class Menüeintrag
                         .Expand()
                         .BorderColor(Color.Red);
 
-                AnsiConsole.Write(panel);
+        AnsiConsole.Write(panel);
 
 
 
         dokuwikiZugriff.PutPage("oeffentlich:sprechtag", string.Join("\n", content));
 
         Global.OpenWebseite("https://bkb.wiki/oeffentlich:sprechtag");
+        
+        return [];
     }
 
     public Datei Zusatzdaten(IConfiguration configuration, string zieldateiname)
@@ -3519,12 +3522,17 @@ public class Menüeintrag
         return kategorien.TrimEnd(',');
     }
 
-    public Datei Teilleistungen(IConfiguration configuration, string zieldateiname)
+    public Datei Teilleistungen(
+        IConfiguration configuration,
+        string zieldateiname,
+        string[] anhandDieserAttributeWirdVerglichen,
+        string[] dieseAttributeWerdenBeimVergleichIgnoriert,
+        string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
         configuration = Global.Konfig("Teilleistungsarten", Global.Modus.Update, configuration);
         configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration);
 
-        var zieldatei = new Datei(zieldateiname);
+        var zieldatei = new Datei(zieldateiname, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
         var records = new List<dynamic>();
 
         var marksPerLs = Quelldateien.GetMatchingList(configuration, "marksperlesson", IStudents, Klassen);
