@@ -1560,119 +1560,117 @@ public class Menüeintrag
             var i = 1;
             var gelöschteSchüler = new List<IDictionary<string, object>>();
 
-            AnsiConsole.Status()
-                .Spinner(Spinner.Known.Dots)
-                .Start("Webuntis-Schüler*innen vorbereiten ...", ctx =>                
-                {                    
-                    foreach (var rec in webuntisStudents)
-                    {                
-                        if (rec is not IDictionary<string, object> webuntisStudent) continue;
+            AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Webuntis-Schüler*innen vorbereiten ...", ctx =>                
+            {                    
+                foreach (var rec in webuntisStudents)
+                {                
+                    if (rec is not IDictionary<string, object> webuntisStudent) continue;
 
-                        // Ein Abgänger oder Absolvent, der als Externer oder Gast wiederkommt, hat in seiner aktiven Rolle den niedrigeren Status.
-                        // Also wird bei mehrfach vorkommenden Schülern immer der mit dem niedrigsten Status genommen.                 
-                        var schildStudent = Students
-                            .OrderBy(x => int.TryParse(x.Status, out var status) ? status : 0)
-                            .FirstOrDefault(x =>
-                                x.Nachname == webuntisStudent["longName"].ToString() &&
-                                x.Vorname == webuntisStudent["foreName"].ToString() &&
-                                x.Geburtsdatum == webuntisStudent["birthDate"].ToString());
+                    // Ein Abgänger oder Absolvent, der als Externer oder Gast wiederkommt, hat in seiner aktiven Rolle den niedrigeren Status.
+                    // Also wird bei mehrfach vorkommenden Schülern immer der mit dem niedrigsten Status genommen.                 
+                    var schildStudent = Students
+                        .OrderBy(x => int.TryParse(x.Status, out var status) ? status : 0)
+                        .FirstOrDefault(x =>
+                            x.Nachname == webuntisStudent["longName"].ToString() &&
+                            x.Vorname == webuntisStudent["foreName"].ToString() &&
+                            x.Geburtsdatum == webuntisStudent["birthDate"].ToString());
 
-                        if (schildStudent == null)
+                    if (schildStudent == null)
+                    {
+                        // Wenn der Schüler in Schüler nicht existiert, wird er in die Liste der gelöschten Schüler aufgenommen.
+                        gelöschteSchüler.Add((IDictionary<string, object>)rec);
+                        continue;
+                    }
+
+                    var id = schildStudent.Id;
+                    schildStudent.GetLetztesZeugnisdatumInDerKlasse(schuelerLernabschnittsdaten);
+                    var schildStudentMeldung = (schildStudent.Nachname + ", " + schildStudent.Vorname + ", " + id + " (" + schildStudent.Klasse + ")").PadRight(45);
+
+                    // Wenn er aktiv oder Gast ist, wird seine Klassenzugehörigkeit gecheckt.
+                    if (new List<string>() { "2", "6" }.Contains(schildStudent.Status))
+                    {
+                        if (webuntisStudent["klasse.name"].ToString() != schildStudent.Klasse)
                         {
-                            // Wenn der Schüler in Schüler nicht existiert, wird er in die Liste der gelöschten Schüler aufgenommen.
-                            gelöschteSchüler.Add((IDictionary<string, object>)rec);
-                            continue;
-                        }
+                            susMitÄnderung.Add((i + ". ").PadRight(5) + schildStudentMeldung + " " + schildStudent.Status + "      " + webuntisStudent["klasse.name"].ToString() + " -> " + schildStudent.Klasse);
 
-                        var id = schildStudent.Id;
-                        schildStudent.GetLetztesZeugnisdatumInDerKlasse(schuelerLernabschnittsdaten);
-                        var schildStudentMeldung = (schildStudent.Nachname + ", " + schildStudent.Vorname + ", " + id + " (" + schildStudent.Klasse + ")").PadRight(45);
+                            table.AddRow(new Text[]{
+                                new Text(i+".").RightJustified(),
+                                new Text(schildStudent.Nachname).LeftJustified(),
+                                new Text(schildStudent.Vorname).LeftJustified(),
+                                new Text(id).LeftJustified(),
+                                new Text(schildStudent.Klasse).LeftJustified(),
+                                new Text(schildStudent.Status).LeftJustified(),
+                                new Text(webuntisStudent["klasse.name"].ToString() + " -> " + schildStudent.Klasse).LeftJustified()});
 
-                        // Wenn er aktiv oder Gast ist, wird seine Klassenzugehörigkeit gecheckt.
-                        if (new List<string>() { "2", "6" }.Contains(schildStudent.Status))
-                        {
-                            if (webuntisStudent["klasse.name"].ToString() != schildStudent.Klasse)
-                            {
-                                susMitÄnderung.Add((i + ". ").PadRight(5) + schildStudentMeldung + " " + schildStudent.Status + "      " + webuntisStudent["klasse.name"].ToString() + " -> " + schildStudent.Klasse);
-
-                                table.AddRow(new Text[]{
-                                    new Text(i+".").RightJustified(),
-                                    new Text(schildStudent.Nachname).LeftJustified(),
-                                    new Text(schildStudent.Vorname).LeftJustified(),
-                                    new Text(id).LeftJustified(),
-                                    new Text(schildStudent.Klasse).LeftJustified(),
-                                    new Text(schildStudent.Status).LeftJustified(),
-                                    new Text(webuntisStudent["klasse.name"].ToString() + " -> " + schildStudent.Klasse).LeftJustified()});
-
-                                i++;
-                            }
-                        }
-
-                        // Wenn der SchildStudent nicht aktiv (2) ist und auch kein Gast (Externer) (6) ist ...
-                        if (!new List<string>() { "2", "6" }.Contains(schildStudent.Status))
-                        {
-                            // Prüfen, ob ein Austrittsdatum vorhanden ist und ob es in der Vergangenheit liegt
-                            string exitDateString = webuntisStudent["exitDate"]?.ToString() ?? string.Empty;
-
-                            if (exitDateString != null && !string.IsNullOrEmpty(exitDateString))
-                            {
-                                DateTime exitDate;
-                                bool isValidDate = DateTime.TryParseExact(
-                                exitDateString,
-                                "dd.MM.yyyy",  // Das erwartete Datumsformat (bspw. "31.07.2025")
-                                CultureInfo.InvariantCulture,
-                                DateTimeStyles.None,
-                                out exitDate);
-
-                                if (isValidDate && exitDate >= DateTime.Now)
-                                {
-                                    schildStudent.GetEntlassdatum(schuelerZusatzdaten);
-
-                                    if (schildStudent.ZeugnisdatumLetztesZeugnisInDieserKlasse != null)
-                                    {
-                                        //DateTime entl;
-                                        //bool isValid = DateTime.TryParseExact(schildStudent.Entlassdatum, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out entl);
-
-                                        if (schildStudent.ZeugnisdatumLetztesZeugnisInDieserKlasse >= DateTime.Now)
-                                        {
-                                            susMitÄnderung.Add((i + ". ").PadRight(5) + schildStudentMeldung + " " + schildStudent.Status + "      Austritt: " + schildStudent.ZeugnisdatumLetztesZeugnisInDieserKlasse.ToShortDateString());
-
-                                            table.AddRow(new Text[]{
-                                                new Text(i+".").RightJustified(),
-                                                new Text(schildStudent.Nachname).LeftJustified(),
-                                                new Text(schildStudent.Vorname).LeftJustified(),
-                                                new Text(id).LeftJustified(),
-                                                new Text(schildStudent.Klasse).LeftJustified(),
-                                                new Text(schildStudent.Status).LeftJustified(),
-                                                new Text("Austritt: " + schildStudent.ZeugnisdatumLetztesZeugnisInDieserKlasse.ToShortDateString())});
-
-                                            schildStudent.Entlassdatum = DateTime.Now.ToShortDateString();
-                                        }
-                                        else
-                                        {
-                                            susMitÄnderung.Add((i + ". ").PadRight(5) + schildStudentMeldung + " " + schildStudent.Status + "      Austritt: " + schildStudent.ZeugnisdatumLetztesZeugnisInDieserKlasse.ToString("dd.MM.yyyy"));
-
-                                            table.AddRow(new Text[]{
-                                                new Text(i+".").RightJustified(),
-                                                new Text(schildStudent.Nachname).LeftJustified(),
-                                                new Text(schildStudent.Vorname).LeftJustified(),
-                                                new Text(id).LeftJustified(),
-                                                new Text(schildStudent.Klasse).LeftJustified(),
-                                                new Text(schildStudent.Status).LeftJustified(),
-                                                new Text("Austritt: " + schildStudent.ZeugnisdatumLetztesZeugnisInDieserKlasse.ToString("dd.MM.yyyy"))});
-
-                                            schildStudent.Entlassdatum = DateTime.Now.ToShortDateString();
-                                        }
-                                    }
-                                    i++;
-                                    Thread.Sleep(10);
-                                }
-                            }
+                            i++;
                         }
                     }
 
-                    Global.ZeileSchreiben("Webuntis-Schüler*innen", webuntisStudents.Count().ToString());
-                });
+                    // Wenn der SchildStudent nicht aktiv (2) ist und auch kein Gast (Externer) (6) ist ...
+                    if (!new List<string>() { "2", "6" }.Contains(schildStudent.Status))
+                    {
+                        // Prüfen, ob ein Austrittsdatum vorhanden ist und ob es in der Vergangenheit liegt
+                        string exitDateString = webuntisStudent["exitDate"]?.ToString() ?? string.Empty;
+
+                        if (exitDateString != null && !string.IsNullOrEmpty(exitDateString))
+                        {
+                            DateTime exitDate;
+                            bool isValidDate = DateTime.TryParseExact(
+                            exitDateString,
+                            "dd.MM.yyyy",  // Das erwartete Datumsformat (bspw. "31.07.2025")
+                            CultureInfo.InvariantCulture,
+                            DateTimeStyles.None,
+                            out exitDate);
+
+                            if (isValidDate && exitDate >= DateTime.Now)
+                            {
+                                schildStudent.GetEntlassdatum(schuelerZusatzdaten);
+
+                                if (schildStudent.ZeugnisdatumLetztesZeugnisInDieserKlasse != null)
+                                {
+                                    //DateTime entl;
+                                    //bool isValid = DateTime.TryParseExact(schildStudent.Entlassdatum, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out entl);
+
+                                    if (schildStudent.ZeugnisdatumLetztesZeugnisInDieserKlasse >= DateTime.Now)
+                                    {
+                                        susMitÄnderung.Add((i + ". ").PadRight(5) + schildStudentMeldung + " " + schildStudent.Status + "      Austritt: " + schildStudent.ZeugnisdatumLetztesZeugnisInDieserKlasse.ToShortDateString());
+
+                                        table.AddRow(new Text[]{
+                                            new Text(i+".").RightJustified(),
+                                            new Text(schildStudent.Nachname).LeftJustified(),
+                                            new Text(schildStudent.Vorname).LeftJustified(),
+                                            new Text(id).LeftJustified(),
+                                            new Text(schildStudent.Klasse).LeftJustified(),
+                                            new Text(schildStudent.Status).LeftJustified(),
+                                            new Text("Austritt: " + schildStudent.ZeugnisdatumLetztesZeugnisInDieserKlasse.ToShortDateString())});
+
+                                        schildStudent.Entlassdatum = DateTime.Now.ToShortDateString();
+                                    }
+                                    else
+                                    {
+                                        susMitÄnderung.Add((i + ". ").PadRight(5) + schildStudentMeldung + " " + schildStudent.Status + "      Austritt: " + schildStudent.ZeugnisdatumLetztesZeugnisInDieserKlasse.ToString("dd.MM.yyyy"));
+
+                                        table.AddRow(new Text[]{
+                                            new Text(i+".").RightJustified(),
+                                            new Text(schildStudent.Nachname).LeftJustified(),
+                                            new Text(schildStudent.Vorname).LeftJustified(),
+                                            new Text(id).LeftJustified(),
+                                            new Text(schildStudent.Klasse).LeftJustified(),
+                                            new Text(schildStudent.Status).LeftJustified(),
+                                            new Text("Austritt: " + schildStudent.ZeugnisdatumLetztesZeugnisInDieserKlasse.ToString("dd.MM.yyyy"))});
+
+                                        schildStudent.Entlassdatum = DateTime.Now.ToShortDateString();
+                                    }
+                                }
+                                i++;
+                                Thread.Sleep(10);
+                            }
+                        }
+                    }
+                }
+
+                Global.ZeileSchreiben("Webuntis-Schüler*innen", webuntisStudents.Count().ToString());
+            });
 
             //var zieldateien = new Dateien();
 
@@ -1847,6 +1845,11 @@ public class Menüeintrag
 
                         if (Path.GetFileName(zieldateiname).ToLower().Contains("stammdaten-schueler"))
                         {
+                            if (student.Nachname == "Boldt")
+                            {
+                                string aa = "";
+                            }
+
                             if (configuration["Schulnummer"] == "177659")
                             {
                                 record.Schlüssel = !string.IsNullOrEmpty(sz["Externe ID-Nr"].ToString()) && sz["Externe ID-Nr"].ToString().Length == 6 && sz["Externe ID-Nr"].ToString().StartsWith("15")
@@ -1869,9 +1872,9 @@ public class Menüeintrag
                             record.Austrittsdatum = student.Status == "2" || student.Status == "6" ? "31.07." + Global.AktSj[1] : student.ZeugnisdatumLetztesZeugnisInDieserKlasse != null ? student.ZeugnisdatumLetztesZeugnisInDieserKlasse.ToShortDateString() : sz?["Entlassdatum"].ToString();
                             record.Telefon = sz?["Telefon-Nr."].ToString();
                             record.Mobil = "";
-                            record.Strasse = alter >= 18 ? student.Straße.ToString() : se?["Straße"].ToString();
-                            record.PLZ = alter >= 18 ? student.Postleitzahl.ToString() : se?["PLZ"].ToString();
-                            record.Ort = alter >= 18 ? student.Ort.ToString() : se?["Ort"].ToString();
+                            record.Strasse = student.Straße.ToString();
+                            record.PLZ = student.Postleitzahl.ToString();
+                            record.Ort = student.Ort.ToString();
                             record.ErzName = alter >= 18 ? "" : se?["Vorname 1.Person"].ToString() + " " + se?["Nachname 1.Person"].ToString();
                             record.ErzMobil = alter >= 18 ? "" : "";
                             record.ErzTelefon = alter >= 18 ? "" : "";
@@ -1985,9 +1988,9 @@ public class Menüeintrag
                             record.Austrittsdatum = student.Status == "2" || student.Status == "6" ? "31.07." + Global.AktSj[1] : student.ZeugnisdatumLetztesZeugnisInDieserKlasse != null ? student.ZeugnisdatumLetztesZeugnisInDieserKlasse.ToShortDateString() : sz?["Entlassdatum"].ToString();
                             record.Telefon = sz?["Telefon-Nr."].ToString();
                             record.Mobil = "";
-                            record.Strasse = alter >= 18 ? student.Straße.ToString() : se?["Straße"].ToString();
-                            record.PLZ = alter >= 18 ? student.Postleitzahl.ToString() : se?["PLZ"].ToString();
-                            record.Ort = alter >= 18 ? student.Ort.ToString() : se?["Ort"].ToString();
+                            record.Strasse = student.Straße.ToString();
+                            record.PLZ = student.Postleitzahl.ToString();
+                            record.Ort = student.Ort.ToString();
                             record.ErzName = alter >= 18 ? "" : se?["Vorname 1.Person"].ToString() + " " + se?["Nachname 1.Person"].ToString();
                             record.ErzMobil = alter >= 18 ? "" : "";
                             record.ErzTelefon = alter >= 18 ? "" : "";
@@ -2084,11 +2087,9 @@ public class Menüeintrag
                         }
                     }
 
-                    Global.ZeileSchreiben(zieldateiname, zieldatei.Count().ToString());
+                    Global.ZeileSchreiben(zieldateiname, string.Join(Environment.NewLine, zieldatei.Importhinweise));
                 });
                 
-                Thread.Sleep(1000);
-
                 if (zieldateiname.ToLower().Contains("schueler") && susMitÄnderung.Count() > 2)
                     AnsiConsole.Write(table);
             }

@@ -108,7 +108,8 @@ public static class Global
         Read, // Wird verwendet, um Einstellungen zu lesen und den Benutzer zu fragen
         ReadSilent, // Wird verwendet, um Einstellungen zu lesen, ohne den Benutzer zu fragen     
         Vergleichen,
-        Filtern
+        Filtern,
+        InitialEnumEinlesen
     }
 
     public static List<string> Vorwahlen =new List<string>()
@@ -255,19 +256,6 @@ public static class Global
                 .BorderColor(Global.ColorInfoBox);
 
             AnsiConsole.Write(panel);
-
-            if (!RunningInCodeSpace())
-            {
-                var ordner = Path.GetDirectoryName(linkeSeite);
-                if (!string.IsNullOrEmpty(ordner))
-                {
-                    Process.Start(new ProcessStartInfo
-                    {
-                        FileName = ordner,
-                        UseShellExecute = true
-                    });
-                }
-            }
         }
         else
         {
@@ -1086,6 +1074,8 @@ public static class Global
 
     public static IConfiguration EinstellungenDurchlaufen(IConfiguration configuration, Global.Modus modus = Global.Modus.Read)
     {
+        bool isFirstRun = false;
+
         // Wenn User.json noch nicht existiert, dann erstellen
         if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), Global.User + ".json")))
         {
@@ -1133,7 +1123,13 @@ public static class Global
                (configuration["ZustimmungLizenz"]?.ToLower() != "ja" && configuration["ZustimmungLizenz"]?.ToLower() != "j"))
         {
             DisplayHeader(configuration);
-            configuration = Global.Konfig("ZustimmungLizenz", Global.Modus.Read, configuration);            
+            configuration = Global.Konfig("ZustimmungLizenz", Global.Modus.Read, configuration);
+            
+            // Sobald der Lizenz zugestimmt wurde, werden alle Env-Werte verschlüsselt in die .json geschrieben.
+            if (configuration["ZustimmungLizenz"]?.ToLower() == "ja" || configuration["ZustimmungLizenz"]?.ToLower() == "j")
+            {
+                isFirstRun = true;
+            }
         }
         
         var kon = KonfigMetadaten.Where(e =>
@@ -1153,6 +1149,30 @@ public static class Global
                 continue; // Im Silent-Modus werden nur die Einstellungen abgefragt, die noch keinen Wert haben.
             DisplayHeader(configuration);         
             configuration = Konfig(kon[i].Key, modus, configuration, kon[i].Value.Aufforderung, i + 1, kon.Count(), kon[i].Value.Hinweise, kon[i].Value.DefaultValue);
+        }
+
+        if (isFirstRun)
+        {
+            if (configuration["ZustimmungLizenz"]?.ToLower() == "ja" || configuration["ZustimmungLizenz"]?.ToLower() == "j")
+            {
+                kon = KonfigMetadaten.ToList();
+
+                for (var i = 0; i < kon.Count(); i++)
+                {
+                    // wenn der defaultValue nicht leer ist
+                    if (!string.IsNullOrEmpty(kon[i].Value.DefaultValue))
+                    {
+                        // Zustimmung wird übersprungen
+                        if (kon[i].Key != "ZustimmungLizenz")
+                        {
+                            //configuration = Konfig(kon[i].Key, Modus.InitialEnumEinlesen, configuration, kon[i].Value.Aufforderung, i + 1, kon.Count(), kon[i].Value.Hinweise, kon[i].Value.DefaultValue);
+                            kon[i].Value.InGrundeinstellungAbfragen = false;
+                            configuration[kon[i].Key] = kon[i].Value.DefaultValue;
+                            Speichern(kon[i].Key, kon[i].Value.DefaultValue);
+                        }
+                    }
+                }
+            }
         }
 
         return configuration;
@@ -1411,6 +1431,7 @@ public class KonfigMeta
     /// Wenn der Wert nicht in den Grundeinstellungen abgefragt werden soll, dann auf false     
     /// </summary>
     public bool InGrundeinstellungAbfragen { get; internal set; }
+    public bool InEinstellungenAbfragen { get; internal set; }
     public bool InitialAbfragen { get; internal set; }
 }
 
@@ -1637,7 +1658,7 @@ public static class KonfigHelper
             DefaultValue = "D,BI,M,E",
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie kommasepariert die möglichen [{Global.GetColor(Global.ColorInfoBox)}]Fächer des 1.LKs[/] an. Bitte nur die Fächer angeben, ohne 'LK' etc. Beispiel: [{Global.GetColor(Global.ColorActionInMenüs)}]D,BI,M,E[/]",
-            Datentyp = Global.Datentyp.Maildomain,
+            Datentyp = Global.Datentyp.ListString,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
@@ -1656,7 +1677,7 @@ public static class KonfigHelper
         ["MailDomain"] = new KonfigMeta
         {
             Key = "MailDomain",
-            DefaultValue = "@students.berufskolleg-borken.de",
+            DefaultValue = Environment.GetEnvironmentVariable("MailDomain"),
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie die [{Global.GetColor(Global.ColorInfoBox)}]schulische Mail-Domain[/] für Mailadressen der Schüler*innen an. Bsp.: [{Global.GetColor(Global.ColorHyperlink)}]@students.berufskolleg-borken.de[/]. Ihre Eingabe muss mit [{Global.GetColor(Global.ColorHyperlink)}]@[/] beginnen und mit [{Global.GetColor(Global.ColorHyperlink)}].de[/] etc. enden.",
             Datentyp = Global.Datentyp.Maildomain,
@@ -1711,7 +1732,7 @@ public static class KonfigHelper
         ["PfadSchilddatenaustausch"] = new KonfigMeta
         {
             Key = "PfadSchilddatenaustausch",
-            DefaultValue = $"\\\\fs01\\SchILD-NRW\\Ausgabeverzeichnis",
+            DefaultValue = Environment.GetEnvironmentVariable("PfadSchilddatenaustausch"),
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie das [{Global.GetColor(Global.ColorInfoBox)}]Ausgabeverzeichnis[/] an. \nDas ist in SchILD eingetragen unter: \n[{Global.GetColor(Global.ColorPfadInProgrammen)}]Datenaustausch > Schnittstelle SchILD-NRW > Export[/]",
             Datentyp = Global.Datentyp.Pfad,

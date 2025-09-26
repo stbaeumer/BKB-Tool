@@ -45,6 +45,7 @@ public class Lehrer
     public double AltersermäßigungSollKommendes { get; internal set; }
     public string? Rechtsverhältnis { get; internal set; }
     public string? Beschäftigungsart { get; internal set; }
+    public string? StatistikRelevant { get; internal set; }
 
     internal int GetAlterAmErstenSchultagDesSchuljahres(int jahr)
     {

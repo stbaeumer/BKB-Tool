@@ -57,6 +57,12 @@ public class Students : List<Student>
 
                 student.Vorname = sb["Vorname"].ToString();
                 student.Nachname = sb["Nachname"].ToString();
+           
+                if(student.Nachname.ToLower().Contains("boldt"))
+                {
+                    string aa = "";
+                }
+           
                 student.Geburtsdatum = sb["Geburtsdatum"].ToString();
                 student.Klasse = sb["Klasse"].ToString();
                 student.Status = sb["Status"].ToString();

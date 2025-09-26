@@ -72,12 +72,12 @@ public static class MenueHelper
                         [
                             $"Es wird jetzt die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", "SchuelerZusatzdaten.dat")}[/] um schulinterne Mailadressen ergänzt und in [{Global.GetColor(Global.ColorPfadInDateien)}]{pfadSchilddatenaustausch}[/] für den Re-Import nach SchILD bereitgestellt. Zusätzlich werden Telefonnummern angepasst.",
                             $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise:[/] ",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]#1:[/] BKB-Tool bildet die schulinterne Mailadressen wie folgt: [{Global.GetColor(Global.ColorTextHervorheben)}]nv061231@meine-schule.de[/], wobei gilt:",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]1:[/] BKB-Tool bildet die schulinterne Mailadressen wie folgt: [{Global.GetColor(Global.ColorTextHervorheben)}]nv061231@meine-schule.de[/], wobei gilt:",
                             $"[{Global.GetColor(Global.ColorTextHervorheben)}]    n[/]      : Erster Buchstabe des Nachnamens. Umlaute werden aufgelöst. Bsp.: [{Global.GetColor(Global.ColorTextHervorheben)}]Ü[/] wird zu [{Global.GetColor(Global.ColorTextHervorheben)}]u[/] usw.",
                             $"[{Global.GetColor(Global.ColorTextHervorheben)}]    v[/]      : Erster Buchstabe des Vornamens. Umlaute werden aufgelöst.",
                             $"[{Global.GetColor(Global.ColorTextHervorheben)}]    061231[/] : Geburtsdatum in der Notation: JJMMTT.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]#2:[/] Vorhandene schulinterne SchILD-Mailadressen in [{Global.GetColor(Global.ColorPfadInProgrammen)}]Individualdaten I[/] bleiben unangetastet.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]#3:[/] Doppelungen werden angezeigt und müssen nach Vorgabe behandelt werden.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]2:[/] Vorhandene schulinterne SchILD-Mailadressen in [{Global.GetColor(Global.ColorPfadInProgrammen)}]Individualdaten I[/] bleiben unangetastet.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]3:[/] Doppelungen werden angezeigt und müssen nach Vorgabe behandelt werden.",
                             //$"[{Global.GetColor(Global.ColorHinweise)}]#4:[/] Als Bonus werden die Telefonnummern in den Individualdaten I vereinheitlicht im Format 01245 6789."
                         ],
                         m =>
@@ -88,7 +88,7 @@ public static class MenueHelper
                                 m.SchuelerZusatzdatenUmMailAdresseErgaenzen(
                                     configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerZusatzdaten.dat"),
                                     ["Nachname", "Vorname", "Geburtsdatum"],
-                                    [],
+                                    ["BeginnBildungsgang", "Telefon-Nr.","Fax/Mobilnr"],
                                     "|", '\'', new UTF8Encoding(false), false),
                                 /*m.SchueleradresseTelefonFormatieren(
                                     configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerAdressen.dat"),
@@ -122,9 +122,10 @@ public static class MenueHelper
                         [
                             $"Es werden jetzt verschiedene Dateien in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{pfadDownloads}[/] erstellt: " +
                             $"[bold {Global.GetColor(Global.ColorPfadInDateien)}]Webuntis-Stammdaten-Schueler.csv[/], [bold {Global.GetColor(Global.ColorPfadInDateien)}]Webuntis-Stammdaten-Betriebe.csv[/], [bold {Global.GetColor(Global.ColorPfadInDateien)}]Webuntis-Stammdaten-Erzieher.csv[/], [bold {Global.GetColor(Global.ColorPfadInDateien)}]-ImportNachLittera.xml[/], [bold {Global.GetColor(Global.ColorPfadInDateien)}]-ImportNachNetman.csv[/]",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1:[/] Das Zeugnisdatum des letzten Zeugnisses in einer Klasse wird zum Webuntis-Austrittsdatum bei Schüler*innen, deren Status weder aktiv noch extern ist.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #2:[/] Damit korrekt ausgeschult wird, muss auch Abgang und Abschluss beim SchILD-Export angehakt werden.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #3:[/] Für den Betriebeimport sollte im Webuntis-Importprofil die SchildAdressId auf Schlüssel (externe) matchen."
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis:[/]",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]1:[/] Das Zeugnisdatum des letzten Zeugnisses in einer Klasse wird zum Webuntis-Austrittsdatum bei Schüler*innen, deren Status weder aktiv noch extern ist.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]2:[/] Damit korrekt ausgeschult wird, muss auch Abgang und Abschluss beim SchILD-Export angehakt werden.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]3:[/] Für den Betriebeimport sollte im Webuntis-Importprofil die SchildAdressId auf Schlüssel (externe) matchen."
                         ],
                         m =>
                         {
@@ -723,7 +724,7 @@ public static class MenueHelper
                                     "Die 10% der KuK mit den meisten offenen Klassenbucheinträgen werden angemahnt.",
                                     "Mit weniger als 10 offenen Eintragungen wird nicht gemahnt. Ab 20 oder mehr Stunden wird die Schulleitung in CC informiert.",
                                     $"Die Anzahl der offenen Klassenbucheinträge wird aus der Datei [{Global.GetColor(Global.ColorPfadInDateien)}]OpenPeriods[/] ausgelesen.",
-                                    "Die KuK werden zuerst angezeigt. Vor dem Mailversand wird nochmal explizit gefragt."
+                                    "Die KuK werden zuerst angezeigt. Vor dem Mailversand wird nochmal explizit nach Bestätigung gefragt."
                                 ],
                                 m =>
                                 {
