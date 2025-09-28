@@ -87,8 +87,9 @@ public static class MenueHelper
                             [
                                 m.SchuelerZusatzdatenUmMailAdresseErgaenzen(
                                     configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerZusatzdaten.dat"),
+                                    Global.Modus.FilternNein,
                                     ["Nachname", "Vorname", "Geburtsdatum"],
-                                    ["BeginnBildungsgang", "Telefon-Nr.","Fax/Mobilnr"],
+                                    ["BeginnBildungsgang", "Telefon-Nr.","Fax/Mobilnr","bisherige ID"],
                                     "|", '\'', new UTF8Encoding(false), false),
                                 /*m.SchueleradresseTelefonFormatieren(
                                     configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerAdressen.dat"),
@@ -107,7 +108,7 @@ public static class MenueHelper
                                     "|", '\'', new UTF8Encoding(false), false)*/
                             ];
                             m.Zieldateien.Verarbeiten(quelldateien, Global.Modus.Vergleichen);
-                            m.Zieldateien.Verarbeiten(quelldateien, Global.Modus.Filtern);
+                            m.Zieldateien.Verarbeiten(quelldateien, Global.Modus.FilternJa);
                             m.Zieldateien.Erstellen();
                             m.Zieldateien.OrdnerÖffnen();
                         },
@@ -116,7 +117,7 @@ public static class MenueHelper
                     ),
                     new Menüeintrag(
                         "Webuntis & Co.: Importdateien für Webuntis, Littera, Netman erstellen",
-                        quelldateien.Notwendige(configuration, ["student_,csv","schuelerlernabschnittsdaten,dat", "schuelerzusatzdaten,dat", "schuelererzieher,dat", "schuelerAdressen,dat", "lehrkraefte,dat", "klassen,dat", "schuelerTelefonnummern,dat"]),
+                        quelldateien.Notwendige(configuration, ["legalguardian_,csv,optional","apprenticerepresentative_,csv,optional","student_,csv","schuelerlernabschnittsdaten,dat", "schuelerzusatzdaten,dat", "schuelererzieher,dat", "schuelerAdressen,dat", "lehrkraefte,dat", "klassen,dat", "schuelerTelefonnummern,dat"]),
                         students,
                         klassen,
                         [
@@ -133,7 +134,8 @@ public static class MenueHelper
                             m.Zieldateien.AddRange(m.WebuntisOderNetmanOderLitteraCsv(configuration,
                                 [
                                     new Datei(
-                                        "Webuntis-Stammdaten-Schueler.csv", new string[] { "EMINUSMail" }, new string[] { }, ";", '\'', new UTF8Encoding(false), false,
+                                        "Student_Webuntis-Stammdaten-Schueler.csv", new string[] { "EMINUSMail" }, new string[] { }, ";", '\'', new UTF8Encoding(false), false,
+                                        Global.Modus.FilternNein,
                                         new List<string>(){
                                             $"1. In Webuntis als Webuntis-Admin:  [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Stammdaten > Schüler*innen > Import[/]",
                                             $"2. Datei auswählen, UTF8",
@@ -142,7 +144,8 @@ public static class MenueHelper
                                         }
                                     ),
                                     new Datei(
-                                        "Webuntis-Stammdaten-Ausbildungsbeauftragte.csv", new string[] { "EMINUSMail" }, new string[] { }, ";", '\'', new UTF8Encoding(false), false,
+                                        "ApprenticeRepresentative_Webuntis-Stammdaten-Ausbildungsbeauftragte.csv", new string[] { "EMINUSMail" }, new string[] { }, ";", '\'', new UTF8Encoding(false), false,
+                                        Global.Modus.FilternJa,
                                         new List<string>(){
                                             $"1. In Webuntis als Webuntis-Admin:  [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Stammdaten > Ausbildungsbeauftragte > Import[/]",
                                             $"2. Datei auswählen, UTF8",
@@ -151,7 +154,8 @@ public static class MenueHelper
                                         }
                                     ),
                                     new Datei(
-                                        "Webuntis-Stammdaten-Erziehungsberechtigte.csv", new string[] { "EMINUSMail" }, new string[] { }, ";", '\'', new UTF8Encoding(false), false,
+                                        "LegalGuardian_Webuntis-Stammdaten-Erziehungsberechtigte.csv", new string[] { "EMINUSMail" }, new string[] { }, ";", '\'', new UTF8Encoding(false), false,
+                                        Global.Modus.FilternJa,   
                                         new List<string>(){
                                             $"1. In Webuntis als Webuntis-Admin:  [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Stammdaten > Erziehungsberechtigte > Import[/]",
                                             $"2. Datei auswählen, UTF8",
@@ -161,6 +165,7 @@ public static class MenueHelper
                                     ),
                                     new Datei(
                                         "ImportNachNetman.csv", new string[] { }, new string[] { }, ",", '\'', new UTF8Encoding(false), false,
+                                        Global.Modus.FilternNein,
                                         new List<string>(){
                                             $"Es wird jetzt die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd") + "-ImportNachNetman.csv")}[/] erstellt.",
                                             $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1:[/] Schüler*innen, die bereits abgegangen sind oder einen Abschluss erworben haben, werden erst sechs Wochen später ausgebucht, um den Zugriff auf Teams nicht direkt zu verlieren.",
@@ -170,6 +175,7 @@ public static class MenueHelper
                                     ),
                                     new Datei(
                                         "ImportNachLittera.xml", new string[] { }, new string[] { }, ",", '\'', new UTF8Encoding(false), false,
+                                        Global.Modus.FilternNein,
                                         new List<string>(){
                                             $"Es wird jetzt die Datei [bold {Global.GetColor(Global.ColorPfadInDateien)}]" + Path.Combine(configuration["PfadDownloads"] ?? "", DateTime.Now.ToString("yyyyMMdd-") + @"-ImportNachLittera.csv") + "[/] erstellt.",
                                             $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1:[/] Auch Abschluss und Abgang muss beim SchILD-Export angehakt werden.",
@@ -178,6 +184,8 @@ public static class MenueHelper
                                     )
                                 ]
                             ));
+                            m.Zieldateien.Verarbeiten(quelldateien, Global.Modus.Vergleichen);
+                            m.Zieldateien.Verarbeiten(quelldateien, Global.Modus.FilternJa);
                             m.Zieldateien.Erstellen();
                             m.Zieldateien.OrdnerÖffnen();
                             m.OeffneWebseite("https://nessa.webuntis.com/students");
@@ -282,6 +290,7 @@ public static class MenueHelper
                         [
                             m.KlassenErstellen(
                                 configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Klassen.dat"),
+                                Global.Modus.FilternNein,
                                 ["InternBez"],
                                 ["SonstigeBez", "Folgeklasse"],
                                 "|", '\0', new UTF8Encoding(true), false),
@@ -419,22 +428,26 @@ public static class MenueHelper
                             [
                                 m.Lernabschnittsdaten(
                                     configuration, Global.Zweck.Statistik, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLernabschnittsdaten.dat"),
+                                    Global.Modus.FilternNein,
                                     ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt"],
                                     [],
                                     "|", '\0', new UTF8Encoding(true), false),
                                 m.Kurse(
                                     configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Kurse.dat"),
+                                    Global.Modus.FilternNein,
                                     ["KursBez", "Jahr", "Abschnitt"],
                                     [],
                                     "|", '\0', new UTF8Encoding(true), false),
                                 m.LeistungsdatenStatistik(
                                     configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat"),
+                                    Global.Modus.FilternNein,
                                     ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach", "Kurs"],
                                     [],
                                     "|", '\0', new UTF8Encoding(true), false, null,
                                     Global.Zweck.Statistik),
                                 m.Faecher(
                                     configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Faecher.dat"),
+                                    Global.Modus.FilternNein,
                                     ["InternKrz"],
                                     [],
                                     "|", '\0', new UTF8Encoding(true), false)
@@ -467,11 +480,13 @@ public static class MenueHelper
                             [
                                 m.LehrkraefteSonderzeiten(
                                     configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "LehrkraefteSonderzeiten.dat"),
+                                    Global.Modus.FilternJa,
                                     ["Lehrkraft", "Zeitart", "Grund"],
                                     [],
                                     "|", '\0', new UTF8Encoding(true), false, null, "200", Global.Modus.ReadSilent),
                                 m.Lehrkraefte(
                                     configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Lehrkraefte.dat"),
+                                    Global.Modus.FilternJa,
                                     ["InternKrz"],
                                     [],
                                     "|", '\0', new UTF8Encoding(true), false),
@@ -500,17 +515,19 @@ public static class MenueHelper
                             [
                                 m.LehrkraefteSonderzeiten(
                                     configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "LehrkraefteSonderzeiten.dat"),
+                                    Global.Modus.FilternJa,
                                     ["Lehrkraft", "Zeitart", "Grund"],
                                     [],
                                     "|", '\0', new UTF8Encoding(true), false),
                                 m.Lehrkraefte(
                                     configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Lehrkraefte.dat"),
+                                    Global.Modus.FilternJa,
                                     ["InternKrz"],
                                     [],
                                     "|", '\0', new UTF8Encoding(true), false)
                             ];
                             m.Zieldateien.Verarbeiten(quelldateien, Global.Modus.Vergleichen);
-                            m.Zieldateien.Verarbeiten(quelldateien, Global.Modus.Filtern);
+                            m.Zieldateien.Verarbeiten(quelldateien, Global.Modus.FilternJa);
                             m.Zieldateien.OrdnerÖffnen();
                             m.Zieldateien.Erstellen();
                         },
@@ -685,13 +702,16 @@ public static class MenueHelper
 
                                     m.Zieldateien =
                                     [
-                                        m.Zieldatei = m.Teilleistungen(configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerTeilleistungen.dat"),
-                                        ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach", "Datum"],
-                                        [],
-                                        "|", '\0', new UTF8Encoding(true), false)
+                                        m.Zieldatei = m.Teilleistungen(
+                                            configuration,
+                                            Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerTeilleistungen.dat"),
+                                            Global.Modus.FilternNein,
+                                            ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach", "Datum"],
+                                            [],
+                                            "|", '\0', new UTF8Encoding(true), false)
                                     ];
                                     m.Zieldateien.Verarbeiten(quelldateien, Global.Modus.Vergleichen);
-                                    m.Zieldateien.Verarbeiten(quelldateien, Global.Modus.Filtern);
+                                    m.Zieldateien.Verarbeiten(quelldateien, Global.Modus.FilternJa);
                                     m.Zieldateien.OrdnerÖffnen();
                                     m.Zieldateien.Erstellen();
                                 },

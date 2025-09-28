@@ -81,9 +81,11 @@ public class Dateien : List<Datei>
             Add(new Datei(
                 "OpenPeriod",
                 "Beschreibung",
-                ["Exportieren Sie die Datei aus Webuntis, indem Sie den Pfad gehen:",
-                $"[bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Klassenbuch > Offene Stunden > Bericht[/]",
-                $"Die PDF-Datei in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/] speichern."],
+                [
+                    "Exportieren Sie die Datei aus Webuntis, indem Sie den Pfad gehen:",
+                    $"[bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Klassenbuch > Offene Stunden > Bericht[/]",
+                    $"Die PDF-Datei in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/] speichern."
+                ],
                 [""],
                 true,
                 d => d.FilterOpenPeriod(),
@@ -95,6 +97,34 @@ public class Dateien : List<Datei>
                 [
                     "Exportieren Sie die Datei aus Webuntis, indem Sie als Administrator den Pfad gehen:",
                     $"1. [bold {Global.GetColor(Global.ColorKopfzeileInCSV)}]Stammdaten > Schüler*innen > Berichte > Schüler > CSV-Ausgabe[/]",
+                    $"2. Die Datei in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/] speichern."
+                ],
+                [""],
+                true,
+                d => d.FilternWebuntisStudent(),
+                "*.csv",
+                "\t"
+            ));
+            Add(new Datei(
+                "ApprenticeRepresentative_",
+                "Beschreibung",
+                [
+                    "Exportieren Sie die Datei aus Webuntis, indem Sie als Administrator den Pfad gehen:",
+                    $"1. [bold {Global.GetColor(Global.ColorKopfzeileInCSV)}]Stammdaten > Ausbildungsbeauftragte > Berichte > Ausbildungsbeauftragte > CSV-Ausgabe[/]",
+                    $"2. Die Datei in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/] speichern."
+                ],
+                [""],
+                true,
+                d => d.FilternWebuntisStudent(),
+                "*.csv",
+                "\t"
+            ));
+            Add(new Datei(
+                "LegalGuardian_",
+                "Beschreibung",
+                [
+                    "Exportieren Sie die Datei aus Webuntis, indem Sie als Administrator den Pfad gehen:",
+                    $"1. [bold {Global.GetColor(Global.ColorKopfzeileInCSV)}]Stammdaten > Erziehungsberechtigte > Berichte > Erziehungsberechtigte > CSV-Ausgabe[/]",
                     $"2. Die Datei in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/] speichern."
                 ],
                 [""],
@@ -888,7 +918,10 @@ public class Dateien : List<Datei>
     {
         foreach (var datei in this)
         {
-            datei.Verarbeiten(quelldateien, modus);
+            if (modus == Global.Modus.Vergleichen)
+                datei.Verarbeiten(quelldateien, modus);
+            if (!(datei.Modus == Global.Modus.FilternJa && modus == Global.Modus.FilternJa)) continue;
+                datei.Verarbeiten(quelldateien, modus);
         }
     }
 

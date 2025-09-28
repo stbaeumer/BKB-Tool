@@ -240,13 +240,9 @@ WHERE (((SCHOOLYEAR_ID)= " + Global.AktSj[0] + Global.AktSj[1] + ") AND  ((TERM_
             }
             AnsiConsole.Write(table);
         }
-        
-
             Global.OpenWebseite(url.TrimEnd());
 
             AnsiConsole.WriteLine("Der Browser sollte jetzt folgenden Link öffnen:\n" +  url.TrimEnd());
-
-        
     }
 
     public void OffeneKlassenbuchEinträgeMahnen(Dateien dateien, IConfiguration configuration)

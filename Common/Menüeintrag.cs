@@ -395,11 +395,12 @@ public class Menüeintrag
         IConfiguration configuration,
         Global.Zweck art,
         string zieldateiname,
+        Global.Modus filterModus,
         string[] anhandDieserAttributeWirdVerglichen,
         string[] dieseAttributeWerdenBeimVergleichIgnoriert,
         string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
-        var zieldatei = new Datei(zieldateiname, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+        var zieldatei = new Datei(zieldateiname, filterModus, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         var schuelerLernab = Quelldateien.GetMatchingList(configuration, "schuelerlernabschnittsdaten", IStudents, Klassen);
         if (schuelerLernab == null || !schuelerLernab.Any()) return [];
@@ -672,13 +673,14 @@ public class Menüeintrag
     public Datei LeistungsdatenStatistik(
         IConfiguration configuration,
         string zieldateiname,
+        Global.Modus filterModus,
         string[] anhandDieserAttributeWirdVerglichen,
         string[] dieseAttributeWerdenBeimVergleichIgnoriert,
         string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null, Global.Zweck art = Global.Zweck.Statistik)
     {
         var unterrichte = this.Unterrichte;
-        var zieldatei = new Datei(zieldateiname, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);        
-        
+        var zieldatei = new Datei(zieldateiname, filterModus, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+
         AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start($"{zieldateiname} ...", ctx =>
         {
             foreach (var unt in this.Unterrichte)
@@ -963,11 +965,12 @@ public class Menüeintrag
     public Datei Kurse(
         IConfiguration configuration,
         string zieldateiname,
+        Global.Modus filterModus,
         string[] anhandDieserAttributeWirdVerglichen,
         string[] dieseAttributeWerdenBeimVergleichIgnoriert,
         string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
-        var zieldatei = new Datei(zieldateiname, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+        var zieldatei = new Datei(zieldateiname, filterModus, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
         var kurse = this.Unterrichte.Where(x => !string.IsNullOrEmpty(x.KursBez)).ToList();        
 
         AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Kurse bilden: ...", ctx =>
@@ -1294,9 +1297,9 @@ public class Menüeintrag
     }
 
 
-    public Datei? Faecher(IConfiguration configuration, string zieldateiname, string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
+    public Datei? Faecher(IConfiguration configuration, string zieldateiname, Global.Modus filterModus, string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
-        var zieldatei = new Datei(zieldateiname, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+        var zieldatei = new Datei(zieldateiname, filterModus, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         var gpu002 = Quelldateien.GetMatchingList(configuration, "gpu002", IStudents, Klassen);
         if (!gpu002.Any())
@@ -1911,9 +1914,9 @@ public class Menüeintrag
                                             dict["Geburtsdatum"].ToString() == student.Geburtsdatum &&
                                             dict["Erzieherart"].ToString() == e;
                                     }).LastOrDefault() as IDictionary<string, object>;
-                                
-                                if(see == null) continue;
 
+                                if (see == null) continue;
+                                
                                 var stt = schuelerTelefonnummern
                                     .Where(rec =>
                                     {
@@ -1922,45 +1925,82 @@ public class Menüeintrag
                                             dict["Vorname"].ToString() == student.Vorname &&
                                             dict["Geburtsdatum"].ToString() == student.Geburtsdatum &&
                                             dict["Art"].ToString() == e;
-                                    }).LastOrDefault() as IDictionary<string, object>;
+                                    })
+                                    .Cast<IDictionary<string, object>>()
+                                    .ToList();
 
-                                if (configuration["Schulnummer"] == "177659")
+                                for (int i = 1; i <= 2; i++)
                                 {
-                                    record.Schlüssel = !string.IsNullOrEmpty(sz["Externe ID-Nr"].ToString()) && sz["Externe ID-Nr"].ToString().Length == 6 && sz["Externe ID-Nr"].ToString().StartsWith("15")
-                                    ? sz["Externe ID-Nr"].ToString()
-                                    : sz["schulische E-Mail"].ToString().Split('@')[0];
-                                }
-                                else
-                                {
-                                    record.Schlüssel = sz["schulische E-Mail"].ToString().Split('@')[0];
-                                }
+                                    record = new ExpandoObject();
 
-                                record.EMINUSMail = sz["schulische E-Mail"].ToString();
-                                record.Familienname = student.Nachname;
-                                record.Vorname = student.Vorname;
-                                record.Klasse = student.Klasse;
-                                record.Kurzname = sz["schulische E-Mail"].ToString().Split('@')[0];
-                                record.Geschlecht = student.Geschlecht?.ToString()?.ToUpper() ?? string.Empty;
-                                record.Geburtsdatum = student.Geburtsdatum;
-                                record.Eintrittsdatum = "";
-                                record.Austrittsdatum = student.Status == "2" || student.Status == "6" ? "31.07." + Global.AktSj[1] : student.ZeugnisdatumLetztesZeugnisInDieserKlasse != null ? student.ZeugnisdatumLetztesZeugnisInDieserKlasse.ToShortDateString() : sz?["Entlassdatum"].ToString();
-                                record.Telefon = sz?["Telefon-Nr."].ToString();
-                                record.ErzMail = alter >= 18 ? "" : see?["E-Mail 1. Person"].ToString();
-                                record.ErzStrasse = alter >= 18 ? student.Straße.ToString() : see?["Straße"].ToString();
-                                record.ErzPLZ = alter >= 18 ? student.Postleitzahl.ToString() : see?["PLZ"].ToString();
-                                record.ErzOrt = alter >= 18 ? student.Ort.ToString() : see?["Ort"].ToString();
-                                record.ErzName = see?["Vorname 1.Person"].ToString() + " " + see?["Nachname 1.Person"].ToString();
-                                record.ErzMobil = stt == null ? "" : stt["Telefonnr."].ToString();
-                                record.ErzTelefon = "";
-                                record.Volljährig = alter >= 18 ? "1" : "0";
-                                record.O365Identität = student.MailSchulisch;
-                                record.Benutzername = student.MailSchulisch.Replace("@students.berufskolleg-borken.de", "");
+                                    if (configuration["Schulnummer"] == "177659")
+                                    {
+                                        record.Schlüssel = !string.IsNullOrEmpty(sz["Externe ID-Nr"].ToString()) && sz["Externe ID-Nr"].ToString().Length == 6 && sz["Externe ID-Nr"].ToString().StartsWith("15")
+                                        ? sz["Externe ID-Nr"].ToString()
+                                        : sz["schulische E-Mail"].ToString().Split('@')[0];
+                                    }
+                                    else
+                                    {
+                                        record.Schlüssel = sz["schulische E-Mail"].ToString().Split('@')[0];
+                                    }
 
-                                // Es werden nur diejenigen Schüler exportiert die aktiv oder Gast sind, 
-                                // und alle anderen, deren Entlassdatum heute oder in den letzten sechs Wochen war.                                         
-                                if (student.Status == "2" || student.Status == "6" || student.NochKeineAnzahlWochenHer(6))
-                                {
-                                    zieldatei.Add(record);
+                                    record.EMINUSMail = sz["schulische E-Mail"].ToString();
+                                    record.Familienname = student.Nachname;
+
+                                    if (student.Nachname == "Bösing")
+                                    {
+                                        string aa = "";
+                                    }
+
+                                    
+
+
+
+                                    record.Vorname = student.Vorname;
+                                    record.Klasse = student.Klasse;
+                                    // Kürze e auf die letzten 18 Zeichen. Lösche Leerzeichen und Punkte.
+                                    // So wird aus "Vormund" -> "Vormund", aus "(sonst.) gesetzl. Vertreter" -> "gesetzlVertreter"
+                                    var ee = "";
+                                    if (e.Length > 18) ee = e.Substring(e.Length - 18);
+                                    ee = e.Replace(" ", "").Replace(".", "").Replace("(", "").Replace(")", "").Replace("-", "");                                    
+                                    //record.Kurzname = sz["schulische E-Mail"].ToString().Split('@')[0] + "-" + ee + "-" + i;
+                                    record.Geschlecht = student.Geschlecht?.ToString()?.ToUpper() ?? string.Empty;
+                                    record.Geburtsdatum = student.Geburtsdatum;
+                                    record.Eintrittsdatum = "";
+                                    record.Austrittsdatum = student.Status == "2" || student.Status == "6" ? "31.07." + Global.AktSj[1] : student.ZeugnisdatumLetztesZeugnisInDieserKlasse != null ? student.ZeugnisdatumLetztesZeugnisInDieserKlasse.ToShortDateString() : sz?["Entlassdatum"].ToString();
+                                    record.Telefon = sz?["Telefon-Nr."].ToString();
+                                    record.ErzMail = see?["E-Mail " + i + ". Person"].ToString();
+                                    record.ErzStrasse = see?["Straße"].ToString();
+                                    record.ErzPLZ = see?["PLZ"].ToString();
+                                    record.ErzOrt = see?["Ort"].ToString();
+
+                                    var erzName = (see?["Vorname " + i + ".Person"].ToString() + " " + see?["Nachname " + i + ".Person"].ToString()).Trim();
+                                    if (string.IsNullOrEmpty(erzName)) continue;
+                                    record.ErzName = e + ": " + erzName;
+                                    record.ErzNachname = see?["Nachname " + i + ".Person"].ToString();
+                                    record.ErzVorname = see?["Vorname " + i + ".Person"].ToString();
+                                    record.ErzAnrede = see?["Anrede " + i + ".Person"].ToString();
+                                    record.ErzTitel = see?["Titel " + i + ".Person"].ToString();
+                                    record.ErzArt = e;
+                                    record.ErzMobil = stt != null && stt.Count > 0 ? stt[0]["Telefonnr."].ToString() : "";
+                                    record.ErzTelefon = stt != null && stt.Count > 1 ? stt[1]["Telefonnr."].ToString() : "";
+                                    record.Volljährig = alter >= 18 ? "1" : "0";
+                                    record.O365Identität = student.MailSchulisch;
+                                    record.Benutzername = student.MailSchulisch.Replace(configuration["MailDomain"], "");
+
+                                    // Der Kurzname setzt sich aus den ersten vier Buchstaben des Nachnamens, den ersten vier Buchstaben des Vornamens,
+                                    // den ersten vier Buchstaben der Straße und ee zusammen.
+                                    // Wenn ein Wert weniger als 4 Buchstaben hat, wird der gesamte Wert genommen.
+                                    record.Kurzname = (record.ErzNachname.Length >= 4 ? record.ErzNachname.Substring(0, 4) : record.ErzNachname) +
+                                        (record.ErzVorname.Length >= 4 ? record.ErzVorname.Substring(0, 4) : record.ErzVorname) +
+                                        (record.ErzStrasse.Length >= 4 ? record.ErzStrasse.Substring(0, 4) : record.ErzStrasse) + ee;
+
+                                    // Es werden nur diejenigen Schüler exportiert die aktiv oder Gast sind, 
+                                    // und alle anderen, deren Entlassdatum heute oder in den letzten sechs Wochen war.                                         
+                                    if (student.Status == "2" || student.Status == "6" || student.NochKeineAnzahlWochenHer(6))
+                                    {
+                                        zieldatei.Add(record);
+                                    }
                                 }
                             }
                         }
@@ -2030,11 +2070,6 @@ public class Menüeintrag
                             else
                             {
                                 record.Schlüssel = sz["schulische E-Mail"].ToString().Split('@')[0];
-                            }
-
-                            if (student.Nachname == "Boulos")
-                            {
-                                string aa = "";
                             }
 
                             record.Kurzname = sz["schulische E-Mail"].ToString().Replace("@students.berufskolleg-borken.de", "");
@@ -2644,13 +2679,14 @@ public class Menüeintrag
     public Datei KlassenErstellen(
         IConfiguration configuration,
         string zieldateiname,
+        Global.Modus filterModus,
         string[] anhandDieserAttributeWirdVerglichen,
         string[] dieseAttributeWerdenBeimVergleichIgnoriert,
         string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null,
         string defaultwert = "",        
         Global.Modus modus = Global.Modus.Update)
     {
-        var zieldatei = new Datei(zieldateiname, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+        var zieldatei = new Datei(zieldateiname, filterModus, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         var schildKlassen = Quelldateien.GetMatchingList(configuration, "klassen", Students, Klassen);
         if (schildKlassen.Count == 0) return [];
@@ -3526,6 +3562,7 @@ public class Menüeintrag
     public Datei Teilleistungen(
         IConfiguration configuration,
         string zieldateiname,
+        Global.Modus filterModus,
         string[] anhandDieserAttributeWirdVerglichen,
         string[] dieseAttributeWerdenBeimVergleichIgnoriert,
         string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
@@ -3533,7 +3570,7 @@ public class Menüeintrag
         configuration = Global.Konfig("Teilleistungsarten", Global.Modus.Update, configuration);
         configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration);
 
-        var zieldatei = new Datei(zieldateiname, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+        var zieldatei = new Datei(zieldateiname, filterModus, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
         var records = new List<dynamic>();
 
         var marksPerLs = Quelldateien.GetMatchingList(configuration, "marksperlesson", IStudents, Klassen);
@@ -3642,6 +3679,7 @@ public class Menüeintrag
     internal Datei? LehrkraefteSonderzeiten(
         IConfiguration configuration,
         string zieldateiname,
+        Global.Modus filterModus,
         string[] anhandDieserAttributeWirdVerglichen,
         string[] dieseAttributeWerdenBeimVergleichIgnoriert,
         string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null,
@@ -3650,7 +3688,7 @@ public class Menüeintrag
     {
         var akt = int.Parse(Global.AktSj[0]);
 
-        var zieldatei = new Datei(zieldateiname, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+        var zieldatei = new Datei(zieldateiname, filterModus, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         var lehrkraefte = Quelldateien.GetMatchingList(configuration, "lehrkraefte", IStudents, Klassen);
         if (lehrkraefte == null || lehrkraefte.Count == 0) return [];
@@ -3854,9 +3892,9 @@ public class Menüeintrag
         return zieldatei;
     }
 
-    internal Datei? Lehrkraefte(IConfiguration configuration, string zieldateiname, string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
+    internal Datei? Lehrkraefte(IConfiguration configuration, string zieldateiname, Global.Modus filterModus, string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
-        var zieldatei = new Datei(zieldateiname, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+        var zieldatei = new Datei(zieldateiname, filterModus, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         dynamic record = new ExpandoObject();
         record.InternKrz = "";
@@ -3901,6 +3939,7 @@ public class Menüeintrag
     internal Datei SchuelerZusatzdatenUmMailAdresseErgaenzen(
         IConfiguration configuration,
         string zieldateiname,
+        Global.Modus filterModus,
         string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
         var schuelerZusatzdaten = Quelldateien.GetMatchingList(configuration, "schuelerzusatzdaten", IStudents, Klassen);
@@ -3911,7 +3950,7 @@ public class Menüeintrag
 
         bool problem = false;
 
-        var zieldatei = new Datei(zieldateiname, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+        var zieldatei = new Datei(zieldateiname, filterModus, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         if (schuelerZusatzdaten.Count != Students.Count)
         {
@@ -3939,7 +3978,7 @@ public class Menüeintrag
                 if (!(dictSb["Status"].ToString() == "2" || dictSb["Status"].ToString() == "6")) continue;
 
                 // Wenn der Nachname fehlt, überspringe diese Zeile
-                if (dictSz["Nachname"].ToString().StartsWith("Cuber"))
+                if (dictSz["Nachname"].ToString().StartsWith("Hundt"))
                 { 
                     string a = "";
                 }
@@ -4502,13 +4541,14 @@ public class Menüeintrag
 
     internal Datei SchueleradresseTelefonFormatieren(
         IConfiguration configuration,
+        Global.Modus filterModus,
         string zieldateiname,
         string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
         var schuelerAdressen = Quelldateien.GetMatchingList(configuration, "schueleradressen", IStudents, Klassen);
         if (schuelerAdressen == null || !schuelerAdressen.Any()) return [];
 
-        var zieldatei = new Datei(zieldateiname, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+        var zieldatei = new Datei(zieldateiname, filterModus, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Schueleradressen: Mails und Telefonnummern anpassen ...", ctx =>
         {
@@ -4552,13 +4592,14 @@ public class Menüeintrag
 
     internal Datei AdresseTelefonFormatieren(
         IConfiguration configuration,
+        Global.Modus filterModus,
         string zieldateiname,
         string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
         var adressen = Quelldateien.GetMatchingList(configuration, "adressen", IStudents, Klassen);
         if (adressen == null || !adressen.Any()) return [];
 
-        var zieldatei = new Datei(zieldateiname, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+        var zieldatei = new Datei(zieldateiname, filterModus, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Adressen: Mails und Telefonnummern anpassen ...", ctx =>
         {
@@ -4615,13 +4656,14 @@ public class Menüeintrag
     /// <returns></returns>
     internal Datei SchuelerTelefonnummernFormatieren(
         IConfiguration configuration,
+        Global.Modus filterModus,
         string zieldateiname,
         string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
         var schuelertelefonnummern = Quelldateien.GetMatchingList(configuration, "schuelertelefonnummern", IStudents, Klassen);
         if (schuelertelefonnummern == null || !schuelertelefonnummern.Any()) return [];
 
-        var zieldatei = new Datei(zieldateiname, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+        var zieldatei = new Datei(zieldateiname, filterModus, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("SchuelerTelefonnummern: Telefonnummern anpassen ...", ctx =>
         {

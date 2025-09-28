@@ -55,6 +55,7 @@ public class Datei : List<dynamic>
     public string Dateiname { get; set; } = null!;
     public string ZipPfad { get; private set; }
     public string Fehlermeldung { get; set; }
+    public Global.Modus Modus { get; set; }
     public string Ordner { get; internal set; }
     public bool IstOptional { get; internal set; }
     public bool Nur177659 { get; internal set; }
@@ -70,13 +71,15 @@ public class Datei : List<dynamic>
     public bool V3 { get; }
     public object Value2 { get; }
 
-    public Datei(string name, string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert)
+    //public Datei(string name, Global.Modus modus, string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert)
+    public Datei(string name, Global.Modus modus, string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise)
     {
         Name = name;
         Dateiname = Path.GetFileName(name);
         AnhandDieserSchlüsselAttributeWirdVerglichen = anhandDieserAttributeWirdVerglichen;
         DieseAttributeWerdenBeimVergleichIgnoriert = dieseAttributeWerdenBeimVergleichIgnoriert;
         UnterordnerUndDateiname = name;
+        Modus = modus;
     }
 
     public Datei(string zieldateiname, Datei vergleichsdatei)
@@ -132,9 +135,10 @@ public class Datei : List<dynamic>
         Importhinweise = importhinweise;
     }
 
-    public Datei(string absoluterPfad, string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise) : this(absoluterPfad)
+    public Datei(string absoluterPfad, string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, Global.Modus modus, List<string> importhinweise) : this(absoluterPfad)
     {
         AbsoluterPfad = absoluterPfad;
+        Modus = modus;
         AnhandDieserSchlüsselAttributeWirdVerglichen = anhandDieserAttributeWirdVerglichen;
         DieseAttributeWerdenBeimVergleichIgnoriert = dieseAttributeWerdenBeimVergleichIgnoriert;
         Delimiter = delimiter;
@@ -143,7 +147,7 @@ public class Datei : List<dynamic>
         ShouldAllQuote = shouldAllQuote;
         Importhinweise = importhinweise;
     }
-    
+
     public List<dynamic> Filtern(Students students, Klassen klassen)
     {
         IStudents = students;
@@ -741,7 +745,16 @@ public class Datei : List<dynamic>
 
         foreach (var vorhandeneDatei in quelldateien)
         {
+            // Bei .dat-Dateien matcht der Dateiname
             if (Path.GetFileName(vorhandeneDatei.AbsoluterPfad) == Path.GetFileName(AbsoluterPfad))
+            {
+                vorhandeneRec = vorhandeneDatei;
+                break; // Schleife abbrechen, wenn die Datei gefunden wurde
+            }
+            // bei .csv-Dateien matcht der Dateiname vor dem ersten Unterstrich
+            if (
+                Path.GetFileName(AbsoluterPfad).Contains("_") &&
+                Path.GetFileName(vorhandeneDatei.AbsoluterPfad).Split('_')[0] == Path.GetFileName(AbsoluterPfad).Split('_')[0])
             {
                 vorhandeneRec = vorhandeneDatei;
                 break; // Schleife abbrechen, wenn die Datei gefunden wurde
@@ -1252,13 +1265,27 @@ public class Datei : List<dynamic>
     {
         var modusString = "Vergleichen";
 
-        if (modus == Global.Modus.Filtern)
+        if (modus == Global.Modus.FilternJa)
             modusString = "Filtern";        
 
         var neueDatei = new Datei(AbsoluterPfad);
         bool skipProcessing = false;
 
         var vorhandeneDatei = GetVorhandeneDatei(quelldateien);
+
+        // Wenn keine vorhandene Datei mit demselben Namen existiert, wird die Datei unverändert zurückgegeben.
+        if (string.IsNullOrEmpty(vorhandeneDatei))
+        {
+            var panel = new Panel($"Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.GetFileName(AbsoluterPfad)}[/] wurde nicht gefunden. Ein Vergleich von neu & alt ist nicht möglich.")
+                .Header("[bold aqua] Neue Datei [/]")
+                .HeaderAlignment(Justify.Left)
+                .SquareBorder()
+                .Expand()
+                .BorderColor(Color.Aqua);
+            AnsiConsole.Write(panel);
+            return this;
+        }
+
         var table = TableErstellen(
                 $"Veränderungen von alt ([{Global.GetColor(Global.ColorPfadInDateien)}]{vorhandeneDatei}[/]) nach neu:",
                 AnhandDieserSchlüsselAttributeWirdVerglichen);
@@ -1395,6 +1422,7 @@ public class Datei : List<dynamic>
     {
         var vorhandeneRec = new List<dynamic>();
 
+        // .dat-Quelldateien haben denselben Namen wie die Zieldatei
         foreach (var vorhandeneDatei in quelldateien)
         {
             if (Path.GetFileName(vorhandeneDatei.AbsoluterPfad) == Path.GetFileName(AbsoluterPfad))
@@ -1403,6 +1431,16 @@ public class Datei : List<dynamic>
                 break; // Schleife abbrechen, wenn die Datei gefunden wurde
             }
         }
+        // Neue .csv-Dateien beginnen mit demselben Namen wie die Zieldatei, bis zum Unterstrich
+        foreach (var vorhandeneDatei in quelldateien)
+        {
+            if (Path.GetFileNameWithoutExtension(vorhandeneDatei.AbsoluterPfad).Split('_')[0] == Path.GetFileNameWithoutExtension(AbsoluterPfad).Split('_')[0])
+            {
+                return vorhandeneDatei.AbsoluterPfad;
+                break; // Schleife abbrechen, wenn die Datei gefunden wurde
+            }
+        }
+
         return string.Empty; // Rückgabe der gefundenen Datei oder leere Liste, wenn keine Datei gefunden wurde
     }
 

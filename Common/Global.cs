@@ -107,9 +107,10 @@ public static class Global
         Update,
         Read, // Wird verwendet, um Einstellungen zu lesen und den Benutzer zu fragen
         ReadSilent, // Wird verwendet, um Einstellungen zu lesen, ohne den Benutzer zu fragen     
-        Vergleichen,
-        Filtern,
-        InitialEnumEinlesen
+        Vergleichen,        
+        InitialEnumEinlesen,
+        FilternNein,
+        FilternJa
     }
 
     public static List<string> Vorwahlen =new List<string>()
