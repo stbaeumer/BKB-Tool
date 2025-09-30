@@ -2677,24 +2677,24 @@ public class Menüeintrag
         }
     }
 
-    public Datei KlassenErstellen(
+    public void KlassenErstellen(
         IConfiguration configuration,
         string zieldateiname,
         List<Action<Datei>> funktionen,
         string[] anhandDieserAttributeWirdVerglichen,
         string[] dieseAttributeWerdenBeimVergleichIgnoriert,
         string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null,
-        string defaultwert = "",        
+        string defaultwert = "",
         Global.Modus modus = Global.Modus.Update)
     {
         var zieldatei = new Datei(zieldateiname, funktionen, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         var schildKlassen = Quelldateien.GetMatchingList(configuration, "klassen", Students, Klassen);
-        if (schildKlassen.Count == 0) return [];
+        if (schildKlassen.Count == 0) return;
         var untisKlassen = Quelldateien.GetMatchingList(configuration, "GPU003", Students, Klassen);
-        if (untisKlassen.Count == 0) return [];
+        if (untisKlassen.Count == 0) return;
         List<dynamic> gpu002 = Quelldateien.GetMatchingList(configuration, "gpu002", IStudents, Klassen);
-        if (gpu002 == null || gpu002.Count == 0) return [];
+        if (gpu002 == null || gpu002.Count == 0) return;
 
         var records = new List<dynamic>();
         bool neueKlassen = false;
@@ -2781,8 +2781,8 @@ public class Menüeintrag
                 .BorderColor(Color.Red);
             AnsiConsole.Write(panel);
         }
-
-        return zieldatei;
+        
+        foreach (var aktion in zieldatei.Funktionen) aktion(zieldatei);
     }
 
     private string DecreaseNumberInString(string? input)

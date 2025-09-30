@@ -292,22 +292,17 @@ public static class MenueHelper
                     ],
                     m =>
                     {
-                        m.Zieldateien =
-                        [
-                            m.KlassenErstellen(
-                                configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Klassen.dat"),
-                                [
-                                    datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
-                                    datei => datei.Verarbeiten(quelldateien, Global.Modus.Filtern),
-                                    datei => datei.OrdnerOeffnen(),
-                                    datei => datei.Erstellen()
-                                ],
-                                ["InternBez"],
-                                ["SonstigeBez", "Folgeklasse"],
-                                "|", '\0', new UTF8Encoding(true), false),
-                        ];
-                        m.Zieldateien.ExportAusSchildVerschieben(configuration);
-                        //m.Zieldateien.VergleichenFilternErstellen(quelldateien);
+                        m.KlassenErstellen(
+                            configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Klassen.dat"),
+                            [
+                                datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
+                                datei => datei.Verarbeiten(quelldateien, Global.Modus.Filtern),
+                                datei => datei.OrdnerOeffnen(),
+                                datei => datei.Erstellen()
+                            ],
+                            ["InternBez"],
+                            ["SonstigeBez", "Folgeklasse"],
+                            "|", '\0', new UTF8Encoding(true), false);
                     },
                     Global.Rubrik.Allgemein,
                     Global.NurBeiDiesenSchulnummern.Nur177659

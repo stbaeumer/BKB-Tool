@@ -1206,7 +1206,7 @@ public static class Global
 
     public static void WeiterMitAnykey(IConfiguration configuration, Menüeintrag menüeintrag = null)
     {
-        var panel = new Panel($"Weiter mit [bold {Global.GetColor(Global.ColorActionInMenüs)}]Anykey[/] oder mit [bold {Global.GetColor(Global.ColorActionInMenüs)}]e[/] Einstellungen durchlaufen oder mit [bold {Global.GetColor(Global.ColorActionInMenüs)}]h[/] Onlinehilfe öffnen.")
+        var panel = new Panel($"Zur Menüauswahl mit [bold {Global.GetColor(Global.ColorActionInMenüs)}]Anykey[/], mit [bold {Global.GetColor(Global.ColorActionInMenüs)}]e[/] zu den Einstellungen, mit [bold {Global.GetColor(Global.ColorActionInMenüs)}]h[/] Onlinehilfe öffnen.")
                         .HeaderAlignment(Justify.Left)
                         .SquareBorder()
                         .Expand()
