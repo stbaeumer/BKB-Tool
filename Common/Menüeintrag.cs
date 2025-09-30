@@ -391,22 +391,22 @@ public class Menüeintrag
         return lk1faecher.Contains(linkerTeil) ? "LK1" : "LK2";
     }
 
-    public Datei Lernabschnittsdaten(
+    public void Lernabschnittsdaten(
         IConfiguration configuration,
         Global.Zweck art,
         string zieldateiname,
-        Global.Modus filterModus,
+        List<Action<Datei>> funktionen,
         string[] anhandDieserAttributeWirdVerglichen,
         string[] dieseAttributeWerdenBeimVergleichIgnoriert,
         string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
-        var zieldatei = new Datei(zieldateiname, filterModus, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+        var zieldatei = new Datei(zieldateiname, funktionen, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         var schuelerLernab = Quelldateien.GetMatchingList(configuration, "schuelerlernabschnittsdaten", IStudents, Klassen);
-        if (schuelerLernab == null || !schuelerLernab.Any()) return [];
+        if (schuelerLernab == null || !schuelerLernab.Any()) return;
 
         var schuelerBasisd = Quelldateien.GetMatchingList(configuration, "schuelerbasisdate", IStudents, Klassen);
-        if (schuelerBasisd == null || !schuelerBasisd.Any()) return [];
+        if (schuelerBasisd == null || !schuelerBasisd.Any()) return;
 
         var absencePerStud = new List<dynamic>();
 
@@ -419,7 +419,7 @@ public class Menüeintrag
         if (art != Global.Zweck.Statistik)
         {
             absencePerStud = Quelldateien.GetMatchingList(configuration, "absenceperstudent", IStudents, Klassen);
-            if (absencePerStud == null || !absencePerStud.Any()) return [];
+            if (absencePerStud == null || !absencePerStud.Any()) return;
 
             // Wenn der Abschnittswechsel hinter uns liegt und gleichzeitig Fehlzeiten von vorher vorliegen, dann wird gefragt, ob die vorherigen Fehlzeiten berücksichtigt werden sollen. 
             var abschnittswechsel = DateTime.Parse(configuration["Abschnittswechsel"]);
@@ -657,8 +657,6 @@ public class Menüeintrag
                 }
                 Global.ZeileSchreiben("Lernabschnittsdaten.dat", zieldatei.Count().ToString());
             });
-
-            return zieldatei;
         }
         catch (Exception ex)
         {
@@ -666,20 +664,19 @@ public class Menüeintrag
             while (Console.KeyAvailable) Console.ReadKey(true);
 
             Console.ReadKey();
-            return null;
         }
     }
 
     public Datei LeistungsdatenStatistik(
         IConfiguration configuration,
         string zieldateiname,
-        Global.Modus filterModus,
+        List<Action<Datei>> funktionen,
         string[] anhandDieserAttributeWirdVerglichen,
         string[] dieseAttributeWerdenBeimVergleichIgnoriert,
         string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null, Global.Zweck art = Global.Zweck.Statistik)
     {
         var unterrichte = this.Unterrichte;
-        var zieldatei = new Datei(zieldateiname, filterModus, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+        var zieldatei = new Datei(zieldateiname, funktionen, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start($"{zieldateiname} ...", ctx =>
         {
@@ -965,12 +962,12 @@ public class Menüeintrag
     public Datei Kurse(
         IConfiguration configuration,
         string zieldateiname,
-        Global.Modus filterModus,
+        List<Action<Datei>> funktionen,
         string[] anhandDieserAttributeWirdVerglichen,
         string[] dieseAttributeWerdenBeimVergleichIgnoriert,
         string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
-        var zieldatei = new Datei(zieldateiname, filterModus, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+        var zieldatei = new Datei(zieldateiname, funktionen, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
         var kurse = this.Unterrichte.Where(x => !string.IsNullOrEmpty(x.KursBez)).ToList();        
 
         AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Kurse bilden: ...", ctx =>
@@ -1297,9 +1294,15 @@ public class Menüeintrag
     }
 
 
-    public Datei? Faecher(IConfiguration configuration, string zieldateiname, Global.Modus filterModus, string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
+    public Datei? Faecher(
+        IConfiguration configuration,
+        string zieldateiname,
+        List<Action<Datei>> funktionen,
+        string[] anhandDieserAttributeWirdVerglichen,
+        string[] dieseAttributeWerdenBeimVergleichIgnoriert,
+        string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
-        var zieldatei = new Datei(zieldateiname, filterModus, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+        var zieldatei = new Datei(zieldateiname, funktionen, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         var gpu002 = Quelldateien.GetMatchingList(configuration, "gpu002", IStudents, Klassen);
         if (!gpu002.Any())
@@ -1519,26 +1522,26 @@ public class Menüeintrag
         lehrers.GetTeamsUrl(mitgliederMail.Split(';'), String.Join(';', IKlassen));
     }
     
-    public List<Datei> WebuntisOderNetmanOderLitteraCsv(IConfiguration configuration, List<Datei> zieldateien)
+    public void WebuntisOderNetmanOderLitteraCsv(IConfiguration configuration, List<Datei> zieldateien)
     {
         try
         {
             List<dynamic>? webuntisStudents = Quelldateien.GetMatchingList(configuration, "student_", Students, Klassen);
-            if (webuntisStudents == null || webuntisStudents.Count == 0) return [];
+            if (webuntisStudents == null || webuntisStudents.Count == 0) return;
             var schuelerZusatzdaten = Quelldateien.GetMatchingList(configuration, "schuelerzusatzdaten", Students, Klassen);
-            if (schuelerZusatzdaten == null || schuelerZusatzdaten.Count == 0) return [];
+            if (schuelerZusatzdaten == null || schuelerZusatzdaten.Count == 0) return;
             var schuelerLernabschnittsdaten = Quelldateien.GetMatchingList(configuration, "schuelerlernabschnittsdaten", Students, Klassen);
-            if (schuelerLernabschnittsdaten == null || schuelerLernabschnittsdaten.Count == 0) return [];
+            if (schuelerLernabschnittsdaten == null || schuelerLernabschnittsdaten.Count == 0) return;
             var schuelerErzieher = Quelldateien.GetMatchingList(configuration, "schuelererzieher", Students, Klassen);
-            if (schuelerErzieher == null || schuelerErzieher.Count == 0) return [];
+            if (schuelerErzieher == null || schuelerErzieher.Count == 0) return;
             var schuelerAdressen = Quelldateien.GetMatchingList(configuration, "schueleradressen", Students, Klassen);
-            if (schuelerAdressen == null || schuelerAdressen.Count == 0) return [];
+            if (schuelerAdressen == null || schuelerAdressen.Count == 0) return;
             var lehrkraefte = Quelldateien.GetMatchingList(configuration, "lehrkraefte", Students, Klassen);
-            if (lehrkraefte == null || lehrkraefte.Count == 0) return [];
+            if (lehrkraefte == null || lehrkraefte.Count == 0) return;
             var klassen = Quelldateien.GetMatchingList(configuration, "klassen", Students, Klassen);
-            if (klassen == null || klassen.Count == 0) return [];
+            if (klassen == null || klassen.Count == 0) return;
             var schuelerTelefonnummern = Quelldateien.GetMatchingList(configuration, "schuelertelefonnummern", IStudents, Klassen);
-            if (schuelerTelefonnummern == null || !schuelerTelefonnummern.Any()) return [];
+            if (schuelerTelefonnummern == null || !schuelerTelefonnummern.Any()) return;
 
             var table = new Spectre.Console.Table();
             table.Border(TableBorder.Rounded);
@@ -1916,7 +1919,7 @@ public class Menüeintrag
                                     }).LastOrDefault() as IDictionary<string, object>;
 
                                 if (see == null) continue;
-                                
+
                                 var stt = schuelerTelefonnummern
                                     .Where(rec =>
                                     {
@@ -1952,17 +1955,13 @@ public class Menüeintrag
                                         string aa = "";
                                     }
 
-                                    
-
-
-
                                     record.Vorname = student.Vorname;
                                     record.Klasse = student.Klasse;
                                     // Kürze e auf die letzten 18 Zeichen. Lösche Leerzeichen und Punkte.
                                     // So wird aus "Vormund" -> "Vormund", aus "(sonst.) gesetzl. Vertreter" -> "gesetzlVertreter"
                                     var ee = "";
                                     if (e.Length > 18) ee = e.Substring(e.Length - 18);
-                                    ee = e.Replace(" ", "").Replace(".", "").Replace("(", "").Replace(")", "").Replace("-", "");                                    
+                                    ee = e.Replace(" ", "").Replace(".", "").Replace("(", "").Replace(")", "").Replace("-", "");
                                     //record.Kurzname = sz["schulische E-Mail"].ToString().Split('@')[0] + "-" + ee + "-" + i;
                                     record.Geschlecht = student.Geschlecht?.ToString()?.ToUpper() ?? string.Empty;
                                     record.Geburtsdatum = student.Geburtsdatum;
@@ -2122,13 +2121,16 @@ public class Menüeintrag
                         }
                     }
 
-                    Global.ZeileSchreiben(zieldateiname, string.Join(Environment.NewLine, zieldatei.Importhinweise));
+                    //Global.ZeileSchreiben(zieldateiname, string.Join(Environment.NewLine, zieldatei.Importhinweise));
+
                 });
-                
+
+                foreach (var aktion in zieldatei.Funktionen)
+                    aktion(zieldatei);
+                                                
                 if (zieldateiname.ToLower().Contains("schueler") && susMitÄnderung.Count() > 2)
                     AnsiConsole.Write(table);
             }
-            return zieldateien;
         }
         catch (Exception ex)
         {
@@ -2136,7 +2138,6 @@ public class Menüeintrag
             while (Console.KeyAvailable) Console.ReadKey(true);
 
             Console.ReadKey();
-            return null;
         }
     }
 
@@ -2679,14 +2680,14 @@ public class Menüeintrag
     public Datei KlassenErstellen(
         IConfiguration configuration,
         string zieldateiname,
-        Global.Modus filterModus,
+        List<Action<Datei>> funktionen,
         string[] anhandDieserAttributeWirdVerglichen,
         string[] dieseAttributeWerdenBeimVergleichIgnoriert,
         string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null,
         string defaultwert = "",        
         Global.Modus modus = Global.Modus.Update)
     {
-        var zieldatei = new Datei(zieldateiname, filterModus, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+        var zieldatei = new Datei(zieldateiname, funktionen, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         var schildKlassen = Quelldateien.GetMatchingList(configuration, "klassen", Students, Klassen);
         if (schildKlassen.Count == 0) return [];
@@ -3562,7 +3563,7 @@ public class Menüeintrag
     public Datei Teilleistungen(
         IConfiguration configuration,
         string zieldateiname,
-        Global.Modus filterModus,
+        List<Action<Datei>> funktionen,
         string[] anhandDieserAttributeWirdVerglichen,
         string[] dieseAttributeWerdenBeimVergleichIgnoriert,
         string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
@@ -3570,7 +3571,7 @@ public class Menüeintrag
         configuration = Global.Konfig("Teilleistungsarten", Global.Modus.Update, configuration);
         configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration);
 
-        var zieldatei = new Datei(zieldateiname, filterModus, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+        var zieldatei = new Datei(zieldateiname, funktionen, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
         var records = new List<dynamic>();
 
         var marksPerLs = Quelldateien.GetMatchingList(configuration, "marksperlesson", IStudents, Klassen);
@@ -3676,10 +3677,10 @@ public class Menüeintrag
     /// <param name="zieldateiname"></param>
     /// <param name="nurDieseGründe"></param>
     /// <returns></returns>
-    internal Datei? LehrkraefteSonderzeiten(
+    internal void LehrkraefteSonderzeiten(
         IConfiguration configuration,
         string zieldateiname,
-        Global.Modus filterModus,
+        List<Action<Datei>> funktionen,
         string[] anhandDieserAttributeWirdVerglichen,
         string[] dieseAttributeWerdenBeimVergleichIgnoriert,
         string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null,
@@ -3688,19 +3689,19 @@ public class Menüeintrag
     {
         var akt = int.Parse(Global.AktSj[0]);
 
-        var zieldatei = new Datei(zieldateiname, filterModus, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+        var zieldatei = new Datei(zieldateiname, funktionen, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         var lehrkraefte = Quelldateien.GetMatchingList(configuration, "lehrkraefte", IStudents, Klassen);
-        if (lehrkraefte == null || lehrkraefte.Count == 0) return [];
+        if (lehrkraefte == null || lehrkraefte.Count == 0) return;
 
         var lehrkraefteSonderzeiten = Quelldateien.GetMatchingList(configuration, "lehrkraefteSonderzeiten", IStudents, Klassen);
-        if (lehrkraefteSonderzeiten == null) return [];
+        if (lehrkraefteSonderzeiten == null) return;
 
         var gpu020 = Quelldateien.GetMatchingList(configuration, "gpu020", IStudents, Klassen); // Anrechnungen
-        if (gpu020 == null) return [];
+        if (gpu020 == null) return;
 
         var gpu004 = Quelldateien.GetMatchingList(configuration, "gpu004", IStudents, Klassen); // Lehrkraefte
-        if (gpu004 == null) return [];
+        if (gpu004 == null) return;
 
         var lehrers = lehrkraefte
             .Where(rec => ((IDictionary<string, object>)rec)["statistik-relevant"].ToString() == "J")
@@ -3888,13 +3889,113 @@ public class Menüeintrag
         if(interessierendeGründe.Contains("200"))
             if(tableAltersermäßigung.Rows.Count > 0)
                 AnsiConsole.Write(tableAltersermäßigung);
-
-        return zieldatei;
     }
 
-    internal Datei? Lehrkraefte(IConfiguration configuration, string zieldateiname, Global.Modus filterModus, string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
+    public void ExportAusSchildVerschieben(IConfiguration configuration)
     {
-        var zieldatei = new Datei(zieldateiname, filterModus, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+        configuration = Global.Konfig("PfadSchilddatenaustausch", Global.Modus.ReadSilent, configuration);
+        var pfadDownloads = configuration["PfadDownloads"];
+
+        // Stelle sicher, dass der Zielordner existiert
+        if (!Directory.Exists(configuration["PfadSchilddatenaustausch"]))
+        {
+            try
+            {
+                Directory.CreateDirectory(configuration["PfadSchilddatenaustausch"]);
+            }
+            catch (Exception ex)
+            {
+                AnsiConsole.WriteException(ex, ExceptionFormats.ShortenEverything);
+                return;
+            }
+        }
+
+        // Die SchildSchuelerExport wird immer kopiert.
+        var datei = !string.IsNullOrEmpty(configuration["PfadSchilddatenaustausch"])
+            ? Directory.GetFiles(configuration["PfadSchilddatenaustausch"], "*", SearchOption.TopDirectoryOnly).FirstOrDefault(f => Path.GetFileName(f).ToLower().Contains("schildschuelerexport"))
+            : null;
+
+        if (datei != null)
+        {
+            if (pfadDownloads == null)
+                throw new ArgumentNullException(nameof(pfadDownloads), "Der Pfad zum Downloads-Ordner ist null.");
+
+            var destinationPath = Path.Combine(pfadDownloads, Path.GetFileName(datei));
+            File.Copy(datei, destinationPath, true);
+        }
+
+        var datFiles = !string.IsNullOrEmpty(configuration["PfadSchilddatenaustausch"])
+            ? Directory.GetFiles(configuration["PfadSchilddatenaustausch"], "*.dat").ToList()
+            : new List<string>();
+
+        // Wenn mehr als 5 Dateien im Ausgangsordner sind, dann muss es sich um Exportdateien handeln,
+        // da BKB-Tool niemals mehr als 5 Dateien gleichzeitig in das Ausgabeverzeichnis verschiebt.
+        if (datFiles.Count > 7)
+        {
+            // Hole die Erstellungszeiten der Dateien
+            var creationTimes = datFiles
+                .Select(file => File.GetLastWriteTime(file))
+                .OrderBy(time => time)
+                .ToList();
+
+            // Prüfe, ob alle Dateien innerhalb von vier Minuten erstellt wurden. Daran wird erkannt, ob es sich um einen Export aus SchILD handelt.
+            var within4Minutes = creationTimes.Last() - creationTimes.First() <= TimeSpan.FromMinutes(4);
+
+            if (within4Minutes)
+            {
+                var existingDatFiles = !string.IsNullOrEmpty(pfadDownloads)
+                    ? Directory.GetFiles(pfadDownloads, "*.dat")
+                    : Array.Empty<string>();
+
+                // Panel: Wenn keine .dat-Dateien vorhanden sind, wird eine Warnung ausgegeben.
+
+                var hinweis = $"SchILD verwendet für den Export und den (Re-)Import denselben Ordner. Deswegen verschiebt [bold {Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] jetzt " +
+                    $"[bold {Global.GetColor(Global.ColorZahlen)}]{datFiles.Count} aus SchILD exportierte *.dat-Dateien[/] direkt von [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadSchilddatenaustausch"]}[/] nach [bold {Global.GetColor(Global.ColorPfadInDateien)}]{pfadDownloads}[/]. " +
+                    $"\nDie aufbereiteten Dateien stellt [bold {Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] wiederum in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadSchilddatenaustausch"]}[/] bereit. " +
+                    "So bleiben die Import-Dateien und Export-Dateien stets getrennt voneinander." +
+                    $"\nWeiter mit [bold {Global.GetColor(Global.ColorActionInMenüs)}]ENTER[/].";
+
+                Global.Konfig("FirstRun", Global.Modus.Read, configuration, null, -1, -1, hinweis);
+
+                // Lösche die vorhandenen .dat-Dateien im Zielordner
+                foreach (var file in existingDatFiles)
+                {
+                    File.Delete(file);
+                }
+
+                // Verschiebe die Dateien
+                foreach (var file in datFiles)
+                {
+#pragma warning disable CS8604 // Possible null reference argument.
+                    var destinationPath = Path.Combine(pfadDownloads, Path.GetFileName(file));
+#pragma warning restore CS8604 // Possible null reference argument.
+
+                    File.Move(file, destinationPath);
+                }
+
+                AnsiConsole.Write(new Rule($"[bold fuchsia] {datFiles.Count} Dateien verschoben von [bold aqua]{configuration["PfadSchilddatenaustausch"]}[/] nach [bold aqua]{configuration["PfadDownloads"]}[/][/] ").RuleStyle("fuchsia").LeftJustified());                
+            }
+            else
+            {
+                Console.WriteLine("Die Dateien wurden nicht innerhalb von einer Minute erstellt.");
+            }
+        }
+        else
+        {
+            foreach (var file in datFiles)
+            {
+                File.Delete(file);
+            }
+        }
+    }
+
+    public void Lehrkraefte(
+        IConfiguration configuration,
+        string zieldateiname,
+        List<Action<Datei>> funktionen,
+        string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
+    {
+        var zieldatei = new Datei(zieldateiname, funktionen, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         dynamic record = new ExpandoObject();
         record.InternKrz = "";
@@ -3921,7 +4022,6 @@ public class Menüeintrag
         record.StammschulnrPUNKT = "";
         record.dienstlPUNKTLEERZEICHENEMINUSMail = "";
         zieldatei.Add(record);
-        return zieldatei;
     }
 
     public void RenderAuswahlÜberschrift(IConfiguration configuration)
@@ -3936,21 +4036,23 @@ public class Menüeintrag
         AnsiConsole.Write(panel3);
     }
 
-    internal Datei SchuelerZusatzdatenUmMailAdresseErgaenzen(
+    internal void SchuelerZusatzdatenUmMailAdresseErgaenzen(
         IConfiguration configuration,
         string zieldateiname,
-        Global.Modus filterModus,
-        string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
+        List<Action<Datei>> funktionen,
+        string[] anhandDieserAttributeWirdVerglichen,
+        string[] dieseAttributeWerdenBeimVergleichIgnoriert,
+        string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
         var schuelerZusatzdaten = Quelldateien.GetMatchingList(configuration, "schuelerzusatzdaten", IStudents, Klassen);
-        if (schuelerZusatzdaten == null || !schuelerZusatzdaten.Any()) return [];
+        if (schuelerZusatzdaten == null || !schuelerZusatzdaten.Any()) return;
 
         var schuelerBasisdaten = Quelldateien.GetMatchingList(configuration, "schuelerbasisdaten", IStudents, Klassen);
-        if (schuelerBasisdaten == null || !schuelerBasisdaten.Any()) return [];
+        if (schuelerBasisdaten == null || !schuelerBasisdaten.Any()) return;
 
         bool problem = false;
 
-        var zieldatei = new Datei(zieldateiname, filterModus, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+        var zieldatei = new Datei(zieldateiname, funktionen, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         if (schuelerZusatzdaten.Count != Students.Count)
         {
@@ -3961,7 +4063,7 @@ public class Menüeintrag
                         .BorderColor(Global.ColorFehler);
 
             AnsiConsole.Write(panel);
-            return null;
+            return;
         }
 
         var mailDomain = configuration["MailDomain"].Trim();        
@@ -3974,11 +4076,11 @@ public class Menüeintrag
                 var dictSz = (IDictionary<string, object>)schuelerZusatzdaten[i];
                 var dictSb = (IDictionary<string, object>)schuelerBasisdaten[i];
 
-                // Wenn es keinen aktiven oder externen Schüler gibt, überspringe diese Zeile
+                // Wenn der Schüler nicht aktiv oder extern ist, überspringe diese Zeile
                 if (!(dictSb["Status"].ToString() == "2" || dictSb["Status"].ToString() == "6")) continue;
 
                 // Wenn der Nachname fehlt, überspringe diese Zeile
-                if (dictSz["Nachname"].ToString().StartsWith("Hundt"))
+                if (dictSz["Nachname"].ToString().StartsWith("Buding"))
                 { 
                     string a = "";
                 }
@@ -4115,7 +4217,11 @@ public class Menüeintrag
                 zieldatei.Add(record);
             }        
         });
+
         Global.ZeileSchreiben("Schuelerzusatzdaten: Mails überprüft", zieldatei.Count.ToString());
+
+        foreach (var aktion in zieldatei.Funktionen)
+            aktion(zieldatei);
 
         // Sortiere mehrfachVorhanden nach Geburtsdatum
         mehrfachVorhanden = mehrfachVorhanden.OrderBy(s => s.Geburtsdatum).ToList();
@@ -4131,8 +4237,6 @@ public class Menüeintrag
         {
             throw new Exception($"[grey]  Zuerst die Hinweise [/][bold red]!?[/][grey] bearbeiten, dann hierher zurückkehren![/]");
         }
-
-        return zieldatei;
     }
 
     private string TelefonNummerFormatieren(string? v)
@@ -4433,15 +4537,15 @@ public class Menüeintrag
 
     internal void NeueFotosAusSchildOrdnerErstellenUndAlteFotosVerschieben(IConfiguration configuration)
     {
-        var pfadFotosAusSchILD = configuration["PfadFotosAusSchILD"];
-        var ordnername = new DirectoryInfo(pfadFotosAusSchILD).Name;
-        var übergeordneterOrdner = Directory.GetParent(pfadFotosAusSchILD)?.FullName;
+        var pfadFotosAusSchild = configuration["PfadFotosAusSchild"];
+        var ordnername = new DirectoryInfo(pfadFotosAusSchild).Name;
+        var übergeordneterOrdner = Directory.GetParent(pfadFotosAusSchild)?.FullName;
 
         var neuerOrdnername = $"{ordnername}_{DateTime.Now:yyyyMMdd_HHmmss}";
         var neuerOrdnerPfad = Path.Combine(übergeordneterOrdner ?? "", neuerOrdnername);
         
         var panel = new Panel(
-            $"Nach dem erfolgreichen Zippen werden nun die Fotos aus [{Global.GetColor(Global.ColorPfadInDateien)}]{pfadFotosAusSchILD}[/] nach [{Global.GetColor(Global.ColorPfadInDateien)}]{neuerOrdnerPfad}[/] verschoben. Das ist notwendig, damit BKB-Tool beim nächsten Mal aus dem Vergleich der neuen und alten Fotos die Zipdatei passend erstellen kann. " +
+            $"Nach dem erfolgreichen Zippen werden nun die Fotos aus [{Global.GetColor(Global.ColorPfadInDateien)}]{pfadFotosAusSchild}[/] nach [{Global.GetColor(Global.ColorPfadInDateien)}]{neuerOrdnerPfad}[/] verschoben. Das ist notwendig, damit BKB-Tool beim nächsten Mal aus dem Vergleich der neuen und alten Fotos die Zipdatei passend erstellen kann. " +
             $"Weiter mit [{Global.GetColor(Global.ColorActionInMenüs)}]ENTER[/]. Abbruch mit [bold red]x[/].");
         panel.Header($"[bold {Global.GetColor(Global.ColorHinweise)}] Hinweis: Fotos-Ordner wird verschoben [/]")
             .HeaderAlignment(Justify.Left)
@@ -4460,7 +4564,7 @@ public class Menüeintrag
         Directory.CreateDirectory(neuerOrdnerPfad);
 
         // Verschiebe alle jpg-Dateien aus dem alten Ordner in den neuen Ordner
-        var dateien = Directory.GetFiles(pfadFotosAusSchILD, "*.jpg");
+        var dateien = Directory.GetFiles(pfadFotosAusSchild, "*.jpg");
         Global.ZeileSchreiben($"Neuer Ordner erstellt:", neuerOrdnername);
 
         AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start($"Alte Fotos verschieben ...", ctx =>
@@ -4541,14 +4645,14 @@ public class Menüeintrag
 
     internal Datei SchueleradresseTelefonFormatieren(
         IConfiguration configuration,
-        Global.Modus filterModus,
+        List<Action<Datei>> funktionen,
         string zieldateiname,
         string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
         var schuelerAdressen = Quelldateien.GetMatchingList(configuration, "schueleradressen", IStudents, Klassen);
         if (schuelerAdressen == null || !schuelerAdressen.Any()) return [];
 
-        var zieldatei = new Datei(zieldateiname, filterModus, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+        var zieldatei = new Datei(zieldateiname, funktionen, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Schueleradressen: Mails und Telefonnummern anpassen ...", ctx =>
         {
@@ -4592,14 +4696,14 @@ public class Menüeintrag
 
     internal Datei AdresseTelefonFormatieren(
         IConfiguration configuration,
-        Global.Modus filterModus,
+        List<Action<Datei>> funktionen,
         string zieldateiname,
         string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
         var adressen = Quelldateien.GetMatchingList(configuration, "adressen", IStudents, Klassen);
         if (adressen == null || !adressen.Any()) return [];
 
-        var zieldatei = new Datei(zieldateiname, filterModus, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+        var zieldatei = new Datei(zieldateiname, funktionen, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Adressen: Mails und Telefonnummern anpassen ...", ctx =>
         {
@@ -4656,14 +4760,14 @@ public class Menüeintrag
     /// <returns></returns>
     internal Datei SchuelerTelefonnummernFormatieren(
         IConfiguration configuration,
-        Global.Modus filterModus,
+        List<Action<Datei>> funktionen,
         string zieldateiname,
         string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
         var schuelertelefonnummern = Quelldateien.GetMatchingList(configuration, "schuelertelefonnummern", IStudents, Klassen);
         if (schuelertelefonnummern == null || !schuelertelefonnummern.Any()) return [];
 
-        var zieldatei = new Datei(zieldateiname, filterModus, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+        var zieldatei = new Datei(zieldateiname, funktionen, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("SchuelerTelefonnummern: Telefonnummern anpassen ...", ctx =>
         {

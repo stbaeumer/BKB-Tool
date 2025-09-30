@@ -109,8 +109,10 @@ public static class Global
         ReadSilent, // Wird verwendet, um Einstellungen zu lesen, ohne den Benutzer zu fragen     
         Vergleichen,        
         InitialEnumEinlesen,
-        FilternNein,
-        FilternJa
+        Filtern,
+        Mailen,
+        Verschlüsseln,
+        Verschieben
     }
 
     public static List<string> Vorwahlen =new List<string>()
@@ -1719,10 +1721,10 @@ public static class KonfigHelper
             InitialAbfragen = true,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
-        ["PfadFotosAusSchILD"] = new KonfigMeta
+        ["PfadFotosAusSchild"] = new KonfigMeta
         {
-            Key = "PfadFotosAusSchILD",
-            DefaultValue = $"\\\\fs01\\SchILD-NRW\\Fotos_aus_SchILD",
+            Key = "PfadFotosAusSchild",
+            DefaultValue = $"\\\\fs01\\SchILD-NRW\\Fotos_aus_Schild",
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Wo liegen die [{Global.GetColor(Global.ColorInfoBox)}]Fotos[/], die Sie aus SchILD exportiert haben ([{Global.GetColor(Global.ColorPfadInProgrammen)}]Datenaustausch > Fotos > Fotos exportieren[/])? Der Export ist wichtig, um nur fehlende Fotos an SchILD zu übergeben. Geben Sie den Pfad zu den Fotos aus SchILD an. Beispiel: [{Global.GetColor(Global.ColorPfadInProgrammen)}]\\\\fs01\\SchILD-NRW\\Fotos_aus_SchILD[/]",
             Datentyp = Global.Datentyp.Pfad,

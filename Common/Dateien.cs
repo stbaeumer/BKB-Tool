@@ -866,7 +866,7 @@ public class Dateien : List<Datei>
                 // OrdnerOeffnen wird nur einmal aufgerufen, sobald die erste Datei, die count > 0 hat, erstellt wird.
                 if (datei.Count > 0 && !bereitsGeöffnet)
                 {
-                    OrdnerOeffnen();
+                    datei.OrdnerOeffnen();
                     bereitsGeöffnet = true;
                 }
                 datei.Erstellen();
@@ -914,17 +914,6 @@ public class Dateien : List<Datei>
         }
     }
 
-    internal void Verarbeiten(Dateien quelldateien, Global.Modus modus)
-    {
-        foreach (var datei in this)
-        {
-            if (modus == Global.Modus.Vergleichen)
-                datei.Verarbeiten(quelldateien, modus);
-            if (!(datei.Modus == Global.Modus.FilternJa && modus == Global.Modus.FilternJa)) continue;
-                datei.Verarbeiten(quelldateien, modus);
-        }
-    }
-
     internal void Erstellen()
     {
         foreach (var datei in this)
@@ -944,7 +933,7 @@ public class Dateien : List<Datei>
                 // OrdnerOeffnen wird nur einmal aufgerufen, sobald die erste Datei, die count > 0 hat, erstellt wird.
                 if (datei.Count > 0 && !bereitsGeöffnet)
                 {
-                    OrdnerOeffnen();
+                    datei.OrdnerOeffnen();
                     bereitsGeöffnet = true;
                 }
             }

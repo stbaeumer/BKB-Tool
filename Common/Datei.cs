@@ -52,10 +52,11 @@ public class Datei : List<dynamic>
     private string[] ZuIgnorierendeEigenschaften { get; set; } = null!;
 
     public string? AbsoluterPfad { get; set; } = "";
+    public List<Action<Datei>> Funktionen { get; private set; }
     public string Dateiname { get; set; } = null!;
     public string ZipPfad { get; private set; }
     public string Fehlermeldung { get; set; }
-    public Global.Modus Modus { get; set; }
+    public List<Global.Modus> Modus { get; set; }
     public string Ordner { get; internal set; }
     public bool IstOptional { get; internal set; }
     public bool Nur177659 { get; internal set; }
@@ -72,14 +73,25 @@ public class Datei : List<dynamic>
     public object Value2 { get; }
 
     //public Datei(string name, Global.Modus modus, string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert)
-    public Datei(string name, Global.Modus modus, string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise)
+    public Datei(
+        string name,
+        List<Action<Datei>> funktionen,
+        string[] anhandDieserAttributeWirdVerglichen,
+        string[] dieseAttributeWerdenBeimVergleichIgnoriert,
+        string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise)
     {
         Name = name;
         Dateiname = Path.GetFileName(name);
+        AbsoluterPfad = name;
+        Funktionen = funktionen;
         AnhandDieserSchlüsselAttributeWirdVerglichen = anhandDieserAttributeWirdVerglichen;
         DieseAttributeWerdenBeimVergleichIgnoriert = dieseAttributeWerdenBeimVergleichIgnoriert;
         UnterordnerUndDateiname = name;
-        Modus = modus;
+        Delimiter = delimiter;
+        Quote = quote;
+        Encoding = encoding;
+        ShouldAllQuote = shouldAllQuote;
+        Importhinweise = importhinweise;
     }
 
     public Datei(string zieldateiname, Datei vergleichsdatei)
@@ -135,10 +147,16 @@ public class Datei : List<dynamic>
         Importhinweise = importhinweise;
     }
 
-    public Datei(string absoluterPfad, string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, Global.Modus modus, List<string> importhinweise) : this(absoluterPfad)
+    public Datei(
+        string absoluterPfad,
+        string[] anhandDieserAttributeWirdVerglichen,
+        string[] dieseAttributeWerdenBeimVergleichIgnoriert,
+        string delimiter, char quote, Encoding encoding, bool shouldAllQuote,
+        List<Action<Datei>> funktionen,
+        List<string> importhinweise) : this(absoluterPfad)
     {
         AbsoluterPfad = absoluterPfad;
-        Modus = modus;
+        Funktionen = funktionen;
         AnhandDieserSchlüsselAttributeWirdVerglichen = anhandDieserAttributeWirdVerglichen;
         DieseAttributeWerdenBeimVergleichIgnoriert = dieseAttributeWerdenBeimVergleichIgnoriert;
         Delimiter = delimiter;
@@ -727,7 +745,7 @@ public class Datei : List<dynamic>
             table.Title = new TableTitle(title);
         
         table.Expand();
-        table.AddColumn(string.Join(", ", anhandDieserSchlüsselAttributeWirdVerglichen));
+        table.AddColumn((string.Join(", ", anhandDieserSchlüsselAttributeWirdVerglichen)).Replace("PUNKT", ".").Replace("LEERZEICHEN", " ").Replace("MINUS", "-").Replace("UNTERSTRICH", "_").Replace("SCHRÄGSTRICH", "/"));
         table.AddColumn("Attribut");
         table.AddColumn("alt");
         table.AddColumn("neu");
@@ -1179,7 +1197,7 @@ public class Datei : List<dynamic>
         return this;
     }
 
-    internal void Verschieben(string v)
+    internal void Verschieben(string zielVerzeichnis)
     {
         if (string.IsNullOrEmpty(AbsoluterPfad) || !File.Exists(AbsoluterPfad))
         {
@@ -1189,8 +1207,14 @@ public class Datei : List<dynamic>
 
         try
         {                 
-            var zielPfad = Path.Combine(v, Path.GetFileName(AbsoluterPfad));      
+            var zielPfad = Path.Combine(zielVerzeichnis, Path.GetFileName(AbsoluterPfad));      
             
+            // Lösche die Zieldatei, falls vorhanden
+            if (File.Exists(zielPfad))
+            {
+                File.Delete(zielPfad);
+            }
+
             // Verschiebe die Datei
             File.Move(AbsoluterPfad, zielPfad);                        
             Global.ZeileSchreiben(zielPfad, "", ConsoleColor.Green, ConsoleColor.White);
@@ -1200,6 +1224,22 @@ public class Datei : List<dynamic>
             Console.WriteLine($"Fehler beim Verschieben der Datei: {ex.Message}");
         }
 
+    }
+
+    internal void OeffneWebseite(string url)
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = url,
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            AnsiConsole.MarkupLine($"[red]Fehler beim Öffnen der Webseite: {ex.Message}[/]");
+        }
     }
 
     internal List<dynamic> FilternGPU020()
@@ -1265,7 +1305,7 @@ public class Datei : List<dynamic>
     {
         var modusString = "Vergleichen";
 
-        if (modus == Global.Modus.FilternJa)
+        if (modus == Global.Modus.Filtern)
             modusString = "Filtern";        
 
         var neueDatei = new Datei(AbsoluterPfad);
@@ -1370,7 +1410,7 @@ public class Datei : List<dynamic>
                     if (!string.IsNullOrEmpty(anhandDieserSchlüsselAttributeWirdVerglichenString))
                         table.AddRow(new Text(
                             $"{anhandDieserSchlüsselAttributeWirdVerglichenString}"
-                            ), new Text($"  neue Zeile  "), new Text(""), new Text(""));
+                            ), new Text($"  neue Zeile  "), new Text(""), new Text("")); rows++;
                     continue;
                 } // und die Schleife übersprungen
 

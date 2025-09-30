@@ -1183,17 +1183,50 @@ public class Students : List<Student>
         }
 
         configuration = Global.Konfig("PfadFotosImSchILD-Ordner", Global.Modus.Update, configuration);
-        configuration = Global.Konfig("PfadFotosAusSchild", Global.Modus.Update, configuration);
 
         // Alle *.jpg-Dateien aus dem Ordner (und allen Unterordnern) PfadFotosImSchILD-Ordner werden eingelesen.
-        var fotosImSchildOrdner = Directory.GetFiles(configuration["PfadFotosImSchILD-Ordner"], "*.jpg", SearchOption.AllDirectories);
-        Global.ZeileSchreiben("Mögliche neue Fotos für den Upload in SchILD", fotosImSchildOrdner.Count().ToString(), ConsoleColor.Green, ConsoleColor.Black);
+        var alleFotosImSchildOrdner = Directory.GetFiles(configuration["PfadFotosImSchILD-Ordner"], "*.jpg", SearchOption.AllDirectories);
 
-        // Alle *.jpg-Dateien aus dem Ordner (und allen Unterordnern) PfadFotosAusSchild werden eingelesen.
+        var gefilterteFotosImSchildOrdner = new List<string>();
+        var gefilterteFotosImFotos_Aus_SchildOrdner = new List<string>();
+
+        // Filter alle Fotos, die auf IStudents matchen.
+        foreach (var foto in alleFotosImSchildOrdner)
+        {
+            // Dateiname ohne Endung
+            var dateiName = Path.GetFileNameWithoutExtension(foto);
+            var student = this.FirstOrDefault(s => !string.IsNullOrEmpty(dateiName) && !string.IsNullOrEmpty(s.MailSchulisch) && s.MailSchulisch.StartsWith(dateiName));
+
+            if (student != null)
+            {
+                gefilterteFotosImSchildOrdner.Add(foto);
+            }
+        }
+
+        Global.ZeileSchreiben("Vorhandene Fotos zur obigen Auswahl in " + configuration["PfadFotosImSchILD-Ordner"], gefilterteFotosImSchildOrdner.Count().ToString(), ConsoleColor.Green, ConsoleColor.Black);
+
+
+        configuration = Global.Konfig("PfadFotosAusSchild", Global.Modus.Update, configuration);
+
+        // Alle *.jpg-Dateien aus dem Ordner (und allen Unterordnern) pfadFotosAusSchild werden eingelesen.
         var fotosAusSchildOrdner = Directory.GetFiles(configuration["PfadFotosAusSchild"], "*.jpg", SearchOption.AllDirectories);
-        Global.ZeileSchreiben("Vorhandene Fotos in SchILD", fotosAusSchildOrdner.Count().ToString(), ConsoleColor.Green, ConsoleColor.Black);
 
-        foreach (var foto in fotosImSchildOrdner)
+        // Filter alle Fotos, die auf IStudents matchen.
+        foreach (var foto in fotosAusSchildOrdner)
+        {
+            // Dateiname ohne Endung
+            var dateiName = Path.GetFileNameWithoutExtension(foto);
+            var student = this.FirstOrDefault(s => dateiName.StartsWith(s.Nachname) && dateiName.Contains(s.Vorname) && dateiName.Contains(s.Geburtsdatum));
+
+            if (student != null)
+            {
+                gefilterteFotosImFotos_Aus_SchildOrdner.Add(foto);
+            }
+        }
+
+        Global.ZeileSchreiben("Vorhandene Fotos zur obigen Auswahl in " + configuration["PfadFotosAusSchild"], gefilterteFotosImFotos_Aus_SchildOrdner.Count().ToString(), ConsoleColor.Green, ConsoleColor.Black);
+
+        foreach (var foto in gefilterteFotosImSchildOrdner)
         {
             // Dateiname ohne Endung
             var dateiName = Path.GetFileNameWithoutExtension(foto);
@@ -1204,7 +1237,7 @@ public class Students : List<Student>
             // Wenn der student schon ein FotoAusSchild-Foto hat, erkennbar daran, 
             // dass der Dateiname Vorname, Nachname und Geburtsdatum durch Unterstrich getrennt enthält, 
             // dann wird übersprungen.
-            var fotoBereitsInSchildVorhanden = fotosAusSchildOrdner.FirstOrDefault(f => Path.GetFileNameWithoutExtension(f).Contains(student.Nachname) && Path.GetFileNameWithoutExtension(f).Contains(student.Vorname) && Path.GetFileNameWithoutExtension(f).Contains(student.Geburtsdatum));
+            var fotoBereitsInSchildVorhanden = gefilterteFotosImFotos_Aus_SchildOrdner.FirstOrDefault(f => Path.GetFileNameWithoutExtension(f).Contains(student.Nachname) && Path.GetFileNameWithoutExtension(f).Contains(student.Vorname) && Path.GetFileNameWithoutExtension(f).Contains(student.Geburtsdatum));
             if (!string.IsNullOrEmpty(fotoBereitsInSchildVorhanden)) continue;
 
             // Wenn der student noch kein Foto hat, wird das aktuelle Foto zugewiesen.
@@ -1502,6 +1535,7 @@ public class Students : List<Student>
 
         try
         {
+            configuration = Global.Konfig("ConnectionStringSchild", Global.Modus.Update, configuration);
             DataAccess dataAccess = Global.DataAccessHerstellen(configuration);
 
             AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Fotos hochladen ...", ctx =>
@@ -1610,15 +1644,15 @@ public class Students : List<Student>
     internal Students AlleOderNeueFotopfadeAnStudentsZuweisen(IConfiguration configuration)
     {
         configuration = Global.Konfig("MailDomain", Global.Modus.Read, configuration);
-        configuration = Global.Konfig("PfadFotosAusSchILD", Global.Modus.Read, configuration);
-        var pfadFotosAusSchILD = configuration["PfadFotosAusSchILD"];
+        configuration = Global.Konfig("PfadFotosAusSchild", Global.Modus.Read, configuration);
+        var pfadFotosAusSchild = configuration["PfadFotosAusSchild"];
 
         // Prüfe, ob Bilder im Quellverzeichnis vorhanden sind und ob jpg enthalten sind.
-        if (!Directory.Exists(pfadFotosAusSchILD) || Directory.GetFiles(pfadFotosAusSchILD, "*.jpg").Length == 0)
+        if (!Directory.Exists(pfadFotosAusSchild) || Directory.GetFiles(pfadFotosAusSchild, "*.jpg").Length == 0)
         {
             throw new Exception(
                 $"Keine Fotos für den Export nach Webuntis gefunden. " +
-                $"Bitte exportieren Sie zuerst die Fotos aus SchILD ([{Global.GetColor(Global.ColorPfadInDateien)}]Datenaustausch > Fotos > Fotos exportieren[/]) in den Ordner [{Global.GetColor(Global.ColorPfadInDateien)}]{pfadFotosAusSchILD}[/]. " +
+                $"Bitte exportieren Sie zuerst die Fotos aus SchILD ([{Global.GetColor(Global.ColorPfadInDateien)}]Datenaustausch > Fotos > Fotos exportieren[/]) in den Ordner [{Global.GetColor(Global.ColorPfadInDateien)}]{pfadFotosAusSchild}[/]. " +
                 $"Die Dateinamen müssen Nachname, Vorname und Geburtsdatum enthalten. " +
                 $"Anschließend starten Sie diese Funktion erneut.");
         }
@@ -1626,11 +1660,11 @@ public class Students : List<Student>
         // Falls Bilder vorhanden sind, wird als erstes ein Vergleich zwischen pfadFotosAusSchild und seinem neuesten
         // Klonordner versucht. Der Klon liegt im selben Ordner wie pfadFotosAusSchild. Der Name des Ordners heißt identisch,
         // hat aber das Erstelldatum als Suffix im Namen.
-        var ordnername = new DirectoryInfo(pfadFotosAusSchILD).Name;
-        var übergeordneterOrdner = Directory.GetParent(pfadFotosAusSchILD)?.FullName;
+        var ordnername = new DirectoryInfo(pfadFotosAusSchild).Name;
+        var übergeordneterOrdner = Directory.GetParent(pfadFotosAusSchild)?.FullName;
         var unterordner = Directory.GetDirectories(übergeordneterOrdner ?? "", ordnername + "*")
             .Select(d => new DirectoryInfo(d))
-            .Where(di => di.FullName != pfadFotosAusSchILD)
+            .Where(di => di.FullName != pfadFotosAusSchild)
             .OrderByDescending(di => di.CreationTime)
             .FirstOrDefault()?.FullName;
 
@@ -1651,7 +1685,7 @@ public class Students : List<Student>
             {
                 foreach (var student in this)
                 {
-                    var schuelerfotoNeu = Directory.GetFiles(pfadFotosAusSchILD, $"{student.Nachname}_{student.Vorname}_{student.Geburtsdatum}*.jpg").FirstOrDefault();
+                    var schuelerfotoNeu = Directory.GetFiles(pfadFotosAusSchild, $"{student.Nachname}_{student.Vorname}_{student.Geburtsdatum}*.jpg").FirstOrDefault();
                     if (schuelerfotoNeu == null) continue;
                     alleMöglichenFotos++;
 
@@ -1693,7 +1727,7 @@ public class Students : List<Student>
             table.AddRow($"Summe: [{Global.GetColor(Global.ColorZahlen)}]{anzahl}[/]", "");
             AnsiConsole.Write(table);
 
-            Global.ZeileSchreiben("Alle Fotos im Ordner " + pfadFotosAusSchILD, alleMöglichenFotos.ToString(), ConsoleColor.Green, ConsoleColor.Black);
+            Global.ZeileSchreiben("Alle Fotos im Ordner " + pfadFotosAusSchild, alleMöglichenFotos.ToString(), ConsoleColor.Green, ConsoleColor.Black);
             Global.ZeileSchreiben("Neue oder veränderte Fotos im Ordner", anzahl.ToString(), ConsoleColor.Green, ConsoleColor.Black);
         }
 
@@ -1709,13 +1743,13 @@ public class Students : List<Student>
             return studentsMitNeuenFotos;
         }   
 
-        // Wenn der Anwender alle Fotos exportieren möchte, dann wird jedem Schüler das Foto aus dem Ordner pfadFotosAusSchILD zugewiesen.
+        // Wenn der Anwender alle Fotos exportieren möchte, dann wird jedem Schüler das Foto aus dem Ordner pfadFotosAusSchild zugewiesen.
 
         AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start($"Fotos an SuS zuweisen ...", ctx =>
         {
             foreach (var student in this)
             {
-                var fotoDiesesSchuelersInOrdner = Directory.GetFiles(pfadFotosAusSchILD, $"{student.Nachname}_{student.Vorname}_{student.Geburtsdatum}*.jpg").FirstOrDefault();
+                var fotoDiesesSchuelersInOrdner = Directory.GetFiles(pfadFotosAusSchild, $"{student.Nachname}_{student.Vorname}_{student.Geburtsdatum}*.jpg").FirstOrDefault();
                 if (fotoDiesesSchuelersInOrdner == null)
                     continue;
 
