@@ -175,7 +175,7 @@ public static class MenueHelper
                                         [
                                             datei => datei.Erstellen(),
                                             datei => datei.ZippenMitKennwort(configuration),
-                                            //datei => datei.Mailen(datei.ZipPfad, datei.ZipPfad, configuration, datei.ZipPfad),
+                                            datei => datei.Mailen(datei.ZipPfad, datei.ZipPfad, configuration, datei.ZipPfad),
                                         ],
                                         [
                                             $"Es wird jetzt die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd") + "-ImportNachNetman.csv")}[/] erstellt.",
@@ -201,56 +201,7 @@ public static class MenueHelper
                         },
                         Global.Rubrik.WöchtentlicheArbeiten,
                         Global.NurBeiDiesenSchulnummern.Alle
-                    ),
-                    new Menüeintrag(
-                        "Fotos (a): Schüler*innen klassenweise fotografieren, kopieren, umbenennen, ablegen",
-                        quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "schuelerzusatzdaten,dat"]),
-                        students,
-                        klassen,
-                        [
-                            $"Am Einschulungstag unterstützt diese Funktion beim klassenweisen Fotografieren der Schüler*innen. Konkret beim Kopieren, Verkleinern (160*160), Umbenennen und Zippen der Fotos.",
-                            $"Erstellen Sie jetzt quadratische Fotos der vor Ihnen stehenden Klasse (z.B. mit dem Handy). Dabei ist die [{Global.GetColor(Global.ColorInfoBox)}]Reihenfolge & Anzahl[/] laut folgender Tabelle exakt einzuhalten. Die Fotos werden in den Schild-Fotoordner kopiert und dabei mit der schulischen E-Mail der SuS umbenannt.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1:[/] Wenn jemand fehlt, dann die weiße Wand fotografieren, damit [{Global.GetColor(Global.ColorInfoBox)}]Reihenfolge & Anzahl[/] stimmen.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #2:[/] Wenn ein Foto nicht gelungen ist, dann löschen und neu erstellen.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #3:[/] Wenn mehr als eine Klasse ausgewählt wird, wird nur die erste Klasse berücksichtigt",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #4:[/] Das Kriterium für die Reihenfolge ist der Dateiname.",
-                        ],
-                        m =>
-                        {
-                            m.FilterInteressierendeStudentsUndKlassen(configuration, "Klasse", "Geben Sie den Namen der Klasse an, die jetzt vor Ihnen steht.");
-                            if(m.NichtAlleSusHabenEineEindeutigeMailAdresse(configuration, m.IStudents)) return;
-                            m.IStudents.KlassenordnerErstellenFotosOrdnerÖffnen(configuration);
-                            m.IStudents.KlassenListenAnzeigen(configuration);
-                            m.IStudents.AnzahlPrüfen(configuration);
-                            m.IStudents.KlassenordnerInZielPfadErstellen(configuration);
-                            m.IStudents.FotosZuStudentsZuweisen(configuration);
-                            m.IStudents.FotosNachZielordnerKopieren(configuration);
-                        },
-                        Global.Rubrik.Allgemein,
-                        Global.NurBeiDiesenSchulnummern.Nur177659
-                    ),
-                    new Menüeintrag(
-                        "Fotos (b): Schüler*innenfotos nach SchILD2 hochladen",
-                        quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "schuelerzusatzdaten,dat"]),
-                        students,
-                        klassen,
-                        [
-                            $"Es werden jetzt die Fotos nach SchILD2 hochgeladen. Wenden Sie diese Funktion an, wenn Sie zuvor klassenweise Fotos mit [bold {Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] erstellt haben.",
-                            $"[{Global.GetColor(Global.ColorUnterschrift)}]Voraussetzung #1: [/]Die Fotos müssen aus SchILD exportiert werden: [{Global.GetColor(Global.ColorActionInMenüs)}]Datenaustausch > Fotos > Fotos exportieren[/]. Beachte, dass der Fotodateiname den Nachnamen, Vornamen und das Geburtsdatum enthält.",
-                            $"[{Global.GetColor(Global.ColorUnterschrift)}]Voraussetzung #2: [/]Alle noch nicht zu SchILD hochgeladenen Fotos liegen in einem vorbereiteten Ordner. Beachte: Die Fotos müssen den ersten Teil der E-Mail-Adresse (also alles vor dem @) als Dateinamen haben.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1: [/]Vorhandene Bilder werden nicht überschrieben, sofern der Export aus SchILD zuvor getätigt wurde."
-                        ],
-                        m =>
-                        {
-                            m.FilterInteressierendeStudentsUndKlassen(configuration);
-                            m.IStudents.FotosFürUploadNachSchildAuswählen(configuration);
-                            m.IStudents.FotosRotieren(configuration);
-                            m.IStudents.FotosFürUploadNachSchild2AuflistenUndBestätigen(configuration);
-                            m.IStudents.FotosNachSchild2Hochladen(configuration);
-                        },
-                        Global.Rubrik.Allgemein,
-                        Global.NurBeiDiesenSchulnummern.Nur177659
-                    ),
+                    ),                    
                     new Menüeintrag(
                         "Fotos (c): Schüler*innenfotos aus SchILD für Webuntis und Geevoo bereitstellen",
                         quelldateien.Notwendige(configuration, ["schuelerZusatzdaten,dat"]),
@@ -307,6 +258,25 @@ public static class MenueHelper
                     Global.Rubrik.Allgemein,
                     Global.NurBeiDiesenSchulnummern.Nur177659
                 ),
+                 new Menüeintrag(
+                                "Klassenbucheinträge: Säumige Lehrer*innen erinnern",
+                                quelldateien.Notwendige(configuration, ["lehrkraefte,dat", "openperiod,pdf"]),
+                                students,
+                                klassen,
+                                [
+                                    "Die 10% der KuK mit den meisten offenen Klassenbucheinträgen werden (mit folgender Einschränkung) angemahnt: Mit weniger als 10 offenen Eintragungen wird nicht gemahnt. ",
+                                    "Ab 20 oder mehr Stunden wird die Schulleitung in CC informiert.",
+                                    $"Die Anzahl der offenen Klassenbucheinträge wird aus der Datei [{Global.GetColor(Global.ColorPfadInDateien)}]OpenPeriods[/] ausgelesen.",
+                                    "Die KuK werden zuerst angezeigt. Vor dem Mailversand wird nochmal explizit nach Bestätigung gefragt."
+                                ],
+                                m =>
+                                {
+                                    lehrers = new Lehrers(configuration, m.Quelldateien);
+                                    lehrers.OffeneKlassenbuchEinträgeMahnen(m.Quelldateien, configuration);
+                                },
+                                Global.Rubrik.Allgemein,
+                                Global.NurBeiDiesenSchulnummern.Nur177659
+                            ),
                 new Menüeintrag(
                     "Wiki: Diverse SQLite-Dateien (Organigramm, Praktikum etc.) erstellen",
                     quelldateien.Notwendige(configuration, ["schuelerzusatzdaten,dat", "absenceperstudent,csv", "GPU006,txt", "GPU002,txt", "GPU003,txt", "klassen,dat"]),
@@ -383,6 +353,55 @@ public static class MenueHelper
                             }
                         },
                         Global.Rubrik.Wiki,
+                        Global.NurBeiDiesenSchulnummern.Nur177659
+                    ),
+                    new Menüeintrag(
+                        "Fotos (a): Schüler*innen klassenweise fotografieren, kopieren, umbenennen, ablegen",
+                        quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "schuelerzusatzdaten,dat"]),
+                        students,
+                        klassen,
+                        [
+                            $"Am Einschulungstag unterstützt diese Funktion beim klassenweisen Fotografieren der Schüler*innen. Konkret beim Kopieren, Verkleinern (160*160), Umbenennen und Zippen der Fotos.",
+                            $"Erstellen Sie jetzt quadratische Fotos der vor Ihnen stehenden Klasse (z.B. mit dem Handy). Dabei ist die [{Global.GetColor(Global.ColorInfoBox)}]Reihenfolge & Anzahl[/] laut folgender Tabelle exakt einzuhalten. Die Fotos werden in den Schild-Fotoordner kopiert und dabei mit der schulischen E-Mail der SuS umbenannt.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1:[/] Wenn jemand fehlt, dann die weiße Wand fotografieren, damit [{Global.GetColor(Global.ColorInfoBox)}]Reihenfolge & Anzahl[/] stimmen.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #2:[/] Wenn ein Foto nicht gelungen ist, dann löschen und neu erstellen.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #3:[/] Wenn mehr als eine Klasse ausgewählt wird, wird nur die erste Klasse berücksichtigt",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #4:[/] Das Kriterium für die Reihenfolge ist der Dateiname.",
+                        ],
+                        m =>
+                        {
+                            m.FilterInteressierendeStudentsUndKlassen(configuration, "Klasse", "Geben Sie den Namen der Klasse an, die jetzt vor Ihnen steht.");
+                            if(m.NichtAlleSusHabenEineEindeutigeMailAdresse(configuration, m.IStudents)) return;
+                            m.IStudents.KlassenordnerErstellenFotosOrdnerÖffnen(configuration);
+                            m.IStudents.KlassenListenAnzeigen(configuration);
+                            m.IStudents.AnzahlPrüfen(configuration);
+                            m.IStudents.KlassenordnerInZielPfadErstellen(configuration);
+                            m.IStudents.FotosZuStudentsZuweisen(configuration);
+                            m.IStudents.FotosNachZielordnerKopieren(configuration);
+                        },
+                        Global.Rubrik.Allgemein,
+                        Global.NurBeiDiesenSchulnummern.Nur177659
+                    ),
+                    new Menüeintrag(
+                        "Fotos (b): Schüler*innenfotos nach SchILD2 hochladen",
+                        quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "schuelerzusatzdaten,dat"]),
+                        students,
+                        klassen,
+                        [
+                            $"Es werden jetzt die Fotos nach SchILD2 hochgeladen. Wenden Sie diese Funktion an, wenn Sie zuvor klassenweise Fotos mit [bold {Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] erstellt haben.",
+                            $"[{Global.GetColor(Global.ColorUnterschrift)}]Voraussetzung #1: [/]Die Fotos müssen aus SchILD exportiert werden: [{Global.GetColor(Global.ColorActionInMenüs)}]Datenaustausch > Fotos > Fotos exportieren[/]. Beachte, dass der Fotodateiname den Nachnamen, Vornamen und das Geburtsdatum enthält.",
+                            $"[{Global.GetColor(Global.ColorUnterschrift)}]Voraussetzung #2: [/]Alle noch nicht zu SchILD hochgeladenen Fotos liegen in einem vorbereiteten Ordner. Beachte: Die Fotos müssen den ersten Teil der E-Mail-Adresse (also alles vor dem @) als Dateinamen haben.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1: [/]Vorhandene Bilder werden nicht überschrieben, sofern der Export aus SchILD zuvor getätigt wurde."
+                        ],
+                        m =>
+                        {
+                            m.FilterInteressierendeStudentsUndKlassen(configuration);
+                            m.IStudents.FotosFürUploadNachSchildAuswählen(configuration);
+                            m.IStudents.FotosRotieren(configuration);
+                            m.IStudents.FotosFürUploadNachSchild2AuflistenUndBestätigen(configuration);
+                            m.IStudents.FotosNachSchild2Hochladen(configuration);
+                        },
+                        Global.Rubrik.Allgemein,
                         Global.NurBeiDiesenSchulnummern.Nur177659
                     ),
                     new Menüeintrag(
@@ -752,26 +771,8 @@ public static class MenueHelper
                                 },
                                 Global.Rubrik.Wiki,
                                 Global.NurBeiDiesenSchulnummern.Nur177659
-                            ),
-                            new Menüeintrag(
-                                "Klassenbucheinträge: Säumige Lehrer*innen erinnern",
-                                quelldateien.Notwendige(configuration, ["lehrkraefte,dat", "openperiod,pdf"]),
-                                students,
-                                klassen,
-                                [
-                                    "Die 10% der KuK mit den meisten offenen Klassenbucheinträgen werden angemahnt.",
-                                    "Mit weniger als 10 offenen Eintragungen wird nicht gemahnt. Ab 20 oder mehr Stunden wird die Schulleitung in CC informiert.",
-                                    $"Die Anzahl der offenen Klassenbucheinträge wird aus der Datei [{Global.GetColor(Global.ColorPfadInDateien)}]OpenPeriods[/] ausgelesen.",
-                                    "Die KuK werden zuerst angezeigt. Vor dem Mailversand wird nochmal explizit nach Bestätigung gefragt."
-                                ],
-                                m =>
-                                {
-                                    lehrers = new Lehrers(configuration, m.Quelldateien);
-                                    lehrers.OffeneKlassenbuchEinträgeMahnen(m.Quelldateien, configuration);
-                                },
-                                Global.Rubrik.Allgemein,
-                                Global.NurBeiDiesenSchulnummern.Nur177659
                             )
+                           
                 /*,
                                 new Menüeintrag(
                                     "Zeugnisse #1: Lernabschnittsdaten: Fehlzeiten von Webuntis nach SchILD importieren",
