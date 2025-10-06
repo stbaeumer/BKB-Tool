@@ -296,23 +296,57 @@ public static class MenueHelper
                     {
                         var anrechnungen = new Anrechnungen(lehrers, configuration);
 
-                        m.Zieldateien =
-                        [
-                            m.GetGruppen(configuration, anrechnungen, Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-gruppen.csv"), lehrers, ",", '\"', new UTF8Encoding(false), true),
-                            anrechnungen.Anlegen(Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-untisanrechnungen.csv") ,[500, 510, 530, 590, 900], [500, 510, 530, 590], ["PLA", "BM"], ",", '\"', new UTF8Encoding(false), true),
-                            m.GetLehrer(lehrers, Path.Combine(Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-lul-utf8OhneBom-einmalig-vor-SJ-Beginn.csv")), ",", '\'', new UTF8Encoding(false), false),
-                            m.Praktikanten(
-                                [
-                                    "BW,1,2", "BT,1,2", "BS,1,2", "BS,2,2", "HBG,1,2", "HBT,1,2", "HBT,2,2", "HBW,1,1", "GG,1,1", "GT,1,1", "GW,1,1", "IFK,1,2" // Klasse, Jg, Anzahl Praktika
-                                ],
-                                Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + @"-praktikanten-utf8OhneBom-einmalig-vor-SJ-Beginn.csv"), ",", '\"', new UTF8Encoding(false), true),
-                            m.KlassenAnlegen(configuration, Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + @"-klassen-utf8OhneBom-einmalig-vor-SJ-Beginn.csv"), ",", '\"', new UTF8Encoding(false), true)
-                        ];
-
-                        m.Schulpflichtüberwachung(configuration);
-
-                        m.Zieldateien.Add(m.GetFaecher(configuration, Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-faecher.csv"), ",", '\'', new UTF8Encoding(false), false));
-                        m.Zieldateien.Erstellen();
+                        m.GetGruppen(
+                            configuration,
+                            [ 
+                            ],
+                            anrechnungen,
+                            Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-gruppen.csv"),
+                            lehrers,
+                            ",", '\"', new UTF8Encoding(false), true);
+                        anrechnungen.Anlegen(
+                            Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-untisanrechnungen.csv"),
+                            [                                
+                                zieldatei => zieldatei.Erstellen()
+                            ],
+                            [500, 510, 530, 590, 900],
+                            [500, 510, 530, 590],
+                            ["PLA", "BM"],
+                            ",", '\"', new UTF8Encoding(false), true);
+                        m.GetLehrer(                            
+                            [                                
+                                zieldatei => zieldatei.Erstellen()
+                            ],
+                            lehrers,
+                            Path.Combine(Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-lul-utf8OhneBom-einmalig-vor-SJ-Beginn.csv")),
+                            ",", '\'', new UTF8Encoding(false), false);
+                        m.Praktikanten(
+                            [                                
+                                zieldatei => zieldatei.Erstellen()
+                            ],
+                            [
+                                "BW,1,2", "BT,1,2", "BS,1,2", "BS,2,2", "HBG,1,2", "HBT,1,2", "HBT,2,2", "HBW,1,1", "GG,1,1", "GT,1,1", "GW,1,1", "IFK,1,2" // Klasse, Jg, Anzahl Praktika
+                            ],
+                            Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + @"-praktikanten-utf8OhneBom-einmalig-vor-SJ-Beginn.csv"),
+                            ",", '\"', new UTF8Encoding(false), true);
+                        m.KlassenAnlegen(
+                            configuration,
+                            [                                
+                                zieldatei => zieldatei.Erstellen()
+                            ],
+                            Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + @"-klassen-utf8OhneBom-einmalig-vor-SJ-Beginn.csv"), ",", '\"', new UTF8Encoding(false), true);
+                        m.Schulpflichtüberwachung(
+                            configuration,
+                            [                                
+                                zieldatei => zieldatei.Erstellen()
+                            ]);
+                        m.GetFaecher(
+                            configuration,
+                            [                                
+                                zieldatei => zieldatei.Erstellen()
+                            ],
+                            Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-faecher.csv"),
+                            ",", '\'', new UTF8Encoding(false), false);
                     },
                     Global.Rubrik.Wiki,
                     Global.NurBeiDiesenSchulnummern.Nur177659
@@ -676,52 +710,26 @@ public static class MenueHelper
                         ),
                         new Menüeintrag(
                             "Teams-Chat: Teams-Chat mit Gruppe von Lehrkräften beginnen",
-                            quelldateien.Notwendige(configuration, ["exportlessons,csv"]),
+                            quelldateien.Notwendige(configuration, ["gpu002,txt","gpu003,txt"]),
                             students,
                             klassen,
                             [
-                                "Lehrkräfte können über Teams angeschrieben werden.",
-                                $"Dazu wird die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", "ExportLessons.csv")}[/] ausgewertet.",
-                                "Es wird jetzt ein Link nach Teams erstellt, um einen Chat mit den Lehrkräften zu beginnen."
+                                $"Mit dieser Funktion wird ein Teams-Chat-Link im Browser geöffnet. Der Chat enthält alle Lehrkräfte der im Folgenden ausgewähten Gruppen.",
+                                $"Die Gruppen werden aus den Anrechnungen sowie der Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", "GPU002.TXT")}[/] gebildet."
                             ],
                             m =>
                             {
                                 var anrechnungen = new Anrechnungen(lehrers, configuration);
-                                var datei = m.GetGruppen(configuration, anrechnungen, Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-gruppen.csv"), lehrers, ",", '\"', new UTF8Encoding(false), true);
-
-                                var table = new Table();
-                                table.AddColumn("Nr.");
-                                table.AddColumn("Gruppe");
-
-                                var zulässigeAuswahlOptionen = "";
-
-                                for (int i = 1; i < datei.Count; i++)
-                                {
-                                    string page = datei[i].Page;
-                                    table.AddRow(i.ToString(), page);
-                                    zulässigeAuswahlOptionen += i + ", ";
-                                }
-
-                                table.AddRow((datei.Count).ToString(), "(Eine einzelne) Klasse(n) wählen");
-                                zulässigeAuswahlOptionen += datei.Count;
-
-                                AnsiConsole.Write(table);
-
-                                configuration = Global.Konfig("TeamsChatAuswahl", Global.Modus.Update, configuration);
-
-                                var nummer = int.Parse(configuration["TeamsChatAuswahl"]);
-
-                                if (nummer > 0 && nummer < datei.Count)
-                                {
-                                    m.ChatErzeugen(configuration, datei[nummer - 1].MitgliederMail);
-                                }
-
-                                if (nummer == datei.Count)
-                                {
-                                    m.FilterInteressierendeStudentsUndKlassen(configuration);
-                                    datei = m.GetLehrerDerKlassen(configuration, lehrers ?? []);
-                                    m.ChatErzeugen(configuration, datei[0].MitgliederMail);
-                                }
+                                m.GetGruppen(
+                                    configuration,
+                                    [
+                                        datei => datei.Auswählen(m, lehrers),
+                                        datei => datei.OeffneWebseite("https://teams.microsoft.com/l/chat/0/0?users=", "", "&message=" + Uri.EscapeDataString("Hallo zusammen!")),
+                                    ],
+                                    anrechnungen,
+                                    Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-gruppen.csv"),
+                                    lehrers,
+                                    ",", '\"', new UTF8Encoding(false), true);                                
                             },
                             Global.Rubrik.Allgemein,
                             Global.NurBeiDiesenSchulnummern.Nur177659
@@ -757,17 +765,27 @@ public static class MenueHelper
                             ),
                             new Menüeintrag(
                                 "Sprechtag: Lehrerübersichtsseite im Wiki veröffentlichen",
-                                quelldateien,
+                                quelldateien.Notwendige(configuration, ["exportlessons,csv", "gpu004,txt", "gpu005,txt"]),
                                 students,
                                 klassen,
                                 [
-                                    "Die Wiki-Datei sprechtag.txt wird angepasst. Die Wunschräume werden in den Untis-Stammdaten beim Lehrer eingetragen. Dazu die Fenstergruppe Sprechtag in Untis öffnen. Bei Abwesenheiten die Räume für kommendes Jahr stehen lassen, wenn im Betreff 'außer Haus' steht, dann wird der Raum nicht angezeigt. Fußnoten werden als Text2 in den Untis-Stammdaten eingetragen. Beispiel für eine Fußnote: 'außer Haus; bitte Termin vereinbaren;'",
-                                    "Lehrkräfte ohne Raum werden in der Liste ignoriert. Lehrkräfte ohne eigenen Unterricht bleiben unberücksichtigt"
+                                    $"Die Wiki-Datei [{Global.GetColor(Global.ColorPfadInDateien)}]sprechtag.txt[/] wird über XML-RPC aktualisiert.",
+                                    $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise:[/]",
+                                    $"[{Global.GetColor(Global.ColorHinweise)}]1:[/]Die Wunschräume müssen in den Untis-Stammdaten beim Lehrer eingetragen werden. Dazu am besten die Fenstergruppe Sprechtag in Untis öffnen.",
+                                    $"[{Global.GetColor(Global.ColorHinweise)}]2:[/]Fußnoten werden als Text2 in den Untis-Stammdaten eingetragen. Beispiel für eine Fußnote: [{Global.GetColor(Global.ColorHinweise)}]'außer Haus; bitte Termin vereinbaren;'[/]",
+                                    $"[{Global.GetColor(Global.ColorHinweise)}]3:[/]Lehrkräfte ohne Raum werden in der Liste ignoriert. Bei Abwesenheiten die Räume für kommendes Jahr stehen lassen, wenn im Betreff 'außer Haus' steht, dann wird der Raum nicht angezeigt.",
+                                    $"[{Global.GetColor(Global.ColorHinweise)}]4:[/]Lehrkräfte ohne eigenen Unterricht bleiben unberücksichtigt."
                                 ],
                                 m =>
                                 {
-                                    m.Sprechtag(lehrers, raums, configuration,
-                                        "Zum jährlichen Sprechtag laden wir sehr herzlich am Mittwoch nach der Zeugnisausgabe in der Zeit von 13:30 bis 17:30 Uhr ein. Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
+                                    m.Sprechtag(
+                                        configuration,
+                                        "oeffentlich:sprechtag",
+                                        [
+                                            datei => datei.PutPage(),
+                                            datei => datei.OeffneWebseite("https://bkb.wiki/oeffentlich:sprechtag"),
+                                        ],                                        
+                                        "Zum jährlichen Sprechtag laden wir sehr herzlich am Mittwoch nach der allgemeinen Zeugnisausgabe in der Zeit von 13:30 bis 17:30 Uhr ein. Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
                                 },
                                 Global.Rubrik.Wiki,
                                 Global.NurBeiDiesenSchulnummern.Nur177659

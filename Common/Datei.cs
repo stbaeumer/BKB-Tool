@@ -11,6 +11,8 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
 using Color = Spectre.Console.Color;
 using System.Diagnostics;
+using CookComputing.XmlRpc;
+using System.Dynamic;
 
 namespace Common;
 
@@ -33,6 +35,7 @@ public class Datei : List<dynamic>
     public bool ShouldAllQuote { get; private set; }
     public bool ShouldQuote { get; set; }
     public List<string> Importhinweise { get; set; }
+    public Lehrers Lehrers { get; set; } = null!;
     public bool DarfLeerSein { get; set; } = false;
     public bool HasHeader { get; set; }
     public string Name { get; set; } = null!;
@@ -53,6 +56,7 @@ public class Datei : List<dynamic>
 
     public string? AbsoluterPfad { get; set; } = "";
     public List<Action<Datei>> Funktionen { get; private set; }
+    public IConfiguration Konfiguration { get; private set; }
     public string Dateiname { get; set; } = null!;
     public string ZipPfad { get; private set; }
     public string Fehlermeldung { get; set; }
@@ -71,10 +75,30 @@ public class Datei : List<dynamic>
     public UTF8Encoding UTF8Encoding { get; }
     public bool V3 { get; }
     public object Value2 { get; }
+    public DokuwikiZugriff DokuwikiZugriff { get; private set; }
 
     //public Datei(string name, Global.Modus modus, string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert)
     public Datei(
-        string name,
+        string name,        
+        string[] anhandDieserAttributeWirdVerglichen,
+        string[] dieseAttributeWerdenBeimVergleichIgnoriert,
+        string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise)
+    {
+        Name = name;
+        Dateiname = Path.GetFileName(name);
+        AbsoluterPfad = name;        
+        AnhandDieserSchlüsselAttributeWirdVerglichen = anhandDieserAttributeWirdVerglichen;
+        DieseAttributeWerdenBeimVergleichIgnoriert = dieseAttributeWerdenBeimVergleichIgnoriert;
+        UnterordnerUndDateiname = name;
+        Delimiter = delimiter;
+        Quote = quote;
+        Encoding = encoding;
+        ShouldAllQuote = shouldAllQuote;
+        Importhinweise = importhinweise;
+    }
+    
+    public Datei(
+        string name,        
         List<Action<Datei>> funktionen,
         string[] anhandDieserAttributeWirdVerglichen,
         string[] dieseAttributeWerdenBeimVergleichIgnoriert,
@@ -82,7 +106,7 @@ public class Datei : List<dynamic>
     {
         Name = name;
         Dateiname = Path.GetFileName(name);
-        AbsoluterPfad = name;
+        AbsoluterPfad = name;        
         Funktionen = funktionen;
         AnhandDieserSchlüsselAttributeWirdVerglichen = anhandDieserAttributeWirdVerglichen;
         DieseAttributeWerdenBeimVergleichIgnoriert = dieseAttributeWerdenBeimVergleichIgnoriert;
@@ -92,6 +116,31 @@ public class Datei : List<dynamic>
         Encoding = encoding;
         ShouldAllQuote = shouldAllQuote;
         Importhinweise = importhinweise;
+    }
+
+    public Datei(
+        string name,
+        string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise)
+    {
+        Name = name;
+        Dateiname = Path.GetFileName(name);
+        AbsoluterPfad = name;
+        UnterordnerUndDateiname = name;
+        Delimiter = delimiter;
+        Quote = quote;
+        Encoding = encoding;
+        ShouldAllQuote = shouldAllQuote;
+        Importhinweise = importhinweise;
+    }
+
+    public Datei(
+        string name,
+        List<Action<Datei>> funktionen,
+        IConfiguration configuration)
+    {
+        Name = name;
+        Funktionen = funktionen;
+        Konfiguration = configuration;
     }
 
     public Datei(string zieldateiname, Datei vergleichsdatei)
@@ -137,14 +186,23 @@ public class Datei : List<dynamic>
         DarfLeerSein = darfLeerSein;
     }
 
-    public Datei(string absoluterPfad, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise) : this(absoluterPfad)
+    public Datei(
+        string absoluterPfad,
+        IConfiguration configuration,
+        List<Action<Datei>> funktionen,
+        string delimiter, char quote, Encoding encoding, bool shouldAllQuote,
+        Lehrers lehrers,
+        List<string> importhinweise) : this(absoluterPfad)
     {
         AbsoluterPfad = absoluterPfad;
+        Konfiguration = configuration;
+        Funktionen = funktionen;
         Delimiter = delimiter;
         Quote = quote;
         Encoding = encoding;
         ShouldAllQuote = shouldAllQuote;
         Importhinweise = importhinweise;
+        Lehrers = lehrers;
     }
 
     public Datei(
@@ -164,6 +222,18 @@ public class Datei : List<dynamic>
         Encoding = encoding;
         ShouldAllQuote = shouldAllQuote;
         Importhinweise = importhinweise;
+    }
+
+    public Datei(string absoluterPfad, IConfiguration configuration, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, Lehrers lehrers, List<string> importhinweise) : this(absoluterPfad)
+    {
+        AbsoluterPfad = absoluterPfad;
+        Konfiguration = configuration;
+        Delimiter = delimiter;
+        Quote = quote;
+        Encoding = encoding;
+        ShouldAllQuote = shouldAllQuote;
+        Importhinweise = importhinweise;
+        Lehrers = lehrers;
     }
 
     public List<dynamic> Filtern(Students students, Klassen klassen)
@@ -1226,15 +1296,67 @@ public class Datei : List<dynamic>
 
     }
 
-    internal void OeffneWebseite(string url)
+    internal void OeffneWebseite(string urlBeginn, string urlMitte = "", string urlEnde = "")
     {
+        var mitgliederMail = this
+            .Where(rec =>
+            {
+                if (rec == null) return false;
+                var dict = (IDictionary<string, object>)rec;
+                return dict != null && dict["EMINUSMail"] != null && !string.IsNullOrWhiteSpace(dict["EMINUSMail"].ToString());
+            })
+            .Select(rec => ((IDictionary<string, object>)rec)["EMINUSMail"].ToString())
+            .LastOrDefault();
+
+        // Wenn MitgliederMail vorhanden ist, verwende es in der URL
+        if (!string.IsNullOrEmpty(mitgliederMail))
+        {
+            urlMitte = mitgliederMail;
+        }
+
+        // Wenn der URL insgesamt länger als 300 Zeichen ist, wird der urlMitte solange gekürzt, bis die URL passt.
+        // Das Kürzen geschieht immer an den Kommas. Diejenigen E-Mail-Adressen, die am Ende übrig bleiben, werden in einem Panel angezeigt.
+        var hinweise = new List<string>();
+        while ((urlBeginn + urlMitte + urlEnde).Length > 1000)
+        {
+            var letzteKommaPosition = urlMitte.LastIndexOf(',');
+            if (letzteKommaPosition > 0)
+            {
+                var uebrigeAdressen = urlMitte.Substring(letzteKommaPosition + 1).Trim();
+                hinweise.Add(uebrigeAdressen);
+                urlMitte = urlMitte.Substring(0, letzteKommaPosition).Trim();
+            }
+            else
+            {
+                // Kein Komma mehr gefunden, Abbruch der Schleife
+                break;
+            }
+        }
+
+        if (hinweise.Count > 0)
+        {
+            var panel = new Panel($"[bold {Global.GetColor(Global.ColorHinweise)}]Die URL ist zu lang. Es konnten nicht alle E-Mail-Adressen berücksichtigt werden.[/]\n[gray]{string.Join("\n", hinweise)}[/]")
+                .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] !? [/]")
+                .HeaderAlignment(Justify.Left)
+                .SquareBorder()
+                .Expand()
+                .BorderColor(Global.ColorHinweise);
+
+            AnsiConsole.Write(panel);
+        }
+
+
+
         try
         {
             Process.Start(new ProcessStartInfo
             {
-                FileName = url,
+                FileName = urlBeginn + urlMitte + urlEnde,
                 UseShellExecute = true
             });
+
+
+            AnsiConsole.MarkupLine($"[green]Webseite geöffnet: {urlBeginn + urlMitte + urlEnde}[/]");
         }
         catch (Exception ex)
         {
@@ -1565,6 +1687,10 @@ public class Datei : List<dynamic>
 
     internal void OrdnerOeffnen()
     {
+        if (this.Count == 0)
+        {
+            return;
+        }
         Process.Start(new ProcessStartInfo
         {
             FileName = Path.GetDirectoryName(AbsoluterPfad),
@@ -1585,5 +1711,142 @@ public class Datei : List<dynamic>
             }
         }
         return liste;
+    }
+
+    internal void PutPage()
+    {
+        var configuration = Global.Konfig("WikiSprechtagKleineAenderung", Global.Modus.Update, Konfiguration);
+        DokuwikiZugriff = new DokuwikiZugriff(configuration);
+
+        DokuwikiZugriff.Options = new XmlRpcStruct
+        {
+            { "sum", "Automatische Aktualisierung" },
+            { "minor", Global.WikiSprechtagKleineAenderung } // Kein Minor-Edit
+        };
+        
+        DokuwikiZugriff.Proxy.PutPage(Name, string.Join("\n", this), new XmlRpcStruct());
+    }
+
+    internal void ChatErzeugen(Menüeintrag m)
+    {
+        var table = new Table();
+        table.AddColumn("Nr.");
+        table.AddColumn("Gruppe");
+
+        var zulässigeAuswahlOptionen = "";
+
+        for (int i = 1; i < Count; i++)
+        {
+            string page = this[i].Page;
+            table.AddRow(i.ToString(), page);
+            zulässigeAuswahlOptionen += i + ", ";
+        }
+
+        table.AddRow((Count).ToString(), "(Eine einzelne) Klasse(n) wählen");
+        zulässigeAuswahlOptionen += Count;
+
+        AnsiConsole.Write(table);
+
+        var configuration = Global.Konfig("TeamsChatAuswahl", Global.Modus.Update, Konfiguration);
+
+        var nummer = int.Parse(configuration["TeamsChatAuswahl"]);
+
+        if (nummer > 0 && nummer < Count)
+        {
+            var lehrers = new Lehrers();
+            lehrers.GetTeamsUrl(this[nummer - 1].MitgliederMail.Split(';'), String.Join(';', m.IKlassen));            
+        }
+
+        if (nummer == Count)
+        {
+            m.FilterInteressierendeStudentsUndKlassen(configuration);
+            var l = m.GetLehrerDerKlassen(configuration, Lehrers ?? []);
+            var lehrers = new Lehrers();
+            lehrers.GetTeamsUrl(this[nummer - 1].MitgliederMail.Split(';'), String.Join(';', m.IKlassen));
+        }
+    }
+
+    internal void Auswählen(Menüeintrag m, Lehrers lehrers)
+    {
+        var table = new Table();
+        table.AddColumn("Nr.");
+        table.AddColumn("Gruppe");
+
+        var zulässigeAuswahlOptionen = "";
+
+        for (int i = 1; i < Count; i++)
+        {
+            string page = this[i].Page;
+            table.AddRow(i.ToString(), page);
+            zulässigeAuswahlOptionen += i + ", ";
+        }
+
+        table.AddRow((Count).ToString(), "(Eine einzelne) Klasse(n) wählen");
+        zulässigeAuswahlOptionen += Count;
+
+        AnsiConsole.Write(table);
+
+        var configuration = Global.Konfig("TeamsChatAuswahl", Global.Modus.Update, Konfiguration, "", -1, -1, "", "", null, zulässigeAuswahlOptionen);
+
+        var nummer = int.Parse(configuration["TeamsChatAuswahl"]);
+
+        // Entferne alle zeilen aus this, die nicht der ausgewählten Nummer entsprechen.
+        // Wenn die Nummer Count ist, wird die Datei nicht verändert.
+        if (nummer > 0 && nummer < Count)
+        {
+            for (int i = Count - 1; i >= 0; i--)
+            {
+                if (nummer != i)
+                {
+                    this.RemoveAt(i);
+                }
+            }
+        }
+        else if (nummer == Count)
+        {
+            this.Clear();
+            m.FilterInteressierendeStudentsUndKlassen(configuration);
+            var klasse = m.IKlassen.FirstOrDefault();
+            var lehrerDerKlasse = m.GetLehrerDerKlassen(configuration, lehrers ?? []);
+
+            var gpu002 = m.Quelldateien.GetMatchingList(configuration, "gpu002", IStudents, m.Klassen);
+            if (gpu002 == null || gpu002.Count == 0) return;
+
+            var verschiedeneLulKuerzel = gpu002 
+                .Where(rec =>
+                {
+                    var dict = (IDictionary<string, object>)rec;
+                    var klassenString = dict["Field5"].ToString();
+                    var klassenListe = klassenString.Split('~'); // Zerlegt den String in eine Liste
+                    return m.IKlassen.Any(klasse => klassenListe.Contains(klasse)) &&
+                        !string.IsNullOrEmpty(dict["Field6"].ToString());
+                }).Select(rec =>
+                {
+                    var dict = (IDictionary<string, object>)rec;
+                    return dict["Field6"].ToString();
+                }).Distinct().ToList().OrderBy(x => x).ToList();
+
+            var mitgliederMail = "";
+            var mitgliederKuerzel = "";
+            var mitglieder = "";
+            foreach (var lehrer in Lehrers.Where(l => verschiedeneLulKuerzel.Contains(l.Kürzel)))
+            {
+                if (!string.IsNullOrEmpty(mitgliederMail))
+                    mitgliederMail += ",";
+                mitgliederMail += lehrer.Mail;
+                if (!string.IsNullOrEmpty(mitgliederKuerzel))
+                    mitgliederKuerzel += ",";
+                mitgliederKuerzel += lehrer.Kürzel;
+                if (!string.IsNullOrEmpty(mitglieder))
+                    mitglieder += ", ";
+                mitglieder += (lehrer.Titel != " " ? lehrer.Titel : "") + lehrer.Vorname + " " + lehrer.Nachname;
+            }
+
+            dynamic record = new ExpandoObject();
+            record.Mitglieder = mitglieder;
+            record.MitgliederMail = mitgliederMail;
+            record.MitgliederKuerzel = mitgliederKuerzel;
+            this.Add(record);
+        }
     }
 }

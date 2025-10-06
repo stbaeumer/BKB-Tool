@@ -1031,7 +1031,7 @@ public static class Global
                             return ValidationResult.Success();
                         if (!DateTime.TryParse(n.ToString(), out _))
                         {
-                            return ValidationResult.Error($"[]  {n} ist kein Datum (TT.MM.JJJJ)[/]");
+                            return ValidationResult.Error($"[]  {n} ist kein Datum. (TT.MM.JJJJ)[/]");
                         }
 
                         return ValidationResult.Success();
@@ -1970,7 +1970,7 @@ public static class KonfigHelper
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]Stichtag zur Abgabe der Statistik[/] an. Das ist wichtig, um diejenigen Unterrichte auszuschließen, die befristet sind und nicht am Stichtag stattfinden.",
             Datentyp = Global.Datentyp.DateTime,
-            InGrundeinstellungAbfragen = true,
+            InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
@@ -1979,9 +1979,9 @@ public static class KonfigHelper
             Key = "TeamsChatAuswahl",
             DefaultValue = "1",
             Aufforderung = $"[green]■[/]",
-            Hinweise = $"Bitte eine [{Global.GetColor(Global.ColorInfoBox)}]Zahl[/] auswählen:",
+            Hinweise = $"Bitte eine [{Global.GetColor(Global.ColorInfoBox)}]Zahl[/] eingeben:",
             Datentyp = Global.Datentyp.Int,
-            InGrundeinstellungAbfragen = true,
+            InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
@@ -2012,7 +2012,7 @@ public static class KonfigHelper
             Key = "WikiUrl",
             DefaultValue =  Environment.GetEnvironmentVariable("WikiUrl") ?? "",
             Aufforderung = $"[green]■[/]",
-            Hinweise = $"Geben Sie die [{Global.GetColor(Global.ColorInfoBox)}]URL[/] zum dokuwiki xmlrpc an.",
+            Hinweise = $"Geben Sie die [{Global.GetColor(Global.ColorInfoBox)}]URL[/] zur dokuwiki xmlrpc.php an.",
             Datentyp = Global.Datentyp.Url,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
@@ -2043,7 +2043,7 @@ public static class KonfigHelper
         ["WikiSprechtagKleineAenderung"] = new KonfigMeta
         {
             Key = "WikiSprechtagKleineAenderung",
-            DefaultValue = "",
+            DefaultValue = "j",
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Handelt es sich um eine [{Global.GetColor(Global.ColorInfoBox)}]kleine Änderung[/]? Kleine Änderungen erzeugen keine neue Version (j/n)",
             Datentyp = Global.Datentyp.JaNein,

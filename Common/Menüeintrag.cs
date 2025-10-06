@@ -1518,8 +1518,7 @@ public class Menüeintrag
 
     public void ChatErzeugen(IConfiguration configuration, String mitgliederMail)
     {
-        var lehrers = new Lehrers();
-        lehrers.GetTeamsUrl(mitgliederMail.Split(';'), String.Join(';', IKlassen));
+        
     }
     
     public void WebuntisOderNetmanOderLitteraCsv(IConfiguration configuration, List<Datei> zieldateien)
@@ -2811,37 +2810,57 @@ public class Menüeintrag
     }
 
 
-    public Datei Sprechtag(Lehrers lehrers, Raums raums, IConfiguration configuration, string hinweis)
+    public void Sprechtag(
+        IConfiguration configuration,
+        string zieldateiname,
+        List<Action<Datei>> funktionen,
+        string hinweis)
     {
-
-        var dokuwikiZugriff = new DokuwikiZugriff(configuration);
-
-        Global.Konfig("WikiSprechtagKleineAenderung", Global.Modus.Update, configuration);
-
-        dokuwikiZugriff.Options = new XmlRpcStruct
-        {
-            { "sum", "Automatische Aktualisierung" },
-            { "minor", Global.WikiSprechtagKleineAenderung } // Kein Minor-Edit
-        };
-
-        var content = new List<string>();
-
         var exportLessons = Quelldateien.GetMatchingList(configuration, "exportlessons", IStudents, Klassen);
-        if (exportLessons == null || !exportLessons.Any()) return [];
+        if (exportLessons == null || !exportLessons.Any()) return;
 
-        Global.Konfig("Sprechtagsdatum", Global.Modus.Update, configuration);
-        //Global.Konfig("wikiSprechtagSeite", true, "Seite eingeben, die manipuliert werden soll.");
+        var raums = Quelldateien.GetMatchingList(configuration, "gpu005", IStudents, Klassen);
+        if (raums == null || !raums.Any()) return;
 
-        hinweis = hinweis.Replace(" nach der allgemeinen Zeugnisausgabe", ", " + Global.Sprechtagsdatum + ",");
+        var lehrkräfte = Quelldateien.GetMatchingList(configuration, "gpu004", IStudents, Klassen);
+        if (lehrkräfte == null || !lehrkräfte.Any()) return;
 
-        var alleLehrerImUnterrichtKürzel = exportLessons.Select(rec =>
+        var zieldatei = new Datei(zieldateiname, funktionen, configuration);
+
+        var lehrers = new Lehrers();
+        foreach (var rec in lehrkräfte)
         {
             var dict = (IDictionary<string, object>)rec;
-            return dict["teacher"].ToString();
-        }).Distinct().ToList();
+            var l = new Lehrer
+            {
+                Kürzel = dict["Field1"].ToString(),
+                Nachname = dict["Field2"].ToString(),
+                Vorname = dict["Field29"].ToString(),
+                Geschlecht = dict["Field6"].ToString().ToLower() == "w" ? "w" : "m",
+                Titel = dict["Field30"].ToString(),
+                Raum = dict["Field5"].ToString(),
+                Text2 = dict["Field43"].ToString()
+            };
+            lehrers.Add(l);
+        }
+
+        configuration = Global.Konfig("SprechtagsDatum", Global.Modus.Update, configuration);
+
+        hinweis = hinweis.Replace(" nach der allgemeinen Zeugnisausgabe", ", **" + configuration["SprechtagsDatum"] + "**,");
+
+        // Distincte und sortierte Liste aller Lehrer-Kürzel, die im Unterricht sind  
+        var alleLehrerImUnterrichtKürzel = exportLessons
+    .Select(rec =>
+    {
+        var dict = (IDictionary<string, object>)rec;
+        return dict["teacher"].ToString();
+    })
+    .Where(x => !string.IsNullOrWhiteSpace(x)) // Nur nicht-leere Strings
+    .Distinct()
+    .OrderBy(x => x)
+    .ToList();
 
         var alleLehrerImUnterricht = new Lehrers();
-
         var vergebeneRäume = new Raums();
 
         foreach (var lehrer in lehrers.OrderBy(x => x.Nachname).ThenBy(x => x.Vorname))
@@ -2868,16 +2887,16 @@ public class Menüeintrag
             }
         }
 
-        content.Add("====== Sprechtag ======");
-        content.Add("");
+        zieldatei.Add("====== Sprechtag ======");
+        zieldatei.Add("");
 
-        content.Add(hinweis);
+        zieldatei.Add(hinweis);
 
         var i = 1;
-        content.Add("");
-        content.Add("<WRAP column 15em>");
-        content.Add("");
-        content.Add("^Name^Raum^");
+        zieldatei.Add("");
+        zieldatei.Add("<WRAP column 15em>");
+        zieldatei.Add("");
+        zieldatei.Add("^Name^Raum^");
 
         var lehrerProSpalteAufSeite2 = ((alleLehrerImUnterricht.Count - 60) / 3) + 1;
 
@@ -2891,41 +2910,59 @@ public class Menüeintrag
                 raum = "";
             }
 
-            content.Add(
+            zieldatei.Add(
                 "|" + (l.Geschlecht == "m" ? "Herr " : "Frau ") + (l.Titel == "" ? "" : l.Titel + " ") +
                 l.Nachname + (l.Text2 == "" ? "" : " ((" + l.Text2 + "))") + "|" + raum + "|");
 
             if (i == 20 || i == 40 || i == 60 || i == 60 + lehrerProSpalteAufSeite2 ||
                 i == 60 + lehrerProSpalteAufSeite2 * 2)
             {
-                content.Add("</WRAP>");
-                content.Add("");
+                zieldatei.Add("</WRAP>");
+                zieldatei.Add("");
 
                 if (i == 60)
                 {
-                    content.Add("<WRAP pagebreak>");
+                    zieldatei.Add("<WRAP pagebreak>");
                 }
 
-                content.Add("<WRAP column 15em>");
-                content.Add("");
-                content.Add("^Name^Raum^");
+                zieldatei.Add("<WRAP column 15em>");
+                zieldatei.Add("");
+                zieldatei.Add("^Name^Raum^");
             }
 
             i++;
         }
 
-        content.Add("</WRAP>");
+        zieldatei.Add("</WRAP>");
 
-        content.Add(
+        zieldatei.Add(
             "Klassenleitungen finden die Einladung als Kopiervorlage im [[sharepoint>:f:/s/Kollegium2/EjakJvXmitdCkm_iQcqOTLwB-9EWV5uqXE8j3BrRzKQQAw?e=OwxG0N|Sharepoint]].\r\n" +
             Environment.NewLine);
 
-        content.Add("");
+        zieldatei.Add("");
 
-        var freieR = raums.OrderBy(x => x.Raumnummer)
+        var xx = raums.Select(rec =>
+        {
+            var dict = (IDictionary<string, object>)rec;
+            return dict["Field1"].ToString();
+        }).Distinct().OrderBy(x => x).ToList();
+
+        var räume = new Raums();
+
+        foreach (var dd in xx)
+        {
+            if (!(from v in vergebeneRäume where v.Raumnummer == dd select v).Any())
+            {
+                räume.Add(new Raum(dd));
+            }
+        }
+
+        var freieR = räume.OrderBy(x => x.Raumnummer)
             .Where(raum => !(from v in vergebeneRäume where v.Raumnummer == raum.Raumnummer select v).Any()).Aggregate(
-                @"Sprechtag: Gewünschte Räume müssen in Untis in den Lehrer-Stammdaten eingetragen werden: ",
+                @"Verfügbare, freie Räume für den Sprechtag: ",
                 (current, raum) => current + (raum.Raumnummer + " "));
+
+       
 
         var panel = new Panel(freieR)
                         .HeaderAlignment(Justify.Left)
@@ -2934,14 +2971,9 @@ public class Menüeintrag
                         .BorderColor(Color.Red);
 
         AnsiConsole.Write(panel);
-
-
-
-        dokuwikiZugriff.PutPage("oeffentlich:sprechtag", string.Join("\n", content));
-
-        Global.OpenWebseite("https://bkb.wiki/oeffentlich:sprechtag");
         
-        return [];
+        foreach (var aktion in zieldatei.Funktionen)
+            aktion(zieldatei);
     }
 
     public Datei Zusatzdaten(IConfiguration configuration, string zieldateiname)
@@ -3148,6 +3180,7 @@ public class Menüeintrag
 
     public Datei GetFaecher(
         IConfiguration configuration,
+        List<Action<Datei>> funktionen,
         string zieldateiname,
         string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
@@ -3184,6 +3217,7 @@ public class Menüeintrag
     }
 
     public Datei GetLehrer(
+        List<Action<Datei>> funktionen,
         Lehrers lehrers,
         string zieldateiname,
         string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
@@ -3205,6 +3239,7 @@ public class Menüeintrag
     }
 
     public Datei? Praktikanten(
+        List<Action<Datei>> funktionen,
         List<string> interessierendeKlassenUndJg,
         string zieldateiname,
         string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
@@ -3244,6 +3279,7 @@ public class Menüeintrag
 
     public Datei? KlassenAnlegen(
         IConfiguration configuration,
+        List<Action<Datei>> funktionen,
         string zieldateiname,
         string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
@@ -3280,7 +3316,10 @@ public class Menüeintrag
         return zieldatei;
     }
 
-    public void Schulpflichtüberwachung(IConfiguration configuration)
+    public void Schulpflichtüberwachung(
+        IConfiguration configuration,
+        List<Action<Datei>> funktionen
+        )
     {
         var schuelerMitAbwesenheitenUndMaßnahmen = GetMaßnahmenUndFehlzeiten(configuration,
             [
@@ -3330,19 +3369,21 @@ public class Menüeintrag
         return sMitAbwesenheiten;
     }
 
-    public Datei GetGruppen(
+    public void GetGruppen(
         IConfiguration configuration,
+        List<Action<Datei>> funktionen,
         Anrechnungen anrechnungen,
         string zieldateiname,
         Lehrers lehrers,
         string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
-        var zieldatei = new Datei(zieldateiname, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+        var zieldatei = new Datei(zieldateiname, configuration, funktionen, delimiter, quote, encoding, shouldAllQuote, lehrers, importhinweise);
+
         var gpu002 = Quelldateien.GetMatchingList(configuration, "gpu002", IStudents, Klassen);
-        if (gpu002 == null || gpu002.Count == 0) return [];
+        if (gpu002 == null || gpu002.Count == 0) return;
 
         var gpu003 = Quelldateien.GetMatchingList(configuration, "gpu003", IStudents, Klassen);
-        if (gpu003 == null || gpu003.Count == 0) return [];
+        if (gpu003 == null || gpu003.Count == 0) return;
 
         Gruppen = new Gruppen();
         Gruppen.AddRange(new Gruppen().GetBildungsgaenge(gpu002, anrechnungen, lehrers));
@@ -3399,10 +3440,10 @@ public class Menüeintrag
             "kollegium:lehrerrat"));
 
         foreach (var gruppe in Gruppen)
-        {
             zieldatei.Add(gruppe.Record);
-        }
-        return zieldatei;
+        
+        foreach (var aktion in zieldatei.Funktionen)
+            aktion(zieldatei);
     }
 
     public Datei Kalender2Wiki(
@@ -3631,25 +3672,24 @@ public class Menüeintrag
         var datei = new Datei();
         var mitgliederMail = "";
 
-        var recExp = Quelldateien.GetMatchingList(configuration, "ExportLesson", IStudents, Klassen);
-        if (recExp.Count == 0) return datei;
+        var recGpu002 = Quelldateien.GetMatchingList(configuration, "gpu002", IStudents, Klassen);
+        if (recGpu002.Count == 0) return datei;
 
-        var verschiedeneLulKuerzel = recExp
+        var verschiedeneLulKuerzel = recGpu002
             .Where(rec =>
             {
                 var dict = (IDictionary<string, object>)rec;
-                var klassenString = dict["klassen"].ToString();
+                var klassenString = dict["Field5"].ToString();
                 var klassenListe = klassenString.Split('~'); // Zerlegt den String in eine Liste
                 return IKlassen.Any(klasse => klassenListe.Contains(klasse)) &&
-                       !string.IsNullOrEmpty(dict["teacher"].ToString());
+                       !string.IsNullOrEmpty(dict["Field6"].ToString());
             }).Select(rec =>
             {
                 var dict = (IDictionary<string, object>)rec;
-                return dict["teacher"].ToString();
-            }).Distinct();
+                return dict["Field6"].ToString();
+            }).Distinct().ToList().OrderBy(x => x).ToList();
 
         dynamic record = new ExpandoObject();
-
 
         foreach (var lulKuerzel in verschiedeneLulKuerzel)
         {

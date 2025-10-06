@@ -60,10 +60,10 @@ public class DokuwikiZugriff
         
         // Proxy erstellen
         Proxy = XmlRpcProxyGen.Create<IDokuWikiApi>();
-        ((XmlRpcClientProtocol)Proxy).Url = Global.WikiUrl;
+        ((XmlRpcClientProtocol)Proxy).Url = configuration["WikiUrl"];
 
         // Manuelle HTTP-Header setzen
-        var credentials = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{Global.WikiJsonUser}:{Global.WikiJsonUserKennwort}"));
+        var credentials = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{configuration["WikiJsonUser"]}:{configuration["WikiJsonUserKennwort"]}"));
         ((XmlRpcClientProtocol)Proxy).Headers.Add("Authorization", "Basic " + credentials);
     }
 

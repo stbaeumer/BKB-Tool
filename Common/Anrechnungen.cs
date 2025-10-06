@@ -212,6 +212,7 @@ ORDER BY t.Name;
 
     public Datei Anlegen(
         string zieldateiname,
+        List<Action<Datei>> funktionen,
         List<int> nurDieseGrunde,
         List<int> furDieseGrundeKeinenWert,
         List<string?> furDieseLehrerKeineWerte,
