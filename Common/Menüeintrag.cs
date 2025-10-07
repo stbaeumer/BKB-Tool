@@ -463,6 +463,10 @@ public class Menüeintrag
             if (ab > 0)
             {
                 configuration = Global.Konfig("OffeneFehlstunden", Global.Modus.Update, configuration);
+                if(!configuration["OffeneFehlstunden"].ToLower().StartsWith("j"))
+                {
+                    throw new Exception("Abbruch wegen offener Fehlstunden.");
+                }
             }
 
 
@@ -481,8 +485,8 @@ public class Menüeintrag
 
             configuration = Global.Konfig($"Konferenzdatum", Global.Modus.Read, configuration);
             konferenzdatum = DateTime.Parse(configuration["Konferenzdatum"]);
-            configuration = Global.Konfig($"Zeugnisdatum", Global.Modus.Read, configuration);
-            zeugnisdatum = DateTime.Parse(configuration["Zeugnisdatum"]);
+            configuration = Global.Konfig($"ZeugnisDatum", Global.Modus.Read, configuration);
+            zeugnisdatum = DateTime.Parse(configuration["ZeugnisDatum"]);
             configuration = Global.Konfig("MaximaleAnzahlFehlstundenProTag", Global.Modus.Read, configuration);
             configuration = Global.Konfig("FehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt", Global.Modus.Read, configuration);
         }
@@ -512,8 +516,8 @@ public class Menüeintrag
                     if (dictBasisdaten != null)
                     {
                         //if (dictBasisdaten["Status"] == "2")
-                        if(true)
-                        { 
+                        if (true)
+                        {
                             var versetzung = "";
                             var abschluss = "";
                             var klassenlehrer = Klassen.Where(rec => rec.Name == student.Klasse)
@@ -653,10 +657,13 @@ public class Menüeintrag
                             record.DatumLEERZEICHENbis = "";
                             zieldatei.Add(record);
                         }
-                    }   
+                    }
                 }
                 Global.ZeileSchreiben("Lernabschnittsdaten.dat", zieldatei.Count().ToString());
             });
+            
+            foreach (var aktion in zieldatei.Funktionen)
+                aktion(zieldatei);
         }
         catch (Exception ex)
         {
@@ -709,6 +716,9 @@ public class Menüeintrag
             }
             Global.ZeileSchreiben("SchuelerLeistungsdaten.dat", zieldatei.Count().ToString());
         });
+
+        foreach (var aktion in zieldatei.Funktionen)
+            aktion(zieldatei);
 
         return zieldatei;
     }
@@ -1010,6 +1020,9 @@ public class Menüeintrag
 
             Global.ZeileSchreiben("Kurse", zieldatei.Count().ToString());
         });
+
+        foreach (var aktion in zieldatei.Funktionen)
+            aktion(zieldatei);
 
         return zieldatei;
     }
@@ -1444,7 +1457,10 @@ public class Menüeintrag
                 }
             }
         });
-        //Global.ZeileSchreiben("Neue Fächer:", zieldatei.Count().ToString());
+        Global.ZeileSchreiben("Neue Fächer:", zieldatei.Count().ToString());
+
+        foreach (var aktion in zieldatei.Funktionen)
+            aktion(zieldatei);
 
         return zieldatei;
     }
@@ -3178,7 +3194,7 @@ public class Menüeintrag
         return zieldatei;
     }
 
-    public Datei GetFaecher(
+    public void GetFaecher(
         IConfiguration configuration,
         List<Action<Datei>> funktionen,
         string zieldateiname,
@@ -3186,7 +3202,7 @@ public class Menüeintrag
     {
 
         var faecher = Quelldateien.GetMatchingList(configuration, "gpu006", IStudents, Klassen);
-        var zieldatei = new Datei(zieldateiname, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+        var zieldatei = new Datei(zieldateiname, funktionen, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         var verschiedeneFaecher = faecher.Select(rec =>
         {
@@ -3212,17 +3228,16 @@ public class Menüeintrag
             }            
             zieldatei.Add(record);
         }
-
-        return zieldatei;
+        foreach (var aktion in zieldatei.Funktionen) aktion(zieldatei);
     }
 
-    public Datei GetLehrer(
+    public void GetLehrer(
         List<Action<Datei>> funktionen,
         Lehrers lehrers,
         string zieldateiname,
         string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
-        var zieldatei = new Datei(zieldateiname, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+        var zieldatei = new Datei(zieldateiname, funktionen, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         foreach (var lehrer in lehrers)
         {
@@ -3235,17 +3250,17 @@ public class Menüeintrag
             zieldatei.Add(record);
         }
 
-        return zieldatei;
+        foreach (var aktion in zieldatei.Funktionen) aktion(zieldatei);
     }
 
-    public Datei? Praktikanten(
+    public void Praktikanten(
         List<Action<Datei>> funktionen,
         List<string> interessierendeKlassenUndJg,
         string zieldateiname,
         string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
         var records = new List<dynamic>();
-        var zieldatei = new Datei(zieldateiname, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+        var zieldatei = new Datei(zieldateiname, funktionen, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         var praktikanten = new List<Student>();
 
@@ -3274,10 +3289,10 @@ public class Menüeintrag
                                        }
             }
         }
-        return zieldatei;
+        foreach (var aktion in zieldatei.Funktionen) aktion(zieldatei);
     }
 
-    public Datei? KlassenAnlegen(
+    public void KlassenAnlegen(
         IConfiguration configuration,
         List<Action<Datei>> funktionen,
         string zieldateiname,
@@ -3290,12 +3305,12 @@ public class Menüeintrag
 
         if (klassen.Count == 0)
         {
-            return [];
+            return;
         }
 
         var records = new List<dynamic>();
 
-        var zieldatei = new Datei(zieldateiname, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+        var zieldatei = new Datei(zieldateiname, funktionen, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         foreach (var klasse in klassen.OrderBy(x =>
         {
@@ -3313,7 +3328,7 @@ public class Menüeintrag
             zieldatei.Add(record);
         }
 
-        return zieldatei;
+        foreach (var aktion in zieldatei.Funktionen) aktion(zieldatei);
     }
 
     public void Schulpflichtüberwachung(
@@ -3346,6 +3361,7 @@ public class Menüeintrag
             Klassen,
             Quelldateien
         );
+        //foreach (var aktion in zieldatei.Funktionen) aktion(zieldatei);
     }
 
     public Students GetMaßnahmenUndFehlzeiten(IConfiguration configuration, List<string> maßnahmenString)
@@ -3446,13 +3462,14 @@ public class Menüeintrag
             aktion(zieldatei);
     }
 
-    public Datei Kalender2Wiki(
+    public void Kalender2Wiki(
         IConfiguration configuration,
+        List<Action<Datei>> funktionen,
         string kalender,
         string zieldateiname,
         string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
-        var zieldatei = new Datei(zieldateiname + ".csv", delimiter, quote, encoding, shouldAllQuote, importhinweise);
+        var zieldatei = new Datei(zieldateiname + ".csv", funktionen, delimiter, quote, encoding, shouldAllQuote, importhinweise);
         
         var kalenderRec = Quelldateien.GetMatchingList(configuration, kalender, Students, Klassen);
 
@@ -3534,7 +3551,7 @@ public class Menüeintrag
                         sj = "kommendes";
                     }
 
-                    if(dict["Betreff"].ToString().Contains("QA"))
+                    if (dict["Betreff"].ToString().Contains("QA"))
                     {
                         string a = "";
                     }
@@ -3577,11 +3594,8 @@ public class Menüeintrag
             // Zeige den Link in spectre console            
             AnsiConsole.MarkupLine($"[link=https://bkb.wiki/start?do=admin&page=struct_schemas&table={kalender}#plugin__struct_delete][{Global.GetColor(Global.ColorHyperlink)}]https://bkb.wiki/start?do=admin&page=struct_schemas&table={kalender}[/][/]");
 
-
-            return zieldatei;
+            foreach (var aktion in zieldatei.Funktionen) aktion(zieldatei);
         }
-
-        return [];
     }
 
     private string GetKategorien(string? link, string? toString)
@@ -4838,6 +4852,69 @@ public class Menüeintrag
         Global.ZeileSchreiben("SchuelerTelefonnummern: Telefonnummern angepasst", zieldatei.Count.ToString());
 
         return zieldatei;
+    }
+
+    public void GetUntisAnrechnungen(
+        Anrechnungen anrechnungen,
+        string zieldateiname,
+        List<Action<Datei>> funktionen,
+        List<int> nurDieseGrunde,
+        List<int> furDieseGrundeKeinenWert,
+        List<string?> furDieseLehrerKeineWerte,
+        string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
+    {
+        var zieldatei = new Datei(zieldateiname, funktionen, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+        
+        try
+        {
+            foreach (var anrechnung in anrechnungen.OrderBy(a => a.Lehrer?.Kürzel))
+            {
+                if (!nurDieseGrunde.Contains(anrechnung.Grund)) continue;
+                var wert = (anrechnung.Wert == 0 ? "" : anrechnung.Wert.ToString(CultureInfo.InvariantCulture));
+
+                if (!furDieseGrundeKeinenWert.Contains(anrechnung.Grund))
+                {
+                    wert = "";
+                }
+
+                if (furDieseLehrerKeineWerte.Contains(anrechnung.Lehrer?.Kürzel))
+                {
+                    wert = "";
+                }
+
+                var kategorien = "";
+                if (anrechnung.Kategorien != null)
+                    kategorien = anrechnung.Kategorien.Aggregate(kategorien, (current, c) => current + (c + ","));
+
+                anrechnung.Name = (anrechnung.Lehrer?.Titel == "" ? "" : anrechnung.Lehrer?.Titel + " ") +
+                                  anrechnung.Lehrer?.Vorname + " " + anrechnung.Lehrer?.Nachname;
+
+                dynamic record = new ExpandoObject();
+                record.Name = anrechnung.Name;
+                record.Kuerzel = anrechnung.Lehrer?.Kürzel;
+                record.Mail = anrechnung.Lehrer?.Mail;
+                record.Wert = wert;
+                record.von = (anrechnung.Von.Year == 1 ? "" : anrechnung.Von.ToShortDateString());
+                record.bis = (anrechnung.Bis.Year == 1 ? "" : anrechnung.Bis.ToShortDateString());
+                record.Rolle = anrechnung.Rolle;
+                record.Amt = anrechnung.Amt;
+                record.Grund = anrechnung.Grund.ToString();
+                record.Beschreibung = (anrechnung.Beschr == "" ? "" : "[[" + anrechnung.Beschr + "]]");
+                record.Hinweis = anrechnung.Hinweis;
+                record.Kategorien = kategorien.TrimEnd(',');
+
+                zieldatei.Add(record);
+            }
+
+            foreach (var aktion in zieldatei.Funktionen) aktion(zieldatei);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            while (Console.KeyAvailable) Console.ReadKey(true);
+
+            Console.ReadKey();
+        }
     }
 
 

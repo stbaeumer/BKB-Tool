@@ -327,7 +327,8 @@ WHERE (((SCHOOLYEAR_ID)= " + Global.AktSj[0] + Global.AktSj[1] + ") AND  ((TERM_
         }
         else
         {
-            Console.WriteLine("  Sie haben sich gegen den Mailversand entschieden.");
+            Console.WriteLine("");
+            throw new Exception("Sie haben die Mail-Aktion abgebrochen.");
         }
     }
 }

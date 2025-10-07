@@ -275,7 +275,7 @@ public class Dateien : List<Datei>
                 ],
                 [""],
                 true,
-                d => d.FilternAbsencePerLEssons(),
+                d => d.FilternAbsencePerLessons(),
                 "*.csv",
                 "\t"
             ));

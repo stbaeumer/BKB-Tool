@@ -298,16 +298,20 @@ public static class MenueHelper
 
                         m.GetGruppen(
                             configuration,
-                            [ 
+                            [
+                                zieldatei => zieldatei.Erstellen(),
+                                datei => datei.OeffneWebseite("https://bkb.wiki/oeffentlich:organigramm?do=admin&page=struct_schemas&table=gruppen"),
                             ],
                             anrechnungen,
                             Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-gruppen.csv"),
                             lehrers,
                             ",", '\"', new UTF8Encoding(false), true);
-                        anrechnungen.Anlegen(
+                        m.GetUntisAnrechnungen(
+                            anrechnungen,
                             Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-untisanrechnungen.csv"),
-                            [                                
-                                zieldatei => zieldatei.Erstellen()
+                            [
+                                zieldatei => zieldatei.Erstellen(),
+                                datei => datei.OeffneWebseite("https://bkb.wiki/oeffentlich:organigramm?do=admin&page=struct_schemas&table=untisanrechnungen"),
                             ],
                             [500, 510, 530, 590, 900],
                             [500, 510, 530, 590],
@@ -321,8 +325,9 @@ public static class MenueHelper
                             Path.Combine(Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-lul-utf8OhneBom-einmalig-vor-SJ-Beginn.csv")),
                             ",", '\'', new UTF8Encoding(false), false);
                         m.Praktikanten(
-                            [                                
-                                zieldatei => zieldatei.Erstellen()
+                            [
+                                zieldatei => zieldatei.Erstellen(),
+                                datei => datei.OeffneWebseite("https://bkb.wiki/oeffentlich:organigramm?do=admin&page=struct_schemas&table=praktikanten"),
                             ],
                             [
                                 "BW,1,2", "BT,1,2", "BS,1,2", "BS,2,2", "HBG,1,2", "HBT,1,2", "HBT,2,2", "HBW,1,1", "GG,1,1", "GT,1,1", "GW,1,1", "IFK,1,2" // Klasse, Jg, Anzahl Praktika
@@ -331,19 +336,22 @@ public static class MenueHelper
                             ",", '\"', new UTF8Encoding(false), true);
                         m.KlassenAnlegen(
                             configuration,
-                            [                                
-                                zieldatei => zieldatei.Erstellen()
+                            [
+                                zieldatei => zieldatei.Erstellen(),
+                                datei => datei.OeffneWebseite("https://bkb.wiki/oeffentlich:organigramm?do=admin&page=struct_schemas&table=klassen"),
                             ],
                             Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + @"-klassen-utf8OhneBom-einmalig-vor-SJ-Beginn.csv"), ",", '\"', new UTF8Encoding(false), true);
                         m.Schulpflichtüberwachung(
                             configuration,
-                            [                                
-                                zieldatei => zieldatei.Erstellen()
+                            [
+                                zieldatei => zieldatei.Erstellen(),
+                                datei => datei.PutPage()
                             ]);
                         m.GetFaecher(
                             configuration,
-                            [                                
-                                zieldatei => zieldatei.Erstellen()
+                            [
+                                zieldatei => zieldatei.Erstellen(),
+                                datei => datei.OeffneWebseite("https://bkb.wiki/oeffentlich:organigramm?do=admin&page=struct_schemas&table=gruppen"),
                             ],
                             Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-faecher.csv"),
                             ",", '\'', new UTF8Encoding(false), false);
@@ -374,16 +382,16 @@ public static class MenueHelper
                         ],
                         m =>
                         {
-                            m.OeffneDateienInDownloadsInNotepadPlusPlus(configuration, ["termine_fhr.csv", "termine_verwaltung.csv", "termine_berufliches_gymnasium.csv", "termine_kollegium.csv"]);
-                            m.OeffneWebseite("https://bkb.wiki/start?do=admin&page=struct_schemas&table=termine_kollegium");
+                            m.OeffneDateienInDownloadsInNotepadPlusPlus(configuration, ["termine_fhr.csv", "termine_verwaltung.csv", "termine_berufliches_gymnasium.csv", "termine_kollegium.csv"]);                            
                             foreach (var kalender in new List<string>(){"termine_berufliches_gymnasium", "termine_kollegium", "termine_verwaltung", "termine_fhr" })
                             {
-                                m.Zieldateien =
+                                m.Kalender2Wiki(configuration,
                                 [
-                                    m.Kalender2Wiki(configuration, kalender, Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachWiki-" + kalender), ",", '\"', new UTF8Encoding(false), true)
-                                ];
-
-                                m.Zieldateien[0].Erstellen();
+                                    datei => datei.OrdnerOeffnen(),
+                                    datei => datei.Erstellen(),
+                                    datei => datei.OeffneWebseite($"https://bkb.wiki/start?do=admin&page=struct_schemas&table=" + kalender)
+                                ]
+                                , kalender, Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachWiki-" + kalender), ",", '\"', new UTF8Encoding(false), true);
                             }
                         },
                         Global.Rubrik.Wiki,
@@ -689,7 +697,7 @@ public static class MenueHelper
                             Global.NurBeiDiesenSchulnummern.Alle
                         ),
                         new Menüeintrag(
-                            "Zeugnisse #2: Säumige Lehrer*innen im Teams-Chat an die Noten-Eintragung erinnern",
+                            "Zeugnisse (a): Säumige Lehrer*innen im Teams-Chat an die Noten-Eintragung erinnern",
                             quelldateien.Notwendige(configuration, ["schuelerleistungsdaten,dat"]),
                             students,
                             klassen,
@@ -709,6 +717,79 @@ public static class MenueHelper
                             Global.NurBeiDiesenSchulnummern.Nur177659
                         ),
                         new Menüeintrag(
+                        "Zeugnisse (b): Zeugnisnoten nach SchILD importieren",
+                        quelldateien.Notwendige(configuration, ["absenceperstudent,csv", "studentgroupstudents,csv", "klassen,dat", "schuelerlernabschnitt,dat,optional", "schuelerleistungsdaten,dat", "schuelerbasis,dat", "lehrkraefte,dat", "kurse,dat", "schuelerbasisdaten,dat", "GPU002,txt", "GPU004,txt", "faecher,dat"]),
+                        students,
+                        klassen,
+                        [
+                            $"Es werden jetzt folgende Dateien für den Import nach SchILD erstellt: \n[{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "Lernabschnitte.dat")}[/] \n[{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "Leistungsdaten.dat")}[/] \n[{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "Kurse.dat")}[/]\n[{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "Faecher.dat")}[/]",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise:[/]",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#1[/] Die Kursbezeichnungen setzen sich zusammen aus dem Kursleiterkürzel plus alle beteiligten Untis-Unterrichtsnummern (bis maximal 20 Zeichen).",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#2[/] Kurse werden gebildet aus: Kopplungen in Untis, Schülergruppen in Untis, identischen Fächern mit unterschiedliche LuL",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#3[/] Zähler im Anschluss an Fächer (M1, M2, ...) werden abgeschnitten (also zu M).",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#4[/] Bei mehreren beteiligten Lehrkräften wird das alphabetisch erste Lehrkraftkürzel zum Kursleiter.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#5[/] Team-Teaching ist daran erkennbar, dass die Summe der Kurs-Wochenstunden kleiner ist als die Summe der Lehrkräfte-Wochenstunden.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#6[/] Wenn zwei ansonsten identische Unterrichte einmal mit und einmal ohne Schülergruppe vorliegen, werden zwei unterschiedliche Einträge erstellt.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#7[/] Sobald einem Fach bei einem Schüler in SchILD eine Kursart (AB3,AB4,GKS,GKM) zugewiesen wurde, wird das in die zu erstellenden Leistungsdaten übernommen."
+                        ],
+                        m =>
+                        {
+                            m.FilterInteressierendeStudentsUndKlassen(configuration);
+                            configuration = Global.Konfig("Abschnitt", Global.Modus.Read, configuration);
+                            configuration = Global.Konfig("Schulnummer", Global.Modus.Read, configuration);                            
+                            configuration = Global.Konfig("ZeugnisDatum", Global.Modus.Read, configuration);
+                            configuration = Global.Konfig("Kursarten", Global.Modus.Read, configuration);
+
+                            m.Unterrichte = new Unterrichte(configuration, m, Global.Zweck.Statistik, Global.Art.KursUnterrichte);
+                            m.Unterrichte.AddRange(new Unterrichte(configuration, m, Global.Zweck.Statistik, Global.Art.NichtKursUnterrichte));
+
+                            m.Lernabschnittsdaten(
+                                configuration, Global.Zweck.Zeugnis, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLernabschnittsdaten.dat"),
+                                [
+                                    datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
+                                    datei => datei.Verarbeiten(quelldateien, Global.Modus.Filtern),
+                                    datei => datei.OrdnerOeffnen(),
+                                    datei => datei.Erstellen()
+                                ],
+                                ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt"],
+                                [],
+                                "|", '\0', new UTF8Encoding(true), false);
+                            m.Kurse(
+                                configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Kurse.dat"),
+                                [
+                                    datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
+                                    datei => datei.Verarbeiten(quelldateien, Global.Modus.Filtern),
+                                    datei => datei.Erstellen()
+                                ],
+                                ["KursBez", "Jahr", "Abschnitt"],
+                                [],
+                                "|", '\0', new UTF8Encoding(true), false);
+                            m.LeistungsdatenStatistik(
+                                configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat"),
+                                [
+                                    datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
+                                    datei => datei.Verarbeiten(quelldateien, Global.Modus.Filtern),
+                                    datei => datei.Erstellen()
+                                ],
+                                ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach", "Kurs"],
+                                [],
+                                "|", '\0', new UTF8Encoding(true), false, null,
+                                Global.Zweck.Statistik);
+                            m.Faecher(
+                                configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Faecher.dat"),
+                                [
+                                    datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
+                                    datei => datei.Verarbeiten(quelldateien, Global.Modus.Filtern),
+                                    datei => datei.Erstellen()
+                                ],
+                                ["InternKrz"],
+                                [],
+                                "|", '\0', new UTF8Encoding(true), false);                            
+                        },
+                        Global.Rubrik.Leistungsdaten,
+                        Global.NurBeiDiesenSchulnummern.Alle
+                    ),
+                        new Menüeintrag(
                             "Teams-Chat: Teams-Chat mit Gruppe von Lehrkräften beginnen",
                             quelldateien.Notwendige(configuration, ["gpu002,txt","gpu003,txt"]),
                             students,
@@ -724,12 +805,12 @@ public static class MenueHelper
                                     configuration,
                                     [
                                         datei => datei.Auswählen(m, lehrers),
-                                        datei => datei.OeffneWebseite("https://teams.microsoft.com/l/chat/0/0?users=", "", "&message=" + Uri.EscapeDataString("Hallo zusammen!")),
+                                        datei => datei.OeffneWebseite("https://teams.microsoft.com/l/chat/0/0?users=", datei.UrlMitte, datei.UrlRechts),
                                     ],
                                     anrechnungen,
                                     Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-gruppen.csv"),
                                     lehrers,
-                                    ",", '\"', new UTF8Encoding(false), true);                                
+                                    ",", '\"', new UTF8Encoding(false), true);
                             },
                             Global.Rubrik.Allgemein,
                             Global.NurBeiDiesenSchulnummern.Nur177659

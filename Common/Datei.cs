@@ -76,6 +76,8 @@ public class Datei : List<dynamic>
     public bool V3 { get; }
     public object Value2 { get; }
     public DokuwikiZugriff DokuwikiZugriff { get; private set; }
+    public string UrlMitte { get; private set; }
+    public string UrlRechts { get; private set; }
 
     //public Datei(string name, Global.Modus modus, string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert)
     public Datei(
@@ -120,9 +122,11 @@ public class Datei : List<dynamic>
 
     public Datei(
         string name,
+        List<Action<Datei>> funktionen,
         string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise)
     {
         Name = name;
+        Funktionen = funktionen;
         Dateiname = Path.GetFileName(name);
         AbsoluterPfad = name;
         UnterordnerUndDateiname = name;
@@ -506,7 +510,7 @@ public class Datei : List<dynamic>
         return liste;
     }
 
-    public List<dynamic> FilternAbsencePerLEssons()
+    public List<dynamic> FilternAbsencePerLessons()
     {
         var liste = new List<dynamic>();
 
@@ -1298,21 +1302,27 @@ public class Datei : List<dynamic>
 
     internal void OeffneWebseite(string urlBeginn, string urlMitte = "", string urlEnde = "")
     {
-        var mitgliederMail = this
+        var mitgliederMail = "";
+
+        if (!string.IsNullOrEmpty(urlMitte))
+        {
+            mitgliederMail = this
             .Where(rec =>
             {
                 if (rec == null) return false;
                 var dict = (IDictionary<string, object>)rec;
-                return dict != null && dict["EMINUSMail"] != null && !string.IsNullOrWhiteSpace(dict["EMINUSMail"].ToString());
+                return dict != null && dict["MitgliederMail"] != null && !string.IsNullOrWhiteSpace(dict["MitgliederMail"].ToString());
             })
-            .Select(rec => ((IDictionary<string, object>)rec)["EMINUSMail"].ToString())
+            .Select(rec => ((IDictionary<string, object>)rec)["MitgliederMail"].ToString())
             .LastOrDefault();
 
-        // Wenn MitgliederMail vorhanden ist, verwende es in der URL
-        if (!string.IsNullOrEmpty(mitgliederMail))
-        {
-            urlMitte = mitgliederMail;
+            // Wenn MitgliederMail vorhanden ist, verwende es in der URL
+            if (!string.IsNullOrEmpty(mitgliederMail))
+            {
+                urlMitte = mitgliederMail;
+            }
         }
+        
 
         // Wenn der URL insgesamt länger als 300 Zeichen ist, wird der urlMitte solange gekürzt, bis die URL passt.
         // Das Kürzen geschieht immer an den Kommas. Diejenigen E-Mail-Adressen, die am Ende übrig bleiben, werden in einem Panel angezeigt.
@@ -1344,8 +1354,6 @@ public class Datei : List<dynamic>
 
             AnsiConsole.Write(panel);
         }
-
-
 
         try
         {
@@ -1801,6 +1809,9 @@ public class Datei : List<dynamic>
                     this.RemoveAt(i);
                 }
             }
+
+            this.UrlMitte = this[0].MitgliederMail;
+            this.UrlRechts = "&message=" + Uri.EscapeDataString("Hallo ") + this[0].Page.Replace("kollegium:", "").Replace(":start", "").Replace(":fachschaften", "Fachschaft");
         }
         else if (nummer == Count)
         {
@@ -1812,7 +1823,7 @@ public class Datei : List<dynamic>
             var gpu002 = m.Quelldateien.GetMatchingList(configuration, "gpu002", IStudents, m.Klassen);
             if (gpu002 == null || gpu002.Count == 0) return;
 
-            var verschiedeneLulKuerzel = gpu002 
+            var verschiedeneLulKuerzel = gpu002
                 .Where(rec =>
                 {
                     var dict = (IDictionary<string, object>)rec;
@@ -1847,6 +1858,8 @@ public class Datei : List<dynamic>
             record.MitgliederMail = mitgliederMail;
             record.MitgliederKuerzel = mitgliederKuerzel;
             this.Add(record);
+            this.UrlMitte = mitgliederMail;
+            this.UrlRechts = "&message=" + Uri.EscapeDataString("Hallo LuL ") + klasse;
         }
     }
 }

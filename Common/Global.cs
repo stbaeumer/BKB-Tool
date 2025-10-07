@@ -1641,6 +1641,28 @@ public static class KonfigHelper
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
+        ["MaximaleAnzahlFehlstundenProTag"] = new KonfigMeta
+        {
+            Key = "MaximaleAnzahlFehlstundenProTag",
+            DefaultValue = "8",
+            Aufforderung = $"[green]■[/]",
+            Hinweise = $"Geben Sie die [{Global.GetColor(Global.ColorInfoBox)}]maximale Anzahl der Fehlstunden pro Tag[/] an. Das ist wichtig, weil z.B. die Anzahl der Fehlstunden bei Exkursionen  größer als die Anzahl der regulären Unterrichtsstunden sein kann.",
+            Datentyp = Global.Datentyp.Int,
+            InGrundeinstellungAbfragen = false,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
+        },
+        ["FehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt"] = new KonfigMeta
+        {
+            Key = "FehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt",
+            DefaultValue = "3",
+            Aufforderung = $"[green]■[/]",
+            Hinweise = $"Geben Sie die [{Global.GetColor(Global.ColorInfoBox)}] Anzahl der Tage[/] an, die für die Fehlzeiten während der letzten Tage unberücksichtigt bleiben sollen. Das kann Sinn machen, wenn es Entschuldigungen nicht mehr rechtzeitig eingereicht werden.",
+            Datentyp = Global.Datentyp.Int,
+            InGrundeinstellungAbfragen = false,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
+        },
         ["Kursarten"] = new KonfigMeta
         {
             Key = "Kursarten",
@@ -1801,9 +1823,9 @@ public static class KonfigHelper
         ["OffeneFehlstunden"] = new KonfigMeta
         {
             Key = "OffeneFehlstunden",
-            DefaultValue = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"),
+            DefaultValue = "Nein",
             Aufforderung = $"[green]■[/]",
-            Hinweise = $"Es gibt [{Global.GetColor(Global.ColorInfoBox)}]offene Fehlstunden[/]. Offene Fehlstunden sind weder entschuldigt noch unentschuldigt und werden im Zeugnis nicht berücksichtigt. Mit [{Global.GetColor(Global.ColorActionInMenüs)}]ENTER[/] geht es ohne Berücksichtigung der offenen Fehlstunden weiter. Abbruch mit [{Global.GetColor(Global.ColorFehler)}]ANYKEY[/].",
+            Hinweise = $"Es gibt [{Global.GetColor(Global.ColorInfoBox)}]offene Fehlstunden[/]. Offene Fehlstunden sind weder entschuldigt noch unentschuldigt und werden im Zeugnis nicht berücksichtigt. Mit [{Global.GetColor(Global.ColorActionInMenüs)}]j(a)[/] geht es ohne Berücksichtigung der offenen Fehlstunden weiter. Abbruch mit [{Global.GetColor(Global.ColorFehler)}]n(ein)[/].",
             Datentyp = Global.Datentyp.JaNein,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
@@ -1955,7 +1977,7 @@ public static class KonfigHelper
         ["SprechtagsDatum"] = new KonfigMeta
         {
             Key = "SprechtagsDatum",
-            DefaultValue = $"01.09.{DateTime.Now.Year}",
+            DefaultValue = $"11.02.{Global.AktSj[1]}",
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie das [{Global.GetColor(Global.ColorInfoBox)}]Datum des Sprechtags[/] an (tt.mm.jjjj).",
             Datentyp = Global.Datentyp.DateTime,
@@ -2051,10 +2073,10 @@ public static class KonfigHelper
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
-        ["Zeugnisdatum"] = new KonfigMeta
+        ["ZeugnisDatum"] = new KonfigMeta
         {
-            Key = "Zeugnisdatum",
-            DefaultValue = "",
+            Key = "ZeugnisDatum",
+            DefaultValue = $"01.02.{Global.AktSj[1]}",
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie das [{Global.GetColor(Global.ColorInfoBox)}]Zeugnisdatum[/] an. Das kann später in SchILD (mit einem Gruppenprozess) erneut geändert werden.",
             Datentyp = Global.Datentyp.DateTime,
