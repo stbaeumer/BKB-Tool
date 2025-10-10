@@ -143,6 +143,7 @@ public class Datei : List<dynamic>
         IConfiguration configuration)
     {
         Name = name;
+        AbsoluterPfad = name;
         Funktionen = funktionen;
         Konfiguration = configuration;
     }
@@ -1494,21 +1495,29 @@ public class Datei : List<dynamic>
 
             // Die Tabelle soll begrenzt werden. Falls mehr als maxRows Zeilen gefunden werden, wird eine weitere Zeile mit "..." eingefügt.
 
-            var maxRows = 100;
+            var maxRows = 300;
             var rows = 0;
+
+            int ss = 0;
 
             // Für jede neue Zeile ...
             foreach (var neueRec in this)
             {
+                ss++;
+
+                if(ss == 194)
+                {
+                    var x = 1;
+                }
                 var neueDict = (IDictionary<string, object>)neueRec;
 
-                if (neueDict.ContainsKey("Nachname") && neueDict["Nachname"].ToString().StartsWith("Cuber"))
+                if (neueDict.ContainsKey("Fach") && neueDict["Fach"].ToString().StartsWith("GG"))
                 {
                     var x = 1;
                 }
 
                 var anhandDieserSchlüsselAttributeWirdVerglichenString = "";
-                
+
                 foreach (var key in AnhandDieserSchlüsselAttributeWirdVerglichen)
                 {
                     if (neueDict.TryGetValue(key, out var value) && value != null && !string.IsNullOrEmpty(value.ToString()))
@@ -1519,9 +1528,9 @@ public class Datei : List<dynamic>
                     }
                 }
 
-                if(neueDict.ContainsKey("Fach") && neueDict["Fach"].ToString() == "BWR")
+                if (neueDict.ContainsKey("Fach") && neueDict["Fach"].ToString() == "GG G1")
                 {
-                    if (neueDict.ContainsKey("KursBez") && !neueDict["KursBez"].ToString().StartsWith("ES"))
+                    //if (neueDict.ContainsKey("KursBez") && !neueDict["KursBez"].ToString().StartsWith("ES"))
                     {
                         var x = 1;
                     }
@@ -1556,7 +1565,11 @@ public class Datei : List<dynamic>
                 // Für die ersten 2 abweichenden Attribute dieser Zeile wird eine Zeile in der Tabelle erstellt.
                 for (int i = 0; i < nichtIdentischeSonstigeAttribute.Count; i++)
                 {
-                    if (rows > maxRows) break; // Wenn die maximale Anzahl an Zeilen erreicht ist, breche die Schleife ab.                    
+                    if (rows > maxRows)
+                    {
+                        if(modus == Global.Modus.Vergleichen)
+                            break; // Wenn die maximale Anzahl an Zeilen erreicht ist, breche die Schleife ab.                    
+                    }    
                     if (rows == maxRows)
                         table.AddRow(new Text("..."), new Text("..."), new Text("..."), new Text("..."));
                     if (rows < maxRows)

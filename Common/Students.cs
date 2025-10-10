@@ -1744,7 +1744,6 @@ public class Students : List<Student>
         }   
 
         // Wenn der Anwender alle Fotos exportieren möchte, dann wird jedem Schüler das Foto aus dem Ordner pfadFotosAusSchild zugewiesen.
-
         AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start($"Fotos an SuS zuweisen ...", ctx =>
         {
             foreach (var student in this)

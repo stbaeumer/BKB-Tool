@@ -54,7 +54,7 @@ public static class MenueHelper
                 return new Menue(quelldateien, klassen, lehrers, students, []);
             }
 
-#pragma warning disable CS8601 // Mögliche Nullverweiszuweisung
+            #pragma warning disable CS8601 // Mögliche Nullverweiszuweisung
             //Console.WriteLine("");
             //AnsiConsole.Write(new Rule("").RuleStyle("springgreen2").Centered());
 
@@ -389,6 +389,7 @@ public static class MenueHelper
                                 [
                                     datei => datei.OrdnerOeffnen(),
                                     datei => datei.Erstellen(),
+                                    datei => datei.OeffneWebseite($"https://bkb.wiki/start?do=admin&page=struct_schemas&table=" + kalender),
                                     datei => datei.OeffneWebseite($"https://bkb.wiki/start?do=admin&page=struct_schemas&table=" + kalender)
                                 ]
                                 , kalender, Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachWiki-" + kalender), ",", '\"', new UTF8Encoding(false), true);
@@ -717,8 +718,8 @@ public static class MenueHelper
                             Global.NurBeiDiesenSchulnummern.Nur177659
                         ),
                         new Menüeintrag(
-                        "Zeugnisse (b): Zeugnisnoten nach SchILD importieren",
-                        quelldateien.Notwendige(configuration, ["absenceperstudent,csv", "studentgroupstudents,csv", "klassen,dat", "schuelerlernabschnitt,dat,optional", "schuelerleistungsdaten,dat", "schuelerbasis,dat", "lehrkraefte,dat", "kurse,dat", "schuelerbasisdaten,dat", "GPU002,txt", "GPU004,txt", "faecher,dat"]),
+                        "Zeugnisse (b): Leistungsdaten (Unterrichte, Zeugnisnoten, Fehlzeiten, ...) nach SchILD importieren",
+                        quelldateien.Notwendige(configuration, ["absenceperstudent,csv", "studentgroupstudents,csv", "klassen,dat", "schuelerlernabschnitt,dat,optional", "schuelerleistungsdaten,dat", "lehrkraefte,dat", "kurse,dat", "schuelerbasisdaten,dat", "GPU002,txt", "GPU004,txt", "faecher,dat"]),
                         students,
                         klassen,
                         [
@@ -740,8 +741,8 @@ public static class MenueHelper
                             configuration = Global.Konfig("ZeugnisDatum", Global.Modus.Read, configuration);
                             configuration = Global.Konfig("Kursarten", Global.Modus.Read, configuration);
 
-                            m.Unterrichte = new Unterrichte(configuration, m, Global.Zweck.Statistik, Global.Art.KursUnterrichte);
-                            m.Unterrichte.AddRange(new Unterrichte(configuration, m, Global.Zweck.Statistik, Global.Art.NichtKursUnterrichte));
+                            m.Unterrichte = new Unterrichte(configuration, m, Global.Zweck.Zeugnis, Global.Art.KursUnterrichte);
+                            m.Unterrichte.AddRange(new Unterrichte(configuration, m, Global.Zweck.Zeugnis, Global.Art.NichtKursUnterrichte));
 
                             m.Lernabschnittsdaten(
                                 configuration, Global.Zweck.Zeugnis, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLernabschnittsdaten.dat"),
@@ -774,7 +775,7 @@ public static class MenueHelper
                                 ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach", "Kurs"],
                                 [],
                                 "|", '\0', new UTF8Encoding(true), false, null,
-                                Global.Zweck.Statistik);
+                                Global.Zweck.Zeugnis);
                             m.Faecher(
                                 configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Faecher.dat"),
                                 [
@@ -785,6 +786,32 @@ public static class MenueHelper
                                 ["InternKrz"],
                                 [],
                                 "|", '\0', new UTF8Encoding(true), false);                            
+                        },
+                        Global.Rubrik.Leistungsdaten,
+                        Global.NurBeiDiesenSchulnummern.Alle
+                    ),
+                    new Menüeintrag(
+                        "Klausurbelegung: Wiki-Seite (mit Zuordnung der SuS ZU allen Fächern) erstellen",
+                        quelldateien.Notwendige(configuration, ["faecher,dat","gpu002,txt","kurse.,dat","studentgroupstudents,csv", "schuelerleistungsdaten,dat"]),
+                        students,
+                        klassen,
+                        [
+                            $"Es wird für jede Klasse eine Wiki-Seite erstellt. Die Seite enthält eine Tabelle mit allen Schüler*innen der Klasse und allen Fächern, die die Schüler*innen belegen. Klassenleitungen können dort einfach alle Belegungen eintragen. Am besten wird die Tabelle von Klassenleitungen vor den Sommerferien erstellt.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise:[/]",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#1[/] Für das Erstellen wird die Schuelerleistungsdaten.dat ausgelesen."
+                        ],
+                        m =>
+                        {
+                            m.FilterInteressierendeStudentsUndKlassen(configuration);                            
+                            m.Unterrichte = new Unterrichte(configuration, m, Global.Zweck.Zeugnis, Global.Art.KursUnterrichte);
+                            m.Unterrichte.AddRange(new Unterrichte(configuration, m, Global.Zweck.Zeugnis, Global.Art.NichtKursUnterrichte));
+                            m.KlausurbelegungWikiSeiteErstellen(
+                                configuration,
+                                "playground:klausurbelegung",
+                                [
+                                    datei => datei.PutPage(),
+                                    datei => datei.OeffneWebseite($"https://bkb.wiki/{datei.Name}"),
+                                ]);
                         },
                         Global.Rubrik.Leistungsdaten,
                         Global.NurBeiDiesenSchulnummern.Alle

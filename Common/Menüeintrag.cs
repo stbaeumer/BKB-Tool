@@ -437,7 +437,6 @@ public class Menüeintrag
                 if (alteFehlzeiten > 0)
                     configuration = Global.Konfig("FehlzeitenVorDemAbschnittswechselBeruecksichtigen", Global.Modus.Update, configuration);
 
-
                 // Wenn die Fehlzeiten vor dem Abschnittswechsel nicht berücksichtigt werden sollen, dann werden sie aus der Liste entfernt.
                 if (!configuration["FehlzeitenVorDemAbschnittswechselBeruecksichtigen"].ToLower().StartsWith("j"))
                 {
@@ -465,10 +464,9 @@ public class Menüeintrag
                 configuration = Global.Konfig("OffeneFehlstunden", Global.Modus.Update, configuration);
                 if(!configuration["OffeneFehlstunden"].ToLower().StartsWith("j"))
                 {
-                    throw new Exception("Abbruch wegen offener Fehlstunden.");
+                    throw new Exception("Sie haben wegen offener Fehlstunden in Webuntis abgebrochen.");
                 }
             }
-
 
             var konferenzart = "";
             switch (configuration["Abschnitt"])
@@ -674,7 +672,7 @@ public class Menüeintrag
         }
     }
 
-    public Datei LeistungsdatenStatistik(
+    public void LeistungsdatenStatistik(
         IConfiguration configuration,
         string zieldateiname,
         List<Action<Datei>> funktionen,
@@ -683,6 +681,12 @@ public class Menüeintrag
         string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null, Global.Zweck art = Global.Zweck.Statistik)
     {
         var unterrichte = this.Unterrichte;
+
+        List<dynamic>? schuelerLeistungsdaten = null;
+
+        if(art == Global.Zweck.Zeugnis)
+            schuelerLeistungsdaten = Quelldateien.GetMatchingList(configuration, "schuelerleistungsdaten", IStudents, Klassen);        
+        
         var zieldatei = new Datei(zieldateiname, funktionen, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start($"{zieldateiname} ...", ctx =>
@@ -691,6 +695,27 @@ public class Menüeintrag
             {
                 foreach (var student in unt.Students.OrderBy(x => x.Nachname).ThenBy(x => x.Vorname))
                 {
+                    var kursart = unt.Kursart;
+                    var abiturfach = "";
+
+                    // Kursart und Abiturfach werden in SchILD direkt gepflegt und dürfen von BKB-Tool nicht überschrieben werden.
+                    // Sie müssen aus den bisherigen schuelerleistungsdaten entnommen werden.
+                    var leistungsdaten = schuelerLeistungsdaten
+                            .Where(rec =>
+                            {
+                                var dict = (IDictionary<string, object>)rec;
+                                return dict["Nachname"].ToString() == student.Nachname &&
+                                    dict["Vorname"].ToString() == student.Vorname &&
+                                    // Vergleiche nur den ersten Teil des Fachnamens, da es z.B. "E L1" und "E L2" geben kann.
+                                    dict["Fach"].ToString().Split(' ')[0] == unt.Fach.Split(' ')[0] &&
+                                    dict["Geburtsdatum"].ToString() == student.Geburtsdatum;
+                            }).LastOrDefault() as IDictionary<string, object>;
+
+                    if (leistungsdaten != null && !string.IsNullOrEmpty(leistungsdaten["Kursart"].ToString()))                    
+                        kursart = leistungsdaten["Kursart"].ToString();
+                    if (leistungsdaten != null && !string.IsNullOrEmpty(leistungsdaten["Abiturfach"].ToString()))
+                        abiturfach = leistungsdaten["Abiturfach"].ToString();
+                    
                     dynamic record = new ExpandoObject();
                     record.Nachname = $"{student.Nachname}#{student.Klasse}";
                     record.Vorname = student.Vorname;
@@ -698,11 +723,16 @@ public class Menüeintrag
                     record.Jahr = Global.AktSj[0];
                     record.Abschnitt = configuration["Abschnitt"];
                     record.Fach = unt.Fach;
+                    if (unt.Fach == "GG G1")
+                    {
+                        var saw = "";
+                    }
+                        
                     record.Fachlehrer = unt.Kursleiter;
-                    record.Kursart = unt.Kursart;
+                    record.Kursart = kursart;
                     record.Kurs = unt.KursBez;
                     record.Note = "";
-                    record.Abiturfach = "";
+                    record.Abiturfach = abiturfach;
                     record.WochenstdPUNKT = unt.Wochenstunden.ToString();
                     record.ExterneLEERZEICHENSchulnrPUNKT = "";
                     record.Zusatzkraft = "";
@@ -719,8 +749,6 @@ public class Menüeintrag
 
         foreach (var aktion in zieldatei.Funktionen)
             aktion(zieldatei);
-
-        return zieldatei;
     }
 
 
@@ -969,7 +997,7 @@ public class Menüeintrag
     }
     */
 
-    public Datei Kurse(
+    public void Kurse(
         IConfiguration configuration,
         string zieldateiname,
         List<Action<Datei>> funktionen,
@@ -1021,10 +1049,7 @@ public class Menüeintrag
             Global.ZeileSchreiben("Kurse", zieldatei.Count().ToString());
         });
 
-        foreach (var aktion in zieldatei.Funktionen)
-            aktion(zieldatei);
-
-        return zieldatei;
+        foreach (var aktion in zieldatei.Funktionen) aktion(zieldatei);
     }
 
     private List<string> GetDistincteKombinationenUnrPlusFachOhneSchuelergruppen(List<dynamic> gpu002)
@@ -1457,7 +1482,7 @@ public class Menüeintrag
                 }
             }
         });
-        Global.ZeileSchreiben("Neue Fächer:", zieldatei.Count().ToString());
+        //Global.ZeileSchreiben("Neue Fächer:", zieldatei.Count().ToString());
 
         foreach (var aktion in zieldatei.Funktionen)
             aktion(zieldatei);
@@ -4914,6 +4939,166 @@ public class Menüeintrag
             while (Console.KeyAvailable) Console.ReadKey(true);
 
             Console.ReadKey();
+        }
+    }
+
+    internal void KlausurbelegungWikiSeiteErstellen(
+        IConfiguration configuration,
+        string zieldateiname,
+        List<Action<Datei>> funktionen)
+    {
+        var leistungsdaten = Quelldateien.GetMatchingList(configuration, "schuelerleistungsdaten", IStudents, Klassen);
+        if (leistungsdaten == null || !leistungsdaten.Any()) return;
+
+        var gpu002 = Quelldateien.GetMatchingList(configuration, "gpu002", IStudents, Klassen);
+        if (gpu002 == null || !gpu002.Any()) return;
+
+        var faecher = Quelldateien.GetMatchingList(configuration, "faecher", IStudents, Klassen);
+        if (faecher == null || !faecher.Any()) return;
+
+        var zieldatei = new Datei(zieldateiname, funktionen, configuration);
+
+        // Gib alle Fächer distinct als List<string> zurück, sortiert nach Sortierung S2
+        var alleFaecherDistinct = faecher
+            .Select(rec => (IDictionary<string, object>)rec)
+            .OrderBy(dict => dict["Sortierung S2"].ToString())
+            .Select(dict => dict["InternKrz"].ToString()) // Nur Teil vor Leerzeichen
+            .Distinct()            
+            .ToList();
+
+        var faecherInDieserKlasseAusLeistungsdaten = alleFaecherDistinct
+            .Where(fach =>
+                leistungsdaten.Any(rec =>
+                {
+                    var dict = (IDictionary<string, object>)rec;
+                    // Nur Teil vor Leerzeichen vergleichen
+                    return dict.ContainsKey("Fach") && dict["Fach"].ToString() == fach;
+                }))
+            .ToList();        
+
+        var faecherInDieserKlasseAusGpu002 = alleFaecherDistinct
+            .Where(fach =>
+                gpu002.Any(rec =>
+                {
+                    var dict = (IDictionary<string, object>)rec;
+                    // Nur Teil vor Leerzeichen vergleichen
+                    return dict.ContainsKey("Field7") && dict["Field7"].ToString() == fach;
+                }))
+            .ToList();
+
+        var verschiedeneKlassenDerStudents = IStudents.Select(s => s.Klasse).Distinct().OrderBy(k => k).ToList();
+
+        configuration = Global.Konfig("KlausurbelegungAusGPU02OderLeistungsdaten", Global.Modus.Update, configuration);
+
+        foreach (var klasse in verschiedeneKlassenDerStudents)
+        {
+            zieldatei.Name = $"oeffentlich:Klausurbelegung:{klasse}";
+            zieldatei.Add("====== Klausurbelegung " + klasse + " ======");
+            zieldatei.Add("");
+
+            var kopfzeile = "^Name  ^ ";
+            var kopfzeile2 = "^  ^";
+
+            // Prüfe für alle IStudents dieser Klasse, ob die Initialen (z.B. A.B.) mehrfach vorkommen.
+            // Wenn ja, dann muss für diese Klasse die Initialen soweit verlängert werden, bis der Wert eindeutig ist.
+            int anzahlZeichen = 1;
+            for (int i = 1; i <= 5; i++) // Maximal bis 5 Zeichen
+            {
+                var initialenGruppiert = IStudents
+                    .Where(s => s.Klasse == klasse)
+                    .Select(s => new
+                    {
+                        Student = s,
+                        Initialen = s.Nachname.Substring(0, i) + "." + s.Vorname.Substring(0, i) + "."
+                    })
+                    .GroupBy(x => x.Initialen)
+                    .Where(g => g.Count() > 1)
+                    .ToList();
+
+                if (initialenGruppiert.Count == 0)
+                {
+                    anzahlZeichen = i;
+                    break; // Alle Initialen sind eindeutig
+                }
+            }
+
+            if (configuration["KlausurbelegungAusGPU02OderLeistungsdaten"] == "Ja")
+            {
+                foreach (var fach in faecherInDieserKlasseAusGpu002)
+                {
+                    // Alle verschiedenen Lehrerkürzel, die das Fach (ohne Ziffer und nur vor dem Leerzeichen) unterrichten
+                    var alleLehrerDiesesFachs = gpu002
+                        .Where(rec =>
+                        {
+                            var dict = (IDictionary<string, object>)rec;
+                            return dict["Field7"].ToString().StartsWith(fach + " ");
+                        })
+                        .Select(rec => (IDictionary<string, object>)rec)
+                        .GroupBy(dict => dict["Field6"].ToString().Split(' ')[0])
+                        .Select(g => g.First())
+                        .Select(dict => new
+                        {
+                            Kürzel = dict["Field6"].ToString().Split(' ')[0]
+                        })
+                        .OrderBy(l => l.Kürzel)
+                        .ToList();
+
+                    foreach (var lehrer in alleLehrerDiesesFachs)
+                    {
+                        kopfzeile += fach + "  ^  ";
+                        kopfzeile2 += lehrer.Kürzel + "  ^  ";
+                    }
+                }
+            }
+            else
+            {
+                foreach (var fach in faecherInDieserKlasseAusLeistungsdaten)
+                {
+                    // Alle verschiedenen Lehrerkürzel, die das Fach (ohne Ziffer und nur vor dem Leerzeichen) unterrichten
+                    var alleLehrerDiesesFachs = leistungsdaten
+                        .Where(rec =>
+                        {
+                            var dict = (IDictionary<string, object>)rec;
+                            return dict["Fach"].ToString().StartsWith(fach + " ");
+                        })
+                        .Select(rec => (IDictionary<string, object>)rec)
+                        .GroupBy(dict => dict["Fachlehrer"].ToString().Split(' ')[0])
+                        .Select(g => g.First())
+                        .Select(dict => new
+                        {
+                            Kürzel = dict["Fachlehrer"].ToString().Split(' ')[0]
+                        })
+                        .OrderBy(l => l.Kürzel)
+                        .ToList();
+
+                    foreach (var lehrer in alleLehrerDiesesFachs)
+                    {
+                        kopfzeile += fach + "  ^  ";
+                        kopfzeile2 += lehrer.Kürzel + "  ^  ";
+                    }
+                }
+            }
+            
+            zieldatei.Add(kopfzeile);
+            zieldatei.Add(kopfzeile2);
+
+            foreach (var student in IStudents.Where(s => s.Klasse == klasse).OrderBy(s => s.Nachname).ThenBy(s => s.Vorname))
+            {
+                var nameKurz = student.Nachname.Substring(0, anzahlZeichen) + "." + student.Vorname.Substring(0, anzahlZeichen) + ".";
+
+                var zeile = "| " + nameKurz + " | ";
+
+                foreach (var fach in faecherInDieserKlasseAusLeistungsdaten)
+                {
+                    zeile += "| ";
+                }
+
+                zieldatei.Add(zeile);
+            }
+            zieldatei.Add("");
+
+            foreach (var aktion in zieldatei.Funktionen)
+                aktion(zieldatei);
         }
     }
 

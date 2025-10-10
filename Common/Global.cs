@@ -1464,8 +1464,8 @@ public static class KonfigHelper
 
 
     public static readonly Dictionary<string, KonfigMeta> KonfigMetadaten = new()
-    {        
-        ["AppDescription"] = new KonfigMeta        
+    {
+        ["AppDescription"] = new KonfigMeta
         {
             Key = "AppDescription",
             DefaultValue = "BKB-Tool - Ein Werkzeug an der Schnittstelle zwischen SchILD und Webuntis.",
@@ -1574,7 +1574,7 @@ public static class KonfigHelper
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.Schulnummer177659
-        },        
+        },
         ["ConnectionStringUntis"] = new KonfigMeta
         {
             Key = "ConnectionStringUntis",
@@ -1823,14 +1823,14 @@ public static class KonfigHelper
         ["OffeneFehlstunden"] = new KonfigMeta
         {
             Key = "OffeneFehlstunden",
-            DefaultValue = "Nein",
+            DefaultValue = "nein",
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Es gibt [{Global.GetColor(Global.ColorInfoBox)}]offene Fehlstunden[/]. Offene Fehlstunden sind weder entschuldigt noch unentschuldigt und werden im Zeugnis nicht berücksichtigt. Mit [{Global.GetColor(Global.ColorActionInMenüs)}]j(a)[/] geht es ohne Berücksichtigung der offenen Fehlstunden weiter. Abbruch mit [{Global.GetColor(Global.ColorFehler)}]n(ein)[/].",
             Datentyp = Global.Datentyp.JaNein,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
-        },         
+        },
         ["PfadDokumentenverwaltung"] = new KonfigMeta
         {
             Key = "PfadDokumentenverwaltung",
@@ -1951,7 +1951,7 @@ public static class KonfigHelper
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
-        },        
+        },
         ["SmtpServer"] = new KonfigMeta
         {
             Key = "SmtpServer",
@@ -2017,7 +2017,7 @@ public static class KonfigHelper
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
-        },        
+        },
         ["VolleStelle"] = new KonfigMeta
         {
             Key = "VolleStelle",
@@ -2032,14 +2032,14 @@ public static class KonfigHelper
         ["WikiUrl"] = new KonfigMeta
         {
             Key = "WikiUrl",
-            DefaultValue =  Environment.GetEnvironmentVariable("WikiUrl") ?? "",
+            DefaultValue = Environment.GetEnvironmentVariable("WikiUrl") ?? "",
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie die [{Global.GetColor(Global.ColorInfoBox)}]URL[/] zur dokuwiki xmlrpc.php an.",
             Datentyp = Global.Datentyp.Url,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
-        },        
+        },
         ["WikiJsonUser"] = new KonfigMeta
         {
             Key = "WikiJsonUser",
@@ -2083,6 +2083,17 @@ public static class KonfigHelper
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
+        },
+        ["KlausurbelegungAusGPU02OderLeistungsdaten"] = new KonfigMeta
+        {
+            Key = "KlausurbelegungAusGPU02OderLeistungsdaten",
+            DefaultValue = $"Ja",
+            Aufforderung = $"[green]■[/]",
+            Hinweise = $"Soll die Tabelle aus der GPU002 ([{Global.GetColor(Global.ColorPfadInProgrammen)}]Ja[/]) oder den Leistungsdaten ([{Global.GetColor(Global.ColorPfadInProgrammen)}]Nein[/]) übernommen werden? Die GPU002 bietet sich vor den Sommerferien an, die Leistungsdaten eher nach den Sommerferien, wenn bereits Leistungsdaten in SchILD vorliegen. (ja/nein)",
+            Datentyp = Global.Datentyp.JaNein,
+            InGrundeinstellungAbfragen = false,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.Schulnummer177659
         },
         ["NotenlistenUrl"] = new KonfigMeta
         {
