@@ -47,7 +47,7 @@ public interface IDokuWikiApi : IXmlRpcProxy
     string GetPage(string page);
 
     [XmlRpcMethod("wiki.putPage")]
-    bool PutPage(string page, string content, XmlRpcStruct options);
+    bool PutPage(string page, string content, XmlRpcStruct options);    
 }
 
 public class DokuwikiZugriff

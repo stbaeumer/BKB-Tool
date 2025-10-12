@@ -805,13 +805,27 @@ public static class MenueHelper
                             m.FilterInteressierendeStudentsUndKlassen(configuration);                            
                             m.Unterrichte = new Unterrichte(configuration, m, Global.Zweck.Zeugnis, Global.Art.KursUnterrichte);
                             m.Unterrichte.AddRange(new Unterrichte(configuration, m, Global.Zweck.Zeugnis, Global.Art.NichtKursUnterrichte));
-                            m.KlausurbelegungWikiSeiteErstellen(
-                                configuration,
-                                "playground:klausurbelegung",
-                                [
-                                    datei => datei.PutPage(),
-                                    datei => datei.OeffneWebseite($"https://bkb.wiki/{datei.Name}"),
-                                ]);
+                            Global.Konfig("Klausurbelegung", Global.Modus.Update, configuration, "", -1, -1, "", "1", null,
+        "1,2,3");
+                            if(configuration["Klausurbelegung"] == "1" || configuration["Klausurbelegung"] == "2")
+                                m.KlausurbelegungWikiSeiteErstellen(
+                                    configuration,
+                                    "oeffentlich:klausurbelegung",
+                                    [
+                                        datei => datei.PutPage(),
+                                        datei => datei.OeffneWebseite($"https://bkb.wiki/{datei.Name}"),
+                                    ]);
+                            if(configuration["Klausurbelegung"] == "3")
+                                m.KlausurbelegungAusWikiNachSchildEinlesen(
+                                    configuration,
+                                    Path.Combine(pfadSchilddatenaustausch ?? "", "schuelerLeistungsdaten.dat"),
+                                    [
+                                        datei => datei.OrdnerOeffnen(),
+                                        datei => datei.Erstellen()
+                                    ],
+                                    ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt"],
+                                    [],
+                                    "|", '\0', new UTF8Encoding(true), false);
                         },
                         Global.Rubrik.Leistungsdaten,
                         Global.NurBeiDiesenSchulnummern.Alle

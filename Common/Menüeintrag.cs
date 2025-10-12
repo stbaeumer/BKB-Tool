@@ -4974,7 +4974,7 @@ public class Menüeintrag
                     // Nur Teil vor Leerzeichen vergleichen
                     return dict.ContainsKey("Fach") && dict["Fach"].ToString() == fach;
                 }))
-            .ToList();        
+            .ToList();
 
         var faecherInDieserKlasseAusGpu002 = alleFaecherDistinct
             .Where(fach =>
@@ -4987,8 +4987,6 @@ public class Menüeintrag
             .ToList();
 
         var verschiedeneKlassenDerStudents = IStudents.Select(s => s.Klasse).Distinct().OrderBy(k => k).ToList();
-
-        configuration = Global.Konfig("KlausurbelegungAusGPU02OderLeistungsdaten", Global.Modus.Update, configuration);
 
         foreach (var klasse in verschiedeneKlassenDerStudents)
         {
@@ -5022,7 +5020,7 @@ public class Menüeintrag
                 }
             }
 
-            if (configuration["KlausurbelegungAusGPU02OderLeistungsdaten"] == "Ja")
+            if (configuration["Klausurbelegung"] == "1")
             {
                 foreach (var fach in faecherInDieserKlasseAusGpu002)
                 {
@@ -5031,26 +5029,27 @@ public class Menüeintrag
                         .Where(rec =>
                         {
                             var dict = (IDictionary<string, object>)rec;
-                            return dict["Field7"].ToString().StartsWith(fach + " ");
+                            return dict["Field7"].ToString().StartsWith(fach);
                         })
                         .Select(rec => (IDictionary<string, object>)rec)
-                        .GroupBy(dict => dict["Field6"].ToString().Split(' ')[0])
+                        .GroupBy(dict => dict["Field6"].ToString())
                         .Select(g => g.First())
                         .Select(dict => new
                         {
-                            Kürzel = dict["Field6"].ToString().Split(' ')[0]
+                            Kürzel = dict["Field6"].ToString()
                         })
                         .OrderBy(l => l.Kürzel)
                         .ToList();
 
                     foreach (var lehrer in alleLehrerDiesesFachs)
                     {
-                        kopfzeile += fach + "  ^  ";
-                        kopfzeile2 += lehrer.Kürzel + "  ^  ";
+                        kopfzeile2 += lehrer.Kürzel + " ";
                     }
+                    kopfzeile += fach + "  ^  ";
+                    kopfzeile2 += "^";
                 }
             }
-            else
+            else if (configuration["Klausurbelegung"] == "2")
             {
                 foreach (var fach in faecherInDieserKlasseAusLeistungsdaten)
                 {
@@ -5059,7 +5058,7 @@ public class Menüeintrag
                         .Where(rec =>
                         {
                             var dict = (IDictionary<string, object>)rec;
-                            return dict["Fach"].ToString().StartsWith(fach + " ");
+                            return dict["Fach"].ToString() == fach;
                         })
                         .Select(rec => (IDictionary<string, object>)rec)
                         .GroupBy(dict => dict["Fachlehrer"].ToString().Split(' ')[0])
@@ -5073,9 +5072,10 @@ public class Menüeintrag
 
                     foreach (var lehrer in alleLehrerDiesesFachs)
                     {
-                        kopfzeile += fach + "  ^  ";
-                        kopfzeile2 += lehrer.Kürzel + "  ^  ";
+                        kopfzeile2 += lehrer.Kürzel + " ";
                     }
+                    kopfzeile += fach + "  ^  ";
+                    kopfzeile2 += "^";
                 }
             }
             
@@ -5086,20 +5086,206 @@ public class Menüeintrag
             {
                 var nameKurz = student.Nachname.Substring(0, anzahlZeichen) + "." + student.Vorname.Substring(0, anzahlZeichen) + ".";
 
-                var zeile = "| " + nameKurz + " | ";
+                var zeile = "| " + nameKurz;
 
-                foreach (var fach in faecherInDieserKlasseAusLeistungsdaten)
+                if (configuration["Klausurbelegung"] == "1")
                 {
-                    zeile += "| ";
+                    foreach (var fach in faecherInDieserKlasseAusGpu002)
+                    {
+                        zeile += "| ";
+                    }
                 }
+                else if (configuration["Klausurbelegung"] == "2")
+                {   // Wenn Leistungsdaten genutzt werden, dann auch die Inhalte in die Zellen übergeben
+                    foreach (var fach in faecherInDieserKlasseAusLeistungsdaten)
+                    {
+                        // Suche die Kursart aus den Leistungsdaten für diesen Schüler
+                        var kursart = leistungsdaten
+                            .Where(rec =>
+                            {
+                                var dict = (IDictionary<string, object>)rec;
+                                return dict["Fach"].ToString() == fach &&
+                                       dict["Nachname"].ToString() == student.Nachname &&
+                                       dict["Vorname"].ToString() == student.Vorname &&
+                                       dict["Geburtsdatum"].ToString() == student.Geburtsdatum;
+                            })
+                            .Select(rec => (IDictionary<string, object>)rec)
+                            .Select(dict => dict["Kursart"].ToString())
+                            .FirstOrDefault();
+                        kursart = kursart;// (kursart == null ? "" : new List<string> { "PUK", "GK" }.Contains(kursart) ? "X" : kursart);
 
+                        zeile += "| " + kursart + " ";
+                    }
+                }
+                else if (configuration["Klausurbelegung"] == "3")
+                {
+                    throw new Exception("Unbekannte Einstellung für Klausurbelegung: " + configuration["Klausurbelegung"]);
+                }
+                
+                zeile += "| ";
                 zieldatei.Add(zeile);
             }
-            zieldatei.Add("");
+            zieldatei.Add("LK1,LK2,AB3,AB4: Abiturfächer; GKS: Schriftliches Fach; GKM: Mündliches Fach");
 
             foreach (var aktion in zieldatei.Funktionen)
                 aktion(zieldatei);
         }
+    }
+
+    internal void KlausurbelegungAusWikiNachSchildEinlesen(
+        IConfiguration configuration,
+        string zieldateiname,
+        List<Action<Datei>> funktionen,
+        string[] anhandDieserAttributeWirdVerglichen,
+        string[] dieseAttributeWerdenBeimVergleichIgnoriert,
+        string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
+    {
+        var zieldatei = new Datei(zieldateiname, funktionen, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+
+        var leistungsdaten = Quelldateien.GetMatchingList(configuration, "schuelerleistungsdaten", IStudents, Klassen);
+        if (!leistungsdaten.Any())
+        {
+            throw new Exception("Es sind keine Leistungsdaten vorhanden.");
+        }
+
+        var dokuwikiZugriff = new DokuwikiZugriff(configuration);
+
+        dokuwikiZugriff.Options = new XmlRpcStruct
+        {
+            { "sum", "Automatische Aktualisierung" },
+            { "minor", Global.WikiSprechtagKleineAenderung } // Kein Minor-Edit
+        };
+
+        var verschiedeneKlassenDerStudents = IStudents.Select(s => s.Klasse).Distinct().OrderBy(k => k).ToList();
+
+        foreach (var klasse in verschiedeneKlassenDerStudents)
+        {
+            // Wiki-Seite lesen
+            string seitenName = $"oeffentlich:Klausurbelegung:{klasse}"; // Pfad im Wiki
+            var seitenInhalt = dokuwikiZugriff.Proxy.GetPage(seitenName);
+
+            // Tabelle parsen
+            var tabelle = ParseDokuWikiTable(seitenInhalt);
+
+            var maxSpalten = 9; // Maximal 9 Spalten anzeigen
+            var table = new Spectre.Console.Table();
+            table.Border(TableBorder.Rounded);
+            table.Expand();
+            
+            // Die ersten beiden Zeilen als Header verwenden
+            int spalten = Math.Min(tabelle[0].Count, maxSpalten);
+            for (int j = 0; j < spalten; j++)
+            {
+                var header = tabelle[0][j];
+                if (tabelle.Count > 1 && tabelle[1].Count > j)
+                    header += "\n" + tabelle[1][j];
+                table.AddColumn(header);
+            }
+            if (tabelle[0].Count > maxSpalten)
+            {
+                table.AddColumn("...");
+            }
+            
+            int laengeDesNamens = 0;
+
+            // Ab Zeile 2 die Daten einfügen
+            for (int i = 2; i < tabelle.Count; i++)
+            {
+                var row = tabelle[i].Take(maxSpalten).ToList();
+
+                laengeDesNamens = row[0].Split('.')[0].Length;
+
+                if (tabelle[i].Count > maxSpalten)
+                    row.Add("...");
+                table.AddRow(row.ToArray());
+            }
+            
+            AnsiConsole.Write(table);
+
+            // Beispiel: Zugriff auf einzelne Zelle
+            //Console.WriteLine("\nZelle [2][0] = " + tabelle[2][0]);
+
+            // Durchlaufe alle Zeilen der bisherigen leistungsdaten mit dem Ziel die Kursart zu aktualisieren
+            foreach (var leistung in leistungsdaten)
+            {
+                var dict = (IDictionary<string, object>)leistung;
+
+                // suche den Spaltenindex aus Tabelle, der dem Fach entspricht
+                var fach = dict["Fach"].ToString();
+                var spaltenIndex = tabelle[0].IndexOf(fach);
+                if (spaltenIndex == -1)
+                {
+                    // Fach nicht gefunden, überspringe diesen Eintrag
+                    continue;
+                }
+                // suche den Zeilenindex aus Tabelle, der dem Schüler entspricht
+                var schuelername = dict["Nachname"].ToString().Substring(0, laengeDesNamens) + "." + dict["Vorname"].ToString().Substring(0, laengeDesNamens) + "."; // Nur erstes Zeichen des Vornamens
+                var zeilenIndex = tabelle.FindIndex(row =>
+                    row.Count > 0 &&
+                    row[0] == schuelername
+                );
+                if (zeilenIndex == -1)
+                {
+                    // Schüler nicht gefunden, überspringe diesen Eintrag
+                    continue;
+                }
+
+                dynamic record = new ExpandoObject();
+
+                foreach (var prop in dict)
+                {
+                    var name = prop.Key;
+                    var value = prop.Value;
+
+                    if (name == "Kursart")
+                    {
+                        // Wert aus der Tabelle übernehmen
+                        if (spaltenIndex < tabelle[zeilenIndex].Count)
+                        {
+                            value = tabelle[zeilenIndex][spaltenIndex].Trim();
+                        }
+                    }
+
+                    ((IDictionary<string, object>)record)[name] = value;
+                }
+                zieldatei.Add(record);
+            }
+        }
+        foreach (var aktion in zieldatei.Funktionen)
+            aktion(zieldatei);
+    }
+
+    static List<List<string>> ParseDokuWikiTable(string wikiText)
+    {
+        var result = new List<List<string>>();
+
+        // Nur Zeilen mit Tabelle (| oder ^)
+        var lines = wikiText
+            .Split('\n')
+            .Select(l => l.Trim())
+            .Where(l => l.StartsWith("^") || l.StartsWith("|"))
+            .ToList();
+
+        foreach (var line in lines)
+        {
+            char sep = line.StartsWith("^") ? '^' : '|';
+
+            // WICHTIG: StringSplitOptions.None => behält leere Zellen bei
+            var cells = line
+                .Split(new[] { sep }, StringSplitOptions.None)
+                .Select(c => c.Trim())
+                .ToList();
+
+            // Entferne NUR leere Elemente am Anfang/Ende, falls sie durch äußere Trennzeichen entstehen
+            if (cells.Count > 0 && cells.First() == "")
+                cells.RemoveAt(0);
+            if (cells.Count > 0 && cells.Last() == "")
+                cells.RemoveAt(cells.Count - 1);
+
+            result.Add(cells);
+        }
+
+        return result;
     }
 
 

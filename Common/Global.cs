@@ -2084,13 +2084,13 @@ public static class KonfigHelper
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
-        ["KlausurbelegungAusGPU02OderLeistungsdaten"] = new KonfigMeta
+        ["Klausurbelegung"] = new KonfigMeta
         {
-            Key = "KlausurbelegungAusGPU02OderLeistungsdaten",
-            DefaultValue = $"Ja",
+            Key = "Klausurbelegung",
+            DefaultValue = $"1",
             Aufforderung = $"[green]■[/]",
-            Hinweise = $"Soll die Tabelle aus der GPU002 ([{Global.GetColor(Global.ColorPfadInProgrammen)}]Ja[/]) oder den Leistungsdaten ([{Global.GetColor(Global.ColorPfadInProgrammen)}]Nein[/]) übernommen werden? Die GPU002 bietet sich vor den Sommerferien an, die Leistungsdaten eher nach den Sommerferien, wenn bereits Leistungsdaten in SchILD vorliegen. (ja/nein)",
-            Datentyp = Global.Datentyp.JaNein,
+            Hinweise = $"Wählen aus:\n[{Global.GetColor(Global.ColorActionInMenüs)}]1.[/]Tabelle aus der GPU002 erstellen und in Wiki als Seite anlegen\n[{Global.GetColor(Global.ColorActionInMenüs)}]2.[/]Tabelle aus Leistungsdaten erstellen und inkl. alle Einträge in Wiki anlegen.\n[{Global.GetColor(Global.ColorActionInMenüs)}]3.[/]Tabelle aus Wiki auslesen und SchuelerLeistungsdaten für den Re-Import nach SchILD erstellen.",
+            Datentyp = Global.Datentyp.Auswahl,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.Schulnummer177659
