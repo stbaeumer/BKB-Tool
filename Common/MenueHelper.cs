@@ -807,10 +807,12 @@ public static class MenueHelper
                             m.Unterrichte.AddRange(new Unterrichte(configuration, m, Global.Zweck.Zeugnis, Global.Art.NichtKursUnterrichte));
                             Global.Konfig("Klausurbelegung", Global.Modus.Update, configuration, "", -1, -1, "", "1", null,
         "1,2,3");
+                            Global.Konfig("InteressierendesSchuljahr", Global.Modus.Update, configuration, "", -1, -1, "", "1", null,
+        "25-26,26-27,27-28");
                             if(configuration["Klausurbelegung"] == "1" || configuration["Klausurbelegung"] == "2")
                                 m.KlausurbelegungWikiSeiteErstellen(
                                     configuration,
-                                    "oeffentlich:klausurbelegung",
+                                    $"oeffentlich:klausurbelegung:{configuration["InteressierendesSchuljahr"]}:",
                                     [
                                         datei => datei.PutPage(),
                                         datei => datei.OeffneWebseite($"https://bkb.wiki/{datei.Name}"),

@@ -4990,11 +4990,11 @@ public class Menüeintrag
 
         foreach (var klasse in verschiedeneKlassenDerStudents)
         {
-            zieldatei.Name = $"oeffentlich:Klausurbelegung:{klasse}";
-            zieldatei.Add("====== Klausurbelegung " + klasse + " ======");
+            zieldatei.Name = $"oeffentlich:Klausurbelegung:{configuration["InteressierendesSchuljahr"]}:{klasse}";
+            zieldatei.Add($"====== Klausurbelegung {klasse} ======");
             zieldatei.Add("");
 
-            var kopfzeile = "^Name  ^ ";
+            var kopfzeile = "^  Name  ^ ";
             var kopfzeile2 = "^  ^";
 
             // Prüfe für alle IStudents dieser Klasse, ob die Initialen (z.B. A.B.) mehrfach vorkommen.
@@ -5075,7 +5075,7 @@ public class Menüeintrag
                         kopfzeile2 += lehrer.Kürzel + " ";
                     }
                     kopfzeile += fach + "  ^  ";
-                    kopfzeile2 += "^";
+                    kopfzeile2 += "^  ";
                 }
             }
             
@@ -5144,9 +5144,7 @@ public class Menüeintrag
 
         var leistungsdaten = Quelldateien.GetMatchingList(configuration, "schuelerleistungsdaten", IStudents, Klassen);
         if (!leistungsdaten.Any())
-        {
-            throw new Exception("Es sind keine Leistungsdaten vorhanden.");
-        }
+            throw new Exception("Es sind keine Leistungsdaten vorhanden.");        
 
         var dokuwikiZugriff = new DokuwikiZugriff(configuration);
 
@@ -5161,7 +5159,7 @@ public class Menüeintrag
         foreach (var klasse in verschiedeneKlassenDerStudents)
         {
             // Wiki-Seite lesen
-            string seitenName = $"oeffentlich:Klausurbelegung:{klasse}"; // Pfad im Wiki
+            string seitenName = $"oeffentlich:Klausurbelegung:{configuration["InteressierendesSchuljahr"]}:{klasse}"; // Pfad im Wiki
             var seitenInhalt = dokuwikiZugriff.Proxy.GetPage(seitenName);
 
             // Tabelle parsen
@@ -5232,20 +5230,25 @@ public class Menüeintrag
 
                 dynamic record = new ExpandoObject();
 
+                var kursart = "";
+
                 foreach (var prop in dict)
                 {
                     var name = prop.Key;
                     var value = prop.Value;
 
                     if (name == "Kursart")
-                    {
-                        // Wert aus der Tabelle übernehmen
                         if (spaltenIndex < tabelle[zeilenIndex].Count)
                         {
-                            value = tabelle[zeilenIndex][spaltenIndex].Trim();
+                            kursart = tabelle[zeilenIndex][spaltenIndex].Trim();
+                            value = kursart;
                         }
-                    }
 
+                    if (name == "Abiturfach")
+                        if (spaltenIndex < tabelle[zeilenIndex].Count)                                                    
+                            if (new List<string> { "LK1", "LK2", "AB3", "AB4" }.Contains(kursart))
+                                value = kursart.Substring(2, 1); // Nur die Ziffer  
+                        
                     ((IDictionary<string, object>)record)[name] = value;
                 }
                 zieldatei.Add(record);

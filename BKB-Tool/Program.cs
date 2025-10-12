@@ -4,7 +4,7 @@ using Common;
 using Microsoft.Extensions.Configuration;
 using Spectre.Console;
 
-try{ Console.WindowHeight = 33;} catch { }
+try{ Console.WindowHeight = 35;} catch { }
 
 Global.User = Environment.UserName;
 IConfiguration? configuration = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile($"{Global.User}.json", optional: true, reloadOnChange: true).Build();

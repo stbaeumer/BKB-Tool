@@ -2089,8 +2089,19 @@ public static class KonfigHelper
             Key = "Klausurbelegung",
             DefaultValue = $"1",
             Aufforderung = $"[green]■[/]",
-            Hinweise = $"Wählen aus:\n[{Global.GetColor(Global.ColorActionInMenüs)}]1.[/]Tabelle aus der GPU002 erstellen und in Wiki als Seite anlegen\n[{Global.GetColor(Global.ColorActionInMenüs)}]2.[/]Tabelle aus Leistungsdaten erstellen und inkl. alle Einträge in Wiki anlegen.\n[{Global.GetColor(Global.ColorActionInMenüs)}]3.[/]Tabelle aus Wiki auslesen und SchuelerLeistungsdaten für den Re-Import nach SchILD erstellen.",
+            Hinweise = $"Wählen aus:\n[{Global.GetColor(Global.ColorActionInMenüs)}]1.[/]\nTabelle aus der GPU002 erstellen und in Wiki als Seite anlegen\nDiese Option ist direkt vor den Sommerferien sinnvoll, damit Kurswahlen durchgeführt werden können.\n[{Global.GetColor(Global.ColorActionInMenüs)}]2.[/]\nTabelle aus Leistungsdaten erstellen und inkl. alle Einträge in Wiki anlegen.\nDiese Option ist nach den Sommerferien sinnvoll, um bestehende Leistungsdaten in SchILD zu aktualisieren.\n[{Global.GetColor(Global.ColorActionInMenüs)}]3.[/]\nTabelle aus Wiki auslesen und SchuelerLeistungsdaten für den Re-Import nach SchILD erstellen.",
             Datentyp = Global.Datentyp.Auswahl,
+            InGrundeinstellungAbfragen = false,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.Schulnummer177659
+        },
+        ["InteressierendesSchuljahr"] = new KonfigMeta
+        {
+            Key = "InteressierendesSchuljahr",
+            DefaultValue = Global.AktSj[0].Replace("20", "") + "-" + Global.AktSj[1].Replace("20", ""),
+            Aufforderung = $"[green]■[/]",
+            Hinweise = $"Geben Sie das interessierden [{Global.GetColor(Global.ColorInfoBox)}]Schuljahr[/] an. Beispiel: [{Global.GetColor(Global.ColorZahlen)}]{Global.AktSj[0].Replace("20", "") + "-" + Global.AktSj[1].Replace("20", "")}[/].",
+            Datentyp = Global.Datentyp.String,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.Schulnummer177659
