@@ -5125,7 +5125,7 @@ public class Menüeintrag
                 zeile += "| ";
                 zieldatei.Add(zeile);
             }
-            zieldatei.Add("LK1,LK2,AB3,AB4: Abiturfächer; GKS: Schriftliches Fach; GKM: Mündliches Fach");
+            zieldatei.Add("LK1, LK2, AB3, AB4: Abiturfächer; GKS: Schriftliches Fach; GKM: Mündliches Fach");
 
             foreach (var aktion in zieldatei.Funktionen)
                 aktion(zieldatei);
