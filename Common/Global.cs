@@ -1206,7 +1206,7 @@ public static class Global
 
     public static void WeiterMitAnykey(IConfiguration configuration, Menüeintrag menüeintrag = null)
     {
-        var panel = new Panel($"Zur Menüauswahl mit [bold {Global.GetColor(Global.ColorActionInMenüs)}]Anykey[/], mit [bold {Global.GetColor(Global.ColorActionInMenüs)}]e[/] zu den Einstellungen, mit [bold {Global.GetColor(Global.ColorActionInMenüs)}]h[/] Onlinehilfe öffnen.")
+        var panel = new Panel($"Zur Menüauswahl mit [bold {Global.GetColor(Global.ColorActionInMenüs)}]Anykey[/], mit [bold {Global.GetColor(Global.ColorActionInMenüs)}]e[/] zu den Einstellungen, mit [bold {Global.GetColor(Global.ColorActionInMenüs)}]h[/] zur Onlinehilfe.")
                         .HeaderAlignment(Justify.Left)
                         .SquareBorder()
                         .Expand()
@@ -1524,7 +1524,7 @@ public static class KonfigHelper
         {
             Key = "Auswahl",
             DefaultValue = "1",
-            Aufforderung = "Ihre Auswahl bitte",
+            Aufforderung = "Ihre Auswahl",
             Hinweise = $"Geben Sie eine [bold {Global.GetColor(Global.ColorTextHervorheben)}]Zahl[/] ein oder [bold {Global.GetColor(Global.ColorTextHervorheben)}]e[/] für Einstellungen oder [bold {Global.GetColor(Global.ColorTextHervorheben)}]h[/] für Onlinehilfe",
             Datentyp = Global.Datentyp.Auswahl,
             InGrundeinstellungAbfragen = false,
@@ -2010,7 +2010,7 @@ public static class KonfigHelper
         ["Teilleistungsarten"] = new KonfigMeta
         {
             Key = "Teilleistungsarten",
-            DefaultValue = "Vornote,Abschluss-Schriftl.,Abschluss-Mündl.",
+            DefaultValue = "Vornote,Abschluss-Schriftl.,Abschluss-Mündl.,sonstige Mitarbeit",
             Aufforderung = "Welche Teilleistungsarten (kommagetrennt) sollen gezogen werden?",
             Hinweise = $"Die [{Global.GetColor(Global.ColorInfoBox)}]Teilleistungsart(en)[/] in Webuntis und in SchILD müssen identisch heißen. Ansonsten werden keine Teilleistungen nach SchILD importiert.",
             Datentyp = Global.Datentyp.ListString,
@@ -2067,7 +2067,7 @@ public static class KonfigHelper
             Key = "WikiSprechtagKleineAenderung",
             DefaultValue = "j",
             Aufforderung = $"[green]■[/]",
-            Hinweise = $"Handelt es sich um eine [{Global.GetColor(Global.ColorInfoBox)}]kleine Änderung[/]? Kleine Änderungen erzeugen keine neue Version (j/n)",
+            Hinweise = $"Handelt es sich um eine [{Global.GetColor(Global.ColorInfoBox)}]kleine Änderung[/]? Kleine Änderungen erzeugen keine neue Version. (j/n)",
             Datentyp = Global.Datentyp.JaNein,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
@@ -2106,21 +2106,21 @@ public static class KonfigHelper
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.Schulnummer177659
         },
-        ["NotenlistenUrl"] = new KonfigMeta
+        ["ZeugnisUrl"] = new KonfigMeta
         {
-            Key = "NotenlistenUrl",
-            DefaultValue = Environment.GetEnvironmentVariable("NotenlistenUrl") ?? "",
+            Key = "ZeugnisUrl",
+            DefaultValue = Environment.GetEnvironmentVariable("ZeugnisUrl") ?? "",
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Soll eine [{Global.GetColor(Global.ColorInfoBox)}]bestimmte Webseite[/] geöffnet werden, um die verschlüsselte(n) Datei(en) dort hochzuladen?\nFalls Sie keine Seite öffnen wollen, lassen Sie die Eingabe leer oder überschreiben Sie den bisherigen Wert mit einem \"-\".",
-            Datentyp = Global.Datentyp.DateTime,
+            Datentyp = Global.Datentyp.Url,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
-        ["NotenlistenKennwort"] = new KonfigMeta
+        ["ZeugnisKennwort"] = new KonfigMeta
         {
-            Key = "NotenlistenKennwort",
-            DefaultValue = Environment.GetEnvironmentVariable("NotenlistenKennwort") ?? "",
+            Key = "ZeugnisKennwort",
+            DefaultValue = Environment.GetEnvironmentVariable("ZeugnisKennwort") ?? "",
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Mit welchem [{Global.GetColor(Global.ColorInfoBox)}]Notenlisten-Kennwort[/] sollen die Dateien verschlüsselt werden?",
             Datentyp = Global.Datentyp.Kennwort,

@@ -476,7 +476,14 @@ public class Dateien : List<Datei>
             Add(new Datei(
                 "MarksPerLesson",
                 "Beschreibung",
-                schildhinweise,
+                [
+                    "Exportieren Sie die Datei aus Webuntis, indem Sie als Admin den Pfad gehen:",
+                    $"1. [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Klassenbuch > Berichte[/]",
+                    $"2. Evtl. Klasse auswählen. Evtl. den Zeitraum eingrenzen.",
+                    $"3. [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Noten > Noten pro Schüler*in > CSV-Symbol[/] klicken.",
+                    $"4. Die Datei in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/] speichern."
+
+                ],
                 [""],
                 true,
                 d => d.FilternMarksPerLessons(),

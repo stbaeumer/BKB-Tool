@@ -3640,7 +3640,7 @@ public class Menüeintrag
         return kategorien.TrimEnd(',');
     }
 
-    public Datei Teilleistungen(
+    public void Teilleistungen(
         IConfiguration configuration,
         string zieldateiname,
         List<Action<Datei>> funktionen,
@@ -3655,7 +3655,8 @@ public class Menüeintrag
         var records = new List<dynamic>();
 
         var marksPerLs = Quelldateien.GetMatchingList(configuration, "marksperlesson", IStudents, Klassen);
-        if (marksPerLs == null || marksPerLs.Count == 0) return [];
+        if (marksPerLs == null) return;
+        if (marksPerLs.Count == 0) throw new Exception("In der Quelldatei marksperlesson wurden keine Datensätze gefunden.");
 
         try
         {
@@ -3693,7 +3694,8 @@ public class Menüeintrag
                 AnsiConsole.Write(panel);
             }
 
-            return zieldatei;
+            foreach (var aktion in zieldatei.Funktionen)
+                aktion(zieldatei);
         }
         catch (Exception ex)
         {
@@ -3702,8 +3704,6 @@ public class Menüeintrag
 
             Console.ReadKey();
         }
-
-        return null;
     }
 
     internal Datei GetLehrerDerKlassen(IConfiguration configuration, Lehrers lehrers)
@@ -3852,7 +3852,6 @@ public class Menüeintrag
                                 "Ohne Angabe des Deputats und Geburtsdatums in SchILD, findet keine Berechnung statt. " +
                                 "Sch/Unt zeigt (möglicherweise) abweichende Werte in SchILD und in Untis. " +
                                 $"Die Datei [aqua]{zieldateiname}[/] wird neu erstellt und kann nach ScHILD importiert werden. " +
-                                "Auch wenn der Wert eines Anrechnungsgrunds bei einer Lehrkraft 0 ist, wird er in die Datei übernommen, um möglicherweise veraltete Werte zu überschreiben. " +
                                 $"Da die Datei nur zusammen mit einer (leeren) lehrkraefte.dat importiert werden kann, wird eine leere lehrkraefte.dat ebenfalls erzeugt. " +
                                 $"Wenn in der Spalte [bold springGreen2]Alter am 31.7.{akt + 1}[/] die Zahl 55 oder 60 steht, dann ändern sich die Werte im kommenden Jahr. ")
                     .HeaderAlignment(Justify.Left)
@@ -5075,7 +5074,7 @@ public class Menüeintrag
                         kopfzeile2 += lehrer.Kürzel + " ";
                     }
                     kopfzeile += fach + "  ^  ";
-                    kopfzeile2 += "^  ";
+                    kopfzeile2 += "  ^  ";
                 }
             }
             
@@ -5125,7 +5124,9 @@ public class Menüeintrag
                 zeile += "| ";
                 zieldatei.Add(zeile);
             }
-            zieldatei.Add("LK1, LK2, AB3, AB4: Abiturfächer; GKS: Schriftliches Fach; GKM: Mündliches Fach");
+            zieldatei.Add("Klassenleitungen (zusammen mit Schüler*innen) nehmen hier im Wiki die Klausurbelegung vor. Unmittelbar vor den Zeugnissen wird die Tabelle nach SchILD importiert. Zulässige Werte:");
+            zieldatei.Add("  * LK1, LK2, AB3, AB4 (für die 4 Abiturfächer)");
+            zieldatei.Add("  * GKS, GKM (für schriftliche und mündliche Grundkurse)");
 
             foreach (var aktion in zieldatei.Funktionen)
                 aktion(zieldatei);

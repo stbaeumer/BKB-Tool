@@ -136,7 +136,10 @@ public static class MenueHelper
                                         "ImportNachWebuntis-Stammdaten-Schueler.csv", new string[] { "EMINUSMail" }, new string[] { }, ";", '\'', new UTF8Encoding(false), false,
                                         [
                                             datei => datei.OrdnerOeffnen(),
-                                            datei => datei.Erstellen()
+                                            datei => datei.Erstellen(),
+                                            datei => datei.OeffneWebseite("https://nessa.webuntis.com/students"),
+                                            datei => datei.OeffneWebseite("https://management.geevoo.de/import/"),
+                                            datei => datei.OeffneWebseite("https://nessa.webuntis.com/users")
                                         ],
                                         [
                                             $"1. In Webuntis als Webuntis-Admin:  [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Stammdaten > Schüler*innen > Import[/]",
@@ -148,7 +151,8 @@ public static class MenueHelper
                                     new Datei(
                                         "ImportNachWebuntis-Stammdaten-Ausbildungsbeauftragte.csv", new string[] { "EMINUSMail" }, new string[] { }, ";", '\'', new UTF8Encoding(false), false,
                                         [
-                                            datei => datei.Erstellen()
+                                            datei => datei.Erstellen(),
+                                            datei => datei.OeffneWebseite("https://nessa.webuntis.com/apprenticerepresentatives")
                                         ],
                                         [
                                             $"1. In Webuntis als Webuntis-Admin:  [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Stammdaten > Ausbildungsbeauftragte > Import[/]",
@@ -161,7 +165,7 @@ public static class MenueHelper
                                         "ImportNachWebuntis-Stammdaten-Erziehungsberechtigte.csv", new string[] { "EMINUSMail" }, new string[] { }, ";", '\'', new UTF8Encoding(false), false,
                                         [
                                             datei => datei.Erstellen(),
-                                            datei => datei.OeffneWebseite("https://nessa.webuntis.com/students")
+                                            datei => datei.OeffneWebseite("https://nessa.webuntis.com/legalguardians")                                            
                                         ],   
                                         [
                                             $"1. In Webuntis als Webuntis-Admin:  [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Stammdaten > Erziehungsberechtigte > Import[/]",
@@ -698,7 +702,7 @@ public static class MenueHelper
                             Global.NurBeiDiesenSchulnummern.Alle
                         ),
                         new Menüeintrag(
-                            "Zeugnisse (a): Säumige Lehrer*innen im Teams-Chat an die Noten-Eintragung erinnern",
+                            "Zeugnis-Chat: Säumige Lehrer*innen im Teams-Chat an die Noten-Eintragung erinnern",
                             quelldateien.Notwendige(configuration, ["schuelerleistungsdaten,dat"]),
                             students,
                             klassen,
@@ -718,7 +722,7 @@ public static class MenueHelper
                             Global.NurBeiDiesenSchulnummern.Nur177659
                         ),
                         new Menüeintrag(
-                        "Zeugnisse (b): Leistungsdaten (Unterrichte, Zeugnisnoten, Fehlzeiten, ...) nach SchILD importieren",
+                        "Zeugnisse: Leistungsdaten (Unterrichte, Zeugnisnoten, Fehlzeiten, ...) nach SchILD importieren",
                         quelldateien.Notwendige(configuration, ["absenceperstudent,csv", "studentgroupstudents,csv", "klassen,dat", "schuelerlernabschnitt,dat,optional", "schuelerleistungsdaten,dat", "lehrkraefte,dat", "kurse,dat", "schuelerbasisdaten,dat", "GPU002,txt", "GPU004,txt", "faecher,dat"]),
                         students,
                         klassen,
@@ -830,7 +834,7 @@ public static class MenueHelper
                                     "|", '\0', new UTF8Encoding(true), false);
                         },
                         Global.Rubrik.Leistungsdaten,
-                        Global.NurBeiDiesenSchulnummern.Alle
+                        Global.NurBeiDiesenSchulnummern.Nur177659
                     ),
                         new Menüeintrag(
                             "Teams-Chat: Teams-Chat mit Gruppe von Lehrkräften beginnen",
@@ -860,7 +864,7 @@ public static class MenueHelper
                         ),
                         new Menüeintrag(
                                 "Teilleistungen: SchuelerTeilleistungen.dat erstellen",
-                                quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "exportlessons,csv", "marksperlesson,csv"]),
+                                quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "marksperlesson,csv"]),
                                 students,
                                 klassen,
                                 [
@@ -871,7 +875,7 @@ public static class MenueHelper
                                 m =>
                                 {
                                     m.FilterInteressierendeStudentsUndKlassen(configuration);
-                                    m.Zieldatei = m.Teilleistungen(
+                                    m.Teilleistungen(
                                         configuration,
                                         Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerTeilleistungen.dat"),
                                         [

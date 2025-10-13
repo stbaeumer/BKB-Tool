@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Version>0.1.1</Version>
+    <Version>0.1.2</Version>
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -12,9 +12,17 @@
       <NoWarn>NU1992;NU1903</NoWarn> 
   </PropertyGroup>
 
+  <!-- Icon für Windows (.exe) -->
   <ItemGroup>
     <None Update="BKB-Tool.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <!-- Icon für Linux (.png) -->
+  <ItemGroup>
+    <None Include="BKB-Tool_256.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
