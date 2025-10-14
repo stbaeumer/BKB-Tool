@@ -687,7 +687,7 @@ public static class MenueHelper
                             students,
                             klassen,
                             [
-                                $"PDF-Zeugnisse und andere PDF-Dateien in [{Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/] werden in die Schüler*innen-Ordner der SchILD-Dokumentenverwaltung einsortiert.",
+                                $"PDF-Zeugnisse und andere PDF-Dateien in [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(configuration["PfadDownloads"], "PDF-Input")}[/] werden in die Schüler*innen-Ordner der SchILD-Dokumentenverwaltung einsortiert.",
                                 $"[{Global.GetColor(Global.ColorHinweise)}]Vorbereitung #1[/]: Zu kopierende PDF-Dateien nach [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(configuration["PfadDownloads"], "PDF-Input")}[/] kopieren.",
                                 $"[{Global.GetColor(Global.ColorHinweise)}]Vorbereitung #2[/]: Eine UTF8-CSV-Datei mit Spalten: Nachname, Vorname, Geburtsdatum und Klasse aus Atlantis exportieren und in [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(configuration["PfadDownloads"], "PDF-Input")}[/] ablegen.",
                                 $"[{Global.GetColor(Global.ColorTextHervorheben)}]Durchführung #1[/]: (Einzelne) Klasse(n) oder 'alle' auswählen.",
@@ -864,13 +864,13 @@ public static class MenueHelper
                         ),
                         new Menüeintrag(
                                 "Teilleistungen: SchuelerTeilleistungen.dat erstellen",
-                                quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "marksperlesson,csv"]),
+                                quelldateien.Notwendige(configuration, ["schuelerteilleistungen,dat", "schuelerleistungsdaten,dat", "schuelerbasisdaten,dat", "marksperlesson,csv"]),
                                 students,
                                 klassen,
                                 [
                                     $"Es wird jetzt die Datei [bold {Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerTeilleistungen.dat")}[/] erstellt.",
                                     $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis:[/] Damit der Import nach SchILD reibungslos funktioniert, müssen zuvor die Teilleistungsarten in SchILD ([{Global.GetColor(Global.ColorPfadInProgrammen)}]Schulverwaltung > Teilleistungsarten[/]) gleichlautend mit dem Langnamen in Webuntis ([{Global.GetColor(Global.ColorPfadInProgrammen)}]Stammdaten > Prüfungsarten[/]) angelegt werden.",
-                                    $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis:[/] Es empfiehlt sich, dass die Lernabschnitssdaten und Leistungsdaten zuerst in SchILD importiert bzw. angelegt werden."
+                                    $"[{Global.GetColor(Global.ColorHinweise)}]Wichtig:[/] Um feststellen zu können wo Teilleistungen fehlen, müssen die Leistungsdaten bereits in SchILD importiert bzw. angelegt worden sein."
                                 ],
                                 m =>
                                 {
@@ -878,11 +878,11 @@ public static class MenueHelper
                                     m.Teilleistungen(
                                         configuration,
                                         Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerTeilleistungen.dat"),
+                                        lehrers,
                                         [
                                             datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
                                             datei => datei.Verarbeiten(quelldateien, Global.Modus.Filtern),
-                                            datei => datei.OrdnerOeffnen(),
-                                            datei => datei.Erstellen()
+                                            datei => datei.OeffneWebseite("https://teams.microsoft.com/l/chat/0/0?users=", datei.UrlMitte, datei.UrlRechts),
                                         ],
                                         ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach", "Datum"],
                                         [],

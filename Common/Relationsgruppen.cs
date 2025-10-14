@@ -285,10 +285,21 @@ public class Relationsgruppen : List<Relationsgruppe>
         Global.EditorOeffnen(pfad);
 
         // Öffne Browser: https://www.schulministerium.nrw.de/BiPo/ppschips/pages/index.jsf
-        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+        if (OperatingSystem.IsWindows())
         {
-            FileName = "https://www.schulministerium.nrw.de/BiPo/ppschips/pages/index.jsf",
-            UseShellExecute = true
-        });
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = "https://www.schulministerium.nrw.de/BiPo/ppschips/pages/index.jsf",
+                UseShellExecute = true
+            });
+        }
+        else if (OperatingSystem.IsLinux())
+        {
+            System.Diagnostics.Process.Start("xdg-open", "https://www.schulministerium.nrw.de/BiPo/ppschips/pages/index.jsf");
+        }
+        else if (OperatingSystem.IsMacOS())
+        {
+            System.Diagnostics.Process.Start("open", "https://www.schulministerium.nrw.de/BiPo/ppschips/pages/index.jsf");
+        }
     }
 }

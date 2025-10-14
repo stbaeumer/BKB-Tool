@@ -1055,11 +1055,27 @@ public static class Global
     {
         try
         {
-            System.Diagnostics.Process.Start(@"C:\Program Files (x86)\Notepad++\Notepad++.exe", pfad);
+            if (OperatingSystem.IsWindows())
+            {
+                // Windows: Notepad++ oder Notepad
+                try
+                {
+                    System.Diagnostics.Process.Start(@"C:\Program Files (x86)\Notepad++\Notepad++.exe", pfad);
+                }
+                catch
+                {
+                    System.Diagnostics.Process.Start("Notepad.exe", pfad);
+                }
+            }
+            else if (OperatingSystem.IsLinux())
+            {
+                // Linux: xdg-open (öffnet Standardeditor)
+                System.Diagnostics.Process.Start("xdg-open", pfad);
+            }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            System.Diagnostics.Process.Start("Notepad.exe", pfad);
+            Console.WriteLine("Fehler beim Öffnen des Editors: " + ex.Message);
         }
     }
 
@@ -2011,7 +2027,7 @@ public static class KonfigHelper
         {
             Key = "Teilleistungsarten",
             DefaultValue = "Vornote,Abschluss-Schriftl.,Abschluss-Mündl.,sonstige Mitarbeit",
-            Aufforderung = "Welche Teilleistungsarten (kommagetrennt) sollen gezogen werden?",
+            Aufforderung = $"[green]■[/]",
             Hinweise = $"Die [{Global.GetColor(Global.ColorInfoBox)}]Teilleistungsart(en)[/] in Webuntis und in SchILD müssen identisch heißen. Ansonsten werden keine Teilleistungen nach SchILD importiert.",
             Datentyp = Global.Datentyp.ListString,
             InGrundeinstellungAbfragen = false,
@@ -2089,7 +2105,7 @@ public static class KonfigHelper
             Key = "Klausurbelegung",
             DefaultValue = $"1",
             Aufforderung = $"[green]■[/]",
-            Hinweise = $"Wählen aus:\n[{Global.GetColor(Global.ColorActionInMenüs)}]1.[/]\nTabelle aus der GPU002 erstellen und in Wiki als Seite anlegen\nDiese Option ist direkt vor den Sommerferien sinnvoll, damit Kurswahlen durchgeführt werden können.\n[{Global.GetColor(Global.ColorActionInMenüs)}]2.[/]\nTabelle aus Leistungsdaten erstellen und inkl. alle Einträge in Wiki anlegen.\nDiese Option ist nach den Sommerferien sinnvoll, um bestehende Leistungsdaten in SchILD zu aktualisieren.\n[{Global.GetColor(Global.ColorActionInMenüs)}]3.[/]\nTabelle aus Wiki auslesen und SchuelerLeistungsdaten für den Re-Import nach SchILD erstellen.",
+            Hinweise = $"Wählen aus:\n[{Global.GetColor(Global.ColorActionInMenüs)}]1. Tabelle aus der GPU002 erstellen und in Wiki als Seite anlegen[/]\nDiese Option ist direkt vor den Sommerferien sinnvoll, damit Kurswahlen durchgeführt werden können.\n[{Global.GetColor(Global.ColorActionInMenüs)}]2. Tabelle aus Leistungsdaten erstellen und inkl. alle Einträge in Wiki anlegen.[/]\nDiese Option ist nach den Sommerferien sinnvoll, um bestehende Leistungsdaten in SchILD zu aktualisieren.\n[{Global.GetColor(Global.ColorActionInMenüs)}]3. Tabelle aus Wiki auslesen[/]\nSchuelerLeistungsdaten werden für den Re-Import nach SchILD erstellt.",
             Datentyp = Global.Datentyp.Auswahl,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,

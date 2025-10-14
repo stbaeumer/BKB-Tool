@@ -3643,6 +3643,7 @@ public class Menüeintrag
     public void Teilleistungen(
         IConfiguration configuration,
         string zieldateiname,
+        Lehrers lehrers,
         List<Action<Datei>> funktionen,
         string[] anhandDieserAttributeWirdVerglichen,
         string[] dieseAttributeWerdenBeimVergleichIgnoriert,
@@ -3660,38 +3661,136 @@ public class Menüeintrag
 
         try
         {
-            foreach (var student in IStudents)
+            AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Teilleistungen aus MarksPerLesson einlesen ...", ctx =>
             {
-                foreach (var recMar in marksPerLs)                
+                foreach (var student in IStudents)
                 {
-                    var dictMar = (IDictionary<string, object>)recMar;
-                    if (!(dictMar["Name"].ToString() == student.Nachname + " " + student.Vorname && dictMar["Klasse"].ToString() == student.Klasse)) continue;
-                    if (!(string.IsNullOrEmpty(configuration["Teilleistungsarten"].ToString()) || configuration["Teilleistungsarten"].ToString().ToLower().Trim().Split(',').Contains(dictMar["Prüfungsart"].ToString().ToLower()))) continue;
-                    dynamic record = new ExpandoObject();
-                    record.Nachname = $"{student.Nachname}#{student.Klasse}";
-                    record.Vorname = student.Vorname;
-                    record.Geburtsdatum = student.Geburtsdatum;
-                    record.Jahr = Global.AktSj[0];
-                    record.Abschnitt = configuration["Abschnitt"];
-                    record.Fach = dictMar["Fach"].ToString();
-                    record.Datum = dictMar["Datum"].ToString();
-                    record.Teilleistung = dictMar["Prüfungsart"].ToString();
-                    record.Note = student.GetNote(dictMar["Note"].ToString());
-                    record.Bemerkung = dictMar["Bemerkung"].ToString();
-                    record.Lehrkraft = dictMar["Benutzer"].ToString();
-                    zieldatei.Add(record);
+                    foreach (var recMar in marksPerLs)
+                    {
+                        var dictMar = (IDictionary<string, object>)recMar;
+                        if (!(dictMar["Name"].ToString() == student.Nachname + " " + student.Vorname && dictMar["Klasse"].ToString() == student.Klasse)) continue;
+                        if (!(string.IsNullOrEmpty(configuration["Teilleistungsarten"].ToString()) || configuration["Teilleistungsarten"].ToString().ToLower().Trim().Split(',').Contains(dictMar["Prüfungsart"].ToString().ToLower()))) continue;
+                        dynamic record = new ExpandoObject();
+                        record.Nachname = $"{student.Nachname}#{student.Klasse}";
+                        record.Vorname = student.Vorname;
+                        record.Geburtsdatum = student.Geburtsdatum;
+                        record.Jahr = Global.AktSj[0];
+                        record.Abschnitt = configuration["Abschnitt"];
+                        record.Fach = dictMar["Fach"].ToString();
+                        record.Datum = dictMar["Datum"].ToString();
+                        record.Teilleistung = dictMar["Prüfungsart"].ToString();
+                        record.Note = student.GetNote(dictMar["Note"].ToString());
+                        record.Bemerkung = dictMar["Bemerkung"].ToString();
+                        record.Lehrkraft = dictMar["Benutzer"].ToString();
+                        zieldatei.Add(record);
+                    }
                 }
-            }
 
-            if (zieldatei.Count == 0)
+                if (zieldatei.Count == 0)
+                {
+                    var panel = new Panel($"Keine Teilleistungen gefunden. Haben Sie die Teilleistungsart(en) exakt so eingegeben, wie sie in SchILD bzw. Webuntis mit Langname heißt?")
+                            .HeaderAlignment(Justify.Left)
+                            .SquareBorder()
+                            .Expand()
+                            .BorderColor(Color.Red);
+
+                    AnsiConsole.Write(panel);
+                }
+            });
+            
+            var teilleistungen = Quelldateien.GetMatchingList(configuration, "schuelerteilleistungen", IStudents, Klassen);
+
+            var leistungsdaten = Quelldateien.GetMatchingList(configuration, "schuelerleistungsdaten", IStudents, Klassen);
+            if (leistungsdaten == null ||leistungsdaten.Count == 0)
             {
-                var panel = new Panel($"Keine Teilleistungen gefunden. Haben Sie die Teilleistungsart(en) exakt so eingegeben, wie sie in SchILD bzw. Webuntis mit Langname heißt?")
+                var panel = new Panel($"In der Quelldatei schuelerLeistungsdaten.dat wurden keine Datensätze gefunden. Also kann nicht ermittelt werden, ob Teilleistungen fehlen.")
                         .HeaderAlignment(Justify.Left)
                         .SquareBorder()
                         .Expand()
                         .BorderColor(Color.Red);
 
                 AnsiConsole.Write(panel);
+            }
+            else
+            {
+                var alleVerschiedenenLehrer = leistungsdaten.Select(r =>
+                {
+                    var dict = (IDictionary<string, object>)r;
+                    return dict["Fachlehrer"].ToString();
+                }).Distinct().OrderBy(f => f).ToList();
+
+                var meldung = new List<string>();
+                var urlMitte = "";
+
+                AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Leistungsdaten aus Schülerleistungsdaten einlesen ...", ctx =>
+                {
+                    foreach (var lehrer in alleVerschiedenenLehrer)
+                    {
+                        // Durchlaufe alle Leistungsdaten.
+                        foreach (var leistungsdatensatz in leistungsdaten.Where(r =>
+                        {
+                            var dict = (IDictionary<string, object>)r;
+                            return dict["Fachlehrer"].ToString() == lehrer;
+                        }))
+                        {
+                            // Suche in den zieldatei.Records nach einem Eintrag, der zu dem Leistungsdatensatz passt.
+                            var dictLeistungsdatensatz = (IDictionary<string, object>)leistungsdatensatz;
+
+                            var matchingRecord = zieldatei.FirstOrDefault(r =>
+                            {
+                                var dictRecord = (IDictionary<string, object>)r;
+                                return dictRecord["Nachname"].ToString().Split('#')[0] == $"{dictLeistungsdatensatz["Nachname"]}"
+                                    && dictRecord["Vorname"].ToString() == dictLeistungsdatensatz["Vorname"].ToString()
+                                    && dictRecord["Fach"].ToString() == dictLeistungsdatensatz["Fach"].ToString()
+                                    && configuration["Teilleistungsarten"].ToString().ToLower().Contains(dictRecord["Teilleistung"].ToString().ToLower());
+                            });
+
+                            if(matchingRecord == null)
+                            {
+                                // Wenn kein passender Wert gefunden wurde, durchsuche die isherigen Teilleistungsdaten.
+                                matchingRecord = teilleistungen.FirstOrDefault(r =>
+                                {
+                                    var dictRecord = (IDictionary<string, object>)r;
+                                    return dictRecord["Nachname"].ToString().Split('#')[0] == $"{dictLeistungsdatensatz["Nachname"]}"
+                                        && dictRecord["Vorname"].ToString() == dictLeistungsdatensatz["Vorname"].ToString()
+                                        && dictRecord["Fach"].ToString() == dictLeistungsdatensatz["Fach"].ToString()
+                                        && configuration["Teilleistungsarten"].ToString().Contains(dictRecord["Teilleistung"].ToString());
+                                });                                
+                            }
+
+                            // Wenn kein passender Eintrag gefunden wurde, gebe eine Warnung aus.
+                            if (matchingRecord == null)
+                            {
+                                meldung.Add($"{dictLeistungsdatensatz["Nachname"]} {dictLeistungsdatensatz["Vorname"]} ({dictLeistungsdatensatz["Fach"]}, {lehrer})");
+
+                                var lehrerMail = lehrers.FirstOrDefault(l => l.Kürzel == lehrer)?.Mail;
+
+                                if (urlMitte.Split(',').Contains(lehrerMail) == false)
+                                {
+                                    urlMitte += lehrerMail + ",";                                    
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Nachricht an den Lehrer erstellen
+                if (meldung.Count > 0)
+                {
+                    var anzahl = meldung.Count;
+                
+                    var nursoviele = 10;
+                    var panel = new Panel($"{anzahl}x wurden keine Teilleistungen eingetragen.\n\n" +
+                        $"{meldung.Take(nursoviele).Select(m => $"- {m}").Aggregate((current, next) => current + "\n" + next)}")
+                        .HeaderAlignment(Justify.Left)
+                        .SquareBorder()
+                        .Expand()
+                        .BorderColor(Color.Red);
+
+                    AnsiConsole.Write(panel);
+                }
+                zieldatei.UrlMitte = urlMitte.TrimEnd(',');
+                zieldatei.UrlRechts = "&message=" + Uri.EscapeDataString("Hallo LuL ");
             }
 
             foreach (var aktion in zieldatei.Funktionen)

@@ -76,8 +76,8 @@ public class Datei : List<dynamic>
     public bool V3 { get; }
     public object Value2 { get; }
     public DokuwikiZugriff DokuwikiZugriff { get; private set; }
-    public string UrlMitte { get; private set; }
-    public string UrlRechts { get; private set; }
+    public string UrlMitte { get; set; }
+    public string UrlRechts { get; set; }
 
     //public Datei(string name, Global.Modus modus, string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert)
     public Datei(
@@ -1305,7 +1305,7 @@ public class Datei : List<dynamic>
     {
         var mitgliederMail = "";
 
-        if (!string.IsNullOrEmpty(urlMitte))
+        if (string.IsNullOrEmpty(urlMitte))
         {
             mitgliederMail = this
             .Where(rec =>
@@ -1358,12 +1358,22 @@ public class Datei : List<dynamic>
 
         try
         {
-            Process.Start(new ProcessStartInfo
+            if (OperatingSystem.IsWindows())
             {
-                FileName = urlBeginn + urlMitte + urlEnde,
-                UseShellExecute = true
-            });
-
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = urlBeginn + urlMitte + urlEnde,
+                    UseShellExecute = true
+                });
+            }
+            else if (OperatingSystem.IsLinux())
+            {
+                Process.Start("xdg-open", urlBeginn + urlMitte + urlEnde);
+            }
+            else if (OperatingSystem.IsMacOS())
+            {
+                Process.Start("open", urlBeginn + urlMitte + urlEnde);
+            }
 
             AnsiConsole.MarkupLine($"[green]Webseite geöffnet: {urlBeginn + urlMitte + urlEnde}[/]");
         }
@@ -1712,11 +1722,34 @@ public class Datei : List<dynamic>
         {
             return;
         }
-        Process.Start(new ProcessStartInfo
+    
+        var ordnerPfad = Path.GetDirectoryName(AbsoluterPfad);
+    
+        try
         {
-            FileName = Path.GetDirectoryName(AbsoluterPfad),
-            UseShellExecute = true
-        });
+            if (OperatingSystem.IsWindows())
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = ordnerPfad,
+                    UseShellExecute = true
+                });
+            }
+            else if (OperatingSystem.IsLinux())
+            {
+                // Öffnet den Ordner mit dem Standard-Dateimanager
+                Process.Start("xdg-open", ordnerPfad);
+            }
+            else if (OperatingSystem.IsMacOS())
+            {
+                // Öffnet den Ordner im Finder
+                Process.Start("open", ordnerPfad);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Fehler beim Öffnen des Ordners: {ex.Message}");
+        }
     }
 
     internal List<dynamic>? FilternStudentgroupStudents(Students? students, Klassen klassen)
