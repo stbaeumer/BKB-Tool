@@ -35,7 +35,6 @@
  Ihre Auswahl (2):
 ```
 
-
 <a name="funktionen"></a>
 ## Funktionen in BKB-Tool
 
