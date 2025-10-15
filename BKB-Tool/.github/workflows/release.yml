@@ -1,0 +1,45 @@
+name: Continuous Build
+
+on:
+  push:
+    branches:
+      - main  # oder "master", falls dein Hauptbranch so heißt
+
+permissions:
+  contents: write  # erlaubt das Erstellen/Aktualisieren von Releases
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'  # passe ggf. deine Version an
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build project
+        run: dotnet build --configuration Release
+
+      - name: Publish application
+        run: dotnet publish -c Release -o build
+
+      - name: Create or update "continuous" release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: continuous
+          name: Continuous build
+          prerelease: true
+          files: build/**  # alle veröffentlichten Dateien aus dem publish-Ordner
+          body: |
+            🚀 Automatisch erstellter Continuous Release
+            Commit: ${{ github.event.head_commit.message }}
+            SHA: ${{ github.sha }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

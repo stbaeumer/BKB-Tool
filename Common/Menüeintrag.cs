@@ -3780,7 +3780,7 @@ public class Menüeintrag
                     var anzahl = meldung.Count;
                 
                     var nursoviele = 10;
-                    var panel = new Panel($"{anzahl}x wurden keine Teilleistungen eingetragen.\n\n" +
+                    var panel = new Panel($"{anzahl}x wurden keine Teilleistungen eingetragen. Die LuL werden im Chat informiert.\n\n" +
                         $"{meldung.Take(nursoviele).Select(m => $"- {m}").Aggregate((current, next) => current + "\n" + next)}")
                         .HeaderAlignment(Justify.Left)
                         .SquareBorder()
