@@ -242,7 +242,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
 
                 var panel = new Panel(
                     //$"Die neue Datei wurde heruntergeladen und gespeichert als [{Global.GetColor(Global.ColorPfadInDateien)}]{zielDatei}[/].\n" +
-                    $"Mit [{Global.GetColor(Global.ColorActionInMenüs)} bold]ENTER[/] wird jetzt in die Version {githubVer} neugestartet.")
+                    $"Mit [{Global.GetColor(Global.ColorActionInMenüs)} bold]ENTER[/] wird jetzt in die Version v{githubVer} neugestartet.")
                     .Header("[bold green]  Update erfolgreich  [/]")
                     .HeaderAlignment(Justify.Left)
                     .SquareBorder()

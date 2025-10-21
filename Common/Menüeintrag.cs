@@ -3496,7 +3496,7 @@ public class Menüeintrag
     {
         var zieldatei = new Datei(zieldateiname + ".csv", funktionen, delimiter, quote, encoding, shouldAllQuote, importhinweise);
         
-        var kalenderRec = Quelldateien.GetMatchingList(configuration, kalender, Students, Klassen);
+        var kalenderRec = Quelldateien.GetMatchingList(configuration, DateTime.Now.ToString("yyyyMMdd") + "_" + kalender, Students, Klassen);
 
         if (kalenderRec?.Count != 0)
         {

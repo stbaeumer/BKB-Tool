@@ -284,10 +284,10 @@ public class Dateien : List<Datei>
                 "Beschreibung",
                 [
                     "Exportieren Sie die Datei aus Outlook, indem Sie:",
-                "den Kalender in Listenansicht anzeigen",
-                "Mit Strg+A alles markieren",
-                "Mit Strg+C kopieren",
-                "Die Datei " + Path.Combine(configuration["PfadDownloads"],"termine_kollegium.csv") + " überschreiben oder neu anlegen."
+                "-den Kalender in Listenansicht anzeigen",
+                "-mit Strg+A alles markieren",
+                "-mit Strg+C kopieren",
+                "-die Datei " + Path.Combine(configuration["PfadDownloads"],"termine_kollegium.csv") + " überschreiben oder neu anlegen."
                 ],
                 [""],
                 true,
@@ -296,14 +296,14 @@ public class Dateien : List<Datei>
                 ";"
             ));
             Add(new Datei(
-                @"termine_kollegium.csv",
+                $@"termine_kollegium_{DateTime.Now:yyyyMMdd}.csv",
                 "Beschreibung",
                 [
                     "Exportieren Sie die Datei aus Outlook, indem Sie:",
-                "den Kalender in Listenansicht anzeigen",
-                "Mit Strg+A alles markieren",
-                "Mit Strg+C kopieren",
-                $"Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]" + Path.Combine(configuration["PfadDownloads"],"termine_kollegium.csv") + "[/] überschreiben oder neu anlegen."
+                "-den Kalender in Listenansicht anzeigen",
+                "-mit Strg+A alles markieren",
+                "-mit Strg+C kopieren",
+                $"-die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]" + Path.Combine(configuration["PfadDownloads"],"termine_kollegium.csv") + "[/] überschreiben oder neu anlegen."
                 ],
                 [""],
                 true,
@@ -312,14 +312,14 @@ public class Dateien : List<Datei>
                 "\t"
             ));
             Add(new Datei(
-                @"termine_fhr.csv",
+                $@"termine_fhr_{DateTime.Now:yyyyMMdd}.csv",
                 "Beschreibung",
                 [
                     "Exportieren Sie die Datei aus Outlook, indem Sie:",
-                "den Kalender in Listenansicht anzeigen",
-                "Mit Strg+A alles markieren",
-                "Mit Strg+C kopieren",
-                $"Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]" + Path.Combine(configuration["PfadDownloads"],"termine_fhr.csv") + "[/] überschreiben oder neu anlegen."
+                "-den Kalender in Listenansicht anzeigen",
+                "-mit Strg+A alles markieren",
+                "-mit Strg+C kopieren",
+                $"-die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]" + Path.Combine(configuration["PfadDownloads"],"termine_fhr.csv") + "[/] überschreiben oder neu anlegen."
                 ],
                 [""],
                 true,
@@ -328,14 +328,14 @@ public class Dateien : List<Datei>
                 "\t"
             ));
             Add(new Datei(
-                @"termine_verwaltung.csv",
+                $@"termine_verwaltung_{DateTime.Now:yyyyMMdd}.csv",
                 "Beschreibung",
                 [
                     "Exportieren Sie die Datei aus Outlook, indem Sie:",
-                "den Kalender in Listenansicht anzeigen",
-                "Mit Strg+A alles markieren",
-                "Mit Strg+C kopieren",
-                $"Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]" + Path.Combine(configuration["PfadDownloads"],"termine_verwaltung.csv") + "[/] überschreiben oder neu anlegen."
+                "-den Kalender in Listenansicht anzeigen",
+                "-mit Strg+A alles markieren",
+                "-mit Strg+C kopieren",
+                $"-die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]" + Path.Combine(configuration["PfadDownloads"],"termine_verwaltung.csv") + "[/] überschreiben oder neu anlegen."
                 ],
                 [""],
                 true,
@@ -344,14 +344,14 @@ public class Dateien : List<Datei>
                 "\t"
             ));
             Add(new Datei(
-                @"termine_berufliches_gymnasium.csv",
+                $@"termine_berufliches_gymnasium_{DateTime.Now:yyyyMMdd}.csv",
                 "Beschreibung",
                  [
                     "Exportieren Sie die Datei aus Outlook, indem Sie:",
-                "den Kalender in Listenansicht anzeigen",
-                "Mit Strg+A alles markieren",
-                "Mit Strg+C kopieren",
-                $"Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]" + Path.Combine(configuration["PfadDownloads"],"termine_berufliches_gymnasium.csv") + "[/] überschreiben oder neu anlegen."
+                "-den Kalender in Listenansicht anzeigen",
+                "-mit Strg+A alles markieren",
+                "-mit Strg+C kopieren",
+                $"-die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]" + Path.Combine(configuration["PfadDownloads"],"termine_berufliches_gymnasium.csv") + "[/] überschreiben oder neu anlegen."
                 ],
                 [""],
                 true,
@@ -604,10 +604,8 @@ public class Dateien : List<Datei>
                     {
                         datei.Fehlermeldung = $"Die Datei [bold {Global.GetColor(Global.ColorPfadInDateien)}]{absoluterPfad}[/] hat nur eine einzige Spalte. Das korrekte Trennzeichen ist: [{Global.GetColor(Global.ColorZahlen)}]'{datei.Delimiter}'[/].";
                         if (meldungAnzeigen && !datei.IstOptional)
-                            datei.FehlermeldungRendern(configuration);
-                        
+                            datei.FehlermeldungRendern(configuration);            
                     }
-
 
                     if (datei.Erstelldatum.Date.AddDays(maxDateiAlter) < DateTime.Now.Date)
                     {
@@ -990,4 +988,80 @@ public class Dateien : List<Datei>
                 datei.Mailen(datei.ZipPfad, datei.ZipPfad, configuration, datei.ZipPfad);
         }
     }
+
+    internal Dateien LeerErstellenUndOeffnen(IConfiguration configuration, List<string> dateien)
+    {
+        var result = new Dateien();
+
+        foreach (var datei in dateien)
+        {
+            var neuerDateiname = Path.Combine(configuration["PfadDownloads"] ?? "", $"{Path.GetFileName(datei.Split(',')[0])}.csv");
+
+            // Wenn die Datei schon existiert, dann nicht erstellen.
+            if (!File.Exists(neuerDateiname))
+            {
+                // Die Dateien sollen den Typ utf8 haben, damit Umlaute korrekt dargestellt werden.
+                using (var stream = new FileStream(neuerDateiname, FileMode.Create, FileAccess.Write))
+                {
+                    result.Add(new Datei(neuerDateiname));
+                    using (var writer = new StreamWriter(stream, new System.Text.UTF8Encoding(false)))
+                    {
+                        // Schreibe die Zeile Beginn	Ende	Betreff	Kategorien	Ressourcen	Ort	Optionale Teilnehmer	Fällig um	Beschriftung	Nachricht	
+                        writer.WriteLine("Beginn\tEnde\tBetreff\tKategorien\tRessourcen\tOrt\tOptionale Teilnehmer\tFällig um\tBeschriftung\tNachricht");
+                        writer.Flush();
+                    }
+                }
+            }
+
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = neuerDateiname,
+                UseShellExecute = true
+            });
+        }
+
+        // Solange warten, bis der User die Dateien geschlossen hat.
+        AnsiConsole.Write(
+    new Panel(
+        $"[bold {Global.GetColor(Global.ColorHinweise)}]Die Dateien wurden erstellt und in Notepad++ geöffnet.[/]\n" +
+        $"Bitte füllen Sie die Dateien mit den Terminen und schließen Sie Notepad++, wenn Sie fertig sind.\n" +
+        $"Weiter mit [bold {Global.GetColor(Global.ColorActionInMenüs)}]ENTER[/]."
+    )
+    .Header("[bold yellow]Termine eintragen[/]")
+    .BorderColor(Global.ColorHinweise)
+    .Expand()
+);
+        Console.ReadLine();
+
+        // Solange warten, bis alle Dateien mehr als eine Zeile haben
+        while (true)
+        {
+            bool alleDateienGefüllt = true;
+            foreach (var datei in dateien)
+            {
+                var neuerDateiname = Path.Combine(configuration["PfadDownloads"] ?? "", $"{Path.GetFileName(datei.Split(',')[0])}.csv");
+
+                if (File.Exists(neuerDateiname))
+                {
+                    var zeilen = File.ReadAllLines(neuerDateiname);
+                    if (zeilen.Length <= 1)
+                    {
+                        alleDateienGefüllt = false;
+                        AnsiConsole.MarkupLine($"[bold {Global.GetColor(Global.ColorFehler)}]Die Datei [bold {Global.GetColor(Global.ColorPfadInDateien)}]{neuerDateiname}[/] enthält keine Termine. Bitte fügen Sie Termine hinzu und drücken Sie [bold {Global.GetColor(Global.ColorActionInMenüs)}]ENTER[/].[/]");
+                    }
+                }
+                else
+                {
+                    alleDateienGefüllt = false;
+                    AnsiConsole.MarkupLine($"[bold {Global.GetColor(Global.ColorFehler)}]Die Datei [bold {Global.GetColor(Global.ColorPfadInDateien)}]{neuerDateiname}[/] wurde nicht gefunden. Bitte erstellen Sie die Datei und drücken Sie [bold {Global.GetColor(Global.ColorActionInMenüs)}]ENTER[/].[/]");
+                }
+            }
+
+            if (alleDateienGefüllt)
+                break;
+
+            Console.ReadLine();
+        }
+        return result;
+    }    
 }

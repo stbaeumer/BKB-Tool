@@ -165,7 +165,7 @@ public class Datei : List<dynamic>
 
     public Datei(string absoluterPfad)
     {
-        AbsoluterPfad = absoluterPfad;
+        AbsoluterPfad = absoluterPfad;        
     }
 
     public Datei(Datei datei)

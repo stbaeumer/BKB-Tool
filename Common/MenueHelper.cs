@@ -70,7 +70,7 @@ public static class MenueHelper
                         students,
                         klassen,
                         [
-                            $"Es wird jetzt die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", "SchuelerZusatzdaten.dat")}[/] um schulinterne Mailadressen ergänzt und in [{Global.GetColor(Global.ColorPfadInDateien)}]{pfadSchilddatenaustausch}[/] für den Re-Import nach SchILD bereitgestellt. Zusätzlich werden Telefonnummern angepasst.",
+                            $"Es wird jetzt die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", "SchuelerZusatzdaten.dat")}[/] um schulinterne Mailadressen ergänzt und in [{Global.GetColor(Global.ColorPfadInDateien)}]{pfadSchilddatenaustausch}[/] für den Re-Import nach SchILD bereitgestellt.",
                             $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise:[/] ",
                             $"[{Global.GetColor(Global.ColorHinweise)}]1:[/] BKB-Tool bildet die schulinterne Mailadressen wie folgt: [{Global.GetColor(Global.ColorTextHervorheben)}]nv061231@meine-schule.de[/], wobei gilt:",
                             $"[{Global.GetColor(Global.ColorTextHervorheben)}]    n[/]      : Erster Buchstabe des Nachnamens. Umlaute werden aufgelöst. Bsp.: [{Global.GetColor(Global.ColorTextHervorheben)}]Ü[/] wird zu [{Global.GetColor(Global.ColorTextHervorheben)}]u[/] usw.",
@@ -365,7 +365,7 @@ public static class MenueHelper
                 ),
                 new Menüeintrag(
                         "Outlook: CSV-Terminexporte für Wiki aufbereiten",
-                        quelldateien.Notwendige(configuration,["termine_fhr,csv", "termine_verwaltung,csv", "termine_berufliches_gymnasium,csv", "termine_kollegium,csv"]),
+                        quelldateien.Notwendige(configuration,[]),
                         students,
                         klassen,
                         [
@@ -386,12 +386,16 @@ public static class MenueHelper
                         ],
                         m =>
                         {
-                            m.OeffneDateienInDownloadsInNotepadPlusPlus(configuration, ["termine_fhr.csv", "termine_verwaltung.csv", "termine_berufliches_gymnasium.csv", "termine_kollegium.csv"]);                            
+                            var p = DateTime.Now.ToString("yyyyMMdd");
+                            var l = new List<string>(){ $"termine_verwaltung_{p},csv", $"termine_berufliches_gymnasium_{p},csv", $"termine_fhr_{p},csv", $"termine_kollegium_{p},csv" };
+                            m.Quelldateien = quelldateien.LeerErstellenUndOeffnen(configuration, l);
+                            m.Quelldateien = quelldateien.Notwendige(configuration, l);
                             foreach (var kalender in new List<string>(){"termine_berufliches_gymnasium", "termine_kollegium", "termine_verwaltung", "termine_fhr" })
                             {
                                 m.Kalender2Wiki(configuration,
                                 [
                                     datei => datei.OrdnerOeffnen(),
+                                    datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
                                     datei => datei.Erstellen(),
                                     datei => datei.OeffneWebseite($"https://bkb.wiki/start?do=admin&page=struct_schemas&table=" + kalender),
                                     datei => datei.OeffneWebseite($"https://bkb.wiki/start?do=admin&page=struct_schemas&table=" + kalender)
