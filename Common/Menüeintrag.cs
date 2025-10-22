@@ -3495,8 +3495,8 @@ public class Menüeintrag
         string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
         var zieldatei = new Datei(zieldateiname + ".csv", funktionen, delimiter, quote, encoding, shouldAllQuote, importhinweise);
-        
-        var kalenderRec = Quelldateien.GetMatchingList(configuration, DateTime.Now.ToString("yyyyMMdd") + "_" + kalender, Students, Klassen);
+
+        var kalenderRec = Quelldateien.GetMatchingList(configuration, kalender, Students, Klassen);
 
         if (kalenderRec?.Count != 0)
         {
@@ -4757,50 +4757,58 @@ public class Menüeintrag
         Global.ZeileSchreiben($"Alte Fotos verschoben:", dateien.Length.ToString());
     }
 
-   internal void OeffneDateienInDownloadsInNotepadPlusPlus(IConfiguration configuration, List<string> dateien)
+    internal void OeffneDateienInDownloadsInNotepadPlusPlus(IConfiguration configuration, List<string> dateien)
     {
-        try
+        var notepadPlusPlusPath = @"C:\Program Files\Notepad++\notepad++.exe";
+        var pfadDownloads = configuration["PfadDownloads"];
+        if (string.IsNullOrEmpty(pfadDownloads) || !Directory.Exists(pfadDownloads))
         {
-            var notepadPlusPlusPath = @"C:\Program Files\Notepad++\notepad++.exe";
-            var pfadDownloads = configuration["PfadDownloads"];
-            if (string.IsNullOrEmpty(pfadDownloads) || !Directory.Exists(pfadDownloads))
-            {
-                AnsiConsole.MarkupLine($"[red]Der Ordner {pfadDownloads} existiert nicht.[/]");
-                return;
-            }
+            AnsiConsole.MarkupLine($"[red]Der Ordner {pfadDownloads} existiert nicht.[/]");
+            return;
+        }
 
-            // Baue die vollständigen Pfade zusammen
-            var vollstaendigeDateien = dateien
-                .Select(datei => Path.Combine(pfadDownloads, datei))
-                .Where(File.Exists)
+        // Baue die vollständigen Pfade zusammen
+        var vollstaendigeDateien = dateien
+            .Select(datei => Path.Combine(pfadDownloads, datei))
+            .Where(File.Exists)
+            .ToList();
+
+        if (vollstaendigeDateien.Count == 0)
+        {
+            AnsiConsole.MarkupLine($"[yellow]Keine der angegebenen Dateien wurde im Ordner {pfadDownloads} gefunden.[/]");
+            return;
+        }
+
+        if (File.Exists(notepadPlusPlusPath))
+        {
+            var maxAlter = DateTime.Now.Date.AddDays(-0);
+            var dateienDieAelterSind = vollstaendigeDateien
+                .Where(datei => File.GetLastWriteTime(datei) < maxAlter)
                 .ToList();
 
-            if (vollstaendigeDateien.Count == 0)
+            if (dateienDieAelterSind.Count > 0)
             {
-                AnsiConsole.MarkupLine($"[yellow]Keine der angegebenen Dateien wurde im Ordner {pfadDownloads} gefunden.[/]");
-                return;
+                AnsiConsole.MarkupLine($"[yellow]Die folgenden Dateien sind älter als vom {maxAlter:dd.MM.yyyy} Tage:[/]");
+                foreach (var datei in dateienDieAelterSind)
+                {
+                    AnsiConsole.MarkupLine($"[yellow]- {Path.GetFileName(datei)} (letzte Änderung: {File.GetLastWriteTime(datei)})[/]");
+                }
+                throw new Exception("Aktualisieren Sie die Dateien. Kehren Sie dann hierher zurück.");
             }
 
-            if (File.Exists(notepadPlusPlusPath))
+            foreach (var datei in vollstaendigeDateien)
             {
-                foreach (var datei in vollstaendigeDateien)
+                Process.Start(new ProcessStartInfo
                 {
-                    Process.Start(new ProcessStartInfo
-                    {
-                        FileName = notepadPlusPlusPath,
-                        Arguments = $"\"{datei}\"",
-                        UseShellExecute = false
-                    });
-                }
-            }
-            else
-            {
-                AnsiConsole.MarkupLine($"[red]Notepad++ wurde nicht gefunden unter {notepadPlusPlusPath}. Bitte installieren Sie Notepad++ oder passen Sie den Pfad im Code an.[/]");
+                    FileName = notepadPlusPlusPath,
+                    Arguments = $"\"{datei}\"",
+                    UseShellExecute = false
+                });
             }
         }
-        catch (Exception ex)
+        else
         {
-            AnsiConsole.MarkupLine($"[red]Fehler beim Starten von Notepad++: {ex.Message}[/]");
+            AnsiConsole.MarkupLine($"[red]Notepad++ wurde nicht gefunden unter {notepadPlusPlusPath}. Bitte installieren Sie Notepad++ oder passen Sie den Pfad im Code an.[/]");
         }
     }
 

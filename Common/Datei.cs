@@ -1305,7 +1305,7 @@ public class Datei : List<dynamic>
     {
         var mitgliederMail = "";
 
-        if (string.IsNullOrEmpty(urlMitte))
+        if (!string.IsNullOrEmpty(urlMitte))
         {
             mitgliederMail = this
             .Where(rec =>

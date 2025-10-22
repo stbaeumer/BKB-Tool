@@ -1,4 +1,5 @@
 ﻿// Stefan Bäumer 2025
+using System.Diagnostics;
 using System.Reflection;
 using Common;
 using Microsoft.Extensions.Configuration;
@@ -143,6 +144,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
 
         string githubVersionClean = githubVersion?.TrimStart('v', 'V');
         string lokaleVersionClean = lokaleVersion?.TrimStart('v', 'V');
+        string os = OperatingSystem.IsWindows() ? "Windows" : OperatingSystem.IsLinux() ? "Linux" : OperatingSystem.IsMacOS() ? "macOS" : "Unknown";
 
         // In Version-Objekte umwandeln
         if (Version.TryParse(githubVersionClean, out var githubVer) && Version.TryParse(lokaleVersionClean, out var lokalVer))
@@ -152,7 +154,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                 Global.DisplayHeader(configuration);
 
                 // Der Update-Hinweis wird in einem Panel angezeigt
-                var panelUpdate = new Panel(new Markup($"Ein Update auf Version [tan]{githubVersion}[/] ist verfügbar. Drücken Sie eine [{Global.GetColor(Global.ColorActionInMenüs)} bold]beliebige Taste[/], um das Update zu starten."))
+                var panelUpdate = new Panel(new Markup($"Ein Update auf {os}-Version [tan]{githubVersion}[/] ist verfügbar. Drücken Sie eine [{Global.GetColor(Global.ColorActionInMenüs)} bold]beliebige Taste[/], um das Update zu starten."))
                     .BorderStyle(new Style(Color.Red))
                     .Expand();
                 AnsiConsole.Write(panelUpdate);
@@ -160,23 +162,41 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                 Console.ReadKey(); // Warten auf Benutzereingabe, bevor das Update gestartet wird
 
                 // Lade die Datei nach bkb-neu.exe herunter und führe den Autoupdater aus.
-
-                // Download-URL aus dem Release-Asset holen
+                
                 string downloadUrl = null;
                 foreach (var asset in releases
                     .First(r => !r.GetProperty("draft").GetBoolean() && (allowPrerelease || !r.GetProperty("prerelease").GetBoolean()))
                     .GetProperty("assets").EnumerateArray())
                 {
                     var name = asset.GetProperty("name").GetString();
-                    if (name != null && name.Equals("BKB-Tool.exe", StringComparison.OrdinalIgnoreCase))
+                    
+                    // Je nach Betriebssystem die richtige Datei herunterladen
+                    string expectedFileName = os switch
+                    {
+                        "Windows" => "BKB-Tool.exe",
+                        "Linux" => "BKB-Tool",
+                        "macOS" => "BKB-Tool-macos",
+                        _ => "BKB-Tool.exe"
+                    };
+                    
+                    if (name != null && name.Equals(expectedFileName, StringComparison.OrdinalIgnoreCase))
                     {
                         downloadUrl = asset.GetProperty("browser_download_url").GetString();
                         break;
                     }
                 }
 
+                if (string.IsNullOrEmpty(downloadUrl))
+                {
+                    AnsiConsole.MarkupLine($"[red]Fehler: Keine passende Datei für {os} im Release gefunden.[/]");
+                    return configuration;
+                }
+
                 // Zielpfad für die neue Datei
                 string zielDatei = Path.Combine(Directory.GetCurrentDirectory(), "BKB-Tool_neu.exe");
+
+                if(os != "Windows")
+                    zielDatei = Path.Combine(Directory.GetCurrentDirectory(), "BKB-Tool_neu");
 
                 using (var webClient = new System.Net.WebClient())
                 {
@@ -203,42 +223,137 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
 
                 string updaterPath = Path.Combine(Directory.GetCurrentDirectory(), "BKB-Tool-autoupdater.bat");
 
-                // wenn die Datei schon existiert, dann löschen
+                if(os != "Windows")
+                    updaterPath = Path.Combine(Directory.GetCurrentDirectory(), "BKB-Tool-autoupdater.sh");
+                
                 if (File.Exists(updaterPath))
-                {
-                    //AnsiConsole.MarkupLine($"[bold yellow]{updaterPath} wird gelöscht.[/]");
                     File.Delete(updaterPath);
-                }
 
-                File.WriteAllText(updaterPath,
-                "@echo off\n" +
-                "echo.\n" +
-                "echo BKB-Tool\n" +
-                "echo =========\n" +
-                "echo Warte auf Beenden von BKB-Tool.exe ...\n" +
-                "set /a counter=0\n" +
-                ":waitforend\n" +
-                "tasklist | find /I \"BKB-Tool.exe\" >nul\n" +
-                "if not errorlevel 1 (\n" +
-                "    timeout /t 1 >nul\n" +
-                "    set /a counter+=1\n" +
-                "    if %counter%==7 (\n" +
-                "        echo Das Beenden dauert zu lange. Versuchen Sie BKB-Tool im Taskmanager zu beenden oder starten Sie den Rechner neu.\n" +
-                "    )\n" +
-                "    goto waitforend\n" +
-                ")\n" +
-                "echo Ersetze alte Version ...\n" +
-                "del /F /Q BKB-Tool.exe\n" +
-                "if exist BKB-Tool.exe (\n" +
-                "    echo Fehler: Die alte BKB-Tool.exe konnte nicht gelöscht werden. Bitte schließen Sie alle Instanzen und versuchen Sie es erneut.\n" +
-                "    pause\n" +
-                "    exit /b 1\n" +
-                ")\n" +
-                "rename BKB-Tool_neu.exe BKB-Tool.exe\n" +
-                "echo Starte neue Version ...\n" +
-                "start \"\" BKB-Tool.exe\n" +
-                "exit\n"
-                );
+                if (os == "Windows")
+                    File.WriteAllText(updaterPath,
+                    "@echo off\n" +
+                    "echo.\n" +
+                    "echo BKB-Tool\n" +
+                    "echo =========\n" +
+                    "echo Warte auf Beenden von BKB-Tool.exe ...\n" +
+                    "set /a counter=0\n" +
+                    ":waitforend\n" +
+                    "tasklist | find /I \"BKB-Tool.exe\" >nul\n" +
+                    "if not errorlevel 1 (\n" +
+                    "    timeout /t 1 >nul\n" +
+                    "    set /a counter+=1\n" +
+                    "    if %counter%==7 (\n" +
+                    "        echo Das Beenden dauert zu lange. Versuchen Sie BKB-Tool im Taskmanager zu beenden oder starten Sie den Rechner neu.\n" +
+                    "    )\n" +
+                    "    goto waitforend\n" +
+                    ")\n" +
+                    "echo Ersetze alte Version ...\n" +
+                    "del /F /Q BKB-Tool.exe\n" +
+                    "if exist BKB-Tool.exe (\n" +
+                    "    echo Fehler: Die alte BKB-Tool.exe konnte nicht gelöscht werden. Bitte schließen Sie alle Instanzen und versuchen Sie es erneut.\n" +
+                    "    pause\n" +
+                    "    exit /b 1\n" +
+                    ")\n" +
+                    "rename BKB-Tool_neu.exe BKB-Tool.exe\n" +
+                    "echo Starte neue Version ...\n" +
+                    "start \"\" BKB-Tool.exe\n" +
+                    "exit\n"
+                    );
+                
+                                                if (os == "Linux" || os == "macOS")
+                                {
+                                    // Linux / macOS: shell updater
+                                                                        // ...existing code...
+                                    // Linux / macOS: shell updater
+                                    var shContent = @"#!/usr/bin/env bash
+                                    set -euo pipefail
+                                    cd ""$(dirname ""$0"")""
+                                    
+                                    LOG=""BKB-Tool-update.log""
+                                    
+                                    echo ""[$(date)] Updater gestartet in $(pwd)"" >>""$LOG""
+                                    echo ""Warte auf Beenden von BKB-Tool ..."" | tee -a ""$LOG""
+                                    # Wichtig: exakten Prozessnamen matchen, nicht -f (verhindert Match auf Autoupdater)
+                                    while pgrep -x ""BKB-Tool"" >/dev/null 2>&1; do
+                                      echo ""[$(date)] BKB-Tool läuft noch ..."" >>""$LOG""
+                                      sleep 1
+                                    done
+                                    
+                                    echo ""Ersetze alte Version ..."" | tee -a ""$LOG""
+                                    if [[ -f ""BKB-Tool_neu"" ]]; then
+                                      rm -f ""BKB-Tool"" || true
+                                      mv -f ""BKB-Tool_neu"" ""BKB-Tool""
+                                      chmod +x ""BKB-Tool""
+                                      echo ""Starte neue Version ..."" | tee -a ""$LOG""
+                                      nohup ./BKB-Tool >/dev/null 2>&1 &
+                                      echo ""Update abgeschlossen."" | tee -a ""$LOG""
+                                    else
+                                      echo ""Fehler: BKB-Tool_neu wurde nicht gefunden."" | tee -a ""$LOG""
+                                      exit 1
+                                    fi
+                                    ";
+                                    shContent = shContent.Replace("\r\n", "\n");
+                                    File.WriteAllText(updaterPath, shContent, new System.Text.UTF8Encoding(false));
+                                    
+                                    try
+                                    {
+                                        var chmod = new ProcessStartInfo
+                                        {
+                                            FileName = "bash",
+                                            ArgumentList = { "-c", $"chmod +x \"{updaterPath}\"" },
+                                            UseShellExecute = false
+                                        };
+                                        using var proc = Process.Start(chmod);
+                                        proc?.WaitForExit();
+                                    }
+                                    catch { }
+                                    
+                                    // Updater in neuem Terminalfenster starten
+                                    try
+                                    {
+                                        string? terminal = null;
+                                        if (File.Exists("/usr/bin/gnome-terminal")) terminal = "/usr/bin/gnome-terminal";
+                                        else if (File.Exists("/usr/bin/konsole")) terminal = "/usr/bin/konsole";
+                                        else if (File.Exists("/usr/bin/xterm")) terminal = "/usr/bin/xterm";
+                                    
+                                        if (terminal != null)
+                                        {
+                                            var args = terminal.Contains("gnome-terminal")
+                                                ? $"-- bash -lc '\"{updaterPath}\"; read -n1 -s -p \"Fertig. Fenster schließen...\"'"
+                                                : terminal.Contains("konsole")
+                                                    ? $"--noclose -e bash -lc '\"{updaterPath}\"'"
+                                                    : $"-hold -e bash -lc '\"{updaterPath}\"'";
+                                    
+                                            Process.Start(new ProcessStartInfo
+                                            {
+                                                FileName = terminal,
+                                                Arguments = args,
+                                                UseShellExecute = false,
+                                                CreateNoWindow = false
+                                            });
+                                        }
+                                        else
+                                        {
+                                            // Fallback: Hintergrund
+                                            Process.Start(new ProcessStartInfo
+                                            {
+                                                FileName = "bash",
+                                                ArgumentList = { "-c", $"nohup \"{updaterPath}\" >/dev/null 2>&1 &" },
+                                                UseShellExecute = false,
+                                                CreateNoWindow = true
+                                            });
+                                        }
+                                    
+                                        AnsiConsole.MarkupLine("[yellow]Update wird in einem neuen Terminalfenster gestartet...[/]");
+                                        System.Threading.Thread.Sleep(500);
+                                        Environment.Exit(0);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        AnsiConsole.MarkupLine($"[red]Fehler beim Starten des Updaters: {ex.Message}[/]");
+                                    }
+                                    // ...existing code...
+                                }
 
                 var panel = new Panel(
                     //$"Die neue Datei wurde heruntergeladen und gespeichert als [{Global.GetColor(Global.ColorPfadInDateien)}]{zielDatei}[/].\n" +
