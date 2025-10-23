@@ -175,15 +175,19 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                     var name = asset.GetProperty("name").GetString();
                     
                     // Je nach Betriebssystem die richtige Datei herunterladen
-                    string expectedFileName = os switch
+                    string expectedPattern = os switch
                     {
                         "Windows" => "BKB-Tool.exe",
-                        "Linux" => "BKB-Tool",
+                        "Linux" => ".AppImage",
                         "macOS" => "BKB-Tool-macos",
                         _ => "BKB-Tool.exe"
                     };
                     
-                    if (name != null && name.Equals(expectedFileName, StringComparison.OrdinalIgnoreCase))
+                    bool matches = os == "Linux" 
+                        ? (name != null && name.EndsWith(expectedPattern, StringComparison.OrdinalIgnoreCase))
+                        : (name != null && name.Equals(expectedPattern, StringComparison.OrdinalIgnoreCase));
+                    
+                    if (matches)
                     {
                         downloadUrl = asset.GetProperty("browser_download_url").GetString();
                         break;
@@ -197,7 +201,13 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                 }
 
                 // Zielpfad für die neue Datei
-                string zielDatei = Path.Combine(Directory.GetCurrentDirectory(), "BKB-Tool_neu.exe");
+                string zielDatei = os switch
+                {
+                    "Windows" => Path.Combine(Directory.GetCurrentDirectory(), "BKB-Tool_neu.exe"),
+                    "Linux" => Path.Combine(Directory.GetCurrentDirectory(), "BKB-Tool_neu.AppImage"),
+                    "macOS" => Path.Combine(Directory.GetCurrentDirectory(), "BKB-Tool_neu"),
+                    _ => Path.Combine(Directory.GetCurrentDirectory(), "BKB-Tool_neu.exe")
+                };
 
                 if(os != "Windows")
                     zielDatei = Path.Combine(Directory.GetCurrentDirectory(), "BKB-Tool_neu");
