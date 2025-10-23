@@ -199,12 +199,22 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                 }
 
                 // Zielpfad für die neue Datei
+                string downloadDir = Directory.GetCurrentDirectory();
+                if (os == "Linux")
+                {
+                    // Beim AppImage liefert APPIMAGE den Pfad zur aktuell laufenden Datei
+                    var appImagePath = Environment.GetEnvironmentVariable("APPIMAGE");
+                    var appImageDir = string.IsNullOrEmpty(appImagePath) ? null : Path.GetDirectoryName(appImagePath);
+                    if (!string.IsNullOrEmpty(appImageDir))
+                        downloadDir = appImageDir!;
+                }
+
                 string zielDatei = os switch
                 {
-                    "Windows" => Path.Combine(Directory.GetCurrentDirectory(), "BKB-Tool_neu.exe"),
-                    "Linux" => Path.Combine(Directory.GetCurrentDirectory(), "BKB-Tool_neu.AppImage"),
-                    "macOS" => Path.Combine(Directory.GetCurrentDirectory(), "BKB-Tool_neu"),
-                    _ => Path.Combine(Directory.GetCurrentDirectory(), "BKB-Tool_neu.exe")
+                    "Windows" => Path.Combine(downloadDir, "BKB-Tool_neu.exe"),
+                    "Linux" => Path.Combine(downloadDir, "BKB-Tool_neu.AppImage"),
+                    "macOS" => Path.Combine(downloadDir, "BKB-Tool_neu"),
+                    _ => Path.Combine(downloadDir, "BKB-Tool_neu.exe")
                 };
 
                 if(os != "Windows")
@@ -232,6 +242,27 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                             downloadCompleted.WaitOne();
                         });
                 }
+
+                // Linux: Nur informieren und Gear Lever verwenden, kein Autoupdater
+                if (os == "Linux")
+                {
+                    var info = new Panel(new Markup(
+                        $"Das Update wurde erfolgreich heruntergeladen:\n[bold {Global.GetColor(Global.ColorPfadInDateien)}]{zielDatei}[/]\n\n" +
+                        $"Vorgehen:\n" +
+                        $"1. Beenden Sie BKB-Tool\n" +
+                        $"2. Starten Sie [link=https://flathub.org/apps/de.toolgear.GearLever]Gear Lever[/], um das Update zu installieren."))
+                        .Header("[bold springGreen2]Update bereit[/]")
+                        .HeaderAlignment(Justify.Left)
+                        .SquareBorder()
+                        .Expand()
+                        .BorderColor(Global.ColorActionInMenüs);
+
+                    AnsiConsole.Write(info);
+                    while (Console.KeyAvailable) Console.ReadKey(true);
+                    Console.ReadKey();
+                    return configuration;
+                }
+
 
                 string updaterPath = Path.Combine(Directory.GetCurrentDirectory(), "BKB-Tool-autoupdater.bat");
 
