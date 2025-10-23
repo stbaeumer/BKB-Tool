@@ -21,11 +21,69 @@ jobs:
       with:
         dotnet-version: '8.0.x'
     
+    - name: Create scripts directory if not exists
+      shell: pwsh
+      run: |
+        if (-not (Test-Path "scripts")) {
+          New-Item -ItemType Directory -Path "scripts"
+        }
+    
+    - name: Create increment-version script
+      shell: pwsh
+      run: |
+        $scriptContent = @'
+        param(
+            [string]$projectPath = "BKB-Tool/BKB-Tool.csproj"
+        )
+        
+        Write-Host "Incrementing version in $projectPath" -ForegroundColor Cyan
+        
+        # Projektdatei einlesen
+        $csprojContent = Get-Content $projectPath -Raw
+        
+        # Aktuelle Version extrahieren
+        if ($csprojContent -match '<Version>([\d\.]+)</Version>') {
+            $currentVersion = $matches[1]
+            Write-Host "Current version: $currentVersion" -ForegroundColor Yellow
+            
+            # Version in Teile zerlegen
+            $versionParts = $currentVersion.Split('.')
+            $major = [int]$versionParts[0]
+            $minor = [int]$versionParts[1]
+            $build = [int]$versionParts[2]
+            
+            # Build-Nummer erhöhen
+            $build++
+            
+            $newVersion = "$major.$minor.$build"
+            Write-Host "New version: $newVersion" -ForegroundColor Green
+            
+            # Alle Version-Tags aktualisieren
+            $csprojContent = $csprojContent -replace '<Version>[\d\.]+</Version>', "<Version>$newVersion</Version>"
+            $csprojContent = $csprojContent -replace '<AssemblyVersion>[\d\.]+</AssemblyVersion>', "<AssemblyVersion>$newVersion</AssemblyVersion>"
+            $csprojContent = $csprojContent -replace '<FileVersion>[\d\.]+</FileVersion>', "<FileVersion>$newVersion</FileVersion>"
+            
+            # Datei speichern
+            $csprojContent | Set-Content $projectPath -NoNewline
+            
+            Write-Host "Version successfully updated!" -ForegroundColor Green
+            
+            # Version für GitHub Actions ausgeben
+            Write-Output "NEW_VERSION=$newVersion" >> $env:GITHUB_OUTPUT
+            Write-Output "CURRENT_VERSION=$currentVersion" >> $env:GITHUB_OUTPUT
+        } else {
+            Write-Host "Error: Could not find version tag in project file" -ForegroundColor Red
+            exit 1
+        }
+        '@
+        
+        $scriptContent | Out-File -FilePath "scripts/increment-version.ps1" -Encoding UTF8
+    
     - name: Increment version
       id: version
       shell: pwsh
       run: |
-        .\scripts\increment-version.ps1
+        & "scripts/increment-version.ps1"
     
     - name: Get version
       id: get_version
@@ -60,6 +118,11 @@ jobs:
           -p:PublishTrimmed=false `
           -o ./publish/windows
     
+    - name: Setup Linux for AppImage build
+      run: |
+        wsl --set-default-version 2
+        wsl --install Ubuntu --no-launch
+    
     - name: Build Linux x64
       run: |
         dotnet publish BKB-Tool/BKB-Tool.csproj `
@@ -71,15 +134,61 @@ jobs:
           -p:PublishTrimmed=false `
           -o ./publish/linux
     
-    - name: Setup Linux environment for AppImage
+    - name: Create AppImage structure
+      shell: pwsh
       run: |
-        wsl --install -d Ubuntu
-        wsl sudo apt-get update
-        wsl sudo apt-get install -y wget file desktop-file-utils
+        # AppDir erstellen
+        New-Item -ItemType Directory -Force -Path "AppDir/usr/bin"
+        New-Item -ItemType Directory -Force -Path "AppDir/usr/share/icons/hicolor/256x256/apps"
+        New-Item -ItemType Directory -Force -Path "AppDir/usr/share/icons/hicolor/512x512/apps"
+        New-Item -ItemType Directory -Force -Path "AppDir/usr/share/applications"
+        
+        # Binary kopieren
+        Copy-Item "./publish/linux/BKB-Tool" -Destination "AppDir/usr/bin/"
+        
+        # Icons kopieren (wenn vorhanden)
+        if (Test-Path "BKB-Tool/Icons/BKB-Tool_256.png") {
+          Copy-Item "BKB-Tool/Icons/BKB-Tool_256.png" -Destination "AppDir/usr/share/icons/hicolor/256x256/apps/bkb-tool.png"
+          Copy-Item "BKB-Tool/Icons/BKB-Tool_256.png" -Destination "AppDir/bkb-tool.png"
+        }
+        if (Test-Path "BKB-Tool/Icons/BKB-Tool_512.png") {
+          Copy-Item "BKB-Tool/Icons/BKB-Tool_512.png" -Destination "AppDir/usr/share/icons/hicolor/512x512/apps/bkb-tool.png"
+        }
+        
+        # Desktop-Datei erstellen
+        @"
+        [Desktop Entry]
+        Type=Application
+        Name=BKB-Tool
+        Comment=Ein Werkzeug an der Schnittstelle zwischen SchILD und Webuntis
+        Exec=BKB-Tool
+        Icon=bkb-tool
+        Categories=Utility;Education;Office;
+        Terminal=false
+        StartupNotify=true
+        Version=1.0
+        "@ | Out-File -FilePath "AppDir/bkb-tool.desktop" -Encoding ASCII
+        
+        Copy-Item "AppDir/bkb-tool.desktop" -Destination "AppDir/usr/share/applications/"
+        
+        # AppRun erstellen
+        @"
+        #!/bin/bash
+        SELF=`$(readlink -f "`$0")
+        HERE=`${SELF%/*}
+        export PATH="`${HERE}/usr/bin:`${PATH}"
+        export LD_LIBRARY_PATH="`${HERE}/usr/lib:`${LD_LIBRARY_PATH}"
+        exec "`${HERE}/usr/bin/BKB-Tool" "`$@"
+        "@ | Out-File -FilePath "AppDir/AppRun" -Encoding ASCII
     
-    - name: Create AppImage
+    - name: Build AppImage with WSL
       run: |
-        wsl bash -c "cd /mnt/c/Users/bm/source/repos/BKB-Tool && ./scripts/create-appimage.sh ${{ steps.get_version.outputs.version }}"
+        wsl bash -c "cd /mnt/c/Users/runneradmin/work/BKB-Tool/BKB-Tool && chmod +x AppDir/AppRun && chmod +x AppDir/usr/bin/BKB-Tool && wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool && chmod +x appimagetool && ARCH=x86_64 ./appimagetool AppDir BKB-Tool-${{ steps.get_version.outputs.version }}.AppImage"
+    
+    - name: Copy AppImage to workspace
+      shell: pwsh
+      run: |
+        wsl bash -c "cp /mnt/c/Users/runneradmin/work/BKB-Tool/BKB-Tool/BKB-Tool-${{ steps.get_version.outputs.version }}.AppImage /mnt/c/Users/runneradmin/work/BKB-Tool/BKB-Tool/"
     
     - name: Create Release
       id: create_release
