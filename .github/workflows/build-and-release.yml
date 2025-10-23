@@ -134,6 +134,7 @@ jobs:
       run: |
         # AppDir erstellen (minimale Struktur)
         New-Item -ItemType Directory -Force -Path "AppDir/usr/bin"
+        New-Item -ItemType Directory -Force -Path "AppDir/usr/share/applications"
         
         # Binary kopieren
         Copy-Item "./publish/linux/BKB-Tool" -Destination "AppDir/usr/bin/"
@@ -143,10 +144,11 @@ jobs:
           Copy-Item "BKB-Tool/Icons/BKB-Tool_256.png" -Destination "AppDir/bkb-tool.png"
         }
         
-        # Minimale Desktop-Datei (nur für AppImage-Metadaten, nicht für Desktop-Integration)
-        $desktopContent = "[Desktop Entry]`nType=Application`nName=BKB-Tool`nExec=BKB-Tool`nIcon=bkb-tool`nCategories=Utility;`n"
+        # Desktop-Datei erstellen (WICHTIG: Terminal=true und richtige Position)
+        $desktopContent = "[Desktop Entry]`nType=Application`nName=BKB-Tool`nComment=Ein Werkzeug an der Schnittstelle zwischen SchILD und Webuntis`nExec=BKB-Tool`nIcon=bkb-tool`nCategories=Utility;`nTerminal=true`nVersion=1.0`n"
         $utf8NoBom = New-Object System.Text.UTF8Encoding $false
         [System.IO.File]::WriteAllText("AppDir/bkb-tool.desktop", $desktopContent, $utf8NoBom)
+        Copy-Item "AppDir/bkb-tool.desktop" -Destination "AppDir/usr/share/applications/"
         
         # AppRun erstellen
         $apprunContent = "#!/bin/bash`nSELF=`$(readlink -f `"`$0`")`nHERE=`${SELF%/*}`nexport PATH=`"`${HERE}/usr/bin:`${PATH}`"`nexport LD_LIBRARY_PATH=`"`${HERE}/usr/lib:`${LD_LIBRARY_PATH}`"`nexec `"`${HERE}/usr/bin/BKB-Tool`" `"`$@`"`n"
