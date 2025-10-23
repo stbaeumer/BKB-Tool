@@ -129,7 +129,7 @@ jobs:
           -p:PublishTrimmed=false `
           -o ./publish/linux
     
-    - name: Create AppImage structure
+      - name: Create AppImage structure
       shell: pwsh
       run: |
         # AppDir erstellen (minimale Struktur)
@@ -150,10 +150,10 @@ jobs:
         [System.IO.File]::WriteAllText("AppDir/bkb-tool.desktop", $desktopContent, $utf8NoBom)
         Copy-Item "AppDir/bkb-tool.desktop" -Destination "AppDir/usr/share/applications/"
         
-        # AppRun erstellen
-        $apprunContent = "#!/bin/bash`nSELF=`$(readlink -f `"`$0`")`nHERE=`${SELF%/*}`nexport PATH=`"`${HERE}/usr/bin:`${PATH}`"`nexport LD_LIBRARY_PATH=`"`${HERE}/usr/lib:`${LD_LIBRARY_PATH}`"`nexec `"`${HERE}/usr/bin/BKB-Tool`" `"`$@`"`n"
+        # AppRun erstellen (mit Terminal-Titel)
+        $apprunContent = "#!/bin/bash`nSELF=`$(readlink -f `"`$0`")`nHERE=`${SELF%/*}`nexport PATH=`"`${HERE}/usr/bin:`${PATH}`"`nexport LD_LIBRARY_PATH=`"`${HERE}/usr/lib:`${LD_LIBRARY_PATH}`"`necho -ne `"\033]0;BKB-Tool\007`"`nexec `"`${HERE}/usr/bin/BKB-Tool`" `"`$@`"`n"
         [System.IO.File]::WriteAllText("AppDir/AppRun", $apprunContent, $utf8NoBom)
-    
+
     - name: Install WSL
       uses: Vampire/setup-wsl@v3
       with:
