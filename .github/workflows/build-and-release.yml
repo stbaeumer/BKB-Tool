@@ -190,7 +190,13 @@ jobs:
         cd ..
         wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
         chmod +x appimagetool
-        ARCH=x86_64 ./appimagetool AppDir BKB-Tool-${{ steps.get_version.outputs.version }}.AppImage
+        # AppImage extrahieren statt ausführen (wegen fehlendem FUSE)
+        ./appimagetool --appimage-extract
+        # Squashfs-tools installieren
+        sudo apt-get update
+        sudo apt-get install -y squashfs-tools
+        # AppImage manuell erstellen
+        ./squashfs-root/AppRun AppDir BKB-Tool-${{ steps.get_version.outputs.version }}.AppImage
     
     - name: Create Release
       uses: softprops/action-gh-release@v1
