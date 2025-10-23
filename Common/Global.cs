@@ -1132,7 +1132,8 @@ public static class Global
         // Alle Values entschlüsseln
         foreach (var key in configuration.AsEnumerable())
         {
-            if (key.Value != null)
+            // Zustimmung Lizenz wird hier nicht entschlüsselt, da sie im Klartext vorliegen muss.
+            if (key.Value != null && key.Key != "ZustimmungLizenz")
             {
                 configuration[key.Key] = Entschluesseln(key.Value);
             }
