@@ -1,0 +1,96 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+    
+    - name: Increment version
+      id: version
+      shell: pwsh
+      run: |
+        .\scripts\increment-version.ps1
+    
+    - name: Get version
+      id: get_version
+      shell: pwsh
+      run: |
+        $content = Get-Content BKB-Tool/BKB-Tool.csproj -Raw
+        if ($content -match '<Version>([\d\.]+)</Version>') {
+          $version = $matches[1]
+          Write-Output "version=$version" >> $env:GITHUB_OUTPUT
+          Write-Host "Version: $version"
+        }
+    
+    - name: Commit version bump
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add BKB-Tool/BKB-Tool.csproj
+        git diff --staged --quiet || git commit -m "chore: bump version to ${{ steps.get_version.outputs.version }}"
+        git push || echo "No changes to push"
+    
+    - name: Restore dependencies
+      run: dotnet restore BKB-Tool/BKB-Tool.csproj
+    
+    - name: Build Windows x64
+      run: |
+        dotnet publish BKB-Tool/BKB-Tool.csproj `
+          -c Release `
+          -r win-x64 `
+          --self-contained true `
+          -p:PublishSingleFile=true `
+          -p:IncludeNativeLibrariesForSelfExtract=true `
+          -p:PublishTrimmed=false `
+          -o ./publish/windows
+    
+    - name: Build Linux x64
+      run: |
+        dotnet publish BKB-Tool/BKB-Tool.csproj `
+          -c Release `
+          -r linux-x64 `
+          --self-contained true `
+          -p:PublishSingleFile=true `
+          -p:IncludeNativeLibrariesForSelfExtract=true `
+          -p:PublishTrimmed=false `
+          -o ./publish/linux
+    
+    - name: Setup Linux environment for AppImage
+      run: |
+        wsl --install -d Ubuntu
+        wsl sudo apt-get update
+        wsl sudo apt-get install -y wget file desktop-file-utils
+    
+    - name: Create AppImage
+      run: |
+        wsl bash -c "cd /mnt/c/Users/bm/source/repos/BKB-Tool && ./scripts/create-appimage.sh ${{ steps.get_version.outputs.version }}"
+    
+    - name: Create Release
+      id: create_release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: v${{ steps.get_version.outputs.version }}
+        name: Release v${{ steps.get_version.outputs.version }} (Beta)
+        draft: false
+        prerelease: true
+        files: |
+          ./publish/windows/BKB-Tool.exe
+          ./BKB-Tool-${{ steps.get_version.outputs.version }}.AppImage
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

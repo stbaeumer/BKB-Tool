@@ -1,11 +1,15 @@
 ﻿// Stefan Bäumer 2025
+using System;
 using System.Diagnostics;
 using System.Reflection;
+using System.IO;
+using System.Collections.Generic;
 using Common;
 using Microsoft.Extensions.Configuration;
 using Spectre.Console;
+using System.Linq;
 
-try{ Console.WindowHeight = 35;} catch { }
+try { Console.WindowHeight = 35;} catch { }
 
 Global.User = Environment.UserName;
 IConfiguration? configuration = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile($"{Global.User}.json", optional: true, reloadOnChange: true).Build();

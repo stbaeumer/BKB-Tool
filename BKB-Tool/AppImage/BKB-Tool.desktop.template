@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=BKB-Tool
+Comment=Ein Werkzeug an der Schnittstelle zwischen SchILD und Webuntis
+Exec=BKB-Tool
+Icon=bkb-tool
+Categories=Utility;Education;Office;
+Terminal=false
+StartupNotify=true
