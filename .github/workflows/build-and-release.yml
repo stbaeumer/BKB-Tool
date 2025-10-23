@@ -175,18 +175,18 @@ jobs:
         chmod +x appimagetool
         ./appimagetool --appimage-extract
         
-        # AppImage erstellen (ohne Desktop-Integration)
-        ARCH=x86_64 ./squashfs-root/AppRun --no-appstream AppDir BKB-Tool-${{ steps.get_version.outputs.version }}.AppImage
+        # AppImage erstellen (ohne Versionsnummer im Dateinamen)
+        ARCH=x86_64 ./squashfs-root/AppRun --no-appstream AppDir BKB-Tool.AppImage
     
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: v${{ steps.get_version.outputs.version }}
-        name: Release v${{ steps.get_version.outputs.version }} (Beta)
+        tag_name: ${{ steps.get_version.outputs.version }}
+        name: Release ${{ steps.get_version.outputs.version }} (Beta)
         draft: false
         prerelease: true
         files: |
           ./publish/windows/BKB-Tool.exe
-          ./BKB-Tool-${{ steps.get_version.outputs.version }}.AppImage
+          ./BKB-Tool.AppImage
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
