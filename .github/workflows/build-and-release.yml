@@ -132,29 +132,21 @@ jobs:
     - name: Create AppImage structure
       shell: pwsh
       run: |
-        # AppDir erstellen
+        # AppDir erstellen (minimale Struktur)
         New-Item -ItemType Directory -Force -Path "AppDir/usr/bin"
-        New-Item -ItemType Directory -Force -Path "AppDir/usr/share/icons/hicolor/256x256/apps"
-        New-Item -ItemType Directory -Force -Path "AppDir/usr/share/icons/hicolor/512x512/apps"
-        New-Item -ItemType Directory -Force -Path "AppDir/usr/share/applications"
         
         # Binary kopieren
         Copy-Item "./publish/linux/BKB-Tool" -Destination "AppDir/usr/bin/"
         
-        # Icons kopieren (wenn vorhanden)
+        # Icons kopieren (optional, für AppImage-Icon)
         if (Test-Path "BKB-Tool/Icons/BKB-Tool_256.png") {
-          Copy-Item "BKB-Tool/Icons/BKB-Tool_256.png" -Destination "AppDir/usr/share/icons/hicolor/256x256/apps/bkb-tool.png"
           Copy-Item "BKB-Tool/Icons/BKB-Tool_256.png" -Destination "AppDir/bkb-tool.png"
         }
-        if (Test-Path "BKB-Tool/Icons/BKB-Tool_512.png") {
-          Copy-Item "BKB-Tool/Icons/BKB-Tool_512.png" -Destination "AppDir/usr/share/icons/hicolor/512x512/apps/bkb-tool.png"
-        }
         
-        # Desktop-Datei erstellen (Terminal=true für Terminal-Anwendung)
-        $desktopContent = "[Desktop Entry]`nType=Application`nName=BKB-Tool`nComment=Ein Werkzeug an der Schnittstelle zwischen SchILD und Webuntis`nExec=BKB-Tool`nIcon=bkb-tool`nCategories=Utility;`nTerminal=true`nStartupNotify=true`nVersion=1.0`n"
+        # Minimale Desktop-Datei (nur für AppImage-Metadaten, nicht für Desktop-Integration)
+        $desktopContent = "[Desktop Entry]`nType=Application`nName=BKB-Tool`nExec=BKB-Tool`nIcon=bkb-tool`nCategories=Utility;`n"
         $utf8NoBom = New-Object System.Text.UTF8Encoding $false
         [System.IO.File]::WriteAllText("AppDir/bkb-tool.desktop", $desktopContent, $utf8NoBom)
-        Copy-Item "AppDir/bkb-tool.desktop" -Destination "AppDir/usr/share/applications/"
         
         # AppRun erstellen
         $apprunContent = "#!/bin/bash`nSELF=`$(readlink -f `"`$0`")`nHERE=`${SELF%/*}`nexport PATH=`"`${HERE}/usr/bin:`${PATH}`"`nexport LD_LIBRARY_PATH=`"`${HERE}/usr/lib:`${LD_LIBRARY_PATH}`"`nexec `"`${HERE}/usr/bin/BKB-Tool`" `"`$@`"`n"
@@ -172,9 +164,8 @@ jobs:
         chmod +x AppDir/AppRun
         chmod +x AppDir/usr/bin/BKB-Tool
         
-        # CRLF zu LF konvertieren (falls vorhanden)
+        # CRLF zu LF konvertieren
         sed -i 's/\r$//' AppDir/bkb-tool.desktop || true
-        sed -i 's/\r$//' AppDir/usr/share/applications/bkb-tool.desktop || true
         sed -i 's/\r$//' AppDir/AppRun || true
         
         # AppImageTool herunterladen und extrahieren
@@ -182,13 +173,8 @@ jobs:
         chmod +x appimagetool
         ./appimagetool --appimage-extract
         
-        # AppImage erstellen
-        ARCH=x86_64 ./squashfs-root/AppRun AppDir BKB-Tool-${{ steps.get_version.outputs.version }}.AppImage
-        
-        # Desktop-Datei validieren (nur zur Info)
-        if command -v desktop-file-validate >/dev/null 2>&1; then
-          desktop-file-validate AppDir/bkb-tool.desktop || true
-        fi
+        # AppImage erstellen (ohne Desktop-Integration)
+        ARCH=x86_64 ./squashfs-root/AppRun --no-appstream AppDir BKB-Tool-${{ steps.get_version.outputs.version }}.AppImage
     
     - name: Create Release
       uses: softprops/action-gh-release@v1
