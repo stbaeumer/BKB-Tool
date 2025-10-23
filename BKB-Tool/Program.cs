@@ -165,8 +165,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
 
                 Console.ReadKey(); // Warten auf Benutzereingabe, bevor das Update gestartet wird
 
-                // Lade die Datei nach bkb-neu.exe herunter und führe den Autoupdater aus.
-                
+                // Lade die Datei nach bkb-neu.exe herunter und führe den Autoupdater aus.                
                 string downloadUrl = null;
                 foreach (var asset in releases
                     .First(r => !r.GetProperty("draft").GetBoolean() && (allowPrerelease || !r.GetProperty("prerelease").GetBoolean()))
