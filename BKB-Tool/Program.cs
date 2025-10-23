@@ -373,7 +373,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                 while (Console.KeyAvailable) Console.ReadKey(true);
                 Console.ReadKey();
 
-                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                Process.Start(new ProcessStartInfo
                 {
                     FileName = updaterPath,
                     UseShellExecute = true,
