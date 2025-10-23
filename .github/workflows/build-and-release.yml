@@ -101,7 +101,7 @@ jobs:
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
         git add BKB-Tool/BKB-Tool.csproj
-        git diff --staged --quiet || git commit -m "chore: bump version to ${{ steps.get_version.outputs.version }}"
+        git diff --staged --quiet || git commit -m "chore: bump version to ${{ steps.get_version.outputs.version }} [skip ci]"
         git push || echo "No changes to push"
     
     - name: Restore dependencies
@@ -117,11 +117,6 @@ jobs:
           -p:IncludeNativeLibrariesForSelfExtract=true `
           -p:PublishTrimmed=false `
           -o ./publish/windows
-    
-    - name: Setup Linux for AppImage build
-      run: |
-        wsl --set-default-version 2
-        wsl --install Ubuntu --no-launch
     
     - name: Build Linux x64
       run: |
@@ -181,17 +176,23 @@ jobs:
         exec "`${HERE}/usr/bin/BKB-Tool" "`$@"
         "@ | Out-File -FilePath "AppDir/AppRun" -Encoding ASCII
     
-    - name: Build AppImage with WSL
-      run: |
-        wsl bash -c "cd /mnt/c/Users/runneradmin/work/BKB-Tool/BKB-Tool && chmod +x AppDir/AppRun && chmod +x AppDir/usr/bin/BKB-Tool && wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool && chmod +x appimagetool && ARCH=x86_64 ./appimagetool AppDir BKB-Tool-${{ steps.get_version.outputs.version }}.AppImage"
+    - name: Install WSL
+      uses: Vampire/setup-wsl@v3
+      with:
+        distribution: Ubuntu-22.04
     
-    - name: Copy AppImage to workspace
-      shell: pwsh
+    - name: Build AppImage
+      shell: wsl-bash {0}
       run: |
-        wsl bash -c "cp /mnt/c/Users/runneradmin/work/BKB-Tool/BKB-Tool/BKB-Tool-${{ steps.get_version.outputs.version }}.AppImage /mnt/c/Users/runneradmin/work/BKB-Tool/BKB-Tool/"
+        cd AppDir
+        chmod +x AppRun
+        chmod +x usr/bin/BKB-Tool
+        cd ..
+        wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
+        chmod +x appimagetool
+        ARCH=x86_64 ./appimagetool AppDir BKB-Tool-${{ steps.get_version.outputs.version }}.AppImage
     
     - name: Create Release
-      id: create_release
       uses: softprops/action-gh-release@v1
       with:
         tag_name: v${{ steps.get_version.outputs.version }}
