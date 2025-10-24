@@ -176,7 +176,18 @@ jobs:
         ./appimagetool --appimage-extract
         
         # AppImage erstellen (ohne Versionsnummer im Dateinamen)
-        ARCH=x86_64 ./squashfs-root/AppRun --no-appstream AppDir BKB-Tool.AppImage
+        # -u "gh-releases-zsync|OWNER|REPO|latest|BKB-Tool.AppImage.zsync" erstellt automatisch die .zsync-Datei
+        ARCH=x86_64 ./squashfs-root/AppRun --no-appstream \
+          -u "gh-releases-zsync|${{ github.repository_owner }}|${{ github.event.repository.name }}|${{ steps.get_version.outputs.version }}|BKB-Tool.AppImage.zsync" \
+          AppDir BKB-Tool.AppImage
+        
+        # Prüfen ob .zsync-Datei erstellt wurde
+        if [ -f "BKB-Tool.AppImage.zsync" ]; then
+          echo "✓ .zsync-Datei erfolgreich erstellt"
+          ls -lh BKB-Tool.AppImage*
+        else
+          echo "⚠ Warnung: .zsync-Datei wurde nicht erstellt"
+        fi
     
     - name: Create Release
       uses: softprops/action-gh-release@v1
@@ -188,5 +199,6 @@ jobs:
         files: |
           ./publish/windows/BKB-Tool.exe
           ./BKB-Tool.AppImage
+          ./BKB-Tool.AppImage.zsync
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
