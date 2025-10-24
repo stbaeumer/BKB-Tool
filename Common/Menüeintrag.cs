@@ -1628,6 +1628,11 @@ public class Menüeintrag
                         continue;
                     }
 
+                    if(schildStudent.Nachname == "Vogt" && schildStudent.Vorname == "Niklas")
+                    {
+                        var debug = 1;
+                    }
+
                     var id = schildStudent.Id;
                     schildStudent.GetLetztesZeugnisdatumInDerKlasse(schuelerLernabschnittsdaten);
                     var schildStudentMeldung = (schildStudent.Nachname + ", " + schildStudent.Vorname + ", " + id + " (" + schildStudent.Klasse + ")").PadRight(45);

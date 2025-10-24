@@ -1576,7 +1576,7 @@ public static class KonfigHelper
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie [{Global.GetColor(Global.ColorInfoBox)}]Nachricht[/] ein. Geben Sie \\n ein, um einen Zeilenumbruch zu erzeugen. geben Sie #Lehrer# als Platzhalter für den Namen des Lehrers ein. Der Name wird dann automatisch ersetzt.",
             Datentyp = Global.Datentyp.String,
-            InGrundeinstellungAbfragen = true,
+            InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
@@ -1689,7 +1689,7 @@ public static class KonfigHelper
             $"\nIhre vollständige Eingabe könnte also so aussehen: [{Global.GetColor(Global.ColorActionInMenüs)}] G, L, A, Z, V, P[/]." +
             $"\nWenn Sie die automatische Zuordnung nicht nutzen möchten, weil Sie z.B. keine Kurse nutzen, geben Sie weniger als 5 Kommas ein.",
             Datentyp = Global.Datentyp.String,
-            InGrundeinstellungAbfragen = true,
+            InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
@@ -1865,7 +1865,7 @@ public static class KonfigHelper
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Wo werden die aufbereiteten Schüler*innenfotos in Klassenordnern gespeichert? Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]Pfad[/] an! Beispiel: [aqua]\\\\fs01\\SchILD-NRW\\Fotos[/]. Beachten Sie, dass alle Fotos im Zielordner den Benutzernamen (der Teil vor dem @ der Mail-Adresse) als Namen haben müssen.",
             Datentyp = Global.Datentyp.Pfad,
-            InGrundeinstellungAbfragen = true,
+            InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
@@ -1997,7 +1997,7 @@ public static class KonfigHelper
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie das [{Global.GetColor(Global.ColorInfoBox)}]Datum des Sprechtags[/] an (tt.mm.jjjj).",
             Datentyp = Global.Datentyp.DateTime,
-            InGrundeinstellungAbfragen = true,
+            InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
@@ -2041,7 +2041,7 @@ public static class KonfigHelper
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie an, wie viele Stunden einer [{Global.GetColor(Global.ColorInfoBox)}]vollen Stelle[/] entsprechen. Das ist wichtig, um die Altersermäßigung berechnen zu können. Beispiel: [{Global.GetColor(Global.ColorZahlen)}]25,5[/].",
             Datentyp = Global.Datentyp.Float,
-            InGrundeinstellungAbfragen = true,
+            InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
