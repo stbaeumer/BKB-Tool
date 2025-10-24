@@ -215,10 +215,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                     "Linux" => Path.Combine(downloadDir, "BKB-Tool_neu.AppImage"),
                     "macOS" => Path.Combine(downloadDir, "BKB-Tool_neu"),
                     _ => Path.Combine(downloadDir, "BKB-Tool_neu.exe")
-                };
-
-                if(os != "Windows")
-                    zielDatei = Path.Combine(Directory.GetCurrentDirectory(), "BKB-Tool_neu");
+                };                
 
                 using (var webClient = new System.Net.WebClient())
                 {
