@@ -330,8 +330,8 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                         Process.Start(new ProcessStartInfo
                         {
                             FileName = "alacritty",
-                            Arguments = $"-t \"BKB-Tool Update\" --hold -e bash {updaterScript}",
-                            UseShellExecute = false,
+                            Arguments = $"-t \"BKB-Tool Update\" --hold -e bash \"{updaterScript}\"",
+                            UseShellExecute = true,
                             WorkingDirectory = appDir
                         });
                     }
@@ -341,8 +341,8 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                         Process.Start(new ProcessStartInfo
                         {
                             FileName = "gnome-terminal",
-                            Arguments = $"--wait -- bash {updaterScript}",
-                            UseShellExecute = false,
+                            Arguments = $"--wait -- bash \"{updaterScript}\"",
+                            UseShellExecute = true,
                             WorkingDirectory = appDir
                         });
                     }
