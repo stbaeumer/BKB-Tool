@@ -327,6 +327,8 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                         if (hasAlacritty)
                         {
                             Process.Start("/usr/bin/gnome-terminal");
+                            Process.Start("bash", new [] { "-c", "gnome-terminal" });
+
 
                             var psi = new ProcessStartInfo
                             {
@@ -356,6 +358,8 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                         else
                         {
                             Process.Start("/usr/bin/gnome-terminal");
+                            Process.Start("bash", new [] { "-c", "gnome-terminal" });
+
 
                             var psi = new ProcessStartInfo
                             {
