@@ -169,7 +169,6 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                         return configuration;
                     }
 
-
                     // 1) Download-URL für AppImage finden (Name exakt: BKB-Tool.AppImage)
                     string downloadUrl = null;
                     foreach (var asset in selectedRelease.Value.GetProperty("assets").EnumerateArray())
@@ -327,18 +326,47 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                     {
                         if (hasAlacritty)
                         {
-                            Process.Start("alacritty", new[]
+                            //Process.Start("bash", new [] { "-c", "gnome-terminal" });
+                            //Process.Start("/usr/bin/gnome-terminal");
+
+                            var psi = new ProcessStartInfo
                             {
-                                "-t", "BKB-Tool Update",
-                                "-e", "bash", updaterScript
-                            });
+                                FileName = "/usr/bin/alacritty",
+                                UseShellExecute = true,
+                                WorkingDirectory = "/home/stefan/"
+                            };
+                            psi.ArgumentList.Add("-t");
+                            psi.ArgumentList.Add("BKB-Tool Update");
+                            psi.ArgumentList.Add("-e");
+                            psi.ArgumentList.Add("bash");
+                            psi.ArgumentList.Add(updaterScript);
+                            Process.Start(psi);
+                            Console.WriteLine($"PATH: {Environment.GetEnvironmentVariable("PATH")}");
+                            Console.WriteLine($"DISPLAY: {Environment.GetEnvironmentVariable("DISPLAY")}");
+                            Console.WriteLine($"DBUS_SESSION_BUS_ADDRESS: {Environment.GetEnvironmentVariable("DBUS_SESSION_BUS_ADDRESS")}");
+                            Console.ReadKey();
                         }
                         else
                         {
-                            Process.Start("gnome-terminal", new[]
+                            //Process.Start("bash", new [] { "-c", "gnome-terminal" });
+                            //Process.Start("/usr/bin/gnome-terminal");
+
+                            var psi = new ProcessStartInfo
                             {
-                                "--wait", "--", "bash", updaterScript
-                            });
+                                FileName = "/usr/bin/alacritty",
+                                UseShellExecute = true,
+                                WorkingDirectory = "/home/stefan/"
+                            };
+                            psi.ArgumentList.Add("-t");
+                            psi.ArgumentList.Add("BKB-Tool Update");
+                            psi.ArgumentList.Add("-e");
+                            psi.ArgumentList.Add("bash");
+                            psi.ArgumentList.Add(updaterScript);
+                            Process.Start(psi);
+                            Console.WriteLine($"PATH: {Environment.GetEnvironmentVariable("PATH")}");
+                            Console.WriteLine($"DISPLAY: {Environment.GetEnvironmentVariable("DISPLAY")}");
+                            Console.WriteLine($"DBUS_SESSION_BUS_ADDRESS: {Environment.GetEnvironmentVariable("DBUS_SESSION_BUS_ADDRESS")}");
+                            Console.ReadKey();
                         }
                     }
                     catch (Exception e)
