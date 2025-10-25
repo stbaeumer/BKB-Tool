@@ -234,7 +234,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                     "sleep 1\n" +
                     "n=0\n" +
                     "while pgrep -f \"BKB-Tool.*AppImage\" >/dev/null 2>&1; do\n" +
-                    "  echo \"[$(date)] BKB-Tool läuft noch...\" | tee -a \"$LOG\"\n" +
+                    "  echo \"[$(date)] BKB-Tool läuft noch. Bitte schließen!\" | tee -a \"$LOG\"\n" +
                     "  sleep 1\n" +
                     "  n=$((n+1))\n" +
                     "  if [ $n -gt 120 ]; then\n" +
@@ -317,8 +317,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                             .Header("[red]Terminal fehlt[/]")
                             .BorderColor(Color.Red)
                             .Expand();
-                        AnsiConsole.Write(terminalWarning);
-                        Console.ReadKey();
+                        AnsiConsole.Write(terminalWarning);                        
                         return configuration;
                     }
 
@@ -340,6 +339,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                                 $"gnome-terminal --wait -- bash '{updaterScript}' & disown"
                             });
                         }
+                        Console.ReadKey();
                     }
                     catch (Exception e)
                     {
