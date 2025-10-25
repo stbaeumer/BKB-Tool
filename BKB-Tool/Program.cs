@@ -326,41 +326,19 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                     {
                         if (hasAlacritty)
                         {
-                            var psi = new ProcessStartInfo
+                            Process.Start("bash", new[]
                             {
-                                FileName = "/usr/bin/alacritty",
-                                UseShellExecute = true,
-                                WorkingDirectory = "/home/stefan/"
-                            };
-                            psi.ArgumentList.Add("-t");
-                            psi.ArgumentList.Add("BKB-Tool Update");
-                            psi.ArgumentList.Add("-e");
-                            psi.ArgumentList.Add("bash");
-                            psi.ArgumentList.Add(updaterScript);
-                            Process.Start(psi);
-                            Console.WriteLine($"PATH: {Environment.GetEnvironmentVariable("PATH")}");
-                            Console.WriteLine($"DISPLAY: {Environment.GetEnvironmentVariable("DISPLAY")}");
-                            Console.WriteLine($"DBUS_SESSION_BUS_ADDRESS: {Environment.GetEnvironmentVariable("DBUS_SESSION_BUS_ADDRESS")}");
-                            Console.ReadKey();
+                                "-c",
+                                $"alacritty -t 'BKB-Tool Update' -e bash '{updaterScript}' &"
+                            });
                         }
                         else
                         {
-                            var psi = new ProcessStartInfo
+                            Process.Start("bash", new[]
                             {
-                                FileName = "/usr/bin/alacritty",
-                                UseShellExecute = true,
-                                WorkingDirectory = "/home/stefan/"
-                            };
-                            psi.ArgumentList.Add("-t");
-                            psi.ArgumentList.Add("BKB-Tool Update");
-                            psi.ArgumentList.Add("-e");
-                            psi.ArgumentList.Add("bash");
-                            psi.ArgumentList.Add(updaterScript);
-                            Process.Start(psi);
-                            Console.WriteLine($"PATH: {Environment.GetEnvironmentVariable("PATH")}");
-                            Console.WriteLine($"DISPLAY: {Environment.GetEnvironmentVariable("DISPLAY")}");
-                            Console.WriteLine($"DBUS_SESSION_BUS_ADDRESS: {Environment.GetEnvironmentVariable("DBUS_SESSION_BUS_ADDRESS")}");
-                            Console.ReadKey();
+                                "-c",
+                                $"gnome-terminal --wait -- bash '{updaterScript}' &"
+                            });
                         }
                     }
                     catch (Exception e)
