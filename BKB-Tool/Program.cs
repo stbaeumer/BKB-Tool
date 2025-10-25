@@ -361,7 +361,8 @@ Console.ReadKey();
                         else
                         {
                             Process.Start("/usr/bin/gnome-terminal");
-                            Process.Start("bash", new [] { "-c", "gnome-terminal" });
+                            Process.Start("bash", new[] { "-c", "gnome-terminal" });
+                            
 Console.WriteLine($"PATH: {Environment.GetEnvironmentVariable("PATH")}");
 Console.WriteLine($"DISPLAY: {Environment.GetEnvironmentVariable("DISPLAY")}");
 Console.WriteLine($"DBUS_SESSION_BUS_ADDRESS: {Environment.GetEnvironmentVariable("DBUS_SESSION_BUS_ADDRESS")}");
