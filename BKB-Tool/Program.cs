@@ -221,110 +221,121 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                             mre.WaitOne();
                         });
                     }
+                                        
+                    // Im gleichen Ordner wie das AppImage speichern (sichtbar/prüfbar)
+                    string updaterScript = Path.Combine(appDir, "BKB-Tool-update.sh");
+                    string script = "#!/usr/bin/env bash\n" +
+                    "set -euo pipefail\n" +
+                    "trap 'echo; echo \"Es ist ein Fehler aufgetreten.\"; read -n1 -s -r -p \"Taste drücken, um dieses Fenster zu schließen ...\"; echo' ERR\n" +
+                    $"APP=\"{appImagePath}\"\n" +
+                    $"NEW=\"{newPath}\"\n" +
+                    "DIR=\"$(dirname \"$APP\")\"\n" +
+                    "LOG=\"$DIR/BKB-Tool-update.log\"\n" +
+                    "echo \"[$(date)] Selfupdate gestartet. APP=$APP NEW=$NEW\" | tee -a \"$LOG\"\n" +
+                    "# Kurz warten, bis die App beendet ist\n" +
+                    "sleep 1\n" +
+                    "# Warten bis Prozess beendet\n" +
+                    "n=0\n" +
+                    "while pgrep -f \"BKB-Tool.*AppImage\" >/dev/null 2>&1; do\n" +
+                    "  echo \"[$(date)] BKB-Tool läuft noch...\" | tee -a \"$LOG\"\n" +
+                    "  sleep 1\n" +
+                    "  n=$((n+1))\n" +
+                    "  if [ $n -gt 120 ]; then\n" +
+                    "    echo \"Timeout: BKB-Tool beendet sich nicht.\" | tee -a \"$LOG\"\n" +
+                    "    echo\n" +
+                    "    read -n1 -s -r -p \"Taste drücken, um dieses Fenster zu schließen ...\"; echo\n" +
+                    "    exit 1\n" +
+                    "  fi\n" +
+                    "done\n" +
+                    "if [ ! -f \"$NEW\" ]; then\n" +
+                    "  echo \"Fehler: Update-Datei fehlt: $NEW\" | tee -a \"$LOG\"\n" +
+                    "  echo\n" +
+                    "  read -n1 -s -r -p \"Taste drücken, um dieses Fenster zu schließen ...\"; echo\n" +
+                    "  exit 1\n" +
+                    "fi\n" +
+                    "echo \"Ersetze alte Version...\" | tee -a \"$LOG\"\n" +
+                    "mv -f \"$NEW\" \"$APP\"\n" +
+                    "chmod +x \"$APP\"\n" +
+                    "echo \"Starte neue Version...\" | tee -a \"$LOG\"\n" +
+                    "nohup \"$APP\" >/dev/null 2>&1 &\n" +
+                    "echo\n" +
+                    "echo \"Update abgeschlossen.\"\n" +
+                    "echo \"Log: $LOG\"\n" +
+                    "echo\n" +
+                    "read -n1 -s -r -p \"Taste drücken, um dieses Fenster zu schließen ...\"; echo\n";
 
-                    
-// Im gleichen Ordner wie das AppImage speichern (sichtbar/prüfbar)
-string updaterScript = Path.Combine(appDir, "BKB-Tool-update.sh");
-string script = "#!/usr/bin/env bash\n" +
-"set -euo pipefail\n" +
-"trap 'echo; echo \"Es ist ein Fehler aufgetreten.\"; read -n1 -s -r -p \"Taste drücken, um dieses Fenster zu schließen ...\"; echo' ERR\n" +
-$"APP=\"{appImagePath}\"\n" +
-$"NEW=\"{newPath}\"\n" +
-"DIR=\"$(dirname \"$APP\")\"\n" +
-"LOG=\"$DIR/BKB-Tool-update.log\"\n" +
-"echo \"[$(date)] Selfupdate gestartet. APP=$APP NEW=$NEW\" | tee -a \"$LOG\"\n" +
-"# Kurz warten, bis die App beendet ist\n" +
-"sleep 1\n" +
-"# Warten bis Prozess beendet\n" +
-"n=0\n" +
-"while pgrep -f \"BKB-Tool.*AppImage\" >/dev/null 2>&1; do\n" +
-"  echo \"[$(date)] BKB-Tool läuft noch...\" | tee -a \"$LOG\"\n" +
-"  sleep 1\n" +
-"  n=$((n+1))\n" +
-"  if [ $n -gt 120 ]; then\n" +
-"    echo \"Timeout: BKB-Tool beendet sich nicht.\" | tee -a \"$LOG\"\n" +
-"    echo\n" +
-"    read -n1 -s -r -p \"Taste drücken, um dieses Fenster zu schließen ...\"; echo\n" +
-"    exit 1\n" +
-"  fi\n" +
-"done\n" +
-"if [ ! -f \"$NEW\" ]; then\n" +
-"  echo \"Fehler: Update-Datei fehlt: $NEW\" | tee -a \"$LOG\"\n" +
-"  echo\n" +
-"  read -n1 -s -r -p \"Taste drücken, um dieses Fenster zu schließen ...\"; echo\n" +
-"  exit 1\n" +
-"fi\n" +
-"echo \"Ersetze alte Version...\" | tee -a \"$LOG\"\n" +
-"mv -f \"$NEW\" \"$APP\"\n" +
-"chmod +x \"$APP\"\n" +
-"echo \"Starte neue Version...\" | tee -a \"$LOG\"\n" +
-"nohup \"$APP\" >/dev/null 2>&1 &\n" +
-"echo\n" +
-"echo \"Update abgeschlossen.\"\n" +
-"echo \"Log: $LOG\"\n" +
-"echo\n" +
-"read -n1 -s -r -p \"Taste drücken, um dieses Fenster zu schließen ...\"; echo\n";
+                    // Skript speichern und ausführbar machen
+                    File.WriteAllText(updaterScript, script, new System.Text.UTF8Encoding(false));
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = "chmod",
+                        Arguments = $"+x \"{updaterScript}\"",
+                        UseShellExecute = false
+                    })?.WaitForExit();
 
-// Skript speichern und ausführbar machen
-File.WriteAllText(updaterScript, script, new System.Text.UTF8Encoding(false));
-Process.Start(new ProcessStartInfo
-{
-    FileName = "chmod",
-    Arguments = $"+x \"{updaterScript}\"",
-    UseShellExecute = false
-})?.WaitForExit();
+                    AnsiConsole.MarkupLine($"[gray]Updater-Skript:[/] [bold {Global.GetColor(Global.ColorPfadInDateien)}]{updaterScript}[/]");
 
-// ...existing code...
-AnsiConsole.MarkupLine($"[gray]Updater-Skript:[/] [bold {Global.GetColor(Global.ColorPfadInDateien)}]{updaterScript}[/]");
+                    bool hasAlacritty = false;
+                    bool hasGnomeTerminal = false;
+                    try
+                    {
+                        var checkAlacritty = Process.Start(new ProcessStartInfo
+                        {
+                            FileName = "which",
+                            Arguments = "alacritty",
+                            UseShellExecute = false,
+                            RedirectStandardOutput = true,
+                            CreateNoWindow = true
+                        });
+                        checkAlacritty?.WaitForExit();
+                        hasAlacritty = checkAlacritty?.ExitCode == 0;
 
-// Prüfen ob gnome-terminal verfügbar ist
-bool hasGnomeTerminal = false;
-try
-{
-    var checkProcess = Process.Start(new ProcessStartInfo
-    {
-        FileName = "which",
-        Arguments = "gnome-terminal",
-        UseShellExecute = false,
-        RedirectStandardOutput = true,
-        CreateNoWindow = true
-    });
-    checkProcess?.WaitForExit();
-    hasGnomeTerminal = checkProcess?.ExitCode == 0;
-}
-catch { }
+                        if (!hasAlacritty)
+                        {
+                            var checkGnome = Process.Start(new ProcessStartInfo
+                            {
+                                FileName = "which",
+                                Arguments = "gnome-terminal",
+                                UseShellExecute = false,
+                                RedirectStandardOutput = true,
+                                CreateNoWindow = true
+                            });
+                            checkGnome?.WaitForExit();
+                            hasGnomeTerminal = checkGnome?.ExitCode == 0;
+                        }
+                    }
+                    catch { }
 
-if (!hasGnomeTerminal)
-{
-    var terminalWarning = new Panel(new Markup(
-        $"[red]gnome-terminal ist nicht installiert.[/]\n\n" +
-        $"Das Update-Skript wurde erstellt:\n" +
-        $"[bold {Global.GetColor(Global.ColorPfadInDateien)}]{updaterScript}[/]\n\n" +
-        $"Installation von gnome-terminal:\n" +
-        $"[{Global.GetColor(Global.ColorPfadInDateien)}]sudo apt install gnome-terminal[/]\n\n" +
-        $"Oder führen Sie das Skript manuell aus:\n" +
-        $"[{Global.GetColor(Global.ColorPfadInDateien)}]bash {updaterScript}[/]"))
-        .Header("[red]Terminal fehlt[/]")
-        .BorderColor(Color.Red)
-        .Expand();
-    AnsiConsole.Write(terminalWarning);
-    Console.ReadKey();
-    return configuration;
-}
+                    if (!hasAlacritty && !hasGnomeTerminal)
+                    {
+                        var terminalWarning = new Panel(new Markup(
+                            $"[red]Weder alacritty noch gnome-terminal ist installiert.[/]\n\n" +
+                            $"Das Update-Skript wurde erstellt:\n" +
+                            $"[bold {Global.GetColor(Global.ColorPfadInDateien)}]{updaterScript}[/]\n\n" +
+                            $"Installation:\n" +
+                            $"[{Global.GetColor(Global.ColorPfadInDateien)}]sudo dnf install alacritty[/] (Fedora) oder\n" +
+                            $"[{Global.GetColor(Global.ColorPfadInDateien)}]sudo apt install alacritty[/] (Debian/Ubuntu)\n\n" +
+                            $"Oder führen Sie das Skript manuell aus:\n" +
+                            $"[{Global.GetColor(Global.ColorPfadInDateien)}]bash {updaterScript}[/]"))
+                            .Header("[red]Terminal fehlt[/]")
+                            .BorderColor(Color.Red)
+                            .Expand();
+                        AnsiConsole.Write(terminalWarning);
+                        Console.ReadKey();
+                        return configuration;
+                    }
+                    // gnome-terminal starten
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = "gnome-terminal",
+                        Arguments = $"--title=\"BKB-Tool Update\" -- bash -c '{updaterScript}'",
+                        UseShellExecute = false,
+                        WorkingDirectory = appDir
+                    });
 
-// gnome-terminal starten
-Process.Start(new ProcessStartInfo
-{
-    FileName = "gnome-terminal",
-    Arguments = $"--title=\"BKB-Tool Update\" -- bash -c '{updaterScript}'",
-    UseShellExecute = false,
-    WorkingDirectory = appDir
-});
-
-// Hauptprozess beenden, damit das Skript ersetzen kann
-Environment.Exit(0);
-return configuration; // unreachable
-// ...existing code...
+                    // Hauptprozess beenden, damit das Skript ersetzen kann
+                    Environment.Exit(0);
+                    return configuration; // unreachable
                 return configuration; // unreachable
             }
         }
