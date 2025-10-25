@@ -8,7 +8,6 @@
     <Authors>Stefan Bäumer</Authors>
     <Company>Berufskolleg Borken</Company>
     <Product>BKB-Tool</Product>
-    <!-- Icon für die Windows-EXE -->
     <ApplicationIcon>Icons\BKB-Tool.ico</ApplicationIcon>
     <Copyright>Copyright © 2025 Stefan Bäumer</Copyright>
   </PropertyGroup>
