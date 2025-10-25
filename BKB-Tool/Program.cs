@@ -264,7 +264,6 @@ $"NEW=\"{newPath}\"\n" +
 "echo \"Log: $LOG\"\n" +
 "echo\n" +
 "read -n1 -s -r -p \"Taste drücken, um dieses Fenster zu schließen ...\"; echo\n";
-// ...existing code...
 
 // Skript speichern und ausführbar machen
 File.WriteAllText(updaterScript, script, new System.Text.UTF8Encoding(false));
