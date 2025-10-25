@@ -274,88 +274,63 @@ Process.Start(new ProcessStartInfo
     UseShellExecute = false
 })?.WaitForExit();
 
+// ...existing code...
 AnsiConsole.MarkupLine($"[gray]Updater-Skript:[/] [bold {Global.GetColor(Global.ColorPfadInDateien)}]{updaterScript}[/]");
-// Skript speichern (UTF-8 ohne BOM) und ausführbar machen
 
-// In Terminal starten (sichtbar halten)
-string? terminal = null;
-string args;
-if (File.Exists("/usr/bin/x-terminal-emulator"))
+// Prüfen ob gnome-terminal verfügbar ist
+bool hasGnomeTerminal = false;
+try
 {
-    terminal = "/usr/bin/x-terminal-emulator";
-    args = $"-e bash -lc '\"{updaterScript}\"'";
+    var checkProcess = Process.Start(new ProcessStartInfo
+    {
+        FileName = "which",
+        Arguments = "gnome-terminal",
+        UseShellExecute = false,
+        RedirectStandardOutput = true,
+        CreateNoWindow = true
+    });
+    checkProcess?.WaitForExit();
+    hasGnomeTerminal = checkProcess?.ExitCode == 0;
 }
-else if (File.Exists("/usr/bin/gnome-terminal"))
+catch { }
+
+if (!hasGnomeTerminal)
 {
-    terminal = "/usr/bin/gnome-terminal";
-    args = $"--title=\"BKB-Tool Update\" -- bash -lc '\"{updaterScript}\"'";
-}
-else if (File.Exists("/usr/bin/kgx")) // GNOME Console
-{
-    terminal = "/usr/bin/kgx";
-    args = $"-- bash -lc '\"{updaterScript}\"'";
-}
-else if (File.Exists("/usr/bin/konsole"))
-{
-    terminal = "/usr/bin/konsole";
-    args = $"--new-tab --noclose -e bash -lc '\"{updaterScript}\"'";
-}
-else if (File.Exists("/usr/bin/xfce4-terminal"))
-{
-    terminal = "/usr/bin/xfce4-terminal";
-    args = $"--title=\"BKB-Tool Update\" --hold -e bash -lc '\"{updaterScript}\"'";
-}
-else if (File.Exists("/usr/bin/mate-terminal"))
-{
-    terminal = "/usr/bin/mate-terminal";
-    args = $"--title=\"BKB-Tool Update\" -- bash -lc '\"{updaterScript}\"'";
-}
-else if (File.Exists("/usr/bin/alacritty"))
-{
-    terminal = "/usr/bin/alacritty";
-    args = $"-t \"BKB-Tool Update\" -e bash -lc '\"{updaterScript}\"'";
-}
-else if (File.Exists("/usr/bin/xterm"))
-{
-    terminal = "/usr/bin/xterm";
-    args = $"-T \"BKB-Tool Update\" -hold -e bash -lc '\"{updaterScript}\"'";
-}
-else
-{
-    terminal = null;
-    args = $"\"{updaterScript}\"";
+    var terminalWarning = new Panel(new Markup(
+        $"[red]gnome-terminal ist nicht installiert.[/]\n\n" +
+        $"Das Update-Skript wurde erstellt:\n" +
+        $"[bold {Global.GetColor(Global.ColorPfadInDateien)}]{updaterScript}[/]\n\n" +
+        $"Installation von gnome-terminal:\n" +
+        $"[{Global.GetColor(Global.ColorPfadInDateien)}]sudo apt install gnome-terminal[/]\n\n" +
+        $"Oder führen Sie das Skript manuell aus:\n" +
+        $"[{Global.GetColor(Global.ColorPfadInDateien)}]bash {updaterScript}[/]"))
+        .Header("[red]Terminal fehlt[/]")
+        .BorderColor(Color.Red)
+        .Expand();
+    AnsiConsole.Write(terminalWarning);
+    Console.ReadKey();
+    return configuration;
 }
 
-if (terminal != null)
+// gnome-terminal starten
+Process.Start(new ProcessStartInfo
 {
-    Process.Start(new ProcessStartInfo
-    {
-        FileName = terminal,
-        Arguments = args,
-        UseShellExecute = false,
-        WorkingDirectory = appDir
-    });
-}
-else
-{
-    // Fallback: ohne eigenes Terminal (nicht sichtbar)
-    Process.Start(new ProcessStartInfo
-    {
-        FileName = "bash",
-        Arguments = args,
-        UseShellExecute = false,
-        WorkingDirectory = appDir
-    });
-}
+    FileName = "gnome-terminal",
+    Arguments = $"--title=\"BKB-Tool Update\" -- bash -c '{updaterScript}'",
+    UseShellExecute = false,
+    WorkingDirectory = appDir
+});
 
 // Hauptprozess beenden, damit das Skript ersetzen kann
 Environment.Exit(0);
-                    return configuration; // unreachable
-                }
+return configuration; // unreachable
+// ...existing code...
+                return configuration; // unreachable
             }
         }
-        else
-        {
+    }
+    else
+{
             string updaterPath = Path.Combine(Directory.GetCurrentDirectory(), "BKB-Tool-autoupdater.bat");
             if (File.Exists(updaterPath)) File.Delete(updaterPath);
         }
