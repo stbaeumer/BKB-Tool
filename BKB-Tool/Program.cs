@@ -146,7 +146,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
 
         string githubVersionClean = githubVersion?.TrimStart('v', 'V');
         string lokaleVersionClean = lokaleVersion?.TrimStart('v', 'V');
-        
+
         string os = OperatingSystem.IsWindows() ? "Windows" : OperatingSystem.IsLinux() ? "Linux" : OperatingSystem.IsMacOS() ? "macOS" : "Unknown";
 
         if (Version.TryParse(githubVersionClean, out var githubVer) && Version.TryParse(lokaleVersionClean, out var lokalVer))
@@ -222,143 +222,135 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                         });
                     }
 
-                    // 4) Updater-Skript schreiben und starten
-                    // Eindeutiger Temp-Dateiname
-                    string updaterScript = Path.Combine(Path.GetTempPath(), $"bkb-tool-selfupdate-{Guid.NewGuid():N}.sh");
-                    string script = $@"#!/usr/bin/env bash
-                    set -euo pipefail
-                    # Bei Fehler: sichtbar pausieren
-                    trap 'echo; echo ""Es ist ein Fehler aufgetreten.""; read -n1 -s -r -p ""Taste drücken, um dieses Fenster zu schließen ...""; echo' ERR
+                    
+// Im gleichen Ordner wie das AppImage speichern (sichtbar/prüfbar)
+string updaterScript = Path.Combine(appDir, "BKB-Tool-update.sh");
+string script = "#!/usr/bin/env bash\n" +
+"set -euo pipefail\n" +
+"trap 'echo; echo \"Es ist ein Fehler aufgetreten.\"; read -n1 -s -r -p \"Taste drücken, um dieses Fenster zu schließen ...\"; echo' ERR\n" +
+$"APP=\"{appImagePath}\"\n" +
+$"NEW=\"{newPath}\"\n" +
+"DIR=\"$(dirname \"$APP\")\"\n" +
+"LOG=\"$DIR/BKB-Tool-update.log\"\n" +
+"echo \"[$(date)] Selfupdate gestartet. APP=$APP NEW=$NEW\" | tee -a \"$LOG\"\n" +
+"# Kurz warten, bis die App beendet ist\n" +
+"sleep 1\n" +
+"# Warten bis Prozess beendet\n" +
+"n=0\n" +
+"while pgrep -f \"BKB-Tool.*AppImage\" >/dev/null 2>&1; do\n" +
+"  echo \"[$(date)] BKB-Tool läuft noch...\" | tee -a \"$LOG\"\n" +
+"  sleep 1\n" +
+"  n=$((n+1))\n" +
+"  if [ $n -gt 120 ]; then\n" +
+"    echo \"Timeout: BKB-Tool beendet sich nicht.\" | tee -a \"$LOG\"\n" +
+"    echo\n" +
+"    read -n1 -s -r -p \"Taste drücken, um dieses Fenster zu schließen ...\"; echo\n" +
+"    exit 1\n" +
+"  fi\n" +
+"done\n" +
+"if [ ! -f \"$NEW\" ]; then\n" +
+"  echo \"Fehler: Update-Datei fehlt: $NEW\" | tee -a \"$LOG\"\n" +
+"  echo\n" +
+"  read -n1 -s -r -p \"Taste drücken, um dieses Fenster zu schließen ...\"; echo\n" +
+"  exit 1\n" +
+"fi\n" +
+"echo \"Ersetze alte Version...\" | tee -a \"$LOG\"\n" +
+"mv -f \"$NEW\" \"$APP\"\n" +
+"chmod +x \"$APP\"\n" +
+"echo \"Starte neue Version...\" | tee -a \"$LOG\"\n" +
+"nohup \"$APP\" >/dev/null 2>&1 &\n" +
+"echo\n" +
+"echo \"Update abgeschlossen.\"\n" +
+"echo \"Log: $LOG\"\n" +
+"echo\n" +
+"read -n1 -s -r -p \"Taste drücken, um dieses Fenster zu schließen ...\"; echo\n";
+// ...existing code...
 
-                    APP=""{appImagePath}""
-                    NEW=""{newPath}""
-                    DIR=""$(dirname ""$APP"")""
-                    LOG=""$DIR/BKB-Tool-update.log""
+// Skript speichern und ausführbar machen
+File.WriteAllText(updaterScript, script, new System.Text.UTF8Encoding(false));
+Process.Start(new ProcessStartInfo
+{
+    FileName = "chmod",
+    Arguments = $"+x \"{updaterScript}\"",
+    UseShellExecute = false
+})?.WaitForExit();
 
-                    echo ""[$(date)] Selfupdate gestartet. APP=$APP NEW=$NEW"" | tee -a ""$LOG""
+AnsiConsole.MarkupLine($"[gray]Updater-Skript:[/] [bold {Global.GetColor(Global.ColorPfadInDateien)}]{updaterScript}[/]");
+// Skript speichern (UTF-8 ohne BOM) und ausführbar machen
 
-                    # Kurz warten, bis die App beendet ist
-                    sleep 1
+// In Terminal starten (sichtbar halten)
+string? terminal = null;
+string args;
+if (File.Exists("/usr/bin/x-terminal-emulator"))
+{
+    terminal = "/usr/bin/x-terminal-emulator";
+    args = $"-e bash -lc '\"{updaterScript}\"'";
+}
+else if (File.Exists("/usr/bin/gnome-terminal"))
+{
+    terminal = "/usr/bin/gnome-terminal";
+    args = $"--title=\"BKB-Tool Update\" -- bash -lc '\"{updaterScript}\"'";
+}
+else if (File.Exists("/usr/bin/kgx")) // GNOME Console
+{
+    terminal = "/usr/bin/kgx";
+    args = $"-- bash -lc '\"{updaterScript}\"'";
+}
+else if (File.Exists("/usr/bin/konsole"))
+{
+    terminal = "/usr/bin/konsole";
+    args = $"--new-tab --noclose -e bash -lc '\"{updaterScript}\"'";
+}
+else if (File.Exists("/usr/bin/xfce4-terminal"))
+{
+    terminal = "/usr/bin/xfce4-terminal";
+    args = $"--title=\"BKB-Tool Update\" --hold -e bash -lc '\"{updaterScript}\"'";
+}
+else if (File.Exists("/usr/bin/mate-terminal"))
+{
+    terminal = "/usr/bin/mate-terminal";
+    args = $"--title=\"BKB-Tool Update\" -- bash -lc '\"{updaterScript}\"'";
+}
+else if (File.Exists("/usr/bin/alacritty"))
+{
+    terminal = "/usr/bin/alacritty";
+    args = $"-t \"BKB-Tool Update\" -e bash -lc '\"{updaterScript}\"'";
+}
+else if (File.Exists("/usr/bin/xterm"))
+{
+    terminal = "/usr/bin/xterm";
+    args = $"-T \"BKB-Tool Update\" -hold -e bash -lc '\"{updaterScript}\"'";
+}
+else
+{
+    terminal = null;
+    args = $"\"{updaterScript}\"";
+}
 
-                    # Warten bis Prozess beendet
-                    n=0
-                    while pgrep -f ""BKB-Tool.*AppImage"" >/dev/null 2>&1; do
-                    echo ""[$(date)] BKB-Tool läuft noch..."" | tee -a ""$LOG""
-                    sleep 1
-                    n=$((n+1))
-                    if [ $n -gt 120 ]; then
-                        echo ""Timeout: BKB-Tool beendet sich nicht."" | tee -a ""$LOG""
-                        echo
-                        read -n1 -s -r -p ""Taste drücken, um dieses Fenster zu schließen ...""; echo
-                        exit 1
-                    fi
-                    done
+if (terminal != null)
+{
+    Process.Start(new ProcessStartInfo
+    {
+        FileName = terminal,
+        Arguments = args,
+        UseShellExecute = false,
+        WorkingDirectory = appDir
+    });
+}
+else
+{
+    // Fallback: ohne eigenes Terminal (nicht sichtbar)
+    Process.Start(new ProcessStartInfo
+    {
+        FileName = "bash",
+        Arguments = args,
+        UseShellExecute = false,
+        WorkingDirectory = appDir
+    });
+}
 
-                    if [ ! -f ""$NEW"" ]; then
-                    echo ""Fehler: Update-Datei fehlt: $NEW"" | tee -a ""$LOG""
-                    echo
-                    read -n1 -s -r -p ""Taste drücken, um dieses Fenster zu schließen ...""; echo
-                    exit 1
-                    fi
-
-                    echo ""Ersetze alte Version..."" | tee -a ""$LOG""
-                    mv -f ""$NEW"" ""$APP""
-                    chmod +x ""$APP""
-
-                    echo ""Starte neue Version..."" | tee -a ""$LOG""
-                    nohup ""$APP"" >/dev/null 2>&1 &
-
-                    echo
-                    echo ""Update abgeschlossen.""
-                    echo ""Log: $LOG""
-                    echo
-                    read -n1 -s -r -p ""Taste drücken, um dieses Fenster zu schließen ...""; echo
-
-                    # Skript entfernt sich selbst
-                    rm -- ""$0""
-                    ";
-
-                    // Skript speichern (UTF-8 ohne BOM) und ausführbar machen
-                    File.WriteAllText(updaterScript, script.Replace("\r\n", "\n"), new System.Text.UTF8Encoding(false));
-                    Process.Start(new ProcessStartInfo
-                    {
-                        FileName = "chmod",
-                        Arguments = $"+x \"{updaterScript}\"",
-                        UseShellExecute = false
-                    })?.WaitForExit();
-
-                    // In Terminal starten (sichtbar halten)
-                    string? terminal = null;
-                    string args;
-                    if (File.Exists("/usr/bin/gnome-terminal"))
-                    {
-                        terminal = "/usr/bin/gnome-terminal";
-                        args = $"--title=\"BKB-Tool Update\" -- bash -lc '\"{updaterScript}\"'";
-                    }
-                    else if (File.Exists("/usr/bin/kgx")) // GNOME Console
-                    {
-                        terminal = "/usr/bin/kgx";
-                        args = $"-- bash -lc '\"{updaterScript}\"'";
-                    }
-                    else if (File.Exists("/usr/bin/konsole"))
-                    {
-                        terminal = "/usr/bin/konsole";
-                        args = $"--new-tab --noclose -e bash -lc '\"{updaterScript}\"'";
-                    }
-                    else if (File.Exists("/usr/bin/xfce4-terminal"))
-                    {
-                        terminal = "/usr/bin/xfce4-terminal";
-                        args = $"--title=\"BKB-Tool Update\" --hold -e bash -lc '\"{updaterScript}\"'";
-                    }
-                    else if (File.Exists("/usr/bin/mate-terminal"))
-                    {
-                        terminal = "/usr/bin/mate-terminal";
-                        // FIX: korrekt escapen, keine doppelten "" im C#-String
-                        args = $"--title=\"BKB-Tool Update\" -- bash -lc '\"{updaterScript}\"'";
-                    }
-                    else if (File.Exists("/usr/bin/alacritty"))
-                    {
-                        terminal = "/usr/bin/alacritty";
-                        args = $"-t \"BKB-Tool Update\" -e bash -lc '\"{updaterScript}\"'";
-                    }
-                    else if (File.Exists("/usr/bin/xterm"))
-                    {
-                        terminal = "/usr/bin/xterm";
-                        args = $"-T \"BKB-Tool Update\" -hold -e bash -lc '\"{updaterScript}\"'";
-                    }
-                    else if (File.Exists("/usr/bin/x-terminal-emulator"))
-                    {
-                        terminal = "/usr/bin/x-terminal-emulator";
-                        args = $"-e bash -lc '\"{updaterScript}\"'";
-                    }
-                    else
-                    {
-                        terminal = null;
-                        args = $"\"{updaterScript}\"";
-                    }
-
-                    if (terminal != null)
-                    {
-                        Process.Start(new ProcessStartInfo
-                        {
-                            FileName = terminal,
-                            Arguments = args,
-                            UseShellExecute = false
-                        });
-                    }
-                    else
-                    {
-                        // Fallback: ohne eigenes Terminal (unsichtbar)
-                        Process.Start(new ProcessStartInfo
-                        {
-                            FileName = "bash",
-                            Arguments = args,
-                            UseShellExecute = false
-                        });
-                    }
-
-                    // Hauptprozess beenden, damit das Skript ersetzen kann
-                    Environment.Exit(0);
+// Hauptprozess beenden, damit das Skript ersetzen kann
+Environment.Exit(0);
                     return configuration; // unreachable
                 }
             }
