@@ -146,6 +146,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
 
         string githubVersionClean = githubVersion?.TrimStart('v', 'V');
         string lokaleVersionClean = lokaleVersion?.TrimStart('v', 'V');
+        
         string os = OperatingSystem.IsWindows() ? "Windows" : OperatingSystem.IsLinux() ? "Linux" : OperatingSystem.IsMacOS() ? "macOS" : "Unknown";
 
         if (Version.TryParse(githubVersionClean, out var githubVer) && Version.TryParse(lokaleVersionClean, out var lokalVer))
