@@ -119,16 +119,18 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
     {
         string lokaleVersion = Global.AppVersion ?? "0.1";
         string apiUrl = "https://api.github.com/repos/stbaeumer/BKB-Tool/releases";
-        var client = new System.Net.WebClient();
+        using var client = new System.Net.WebClient();
         client.Headers.Add("User-Agent", "request");
         string json = client.DownloadString(apiUrl);
 
         using var doc = System.Text.Json.JsonDocument.Parse(json);
         var releases = doc.RootElement.EnumerateArray();
         string githubVersion = null;
+
         configuration = Global.Konfig("Schulnummer", Global.Modus.ReadSilent, configuration);
         bool allowPrerelease = configuration["Schulnummer"] == "000000";
 
+        System.Text.Json.JsonElement? selectedRelease = null;
         foreach (var release in releases)
         {
             if (!release.GetProperty("draft").GetBoolean())
@@ -137,6 +139,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                 if (allowPrerelease || !isPrerelease)
                 {
                     githubVersion = release.GetProperty("tag_name").GetString();
+                    selectedRelease = release;
                     break;
                 }
             }
@@ -148,100 +151,122 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
 
         if (Version.TryParse(githubVersionClean, out var githubVer) && Version.TryParse(lokaleVersionClean, out var lokalVer))
         {
-            if (true)
-            //if (githubVer > lokalVer)
+            if (githubVer > lokalVer)
             {
                 Global.DisplayHeader(configuration);
 
-                var panelUpdate = new Panel(new Markup($"Ein Update auf {os}-Version [tan]{githubVersion}[/] ist verfügbar. Drücken Sie eine [{Global.GetColor(Global.ColorActionInMenüs)} bold]beliebige Taste[/], um das Update zu starten."))
+                var updatePanel = new Panel(new Markup($"Ein Update auf {os}-Version [tan]{githubVersionClean}[/] ist verfügbar. Drücken Sie eine [{Global.GetColor(Global.ColorActionInMenüs)} bold]beliebige Taste[/], um das Update zu starten."))
                     .BorderStyle(new Style(Color.Red))
                     .Expand();
-                AnsiConsole.Write(panelUpdate);
+                AnsiConsole.Write(updatePanel);
+                Console.ReadKey(true);
 
-                Console.ReadKey();
-
-                // Linux: AppImageUpdate verwenden
                 if (os == "Linux")
                 {
+                    if (selectedRelease is null)
+                    {
+                        AnsiConsole.MarkupLine("[red]Fehler: Release nicht gefunden.[/]");
+                        return configuration;
+                    }
+
+                    // 1) Download-URL für AppImage finden (Name exakt: BKB-Tool.AppImage)
+                    string downloadUrl = null;
+                    foreach (var asset in selectedRelease.Value.GetProperty("assets").EnumerateArray())
+                    {
+                        var name = asset.GetProperty("name").GetString();
+                        if (string.Equals(name, "BKB-Tool.AppImage", StringComparison.OrdinalIgnoreCase))
+                        {
+                            downloadUrl = asset.GetProperty("browser_download_url").GetString();
+                            break;
+                        }
+                    }
+
+                    if (string.IsNullOrEmpty(downloadUrl))
+                    {
+                        AnsiConsole.MarkupLine("[red]Fehler: BKB-Tool.AppImage im Release nicht gefunden.[/]");
+                        return configuration;
+                    }
+
+                    // 2) Zielpfade bestimmen
                     string appImagePath = Environment.GetEnvironmentVariable("APPIMAGE");
-                    
                     if (string.IsNullOrEmpty(appImagePath))
                     {
-                        AnsiConsole.MarkupLine("[red]Fehler: Keine AppImage-Umgebung erkannt.[/]");
+                        // Fallback: im aktuellen Ordner nach BKB-Tool.AppImage oder BKB-Tool*.AppImage suchen
+                        var guess = Path.Combine(Directory.GetCurrentDirectory(), "BKB-Tool.AppImage");
+                        if (File.Exists(guess))
+                            appImagePath = guess;
+                        else
+                            appImagePath = Directory.GetFiles(Directory.GetCurrentDirectory(), "BKB-Tool*.AppImage").FirstOrDefault() ?? "";
+                    }
+                    if (string.IsNullOrEmpty(appImagePath) || !File.Exists(appImagePath))
+                    {
+                        AnsiConsole.MarkupLine("[red]Fehler: Laufendes AppImage nicht ermittelt. Starten Sie BKB-Tool als AppImage und versuchen Sie es erneut.[/]");
                         return configuration;
                     }
 
-                    // Prüfen ob AppImageUpdate verfügbar ist
-                    bool hasAppImageUpdate = false;
-                    try
+                    string appDir = Path.GetDirectoryName(appImagePath) ?? Directory.GetCurrentDirectory();
+                    string newPath = Path.Combine(appDir, "BKB-Tool_neu.AppImage");
+
+                    // 3) Neue Version herunterladen (mit Fortschritt)
+                    using (var wc = new System.Net.WebClient())
                     {
-                        var checkProcess = Process.Start(new ProcessStartInfo
+                        wc.Headers.Add("User-Agent", "request");
+                        AnsiConsole.Progress().Start(ctx =>
                         {
-                            FileName = "which",
-                            Arguments = "AppImageUpdate",
-                            UseShellExecute = false,
-                            RedirectStandardOutput = true
+                            var task = ctx.AddTask("Lade Update herunter");
+                            var mre = new System.Threading.ManualResetEvent(false);
+                            wc.DownloadProgressChanged += (_, e) => task.Value = e.ProgressPercentage;
+                            wc.DownloadFileCompleted += (_, __) => { task.Value = 100; mre.Set(); };
+                            wc.DownloadFileAsync(new Uri(downloadUrl), newPath);
+                            mre.WaitOne();
                         });
-                        checkProcess?.WaitForExit();
-                        hasAppImageUpdate = checkProcess?.ExitCode == 0;
-                    }
-                    catch { }
-
-                    if (!hasAppImageUpdate)
-                    {
-                        var panelAppImageUpdate = new Panel(new Markup(
-                            $"[red]AppImageUpdate ist nicht installiert.[/]\n\n" +
-                            $"Installation:\n" +
-                            $"[{Global.GetColor(Global.ColorPfadInDateien)}]sudo apt install appimageupdatetool[/]\n\n" +
-                            $"oder über [link=https://flathub.org/apps/de.toolgear.GearLever]Gear Lever[/]"))
-                            .Header("[red]AppImageUpdate fehlt[/]")
-                            .BorderColor(Color.Red)
-                            .Expand();
-                        AnsiConsole.Write(panelAppImageUpdate);
-                        Console.ReadKey();
-                        return configuration;
                     }
 
-                    // Updater-Skript erstellen
-                    string updaterScript = Path.Combine(Path.GetTempPath(), "bkb-tool-update.sh");
-                    string script = $@"#!/bin/bash
-set -e
-LOG=""{Path.Combine(Path.GetDirectoryName(appImagePath) ?? "/tmp", "BKB-Tool-update.log")}""
+                    // 4) Updater-Skript schreiben und starten
+                    string updaterScript = Path.Combine(Path.GetTempPath(), "bkb-tool-selfupdate.sh");
+                    string script = $@"#!/usr/bin/env bash
+set -euo pipefail
 
-echo ""[$(date)] Update gestartet"" >> ""$LOG""
-echo ""Warte auf Beenden von BKB-Tool...""
+APP=""{appImagePath}""
+NEW=""{newPath}""
+DIR=""$(dirname ""$APP"")""
+LOG=""$DIR/BKB-Tool-update.log""
 
-# Warte bis Prozess beendet ist
+echo ""[$(date)] Selfupdate gestartet. APP=$APP NEW=$NEW"" >>""$LOG""
+
+# Kurz warten, bis die App beendet ist
+sleep 1
+
+# Warten bis Prozess beendet
+n=0
 while pgrep -f ""BKB-Tool.*AppImage"" >/dev/null 2>&1; do
   sleep 1
+  n=$((n+1))
+  if [ $n -gt 120 ]; then
+    echo ""Timeout: BKB-Tool beendet sich nicht."" | tee -a ""$LOG""
+    exit 1
+  fi
 done
 
-echo ""Starte AppImageUpdate..."" | tee -a ""$LOG""
-cd ""$(dirname ""{appImagePath}"")""
-
-# AppImageUpdate ausführen
-if AppImageUpdate ""{appImagePath}"" 2>&1 | tee -a ""$LOG""; then
-  # Update erfolgreich: .new → alte Datei ersetzen
-  if [[ -f ""{appImagePath}.new"" ]]; then
-    mv -f ""{appImagePath}.new"" ""{appImagePath}""
-    chmod +x ""{appImagePath}""
-    echo ""Update erfolgreich installiert."" | tee -a ""$LOG""
-    
-    echo ""Starte neue Version...""
-    nohup ""{appImagePath}"" >/dev/null 2>&1 &
-  else
-    echo ""Fehler: {appImagePath}.new nicht gefunden."" | tee -a ""$LOG""
-  fi
-else
-  echo ""AppImageUpdate fehlgeschlagen."" | tee -a ""$LOG""
+if [ ! -f ""$NEW"" ]; then
+  echo ""Fehler: Update-Datei fehlt: $NEW"" | tee -a ""$LOG""
+  exit 1
 fi
 
-# Skript löscht sich selbst
+# Ersetzen
+mv -f ""$NEW"" ""$APP""
+chmod +x ""$APP""
+
+echo ""Starte neue Version..."" | tee -a ""$LOG""
+nohup ""$APP"" >/dev/null 2>&1 &
+
+# Skript entfernt sich selbst
 rm -- ""$0""
 ";
 
+                    // LF + UTF8 ohne BOM schreiben
                     File.WriteAllText(updaterScript, script.Replace("\r\n", "\n"), new System.Text.UTF8Encoding(false));
-                    
+
                     // Ausführbar machen
                     Process.Start(new ProcessStartInfo
                     {
@@ -250,7 +275,7 @@ rm -- ""$0""
                         UseShellExecute = false
                     })?.WaitForExit();
 
-                    // Updater in neuem Terminal starten
+                    // In Terminal starten (wenn vorhanden), sonst direkt
                     string? terminal = null;
                     if (File.Exists("/usr/bin/gnome-terminal")) terminal = "/usr/bin/gnome-terminal";
                     else if (File.Exists("/usr/bin/konsole")) terminal = "/usr/bin/konsole";
@@ -259,7 +284,7 @@ rm -- ""$0""
                     if (terminal != null)
                     {
                         var args = terminal.Contains("gnome-terminal")
-                            ? $"-- bash -c '\"{updaterScript}\"; read -n1 -s -p \"Update abgeschlossen. Drücken Sie eine Taste...\"'"
+                            ? $"-- bash -c '\"{updaterScript}\"; read -n1 -s -p \"Update abgeschlossen. Taste drücken...\"'"
                             : terminal.Contains("konsole")
                                 ? $"--noclose -e bash -c '\"{updaterScript}\"'"
                                 : $"-hold -e bash -c '\"{updaterScript}\"'";
@@ -270,43 +295,37 @@ rm -- ""$0""
                             Arguments = args,
                             UseShellExecute = false
                         });
-
-                        AnsiConsole.MarkupLine("[yellow]Update läuft in neuem Terminal...[/]");
-                        System.Threading.Thread.Sleep(1000);
-                        Environment.Exit(0);
                     }
                     else
                     {
-                        // Fallback: Hintergrund
                         Process.Start(new ProcessStartInfo
                         {
                             FileName = "bash",
-                            Arguments = updaterScript,
+                            Arguments = $"\"{updaterScript}\"",
                             UseShellExecute = false
                         });
-                        Environment.Exit(0);
                     }
 
-                    return configuration;
+                    // Hauptprozess beenden, damit das Skript ersetzen kann
+                    Environment.Exit(0);
+                    return configuration; // unreachable
                 }
 
-                // Windows: Bisheriger Code
-                string downloadUrl = null;
-                foreach (var asset in releases
-                    .First(r => !r.GetProperty("draft").GetBoolean() && (allowPrerelease || !r.GetProperty("prerelease").GetBoolean()))
-                    .GetProperty("assets").EnumerateArray())
+                // Windows: unverändert (Download + .bat Updater)
+                string downloadUrlWin = null;
+                foreach (var asset in selectedRelease.Value.GetProperty("assets").EnumerateArray())
                 {
                     var name = asset.GetProperty("name").GetString();
                     if (name != null && name.Equals("BKB-Tool.exe", StringComparison.OrdinalIgnoreCase))
                     {
-                        downloadUrl = asset.GetProperty("browser_download_url").GetString();
+                        downloadUrlWin = asset.GetProperty("browser_download_url").GetString();
                         break;
                     }
                 }
 
-                if (string.IsNullOrEmpty(downloadUrl))
+                if (string.IsNullOrEmpty(downloadUrlWin))
                 {
-                    AnsiConsole.MarkupLine($"[red]Fehler: BKB-Tool.exe im Release nicht gefunden.[/]");
+                    AnsiConsole.MarkupLine("[red]Fehler: BKB-Tool.exe im Release nicht gefunden.[/]");
                     return configuration;
                 }
 
@@ -315,16 +334,15 @@ rm -- ""$0""
                 using (var webClient = new System.Net.WebClient())
                 {
                     webClient.Headers.Add("User-Agent", "request");
-                    AnsiConsole.Progress()
-                        .Start(ctx =>
-                        {
-                            var task = ctx.AddTask("Lade Update herunter ");
-                            webClient.DownloadProgressChanged += (s, e) => task.Value = e.ProgressPercentage;
-                            var downloadCompleted = new System.Threading.ManualResetEvent(false);
-                            webClient.DownloadFileCompleted += (s, e) => { task.Value = 100; downloadCompleted.Set(); };
-                            webClient.DownloadFileAsync(new Uri(downloadUrl), zielDatei);
-                            downloadCompleted.WaitOne();
-                        });
+                    AnsiConsole.Progress().Start(ctx =>
+                    {
+                        var task = ctx.AddTask("Lade Update herunter");
+                        var mre = new System.Threading.ManualResetEvent(false);
+                        webClient.DownloadProgressChanged += (_, e) => task.Value = e.ProgressPercentage;
+                        webClient.DownloadFileCompleted += (_, __) => { task.Value = 100; mre.Set(); };
+                        webClient.DownloadFileAsync(new Uri(downloadUrlWin), zielDatei);
+                        mre.WaitOne();
+                    });
                 }
 
                 string updaterPath = Path.Combine(Directory.GetCurrentDirectory(), "BKB-Tool-autoupdater.bat");
@@ -359,11 +377,11 @@ rm -- ""$0""
                     "start \"\" BKB-Tool.exe\n" +
                     "exit\n");
 
-                var panel = new Panel($"Mit [{Global.GetColor(Global.ColorActionInMenüs)} bold]ENTER[/] wird jetzt in die Version v{githubVer} neugestartet.")
+                var panelWin = new Panel($"Mit [{Global.GetColor(Global.ColorActionInMenüs)} bold]ENTER[/] wird jetzt in die Version {githubVer} neugestartet.")
                     .Header("[bold green]  Update erfolgreich  [/]")
                     .BorderColor(Global.ColorActionInMenüs)
                     .Expand();
-                AnsiConsole.Write(panel);
+                AnsiConsole.Write(panelWin);
 
                 while (Console.KeyAvailable) Console.ReadKey(true);
                 Console.ReadKey();
