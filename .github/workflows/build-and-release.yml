@@ -96,6 +96,18 @@ jobs:
           Write-Host "Version: $version"
         }
     
+    - name: Get commit message
+      id: commit_msg
+      shell: pwsh
+      run: |
+        $msg = git log -1 --pretty=%B
+        # Wenn die Nachricht "[skip ci]" oder "chore: bump version" enthält, nehme die vorherige
+        if ($msg -match "\[skip ci\]" -or $msg -match "chore: bump version") {
+          $msg = git log -2 --pretty=%B --skip=1 | Select-Object -First 1
+        }
+        Write-Output "message=$msg" >> $env:GITHUB_OUTPUT
+        Write-Host "Commit message: $msg"
+    
     - name: Commit version bump
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
@@ -193,7 +205,18 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         tag_name: ${{ steps.get_version.outputs.version }}
-        name: Release ${{ steps.get_version.outputs.version }} (Beta)
+        name: Version ${{ steps.get_version.outputs.version }}
+        body: |
+          **Version ${{ steps.get_version.outputs.version }}** (Beta)
+          
+          ${{ steps.commit_msg.outputs.message }}
+          
+          ---
+          
+          **Downloads:**
+          - `BKB-Tool.exe` - Windows x64
+          - `BKB-Tool.AppImage` - Linux x64 (benötigt gnome-terminal oder alacritty)
+          - `BKB-Tool.AppImage.zsync` - für Gear Lever Updates
         draft: false
         prerelease: true
         files: |
