@@ -351,10 +351,10 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                     Environment.Exit(0);
                     return configuration; // unreachable
                 }
+            }
         }
-    }
-    else
-{
+        else
+        {
             string updaterPath = Path.Combine(Directory.GetCurrentDirectory(), "BKB-Tool-autoupdater.bat");
             if (File.Exists(updaterPath)) File.Delete(updaterPath);
         }
