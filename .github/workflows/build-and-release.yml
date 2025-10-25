@@ -213,7 +213,7 @@ jobs:
           
           ---
           
-          **Downloads:**
+          **Assets - Downloads:**
           - `BKB-Tool.exe` - Windows x64
           - `BKB-Tool.AppImage` - Linux x64
           - `BKB-Tool.AppImage.zsync` - für Linux-AppImage-Updates

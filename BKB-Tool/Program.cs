@@ -347,10 +347,10 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                                 UseShellExecute = false,
                                 WorkingDirectory = appDir
                             };
-                            psi.ArgumentList.Add("--wait");
-                            psi.ArgumentList.Add("--");
-                            psi.ArgumentList.Add("bash");
-                            psi.ArgumentList.Add(updaterScript);
+                            //psi.ArgumentList.Add("--wait");
+                            //psi.ArgumentList.Add("--");
+                            //psi.ArgumentList.Add("bash");
+                            //psi.ArgumentList.Add(updaterScript);
                             Process.Start(psi);
                         }
                     }
@@ -438,7 +438,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                         "start \"\" \"BKB-Tool.exe\"",
                         "echo.",
                         "echo Fertig.",
-                        "pause",
+                        // entfernt: "pause",
                         "exit /b 0"
                     });
                     File.WriteAllText(updaterPath, bat, System.Text.Encoding.ASCII);
