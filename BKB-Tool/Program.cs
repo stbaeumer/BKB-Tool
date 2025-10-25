@@ -329,7 +329,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                             Process.Start("bash", new[]
                             {
                                 "-c",
-                                $"alacritty -t 'BKB-Tool Update' -e bash '{updaterScript}' &"
+                                $"alacritty -t 'BKB-Tool Update' -e bash '{updaterScript}' & disown"
                             });
                         }
                         else
@@ -337,7 +337,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                             Process.Start("bash", new[]
                             {
                                 "-c",
-                                $"gnome-terminal --wait -- bash '{updaterScript}' &"
+                                $"gnome-terminal --wait -- bash '{updaterScript}' & disown"
                             });
                         }
                     }
