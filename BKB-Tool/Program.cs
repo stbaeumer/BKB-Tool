@@ -276,7 +276,15 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                     # Skript entfernt sich selbst
                     rm -- ""$0""
                     ";
-                    // ...existing code...
+
+                    // Skript speichern (UTF-8 ohne BOM) und ausführbar machen
+                    File.WriteAllText(updaterScript, script.Replace("\r\n", "\n"), new System.Text.UTF8Encoding(false));
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = "chmod",
+                        Arguments = $"+x \"{updaterScript}\"",
+                        UseShellExecute = false
+                    })?.WaitForExit();
 
                     // In Terminal starten (sichtbar halten)
                     string? terminal = null;
@@ -304,7 +312,8 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                     else if (File.Exists("/usr/bin/mate-terminal"))
                     {
                         terminal = "/usr/bin/mate-terminal";
-                        args = $"--title=""BKB-Tool Update"" -- bash -lc '\"{updaterScript}\"'";
+                        // FIX: korrekt escapen, keine doppelten "" im C#-String
+                        args = $"--title=\"BKB-Tool Update\" -- bash -lc '\"{updaterScript}\"'";
                     }
                     else if (File.Exists("/usr/bin/alacritty"))
                     {
@@ -338,7 +347,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                     }
                     else
                     {
-                        // Fallback: ohne eigenes Terminal (nicht sichtbar), vermeidet aber Abbruch
+                        // Fallback: ohne eigenes Terminal (unsichtbar)
                         Process.Start(new ProcessStartInfo
                         {
                             FileName = "bash",
