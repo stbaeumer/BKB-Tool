@@ -332,11 +332,11 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                                 UseShellExecute = false,
                                 WorkingDirectory = appDir
                             };
-                            psi.ArgumentList.Add("-t");
+                            /*psi.ArgumentList.Add("-t");
                             psi.ArgumentList.Add("BKB-Tool Update");
                             psi.ArgumentList.Add("-e");
                             psi.ArgumentList.Add("bash");
-                            psi.ArgumentList.Add(updaterScript);
+                            psi.ArgumentList.Add(updaterScript);*/
                             Process.Start(psi);
                         }
                         else
