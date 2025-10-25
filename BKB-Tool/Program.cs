@@ -105,6 +105,7 @@ do
     }    
 } while (true);
 
+// ...existing code...
 IConfiguration CheckForUpdate(IConfiguration configuration)
 {
     if (Global.RunningInCodeSpace())
@@ -190,7 +191,6 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                     string appImagePath = Environment.GetEnvironmentVariable("APPIMAGE");
                     if (string.IsNullOrEmpty(appImagePath))
                     {
-                        // Fallback: im aktuellen Ordner nach BKB-Tool.AppImage oder BKB-Tool*.AppImage suchen
                         var guess = Path.Combine(Directory.GetCurrentDirectory(), "BKB-Tool.AppImage");
                         if (File.Exists(guess))
                             appImagePath = guess;
@@ -220,8 +220,8 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                             mre.WaitOne();
                         });
                     }
-                                        
-                    // Im gleichen Ordner wie das AppImage speichern (sichtbar/prüfbar)
+
+                    // Updater-Skript schreiben (sichtbar, bleibt erhalten)
                     string updaterScript = Path.Combine(appDir, "BKB-Tool-update.sh");
                     string script = "#!/usr/bin/env bash\n" +
                     "set -euo pipefail\n" +
@@ -231,9 +231,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                     "DIR=\"$(dirname \"$APP\")\"\n" +
                     "LOG=\"$DIR/BKB-Tool-update.log\"\n" +
                     "echo \"[$(date)] Selfupdate gestartet. APP=$APP NEW=$NEW\" | tee -a \"$LOG\"\n" +
-                    "# Kurz warten, bis die App beendet ist\n" +
                     "sleep 1\n" +
-                    "# Warten bis Prozess beendet\n" +
                     "n=0\n" +
                     "while pgrep -f \"BKB-Tool.*AppImage\" >/dev/null 2>&1; do\n" +
                     "  echo \"[$(date)] BKB-Tool läuft noch...\" | tee -a \"$LOG\"\n" +
@@ -263,7 +261,6 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                     "echo\n" +
                     "read -n1 -s -r -p \"Taste drücken, um dieses Fenster zu schließen ...\"; echo\n";
 
-                    // Skript speichern und ausführbar machen
                     File.WriteAllText(updaterScript, script, new System.Text.UTF8Encoding(false));
                     Process.Start(new ProcessStartInfo
                     {
@@ -274,6 +271,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
 
                     AnsiConsole.MarkupLine($"[gray]Updater-Skript:[/] [bold {Global.GetColor(Global.ColorPfadInDateien)}]{updaterScript}[/]");
 
+                    // Terminal-Erkennung: alacritty > gnome-terminal
                     bool hasAlacritty = false;
                     bool hasGnomeTerminal = false;
                     try
@@ -323,7 +321,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                         Console.ReadKey();
                         return configuration;
                     }
-                    
+
                     try
                     {
                         if (hasAlacritty)
@@ -338,7 +336,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                             psi.ArgumentList.Add("BKB-Tool Update");
                             psi.ArgumentList.Add("-e");
                             psi.ArgumentList.Add("bash");
-                            psi.ArgumentList.Add(updaterScript); // kein -c, Skript direkt
+                            psi.ArgumentList.Add(updaterScript);
                             Process.Start(psi);
                         }
                         else
@@ -349,7 +347,6 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                                 UseShellExecute = false,
                                 WorkingDirectory = appDir
                             };
-                            // gnome-terminal korrekt mit -- und ohne -c
                             psi.ArgumentList.Add("--wait");
                             psi.ArgumentList.Add("--");
                             psi.ArgumentList.Add("bash");
@@ -363,7 +360,100 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                         AnsiConsole.MarkupLine($"[gray]Tipp:[/] Versuchen Sie manuell:\n  gnome-terminal --wait -- bash \"{updaterScript}\"");
                     }
 
-                    // Hauptprozess beenden, damit das Skript ersetzen kann
+                    Environment.Exit(0);
+                    return configuration; // unreachable
+                }
+                else if (os == "Windows")
+                {
+                    if (selectedRelease is null)
+                    {
+                        AnsiConsole.MarkupLine("[red]Fehler: Release nicht gefunden.[/]");
+                        return configuration;
+                    }
+
+                    // Download-URL für Windows finden
+                    string downloadUrlWin = null;
+                    foreach (var asset in selectedRelease.Value.GetProperty("assets").EnumerateArray())
+                    {
+                        var name = asset.GetProperty("name").GetString();
+                        if (!string.IsNullOrEmpty(name) && name.Equals("BKB-Tool.exe", StringComparison.OrdinalIgnoreCase))
+                        {
+                            downloadUrlWin = asset.GetProperty("browser_download_url").GetString();
+                            break;
+                        }
+                    }
+
+                    if (string.IsNullOrEmpty(downloadUrlWin))
+                    {
+                        AnsiConsole.MarkupLine("[red]Fehler: BKB-Tool.exe im Release nicht gefunden.[/]");
+                        return configuration;
+                    }
+
+                    // Ablageordner: neben der laufenden EXE
+                    var exePath = Process.GetCurrentProcess().MainModule?.FileName ?? Assembly.GetExecutingAssembly().Location;
+                    var exeDir = Path.GetDirectoryName(exePath) ?? Directory.GetCurrentDirectory();
+                    var zielDatei = Path.Combine(exeDir, "BKB-Tool_neu.exe");
+
+                    // Download mit Fortschritt
+                    using (var webClient = new System.Net.WebClient())
+                    {
+                        webClient.Headers.Add("User-Agent", "request");
+                        AnsiConsole.Progress().Start(ctx =>
+                        {
+                            var task = ctx.AddTask("Lade Update herunter");
+                            var mre = new System.Threading.ManualResetEvent(false);
+                            webClient.DownloadProgressChanged += (_, e) => task.Value = e.ProgressPercentage;
+                            webClient.DownloadFileCompleted += (_, __) => { task.Value = 100; mre.Set(); };
+                            webClient.DownloadFileAsync(new Uri(downloadUrlWin), zielDatei);
+                            mre.WaitOne();
+                        });
+                    }
+
+                    // Updater-Batch neben der EXE erstellen
+                    string updaterPath = Path.Combine(exeDir, "BKB-Tool-autoupdater.bat");
+                    var bat = string.Join("\r\n", new[]
+                    {
+                        "@echo off",
+                        "title BKB-Tool Updater",
+                        "echo.",
+                        "echo BKB-Tool Updater",
+                        "echo =================",
+                        "echo Warte auf Beenden von BKB-Tool.exe ...",
+                        ":waitforend",
+                        "tasklist | find /I \"BKB-Tool.exe\" >nul",
+                        "if not errorlevel 1 (",
+                        "  timeout /t 1 >nul",
+                        "  goto waitforend",
+                        ")",
+                        "echo Ersetze alte Version ...",
+                        "del /F /Q \"BKB-Tool.exe\"",
+                        "if exist \"BKB-Tool.exe\" (",
+                        "  echo Fehler: Die alte BKB-Tool.exe konnte nicht geloescht werden.",
+                        "  echo Bitte alle Instanzen schliessen und erneut versuchen.",
+                        "  pause",
+                        "  exit /b 1",
+                        ")",
+                        "rename \"BKB-Tool_neu.exe\" \"BKB-Tool.exe\"",
+                        "echo Starte neue Version ...",
+                        "start \"\" \"BKB-Tool.exe\"",
+                        "echo.",
+                        "echo Fertig.",
+                        "pause",
+                        "exit /b 0"
+                    });
+                    File.WriteAllText(updaterPath, bat, System.Text.Encoding.ASCII);
+
+                    // Batch in neuem sichtbaren Fenster starten
+                    var psiWin = new ProcessStartInfo
+                    {
+                        FileName = "cmd.exe",
+                        Arguments = $"/c start \"BKB-Tool Updater\" \"{updaterPath}\"",
+                        UseShellExecute = false,
+                        WorkingDirectory = exeDir
+                    };
+                    Process.Start(psiWin);
+
+                    // Aktuelle App beenden, damit die EXE ersetzt werden kann
                     Environment.Exit(0);
                     return configuration; // unreachable
                 }
