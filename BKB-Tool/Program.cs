@@ -222,72 +222,113 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                     }
 
                     // 4) Updater-Skript schreiben und starten
-                    string updaterScript = Path.Combine(Path.GetTempPath(), "bkb-tool-selfupdate.sh");
+                    // Eindeutiger Temp-Dateiname
+                    string updaterScript = Path.Combine(Path.GetTempPath(), $"bkb-tool-selfupdate-{Guid.NewGuid():N}.sh");
                     string script = $@"#!/usr/bin/env bash
-set -euo pipefail
+                    set -euo pipefail
+                    # Bei Fehler: sichtbar pausieren
+                    trap 'echo; echo ""Es ist ein Fehler aufgetreten.""; read -n1 -s -r -p ""Taste drücken, um dieses Fenster zu schließen ...""; echo' ERR
 
-APP=""{appImagePath}""
-NEW=""{newPath}""
-DIR=""$(dirname ""$APP"")""
-LOG=""$DIR/BKB-Tool-update.log""
+                    APP=""{appImagePath}""
+                    NEW=""{newPath}""
+                    DIR=""$(dirname ""$APP"")""
+                    LOG=""$DIR/BKB-Tool-update.log""
 
-echo ""[$(date)] Selfupdate gestartet. APP=$APP NEW=$NEW"" >>""$LOG""
+                    echo ""[$(date)] Selfupdate gestartet. APP=$APP NEW=$NEW"" | tee -a ""$LOG""
 
-# Kurz warten, bis die App beendet ist
-sleep 1
+                    # Kurz warten, bis die App beendet ist
+                    sleep 1
 
-# Warten bis Prozess beendet
-n=0
-while pgrep -f ""BKB-Tool.*AppImage"" >/dev/null 2>&1; do
-  sleep 1
-  n=$((n+1))
-  if [ $n -gt 120 ]; then
-    echo ""Timeout: BKB-Tool beendet sich nicht."" | tee -a ""$LOG""
-    exit 1
-  fi
-done
+                    # Warten bis Prozess beendet
+                    n=0
+                    while pgrep -f ""BKB-Tool.*AppImage"" >/dev/null 2>&1; do
+                    echo ""[$(date)] BKB-Tool läuft noch..."" | tee -a ""$LOG""
+                    sleep 1
+                    n=$((n+1))
+                    if [ $n -gt 120 ]; then
+                        echo ""Timeout: BKB-Tool beendet sich nicht."" | tee -a ""$LOG""
+                        echo
+                        read -n1 -s -r -p ""Taste drücken, um dieses Fenster zu schließen ...""; echo
+                        exit 1
+                    fi
+                    done
 
-if [ ! -f ""$NEW"" ]; then
-  echo ""Fehler: Update-Datei fehlt: $NEW"" | tee -a ""$LOG""
-  exit 1
-fi
+                    if [ ! -f ""$NEW"" ]; then
+                    echo ""Fehler: Update-Datei fehlt: $NEW"" | tee -a ""$LOG""
+                    echo
+                    read -n1 -s -r -p ""Taste drücken, um dieses Fenster zu schließen ...""; echo
+                    exit 1
+                    fi
 
-# Ersetzen
-mv -f ""$NEW"" ""$APP""
-chmod +x ""$APP""
+                    echo ""Ersetze alte Version..."" | tee -a ""$LOG""
+                    mv -f ""$NEW"" ""$APP""
+                    chmod +x ""$APP""
 
-echo ""Starte neue Version..."" | tee -a ""$LOG""
-nohup ""$APP"" >/dev/null 2>&1 &
+                    echo ""Starte neue Version..."" | tee -a ""$LOG""
+                    nohup ""$APP"" >/dev/null 2>&1 &
 
-# Skript entfernt sich selbst
-rm -- ""$0""
-";
+                    echo
+                    echo ""Update abgeschlossen.""
+                    echo ""Log: $LOG""
+                    echo
+                    read -n1 -s -r -p ""Taste drücken, um dieses Fenster zu schließen ...""; echo
 
-                    // LF + UTF8 ohne BOM schreiben
-                    File.WriteAllText(updaterScript, script.Replace("\r\n", "\n"), new System.Text.UTF8Encoding(false));
+                    # Skript entfernt sich selbst
+                    rm -- ""$0""
+                    ";
+                    // ...existing code...
 
-                    // Ausführbar machen
-                    Process.Start(new ProcessStartInfo
-                    {
-                        FileName = "chmod",
-                        Arguments = $"+x \"{updaterScript}\"",
-                        UseShellExecute = false
-                    })?.WaitForExit();
-
-                    // In Terminal starten (wenn vorhanden), sonst direkt
+                    // In Terminal starten (sichtbar halten)
                     string? terminal = null;
-                    if (File.Exists("/usr/bin/gnome-terminal")) terminal = "/usr/bin/gnome-terminal";
-                    else if (File.Exists("/usr/bin/konsole")) terminal = "/usr/bin/konsole";
-                    else if (File.Exists("/usr/bin/xterm")) terminal = "/usr/bin/xterm";
+                    string args;
+                    if (File.Exists("/usr/bin/gnome-terminal"))
+                    {
+                        terminal = "/usr/bin/gnome-terminal";
+                        args = $"--title=\"BKB-Tool Update\" -- bash -lc '\"{updaterScript}\"'";
+                    }
+                    else if (File.Exists("/usr/bin/kgx")) // GNOME Console
+                    {
+                        terminal = "/usr/bin/kgx";
+                        args = $"-- bash -lc '\"{updaterScript}\"'";
+                    }
+                    else if (File.Exists("/usr/bin/konsole"))
+                    {
+                        terminal = "/usr/bin/konsole";
+                        args = $"--new-tab --noclose -e bash -lc '\"{updaterScript}\"'";
+                    }
+                    else if (File.Exists("/usr/bin/xfce4-terminal"))
+                    {
+                        terminal = "/usr/bin/xfce4-terminal";
+                        args = $"--title=\"BKB-Tool Update\" --hold -e bash -lc '\"{updaterScript}\"'";
+                    }
+                    else if (File.Exists("/usr/bin/mate-terminal"))
+                    {
+                        terminal = "/usr/bin/mate-terminal";
+                        args = $"--title=""BKB-Tool Update"" -- bash -lc '\"{updaterScript}\"'";
+                    }
+                    else if (File.Exists("/usr/bin/alacritty"))
+                    {
+                        terminal = "/usr/bin/alacritty";
+                        args = $"-t \"BKB-Tool Update\" -e bash -lc '\"{updaterScript}\"'";
+                    }
+                    else if (File.Exists("/usr/bin/xterm"))
+                    {
+                        terminal = "/usr/bin/xterm";
+                        args = $"-T \"BKB-Tool Update\" -hold -e bash -lc '\"{updaterScript}\"'";
+                    }
+                    else if (File.Exists("/usr/bin/x-terminal-emulator"))
+                    {
+                        terminal = "/usr/bin/x-terminal-emulator";
+                        args = $"-e bash -lc '\"{updaterScript}\"'";
+                    }
+                    else
+                    {
+                        terminal = null;
+                        args = $"\"{updaterScript}\"";
+                    }
 
                     if (terminal != null)
                     {
-                        var args = terminal.Contains("gnome-terminal")
-                            ? $"-- bash -c '\"{updaterScript}\"; read -n1 -s -p \"Update abgeschlossen. Taste drücken...\"'"
-                            : terminal.Contains("konsole")
-                                ? $"--noclose -e bash -c '\"{updaterScript}\"'"
-                                : $"-hold -e bash -c '\"{updaterScript}\"'";
-
                         Process.Start(new ProcessStartInfo
                         {
                             FileName = terminal,
@@ -297,10 +338,11 @@ rm -- ""$0""
                     }
                     else
                     {
+                        // Fallback: ohne eigenes Terminal (nicht sichtbar), vermeidet aber Abbruch
                         Process.Start(new ProcessStartInfo
                         {
                             FileName = "bash",
-                            Arguments = $"\"{updaterScript}\"",
+                            Arguments = args,
                             UseShellExecute = false
                         });
                     }
@@ -309,84 +351,6 @@ rm -- ""$0""
                     Environment.Exit(0);
                     return configuration; // unreachable
                 }
-
-                // Windows: unverändert (Download + .bat Updater)
-                string downloadUrlWin = null;
-                foreach (var asset in selectedRelease.Value.GetProperty("assets").EnumerateArray())
-                {
-                    var name = asset.GetProperty("name").GetString();
-                    if (name != null && name.Equals("BKB-Tool.exe", StringComparison.OrdinalIgnoreCase))
-                    {
-                        downloadUrlWin = asset.GetProperty("browser_download_url").GetString();
-                        break;
-                    }
-                }
-
-                if (string.IsNullOrEmpty(downloadUrlWin))
-                {
-                    AnsiConsole.MarkupLine("[red]Fehler: BKB-Tool.exe im Release nicht gefunden.[/]");
-                    return configuration;
-                }
-
-                string zielDatei = Path.Combine(Directory.GetCurrentDirectory(), "BKB-Tool_neu.exe");
-
-                using (var webClient = new System.Net.WebClient())
-                {
-                    webClient.Headers.Add("User-Agent", "request");
-                    AnsiConsole.Progress().Start(ctx =>
-                    {
-                        var task = ctx.AddTask("Lade Update herunter");
-                        var mre = new System.Threading.ManualResetEvent(false);
-                        webClient.DownloadProgressChanged += (_, e) => task.Value = e.ProgressPercentage;
-                        webClient.DownloadFileCompleted += (_, __) => { task.Value = 100; mre.Set(); };
-                        webClient.DownloadFileAsync(new Uri(downloadUrlWin), zielDatei);
-                        mre.WaitOne();
-                    });
-                }
-
-                string updaterPath = Path.Combine(Directory.GetCurrentDirectory(), "BKB-Tool-autoupdater.bat");
-                if (File.Exists(updaterPath)) File.Delete(updaterPath);
-
-                File.WriteAllText(updaterPath,
-                    "@echo off\n" +
-                    "echo.\n" +
-                    "echo BKB-Tool\n" +
-                    "echo =========\n" +
-                    "echo Warte auf Beenden von BKB-Tool.exe ...\n" +
-                    "set /a counter=0\n" +
-                    ":waitforend\n" +
-                    "tasklist | find /I \"BKB-Tool.exe\" >nul\n" +
-                    "if not errorlevel 1 (\n" +
-                    "    timeout /t 1 >nul\n" +
-                    "    set /a counter+=1\n" +
-                    "    if %counter%==7 (\n" +
-                    "        echo Das Beenden dauert zu lange. Versuchen Sie BKB-Tool im Taskmanager zu beenden oder starten Sie den Rechner neu.\n" +
-                    "    )\n" +
-                    "    goto waitforend\n" +
-                    ")\n" +
-                    "echo Ersetze alte Version ...\n" +
-                    "del /F /Q BKB-Tool.exe\n" +
-                    "if exist BKB-Tool.exe (\n" +
-                    "    echo Fehler: Die alte BKB-Tool.exe konnte nicht gelöscht werden. Bitte schließen Sie alle Instanzen und versuchen Sie es erneut.\n" +
-                    "    pause\n" +
-                    "    exit /b 1\n" +
-                    ")\n" +
-                    "rename BKB-Tool_neu.exe BKB-Tool.exe\n" +
-                    "echo Starte neue Version ...\n" +
-                    "start \"\" BKB-Tool.exe\n" +
-                    "exit\n");
-
-                var panelWin = new Panel($"Mit [{Global.GetColor(Global.ColorActionInMenüs)} bold]ENTER[/] wird jetzt in die Version {githubVer} neugestartet.")
-                    .Header("[bold green]  Update erfolgreich  [/]")
-                    .BorderColor(Global.ColorActionInMenüs)
-                    .Expand();
-                AnsiConsole.Write(panelWin);
-
-                while (Console.KeyAvailable) Console.ReadKey(true);
-                Console.ReadKey();
-
-                Process.Start(new ProcessStartInfo { FileName = updaterPath, UseShellExecute = true, CreateNoWindow = true });
-                Environment.Exit(0);
             }
         }
         else
