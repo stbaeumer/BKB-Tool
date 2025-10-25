@@ -8,6 +8,8 @@
     <Authors>Stefan Bäumer</Authors>
     <Company>Berufskolleg Borken</Company>
     <Product>BKB-Tool</Product>
+    <!-- Icon für die Windows-EXE -->
+    <ApplicationIcon>Icons\BKB-Tool.ico</ApplicationIcon>
     <Copyright>Copyright © 2025 Stefan Bäumer</Copyright>
   </PropertyGroup>
 
@@ -16,10 +18,10 @@
     <None Include="Icons\BKB-Tool_512.png" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
-  <!-- Icon für Windows (.exe) -->
+  <!-- Icon-Datei explizit im Projekt (optional) -->
   <ItemGroup>
-    <None Update="BKB-Tool.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <None Update="Icons\BKB-Tool.ico">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
