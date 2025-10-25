@@ -357,7 +357,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                             {
                                 FileName = "gnome-terminal",
                                 UseShellExecute = false,
-                                WorkingDirectory = appDir
+                                WorkingDirectory = "/home/stefan/"
                             };
                             //psi.ArgumentList.Add("--wait");
                             //psi.ArgumentList.Add("--");
