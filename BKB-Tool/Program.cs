@@ -328,9 +328,21 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                         {
                             var psi = new ProcessStartInfo
                             {
-                                FileName = "alacritty",
+                                FileName = "/usr/bin/alacritty",
                                 UseShellExecute = false,
-                                WorkingDirectory = appDir
+                                WorkingDirectory = "/home/stefan/"
+                            };
+                            /*psi.ArgumentList.Add("-t");
+                            psi.ArgumentList.Add("BKB-Tool Update");
+                            psi.ArgumentList.Add("-e");
+                            psi.ArgumentList.Add("bash");
+                            psi.ArgumentList.Add(updaterScript);*/
+                            Process.Start(psi);
+                            psi = new ProcessStartInfo
+                            {
+                                FileName = "/usr/bin/alacritty",
+                                UseShellExecute = true,
+                                WorkingDirectory = "/home/stefan/"
                             };
                             /*psi.ArgumentList.Add("-t");
                             psi.ArgumentList.Add("BKB-Tool Update");
@@ -351,6 +363,18 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                             //psi.ArgumentList.Add("--");
                             //psi.ArgumentList.Add("bash");
                             //psi.ArgumentList.Add(updaterScript);
+                            Process.Start(psi);
+                            psi = new ProcessStartInfo
+                            {
+                                FileName = "/usr/bin/gnome-terminal",
+                                UseShellExecute = true,
+                                WorkingDirectory = "/home/stefan/"
+                            };
+                            /*psi.ArgumentList.Add("-t");
+                            psi.ArgumentList.Add("BKB-Tool Update");
+                            psi.ArgumentList.Add("-e");
+                            psi.ArgumentList.Add("bash");
+                            psi.ArgumentList.Add(updaterScript);*/
                             Process.Start(psi);
                         }
                     }
