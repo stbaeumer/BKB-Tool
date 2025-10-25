@@ -324,20 +324,34 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                         Console.ReadKey();
                         return configuration;
                     }
-                    // gnome-terminal starten
-                    Process.Start(new ProcessStartInfo
+                    
+                    // Terminal starten (Priorität: alacritty > gnome-terminal)
+                    if (hasAlacritty)
                     {
-                        FileName = "gnome-terminal",
-                        Arguments = $"--title=\"BKB-Tool Update\" -- bash -c '{updaterScript}'",
-                        UseShellExecute = false,
-                        WorkingDirectory = appDir
-                    });
+                        Process.Start(new ProcessStartInfo
+                        {
+                            FileName = "alacritty",
+                            Arguments = $"-t \"BKB-Tool Update\" --hold -e bash {updaterScript}",
+                            UseShellExecute = false,
+                            WorkingDirectory = appDir
+                        });
+                    }
+                    else
+                    {
+                        // gnome-terminal mit korrekten Argumenten
+                        Process.Start(new ProcessStartInfo
+                        {
+                            FileName = "gnome-terminal",
+                            Arguments = $"--wait -- bash {updaterScript}",
+                            UseShellExecute = false,
+                            WorkingDirectory = appDir
+                        });
+                    }
 
                     // Hauptprozess beenden, damit das Skript ersetzen kann
                     Environment.Exit(0);
                     return configuration; // unreachable
-                return configuration; // unreachable
-            }
+                }
         }
     }
     else
