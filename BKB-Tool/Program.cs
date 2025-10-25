@@ -97,8 +97,7 @@ do
             .HeaderAlignment(Justify.Left)
             .SquareBorder()
             .Expand()
-            .BorderColor(Global.ColorFehler);
-        
+            .BorderColor(Global.ColorFehler);        
             AnsiConsole.Write(panel3);
             Global.WeiterMitAnykey(configuration);
             
