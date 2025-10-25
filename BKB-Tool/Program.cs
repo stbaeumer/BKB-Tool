@@ -203,6 +203,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                         return configuration;
                     }
 
+
                     string appDir = Path.GetDirectoryName(appImagePath) ?? Directory.GetCurrentDirectory();
                     string newPath = Path.Combine(appDir, "BKB-Tool_neu.AppImage");
 
