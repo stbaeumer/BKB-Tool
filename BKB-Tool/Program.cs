@@ -326,71 +326,18 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                     {
                         if (hasAlacritty)
                         {
-                            Process.Start("/usr/bin/gnome-terminal");
-                            Process.Start("bash", new [] { "-c", "gnome-terminal" });
-Console.WriteLine($"PATH: {Environment.GetEnvironmentVariable("PATH")}");
-Console.WriteLine($"DISPLAY: {Environment.GetEnvironmentVariable("DISPLAY")}");
-Console.WriteLine($"DBUS_SESSION_BUS_ADDRESS: {Environment.GetEnvironmentVariable("DBUS_SESSION_BUS_ADDRESS")}");
-Console.ReadKey();
-
-                            var psi = new ProcessStartInfo
+                            Process.Start("alacritty", new[]
                             {
-                                FileName = "/usr/bin/alacritty",
-                                UseShellExecute = false,
-                                WorkingDirectory = "/home/stefan/"
-                            };
-                            /*psi.ArgumentList.Add("-t");
-                            psi.ArgumentList.Add("BKB-Tool Update");
-                            psi.ArgumentList.Add("-e");
-                            psi.ArgumentList.Add("bash");
-                            psi.ArgumentList.Add(updaterScript);*/
-                            Process.Start(psi);
-                            psi = new ProcessStartInfo
-                            {
-                                FileName = "/usr/bin/alacritty",
-                                UseShellExecute = true,
-                                WorkingDirectory = "/home/stefan/"
-                            };
-                            /*psi.ArgumentList.Add("-t");
-                            psi.ArgumentList.Add("BKB-Tool Update");
-                            psi.ArgumentList.Add("-e");
-                            psi.ArgumentList.Add("bash");
-                            psi.ArgumentList.Add(updaterScript);*/
-                            Process.Start(psi);
+                                "-t", "BKB-Tool Update",
+                                "-e", "bash", updaterScript
+                            });
                         }
                         else
                         {
-                            Process.Start("/usr/bin/gnome-terminal");
-                            Process.Start("bash", new[] { "-c", "gnome-terminal" });
-                            
-Console.WriteLine($"PATH: {Environment.GetEnvironmentVariable("PATH")}");
-Console.WriteLine($"DISPLAY: {Environment.GetEnvironmentVariable("DISPLAY")}");
-Console.WriteLine($"DBUS_SESSION_BUS_ADDRESS: {Environment.GetEnvironmentVariable("DBUS_SESSION_BUS_ADDRESS")}");
-Console.ReadKey();
-
-                            var psi = new ProcessStartInfo
+                            Process.Start("gnome-terminal", new[]
                             {
-                                FileName = "gnome-terminal",
-                                UseShellExecute = false,
-                                WorkingDirectory = "/home/stefan/"
-                            };
-                            //psi.ArgumentList.Add("--wait");
-                            //psi.ArgumentList.Add("--");
-                            //psi.ArgumentList.Add("bash");
-                            //psi.ArgumentList.Add(updaterScript);
-                            Process.Start(psi);
-                            psi = new ProcessStartInfo
-                            {
-                                FileName = "/usr/bin/gnome-terminal",
-                                UseShellExecute = true,
-                                WorkingDirectory = "/home/stefan/"
-                            };
-                            /*psi.ArgumentList.Add("-t");
-                            psi.ArgumentList.Add("BKB-Tool Update");
-                            psi.ArgumentList.Add("-e");
-                            psi.ArgumentList.Add("bash");
-                            psi.ArgumentList.Add(updaterScript);*/
-                            Process.Start(psi);
+                                "--wait", "--", "bash", updaterScript
+                            });
                         }
                     }
                     catch (Exception e)
