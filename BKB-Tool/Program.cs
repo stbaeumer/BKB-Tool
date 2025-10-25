@@ -324,27 +324,43 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                         return configuration;
                     }
                     
-                    // Terminal starten (Priorität: alacritty > gnome-terminal)
-                    if (hasAlacritty)
+                    try
                     {
-                        Process.Start(new ProcessStartInfo
+                        if (hasAlacritty)
                         {
-                            FileName = "alacritty",
-                            Arguments = $"-t \"BKB-Tool Update\" --hold -e bash \"{updaterScript}\"",
-                            UseShellExecute = true,
-                            WorkingDirectory = appDir
-                        });
+                            var psi = new ProcessStartInfo
+                            {
+                                FileName = "alacritty",
+                                UseShellExecute = false,
+                                WorkingDirectory = appDir
+                            };
+                            psi.ArgumentList.Add("-t");
+                            psi.ArgumentList.Add("BKB-Tool Update");
+                            psi.ArgumentList.Add("-e");
+                            psi.ArgumentList.Add("bash");
+                            psi.ArgumentList.Add(updaterScript); // kein -c, Skript direkt
+                            Process.Start(psi);
+                        }
+                        else
+                        {
+                            var psi = new ProcessStartInfo
+                            {
+                                FileName = "gnome-terminal",
+                                UseShellExecute = false,
+                                WorkingDirectory = appDir
+                            };
+                            // gnome-terminal korrekt mit -- und ohne -c
+                            psi.ArgumentList.Add("--wait");
+                            psi.ArgumentList.Add("--");
+                            psi.ArgumentList.Add("bash");
+                            psi.ArgumentList.Add(updaterScript);
+                            Process.Start(psi);
+                        }
                     }
-                    else
+                    catch (Exception e)
                     {
-                        // gnome-terminal mit korrekten Argumenten
-                        Process.Start(new ProcessStartInfo
-                        {
-                            FileName = "gnome-terminal",
-                            Arguments = $"--wait -- bash \"{updaterScript}\"",
-                            UseShellExecute = true,
-                            WorkingDirectory = appDir
-                        });
+                        AnsiConsole.MarkupLine($"[red]Start des Terminals fehlgeschlagen:[/] {e.Message}");
+                        AnsiConsole.MarkupLine($"[gray]Tipp:[/] Versuchen Sie manuell:\n  gnome-terminal --wait -- bash \"{updaterScript}\"");
                     }
 
                     // Hauptprozess beenden, damit das Skript ersetzen kann
