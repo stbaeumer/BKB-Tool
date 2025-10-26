@@ -169,7 +169,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                         return configuration;
                     }
 
-                    // 1) Download-URL für AppImage finden (Name exakt: BKB-Tool.AppImage)
+                    // 1) Download-URL für AppImage finden (Name exakt: BKB-Tool.AppImage) 
                     string downloadUrl = null;
                     foreach (var asset in selectedRelease.Value.GetProperty("assets").EnumerateArray())
                     {
