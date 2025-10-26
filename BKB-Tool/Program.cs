@@ -320,14 +320,15 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                         AnsiConsole.Write(terminalWarning);                        
                         return configuration;
                     }
+                    // ...existing code...
                     try
                     {
                         // Terminal unabhängig vom Parent-Prozess starten (detached)
                         string cmd = hasAlacritty
-                            // Alacritty: Skript direkt ausführen (-e bash -c '...'), keine Login-Shell
-                            ? $"nohup setsid alacritty -t \"BKB-Tool Update\" -e bash -c '{updaterScript}' >/dev/null 2>&1 &"
-                            // gnome-terminal: ebenso direkt via bash -c
-                            : $"nohup setsid gnome-terminal -- bash -c '{updaterScript}' >/dev/null 2>&1 &";
+                            // Alacritty: Skript direkt ausführen
+                            ? $"nohup setsid alacritty -t \"BKB-Tool Update\" -e bash '{updaterScript}' >/dev/null 2>&1 &"
+                            // gnome-terminal: Skript direkt ausführen
+                            : $"nohup setsid gnome-terminal -- bash '{updaterScript}' >/dev/null 2>&1 &";
 
                         Process.Start(new ProcessStartInfo
                         {
@@ -340,7 +341,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                     catch (Exception e)
                     {
                         AnsiConsole.MarkupLine($"[red]Start des Terminals fehlgeschlagen:[/] {e.Message}");
-                        AnsiConsole.MarkupLine($"[gray]Tipp:[/] Versuchen Sie manuell:\n  gnome-terminal -- bash -c \"{updaterScript}\"");
+                        AnsiConsole.MarkupLine($"[gray]Tipp:[/] Versuchen Sie manuell:\n  bash '{updaterScript}'");
                     }
 
                     // Hauptprozess beenden, damit das Skript ersetzen kann
