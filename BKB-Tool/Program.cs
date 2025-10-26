@@ -323,30 +323,27 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
 
                     try
                     {
-                        if (hasAlacritty)
+                        // Terminal unabhängig vom Parent-Prozess starten
+                        string cmd = hasAlacritty
+                            ? $"nohup setsid alacritty -t \"BKB-Tool Update\" -e bash -lc '\"{updaterScript}\"' >/dev/null 2>&1 &"
+                            : $"nohup setsid gnome-terminal -- bash -lc '\"{updaterScript}\"' >/dev/null 2>&1 &";
+
+                        Process.Start(new ProcessStartInfo
                         {
-                            Process.Start("bash", new[]
-                            {
-                                "-c",
-                                $"alacritty -t 'BKB-Tool Update' -e bash '{updaterScript}' & disown"
-                            });
-                        }
-                        else
-                        {
-                            Process.Start("bash", new[]
-                            {
-                                "-c",
-                                $"gnome-terminal --wait -- bash '{updaterScript}' & disown"
-                            });
-                        }
+                            FileName = "bash",
+                            Arguments = $"-c \"{cmd}\"",
+                            UseShellExecute = false,
+                            WorkingDirectory = appDir
+                        });
                         Console.ReadKey();
                     }
                     catch (Exception e)
                     {
                         AnsiConsole.MarkupLine($"[red]Start des Terminals fehlgeschlagen:[/] {e.Message}");
-                        AnsiConsole.MarkupLine($"[gray]Tipp:[/] Versuchen Sie manuell:\n  gnome-terminal --wait -- bash \"{updaterScript}\"");
+                        AnsiConsole.MarkupLine($"[gray]Tipp:[/] Versuchen Sie manuell:\n  gnome-terminal -- bash -lc \"\\\"{updaterScript}\\\"\"");
                     }
 
+                    // Hauptprozess beenden, damit das Skript ersetzen kann
                     Environment.Exit(0);
                     return configuration; // unreachable
                 }
