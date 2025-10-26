@@ -206,7 +206,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                     string appDir = Path.GetDirectoryName(appImagePath) ?? Directory.GetCurrentDirectory();
                     string newPath = Path.Combine(appDir, "BKB-Tool_neu.AppImage");
 
-                    // 3) Neue Version herunterladen (mit Fortschritt)
+                    // 3) Neue Version herunterladen (mit Fortschritt) 
                     using (var wc = new System.Net.WebClient())
                     {
                         wc.Headers.Add("User-Agent", "request");
