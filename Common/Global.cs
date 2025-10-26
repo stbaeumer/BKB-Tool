@@ -268,7 +268,7 @@ public static class Global
 
     public static void Speichern(string key, string value)
     {
-        var json = File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), Global.User + ".json"));
+        var json = File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "BKB-Tool.json"));
         var jsonDoc = JsonDocument.Parse(json);
         var jsonRoot = jsonDoc.RootElement;
 
@@ -302,7 +302,7 @@ public static class Global
             }
 
             // Neue JSON-Daten in die Datei schreiben
-            File.WriteAllText(Path.Combine(Directory.GetCurrentDirectory(), Global.User + ".json"), Encoding.UTF8.GetString(stream.ToArray()));
+            File.WriteAllText(Path.Combine(Directory.GetCurrentDirectory(), "BKB-Tool.json"), Encoding.UTF8.GetString(stream.ToArray()));
         }
     }
 
@@ -1095,8 +1095,8 @@ public static class Global
     {
         bool isFirstRun = false;
 
-        // Wenn User.json noch nicht existiert, dann erstellen
-        if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), Global.User + ".json")))
+        // Wenn BKB-Tool.json noch nicht existiert, dann erstellen
+        if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "BKB-Tool.json")))
         {
             var existiertnichtOderNichtBeschreibbar = true;
 
@@ -1117,16 +1117,16 @@ public static class Global
                 }
             } while (existiertnichtOderNichtBeschreibbar);
 
-            // User.json mit Standardinhalten füllen
+            // BKB-Tool.json mit Standardinhalten füllen
             var bkbJsonContent = CreateBkbJsonContent();
             var json = JsonSerializer.Serialize(bkbJsonContent, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(Path.Combine(Directory.GetCurrentDirectory(), Global.User + ".json"), json);
+            File.WriteAllText(Path.Combine(Directory.GetCurrentDirectory(), "BKB-Tool.json"), json);
         }
 
-        // Konfiguration aus User.json laden
+        // Konfiguration aus BKB-Tool.json laden
         configuration = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile(Global.User + ".json", optional: false, reloadOnChange: false)
+            .AddJsonFile("BKB-Tool.json", optional: false, reloadOnChange: false)
             .Build();
 
         // Alle Values entschlüsseln
