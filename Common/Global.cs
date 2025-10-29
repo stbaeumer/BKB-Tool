@@ -1940,7 +1940,7 @@ public static class KonfigHelper
             Key = "Schulnummer",
             DefaultValue = "177659",
             Aufforderung = $"[green]■[/]",
-            Hinweise = $"Geben Sie Ihre [{Global.GetColor(Global.ColorInfoBox)}]Schulnummer[/] an. \nJe nach Schulnummer werden evtl. unterschiedliche Funktionen angeboten.",
+            Hinweise = $"Geben Sie Ihre [{Global.GetColor(Global.ColorInfoBox)}]Schulnummer[/] an. \nJe nach Schulnummer werden evtl. unterschiedliche Funktionen angeboten. \nMit der Schulnummer [{Global.GetColor(Global.ColorZahlen)}]000000[/] wird ein Update auf ein Pre-release angeboten.",
             Datentyp = Global.Datentyp.Int,
             InGrundeinstellungAbfragen = true,
             InitialAbfragen = true,
