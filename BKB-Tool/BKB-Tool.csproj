@@ -2,9 +2,9 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
-    <Version>0.9.58</Version>
-    <AssemblyVersion>0.9.58</AssemblyVersion>
-    <FileVersion>0.9.58</FileVersion>
+    <Version>0.9.59</Version>
+    <AssemblyVersion>0.9.59</AssemblyVersion>
+    <FileVersion>0.9.59</FileVersion>
     <Authors>Stefan Bäumer</Authors>
     <Company>Berufskolleg Borken</Company>
     <Product>BKB-Tool</Product>
