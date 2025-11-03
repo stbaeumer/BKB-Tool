@@ -309,6 +309,12 @@ WHERE (((SCHOOLYEAR_ID)= " + Global.AktSj[0] + Global.AktSj[1] + ") AND  ((TERM_
             {
                 var le = (from l in this where l.Kürzel == item.Name select l).FirstOrDefault();
 
+                if(le.Mail == "")
+                {
+                    Global.ZeileSchreiben($"Fehler: {le.Kürzel} hat keine E-Mail-Adresse hinterlegt!", "", ConsoleColor.Red, ConsoleColor.Gray);
+                    continue;
+                }
+
                 if (le != null)
                 {
                     var body = "Guten Morgen " + le.Titel + le.Vorname + " " + le.Nachname + ",\n\n";
@@ -319,6 +325,7 @@ WHERE (((SCHOOLYEAR_ID)= " + Global.AktSj[0] + Global.AktSj[1] + ") AND  ((TERM_
                     body += "Ihr Webuntis-Team";
 
                     var mail = new Mail();
+                    AnsiConsole.WriteLine($"\nSende E-Mail an {le.Mail} ({i} von {topLehrer.Count()})...");
                     mail.Senden($" Offenen Klassenbuch-Einträge (" + le.Kürzel + ")", configuration, body, null, le.Mail, (item.Count >= 20 ? "stefan.baeumer@berufskolleg-borken.de" : ""), "");
                 }
 

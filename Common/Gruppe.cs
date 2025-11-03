@@ -222,7 +222,11 @@ public class Gruppe
         var lehrerMail = new List<string>();
         var lehrerName = new List<string>();
 
-        var members = anrechnungen.Select(rec => { return rec.Lehrer.Kürzel; }).Distinct().OrderBy(x => x);
+ var members = anrechnungen
+            .Where(rec => rec.Lehrer != null)
+            .Select(rec => { return rec.Lehrer.Kürzel; })
+            .Distinct()
+            .OrderBy(x => x);
 
 
         foreach (var member in members)

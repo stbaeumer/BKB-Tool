@@ -3262,6 +3262,7 @@ public class Menüeintrag
     }
 
     public void GetLehrer(
+        Anrechnungen anrechnungen,
         List<Action<Datei>> funktionen,
         Lehrers lehrers,
         string zieldateiname,
@@ -3269,14 +3270,25 @@ public class Menüeintrag
     {
         var zieldatei = new Datei(zieldateiname, funktionen, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
-        foreach (var lehrer in lehrers)
+        // alle verschiendenen Lehrkäfte aus anrechnungen und lehrers
+        var alleverschiendenenLehrerKürzel = anrechnungen.Select(a => a.LehrerKuerzel)
+            .Union(lehrers.Select(l => l.Kürzel))
+            .Distinct();
+
+        foreach (var lehrerKuerzel in alleverschiendenenLehrerKürzel)
         {
+            var anrechnung = anrechnungen.FirstOrDefault(a => a.LehrerKuerzel == lehrerKuerzel);
+
+            if(anrechnung == null){
+                string vorname = "";
+            }
+
             dynamic record = new ExpandoObject();
-            record.Kürzel = lehrer.Kürzel;
-            record.Vorname = lehrer.Vorname;
-            record.Nachname = lehrer.Nachname;
-            record.Name = (lehrer.Titel == "" ? "" : lehrer.Titel + " ") + lehrer.Vorname + " " + lehrer.Nachname;
-            record.Mail = lehrer.Mail;
+            record.Kürzel = anrechnung != null ? anrechnung.LehrerKuerzel : lehrerKuerzel;
+            record.Vorname = anrechnung != null ? anrechnung.Vorname : "";
+            record.Nachname = anrechnung != null ? anrechnung.Nachname : "";
+            record.Name = (anrechnung != null && anrechnung.Titel == "" ? "" : anrechnung.Titel + " ") + anrechnung.Vorname + " " + anrechnung.Nachname;
+            record.Mail = anrechnung != null ? anrechnung.Mail : "";
             zieldatei.Add(record);
         }
 
@@ -5003,8 +5015,13 @@ public class Menüeintrag
         
         try
         {
-            foreach (var anrechnung in anrechnungen.OrderBy(a => a.Lehrer?.Kürzel))
+            foreach (var anrechnung in anrechnungen.OrderBy(a => a.LehrerKuerzel).ThenBy(a => a.Grund))
             {
+                if (anrechnung.LehrerKuerzel == "KUH")
+                {
+                    var debug = 1;
+                }
+
                 if (!nurDieseGrunde.Contains(anrechnung.Grund)) continue;
                 var wert = (anrechnung.Wert == 0 ? "" : anrechnung.Wert.ToString(CultureInfo.InvariantCulture));
 
@@ -5013,7 +5030,7 @@ public class Menüeintrag
                     wert = "";
                 }
 
-                if (furDieseLehrerKeineWerte.Contains(anrechnung.Lehrer?.Kürzel))
+                if (furDieseLehrerKeineWerte.Contains(anrechnung.LehrerKuerzel))
                 {
                     wert = "";
                 }
@@ -5022,13 +5039,13 @@ public class Menüeintrag
                 if (anrechnung.Kategorien != null)
                     kategorien = anrechnung.Kategorien.Aggregate(kategorien, (current, c) => current + (c + ","));
 
-                anrechnung.Name = (anrechnung.Lehrer?.Titel == "" ? "" : anrechnung.Lehrer?.Titel + " ") +
-                                  anrechnung.Lehrer?.Vorname + " " + anrechnung.Lehrer?.Nachname;
+                anrechnung.Name = (anrechnung.Titel == "" ? "" : anrechnung.Titel + " ") +
+                                  anrechnung.Vorname + " " + anrechnung.Nachname;
 
                 dynamic record = new ExpandoObject();
                 record.Name = anrechnung.Name;
-                record.Kuerzel = anrechnung.Lehrer?.Kürzel;
-                record.Mail = anrechnung.Lehrer?.Mail;
+                record.Kuerzel = anrechnung.LehrerKuerzel;
+                record.Mail = anrechnung.Mail;
                 record.Wert = wert;
                 record.von = (anrechnung.Von.Year == 1 ? "" : anrechnung.Von.ToShortDateString());
                 record.bis = (anrechnung.Bis.Year == 1 ? "" : anrechnung.Bis.ToShortDateString());

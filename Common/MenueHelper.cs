@@ -137,9 +137,9 @@ public static class MenueHelper
                                         [
                                             datei => datei.OrdnerOeffnen(),
                                             datei => datei.Erstellen(),
-                                            datei => datei.OeffneWebseite("https://nessa.webuntis.com/students"),
+                                            datei => datei.OeffneWebseite("https://nessa.webuntis.com/users"),
                                             datei => datei.OeffneWebseite("https://management.geevoo.de/import/"),
-                                            datei => datei.OeffneWebseite("https://nessa.webuntis.com/users")
+                                            datei => datei.OeffneWebseite("https://nessa.webuntis.com/students")
                                         ],
                                         [
                                             $"1. In Webuntis als Webuntis-Admin:  [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Stammdaten > Schüler*innen > Import[/]",
@@ -321,8 +321,9 @@ public static class MenueHelper
                             [500, 510, 530, 590],
                             ["PLA", "BM"],
                             ",", '\"', new UTF8Encoding(false), true);
-                        m.GetLehrer(                            
-                            [                                
+                        m.GetLehrer(
+                            anrechnungen,
+                            [
                                 zieldatei => zieldatei.Erstellen()
                             ],
                             lehrers,

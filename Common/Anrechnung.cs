@@ -15,4 +15,9 @@ public class Anrechnung
     public string? Hinweis { get; internal set; }
     public List<string>? Kategorien { get; internal set; }
     public string? Name { get; set; }
+    public string LehrerKuerzel { get; internal set; }
+    public string? Vorname { get; internal set; }
+    public string? Nachname { get; internal set; }
+    public string? Mail { get; internal set; }
+    public string? Titel { get; internal set; }
 }
