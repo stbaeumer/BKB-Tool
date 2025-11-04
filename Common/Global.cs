@@ -19,8 +19,6 @@ using static KonfigHelper;
 #pragma warning disable CS0472
 #pragma warning disable CS8625
 #pragma warning disable CS8600
-
-
 public static class Global
 {
     public static List<(string Meldung, ConsoleColor Farbe)> Zeilen = new();
