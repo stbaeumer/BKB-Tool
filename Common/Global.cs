@@ -521,29 +521,33 @@ public static class Global
                     })
                 .DefaultValue<string>(defaultValue));
         }
-        if (datentyp == Datentyp.Kennwort)
+                if (datentyp == Datentyp.Kennwort)
         {
             // Der Wert wird im Read-Modus nicht erneut abgefragt, wenn der Wert plausibel ist und schon ein Wert in der configuration existiert.
             if ((modus == Modus.ReadSilent || modus == Modus.Read) && !string.IsNullOrEmpty(defaultValue) && !string.IsNullOrEmpty(configuration[parameter]))
             {
                 configuration[parameter] = defaultValue;
                 if (modus != Modus.ReadSilent)
-                    ZeileSchreiben(metakey, defaultValue);
+                    ZeileSchreiben(metakey, new string('*', defaultValue.Length)); // Maskierung mit Sternchen
                 return configuration;
             }
 
             // Wenn der Wert abgefragt wird, dann wird ein Panel mit dem Hinweis angezeigt
             AnsiConsole.Write(panel);
 
+            // Maskierter Defaultwert für die Anzeige
+            string maskedDefault = string.IsNullOrEmpty(defaultValue) ? "" : new string('*', defaultValue.Length);
+
             userInput = AnsiConsole.Prompt(
                 new TextPrompt<string>($"[] {aufforderung}[/]")
                 .PromptStyle(Global.GetColor(Global.ColorActionInMenüs))
                     .ShowDefaultValue(true)
+                    .Secret() // Eingabe wird während des Tippens maskiert
                     .Validate(n =>
                     {
                         if (n == "x")
                             throw new Exception("Sie haben abgebrochen.");
-                        if (n == "-") // Sonderzeichen für „leer“
+                        if (n == "-") // Sonderzeichen für „leer"
                             return ValidationResult.Success();
                         if (n == "" || n.Length < 3)
                             return ValidationResult.Error("[]  Das Kennwort muss mindestens 3 Zeichen lang sein.[/]");
@@ -551,7 +555,14 @@ public static class Global
                             return ValidationResult.Error("[]  Eingabe darf nicht leer sein.[/]");
                         return ValidationResult.Success();
                     })
-                .DefaultValue<string>(defaultValue));
+                .DefaultValue<string>(maskedDefault));
+            
+            // Wenn maskierter Wert übernommen wurde (nur ENTER gedrückt), den echten Wert verwenden
+            if (userInput.ToString() == maskedDefault && !string.IsNullOrEmpty(defaultValue))
+            {
+                userInput = defaultValue;
+            }
+            
             // Wenn der Benutzer nur ein "-" eingibt, wird das als leere Eingabe interpretiert.
             if (userInput.ToString() == "-")
                 userInput = "";

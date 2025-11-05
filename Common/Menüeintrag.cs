@@ -2818,7 +2818,7 @@ public class Menüeintrag
         if (klassenOhneUnterricht != "")
         {
             klassenOhneUnterricht = klassenOhneUnterricht.TrimEnd(' ', ',');
-            var panel = new Panel($"Die folgenden Klassen bleiben unberücksichtigt, da sie keinen Unterricht haben: {klassenOhneUnterricht}.")
+            var panel = new Panel($"Klassen ohne Unterricht bleiben unberücksichtigt: {klassenOhneUnterricht}.")
                 .HeaderAlignment(Justify.Left)
                 .Header($"  Hinweis  ")
                 .SquareBorder()
