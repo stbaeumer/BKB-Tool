@@ -72,7 +72,7 @@ public static class MenueHelper
                         [
                             $"Es wird jetzt die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", "SchuelerZusatzdaten.dat")}[/] um schulinterne Mailadressen ergänzt und in [{Global.GetColor(Global.ColorPfadInDateien)}]{pfadSchilddatenaustausch}[/] für den Re-Import nach SchILD bereitgestellt.",
                             $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise:[/] ",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]1:[/] BKB-Tool bildet die schulinterne Mailadressen wie folgt: [{Global.GetColor(Global.ColorTextHervorheben)}]nv061231@meine-schule.de[/], wobei gilt:",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]1:[/] BKB-Tool bildet die schulinternen Mailadressen wie folgt: [{Global.GetColor(Global.ColorTextHervorheben)}]nv061231@meine-schule.de[/], wobei gilt:",
                             $"[{Global.GetColor(Global.ColorTextHervorheben)}]    n[/]      : Erster Buchstabe des Nachnamens. Umlaute werden aufgelöst. Bsp.: [{Global.GetColor(Global.ColorTextHervorheben)}]Ü[/] wird zu [{Global.GetColor(Global.ColorTextHervorheben)}]u[/] usw.",
                             $"[{Global.GetColor(Global.ColorTextHervorheben)}]    v[/]      : Erster Buchstabe des Vornamens. Umlaute werden aufgelöst.",
                             $"[{Global.GetColor(Global.ColorTextHervorheben)}]    061231[/] : Geburtsdatum in der Notation: JJMMTT.",
@@ -736,7 +736,8 @@ public static class MenueHelper
                             $"[{Global.GetColor(Global.ColorHinweise)}]#4[/] Bei mehreren beteiligten Lehrkräften wird das alphabetisch erste Lehrkraftkürzel zum Kursleiter.",
                             $"[{Global.GetColor(Global.ColorHinweise)}]#5[/] Team-Teaching ist daran erkennbar, dass die Summe der Kurs-Wochenstunden kleiner ist als die Summe der Lehrkräfte-Wochenstunden.",
                             $"[{Global.GetColor(Global.ColorHinweise)}]#6[/] Wenn zwei ansonsten identische Unterrichte einmal mit und einmal ohne Schülergruppe vorliegen, werden zwei unterschiedliche Einträge erstellt.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]#7[/] Sobald einem Fach bei einem Schüler in SchILD eine Kursart (AB3,AB4,GKS,GKM) zugewiesen wurde, wird das in die zu erstellenden Leistungsdaten übernommen."
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#7[/] Sobald einem Fach bei einem Schüler in SchILD eine Kursart (AB3,AB4,GKS,GKM) zugewiesen wurde, wird das in die zu erstellenden Leistungsdaten übernommen.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#8[/] Fehlzeiten: [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Verspätungen[/] und [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Nur zählende Abwesenheiten[/] anhaken."
                         ],
                         m =>
                         {
