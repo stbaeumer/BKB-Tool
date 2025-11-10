@@ -683,6 +683,19 @@ public class Menüeintrag
         var unterrichte = this.Unterrichte;
 
         List<dynamic>? schuelerLeistungsdaten = null;
+        List<dynamic>? marksPerLs = null;
+
+        List<dynamic> schBasisds = Quelldateien.GetMatchingList(configuration, "schuelerbasisdaten", IStudents, Klassen);
+        if (art == null && (schBasisds == null || schBasisds.Count == 0)) return;
+
+        List<dynamic> schLeistus = Quelldateien.GetMatchingList(configuration, "schuelerleistungsdaten", IStudents, Klassen);
+        if (art == null && (schLeistus == null || schLeistus.Count == 0)) return;
+
+        if(art == Global.Zweck.Zeugnis)
+        {
+            marksPerLs = Quelldateien.GetMatchingList(configuration, "marksperlesson", IStudents, Klassen);
+            if (marksPerLs == null || marksPerLs.Count == 0) return;
+        }
 
         if(art == Global.Zweck.Zeugnis)
             schuelerLeistungsdaten = Quelldateien.GetMatchingList(configuration, "schuelerleistungsdaten", IStudents, Klassen);        
@@ -716,6 +729,9 @@ public class Menüeintrag
                     if (leistungsdaten != null && !string.IsNullOrEmpty(leistungsdaten["Abiturfach"].ToString()))
                         abiturfach = leistungsdaten["Abiturfach"].ToString();
                     
+                    string jahrgang = student.GetJahrgang(schBasisds);
+                    string note = student.GetNote(jahrgang, marksPerLs, unt.Fach, art);
+
                     dynamic record = new ExpandoObject();
                     record.Nachname = $"{student.Nachname}#{student.Klasse}";
                     record.Vorname = student.Vorname;
@@ -723,15 +739,14 @@ public class Menüeintrag
                     record.Jahr = Global.AktSj[0];
                     record.Abschnitt = configuration["Abschnitt"];
                     record.Fach = unt.Fach;
-                    if (unt.Fach == "GG G1")
+                    if (unt.Fach == "D")
                     {
                         var saw = "";
                     }
-                        
                     record.Fachlehrer = unt.Kursleiter;
                     record.Kursart = kursart;
                     record.Kurs = unt.KursBez;
-                    record.Note = "";
+                    record.Note = art == Global.Zweck.Statistik ? "" : note;
                     record.Abiturfach = abiturfach;
                     record.WochenstdPUNKT = unt.Wochenstunden.ToString();
                     record.ExterneLEERZEICHENSchulnrPUNKT = "";
@@ -751,9 +766,7 @@ public class Menüeintrag
             aktion(zieldatei);
     }
 
-
-    /*
-    public Datei Leistungsdaten(IConfiguration configuration, string zieldateiname, Global.Zweck art)
+    /*public Datei Leistungsdaten(IConfiguration configuration, string zieldateiname, Global.Zweck art)
     {
         var unterrichte = this.Unterrichte;
         var zieldatei = new Datei(zieldateiname);
@@ -994,8 +1007,7 @@ public class Menüeintrag
 
         zieldatei.AddRange(records);
         return zieldatei;
-    }
-    */
+    }*/
 
     public void Kurse(
         IConfiguration configuration,

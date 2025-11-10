@@ -724,7 +724,7 @@ public static class MenueHelper
                         ),
                         new Menüeintrag(
                         "Zeugnisse: Leistungsdaten (Unterrichte, Zeugnisnoten, Fehlzeiten, ...) nach SchILD importieren",
-                        quelldateien.Notwendige(configuration, ["absenceperstudent,csv", "studentgroupstudents,csv", "klassen,dat", "schuelerlernabschnitt,dat,optional", "schuelerleistungsdaten,dat", "lehrkraefte,dat", "kurse,dat", "schuelerbasisdaten,dat", "GPU002,txt", "GPU004,txt", "faecher,dat"]),
+                        quelldateien.Notwendige(configuration, ["absenceperstudent,csv", "studentgroupstudents,csv", "klassen,dat", "schuelerlernabschnitt,dat,optional", "schuelerleistungsdaten,dat", "lehrkraefte,dat", "kurse,dat", "schuelerbasisdaten,dat", "GPU002,txt", "GPU004,txt", "faecher,dat", "marksperlesson,csv,optional"]),
                         students,
                         klassen,
                         [
@@ -771,7 +771,7 @@ public static class MenueHelper
                                 [],
                                 "|", '\0', new UTF8Encoding(true), false);
                             m.LeistungsdatenStatistik(
-                                configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat"),
+                                configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat", ""),
                                 [
                                     datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
                                     datei => datei.Verarbeiten(quelldateien, Global.Modus.Filtern),
