@@ -1583,7 +1583,7 @@ public class Datei : List<dynamic>
                 }
                 var neueDict = (IDictionary<string, object>)neueRec;
 
-                if (neueDict.ContainsKey("Fach") && neueDict["Fach"].ToString().StartsWith("GG"))
+                if (neueDict.ContainsKey("Fach") && neueDict["Fach"].ToString().StartsWith("DPF"))
                 {
                     var x = 1;
                 }

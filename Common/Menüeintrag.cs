@@ -739,7 +739,7 @@ public class Menüeintrag
                     record.Jahr = Global.AktSj[0];
                     record.Abschnitt = configuration["Abschnitt"];
                     record.Fach = unt.Fach;
-                    if (unt.Fach == "D")
+                    if (unt.Fach == "DPF")
                     {
                         var saw = "";
                     }
