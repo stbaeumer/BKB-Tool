@@ -1638,7 +1638,7 @@ public static class KonfigHelper
             Key = "InteressierendeUnterrichtsgruppen",
             DefaultValue = Environment.GetEnvironmentVariable("InteressierendeUnterrichtsgruppen") ?? "",
             Aufforderung = $"[green]■[/]",
-            Hinweise = $"Geben Sie alle [{Global.GetColor(Global.ColorInfoBox)}]Unterrichtsgruppen[/] an, die am Stichtag anwesend sein werden. Unterrichte ohne Unterrichtsgrupe werden immer berücksichtigt.\nGroß- und Kleinschreibung beachten!\nWenn Sie alle Unterrichtsgruppen berücksichtigen wollen, schreiben wie das Wort [{Global.GetColor(Global.ColorActionInMenüs)}]alle[/] gewählt.",
+            Hinweise = $"Geben Sie alle interessierenden [{Global.GetColor(Global.ColorInfoBox)}]Unterrichtsgruppen[/]. Bei der Statistik sind das alle Unterrichtsgruppen, die am Stichtag anwesend sind. Unterrichte ohne Unterrichtsgrupe werden immer berücksichtigt.\nGroß- und Kleinschreibung beachten!\nWenn Sie alle Unterrichtsgruppen berücksichtigen wollen, schreiben wie das Wort [{Global.GetColor(Global.ColorActionInMenüs)}]alle[/] gewählt.",
             Datentyp = Global.Datentyp.ListString,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,

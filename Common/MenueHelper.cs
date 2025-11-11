@@ -737,7 +737,7 @@ public static class MenueHelper
                             $"[{Global.GetColor(Global.ColorHinweise)}]#5[/] Team-Teaching ist daran erkennbar, dass die Summe der Kurs-Wochenstunden kleiner ist als die Summe der Lehrkräfte-Wochenstunden.",
                             $"[{Global.GetColor(Global.ColorHinweise)}]#6[/] Wenn zwei ansonsten identische Unterrichte einmal mit und einmal ohne Schülergruppe vorliegen, werden zwei unterschiedliche Einträge erstellt.",
                             $"[{Global.GetColor(Global.ColorHinweise)}]#7[/] Sobald einem Fach bei einem Schüler in SchILD eine Kursart (AB3,AB4,GKS,GKM) zugewiesen wurde, wird das in die zu erstellenden Leistungsdaten übernommen.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]#8[/] Fehlzeiten: [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Verspätungen[/] und [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Nur zählende Abwesenheiten[/] anhaken."
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#8[/] Fehlzeiten pro Schüler*in pro Tag: [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Fehlzeiten[/], [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Verspätungen[/] und [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Nur zählende Abwesenheiten[/] anhaken."
                         ],
                         m =>
                         {
