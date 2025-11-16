@@ -65,19 +65,19 @@ public static class MenueHelper
                 students,
                 [
                     new Menüeintrag(
-                        "Mailadressen: Fehlende Schulinterne Mailadressen in den Individualdaten I ergänzen",
+                        "Mailadressen: Fehlende schulinterne Mailadressen in den Individualdaten I ergänzen",
                         quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat","schuelerzusatzdaten,dat", "schueleradressen,dat", "adressen,dat", "schuelertelefonnummern,dat"]),
                         students,
                         klassen,
                         [
                             $"Es wird jetzt die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", "SchuelerZusatzdaten.dat")}[/] um schulinterne Mailadressen ergänzt und in [{Global.GetColor(Global.ColorPfadInDateien)}]{pfadSchilddatenaustausch}[/] für den Re-Import nach SchILD bereitgestellt.",
                             $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise:[/] ",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]1:[/] BKB-Tool bildet die schulinternen Mailadressen wie folgt: [{Global.GetColor(Global.ColorTextHervorheben)}]nv061231@meine-schule.de[/], wobei gilt:",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#1:[/] BKB-Tool bildet die schulinternen Mailadressen wie folgt: [{Global.GetColor(Global.ColorTextHervorheben)}]nv061231@meine-schule.de[/], wobei gilt:",
                             $"[{Global.GetColor(Global.ColorTextHervorheben)}]    n[/]      : Erster Buchstabe des Nachnamens. Umlaute werden aufgelöst. Bsp.: [{Global.GetColor(Global.ColorTextHervorheben)}]Ü[/] wird zu [{Global.GetColor(Global.ColorTextHervorheben)}]u[/] usw.",
                             $"[{Global.GetColor(Global.ColorTextHervorheben)}]    v[/]      : Erster Buchstabe des Vornamens. Umlaute werden aufgelöst.",
                             $"[{Global.GetColor(Global.ColorTextHervorheben)}]    061231[/] : Geburtsdatum in der Notation: JJMMTT.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]2:[/] Vorhandene schulinterne SchILD-Mailadressen in [{Global.GetColor(Global.ColorPfadInProgrammen)}]Individualdaten I[/] bleiben unangetastet.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]3:[/] Doppelungen werden angezeigt und müssen nach Vorgabe behandelt werden."
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#2:[/] Vorhandene schulinterne SchILD-Mailadressen in [{Global.GetColor(Global.ColorPfadInProgrammen)}]Individualdaten I[/] bleiben unangetastet.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#3:[/] Doppelungen werden angezeigt und müssen nach Vorgabe behandelt werden."
                         ],
                         m =>
                         {
@@ -123,9 +123,9 @@ public static class MenueHelper
                             $"Es werden jetzt verschiedene Dateien in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{pfadDownloads}[/] erstellt: " +
                             $"[bold {Global.GetColor(Global.ColorPfadInDateien)}]Webuntis-Stammdaten-Schueler.csv[/], [bold {Global.GetColor(Global.ColorPfadInDateien)}]Webuntis-Stammdaten-Betriebe.csv[/], [bold {Global.GetColor(Global.ColorPfadInDateien)}]Webuntis-Stammdaten-Erzieher.csv[/], [bold {Global.GetColor(Global.ColorPfadInDateien)}]-ImportNachLittera.xml[/], [bold {Global.GetColor(Global.ColorPfadInDateien)}]-ImportNachNetman.csv[/]",
                             $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis:[/]",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]1:[/] Das Zeugnisdatum des letzten Zeugnisses in einer Klasse wird zum Webuntis-Austrittsdatum bei Schüler*innen, deren Status weder aktiv noch extern ist.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]2:[/] Damit korrekt ausgeschult wird, muss auch Abgang und Abschluss beim SchILD-Export angehakt werden.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]3:[/] Für den Betriebeimport sollte im Webuntis-Importprofil die SchildAdressId auf Schlüssel (externe) matchen."
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#1:[/] Das Zeugnisdatum des letzten Zeugnisses in einer Klasse wird zum Webuntis-Austrittsdatum bei Schüler*innen, deren Status weder aktiv noch extern ist.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#2:[/] Damit korrekt ausgeschult wird, muss auch Abgang und Abschluss beim SchILD-Export angehakt werden.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#3:[/] Für den Betriebeimport sollte im Webuntis-Importprofil die SchildAdressId auf Schlüssel (externe) matchen."
                         ],
                         m =>
                         {
@@ -142,9 +142,9 @@ public static class MenueHelper
                                             datei => datei.OeffneWebseite("https://nessa.webuntis.com/students")
                                         ],
                                         [
-                                            $"1. In Webuntis als Webuntis-Admin:  [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Stammdaten > Schüler*innen > Import[/]",
-                                            $"2. Datei auswählen, UTF8",
-                                            $"3. Profil: Schuelerimport, dann Vorschau",
+                                            $"[{Global.GetColor(Global.ColorHinweise)}]#1:[/] In Webuntis als Webuntis-Admin:  [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Stammdaten > Schüler*innen > Import[/]",
+                                            $"[{Global.GetColor(Global.ColorHinweise)}]#2:[/] Datei auswählen, UTF8",
+                                            $"[{Global.GetColor(Global.ColorHinweise)}]#3:[/] Profil: Schuelerimport, dann Vorschau",
                                             $"Mehr zum Profil Schuelerimport: [{Global.GetColor(Global.ColorHyperlink)}][link=https://github.com/stbaeumer/BKB-Tool/wiki]https://github.com/stbaeumer/BKB-Tool/wiki[/][/]"
                                         ]
                                     ),
@@ -155,9 +155,9 @@ public static class MenueHelper
                                             datei => datei.OeffneWebseite("https://nessa.webuntis.com/apprenticerepresentatives")
                                         ],
                                         [
-                                            $"1. In Webuntis als Webuntis-Admin:  [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Stammdaten > Ausbildungsbeauftragte > Import[/]",
-                                            $"2. Datei auswählen, UTF8",
-                                            $"3. Profil: Schuelerimport, dann Vorschau",
+                                            $"[{Global.GetColor(Global.ColorHinweise)}]#1:[/] In Webuntis als Webuntis-Admin:  [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Stammdaten > Ausbildungsbeauftragte > Import[/]",
+                                            $"[{Global.GetColor(Global.ColorHinweise)}]#2:[/] Datei auswählen, UTF8",
+                                            $"[{Global.GetColor(Global.ColorHinweise)}]#3:[/] Profil: Schuelerimport, dann Vorschau",
                                             $"Mehr zum Profil Schuelerimport: [{Global.GetColor(Global.ColorHyperlink)}][link=https://github.com/stbaeumer/BKB-Tool/wiki]https://github.com/stbaeumer/BKB-Tool/wiki[/][/]"
                                         ]
                                     ),
@@ -168,9 +168,9 @@ public static class MenueHelper
                                             datei => datei.OeffneWebseite("https://nessa.webuntis.com/legalguardians")                                            
                                         ],   
                                         [
-                                            $"1. In Webuntis als Webuntis-Admin:  [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Stammdaten > Erziehungsberechtigte > Import[/]",
-                                            $"2. Datei auswählen, UTF8",
-                                            $"3. Profil: Schuelerimport, dann Vorschau",
+                                            $"[{Global.GetColor(Global.ColorHinweise)}]#1:[/] In Webuntis als Webuntis-Admin:  [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Stammdaten > Erziehungsberechtigte > Import[/]",
+                                            $"[{Global.GetColor(Global.ColorHinweise)}]#2:[/] Datei auswählen, UTF8",
+                                            $"[{Global.GetColor(Global.ColorHinweise)}]#3:[/] Profil: Schuelerimport, dann Vorschau",
                                             $"Mehr zum Profil Schuelerimport: [{Global.GetColor(Global.ColorHyperlink)}][link=https://github.com/stbaeumer/BKB-Tool/wiki]https://github.com/stbaeumer/BKB-Tool/wiki[/][/]"
                                         ]
                                     ),
@@ -183,7 +183,7 @@ public static class MenueHelper
                                         ],
                                         [
                                             $"Es wird jetzt die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd") + "-ImportNachNetman.csv")}[/] erstellt.",
-                                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1:[/] Schüler*innen, die bereits abgegangen sind oder einen Abschluss erworben haben, werden erst sechs Wochen später ausgebucht, um den Zugriff auf Teams nicht direkt zu verlieren.",
+                                            $"[{Global.GetColor(Global.ColorHinweise)}]#1:[/] Schüler*innen, die bereits abgegangen sind oder einen Abschluss erworben haben, werden erst sechs Wochen später ausgebucht, um den Zugriff auf Teams nicht direkt zu verlieren.",
                                             $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #2:[/] Auch Abschluss und Abgang muss beim SchILD-Export angehakt werden.",
                                             $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #3:[/] Schüler*innen werden 42 Tage nach dem Abgangszeugnis/Abschlusszeugnis ausgeschult. Wenn kein letztes Zeugnisdatum bei Abgängern/Abgeschlossenen ermittelt werden kann, dann wird sofort ausgeschult."
                                         ]

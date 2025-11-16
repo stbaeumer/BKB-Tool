@@ -840,7 +840,7 @@ public static class Global
                         }
                         if (zulässigeAuswahlOptionen != "" && !zulässigeAuswahlOptionen.Contains(n.ToString()))
                         {
-                            return ValidationResult.Error($"Die Zahl {n} außerhalb des zulässigen Bereichs. Zulässige Werte: [{Global.GetColor(Global.ColorActionInMenüs)}]{zulässigeAuswahlOptionen}[/]");
+                            return ValidationResult.Error($"Die Zahl {n} ist außerhalb des zulässigen Bereichs. Zulässige Werte: [{Global.GetColor(Global.ColorActionInMenüs)}]{zulässigeAuswahlOptionen}[/]");
                         }
 
                         return ValidationResult.Success();
