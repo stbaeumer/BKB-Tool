@@ -366,7 +366,7 @@ public static class MenueHelper
                 ),
                 new Menüeintrag(
                         "Outlook: CSV-Terminexporte für Wiki aufbereiten",
-                        quelldateien.Notwendige(configuration,["termine_fhr,csv", "termine_verwaltung,csv", "termine_berufliches_gymnasium,csv", "termine_kollegium,csv"]),
+                        quelldateien.Notwendige(configuration,["termine_fhr,csv,optional", "termine_verwaltung,csv,optional", "termine_berufliches_gymnasium,csv,optional", "termine_kollegium,csv,optional"]),
                         students,
                         klassen,
                         [
@@ -387,8 +387,8 @@ public static class MenueHelper
                         ],
                         m =>
                         {
-                            m.OeffneDateienInDownloadsInNotepadPlusPlus(configuration, ["termine_fhr.csv", "termine_verwaltung.csv", "termine_berufliches_gymnasium.csv", "termine_kollegium.csv"]);                            
-                            foreach (var kalender in new List<string>(){"termine_berufliches_gymnasium", "termine_kollegium", "termine_verwaltung", "termine_fhr" })
+                            m.OeffneDateienInDownloadsInNotepadPlusPlus(configuration, ["termine_fhr.csv", "termine_berufliches_gymnasium.csv", "termine_kollegium.csv", "termine_verwaltung.csv"]);                            
+                            foreach (var kalender in new List<string>(){"termine_berufliches_gymnasium", "termine_kollegium", "termine_fhr", "termine_verwaltung" })
                             {
                                 m.Kalender2Wiki(configuration,
                                 [
