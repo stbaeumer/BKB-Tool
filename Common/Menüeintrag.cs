@@ -413,8 +413,8 @@ public class Menüeintrag
         var konferenzdatum = DateTime.Now;
         var zeugnisdatum = DateTime.Now;
 
-        configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration);
-        configuration = Global.Konfig("Abschnittswechsel", Global.Modus.Update, configuration);
+        configuration = Global.Konfig("Abschnitt", Global.Modus.Read, configuration);
+        configuration = Global.Konfig("Abschnittswechsel", Global.Modus.Read, configuration);
 
         if (art != Global.Zweck.Statistik)
         {
@@ -481,9 +481,9 @@ public class Menüeintrag
                     throw new Exception("Ungültiger Abschnitt. Bitte geben Sie 1 oder 2 ein.");
             }
 
-            configuration = Global.Konfig($"Konferenzdatum", Global.Modus.Read, configuration);
+            configuration = Global.Konfig($"Konferenzdatum", Global.Modus.Update, configuration);
             konferenzdatum = DateTime.Parse(configuration["Konferenzdatum"]);
-            configuration = Global.Konfig($"ZeugnisDatum", Global.Modus.Read, configuration);
+            configuration = Global.Konfig($"ZeugnisDatum", Global.Modus.Update, configuration);
             zeugnisdatum = DateTime.Parse(configuration["ZeugnisDatum"]);
             configuration = Global.Konfig("MaximaleAnzahlFehlstundenProTag", Global.Modus.Read, configuration);
             configuration = Global.Konfig("FehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt", Global.Modus.Read, configuration);
