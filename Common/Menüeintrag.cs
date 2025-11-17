@@ -413,8 +413,8 @@ public class Menüeintrag
         var konferenzdatum = DateTime.Now;
         var zeugnisdatum = DateTime.Now;
 
-        configuration = Global.Konfig("Abschnitt", Global.Modus.Read, configuration);
-        configuration = Global.Konfig("Abschnittswechsel", Global.Modus.Read, configuration);
+        configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration);
+        configuration = Global.Konfig("Abschnittswechsel", Global.Modus.Update, configuration);
 
         if (art != Global.Zweck.Statistik)
         {
