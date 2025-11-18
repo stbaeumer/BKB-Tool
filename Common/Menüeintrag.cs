@@ -392,9 +392,10 @@ public class Menüeintrag
     }
 
     public void Lernabschnittsdaten(
+        Lehrers lehrers,
         IConfiguration configuration,
         Global.Zweck art,
-        string zieldateiname,
+        string zieldateiname,        
         List<Action<Datei>> funktionen,
         string[] anhandDieserAttributeWirdVerglichen,
         string[] dieseAttributeWerdenBeimVergleichIgnoriert,
@@ -463,7 +464,8 @@ public class Menüeintrag
             {
                 configuration = Global.Konfig("OffeneFehlstunden", Global.Modus.Update, configuration);
                 if(!configuration["OffeneFehlstunden"].ToLower().StartsWith("j"))
-                {
+                {                    
+                    zieldatei.Auswählen(configuration, this, lehrers, Global.Modus.NurEineKlasse);
                     throw new Exception("Sie haben wegen offener Fehlstunden in Webuntis abgebrochen.");
                 }
             }
@@ -5431,6 +5433,19 @@ public class Menüeintrag
         }
 
         return result;
+    }
+
+    internal void Chat(
+        IConfiguration configuration,
+        List<Action<Datei>> funktionen,
+        string zieldateiname,
+        Lehrers lehrers,
+        string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
+    {
+        var zieldatei = new Datei(zieldateiname, configuration, funktionen, delimiter, quote, encoding, shouldAllQuote, lehrers, importhinweise);
+
+        foreach (var aktion in zieldatei.Funktionen)
+            aktion(zieldatei);
     }
 
 

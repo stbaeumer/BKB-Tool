@@ -1883,10 +1883,42 @@ public class Datei : List<dynamic>
         }
     }
 
-    internal void Auswählen(Menüeintrag m, Lehrers lehrers, Global.Modus modus)
+    internal void Auswählen(IConfiguration configuration, Menüeintrag m, Lehrers lehrers, Global.Modus modus)
     {
         // Der Modus AlleGruppen erlaubt die Auswahl aller Gruppen ohne Nachfrage.
         // Der Modus NurEineKlasse führt direkt zur Auswahl einer einzelnen Klasse. Der Modus wird verwendet bei der Zeugnisschreibung, um gezielt eine Klase auszuwählen.
+
+        if (modus != Global.Modus.AlleGruppen)
+        {
+            this.Clear();
+            //m.FilterInteressierendeStudentsUndKlassen(configuration);
+            this.AddRange(KlassengruppenAuswählen(configuration, m, lehrers, modus, "Hallo LuL " + m.IKlassen.FirstOrDefault()));
+            
+            var panel = new Panel("")
+                .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] Name des Chats [/]")
+                .HeaderAlignment(Justify.Left)
+                .SquareBorder()
+                .Expand()
+                .BorderColor(Global.ColorHinweise);
+            
+            AnsiConsole.Write(panel);
+            AnsiConsole.MarkupLine($"Zeugnisse {string.Join(", ", m.IKlassen)}");
+
+            var panel2 = new Panel("")
+                .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] Nachricht [/]")
+                .HeaderAlignment(Justify.Left)
+                .SquareBorder()
+                .Expand()
+                .BorderColor(Global.ColorHinweise);
+
+            AnsiConsole.Write(panel2);
+            
+            AnsiConsole.MarkupLine($"Es gibt offene Fehlstunden:\nhttps://nessa.webuntis.com/open-periods\nOffene Fehlstunden müssen vor der Zeugniserstellung behandelt werden und werden nicht in das Zeugnis übernommen.");
+            
+            AnsiConsole.MarkupLine($"Die Zeugnisse sind vorbereitet:\nhttps://bkb.wiki/notenlisten:start\nhttps://bkb.wiki/konferenzen:teilkonferenzen:zeugniskonferenzen:start");
+
+            return;            
+        }
 
         var table = new Table();
         table.AddColumn("Nr.");
@@ -1906,7 +1938,7 @@ public class Datei : List<dynamic>
 
         AnsiConsole.Write(table);
 
-        var configuration = Global.Konfig("TeamsChatAuswahl", Global.Modus.Update, Konfiguration, "", -1, -1, "", "", null, zulässigeAuswahlOptionen);
+        configuration = Global.Konfig("TeamsChatAuswahl", Global.Modus.Update, configuration, "", -1, -1, "", "", null, zulässigeAuswahlOptionen);
 
         var nummer = int.Parse(configuration["TeamsChatAuswahl"]);
 
@@ -1929,50 +1961,56 @@ public class Datei : List<dynamic>
         {
             this.Clear();
             m.FilterInteressierendeStudentsUndKlassen(configuration);
-            var klasse = m.IKlassen.FirstOrDefault();
-            var lehrerDerKlasse = m.GetLehrerDerKlassen(configuration, lehrers ?? []);
-
-            var gpu002 = m.Quelldateien.GetMatchingList(configuration, "gpu002", IStudents, m.Klassen);
-            if (gpu002 == null || gpu002.Count == 0) return;
-
-            var verschiedeneLulKuerzel = gpu002
-                .Where(rec =>
-                {
-                    var dict = (IDictionary<string, object>)rec;
-                    var klassenString = dict["Field5"].ToString();
-                    var klassenListe = klassenString.Split('~'); // Zerlegt den String in eine Liste
-                    return m.IKlassen.Any(klasse => klassenListe.Contains(klasse)) &&
-                        !string.IsNullOrEmpty(dict["Field6"].ToString());
-                }).Select(rec =>
-                {
-                    var dict = (IDictionary<string, object>)rec;
-                    return dict["Field6"].ToString();
-                }).Distinct().ToList().OrderBy(x => x).ToList();
-
-            var mitgliederMail = "";
-            var mitgliederKuerzel = "";
-            var mitglieder = "";
-            foreach (var lehrer in Lehrers.Where(l => verschiedeneLulKuerzel.Contains(l.Kürzel)))
-            {
-                if (!string.IsNullOrEmpty(mitgliederMail))
-                    mitgliederMail += ",";
-                mitgliederMail += lehrer.Mail;
-                if (!string.IsNullOrEmpty(mitgliederKuerzel))
-                    mitgliederKuerzel += ",";
-                mitgliederKuerzel += lehrer.Kürzel;
-                if (!string.IsNullOrEmpty(mitglieder))
-                    mitglieder += ", ";
-                mitglieder += (lehrer.Titel != " " ? lehrer.Titel : "") + lehrer.Vorname + " " + lehrer.Nachname;
-            }
-
-            dynamic record = new ExpandoObject();
-            record.Mitglieder = mitglieder;
-            record.MitgliederMail = mitgliederMail;
-            record.MitgliederKuerzel = mitgliederKuerzel;
-            
-            this.Add(record);
-            this.UrlMitte = mitgliederMail;
-            this.UrlRechts = "&message=" + Uri.EscapeDataString("Hallo LuL ") + klasse;
+            this.AddRange(KlassengruppenAuswählen(configuration, m, lehrers, modus, "Hallo LuL " + m.IKlassen.FirstOrDefault()));            
         }
+    }
+
+    private Datei KlassengruppenAuswählen(IConfiguration configuration, Menüeintrag m, Lehrers lehrers, Global.Modus modus, string message)
+    {        
+        var klasse = m.IKlassen.FirstOrDefault();
+        var lehrerDerKlasse = m.GetLehrerDerKlassen(configuration, lehrers ?? []);
+
+        var gpu002 = m.Quelldateien.GetMatchingList(configuration, "gpu002", IStudents, m.Klassen);
+        if (gpu002 == null || gpu002.Count == 0) return [];
+
+        var verschiedeneLulKuerzel = gpu002
+            .Where(rec =>
+            {
+                var dict = (IDictionary<string, object>)rec;
+                var klassenString = dict["Field5"].ToString();
+                var klassenListe = klassenString.Split('~'); // Zerlegt den String in eine Liste
+                return m.IKlassen.Any(klasse => klassenListe.Contains(klasse)) &&
+                    !string.IsNullOrEmpty(dict["Field6"].ToString());
+            }).Select(rec =>
+            {
+                var dict = (IDictionary<string, object>)rec;
+                return dict["Field6"].ToString();
+            }).Distinct().ToList().OrderBy(x => x).ToList();
+
+        var mitgliederMail = "";
+        var mitgliederKuerzel = "";
+        var mitglieder = "";
+        foreach (var lehrer in lehrers.Where(l => verschiedeneLulKuerzel.Contains(l.Kürzel)))
+        {
+            if (!string.IsNullOrEmpty(mitgliederMail))
+                mitgliederMail += ",";
+            mitgliederMail += lehrer.Mail;
+            if (!string.IsNullOrEmpty(mitgliederKuerzel))
+                mitgliederKuerzel += ",";
+            mitgliederKuerzel += lehrer.Kürzel;
+            if (!string.IsNullOrEmpty(mitglieder))
+                mitglieder += ", ";
+            mitglieder += (lehrer.Titel != " " ? lehrer.Titel : "") + lehrer.Vorname + " " + lehrer.Nachname;
+        }
+
+        dynamic record = new ExpandoObject();
+        record.Mitglieder = mitglieder;
+        record.MitgliederMail = mitgliederMail;
+        record.MitgliederKuerzel = mitgliederKuerzel;
+        
+        this.Add(record);
+        this.UrlMitte = mitgliederMail;
+        this.UrlRechts = "&message=" + Uri.EscapeDataString(message);            
+        return this;
     }
 }

@@ -497,7 +497,7 @@ public static class MenueHelper
                             m.Unterrichte = new Unterrichte(configuration, m, Global.Zweck.Statistik, Global.Art.KursUnterrichte);
                             m.Unterrichte.AddRange(new Unterrichte(configuration, m, Global.Zweck.Statistik, Global.Art.NichtKursUnterrichte));
 
-                            m.Lernabschnittsdaten(
+                            m.Lernabschnittsdaten(lehrers,
                                 configuration, Global.Zweck.Statistik, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLernabschnittsdaten.dat"),
                                 [
                                     datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
@@ -751,6 +751,7 @@ public static class MenueHelper
                             m.Unterrichte.AddRange(new Unterrichte(configuration, m, Global.Zweck.Zeugnis, Global.Art.NichtKursUnterrichte));
 
                             m.Lernabschnittsdaten(
+                                lehrers,
                                 configuration, Global.Zweck.Zeugnis, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLernabschnittsdaten.dat"),
                                 [
                                     datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
@@ -792,6 +793,14 @@ public static class MenueHelper
                                 ["InternKrz"],
                                 [],
                                 "|", '\0', new UTF8Encoding(true), false);                            
+                            m.Chat(configuration,
+                                    [
+                                        datei => datei.Auswählen(configuration, m, lehrers, Global.Modus.NurEineKlasse),
+                                        datei => datei.OeffneWebseite("https://teams.microsoft.com/l/chat/0/0?users=", datei.UrlMitte, datei.UrlRechts),
+                                    ],
+                                    Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-chat.csv"),
+                                    lehrers,
+                                    ",", '\"', new UTF8Encoding(false), true);
                         },
                         Global.Rubrik.Leistungsdaten,
                         Global.NurBeiDiesenSchulnummern.Alle
@@ -851,7 +860,7 @@ public static class MenueHelper
                                 m.GetGruppen(
                                     configuration,
                                     [
-                                        datei => datei.Auswählen(m, lehrers, Global.Modus.AlleGruppen),
+                                        datei => datei.Auswählen(configuration, m, lehrers, Global.Modus.AlleGruppen),
                                         datei => datei.OeffneWebseite("https://teams.microsoft.com/l/chat/0/0?users=", datei.UrlMitte, datei.UrlRechts),
                                     ],
                                     anrechnungen,

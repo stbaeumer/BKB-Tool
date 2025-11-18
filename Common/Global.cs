@@ -111,7 +111,8 @@ public static class Global
         Mailen,
         Verschlüsseln,
         Verschieben,
-        AlleGruppen
+        AlleGruppen,
+        NurEineKlasse
     }
 
     public static List<string> Vorwahlen =new List<string>()
@@ -1851,7 +1852,7 @@ public static class KonfigHelper
             Key = "OffeneFehlstunden",
             DefaultValue = "nein",
             Aufforderung = $"[green]■[/]",
-            Hinweise = $"Es gibt [{Global.GetColor(Global.ColorInfoBox)}]offene Fehlstunden[/]. Offene Fehlstunden sind weder entschuldigt noch unentschuldigt und werden im Zeugnis nicht berücksichtigt. Mit [{Global.GetColor(Global.ColorActionInMenüs)}]j(a)[/] geht es ohne Berücksichtigung der offenen Fehlstunden weiter. Abbruch mit [{Global.GetColor(Global.ColorFehler)}]n(ein)[/].",
+            Hinweise = $"Es gibt [{Global.GetColor(Global.ColorInfoBox)}]offene Fehlstunden[/]. Offene Fehlstunden sind weder entschuldigt noch unentschuldigt und werden im Zeugnis nicht berücksichtigt. Mit [{Global.GetColor(Global.ColorActionInMenüs)}]j(a)[/] geht es ohne Berücksichtigung der offenen Fehlstunden weiter. Wählen Sie [{Global.GetColor(Global.ColorFehler)}]n(ein)[/], um alle Lehrkräfte jetzt anzuchatten und die Verarbeitung hier abzubrechen.",
             Datentyp = Global.Datentyp.JaNein,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
