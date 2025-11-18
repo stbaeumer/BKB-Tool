@@ -811,10 +811,8 @@ public static class MenueHelper
                             m.FilterInteressierendeStudentsUndKlassen(configuration);                            
                             m.Unterrichte = new Unterrichte(configuration, m, Global.Zweck.Zeugnis, Global.Art.KursUnterrichte);
                             m.Unterrichte.AddRange(new Unterrichte(configuration, m, Global.Zweck.Zeugnis, Global.Art.NichtKursUnterrichte));
-                            Global.Konfig("Klausurbelegung", Global.Modus.Update, configuration, "", -1, -1, "", "1", null,
-        "1,2,3");
-                            Global.Konfig("InteressierendesSchuljahr", Global.Modus.Update, configuration, "", -1, -1, "", "1", null,
-        "25-26,26-27,27-28");
+                            Global.Konfig("Klausurbelegung", Global.Modus.Update, configuration, "", -1, -1, "", "1", null, "1,2,3");
+                            Global.Konfig("InteressierendesSchuljahr", Global.Modus.Update, configuration, "", -1, -1, "", "1", null, "25-26,26-27,27-28");
                             if(configuration["Klausurbelegung"] == "1" || configuration["Klausurbelegung"] == "2")
                                 m.KlausurbelegungWikiSeiteErstellen(
                                     configuration,
@@ -853,7 +851,7 @@ public static class MenueHelper
                                 m.GetGruppen(
                                     configuration,
                                     [
-                                        datei => datei.Auswählen(m, lehrers),
+                                        datei => datei.Auswählen(m, lehrers, Global.Modus.AlleGruppen),
                                         datei => datei.OeffneWebseite("https://teams.microsoft.com/l/chat/0/0?users=", datei.UrlMitte, datei.UrlRechts),
                                     ],
                                     anrechnungen,

@@ -110,7 +110,8 @@ public static class Global
         Filtern,
         Mailen,
         Verschlüsseln,
-        Verschieben
+        Verschieben,
+        AlleGruppen
     }
 
     public static List<string> Vorwahlen =new List<string>()

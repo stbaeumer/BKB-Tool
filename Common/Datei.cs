@@ -13,6 +13,7 @@ using Color = Spectre.Console.Color;
 using System.Diagnostics;
 using CookComputing.XmlRpc;
 using System.Dynamic;
+using System.Reflection;
 
 namespace Common;
 
@@ -1652,8 +1653,8 @@ public class Datei : List<dynamic>
                                 nichtIdentischeSonstigeAttribute[i],
                                 zeileMitIdentischenSchlüsselattributen));
                     rows++;
-                    neueDatei.Add(neueRec);
                 }
+                neueDatei.Add(neueRec);
             }
 
             if (table.Rows.Count == 0)
@@ -1882,8 +1883,11 @@ public class Datei : List<dynamic>
         }
     }
 
-    internal void Auswählen(Menüeintrag m, Lehrers lehrers)
+    internal void Auswählen(Menüeintrag m, Lehrers lehrers, Global.Modus modus)
     {
+        // Der Modus AlleGruppen erlaubt die Auswahl aller Gruppen ohne Nachfrage.
+        // Der Modus NurEineKlasse führt direkt zur Auswahl einer einzelnen Klasse. Der Modus wird verwendet bei der Zeugnisschreibung, um gezielt eine Klase auszuwählen.
+
         var table = new Table();
         table.AddColumn("Nr.");
         table.AddColumn("Gruppe");
@@ -1965,6 +1969,7 @@ public class Datei : List<dynamic>
             record.Mitglieder = mitglieder;
             record.MitgliederMail = mitgliederMail;
             record.MitgliederKuerzel = mitgliederKuerzel;
+            
             this.Add(record);
             this.UrlMitte = mitgliederMail;
             this.UrlRechts = "&message=" + Uri.EscapeDataString("Hallo LuL ") + klasse;
