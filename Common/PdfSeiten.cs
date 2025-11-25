@@ -1,4 +1,6 @@
 //using System.Text;
+using DocumentFormat.OpenXml.ExtendedProperties;
+using Microsoft.Extensions.Configuration;
 using UglyToad.PdfPig;
 using UglyToad.PdfPig.Content;
 
@@ -22,6 +24,7 @@ public class PdfSeiten : List<PdfSeite>
     public string QuellDateiName { get; set; }
     
     public List<PdfSeite> Seiten { get; private set; } = new List<PdfSeite>();
+    public int AnzahlElementeInDieserDatei { get; private set; }
 
     public void ZwischenseitenZuordnen()
     {
@@ -50,7 +53,7 @@ public class PdfSeiten : List<PdfSeite>
         }
     }
 
-    public void Read(string dateiName)
+    public void Einlesen(string dateiName)
     {
         List<string> lehrer = new List<string>();
 
@@ -61,29 +64,20 @@ public class PdfSeiten : List<PdfSeite>
             int seitenNummer = 1;
             foreach (Page page in pdfDocument.GetPages())
             {
+                var pdfSeite = new PdfSeite();
+
                 foreach (var word in page.GetWords())
                 {
-                    // Prüfe, ob die linke x-Koordinate (BoundingBox.Left) ungefähr 100 ist
-                    if (Math.Abs(word.BoundingBox.Left - 100) < 0.1)
-                    {
-                        lehrer.Add(word.Text); 
-                        //Console.WriteLine($"Seite {seitenNummer}: Text: {word.Text}, Position: {word.BoundingBox}");
-                    }
-                }                
+                    pdfSeite.Inhalt += word + " ";
+                }
+
+                pdfSeite.DateiName = dateiName;
+                pdfSeite.Seite = seitenNummer;
+                seitenNummer++;
+
+                this.Add(pdfSeite);
             }
         }
-
-        // Gib die 3 häufigsten Nennungen aus der Liste "lehrer" aus
-        var topLehrer = lehrer.GroupBy(x => x)
-                      .OrderByDescending(g => g.Count())
-                      .Take(3)
-                      .Select(g => new { Name = g.Key, Count = g.Count() });
-
-        Console.WriteLine("Die 3 häufigsten Nennungen:");
-        foreach (var item in topLehrer)
-        {
-            Console.WriteLine($"Name: {item.Name}, Häufigkeit: {item.Count}");
-        }   
     }
 
 
@@ -106,46 +100,6 @@ public class PdfSeiten : List<PdfSeite>
             .FirstOrDefault()?.Key; // Nimm die häufigste Gruppe und gib den Schlüssel zurück;
     }
 
-    public string GetArt(List<string> suchmuster)
-    {
-        List<string> art = new List<string>();
-
-        foreach (var pdfSeite in this)
-        {
-            var aa = pdfSeite.SuchmusterAnwenden(suchmuster);
-
-            foreach (var a in aa)
-            {
-                if (!art.Contains(a))
-                {
-                    art.Add(a);
-                }
-            }
-        }
-
-        if (art.Count == 1)
-        {
-            return art[0];
-        }
-
-        if (art.Count == 0)
-        {
-            Console.WriteLine("Art nicht erkannt.");
-            while (Console.KeyAvailable) Console.ReadKey(true);
-
-            Console.ReadKey();
-        }
-
-        if (art.Count > 1)
-        {
-            Console.WriteLine("Art nicht eindeutig");
-            while (Console.KeyAvailable) Console.ReadKey(true);
-
-            Console.ReadKey();
-        }
-
-        return "";
-    }
 
     internal void ZähleOffeneKlassenbuchEinträge(object lehrer)
     {

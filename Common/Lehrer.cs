@@ -46,6 +46,7 @@ public class Lehrer
     public string? Rechtsverhältnis { get; internal set; }
     public string? Beschäftigungsart { get; internal set; }
     public string? StatistikRelevant { get; internal set; }
+    public string? Anrede { get; internal set; }
 
     internal int GetAlterAmErstenSchultagDesSchuljahres(int jahr)
     {

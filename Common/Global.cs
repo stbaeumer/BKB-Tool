@@ -168,6 +168,69 @@ public static class Global
         return string.Empty;
     }
 
+    // Fügt der Klasse Global eine wiederverwendbare Methode zum Öffnen von Ordnern hinzu.
+    public static void OpenFolder(string pfad, bool suppressIfAlreadyOpen = false)
+    {
+        if (string.IsNullOrWhiteSpace(pfad))
+        {
+            AnsiConsole.MarkupLine($"[red]OpenFolder: Pfad ist leer oder null.[/]");
+            return;
+        }
+
+        // Normalisiere Pfad
+        pfad = pfad.Trim().TrimEnd(Path.DirectorySeparatorChar);
+
+        if (!Directory.Exists(pfad))
+        {
+            AnsiConsole.MarkupLine($"[red]OpenFolder: Ordner existiert nicht:[/] {pfad}");
+            return;
+        }
+
+        try
+        {
+            if (suppressIfAlreadyOpen && IsExplorerOpen(pfad))
+            {
+                // bereits offen, nichts weiter tun
+                return;
+            }
+
+            if (OperatingSystem.IsWindows())
+            {
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "explorer.exe",
+                    Arguments = $"\"{pfad}\"",
+                    UseShellExecute = true
+                };
+                Process.Start(psi);
+            }
+            else if (OperatingSystem.IsLinux())
+            {
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "xdg-open",
+                    Arguments = $"\"{pfad}\"",
+                    UseShellExecute = true
+                };
+                Process.Start(psi);
+            }
+            else // macOS
+            {
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "open",
+                    Arguments = $"\"{pfad}\"",
+                    UseShellExecute = true
+                };
+                Process.Start(psi);
+            }
+        }
+        catch (Exception ex)
+        {
+            AnsiConsole.MarkupLine($"[red]OpenFolder: Fehler beim Öffnen des Ordners:[/] {ex.Message}");
+        }
+    }
+
     public static void DisplayHeader(IConfiguration configuration, List<string> content = null)
     {
         Console.Clear();

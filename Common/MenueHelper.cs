@@ -696,8 +696,8 @@ public static class MenueHelper
                             ],
                             m =>
                             {
-                                m.IStudents.GetStudentsVonAtlantisCsv(configuration);
-                                m.IStudents.PdfDateienVerarbeiten(configuration);
+                                m.GetStudentsVonAtlantisCsv(configuration);
+                                m.PdfDateienVerarbeiten(configuration);
                             },
                             Global.Rubrik.Allgemein,
                             Global.NurBeiDiesenSchulnummern.Alle
@@ -903,7 +903,7 @@ public static class MenueHelper
                             ),
                             new Menüeintrag(
                                 "Sprechtag: Lehrerübersichtsseite im Wiki veröffentlichen",
-                                quelldateien.Notwendige(configuration, ["exportlessons,csv", "gpu004,txt", "gpu005,txt"]),
+                                quelldateien.Notwendige(configuration, ["exportlessons,csv", "gpu004,txt", "gpu005,txt", "lehrkraefte,dat"]),
                                 students,
                                 klassen,
                                 [

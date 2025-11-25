@@ -2882,24 +2882,40 @@ public class Menüeintrag
         var raums = Quelldateien.GetMatchingList(configuration, "gpu005", IStudents, Klassen);
         if (raums == null || !raums.Any()) return;
 
-        var lehrkräfte = Quelldateien.GetMatchingList(configuration, "gpu004", IStudents, Klassen);
-        if (lehrkräfte == null || !lehrkräfte.Any()) return;
+        var gpu004 = Quelldateien.GetMatchingList(configuration, "gpu004", IStudents, Klassen);
+        if (gpu004 == null || !gpu004.Any()) return;
+
+        var lehrkraefte = Quelldateien.GetMatchingList(configuration, "lehrkraefte", IStudents, Klassen);
+        if (lehrkraefte == null || lehrkraefte.Count == 0) return;
 
         var zieldatei = new Datei(zieldateiname, funktionen, configuration);
 
         var lehrers = new Lehrers();
-        foreach (var rec in lehrkräfte)
+        foreach (var rec in lehrkraefte)
         {
             var dict = (IDictionary<string, object>)rec;
+
+            var lehGpu004 = gpu004.Where(rec =>
+            {
+                if (rec == null) return false;
+                var dic = (IDictionary<string, object>)rec;
+                return dic != null && dic["Field1"] != null && dic["Field1"].ToString() == dict["InternKrz"].ToString();
+            }).LastOrDefault() as IDictionary<string, object>;
+            
+            if(lehGpu004 == null)
+            {
+                continue;
+            }
+
             var l = new Lehrer
             {
-                Kürzel = dict["Field1"].ToString(),
-                Nachname = dict["Field2"].ToString(),
-                Vorname = dict["Field29"].ToString(),
-                Geschlecht = dict["Field6"].ToString().ToLower() == "w" ? "w" : "m",
-                Titel = dict["Field30"].ToString(),
-                Raum = dict["Field5"].ToString(),
-                Text2 = dict["Field43"].ToString()
+                Kürzel = dict["InternKrz"].ToString(),
+                Nachname = dict["Nachname"].ToString(),
+                Vorname = dict["Vorname"].ToString(),
+                Anrede = dict["Anrede"].ToString(),
+                Titel = dict["Titel"].ToString(),
+                Raum = lehGpu004["Field5"].ToString(),
+                Text2 = lehGpu004["Field43"].ToString()
             };
             lehrers.Add(l);
         }
@@ -2971,7 +2987,7 @@ public class Menüeintrag
             }
 
             zieldatei.Add(
-                "|" + (l.Geschlecht == "m" ? "Herr " : "Frau ") + (l.Titel == "" ? "" : l.Titel + " ") +
+                "|" + l.Anrede + " " + (l.Titel == "" ? "" : l.Titel + " ") +
                 l.Nachname + (l.Text2 == "" ? "" : " ((" + l.Text2 + "))") + "|" + raum + "|");
 
             if (i == 20 || i == 40 || i == 60 || i == 60 + lehrerProSpalteAufSeite2 ||
@@ -5446,6 +5462,143 @@ public class Menüeintrag
 
         foreach (var aktion in zieldatei.Funktionen)
             aktion(zieldatei);
+    }
+
+    internal void GetStudentsVonAtlantisCsv(IConfiguration configuration)
+    {
+        configuration = Global.Konfig("PfadDownloads", Global.Modus.Read, configuration);
+        configuration = Global.Konfig("PfadDokumentenverwaltung", Global.Modus.Read, configuration);
+        configuration = Global.Konfig("Schluesselwoerter", Global.Modus.Update, configuration);
+
+        //var students = new Students();
+        var inputFolder = Path.Combine(configuration["PfadDownloads"], "PDF-Input");
+
+        if (!Directory.Exists(inputFolder))
+        {
+            Directory.CreateDirectory(inputFolder);
+            var path = new TextPath(inputFolder);
+
+            path.RootStyle = new Style(foreground: Spectre.Console.Color.Red);
+            path.SeparatorStyle = new Style(foreground: Spectre.Console.Color.SpringGreen2);
+            path.StemStyle = new Style(foreground: Spectre.Console.Color.DodgerBlue1);
+            path.LeafStyle = new Style(foreground: Spectre.Console.Color.Yellow);
+
+            var panel = new Panel(path)
+                .Header("[bold greenYellow] Neuer Ordner für PDF-Dateien: [/]")
+                .HeaderAlignment(Justify.Left)
+                .SquareBorder()
+                .Expand()
+                .BorderColor(Spectre.Console.Color.SpringGreen2);
+
+            AnsiConsole.Write(panel);
+        }
+
+        do
+        {
+            // Wenn eine einzige CSV-Datei vorhanden ist
+
+            if (Directory.GetFiles(inputFolder, "*.csv").Length == 1)
+            {
+                var csvPath = Directory.GetFiles(inputFolder, "*.csv").FirstOrDefault();
+
+                if (csvPath != null)
+                {
+                    try
+                    {
+                        var csvLines = File.ReadAllLines(csvPath, Encoding.UTF8);
+                        if (csvLines.Length > 0)
+                        {
+                            foreach (var line in csvLines.Skip(1)) // Erste Zeile überspringen (Header)
+                            {
+                                var columns = line.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+                                if (columns.Length >= 3)
+                                {
+                                    var student = new Student
+                                    {
+                                        Vorname = columns[0].Trim().Trim('"'), // Entfernt führende/trailing Leerzeichen und Anführungszeichen
+                                        Nachname = columns[1].Trim().Trim('"'),
+                                        Geburtsdatum = DateTime.ParseExact(columns[2].Trim().Trim('"'), "yyyy-MM-dd", CultureInfo.InvariantCulture).ToString("dd.MM.yyyy")
+                                    };
+                                    Students.Add(student);
+                                }
+                            }
+                            Global.ZeileSchreiben(csvPath, Students.Count().ToString(), ConsoleColor.Yellow, ConsoleColor.Gray);                            
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new Exception($"Fehler beim Einlesen der CSV-Datei: {ex.Message}");
+                    }
+                }
+                else
+                {
+                    var panel = new Panel("Die Datei 'schueler.csv' wurde nicht gefunden. Bitte erstellen Sie die Datei im UTF8-Format.")
+                            .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] !? [/]")
+                            .HeaderAlignment(Justify.Left)
+                            .SquareBorder()
+                            .Expand()
+                            .BorderColor(Global.ColorFehler);
+                    AnsiConsole.Write(panel);
+                    throw new Exception($"[grey]  Zuerst die Hinweise [/][bold red]!?[/][grey] bearbeiten, dann hierher zurückkehren![/]");
+                }
+            }
+            else if (Directory.GetFiles(inputFolder, "*.csv").Length == 0)
+            {
+                var panel = new Panel($"{Path.Combine(inputFolder, "schueler.csv")} existiert nicht. Bitte erstellen Sie die Datei im UTF8-Format.\nFolgende Spalten sind Pflicht: Vorname, Nachname, Geburtsdatum (DD-MM-YYYY), Klasse")
+                            .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] !? [/]")
+                            .HeaderAlignment(Justify.Left)
+                            .SquareBorder()
+                            .Expand()
+                            .BorderColor(Global.ColorFehler);
+                AnsiConsole.Write(panel);
+                throw new Exception($"[grey]  Zuerst die Hinweise [/][bold red]!?[/][grey] bearbeiten, dann hierher zurückkehren![/]");
+            }
+            else if (Directory.GetFiles(inputFolder, "*.csv").Length > 1)
+            {
+                var panel = new Panel($"Es gibt mehrere CSV-Dateien in {inputFolder}. Es darf nur eine CSV-Datei vorhanden sein.")
+                            .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] !? [/]")
+                            .HeaderAlignment(Justify.Left)
+                            .SquareBorder()
+                            .Expand()
+                            .BorderColor(Global.ColorFehler);
+                AnsiConsole.Write(panel);
+                throw new Exception($"[grey]  Zuerst die Hinweise [/][bold red]!?[/][grey] bearbeiten, dann hierher zurückkehren![/]");
+            }
+        }
+        while (Students.Count == 0);
+    }
+
+    internal void PdfDateienVerarbeiten(IConfiguration configuration)
+    {
+        List<string> schlüsselwörter = configuration["Schluesselwoerter"].ToString().Trim().Split(",").ToList();
+
+        foreach (string dateiName in Directory.GetFiles(Path.Combine(configuration["PfadDownloads"], "PDF-Input"), "*.*").Where(file => file.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase)))
+        {
+            try
+            {
+                var pdfDatei = new PdfDatei(dateiName);
+                pdfDatei.Seiten.Einlesen(dateiName);
+                pdfDatei.AnzahlElementeInDieserDatei = pdfDatei.GetAnzahlElementeProDatei(configuration);
+                pdfDatei.Art = pdfDatei.GetArt(schlüsselwörter);
+                pdfDatei.Students = pdfDatei.GetStudentsMitSeiten(Students, configuration);
+
+                foreach (var student in pdfDatei.Students)
+                {
+                    string datum = student.PdfSeiten.GetDatum();
+                    student.CreateFolderPdfDateien(configuration);
+                    student.ZieldateiSpeichern(pdfDatei.Art, datum, dateiName);
+                }
+
+                if (pdfDatei.Students.Any())
+                {
+                    pdfDatei.SeitenAusQuelldateienLöschen();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(dateiName + ": " + ex.Message);
+            }            
+        }
     }
 
 

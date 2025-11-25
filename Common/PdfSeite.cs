@@ -35,6 +35,17 @@ public partial class PdfSeite
         DateiName = dateiName;
     }
 
+    public PdfSeite(int seite, string inhalt, string dateiName)
+    {
+        Seite = seite;
+        Inhalt = inhalt;
+        DateiName = dateiName;
+    }
+
+    public PdfSeite()
+    {
+    }
+
     public Student SchuelerZuSeiteZuordnen(Students students)
     {
         var studs = new List<Student>();

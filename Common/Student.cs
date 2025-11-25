@@ -57,10 +57,12 @@ public partial class Student
     public string MaßnahmenAlsWikiLinkAufzählung { get; set; } = string.Empty;
     public PdfSeiten PdfSeiten { get; set; } = new PdfSeiten();
 
-    public void CreateFolderPdfDateien()
+    public void CreateFolderPdfDateien(IConfiguration configuration)
     {
-        Zielordner = Global.OutputFolder + "/" + Nachname.Substring(0, 1) + "/" +
-                     $"{Nachname}_{Vorname}_{Geburtsdatum}";
+        Zielordner = Path.Combine(configuration["PfadDokumentenverwaltung"], Nachname.Substring(0, 1),
+                     $"{Nachname}, {Vorname}, {Geburtsdatum.ToString()}");
+
+        Zielordner = Zielordner.Replace(".", "_");
 
         if (string.IsNullOrEmpty(Nachname)) return;
         if (!Directory.Exists(Zielordner))
@@ -69,7 +71,7 @@ public partial class Student
         }
     }
 
-    private string Zielordner { get; set; } = string.Empty;
+    public string Zielordner { get; set; } = string.Empty;
     public string? Entlassdatum { get; set; }
     public bool FotoVorhanden { get; set; }
     public bool FotoBinary { get; set; }

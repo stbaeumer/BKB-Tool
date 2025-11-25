@@ -1,11 +1,14 @@
+﻿# Build artifacts
 **/bin/
 **/obj/
 Common/obj/
 BKB-Tool/obj/
 
+# Environment files
 .env
 *.json
 
+# Local folders
 Downloads/
 Datenaustausch/
 Ausgabeverzeichnis/
@@ -26,7 +29,7 @@ publish/
 *.map
 *.exp
 
-# Precompiled Headers
+# Precompiled headers
 *.gch
 *.pch
 
@@ -36,7 +39,7 @@ publish/
 *.la
 *.lo
 
-# Shared objects (inc. Windows DLLs)
+# Shared objects / DLLs
 *.dll
 *.so
 *.so.*
@@ -56,7 +59,7 @@ publish/
 *.idb
 *.pdb
 
-# Kernel Module Compile Results
+# Kernel module compile results
 *.mod*
 *.cmd
 .tmp_versions/
@@ -64,3 +67,12 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.cache/
+*.ide/
+*.VC.db
+*.VC.VC.opendb

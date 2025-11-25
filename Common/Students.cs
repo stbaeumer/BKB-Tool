@@ -132,112 +132,7 @@ public class Students : List<Student>
             ConsoleColor.Yellow, ConsoleColor.Gray);
     }
 
-    public Students GetStudentsVonAtlantisCsv(IConfiguration configuration)
-    {
-        configuration = Global.Konfig("PfadDownloads", Global.Modus.Read, configuration);
-        configuration = Global.Konfig("PfadDokumentenverwaltung", Global.Modus.Read, configuration);
-        configuration = Global.Konfig("Schluesselwoerter", Global.Modus.Update, configuration);
-
-        //var students = new Students();
-        var inputFolder = Path.Combine(configuration["PfadDownloads"], "PDF-Input");
-
-        if (!Directory.Exists(inputFolder))
-        {
-            Directory.CreateDirectory(inputFolder);
-            var path = new TextPath(inputFolder);
-
-            path.RootStyle = new Style(foreground: Spectre.Console.Color.Red);
-            path.SeparatorStyle = new Style(foreground: Spectre.Console.Color.SpringGreen2);
-            path.StemStyle = new Style(foreground: Spectre.Console.Color.DodgerBlue1);
-            path.LeafStyle = new Style(foreground: Spectre.Console.Color.Yellow);
-
-            var panel = new Panel(path)
-                .Header("[bold greenYellow] Neuer Ordner für PDF-Dateien: [/]")
-                .HeaderAlignment(Justify.Left)
-                .SquareBorder()
-                .Expand()
-                .BorderColor(Spectre.Console.Color.SpringGreen2);
-
-            AnsiConsole.Write(panel);
-        }
-
-        do
-        {
-            // Wenn eine einzige CSV-Datei vorhanden ist
-
-            if (Directory.GetFiles(inputFolder, "*.csv").Length == 1)
-            {
-                var csvPath = Directory.GetFiles(inputFolder, "*.csv").FirstOrDefault();
-
-                if (csvPath != null)
-                {
-                    try
-                    {
-                        var csvLines = File.ReadAllLines(csvPath, Encoding.UTF8);
-                        if (csvLines.Length > 0)
-                        {
-                            foreach (var line in csvLines.Skip(1)) // Erste Zeile überspringen (Header)
-                            {
-                                var columns = line.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
-                                if (columns.Length >= 4)
-                                {
-                                    var student = new Student
-                                    {
-                                        Vorname = columns[0].Trim().Trim('"'), // Entfernt führende/trailing Leerzeichen und Anführungszeichen
-                                        Nachname = columns[1].Trim().Trim('"'),
-                                        Geburtsdatum = DateTime.ParseExact(columns[2].Trim().Trim('"'), "yyyy-MM-dd", CultureInfo.InvariantCulture).ToString("dd.MM.yyyy"),
-                                        Klasse = columns[3].Trim().Trim('"')
-                                    };
-                                    this.Add(student);
-                                }
-                            }
-                            Global.ZeileSchreiben(csvPath, this.Count().ToString(), ConsoleColor.Yellow, ConsoleColor.Gray);
-                            return this;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        throw new Exception($"Fehler beim Einlesen der CSV-Datei: {ex.Message}");
-                    }
-                }
-                else
-                {
-                    var panel = new Panel("Die Datei 'schueler.csv' wurde nicht gefunden. Bitte erstellen Sie die Datei im UTF8-Format.")
-                            .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] !? [/]")
-                            .HeaderAlignment(Justify.Left)
-                            .SquareBorder()
-                            .Expand()
-                            .BorderColor(Global.ColorFehler);
-                    AnsiConsole.Write(panel);
-                    throw new Exception($"[grey]  Zuerst die Hinweise [/][bold red]!?[/][grey] bearbeiten, dann hierher zurückkehren![/]");
-                }
-            }
-            else if (Directory.GetFiles(inputFolder, "*.csv").Length == 0)
-            {
-                var panel = new Panel($"{Path.Combine(inputFolder, "schueler.csv")} existiert nicht. Bitte erstellen Sie die Datei im UTF8-Format.\nFolgende Spalten sind Pflicht: Vorname, Nachname, Geburtsdatum (DD-MM-YYYY), Klasse")
-                            .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] !? [/]")
-                            .HeaderAlignment(Justify.Left)
-                            .SquareBorder()
-                            .Expand()
-                            .BorderColor(Global.ColorFehler);
-                AnsiConsole.Write(panel);
-                throw new Exception($"[grey]  Zuerst die Hinweise [/][bold red]!?[/][grey] bearbeiten, dann hierher zurückkehren![/]");
-            }
-            else if (Directory.GetFiles(inputFolder, "*.csv").Length > 1)
-            {
-                var panel = new Panel($"Es gibt mehrere CSV-Dateien in {inputFolder}. Es darf nur eine CSV-Datei vorhanden sein.")
-                            .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] !? [/]")
-                            .HeaderAlignment(Justify.Left)
-                            .SquareBorder()
-                            .Expand()
-                            .BorderColor(Global.ColorFehler);
-                AnsiConsole.Write(panel);
-                throw new Exception($"[grey]  Zuerst die Hinweise [/][bold red]!?[/][grey] bearbeiten, dann hierher zurückkehren![/]");
-            }
-        }
-        while (this.Count == 0);
-        return this;
-    }
+    
 
     private void ErgänzeFehlendeEigenschaften(Student vS, Student nS)
     {
@@ -1047,31 +942,6 @@ public class Students : List<Student>
             }
         }
         Global.ZeileSchreiben("Fotos in Stream umgewandelt", this.Where(x => x.ZielFotoPfad != null).Count().ToString(), ConsoleColor.Green, ConsoleColor.Black);
-    }
-
-    internal void PdfDateienVerarbeiten(IConfiguration configuration)
-    {
-        List<string> schlüsselwörter = configuration["Schlüsselwörter"].ToString().Trim().Split(",").ToList();
-
-        foreach (string dateiName in Directory.GetFiles(Path.Combine(configuration["PfadDownloads"], "PDF-Input"), "*.*").Where(file => file.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase)))
-        {
-            var pdfDatei = new PdfDatei(dateiName);
-            pdfDatei.Seiten.Read(dateiName);
-            pdfDatei.Students = pdfDatei.GetStudentsMitSeiten(this);
-
-            foreach (var student in pdfDatei.Students)
-            {
-                string art = student.PdfSeiten.GetArt(schlüsselwörter);
-                string datum = student.PdfSeiten.GetDatum();
-                student.CreateFolderPdfDateien();
-                student.ZieldateiSpeichern(art, datum, dateiName);
-            }
-
-            if (pdfDatei.Students.Any())
-            {
-                pdfDatei.SeitenAusQuelldateienLöschen();
-            }
-        }
     }
 
     internal void GetPfadDokumentenverwaltung(IConfiguration configuration)
