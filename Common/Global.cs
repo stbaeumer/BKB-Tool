@@ -9,6 +9,7 @@ using Spectre.Console;
 using Path = System.IO.Path;
 using dotenv.net;
 using static KonfigHelper;
+using PdfSharp.Pdf;
 
 #pragma warning disable CS0252 // Unbeabsichtigter Verweisvergleich. Wandeln Sie die linke Seite in den Typ "string" um, um einen Wertvergleich durchzuführen.
 #pragma warning disable CA2200
@@ -1506,6 +1507,55 @@ public static class Global
             }
         }
         return false;
+    }
+
+    internal static void CheckIObDateiGeschlossen(string pfad)
+    {
+        if (pfad == null)
+            return;
+
+        if (string.IsNullOrEmpty(pfad))
+            return;
+
+        try
+        {
+            pfad = Path.GetFullPath(pfad);
+        }
+        catch
+        {
+            // Falls Pfad ungültig, abbrechen
+            return;
+        }
+
+        // Wiederhole, bis die Datei exklusiv geöffnet werden kann (d.h. nicht mehr von einer anderen Anwendung gehalten wird).
+        while (true)
+        {
+            try
+            {
+                using (var fs = new System.IO.FileStream(pfad, System.IO.FileMode.Open, System.IO.FileAccess.ReadWrite, System.IO.FileShare.None))
+                {
+                    // Datei ist nicht gesperrt — weiter
+                    break;
+                }
+            }
+            catch
+            {
+                // Datei ist noch geöffnet/sperrt. Aufforderung an den Anwender.
+                var dateiname = Path.GetFileName(pfad);
+                AnsiConsole.MarkupLine($"[red]Schließen Sie zuerst die Datei {dateiname}. Dann ENTER[/]");
+
+                // Leere den Input-Puffer und warte auf ENTER
+                while (Console.KeyAvailable) Console.ReadKey(true);
+                ConsoleKey key;
+                do
+                {
+                    var ki = Console.ReadKey(true);
+                    key = ki.Key;
+                } while (key != ConsoleKey.Enter);
+
+                // Danach erneut prüfen
+            }
+        }
     }
 }    
 

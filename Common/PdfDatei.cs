@@ -51,6 +51,8 @@ public class PdfDatei
         if (!string.IsNullOrEmpty(title))
             table.Title = new TableTitle(title);
 
+        var zuLöschendeSeiten = new List<int>();
+
         table.Expand();
         table.AddColumn("Nr.");
         table.AddColumn("Nachname");
@@ -65,10 +67,11 @@ public class PdfDatei
         table.AddColumn("alte Datei");
 
 
-        // Durchlaufe alle Elemente in dieser Datei
+        // Durchlaufe alle Elemente (verschiedene )Schüler) in dieser Datei
         for (var i = 0; i < AnzahlElementeInDieserDatei; i++)
         {
-            var seiten = new PdfSeiten();
+            var pdfSeiten = new PdfSeiten();
+
 
             // Die Inhalte aller Seiten eines Elements zusammenfügen
             var inhalt = "";
@@ -80,7 +83,7 @@ public class PdfDatei
             for (laufendeSeitennummer = ersteSeiteDesElements; laufendeSeitennummer <= letzteSeiteDesElements; laufendeSeitennummer++)
             {
                 inhalt += Seiten[laufendeSeitennummer - 1].Inhalt;
-                seiten.Add(Seiten[laufendeSeitennummer - 1]);
+                pdfSeiten.Add(Seiten[laufendeSeitennummer - 1]);
             }
 
             // Den Student aus dem Inhalt aller Seiten eines Elements extrahieren
@@ -148,54 +151,63 @@ public class PdfDatei
                     ordnerNeu = "neu";
                 }
 
-                Global.OpenFolder(student.Zielordner, true);
+                OpenFolder(student.Zielordner, true);
 
                 PdfDocument quelldatei = PdfReader.Open(DateiName, PdfDocumentOpenMode.Import);
                 PdfDocument zieldatei = new PdfDocument();
 
-                student.PdfSeiten = seiten;
+                student.PdfSeiten = pdfSeiten;
 
-                foreach (var pdfSeite in seiten)
+                foreach (var pdfSeite in pdfSeiten)
                 {
                     zieldatei.AddPage(quelldatei.Pages[pdfSeite.Seite - 1]);
                 }
-                                
+
+                CheckIObDateiGeschlossen(DateiName);
+
                 zieldatei.Save(student.Zielordner + "/" + $"{student.Nachname}_{student.Vorname}_{student.Geburtsdatum}_{Art}_{gefundenesDatum}.pdf");
 
-                UserPrompts.ConfirmOrThrow($"Wurde {Path.GetFileName($"{student.Nachname}_{student.Vorname}_{student.Geburtsdatum}_{Art}_{gefundenesDatum}.pdf")} korrekt im Zielordner gespeichert?");
+                UserPrompts.ConfirmOrThrowSeiten($"Wurde {Path.GetFileName($"{student.Nachname}_{student.Vorname}_{student.Geburtsdatum}_{Art}_{gefundenesDatum}.pdf")} korrekt im Zielordner gespeichert?");
 
                 // Löschen
-                var document = PdfSharp.Pdf.IO.PdfReader.Open(DateiName, PdfDocumentOpenMode.Modify);
-                                
                 for (int j = student.PdfSeiten.Count; 0 < j; j--)
                 {
                     var seite = student.PdfSeiten[j - 1];
-                    document.Pages.RemoveAt(seite.Seite - 1);
-                }
-                
-                var gelöscht = "nichts";
-
-                if (document.Pages.Count == 0)
-                {
-                    File.Delete(DateiName);
-                    gelöscht = "Datei gelöscht";
-                }                    
-                if (document.Pages.Count > 0)
-                {
-                    document.Save(DateiName);
-                    gelöscht = "Seiten gelöscht";
+                    zuLöschendeSeiten.Add(seite.Seite - 1);                
                 }
 
                 table.AddRow(new Text((i + 1).ToString()), new Text(student.Nachname), new Text(student.Vorname), new Text(student.Geburtsdatum), new Text($"{ersteSeiteDesElements}"), new Text($"{letzteSeiteDesElements}"), new Text(gefundenesDatum), new Text(ordnerNeu), new Text("erstellt"));
 
-                OpenFolder(Path.GetDirectoryName(DateiName), true);
-                UserPrompts.ConfirmOrThrow($"{Path.GetFileName(DateiName)} korrekt gelöscht bzw. Seiten entfernt?");
-
                 studentsMitSeiten.Add(student);
             }
         }
+                
+        CheckIObDateiGeschlossen(DateiName);
+        OpenFolder(Path.GetDirectoryName(DateiName), true);
 
+        using (var document = PdfReader.Open(DateiName, PdfDocumentOpenMode.Modify))
+        {
+            foreach (var z in zuLöschendeSeiten.OrderByDescending(x=>x))
+            {                 
+                document.Pages.RemoveAt(z);
+            }
+
+            if (document.Pages.Count == 0)
+            {
+                document.Close(); // optional, wird beim Dispose ausgeführt
+                File.Delete(DateiName);
+            }
+            else
+            {
+                document.Save(DateiName);
+            }
+        } // document disposed hier
+              
+        
         AnsiConsole.Write(table);
+
+        UserPrompts.ConfirmOrThrowDateien($"{Path.GetFileName(DateiName)} korrekt gelöscht bzw. Seiten entfernt?");
+
         return studentsMitSeiten;
     }
 

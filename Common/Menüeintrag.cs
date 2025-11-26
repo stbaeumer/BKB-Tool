@@ -5466,11 +5466,6 @@ public class Menüeintrag
 
     internal void GetStudentsVonAtlantisCsv(IConfiguration configuration)
     {
-        configuration = Global.Konfig("PfadDownloads", Global.Modus.Read, configuration);
-        configuration = Global.Konfig("PfadDokumentenverwaltung", Global.Modus.Read, configuration);
-        configuration = Global.Konfig("Schluesselwoerter", Global.Modus.Update, configuration);
-
-        //var students = new Students();
         var inputFolder = Path.Combine(configuration["PfadDownloads"], "PDF-Input");
 
         if (!Directory.Exists(inputFolder))
@@ -5597,7 +5592,7 @@ public class Menüeintrag
             catch (Exception ex)
             {
                 Console.WriteLine(dateiName + ": " + ex.Message);
-            }            
+            }       
         }
     }
 

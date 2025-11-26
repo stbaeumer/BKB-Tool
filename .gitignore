@@ -1,78 +1,116 @@
-﻿# Build artifacts
+﻿############
+# Build Artefacts
+############
 **/bin/
 **/obj/
-Common/obj/
-BKB-Tool/obj/
-
-# Environment files
-.env
-*.json
-
-# Local folders
+publish/
 Downloads/
 Datenaustausch/
 Ausgabeverzeichnis/
 Passwörter/
-publish/
 
-# Prerequisites
-*.d
+############
+# User-specific files
+############
+*.user
+*.userosscache
+*.suo
+*.userprefs
+*.vcxproj.user
+*.rsuser
+*.ide/
 
-# Object files
-*.o
-*.ko
-*.obj
-*.elf
+############
+# Visual Studio
+############
+.vs/
+.vscode/
+*.VC.db
+*.VC.opendb
+*.vscode/
 
-# Linker output
-*.ilk
-*.map
-*.exp
+############
+# Rider / JetBrains
+############
+.idea/
 
-# Precompiled headers
-*.gch
-*.pch
+############
+# Logs
+############
+*.log
 
-# Libraries
-*.lib
-*.a
-*.la
-*.lo
+############
+# Environment Files
+############
+.env
 
-# Shared objects / DLLs
+############
+# JSON – but keep project-specific JSON!
+############
+*.json
+!appsettings*.json   # Keep .NET config files
+
+############
+# System
+############
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+############
+# Package managers
+############
+node_modules/
+packages/
+
+############
+# NuGet
+############
+*.nupkg
+*.snupkg
+project.lock.json
+
+############
+# Misc
+############
+*.tmp
+*.bak
+*.old
+
+############
+# Executables
+############
+*.exe
 *.dll
 *.so
-*.so.*
 *.dylib
-
-# Executables
-*.exe
 *.out
 *.app
-*.i*86
-*.x86_64
-*.hex
 
-# Debug files
-*.dSYM/
-*.su
-*.idb
+############
+# Debug
+############
 *.pdb
+*.mdb
+*.dSYM/
+*.idb
 
-# Kernel module compile results
-*.mod*
-*.cmd
-.tmp_versions/
-modules.order
-Module.symvers
-Mkfile.old
-dkms.conf
+############
+# Icons/Resources (compiled)
+############
+*.ico
+*.png
 
-# Visual Studio
-.vs/
-*.user
-*.suo
+############
+# MSBuild
+############
 *.cache/
-*.ide/
-*.VC.db
-*.VC.VC.opendb
+*.db
+
+############
+# Ignore accidental Copilot/Chat logs
+############
+**/copilot-chat/
+**/CopilotIndices/
+**/*.db
+**/*.v2

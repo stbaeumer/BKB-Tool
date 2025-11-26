@@ -690,12 +690,15 @@ public static class MenueHelper
                             [
                                 $"PDF-Zeugnisse und andere PDF-Dateien in [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(configuration["PfadDownloads"], "PDF-Input")}[/] werden in die Schüler*innen-Ordner der SchILD-Dokumentenverwaltung einsortiert.",
                                 $"[{Global.GetColor(Global.ColorHinweise)}]Vorbereitung #1[/]: Zu kopierende PDF-Dateien nach [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(configuration["PfadDownloads"], "PDF-Input")}[/] kopieren.",
-                                $"[{Global.GetColor(Global.ColorHinweise)}]Vorbereitung #2[/]: Eine UTF8-CSV-Datei mit Spalten: Nachname, Vorname, Geburtsdatum und Klasse aus Atlantis exportieren und in [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(configuration["PfadDownloads"], "PDF-Input")}[/] ablegen.",
-                                $"[{Global.GetColor(Global.ColorTextHervorheben)}]Durchführung #1[/]: (Einzelne) Klasse(n) oder 'alle' auswählen.",
+                                $"[{Global.GetColor(Global.ColorHinweise)}]Vorbereitung #2[/]: Eine UTF8-CSV-Datei mit Spalten: Nachname, Vorname, Geburtsdatum (aus Atlantis) exportieren und in [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(configuration["PfadDownloads"], "PDF-Input")}[/] ablegen.",                                
                                 $"[{Global.GetColor(Global.ColorTextHervorheben)}]Durchführung #2[/]: Geben Sie die Schlüsselwörter an, um die interessierenden PDF-Dateien einzugrenzen.",
                             ],
                             m =>
                             {
+                                configuration = Global.Konfig("PfadDownloads", Global.Modus.Read, configuration);
+                                configuration = Global.Konfig("PfadDokumentenverwaltung", Global.Modus.Read, configuration);
+                                configuration = Global.Konfig("Schluesselwoerter", Global.Modus.Update, configuration);
+
                                 m.GetStudentsVonAtlantisCsv(configuration);
                                 m.PdfDateienVerarbeiten(configuration);
                             },
