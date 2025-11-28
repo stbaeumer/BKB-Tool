@@ -65,7 +65,9 @@ public class PdfSeiten : List<PdfSeite>
             foreach (Page page in pdfDocument.GetPages())
             {
                 var pdfSeite = new PdfSeite();
-
+                
+                pdfSeite.Inhalt = "";
+                
                 foreach (var word in page.GetWords())
                 {
                     pdfSeite.Inhalt += word + " ";

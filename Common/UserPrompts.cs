@@ -8,6 +8,10 @@ public static class UserPrompts
     private static bool _skipConfirmationSeiten = false;
     private static bool _skipConfirmationDateien = false;
 
+    // Anzahl an künftigen Durchläufen, die ohne Nachfrage übersprungen werden sollen
+    private static int _skipConfirmationSeitenCount = 0;
+    private static int _skipConfirmationDateienCount = 0;
+
     public static bool SkipConfirmationSeiten
     {
         get => _skipConfirmationSeiten;
@@ -22,14 +26,23 @@ public static class UserPrompts
 
     /// <summary>
     /// Fragt den Benutzer mit einer individuellen Frage.
-    /// j = weiter, x = Exception (Abbruch), w = nicht mehr fragen in dieser Session.
+    /// ENTER = weiter, x = Exception (Abbruch), w = nicht mehr fragen in dieser Session,
+    /// Ziffer 1-9 = 10-90 weitere Durchläufe ohne Nachfrage.
     /// </summary>
     public static void ConfirmOrThrowSeiten(string question)
     {
-        if (_skipConfirmationSeiten) return;     
+        // Wenn dauerhaft unterdrückt, sofort zurück
+        if (_skipConfirmationSeiten) return;
+
+        // Wenn temporär überspringen (Zähler > 0), dann Zähler verringern und zurück
+        if (_skipConfirmationSeitenCount > 0)
+        {
+            _skipConfirmationSeitenCount--;
+            return;
+        }
 
         AnsiConsole.MarkupLine($"[{Global.GetColor(Global.ColorHinweise)}]{question}[/]");
-        AnsiConsole.MarkupLine($"Drücken Sie [green]ENTER[/] (weiter), [red]x[/] (abbrechen) oder [yellow]w[/] (weiter, nicht mehr fragen in dieser Session).");
+        AnsiConsole.MarkupLine($"Drücken Sie [green]ENTER[/] (weiter), [red]x[/] (abbrechen), [yellow]w[/] (weiter, nicht mehr fragen in dieser Session) oder eine Ziffer [aqua]1-9[/] (10-90 Durchläufe überspringen).");
 
         while (true)
         {
@@ -55,19 +68,38 @@ public static class UserPrompts
                 _skipConfirmationSeiten = true;
                 return; // bestätigen und künftige Fragen unterdrücken
             }
+
+            // Ziffern 1-9: setze temporären Skip-Zähler (10-90 Durchläufe)
+            if (c >= '1' && c <= '9')
+            {
+                int multiplier = c - '0';
+                _skipConfirmationSeitenCount = multiplier * 10;
+                AnsiConsole.MarkupLine($"[yellow]Überspringe die nächsten {_skipConfirmationSeitenCount} Durchläufe ohne Nachfrage.[/]");
+                return;
+            }
+            // ungültige Taste → erneut fragen
         }
     }
 
     /// <summary>
     /// Fragt den Benutzer mit einer individuellen Frage.
-    /// j = weiter, x = Exception (Abbruch), w = nicht mehr fragen in dieser Session.
+    /// ENTER = weiter, x = Exception (Abbruch), w = nicht mehr fragen in dieser Session,
+    /// Ziffer 1-9 = 10-90 weitere Durchläufe ohne Nachfrage.
     /// </summary>
     public static void ConfirmOrThrowDateien(string question)
-    {   
+    {
+        // Wenn dauerhaft unterdrückt, sofort zurück
         if (_skipConfirmationDateien) return;
 
+        // Wenn temporär überspringen (Zähler > 0), dann Zähler verringern und zurück
+        if (_skipConfirmationDateienCount > 0)
+        {
+            _skipConfirmationDateienCount--;
+            return;
+        }
+
         AnsiConsole.MarkupLine($"[{Global.GetColor(Global.ColorHinweise)}]{question}[/]");
-        AnsiConsole.MarkupLine($"Drücken Sie [green]ENTER[/] (weiter), [red]x[/] (abbrechen) oder [yellow]w[/] (weiter, nicht mehr fragen in dieser Session).");
+        AnsiConsole.MarkupLine($"Drücken Sie [green]ENTER[/] (weiter), [red]x[/] (abbrechen), [yellow]w[/] (weiter, nicht mehr fragen in dieser Session) oder eine Ziffer [aqua]1-9[/] (10-90 Durchläufe überspringen).");
 
         while (true)
         {
@@ -93,6 +125,16 @@ public static class UserPrompts
                 _skipConfirmationDateien = true;
                 return; // bestätigen und künftige Fragen unterdrücken
             }
+
+            // Ziffern 1-9: setze temporären Skip-Zähler (10-90 Durchläufe)
+            if (c >= '1' && c <= '9')
+            {
+                int multiplier = c - '0';
+                _skipConfirmationDateienCount = multiplier * 10;
+                AnsiConsole.MarkupLine($"[yellow]Überspringe die nächsten {_skipConfirmationDateienCount} Durchläufe ohne Nachfrage.[/]");
+                return;
+            }
+            // ungültige Taste → erneut fragen
         }
     }
 }

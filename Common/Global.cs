@@ -1509,7 +1509,7 @@ public static class Global
         return false;
     }
 
-    internal static void CheckIObDateiGeschlossen(string pfad)
+    internal static void CheckObDateiGeschlossen(string pfad)
     {
         if (pfad == null)
             return;
@@ -2018,7 +2018,7 @@ public static class KonfigHelper
         ["Schluesselwoerter"] = new KonfigMeta
         {
             Key = "Schluesselwoerter",
-            DefaultValue = "Jahreeszeugnis, Abschlusszeugnis, Abgangszeugnis, Zeugnis",
+            DefaultValue = "Fachhochschulreife, Hochschulreife, Halbjahreszeugnis, Jahreszeugnis, Abschlusszeugnis, Abgangszeugnis, Zeugnis",
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie kommagetrennt interessierende [{Global.GetColor(Global.ColorInfoBox)}]Schluesselwoerter[/] an (z.B. Abgangszeugnis, Abschlusszeugnis, Jahreszeugnis). BKB-Tool durchsucht die PDF-Dateien im Ordner nach den Wörtern. Sobald ein Schlüsselwort matcht, wird die Datei in das Dokumentenverzeichnis kopiert.",
             Datentyp = Global.Datentyp.ListString,

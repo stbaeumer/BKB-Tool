@@ -35,7 +35,7 @@ public class PdfDatei
         Students = new Students();
     }
 
-    public Students GetStudentsMitSeiten(Students students, IConfiguration configuration)
+    public Students PdfDateiVerarbeiten(Students students, IConfiguration configuration)
     {
         Students studentsMitSeiten = new Students();
         var element = 1;
@@ -62,9 +62,8 @@ public class PdfDatei
         table.AddColumn("letzte");
         table.AddColumn("Zeugnisdat");
         table.AddColumn("Zielordner");
-        table.AddColumn("Zieldatei");
-        table.AddColumn("neue Datei");
-        table.AddColumn("alte Datei");
+        table.AddColumn("Zieldatei");        
+        table.AddColumn("gelöschte Seiten (Index)");
 
 
         // Durchlaufe alle Elemente (verschiedene )Schüler) in dieser Datei
@@ -137,7 +136,7 @@ public class PdfDatei
 
             if (student == null)
             {
-                table.AddRow(new Text((i + 1).ToString()), new Text(""), new Text(" "), new Text(" "), new Text($"{ersteSeiteDesElements}"), new Text($"{letzteSeiteDesElements}"), new Text($"{""}"), new Text($"{""}"), new Text($"{""}"), new Text($"{""}"), new Text($"{""}"));                
+                table.AddRow(new Text((i + 1).ToString()), new Text(""), new Text(" "), new Text(" "), new Text($"{ersteSeiteDesElements}"), new Text($"{letzteSeiteDesElements}"), new Text($"{""}"), new Text($"{""}"), new Text($"{""}"), new Text($"{""}"));
             }
             else 
             {
@@ -163,7 +162,7 @@ public class PdfDatei
                     zieldatei.AddPage(quelldatei.Pages[pdfSeite.Seite - 1]);
                 }
 
-                CheckIObDateiGeschlossen(DateiName);
+                CheckObDateiGeschlossen(DateiName);
 
                 zieldatei.Save(student.Zielordner + "/" + $"{student.Nachname}_{student.Vorname}_{student.Geburtsdatum}_{Art}_{gefundenesDatum}.pdf");
 
@@ -176,14 +175,14 @@ public class PdfDatei
                     zuLöschendeSeiten.Add(seite.Seite - 1);                
                 }
 
-                table.AddRow(new Text((i + 1).ToString()), new Text(student.Nachname), new Text(student.Vorname), new Text(student.Geburtsdatum), new Text($"{ersteSeiteDesElements}"), new Text($"{letzteSeiteDesElements}"), new Text(gefundenesDatum), new Text(ordnerNeu), new Text("erstellt"));
+                table.AddRow(new Text((i + 1).ToString()), new Text(student.Nachname), new Text(student.Vorname), new Text(student.Geburtsdatum), new Text($"{ersteSeiteDesElements}"), new Text($"{letzteSeiteDesElements}"), new Text(gefundenesDatum), new Text(ordnerNeu), new Text("erstellt"), new Text(string.Join(',', zuLöschendeSeiten.OrderBy(x=>x))));
 
                 studentsMitSeiten.Add(student);
             }
         }
                 
-        CheckIObDateiGeschlossen(DateiName);
-        OpenFolder(Path.GetDirectoryName(DateiName), true);
+        CheckObDateiGeschlossen(DateiName);
+        //OpenFolder(Path.GetDirectoryName(DateiName), true);
 
         using (var document = PdfReader.Open(DateiName, PdfDocumentOpenMode.Modify))
         {
@@ -314,7 +313,7 @@ public class PdfDatei
 
             foreach (var a in aa)
             {
-                if (!art.Contains(a))
+                if (!art.Contains(a.Trim()))
                 {
                     art.Add(a.Trim());
                 }
@@ -323,15 +322,16 @@ public class PdfDatei
 
         if (art.Count == 1)
         {
-            return art[0];
+            return art.OrderByDescending(x=>x).FirstOrDefault();
         }
 
         if (art.Count == 0)
         {
-            Console.WriteLine("Art nicht erkannt.");
-            while (Console.KeyAvailable) Console.ReadKey(true);
+            Console.WriteLine("Art nicht erkannt: " + this.DateiName);
+            //while (Console.KeyAvailable) Console.ReadKey(true);
 
-            Console.ReadKey();
+            //Console.ReadKey();
+            return "";
         }
         return art[0];        
     }
@@ -348,6 +348,9 @@ public class PdfDatei
                 anzahlElemete++;
             }
         }
-        return anzahlElemete;
+
+        // E muss immer mindestes 1 Element geben
+
+        return Math.Max(1, anzahlElemete);
     }
 }

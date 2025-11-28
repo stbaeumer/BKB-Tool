@@ -98,11 +98,33 @@ public partial class PdfSeite
 
     public List<string> SuchmusterAnwenden(List<string> muster)
     {
-        List<string> art = new List<string>();
+        var art = new List<string>();
 
-        foreach (var a in from m in muster select Regex.Match(Inhalt, m, RegexOptions.IgnoreCase) into match where match.Success select match.Value == null ? "" : match.Value into a where !art.Contains(a) select a)
+        if (muster == null || muster.Count == 0) return art;
+
+        // Sortiere die Muster absteigend nach Länge, damit längere (präzisere) Muster zuerst geprüft werden.
+        var geordneteMuster = muster
+            .Where(m => !string.IsNullOrEmpty(m))
+            .OrderByDescending(m => m.Length)
+            .ToList();
+
+        foreach (var m in geordneteMuster)
         {
-            art.Add(a);
+            var match = Regex.Match(Inhalt ?? string.Empty, m.Trim(), RegexOptions.IgnoreCase);
+            if (!match.Success) continue;
+
+            var value = match.Value ?? string.Empty;
+            if (string.IsNullOrEmpty(value)) continue;
+
+            // Wenn bereits ein vorhandener Eintrag den neuen Wert enthält (längerer Treffer), dann überspringen.
+            if (art.Any(existing => existing.IndexOf(value, StringComparison.OrdinalIgnoreCase) >= 0))
+                continue;
+
+            // Wenn der genaue Wert schon vorhanden ist, überspringen.
+            if (art.Any(existing => string.Equals(existing, value, StringComparison.OrdinalIgnoreCase)))
+                continue;
+
+            art.Add(value);
         }
 
         return art;

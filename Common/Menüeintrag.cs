@@ -5571,23 +5571,19 @@ public class Menüeintrag
         {
             try
             {
+                if (dateiName.Contains("ADLER"))
+                {
+                    string a = "";
+                }
+                    
+
                 var pdfDatei = new PdfDatei(dateiName);
-                pdfDatei.Seiten.Einlesen(dateiName);
-                pdfDatei.AnzahlElementeInDieserDatei = pdfDatei.GetAnzahlElementeProDatei(configuration);
+                pdfDatei.Seiten.Einlesen(dateiName);                
                 pdfDatei.Art = pdfDatei.GetArt(schlüsselwörter);
-                pdfDatei.Students = pdfDatei.GetStudentsMitSeiten(Students, configuration);
-
-                foreach (var student in pdfDatei.Students)
-                {
-                    string datum = student.PdfSeiten.GetDatum();
-                    student.CreateFolderPdfDateien(configuration);
-                    student.ZieldateiSpeichern(pdfDatei.Art, datum, dateiName);
-                }
-
-                if (pdfDatei.Students.Any())
-                {
-                    pdfDatei.SeitenAusQuelldateienLöschen();
-                }
+                if (string.IsNullOrEmpty(pdfDatei.Art))
+                    continue;
+                pdfDatei.AnzahlElementeInDieserDatei = pdfDatei.GetAnzahlElementeProDatei(configuration);
+                pdfDatei.PdfDateiVerarbeiten(Students, configuration);
             }
             catch (Exception ex)
             {
