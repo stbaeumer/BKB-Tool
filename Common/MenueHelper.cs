@@ -745,10 +745,10 @@ public static class MenueHelper
                         m =>
                         {
                             m.FilterInteressierendeStudentsUndKlassen(configuration);
-                            configuration = Global.Konfig("Abschnitt", Global.Modus.Read, configuration);
-                            configuration = Global.Konfig("Schulnummer", Global.Modus.Read, configuration);                            
-                            configuration = Global.Konfig("ZeugnisDatum", Global.Modus.Read, configuration);
-                            configuration = Global.Konfig("Kursarten", Global.Modus.Read, configuration);
+                            configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration);
+                            configuration = Global.Konfig("Schulnummer", Global.Modus.Update, configuration);                            
+                            configuration = Global.Konfig("ZeugnisDatum", Global.Modus.Update, configuration);
+                            configuration = Global.Konfig("Kursarten", Global.Modus.Update, configuration);
 
                             m.Unterrichte = new Unterrichte(configuration, m, Global.Zweck.Zeugnis, Global.Art.KursUnterrichte);
                             m.Unterrichte.AddRange(new Unterrichte(configuration, m, Global.Zweck.Zeugnis, Global.Art.NichtKursUnterrichte));
@@ -809,7 +809,7 @@ public static class MenueHelper
                         Global.NurBeiDiesenSchulnummern.Alle
                     ),
                     new Menüeintrag(
-                        "Klausurbelegung: Wiki-Seite (mit Zuordnung der SuS ZU allen Fächern) erstellen",
+                        "Klausurbelegung: Wiki-Seite (mit Zuordnung der SuS zu allen Fächern) erstellen",
                         quelldateien.Notwendige(configuration, ["faecher,dat","gpu002,txt","kurse.,dat","studentgroupstudents,csv", "schuelerleistungsdaten,dat"]),
                         students,
                         klassen,

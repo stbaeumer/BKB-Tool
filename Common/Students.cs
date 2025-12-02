@@ -1226,10 +1226,10 @@ public class Students : List<Student>
                     statusstring += " in Neuaufnahme, ";
                     break;
                 case "2":
-                    statusstring += " Aktive, ";
+                    statusstring += " aktive, ";
                     break;
                 case "6":
-                    statusstring += " Externe, ";
+                    statusstring += " extern, ";
                     break;
                 case "8":
                     statusstring += " mit Abschluss, ";
@@ -1238,7 +1238,7 @@ public class Students : List<Student>
                     statusstring += " abgegangen, ";
                     break;
                 default:
-                    statusstring += " Beurlaubte, ";
+                    statusstring += " beurlaubt, ";
                     break;
             }
         }
