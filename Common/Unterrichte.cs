@@ -24,7 +24,6 @@ public class Unterrichte : List<Unterricht>
         var zulässigeAuswahlOptionen = GetZulässigeUnterrichtsgruppen(configuration, gpu002);
 
         if (Global.Art.KursUnterrichte == art)
-            if (zulässigeAuswahlOptionen != "")
                 configuration = Global.Konfig("InteressierendeUnterrichtsgruppen", Global.Modus.Update, configuration, null, -1, -1, null, null, null, zulässigeAuswahlOptionen + ",_"); // wird immer abgefragt
 
         AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start($"{art} aus GPU002.TXT einlesen ...", ctx =>
