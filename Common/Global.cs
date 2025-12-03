@@ -1204,14 +1204,17 @@ public static class Global
             .AddJsonFile("BKB-Tool.json", optional: false, reloadOnChange: false)
             .Build();
 
-        // Alle Values entschlüsseln
-        foreach (var key in configuration.AsEnumerable())
+        // Alle Values entschlüsseln (robuster, ohne viele Exceptions)
+        // Alle Values entschlüsseln (robuster, ohne viele Exceptions)
+        // Erst Werte sammeln, dann setzen – vermeidet Änderungen während der Enumeration.
+        var sw = Stopwatch.StartNew();
+        var items = configuration.AsEnumerable().Where(kv => !string.IsNullOrEmpty(kv.Value)).ToList();
+        foreach (var kv in items)
         {
-            if (key.Value != null)
-            {
-                configuration[key.Key] = Entschluesseln(key.Value);
-            }
+            configuration[kv.Key] = Entschluesseln(kv.Value);
         }
+        sw.Stop();
+        AnsiConsole.MarkupLine($"[grey]Konfiguration dekodiert in {sw.ElapsedMilliseconds} ms[/]");
 
         while (string.IsNullOrEmpty(configuration["ZustimmungLizenz"]) ||
                (configuration["ZustimmungLizenz"]?.ToLower() != "ja" && configuration["ZustimmungLizenz"]?.ToLower() != "j"))
@@ -1328,17 +1331,44 @@ public static class Global
     }
     public static string Entschluesseln(string encryptedValue)
     {
-        // Beispiel für eine einfache Entschlüsselung (Base64)
+        if (string.IsNullOrEmpty(encryptedValue))
+            return encryptedValue;
+
+        // Kurze Heuristik: Base64 darf nur bestimmte Zeichen enthalten und Länge ist vielfaches von 4 (mit '=' Padding)
+        // Diese Prüfung vermeidet unnötige Dekodierversuche / Exceptions.
+        for (int i = 0; i < encryptedValue.Length; i++)
+        {
+            char c = encryptedValue[i];
+            // erlaubte Base64‑Zeichen: A-Z a-z 0-9 + / und Padding '='
+            if (!(char.IsLetterOrDigit(c) || c == '+' || c == '/' || c == '='))
+                return encryptedValue;
+        }
+        if (encryptedValue.Length % 4 != 0)
+            return encryptedValue;
+
+        // Versuche schonend zu dekodieren (TryFromBase64String vermeidet Exceptions).
         try
         {
-            byte[] data = Convert.FromBase64String(encryptedValue);
-            return Encoding.UTF8.GetString(data);
+            int maxBytes = (encryptedValue.Length * 3) / 4;
+            if (maxBytes <= 1024)
+            {
+                Span<byte> buffer = stackalloc byte[maxBytes];
+                if (Convert.TryFromBase64String(encryptedValue, buffer, out int written))
+                    return Encoding.UTF8.GetString(buffer.Slice(0, written));
+            }
+            else
+            {
+                byte[] buffer = new byte[maxBytes];
+                if (Convert.TryFromBase64String(encryptedValue, buffer, out int written))
+                    return Encoding.UTF8.GetString(buffer, 0, written);
+            }
         }
         catch
         {
-            // Falls der Wert nicht entschlüsselt werden kann, wird er unverändert zurückgegeben
-            return encryptedValue;
+            // Fallback: im Fehlerfall den Originaltext zurückgeben
         }
+
+        return encryptedValue;
     }
 
     internal static DataAccess DataAccessHerstellen(IConfiguration configuration)
