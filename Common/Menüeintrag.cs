@@ -4304,7 +4304,7 @@ public class Menüeintrag
                 if (!(dictSb["Status"].ToString() == "2" || dictSb["Status"].ToString() == "6")) continue;
 
                 // Wenn der Nachname fehlt, überspringe diese Zeile
-                if (dictSz["Nachname"].ToString().StartsWith("Buding"))
+                if (dictSz["Nachname"].ToString().StartsWith("Wilgenbus"))
                 { 
                     string a = "";
                 }

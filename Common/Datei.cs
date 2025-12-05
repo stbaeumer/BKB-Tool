@@ -1913,7 +1913,7 @@ public class Datei : List<dynamic>
 
             AnsiConsole.Write(panel2);
             
-            AnsiConsole.MarkupLine($"Es gibt offene Fehlstunden:\nhttps://nessa.webuntis.com/open-periods\nOffene Fehlstunden müssen vor der Zeugniserstellung behandelt werden und werden nicht in das Zeugnis übernommen.");
+            AnsiConsole.MarkupLine($"Es gibt offene Fehlstunden:\nhttps://bk-borken.webuntis.com/open-periods\nOffene Fehlstunden müssen vor der Zeugniserstellung behandelt werden und werden nicht in das Zeugnis übernommen.");
             
             AnsiConsole.MarkupLine($"Die Zeugnisse sind vorbereitet:\nhttps://bkb.wiki/notenlisten:start\nhttps://bkb.wiki/konferenzen:teilkonferenzen:zeugniskonferenzen:start");
 

@@ -137,9 +137,9 @@ public static class MenueHelper
                                         [
                                             datei => datei.OrdnerOeffnen(),
                                             datei => datei.Erstellen(),
-                                            datei => datei.OeffneWebseite("https://nessa.webuntis.com/users"),
+                                            datei => datei.OeffneWebseite("https://bk-borken.webuntis.com/users"),
                                             datei => datei.OeffneWebseite("https://management.geevoo.de/import/"),
-                                            datei => datei.OeffneWebseite("https://nessa.webuntis.com/students")
+                                            datei => datei.OeffneWebseite("https://bk-borken.webuntis.com/students")
                                         ],
                                         [
                                             $"[{Global.GetColor(Global.ColorHinweise)}]#1:[/] In Webuntis als Webuntis-Admin:  [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Stammdaten > Schüler*innen > Import[/]",
@@ -152,7 +152,7 @@ public static class MenueHelper
                                         "ImportNachWebuntis-Stammdaten-Ausbildungsbeauftragte.csv", new string[] { "EMINUSMail" }, new string[] { }, ";", '\'', new UTF8Encoding(false), false,
                                         [
                                             datei => datei.Erstellen(),
-                                            datei => datei.OeffneWebseite("https://nessa.webuntis.com/apprenticerepresentatives")
+                                            datei => datei.OeffneWebseite("https://bk-borken.webuntis.com/apprenticerepresentatives")
                                         ],
                                         [
                                             $"[{Global.GetColor(Global.ColorHinweise)}]#1:[/] In Webuntis als Webuntis-Admin:  [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Stammdaten > Ausbildungsbeauftragte > Import[/]",
@@ -165,7 +165,7 @@ public static class MenueHelper
                                         "ImportNachWebuntis-Stammdaten-Erziehungsberechtigte.csv", new string[] { "EMINUSMail" }, new string[] { }, ";", '\'', new UTF8Encoding(false), false,
                                         [
                                             datei => datei.Erstellen(),
-                                            datei => datei.OeffneWebseite("https://nessa.webuntis.com/legalguardians")                                            
+                                            datei => datei.OeffneWebseite("https://bk-borken.webuntis.com/legalguardians")                                            
                                         ],   
                                         [
                                             $"[{Global.GetColor(Global.ColorHinweise)}]#1:[/] In Webuntis als Webuntis-Admin:  [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Stammdaten > Erziehungsberechtigte > Import[/]",
@@ -226,7 +226,7 @@ public static class MenueHelper
                             m.Zieldatei = new Datei(Path.Combine(configuration["PfadDownloads"] ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-" + (string.Join("-", m.IKlassen).Substring(0, Math.Min(25, string.Join("-", m.IKlassen).Length)) + "-Fotos.zip")));
                             m.Zieldatei?.FotosZippen(configuration, "", 0, m.IStudents);
                             m.Zieldatei.OrdnerOeffnen();
-                            m.OeffneWebseite("https://nessa.webuntis.com/students");
+                            m.OeffneWebseite("https://bk-borken.webuntis.com/students");
                             m.OeffneWebseite("https://management.geevoo.de/import/");
                             m.NeueFotosAusSchildOrdnerErstellenUndAlteFotosVerschieben(configuration);
                         },
