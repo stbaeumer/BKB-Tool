@@ -270,7 +270,7 @@ public static class MenueHelper
                                 [
                                     "Die 10% der KuK mit den meisten offenen Klassenbucheinträgen werden (mit folgender Einschränkung) angemahnt: Mit weniger als 10 offenen Eintragungen wird nicht gemahnt. ",
                                     "Ab 20 oder mehr Stunden wird die Schulleitung in CC informiert.",
-                                    $"Die Anzahl der offenen Klassenbucheinträge wird aus der Datei [{Global.GetColor(Global.ColorPfadInDateien)}]OpenPeriods[/] ausgelesen.",
+                                    $"Die Anzahl der offenen Klassenbucheinträge wird aus der Datei [{Global.GetColor(Global.ColorPfadInDateien)}]OpenPeriods[/] ausgelesen. Dazu am besten den Bericht auf 'Beginn des Schuljares' stellen.",
                                     "Die KuK werden zuerst angezeigt. Vor dem Mailversand wird nochmal explizit nach Bestätigung gefragt."
                                 ],
                                 m =>
@@ -387,7 +387,7 @@ public static class MenueHelper
                         ],
                         m =>
                         {
-                            m.OeffneDateienInDownloadsInNotepadPlusPlus(configuration, ["termine_fhr.csv", "termine_berufliches_gymnasium.csv", "termine_kollegium.csv", "termine_verwaltung.csv"]);                            
+                            m.OeffneDateienInEditor(configuration, ["termine_fhr.csv", "termine_berufliches_gymnasium.csv", "termine_kollegium.csv", "termine_verwaltung.csv"]);                            
                             foreach (var kalender in new List<string>(){"termine_berufliches_gymnasium", "termine_kollegium", "termine_fhr", "termine_verwaltung" })
                             {
                                 m.Kalender2Wiki(configuration,

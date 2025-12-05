@@ -318,9 +318,9 @@ WHERE (((SCHOOLYEAR_ID)= " + Global.AktSj[0] + Global.AktSj[1] + ") AND  ((TERM_
                 if (le != null)
                 {
                     var body = "Guten Morgen " + le.Titel + le.Vorname + " " + le.Nachname + ",\n\n";
-                    body += "es liegen einige offene Klassenbuch-Einträge (" + item.Count + ") vor, die Ihrer Verantwortung zugeordnet sind. \n\n";
+                    body += "es liegen " + item.Count + " offene Klassenbuch-Einträge vor. \n\n";
                     body += "Bitte kümmern Sie sich zeitnah um die Bearbeitung dieser Einträge.\n\n";
-                    body += "Vielen Dank für Ihre Unterstützung.\n\n";
+                    body += "Vielen Dank für Ihre Unterstützung!\n\n";
                     body += "Mit freundlichen Grüßen\n\n";
                     body += "Ihr Webuntis-Team";
 

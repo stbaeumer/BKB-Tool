@@ -3573,7 +3573,6 @@ public class Menüeintrag
                 foreach (var rec in sortedRecords)
                 {
                     var dict = (IDictionary<string, object>)rec;
-
                     var beginnString = (string)((IDictionary<string, object>)rec)["Beginn"];
                     var endeString = (string)((IDictionary<string, object>)rec)["Ende"];
                     var beginnDatum = DateTime.ParseExact(beginnString.Substring(3, beginnString.Length - 3),
@@ -4804,9 +4803,14 @@ public class Menüeintrag
         Global.ZeileSchreiben($"Alte Fotos verschoben:", dateien.Length.ToString());
     }
 
-    internal void OeffneDateienInDownloadsInNotepadPlusPlus(IConfiguration configuration, List<string> dateien)
+    internal void OeffneDateienInEditor(IConfiguration configuration, List<string> dateien)
     {
-        var notepadPlusPlusPath = @"C:\Program Files\Notepad++\notepad++.exe";
+        var notepadPlusPlusCandidates = new[]
+        {
+            @"C:\Program Files\Notepad++\notepad++.exe",
+            @"C:\Program Files (x86)\Notepad++\notepad++.exe"
+        };
+
         var pfadDownloads = configuration["PfadDownloads"];
         if (string.IsNullOrEmpty(pfadDownloads) || !Directory.Exists(pfadDownloads))
         {
@@ -4826,36 +4830,101 @@ public class Menüeintrag
             return;
         }
 
-        if (File.Exists(notepadPlusPlusPath))
-        {
-            var maxAlter = DateTime.Now.Date.AddDays(-0);
-            var dateienDieAelterSind = vollstaendigeDateien
-                .Where(datei => File.GetLastWriteTime(datei) < maxAlter)
-                .ToList();
+        // Prüfe auf veraltete Dateien (bestehendes Verhalten beibehalten)
+        var maxAlter = DateTime.Now.Date.AddDays(-0);
+        var dateienDieAelterSind = vollstaendigeDateien
+            .Where(datei => File.GetLastWriteTime(datei) < maxAlter)
+            .ToList();
 
-            if (dateienDieAelterSind.Count > 0)
+        if (dateienDieAelterSind.Count > 0)
+        {
+            AnsiConsole.MarkupLine($"[yellow]Die folgenden Dateien sind älter als vom {maxAlter:dd.MM.yyyy} Tage:[/]");
+            foreach (var datei in dateienDieAelterSind)
             {
-                AnsiConsole.MarkupLine($"[yellow]Die folgenden Dateien sind älter als vom {maxAlter:dd.MM.yyyy} Tage:[/]");
-                foreach (var datei in dateienDieAelterSind)
+                AnsiConsole.MarkupLine($"[yellow]- {Path.GetFileName(datei)} (letzte Änderung: {File.GetLastWriteTime(datei)})[/]");
+            }
+            throw new Exception("Aktualisieren Sie die Dateien. Kehren Sie dann hierher zurück.");
+        }
+
+        try
+        {
+            // Windows: versuche Notepad++ zuerst, sonst Standardeditor
+            if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
+            {
+                var notepadPlusPlusPath = notepadPlusPlusCandidates.FirstOrDefault(File.Exists);
+
+                if (!string.IsNullOrEmpty(notepadPlusPlusPath))
                 {
-                    AnsiConsole.MarkupLine($"[yellow]- {Path.GetFileName(datei)} (letzte Änderung: {File.GetLastWriteTime(datei)})[/]");
+                    // Notepad++ kann mehrere Dateien in einem Aufruf öffnen
+                    var args = string.Join(" ", vollstaendigeDateien.Select(f => $"\"{f}\""));
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = notepadPlusPlusPath,
+                        Arguments = args,
+                        UseShellExecute = false
+                    });
+                    return;
                 }
-                throw new Exception("Aktualisieren Sie die Dateien. Kehren Sie dann hierher zurück.");
+
+                // Fallback: Standardeditor (Dateizuordnung) verwenden
+                foreach (var file in vollstaendigeDateien)
+                {
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = file,
+                        UseShellExecute = true
+                    });
+                }
+                return;
             }
 
-            foreach (var datei in vollstaendigeDateien)
+            // Linux: öffne mit xdg-open (Standardanwendung). Falls xdg-open nicht verfügbar, versuche UseShellExecute.
+            if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux))
+            {
+                foreach (var file in vollstaendigeDateien)
+                {
+                    try
+                    {
+                        Process.Start(new ProcessStartInfo
+                        {
+                            FileName = "xdg-open",
+                            Arguments = $"\"{file}\"",
+                            UseShellExecute = false
+                        });
+                    }
+                    catch (Exception)
+                    {
+                        // Fallback: direkte Shell-Öffnung (funktioniert auf einigen Umgebungen)
+                        try
+                        {
+                            Process.Start(new ProcessStartInfo
+                            {
+                                FileName = file,
+                                UseShellExecute = true
+                            });
+                        }
+                        catch (Exception ex)
+                        {
+                            AnsiConsole.MarkupLine($"[red]Datei konnte nicht geöffnet werden: {file} — {ex.Message}[/]");
+                        }
+                    }
+                }
+                return;
+            }
+
+            // Sonstige OS: Standardöffner verwenden
+            foreach (var file in vollstaendigeDateien)
             {
                 Process.Start(new ProcessStartInfo
                 {
-                    FileName = notepadPlusPlusPath,
-                    Arguments = $"\"{datei}\"",
-                    UseShellExecute = false
+                    FileName = file,
+                    UseShellExecute = true
                 });
             }
         }
-        else
+        catch (Exception ex)
         {
-            AnsiConsole.MarkupLine($"[red]Notepad++ wurde nicht gefunden unter {notepadPlusPlusPath}. Bitte installieren Sie Notepad++ oder passen Sie den Pfad im Code an.[/]");
+            AnsiConsole.MarkupLine($"[red]Fehler beim Öffnen der Datei(en): {ex.Message}[/]");
         }
     }
 
