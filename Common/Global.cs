@@ -1214,7 +1214,7 @@ public static class Global
             configuration[kv.Key] = Entschluesseln(kv.Value);
         }
         sw.Stop();
-        AnsiConsole.MarkupLine($"[grey]Konfiguration dekodiert in {sw.ElapsedMilliseconds} ms[/]");
+        //AnsiConsole.MarkupLine($"[grey]Konfiguration dekodiert in {sw.ElapsedMilliseconds} ms[/]");
 
         while (string.IsNullOrEmpty(configuration["ZustimmungLizenz"]) ||
                (configuration["ZustimmungLizenz"]?.ToLower() != "ja" && configuration["ZustimmungLizenz"]?.ToLower() != "j"))
