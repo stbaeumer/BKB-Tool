@@ -125,7 +125,8 @@ public static class MenueHelper
                             $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis:[/]",
                             $"[{Global.GetColor(Global.ColorHinweise)}]#1:[/] Das Zeugnisdatum des letzten Zeugnisses in einer Klasse wird zum Webuntis-Austrittsdatum bei Schüler*innen, deren Status weder aktiv noch extern ist.",
                             $"[{Global.GetColor(Global.ColorHinweise)}]#2:[/] Damit korrekt ausgeschult wird, muss auch Abgang und Abschluss beim SchILD-Export angehakt werden.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]#3:[/] Für den Betriebeimport sollte im Webuntis-Importprofil die SchildAdressId auf Schlüssel (externe) matchen."
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#3:[/] Für den Betriebeimport sollte im Webuntis-Importprofil die SchildAdressId auf Schlüssel (externe) matchen.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#4:[/] Wenn ein Schüler mehrfach (als Duplikat) aktiv in SchILD ist, wird diejenige Klasse mit dem jüngsten Bildungsgangbeginn zu Klasse des Schülers in Webuntis."
                         ],
                         m =>
                         {
