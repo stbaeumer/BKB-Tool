@@ -31,7 +31,7 @@ public partial class Student
     public string? Foto { get; set; } = string.Empty;
     public string AktuellerAbschnitt { get; set; } = string.Empty;
     public string AktuellesHalbjahr { get; set; } = string.Empty;    
-    public string BeginnDerBildungsganges { get; set; } = string.Empty;    
+    public string BeginnDesBildungsganges { get; set; } = string.Empty;    
     public string ExterneIdNummer { get; set; } = string.Empty;    
     public string? Geburtsdatum { get; set; } = string.Empty;    
     public string Geschlecht { get; set; } = string.Empty;    

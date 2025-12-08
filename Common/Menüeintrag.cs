@@ -1620,6 +1620,47 @@ public class Menüeintrag
             var i = 1;
             var gelöschteSchüler = new List<IDictionary<string, object>>();
 
+            // Ersetze die bisherige DistinctBy-Zeile durch folgende Gruppierung und Auswahlregel:
+            //
+            // Wenn derselbe Schüler mehrfach vorkommt UND in mindestens zwei der Einträge der Status "2" oder "6" ist,
+            // dann wird aus diesen aktiven/Gast-Einträgen derjenige übernommen, dessen `BeginnDesBildungsganges` am spätesten ist.
+            // Andernfalls (kein mehrfacher aktiver/externer Fall) wird weiterhin der Eintrag mit dem numerisch kleinsten Status gewählt
+            // (wie bisher an anderen Stellen des Codes verwendet).
+            //
+            // Diese Logik an den beiden Stellen im File anwenden, an denen `uniqueStudents` gebildet wird.
+
+            var uniqueStudents = Students
+                .GroupBy(s => new { s.Vorname, s.Nachname, s.Geburtsdatum })
+                .Select(g =>
+                {
+                    var list = g.ToList();
+                    if (list.Count == 1) return list[0];
+
+                    DateTime ParseDateOrMin(string? dt)
+                    {
+                        if (string.IsNullOrWhiteSpace(dt)) return DateTime.MinValue;
+                        var formats = new[] { "dd.MM.yyyy", "d.M.yyyy", "yyyy-MM-dd", "yyyyMMdd" };
+                        if (DateTime.TryParseExact(dt, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed)) return parsed;
+                        if (DateTime.TryParse(dt, new CultureInfo("de-DE"), DateTimeStyles.None, out parsed)) return parsed;
+                        if (DateTime.TryParse(dt, out parsed)) return parsed;
+                        return DateTime.MinValue;
+                    }
+
+                    // Kandidaten mit Status aktiv (2) oder Gast/extern (6)
+                    var activeOrGuest = list.Where(s => s.Status == "2" || s.Status == "6").ToList();
+                    if (activeOrGuest.Count > 1)
+                    {
+                        // Wähle den Eintrag mit dem spätesten BeginnDesBildungsganges
+                        return activeOrGuest.OrderByDescending(s => ParseDateOrMin(s.BeginnDesBildungsganges)).First();
+                    }
+
+                    // Fallback: wie bisher – wähle den Eintrag mit dem numerisch kleinsten Status
+                    return list.OrderBy(s => int.TryParse(s.Status, out var st) ? st : int.MaxValue).First();
+                })
+                .OrderBy(s => s.Klasse)
+                .ThenBy(s => s.Nachname)
+                .ThenBy(s => s.Vorname);
+
             AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Webuntis-Schüler*innen vorbereiten ...", ctx =>                
             {                    
                 foreach (var rec in webuntisStudents)
@@ -1628,7 +1669,7 @@ public class Menüeintrag
 
                     // Ein Abgänger oder Absolvent, der als Externer oder Gast wiederkommt, hat in seiner aktiven Rolle den niedrigeren Status.
                     // Also wird bei mehrfach vorkommenden Schülern immer der mit dem niedrigsten Status genommen.                 
-                    var schildStudent = Students
+                    var schildStudent = uniqueStudents
                         .OrderBy(x => int.TryParse(x.Status, out var status) ? status : 0)
                         .FirstOrDefault(x =>
                             x.Nachname == webuntisStudent["longName"].ToString() &&
@@ -1642,7 +1683,7 @@ public class Menüeintrag
                         continue;
                     }
 
-                    if(schildStudent.Nachname == "Vogt" && schildStudent.Vorname == "Niklas")
+                    if(schildStudent.Nachname == "Sadiku" && schildStudent.Vorname == "Almir")
                     {
                         var debug = 1;
                     }
@@ -1751,7 +1792,7 @@ public class Menüeintrag
                     {
                         dynamic record = new ExpandoObject();
                         record.Schlüssel = dict["externKey"].ToString().Split('@')[0];
-                        record.EMINUSMail = dict["externKey"].ToString();
+                        record.EMINUSMail = dict["address.email"].ToString();
                         record.Familienname = dict["longName"].ToString();
                         record.Vorname = dict["foreName"].ToString();
                         record.Klasse = dict["klasse.name"].ToString();
@@ -1768,7 +1809,7 @@ public class Menüeintrag
                         record.ErzName = "";
                         record.ErzMobil = "";
                         record.ErzTelefon = "";
-                        record.Volljährig = "";
+                        record.Volljährig = VolljährigJaNein(dict["birthDate"].ToString());
                         record.BetriebName = "";
                         record.BetriebStrasse = "";
                         record.BetriebPlz = "";
@@ -1802,11 +1843,9 @@ public class Menüeintrag
 
                 // Ab hier die Neuanlagen
 
-                var uniqueStudents = Students
-                    .DistinctBy(s => new { s.Vorname, s.Nachname, s.Geburtsdatum })
-                    .OrderBy(s => s.Klasse)
-                    .ThenBy(s => s.Nachname)
-                    .ThenBy(s => s.Vorname);
+                
+                var aaaaa = uniqueStudents.Where(s => s.Nachname == "Sadiku" && s.Vorname == "Almir" && s.Status == "2").ToList();
+
 
                 AnsiConsole.Status()
                 .Spinner(Spinner.Known.Dots)
@@ -1814,9 +1853,14 @@ public class Menüeintrag
                 {
                     foreach (var studen in uniqueStudents)
                     {
+                        if(studen.Nachname == "Sadiku" && studen.Vorname == "Almir")
+                        {
+                            string aaaa = "";
+                        }
+
                         // Ein Abgänger oder Absolvent, der als Externer oder Gast wiederkommt, hat in seiner aktiven Rolle den niedrigeren Status.
                         // Also wird bei mehrfach vorkommenden Schülern immer der mit dem niedrigsten Status genommen.                 
-                        var student = Students.OrderBy(x => int.TryParse(x.Status, out var status) ? status : 0).FirstOrDefault(x => x.Nachname == studen.Nachname && x.Vorname == studen.Vorname && x.Geburtsdatum == studen.Geburtsdatum);
+                        var student = Students.OrderBy(x => int.TryParse(x.Status, out var status) ? status : 0).FirstOrDefault(x => x.Nachname == studen.Nachname && x.Vorname == studen.Vorname && x.Geburtsdatum == studen.Geburtsdatum && x.Klasse == studen.Klasse);
 
                         if (student == null) continue;
 
@@ -1910,7 +1954,7 @@ public class Menüeintrag
 
                         if (Path.GetFileName(zieldateiname).ToLower().Contains("stammdaten-schueler"))
                         {
-                            if (student.Nachname == "Boldt")
+                            if (student.Nachname == "Sadiku" && student.Vorname == "Almir")
                             {
                                 string aa = "";
                             }
@@ -2009,7 +2053,7 @@ public class Menüeintrag
                                     record.EMINUSMail = sz["schulische E-Mail"].ToString();
                                     record.Familienname = student.Nachname;
 
-                                    if (student.Nachname == "Bösing")
+                                    if (student.Nachname == "Sadiku")
                                     {
                                         string aa = "";
                                     }
@@ -2163,7 +2207,7 @@ public class Menüeintrag
                             record.PLZ = alter >= 18 ? student.Postleitzahl.ToString() : se?["PLZ"].ToString();
                             record.Ort = alter >= 18 ? student.Ort.ToString() : se?["Ort"].ToString();
                             record.Geschlecht = student.Geschlecht.ToString();
-                            record.Anmeldedatum = student.BeginnDerBildungsganges;
+                            record.Anmeldedatum = student.BeginnDesBildungsganges;
                             record.Telefon = sz?["Telefon-Nr."].ToString();
                             record.Mobiltelefon = sz?["Fax/Mobilnr"].ToString();
                             record.email = sz["schulische E-Mail"].ToString();
@@ -2198,6 +2242,41 @@ public class Menüeintrag
 
             Console.ReadKey();
         }
+    }
+
+    private string VolljährigJaNein(string? geburtsdatum)
+    {
+        // Gibt "Ja" zurück, wenn das Geburtsdatum ein volljähriges Alter (>= 18) ergibt, sonst "Nein".
+        if (string.IsNullOrWhiteSpace(geburtsdatum))
+            return "Nein";
+
+        DateTime parsed;
+        var formats = new[]
+        {
+            "dd.MM.yyyy",
+            "d.M.yyyy",
+            "dd.MM.yy",
+            "yyyy-MM-dd",
+            "yyyyMMdd",
+            "dd.MM.yyyy HH:mm",
+            "d.M.yyyy HH:mm"
+        };
+
+        var input = geburtsdatum.Trim();
+
+        // Versuche zuerst mehrere feste Formate, dann deutsch-kulturelle und zuletzt allgemeines TryParse.
+        if (!DateTime.TryParseExact(input, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out parsed)
+            && !DateTime.TryParse(input, new CultureInfo("de-DE"), DateTimeStyles.None, out parsed)
+            && !DateTime.TryParse(input, out parsed))
+        {
+            return "Nein";
+        }
+
+        var today = DateTime.Today;
+        var age = today.Year - parsed.Year;
+        if (parsed > today.AddYears(-age)) age--;
+
+        return age >= 18 ? "Ja" : "Nein";
     }
 
     public Dateien WebuntisUndCo(IConfiguration configuration, List<Datei> zieldateien)
@@ -2692,7 +2771,7 @@ public class Menüeintrag
                             record.PLZ = alter >= 18 ? student.Postleitzahl.ToString() : se?["PLZ"].ToString();
                             record.Ort = alter >= 18 ? student.Ort.ToString() : se?["Ort"].ToString();
                             record.Geschlecht = student.Geschlecht.ToString();
-                            record.Anmeldedatum = student.BeginnDerBildungsganges;
+                            record.Anmeldedatum = student.BeginnDesBildungsganges;
                             record.Telefon = sz?["Telefon-Nr."].ToString();
                             record.Mobiltelefon = sz?["Fax/Mobilnr"].ToString();
                             record.email = sz["schulische E-Mail"].ToString();

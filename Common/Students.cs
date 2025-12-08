@@ -71,6 +71,7 @@ public class Students : List<Student>
                 student.Postleitzahl = sb["PLZ"].ToString();
                 student.Straße = sb["Straße"].ToString();
                 student.MailSchulisch = sz["schulische E-Mail"].ToString();
+                student.BeginnDesBildungsganges = sz["BeginnBildungsgang"].ToString();
                 student.Fachklasse = sb["Fachklasse"].ToString();
                 student.Jahrgang = sb["Jahrgang"].ToString();
                 student.Schulgliederung = sb["Schulgliederung"].ToString();
