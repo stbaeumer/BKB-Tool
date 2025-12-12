@@ -2298,6 +2298,28 @@ public static class KonfigHelper
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
+        ["NotenlistenUrl"] = new KonfigMeta
+        {
+            Key = "NotenlistenUrl",
+            DefaultValue = Environment.GetEnvironmentVariable("NotenlistenUrl") ?? "",
+            Aufforderung = $"[green]■[/]",
+            Hinweise = $"[{Global.GetColor(Global.ColorInfoBox)}]NotenlistenUrl[/] angeben.",
+            Datentyp = Global.Datentyp.Url,
+            InGrundeinstellungAbfragen = false,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
+        },
+        ["NotenlistenKennwort"] = new KonfigMeta
+        {
+            Key = "NotenlistenKennwort",
+            DefaultValue = Environment.GetEnvironmentVariable("NotenlistenKennwort") ?? "",
+            Aufforderung = $"[green]■[/]",
+            Hinweise = $"Mit welchem [{Global.GetColor(Global.ColorInfoBox)}]NotenlistenKennwort[/] angeben.",
+            Datentyp = Global.Datentyp.Kennwort,
+            InGrundeinstellungAbfragen = false,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
+        },
         ["ZipKennwort"] = new KonfigMeta
         {
             Key = "ZipKennwort",

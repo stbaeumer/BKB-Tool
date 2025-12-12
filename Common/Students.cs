@@ -177,7 +177,7 @@ public class Students : List<Student>
     {
 
         var schuelerZusatzdaten = dateien.GetMatchingList(configuration, "schuelerzusatzdaten", null, null);
-        if (schuelerZusatzdaten == null || !schuelerZusatzdaten.Any()) return;
+        if (schuelerZusatzdaten == null || !schuelerZusatzdaten.Any()) throw new Exception("Keine SchuelerZusatzdaten.dat");
 
         var tempdatei = Path.Combine(Path.GetTempPath(), Path.GetFileName(datei));
 

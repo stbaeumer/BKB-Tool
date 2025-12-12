@@ -1581,17 +1581,17 @@ public class Menüeintrag
         try
         {
             List<dynamic>? webuntisStudents = Quelldateien.GetMatchingList(configuration, "student_", Students, Klassen);
-            if (webuntisStudents == null || webuntisStudents.Count == 0) return;
+            if (webuntisStudents == null || webuntisStudents.Count == 0) throw new Exception("Keine Webuntis-Students.csv");
             var schuelerZusatzdaten = Quelldateien.GetMatchingList(configuration, "schuelerzusatzdaten", Students, Klassen);
-            if (schuelerZusatzdaten == null || schuelerZusatzdaten.Count == 0) return;
+            if (schuelerZusatzdaten == null || schuelerZusatzdaten.Count == 0) throw new Exception("Keine schuelerZusatzdaten.dat");
             var schuelerLernabschnittsdaten = Quelldateien.GetMatchingList(configuration, "schuelerlernabschnittsdaten", Students, Klassen);
-            if (schuelerLernabschnittsdaten == null || schuelerLernabschnittsdaten.Count == 0) return;
+            if (schuelerLernabschnittsdaten == null || schuelerLernabschnittsdaten.Count == 0) throw new Exception("Keine schuelerlernabschnittsdaten.dat");
             var schuelerErzieher = Quelldateien.GetMatchingList(configuration, "schuelererzieher", Students, Klassen);
-            if (schuelerErzieher == null || schuelerErzieher.Count == 0) return;
+            if (schuelerErzieher == null || schuelerErzieher.Count == 0) throw new Exception("Keine schuelerErzieher.dat");
             var schuelerAdressen = Quelldateien.GetMatchingList(configuration, "schueleradressen", Students, Klassen);
-            if (schuelerAdressen == null || schuelerAdressen.Count == 0) return;
+            if (schuelerAdressen == null || schuelerAdressen.Count == 0) throw new Exception("Keine Schueleradressen.dat");
             var lehrkraefte = Quelldateien.GetMatchingList(configuration, "lehrkraefte", Students, Klassen);
-            if (lehrkraefte == null || lehrkraefte.Count == 0) return;
+            if (lehrkraefte == null || lehrkraefte.Count == 0) throw new Exception("Keine Lehrkraefte.dat");
             var klassen = Quelldateien.GetMatchingList(configuration, "klassen", Students, Klassen);
             if (klassen == null || klassen.Count == 0) return;
             var schuelerTelefonnummern = Quelldateien.GetMatchingList(configuration, "schuelertelefonnummern", IStudents, Klassen);
@@ -4347,10 +4347,10 @@ public class Menüeintrag
         string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
     {
         var schuelerZusatzdaten = Quelldateien.GetMatchingList(configuration, "schuelerzusatzdaten", IStudents, Klassen);
-        if (schuelerZusatzdaten == null || !schuelerZusatzdaten.Any()) return;
+        if (schuelerZusatzdaten == null || !schuelerZusatzdaten.Any()) throw new Exception("Keine SchuelerZusatzdaten.dat");
 
         var schuelerBasisdaten = Quelldateien.GetMatchingList(configuration, "schuelerbasisdaten", IStudents, Klassen);
-        if (schuelerBasisdaten == null || !schuelerBasisdaten.Any()) return;
+        if (schuelerBasisdaten == null || !schuelerBasisdaten.Any()) throw new Exception("Keine SchuelerBasisdaten.dat");
 
         bool problem = false;
 
