@@ -1,0 +1,65 @@
+@page "/mailadressen"
+@using System.Text
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.JSInterop
+@inject IJSRuntime JS
+
+<h3>Mailadressen ergänzen (SchuelerZusatzdaten)</h3>
+
+<InputFile OnChange="OnInputFileChange" accept=".dat,.csv" />
+<div style="margin-top:10px;">
+    <label>Mail-Domain:&nbsp;</label>
+    <input @bind="MailDomain" />
+</div>
+<br />
+<button @onclick="Process" disabled="@(!CanProcess)">Verarbeiten und herunterladen</button>
+
+@if (!string.IsNullOrEmpty(Message))
+{
+    <div style="margin-top:10px;">@Message</div>
+}
+
+@code {
+    private IBrowserFile? uploadedFile;
+    private string MailDomain { get; set; } = "@meine-schule.de";
+    private string? ResultContent;
+    private string Message = "";
+
+    bool CanProcess => uploadedFile != null;
+
+    private async Task OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        uploadedFile = e.File;
+        Message = $"Datei ausgewählt: {uploadedFile.Name} ({uploadedFile.Size} bytes)";
+    }
+
+    public async Task Process()
+    {
+        try
+        {
+            if (uploadedFile == null)
+            {
+                Message = "Keine Datei ausgewählt.";
+                return;
+            }
+
+            using var ms = new MemoryStream();
+            await uploadedFile.OpenReadStream(50_000_000).CopyToAsync(ms);
+            var content = Encoding.UTF8.GetString(ms.ToArray());
+
+            var result = Common.WebAdapter.ErgaenzeSchuelerZusatzdatenMailadressen(content, MailDomain);
+            ResultContent = result;
+
+            var filename = Path.GetFileName(uploadedFile.Name);
+            var bytes = Encoding.UTF8.GetBytes(result);
+            var base64 = Convert.ToBase64String(bytes);
+            await JS.InvokeVoidAsync("saveFileFromBase64", filename, base64);
+
+            Message = "Fertig. Datei wird zum Download angeboten.";
+        }
+        catch (Exception ex)
+        {
+            Message = "Fehler: " + ex.Message;
+        }
+    }
+}

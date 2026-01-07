@@ -14,7 +14,9 @@ public class Unterrichte : List<Unterricht>
         List<dynamic> gpu002 = m.Quelldateien.GetMatchingList(configuration, "gpu002", m.IStudents, m.Klassen);
         if (gpu002 == null)
             throw new FileNotFoundException($"[grey]Keine GPU002-Daten gefunden. Bitte exportieren Sie die Datei erneut.[/]");
-        
+                if (gpu002.Count == 0)
+                    throw new FileNotFoundException($"[grey]Die Datei GPU002 ist leer. UTF8, Textbegrenzer \" und Delimiter | müssen gesetzt sein.[/]");
+
         List<dynamic> studentgroupStudents = m.Quelldateien.GetMatchingList(configuration, "studentgroupstudents", m.IStudents, m.Klassen);
         if (studentgroupStudents == null)
             throw new FileNotFoundException($"[grey]Keine Kurse instudentgroupStudents gefunden. Bitte exportieren Sie die Datei erneut.[/]");
@@ -35,12 +37,7 @@ public class Unterrichte : List<Unterricht>
             {
                 var Klassen = new Klassen();
                 var dict = (IDictionary<string, object>)record;
-
-                if (dict["Field1"]?.ToString() == "2101")
-                {
-                    string aa = "Test"; // Debugging purpose
-                }
-
+               
                 // ohne eingetragenen Lehrer wird die Zeile übersprungen
                 if (!dict.ContainsKey("Field6") || string.IsNullOrEmpty(dict["Field6"]?.ToString()))
                     continue; // Ohne Lehrer wird die Zeile übersprungen.

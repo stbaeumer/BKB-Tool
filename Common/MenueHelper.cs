@@ -166,8 +166,8 @@ public static class MenueHelper
                                         "ImportNachWebuntis-Stammdaten-Erziehungsberechtigte.csv", new string[] { "EMINUSMail" }, new string[] { }, ";", '\'', new UTF8Encoding(false), false,
                                         [
                                             datei => datei.Erstellen(),
-                                            datei => datei.OeffneWebseite("https://bk-borken.webuntis.com/legalguardians")                                            
-                                        ],   
+                                            datei => datei.OeffneWebseite("https://bk-borken.webuntis.com/legalguardians")
+                                        ],
                                         [
                                             $"[{Global.GetColor(Global.ColorHinweise)}]#1:[/] In Webuntis als Webuntis-Admin:  [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Stammdaten > Erziehungsberechtigte > Import[/]",
                                             $"[{Global.GetColor(Global.ColorHinweise)}]#2:[/] Datei auswählen, UTF8",
@@ -206,7 +206,7 @@ public static class MenueHelper
                         },
                         Global.Rubrik.WöchtentlicheArbeiten,
                         Global.NurBeiDiesenSchulnummern.Alle
-                    ),                    
+                    ),
                     new Menüeintrag(
                         "Fotos (c): Schüler*innenfotos aus SchILD für Webuntis und Geevoo bereitstellen",
                         quelldateien.Notwendige(configuration, ["schuelerZusatzdaten,dat"]),
@@ -263,7 +263,7 @@ public static class MenueHelper
                     Global.Rubrik.Allgemein,
                     Global.NurBeiDiesenSchulnummern.Nur177659
                 ),
-                 new Menüeintrag(
+                new Menüeintrag(
                                 "Klassenbucheinträge: Säumige Lehrer*innen erinnern",
                                 quelldateien.Notwendige(configuration, ["lehrkraefte,dat", "openperiod,pdf"]),
                                 students,
@@ -388,7 +388,7 @@ public static class MenueHelper
                         ],
                         m =>
                         {
-                            m.OeffneDateienInEditor(configuration, ["termine_fhr.csv", "termine_berufliches_gymnasium.csv", "termine_kollegium.csv", "termine_verwaltung.csv"]);                            
+                            m.OeffneDateienInEditor(configuration, ["termine_fhr.csv", "termine_berufliches_gymnasium.csv", "termine_kollegium.csv", "termine_verwaltung.csv"]);
                             foreach (var kalender in new List<string>(){"termine_berufliches_gymnasium", "termine_kollegium", "termine_fhr", "termine_verwaltung" })
                             {
                                 m.Kalender2Wiki(configuration,
@@ -539,7 +539,7 @@ public static class MenueHelper
                                 ],
                                 ["InternKrz"],
                                 [],
-                                "|", '\0', new UTF8Encoding(true), false);                            
+                                "|", '\0', new UTF8Encoding(true), false);
                         },
                         Global.Rubrik.Leistungsdaten,
                         Global.NurBeiDiesenSchulnummern.Alle
@@ -691,8 +691,8 @@ public static class MenueHelper
                             [
                                 $"PDF-Zeugnisse und andere PDF-Dateien in [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(configuration["PfadDownloads"], "PDF-Input")}[/] werden in die Schüler*innen-Ordner der SchILD-Dokumentenverwaltung einsortiert. Wichtige Voraussetzung: Auf der letzten Seite eines jeden Zeugnisses muss die Schulnummer stehen.",
                                 $"[{Global.GetColor(Global.ColorHinweise)}]Vorbereitung #1[/]: Zu kopierende PDF-Dateien nach [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(configuration["PfadDownloads"], "PDF-Input")}[/] kopieren.",
-                                $"[{Global.GetColor(Global.ColorHinweise)}]Vorbereitung #2[/]: Eine UTF8-CSV-Datei mit Spalten: Nachname, Vorname, Geburtsdatum (aus Atlantis) exportieren und in [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(configuration["PfadDownloads"], "PDF-Input")}[/] ablegen.",                                
-                                $"[{Global.GetColor(Global.ColorTextHervorheben)}]Durchführung #2[/]: Geben Sie die Schlüsselwörter an, um die interessierenden PDF-Dateien einzugrenzen.",                                
+                                $"[{Global.GetColor(Global.ColorHinweise)}]Vorbereitung #2[/]: Eine UTF8-CSV-Datei mit Spalten: Nachname, Vorname, Geburtsdatum (aus Atlantis) exportieren und in [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(configuration["PfadDownloads"], "PDF-Input")}[/] ablegen.",
+                                $"[{Global.GetColor(Global.ColorTextHervorheben)}]Durchführung #2[/]: Geben Sie die Schlüsselwörter an, um die interessierenden PDF-Dateien einzugrenzen.",
                             ],
                             m =>
                             {
@@ -747,7 +747,7 @@ public static class MenueHelper
                         {
                             m.FilterInteressierendeStudentsUndKlassen(configuration);
                             configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration);
-                            configuration = Global.Konfig("Schulnummer", Global.Modus.Update, configuration);                            
+                            configuration = Global.Konfig("Schulnummer", Global.Modus.Update, configuration);
                             configuration = Global.Konfig("ZeugnisDatum", Global.Modus.Update, configuration);
                             configuration = Global.Konfig("Kursarten", Global.Modus.Update, configuration);
 
@@ -796,7 +796,7 @@ public static class MenueHelper
                                 ],
                                 ["InternKrz"],
                                 [],
-                                "|", '\0', new UTF8Encoding(true), false);                            
+                                "|", '\0', new UTF8Encoding(true), false);
                             m.Chat(configuration,
                                     [
                                         datei => datei.Auswählen(configuration, m, lehrers, Global.Modus.NurEineKlasse),
@@ -821,7 +821,7 @@ public static class MenueHelper
                         ],
                         m =>
                         {
-                            m.FilterInteressierendeStudentsUndKlassen(configuration);                            
+                            m.FilterInteressierendeStudentsUndKlassen(configuration);
                             m.Unterrichte = new Unterrichte(configuration, m, Global.Zweck.Zeugnis, Global.Art.KursUnterrichte);
                             m.Unterrichte.AddRange(new Unterrichte(configuration, m, Global.Zweck.Zeugnis, Global.Art.NichtKursUnterrichte));
                             Global.Konfig("Klausurbelegung", Global.Modus.Update, configuration, "", -1, -1, "", "1", null, "1,2,3");
@@ -900,7 +900,7 @@ public static class MenueHelper
                                         ],
                                         ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach", "Datum"],
                                         [],
-                                        "|", '\0', new UTF8Encoding(true), false);                                    
+                                        "|", '\0', new UTF8Encoding(true), false);
                                 },
                                 Global.Rubrik.Allgemein,
                                 Global.NurBeiDiesenSchulnummern.Alle
@@ -926,7 +926,7 @@ public static class MenueHelper
                                         [
                                             datei => datei.PutPage(),
                                             datei => datei.OeffneWebseite("https://bkb.wiki/oeffentlich:sprechtag"),
-                                        ],                                        
+                                        ],
                                         "Zum jährlichen Sprechtag laden wir sehr herzlich am Mittwoch nach der allgemeinen Zeugnisausgabe in der Zeit von 13:30 bis 17:30 Uhr ein. Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
                                 },
                                 Global.Rubrik.Wiki,
@@ -1030,6 +1030,6 @@ public static class MenueHelper
         catch (Exception ex)
         {
             throw ex;
-        }   
+        }
     }
 }
