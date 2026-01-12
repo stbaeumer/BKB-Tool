@@ -167,244 +167,245 @@ public class Students : List<Student>
 
     public void SchulpflichtüberwachungTxt(
         IConfiguration configuration,
-        string datei,
+        List<Action<Datei>> funktionen,
+        string dateiname,
         int schonfrist,
         int warnungAbAnzahl,
         int verjaehrungUnbescholtene,
         int nachSovielenTagenVerjährenFehlzeitenBeiMaßnahme,
         Klassen klasses,
+        Lehrers lehrers,
         Dateien dateien)
     {
 
         var schuelerZusatzdaten = dateien.GetMatchingList(configuration, "schuelerzusatzdaten", null, null);
         if (schuelerZusatzdaten == null || !schuelerZusatzdaten.Any()) throw new Exception("Keine SchuelerZusatzdaten.dat");
 
-        var tempdatei = Path.Combine(Path.GetTempPath(), Path.GetFileName(datei));
+        var gpu003 = dateien.GetMatchingList(configuration, "gpu003", null, null);
+        if (gpu003 == null || gpu003.Count == 0) return;
 
-        File.WriteAllText(tempdatei,
-            "====== Schulpflichtüberwachung ======" + Environment.NewLine, Encoding.UTF8);
+        var zieldatei = new Datei(dateiname, funktionen, configuration);
+
+        zieldatei.Add("====== Schulpflichtüberwachung ======");
 
         var zeilen = new List<string>();
-        zeilen.Add(Environment.NewLine);
+        zieldatei.Add("");
 
-        zeilen.Add(@"**Hallo Klassenleitung,**" + Environment.NewLine);
-        zeilen.Add(@"" + Environment.NewLine);
-        zeilen.Add(
-            @"Du wurdest von Teams hierher verlinkt, weil bei der automatisierten, wöchentlichen Durchsicht der Fehlzeiten eine mögliche Schulpflichtverletzung in Deiner Klasse aufgepoppt ist. Können wir Dir Arbeit abnehmen?" +
-            Environment.NewLine);
-        zeilen.Add(@"" + Environment.NewLine);
-        zeilen.Add(@"**Fragen & Antworten**" + Environment.NewLine);
-        zeilen.Add(@"" + Environment.NewLine);
-        zeilen.Add(
-            @"  * :?: Was ist das Ziel dieser Seite? :!: Kritische Fälle erkennen, Reaktionszeiten verkürzen, Klassenleitungen Arbeit abnehmen, SuS signalisieren, dass wir hinschauen." +
-            Environment.NewLine);
+        zieldatei.Add(@"**Hallo Klassenleitung,**");
+        zieldatei.Add(@"");
+        zieldatei.Add(
+            @"Du wurdest von Teams hierher verlinkt, weil bei der automatisierten, wöchentlichen Durchsicht der Fehlzeiten eine mögliche Schulpflichtverletzung in Deiner Klasse aufgepoppt ist. Können wir Dir Arbeit abnehmen?");
+        zieldatei.Add(@"");
+        zieldatei.Add(@"**Fragen & Antworten**");
+        zieldatei.Add(@"");
+        zieldatei.Add(
+            @"  * :?: Was ist das Ziel dieser Seite? :!: Kritische Fälle erkennen, Reaktionszeiten verkürzen, Klassenleitungen Arbeit abnehmen, SuS signalisieren, dass wir hinschauen.");
 
-        zeilen.Add(
-            @"  * :?: Wie oft soll ich mahnen? :!: Nach der Mahnung folgt i.d.R. die Teilkonferenz oder das Bußgeldverfahren. Wenn die letzte Mahnung sehr lange her ist, kommt eine weitere Mahnung in Betracht. " +
-            Environment.NewLine);
+        zieldatei.Add(
+            @"  * :?: Wie oft soll ich mahnen? :!: Nach der Mahnung folgt i.d.R. die Teilkonferenz oder das Bußgeldverfahren. Wenn die letzte Mahnung sehr lange her ist, kommt eine weitere Mahnung in Betracht. ");
 
-        zeilen.Add(
-            @"  * :?: Was, wenn die Zahlen nicht stimmen? :!: Dann gerne melden bei [[chat>stefan.baeumer|Stefan Bäumer]]." +
-            Environment.NewLine);
+        zieldatei.Add(
+            @"  * :?: Was, wenn die Zahlen nicht stimmen? :!: Dann gerne melden bei [[chat>stefan.baeumer|Stefan Bäumer]].");
 
-        zeilen.Add(
-            @"  * :?: Muss ich eine irgendwem eine Rückmeldung zu den Fällen in meiner Klasse geben? :!: Nein. Eine Rückmeldung ist nicht notwendig. Wer Fragen hat, kann sich natürlich immer melden: [[chat>stefan.baeumer|Stefan Bäumer]]." +
-            Environment.NewLine);
-        zeilen.Add(@"" + Environment.NewLine);
-        zeilen.Add(@"" + Environment.NewLine);
-        zeilen.Add(@"" + Environment.NewLine);
-        zeilen.Add(@"" + Environment.NewLine);
-        zeilen.Add(@"===== Tabelle Schulpflichtüberwachung KW " + Global.Kalenderwoche + "=====" + Environment.NewLine);
-        zeilen.Add(@"" + Environment.NewLine);
+        zieldatei.Add(
+            @"  * :?: Muss ich eine irgendwem eine Rückmeldung zu den Fällen in meiner Klasse geben? :!: Nein. Eine Rückmeldung ist nicht notwendig. Wer Fragen hat, kann sich natürlich immer melden: [[chat>stefan.baeumer|Stefan Bäumer]].");
+        zieldatei.Add(@"");
+        zieldatei.Add(@"");
+        zieldatei.Add(@"");
+        zieldatei.Add(@"");
+        zieldatei.Add(@"===== Tabelle Schulpflichtüberwachung KW " + ISOWeek.GetWeekOfYear(DateTime.Now) + "=====");
+        zieldatei.Add(@"");
 
-        zeilen.Add("<searchtable>" + Environment.NewLine);
-        zeilen.Add("^  Klasse  ^  Klassenleitung  ^  Name  ^  Alter am 1.Schultag im SJ " + Global.AktSj[0] + "/" +
+        zieldatei.Add("<searchtable>");
+        zieldatei.Add("^  Klasse  ^  Klassenleitung  ^  Name  ^  Alter am 1.Schultag im SJ " + Global.AktSj[0] + "/" +
                    Global.AktSj[1] +
-                   "  ^  bisherige Maßnahmen  ^  Aussage  ^Womit können wir Arbeit abnehmen?  ^" + Environment.NewLine);
+                   "  ^  bisherige Maßnahmen  ^  Aussage  ^Womit können wir Arbeit abnehmen?  ^");
 
         string teamsChatLink =
             "chats>sina.milewski@berufskolleg-borken.de,stefan.gantefort@berufskolleg-borken.de,ursula.moritz@berufskolleg-borken.de,";
         var mailliste =
             "mailto:sina.milewski@berufskolleg-borken.de;stefan.gantefort@berufskolleg-borken.de;ursula.moritz@berufskolleg-borken.de;";
 
-        foreach (var kl in (from k in this.OrderBy(x => x.Klasse) select k.Klasse).Distinct().ToList())
+        AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Datei Schulpflichtüberwachung erstellen ...", ctx =>
         {
-            var klassenleitungen = (from k in klasses where k.Name == kl select k.Klassenleitungen[0]).ToList();
-
-            foreach (var student in this.OrderBy(x => x.Nachname))
+            foreach (var kl in (from k in this.OrderBy(x => x.Klasse) select k.Klasse).Distinct().ToList())
             {
-                string id = student.Id;
+                var klassenlehrerKürzel = (from k in klasses where k.Name == kl select k.Klassenlehrer).FirstOrDefault();
 
-                if (student.Klasse == kl)
+                var Klassenlehrer = lehrers.FirstOrDefault(l => l.Kürzel == klassenlehrerKürzel);
+
+                foreach (var student in this.OrderBy(x => x.Nachname))
                 {
-                    var name = student.Vorname!.Substring(0, 2) + "." + student.Nachname!.Substring(0, 2);
-
-                    // Geburtsdatum der Person
-                    DateTime geburtsdatum = DateTime.Parse(student.Geburtsdatum!);
-
-                    // Datum, an dem das Alter berechnet werden soll
-                    DateTime ersterSchultag = new DateTime(Convert.ToInt32(Global.AktSj[0]), 8, 1);
-
-                    int alter = ersterSchultag.Year - geburtsdatum.Year;
-
-                    // Prüfen, ob der Geburtstag nach dem 1. August liegt, um das Alter korrekt anzupassen
-                    if (geburtsdatum > ersterSchultag.AddYears(-alter))
+                    if (student.Klasse == kl)
                     {
-                        alter--;
-                    }
+                        var name = student.Vorname!.Substring(0, 2) + "." + student.Nachname!.Substring(0, 2);
 
-                    student.GetJüngsteMaßnahmeInDiesemSj();
-
-                    // Für SuS ohne bisherige Maßnahme: Alle Fehlstunden, die noch nicht verjährt sind.
-
-
-                    /*
-                     * |------------|-------------------|-----------------------|-------------------|
-                     *            Fehlzeit1           Fehlzeit2              Fehlzeit3            jetzt
-                     *            21.8.                24.8.                   27.8.               28.8.
-                     *            6 Stunden            5 Stunden               4 Stunden
-                     *
-                     *                      |<----------------------------------------------------->|
-                     *                            Verjährung oder Zeit seit Maßnahme 6 Tage
-                     *
-                     *                                               |<---------------------------->|
-                     *                                                     Schonfrist für KL
-                     *                                                     zur Behandlung
-                     *                                                     von Fehlzeiten
-                     *                                                     3 Tage
-                     *
-                     *                       |-----------------------|
-                     *                        Da die Fehlzeit2 innerhalb der Verjährung
-                     *                        aber vor der Schonfrist liegt, werden
-                     *                        alle Fehlzeiten (auch die in der Schonfrist) gewarnt.
-                     */
-
-                    student.GetF2(verjaehrungUnbescholtene, schonfrist);
-                    student.GetF3(verjaehrungUnbescholtene, schonfrist);
-                    student.GetF2PlusF3(verjaehrungUnbescholtene, schonfrist);
-                    student.GetF2M(verjaehrungUnbescholtene, schonfrist);
-                    student.GetF2MplusF3();
-
-                    var aussage = "";
-                    var mahnung = "";
-                    var mahnungWikiLink = "";
-                    var attestpflicht = "";
-                    var attestpflichtWikiLink = "";
-                    var teilkonferenz = "";
-                    var bußgeldverfahren = "";
-
-                    var anzahlMassnahmenInDiesemSj = student.Massnahmen.Where(rec =>
-                    {
-                        var dict = (IDictionary<string, object>)rec;
-                        return DateTime.Parse(dict["Datum"].ToString()!) >
-                               new DateTime(Convert.ToInt32(Global.AktSj[0]), 8, 1);
-                    }).Count();
-
-                    // Wenn es noch keine Maßnahme in diesem SJ gab, ...
-                    if (anzahlMassnahmenInDiesemSj == 0)
-                    {
-                        // ... und wenn es eine F2 gibt ...
-                        if (student.F2 > 0)
+                        if (student.Nachname.StartsWith("Li") && student.Vorname.StartsWith("De"))
                         {
-                            if (student.F2PlusF3 > warnungAbAnzahl)
-                            {
-                                // ... dann werden F2 und F3 angemahnt.
-
-                                aussage += student.F2PlusF3 + " unent. Fehlst. in den letzten " +
-                                           verjaehrungUnbescholtene + " Tagen. ";
-                                mahnung = student.GetUrl("Mahnungen");
-                                mahnungWikiLink = student.GetWikiLink("Mahnung", student.F2PlusF3);
-                                attestpflicht = student.GetUrl("Attestpflicht");
-                                attestpflichtWikiLink = student.GetWikiLink("Attestpflicht", student.F2PlusF3);
-                            }
+                            string aa = "";
                         }
-                    }
 
-                    var schonMassnahmen = student.Massnahmen.Where(rec =>
-                    {
-                        var dict = (IDictionary<string, object>)rec;
-                        return DateTime.Parse(dict["Datum"].ToString()!) >
-                               new DateTime(Convert.ToInt32(Global.AktSj[0]), 8, 1);
-                    }).Count();
+                        // Geburtsdatum der Person
+                        DateTime geburtsdatum = DateTime.Parse(student.Geburtsdatum!);
 
-                    // Wenn es schon Maßnahmen gab, ...
-                    if (schonMassnahmen > 0)
-                    {
-                        // ... und wenn es eine F2M gibt ...
-                        if (student.F2M > 0)
+                        // Datum, an dem das Alter berechnet werden soll
+                        DateTime ersterSchultag = new DateTime(Convert.ToInt32(Global.AktSj[0]), 8, 1);
+
+                        int alter = ersterSchultag.Year - geburtsdatum.Year;
+
+                        // Prüfen, ob der Geburtstag nach dem 1. August liegt, um das Alter korrekt anzupassen
+                        if (geburtsdatum > ersterSchultag.AddYears(-alter))
                         {
-                            // ... dann werden F2M und F3 angemahnt.
+                            alter--;
+                        }
 
-                            var dictS = (IDictionary<string, object>)student.JuengsteMassnahmeInDiesemSj;
+                        student.GetJüngsteMaßnahmeInDiesemSj();
 
-                            aussage += student.F2MplusF3 + " unent./offene Fehlstd. seit " +
-                                       dictS["Vermerkart"].ToString() + "(" +
-                                       dictS["Datum"].ToString() + ").";
+                        // Für SuS ohne bisherige Maßnahme: Alle Fehlstunden, die noch nicht verjährt sind.
 
-                            if (dictS["Vermerkart"].ToString() == "Mahnung")
+
+                        /*
+                         * |------------|-------------------|-----------------------|-------------------|
+                         *            Fehlzeit1           Fehlzeit2              Fehlzeit3            jetzt
+                         *            21.8.                24.8.                   27.8.               28.8.
+                         *            6 Stunden            5 Stunden               4 Stunden
+                         *
+                         *                      |<----------------------------------------------------->|
+                         *                            Verjährung oder Zeit seit Maßnahme 6 Tage
+                         *
+                         *                                               |<---------------------------->|
+                         *                                                     Schonfrist für KL
+                         *                                                     zur Behandlung
+                         *                                                     von Fehlzeiten
+                         *                                                     3 Tage
+                         *
+                         *                       |-----------------------|
+                         *                        Da die Fehlzeit2 innerhalb der Verjährung
+                         *                        aber vor der Schonfrist liegt, werden
+                         *                        alle Fehlzeiten (auch die in der Schonfrist) gewarnt.
+                         */
+
+                        student.GetF2(verjaehrungUnbescholtene, schonfrist);
+                        student.GetF3(verjaehrungUnbescholtene, schonfrist);
+                        student.GetF2PlusF3(verjaehrungUnbescholtene, schonfrist);
+                        student.GetF2M(verjaehrungUnbescholtene, schonfrist);
+                        student.GetF2MplusF3();
+
+                        var aussage = "";
+                        var mahnung = "";
+                        var mahnungWikiLink = "";
+                        var attestpflicht = "";
+                        var attestpflichtWikiLink = "";
+                        var teilkonferenz = "";
+                        var bußgeldverfahren = "";
+
+                        var anzahlMassnahmenInDiesemSj = student.Massnahmen.Where(rec =>
+                        {
+                            var dict = (IDictionary<string, object>)rec;
+                            return DateTime.Parse(dict["Datum"].ToString()!) >
+                                   new DateTime(Convert.ToInt32(Global.AktSj[0]), 8, 1);
+                        }).Count();
+
+                        // Wenn es noch keine Maßnahme in diesem SJ gab, ...
+                        if (anzahlMassnahmenInDiesemSj == 0)
+                        {
+                            // ... und wenn es eine F2 gibt ...
+                            if (student.F2 > 0)
                             {
-                                if (alter < 18)
+                                if (student.F2PlusF3 > warnungAbAnzahl)
                                 {
-                                    bußgeldverfahren =
-                                        @"\\ [[eskalationsstufen_erzieherische_einwirkung_ordnungsmassnahmen:bussgeldverfahren:start|Bußgeldverfahren]]";
-                                }
-                                else
-                                {
-                                    teilkonferenz =
-                                        @"\\ [[eskalationsstufen_erzieherische_einwirkung_ordnungsmassnahmen:bussgeldverfahren:start|Teilkonferenz]]";
+                                    // ... dann werden F2 und F3 angemahnt.
+
+                                    aussage += student.F2PlusF3 + " unent. Fehlst. in den letzten " +
+                                               verjaehrungUnbescholtene + " Tagen. ";
+                                    mahnung = student.GetUrl("Mahnungen");
+                                    mahnungWikiLink = student.GetWikiLink("Mahnung", student.F2PlusF3);
+                                    attestpflicht = student.GetUrl("Attestpflicht");
+                                    attestpflichtWikiLink = student.GetWikiLink("Attestpflicht", student.F2PlusF3);
                                 }
                             }
                         }
-                    }
 
-                    student.MaßnahmenAlsWikiLinkAufzählung = student.GetMaßnahmenAlsWikiLinkAufzählung();
+                        var schonMassnahmen = student.Massnahmen.Where(rec =>
+                        {
+                            var dict = (IDictionary<string, object>)rec;
+                            return DateTime.Parse(dict["Datum"].ToString()!) >
+                                   new DateTime(Convert.ToInt32(Global.AktSj[0]), 8, 1);
+                        }).Count();
 
-                    if (aussage.Length > 0)
-                    {
+                        // Wenn es schon Maßnahmen gab, ...
+                        if (schonMassnahmen > 0)
+                        {
+                            // ... und wenn es eine F2M gibt ...
+                            if (student.F2M > 0)
+                            {
+                                // ... dann werden F2M und F3 angemahnt.
+
+                                var dictS = (IDictionary<string, object>)student.JuengsteMassnahmeInDiesemSj;
+
+                                aussage += student.F2MplusF3 + " unent. Fehlstd. seit " +
+                                           dictS["Vermerkart"].ToString() + "(" +
+                                           dictS["Datum"].ToString() + ").";
+
+                                if (dictS["Vermerkart"].ToString() == "Mahnung")
+                                {
+                                    if (alter < 18)
+                                    {
+                                        bußgeldverfahren =
+                                            @"\\ [[eskalationsstufen_erzieherische_einwirkung_ordnungsmassnahmen:bussgeldverfahren:start|Bußgeldverfahren]]";
+                                    }
+                                    else
+                                    {
+                                        teilkonferenz =
+                                            @"\\ [[eskalationsstufen_erzieherische_einwirkung_ordnungsmassnahmen:bussgeldverfahren:start|Teilkonferenz]]";
+                                    }
+                                }
+                            }
+                        }
+
+                        student.MaßnahmenAlsWikiLinkAufzählung = student.GetMaßnahmenAlsWikiLinkAufzählung();
                         var klassenleitungenString = "";
 
-                        foreach (var k in klassenleitungen)
+                        if (aussage.Length > 0)
                         {
-                            if (!klassenleitungenString.Contains(k + ","))
+                            klassenleitungenString += Klassenlehrer.Kürzel + ",";
+
+                            if (!mailliste.Contains(Klassenlehrer.Mail))
                             {
-                                klassenleitungenString += k.Kürzel + ",";
+                                mailliste += Klassenlehrer.Mail + ";";
                             }
 
-                            if (!mailliste.Contains(k.Mail))
+                            if (!teamsChatLink.Contains(Klassenlehrer.Mail))
                             {
-                                mailliste += k.Mail + ";";
+                                teamsChatLink += Klassenlehrer.Mail + ",";
                             }
-
-                            if (!teamsChatLink.Contains(k.Mail))
-                            {
-                                teamsChatLink += k.Mail + ",";
-                            }
-                        }
-
-                        zeilen.Add("|" + student.Klasse.PadRight(10) + "|" +
-                                   klassenleitungenString.TrimEnd(',').PadRight(16) + "  |" + name.PadRight(8) + "|" +
+                            zieldatei.Add("|" + student.Klasse.PadRight(10) + "|" + klassenleitungenString.TrimEnd(',').PadRight(16) + "  |" + name.PadRight(8) + "|" +
                                    alter + "|" +
                                    student.MaßnahmenAlsWikiLinkAufzählung + "  |" + aussage +
                                    "  |[[:eskalationsstufen_erzieherische_einwirkung_ordnungsmassnahmen|Erz.Einwirkung]] " +
                                    attestpflichtWikiLink + " " + mahnungWikiLink + " " + bußgeldverfahren + " " +
-                                   teilkonferenz + "|" + Environment.NewLine);
+                                   teilkonferenz + "|");
+                        }                        
                     }
                 }
             }
-        }
+        });
 
-        zeilen.Add("</searchtable>" + Environment.NewLine);
+        zieldatei.Add("</searchtable>");
 
-        teamsChatLink = teamsChatLink.TrimEnd(',') + "&topicName=Schulpflichtüberwachung KW " + Global.Kalenderwoche +
+        teamsChatLink = teamsChatLink.TrimEnd(',') + "&topicName=Schulpflichtüberwachung KW " + ISOWeek.GetWeekOfYear(DateTime.Now) +
                         "&message=Bitte beachten: https://bkb.wiki/schulpflichtueberwachung";
 
-        foreach (var zeile in zeilen)
+        foreach (var zeile in zieldatei)
         {
-            var z = zeile.Replace("Teams", @"[[" + teamsChatLink + @"|Teams]]");
-            File.AppendAllText(tempdatei, z, Encoding.UTF8);
+            zeile.Replace("Teams", @"[[" + teamsChatLink + @"|Teams]]");
+            //File.AppendAllText(tempdatei, z, Encoding.UTF8);
         }
 
-        Global.Dateischreiben(configuration, datei);
+        Global.ZeileSchreiben($"Datei Schulpflichtüberwachung erstellt. Zeilen:", zieldatei.Count().ToString());
+
+        foreach (var aktion in zieldatei.Funktionen)
+            aktion(zieldatei);
     }
 
     public List<dynamic> Reliabmelder()
@@ -1662,5 +1663,29 @@ public class Students : List<Student>
                 }
             }
         });
+    }
+
+    public void GetMassnahmen(IConfiguration configuration, List<string> maßnahmenString, Dateien Quelldateien)
+    {
+        var sMitMassnahmen = new Students();
+
+        AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("SuS mit Maßnahmen ermitteln ...", ctx =>
+        {
+            var schuelerZusatzdaten = Quelldateien.GetMatchingList(configuration, "schuelerzusatzdaten", this, null);
+
+            foreach (Student student in this)
+            {
+                if (student.Nachname.StartsWith("Li") && student.Vorname.StartsWith("De"))
+                {
+                    string aa = "";
+                }
+                student.GetMaßnahmen(configuration, maßnahmenString);
+
+                if (student.Massnahmen.Count != 0)
+                    sMitMassnahmen.Add(student);
+            }
+        });
+
+        Global.ZeileSchreiben($"SuS mit Maßnahmen:", $"{sMitMassnahmen.Count}");
     }
 }

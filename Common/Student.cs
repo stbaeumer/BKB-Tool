@@ -1,14 +1,15 @@
-﻿using System.Globalization;
-using System.Text.RegularExpressions;
-using Common;
+﻿using Common;
+using DocumentFormat.OpenXml.Office2010.Excel;
+using Microsoft.Extensions.Configuration;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.IO;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
-using Microsoft.Extensions.Configuration;
-using DocumentFormat.OpenXml.Office2010.Excel;
-using Table = Spectre.Console.Table;
 using Spectre.Console;
+using System.Configuration;
+using System.Globalization;
+using System.Text.RegularExpressions;
+using Table = Spectre.Console.Table;
 
 #pragma warning disable CS8603 // Mögliche Null-Verweis-Rückgabe
 #pragma warning disable CS8602 // Dereferenzierung eines möglicherweise null-Objekts.
@@ -30,22 +31,22 @@ public partial class Student
     public int F2PlusF3;
     public string? Foto { get; set; } = string.Empty;
     public string AktuellerAbschnitt { get; set; } = string.Empty;
-    public string AktuellesHalbjahr { get; set; } = string.Empty;    
-    public string BeginnDesBildungsganges { get; set; } = string.Empty;    
-    public string ExterneIdNummer { get; set; } = string.Empty;    
-    public string? Geburtsdatum { get; set; } = string.Empty;    
-    public string Geschlecht { get; set; } = string.Empty;    
+    public string AktuellesHalbjahr { get; set; } = string.Empty;
+    public string BeginnDesBildungsganges { get; set; } = string.Empty;
+    public string ExterneIdNummer { get; set; } = string.Empty;
+    public string? Geburtsdatum { get; set; } = string.Empty;
+    public string Geschlecht { get; set; } = string.Empty;
     //public string IdSchild { get; set; } = string.Empty;    
-    public string Jahrgang { get; set; } = string.Empty;    
-    public string Klasse { get; set; } = string.Empty;    
-    public string MailSchulisch { get; set; } = string.Empty;    
-    public string Nachname { get; set; } = string.Empty;    
+    public string Jahrgang { get; set; } = string.Empty;
+    public string Klasse { get; set; } = string.Empty;
+    public string MailSchulisch { get; set; } = string.Empty;
+    public string Nachname { get; set; } = string.Empty;
     public string Ort { get; set; } = string.Empty;
-    public string Postleitzahl { get; set; } = string.Empty;    
-    public string Schwerstbehinderung { get; set; } = string.Empty;    
+    public string Postleitzahl { get; set; } = string.Empty;
+    public string Schwerstbehinderung { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty;
-    public string Straße { get; set; } = string.Empty;    
-    public string? Vorname { get; set; } = string.Empty;    
+    public string Straße { get; set; } = string.Empty;
+    public string? Vorname { get; set; } = string.Empty;
     public List<dynamic> Abwesenheiten { get; set; } = new List<dynamic>();
     public string AlleMaßnahmenUndVorgänge { get; set; } = string.Empty;
     public List<dynamic> Massnahmen { get; set; } = new List<dynamic>();
@@ -77,7 +78,7 @@ public partial class Student
     public bool FotoBinary { get; set; }
     public int IdSchildInt { get; set; }
     public string KlasseString { get; set; } = string.Empty;
-    public string? KlasseWebuntis { get; set; }    
+    public string? KlasseWebuntis { get; set; }
     public int SchulnrEigner { get; set; }
     public string PfadDokumentenverwaltung { get; private set; } = string.Empty;
     public DateTime ZeugnisdatumLetztesZeugnisInDieserKlasse { get; private set; }
@@ -107,17 +108,17 @@ public partial class Student
                 if (string.IsNullOrEmpty(dict["Fehlstd."].ToString())) continue;
                 if ((DateTime.ParseExact(dict["Datum"].ToString()!, "dd.MM.yy", System.Globalization.CultureInfo.InvariantCulture))
                     .AddDays(fehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt) >= DateTime.Now) continue;
-                
+
                 // Webuntis zählt bei ganztägigen Veranstaltungen 24 Fehlstunden.
                 // Weil das Fehlen außerhalb von Unterricht nicht auf das Zeugnis kommt, wird es genullt.
                 var webuntisFehlst = int.Parse(dict["Fehlstd."].ToString()!);
-                
+
                 if (webuntisFehlst > int.Parse(configuration["MaximaleAnzahlFehlstundenProTag"]))
                 {
                     Console.ForegroundColor = ConsoleColor.Cyan;
-                    Global.ZeileSchreiben( this.Nachname + ", " + this.Vorname + " (" + this.Klasse + ")",
-                        webuntisFehlst + " Fehlstunden am " + dict["Datum"].ToString() + " werden genullt.", ConsoleColor.Yellow,ConsoleColor.Gray);
-                    
+                    Global.ZeileSchreiben(this.Nachname + ", " + this.Vorname + " (" + this.Klasse + ")",
+                        webuntisFehlst + " Fehlstunden am " + dict["Datum"].ToString() + " werden genullt.", ConsoleColor.Yellow, ConsoleColor.Gray);
+
                 }
 
                 int fehlstundenAnDiesemTag = Math.Min(int.Parse(configuration["MaximaleAnzahlFehlstundenProTag"]), webuntisFehlst);
@@ -175,7 +176,7 @@ public partial class Student
                 }
                 else
                 {
-                    fehlstd += webuntisFehlst;    
+                    fehlstd += webuntisFehlst;
                 }
             }
 
@@ -423,8 +424,8 @@ public partial class Student
             Console.ForegroundColor = ConsoleColor.Red;
             linkeSeite = (linkeSeite.PadRight(30, ' ')).Substring(0, 30) + ": Widersprechende Gesamtnoten: ";
             Global.ZeileSchreiben(linkeSeite + " Die zuletzt eingetragene Note gewinnt: " + notenSchild.Last(),
-                string.Join(", ", notenSchild.Distinct()), ConsoleColor.Yellow,ConsoleColor.Gray);
-            
+                string.Join(", ", notenSchild.Distinct()), ConsoleColor.Yellow, ConsoleColor.Gray);
+
         }
 
         if (notenSchild.Count() == 0)
@@ -511,14 +512,14 @@ public partial class Student
             default:
                 result = "";
                 break;
-        }            
+        }
         return result;
     }
 
     public string GenerateMailAusGebdat(IConfiguration configuration)
     {
         if (string.IsNullOrEmpty(Nachname) || string.IsNullOrEmpty(Vorname) || string.IsNullOrEmpty(Geburtsdatum)) return "";
-        
+
         var id = Id;
 
         if (!string.IsNullOrEmpty(ExterneIdNummer))
@@ -611,39 +612,48 @@ public partial class Student
         return string.IsNullOrEmpty(externeIdNr) ? Id : externeIdNr;
     }*/
 
-    public void GetMaßnahmen(List<Datei?> dateien, List<string> maßnahmenString)
+    public void GetMaßnahmen(IConfiguration configuration, List<string> maßnahmenString)
     {
         Massnahmen = new List<dynamic>();
 
-        foreach (var datei in dateien)
-        {
-            if (!string.IsNullOrEmpty(datei.UnterordnerUndDateiname))
-            {
-                if (datei.UnterordnerUndDateiname.Contains("SchuelerVermerke"))
-                {
-                    foreach (var dateiZeile in datei)
-                    {
-                        foreach (var m in maßnahmenString)
-                        {
-                            var dict = (IDictionary<string, object>)dateiZeile;
+        var ordnerDesSchuelers = configuration["PfadDokumentenverwaltung"] + "\\" + Nachname.Substring(0, 1) + "\\" +
+                                 Nachname + ", " + Vorname + ", " + Geburtsdatum.Replace(".", "_");
 
-                            if (dict["Vermerkart"] != null && dict["Vermerkart"].ToString().Contains(m))
-                            {
-                                if (dict["Geburtsdatum"].ToString() == Geburtsdatum &&
-                                    dict["Nachname"].ToString() == Nachname &&
-                                    dict["Vorname"].ToString() == Vorname)
-                                {
-                                    Massnahmen.Add(dateiZeile);
-                                    AlleMaßnahmenUndVorgänge += dict["Datum"] + ":" + dict["Vermerkart"] + ", ";
-                                }
-                            }
-                        }
+        // Word und Pdf Dateien im Ordner des Schülers suchen. Die Dateien vorher aufsteigend nach Datum sortieren
+        if (!Directory.Exists(ordnerDesSchuelers)) return;
+        var dateien = Directory
+    .GetFiles(ordnerDesSchuelers, "*.*", SearchOption.TopDirectoryOnly)
+    .Where(s => s.EndsWith(".pdf") || s.EndsWith(".docx") || s.EndsWith(".doc"))
+    .Select(p => new FileInfo(p))
+    .OrderBy(f => f.CreationTime)
+    .Select(f => f.FullName)
+    .ToList();
+
+        foreach (var file in dateien) 
+        {
+            // Für jede Maßnahmeart prüfen, ob eine Datei mit dem Maßnahmencode im Dateinamen existiert
+            foreach (var maßnahme in maßnahmenString)
+            {
+                if (Path.GetFileName(file).ToLower().Contains(maßnahme.ToLower()))
+                {
+                    var datum = File.GetCreationTime(file).ToString("dd.MM.yyyy");
+
+                    var dict = new Dictionary<string, object>();
+                    dict["Datum"] = datum;
+                    dict["Vermerkart"] = maßnahme;
+
+                    // Nur hinzufügen, wenn noch keine Maßnahme mit gleichem Datum UND gleicher Vermerkart existiert
+                    if (!Massnahmen.Any(m =>
+                        m["Datum"].ToString() == datum &&
+                        m["Vermerkart"].ToString().Equals(maßnahme, StringComparison.OrdinalIgnoreCase)))
+                    {
+                        Massnahmen.Add(dict);
+                        AlleMaßnahmenUndVorgänge += datum + ":" + maßnahme + ", ";
                     }
                 }
             }
         }
     }
-
     public string GetUrl(string v)
     {
         return "https://bkb.wiki/antraege_formulare:" + v + "?@Schüler*in@=" + Vorname + "_" + Nachname + "&@Klasse@=" +
@@ -661,62 +671,31 @@ public partial class Student
         var x = "";
         var bezeichnung = "";
 
-        foreach (var item in Massnahmen.OrderBy(y => y.Datum))
+        if(Massnahmen.Count > 0)
         {
-            var dict = (IDictionary<string, object>)item;
+            string aa = "";
+        }
 
-            if (dict["Vermerkart"].ToString().Contains("ahnung"))
-            {
-                bezeichnung = "Mahnung";
-            }
-
-            if (dict["Vermerkart"].ToString().Contains("ttestp"))
-            {
-                bezeichnung = "Attestpflicht";
-            }
-
-            if (dict["Vermerkart"].ToString().Contains("eilkonf") || dict["Vermerkart"].ToString().Contains("rdnungsm"))
-            {
-                bezeichnung = "Teilkonferenz";
-            }
-
-            if (bezeichnung == "")
-            {
-                bezeichnung = dict["Vermerkart"].ToString();
-            }
-
-            if (bezeichnung == "")
-            {
-                bezeichnung = dict["Vermerkart"].ToString();
-            }
-
-            //x += "[[" + bezeichnung + "]],";
-            x += bezeichnung + " (" + dict["Datum"].ToString() + @")\\ ";
+        foreach (var item in Massnahmen)
+        {
+            var dict = (IDictionary<string, object>)item;            
+            x += dict["Vermerkart"] + "(" + dict["Datum"].ToString() + @")\\ ";
         }
 
         return x.TrimEnd(' ');
     }
 
-    public void GetAbwesenheiten(List<Datei?> dateien, string id)
+    public void GetUnentschFehlzeiten(List<dynamic> abscencePerStudent)
     {
         Abwesenheiten = new List<dynamic>();
 
-        foreach (var datei in dateien)
+        foreach (var zeile in abscencePerStudent)
         {
-            if (!string.IsNullOrEmpty(datei.UnterordnerUndDateiname))
-            {
-                if (datei.UnterordnerUndDateiname.Contains("AbsencePerStudent"))
-                {
-                    foreach (var rec in datei)
-                    {
-                        var dict = (IDictionary<string, object>)rec;
+            var dict = (IDictionary<string, object>)zeile;
 
-                        if (dict["Externe Id"] != null && dict["Externe Id"].ToString() == id)
-                        {
-                            Abwesenheiten.Add(rec);
-                        }
-                    }
-                }
+            if (dict["Schüler*innen"].ToString() == Nachname + " " + Vorname && !string.IsNullOrEmpty(this.MailSchulisch) && this.MailSchulisch.Split('@')[0].Contains(dict["Externe Id"].ToString()) && dict["Status"] != null && dict["Status"].ToString() == "nicht entsch.")
+            {
+                Abwesenheiten.Add(dict);
             }
         }
     }
@@ -1391,5 +1370,26 @@ public partial class Student
             table.AddRow(Nachname + ", " + Vorname + ", " + Klasse, Schulgliederung, Jahrgang, Fachklasse, "Keine Relationsgruppe gefunden.");
         }
         return table;
+    }
+
+    internal bool MehrAlsSovieleUnentschuldigteFehlstunden(int anzahl)
+    {
+        var unentschuldigte = 0;
+
+        foreach (var zeile in Abwesenheiten)
+        {
+            var dict = (IDictionary<string, object>)zeile;
+
+            if (dict["Status"] != null && dict["Status"].ToString() == "nicht entsch." && !string.IsNullOrEmpty(dict["Fehlstd."].ToString()))
+            {
+                int f = Convert.ToInt32(dict["Fehlstd."].ToString());
+
+                unentschuldigte += f;
+                if (unentschuldigte > anzahl)
+                    return true;
+            }
+        }
+
+        return false;
     }
 }

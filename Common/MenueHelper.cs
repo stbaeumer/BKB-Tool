@@ -54,6 +54,7 @@ public static class MenueHelper
                 return new Menue(quelldateien, klassen, lehrers, students, []);
             }
 
+
             #pragma warning disable CS8601 // Mögliche Nullverweiszuweisung
             //Console.WriteLine("");
             //AnsiConsole.Write(new Rule("").RuleStyle("springgreen2").Centered());
@@ -284,7 +285,7 @@ public static class MenueHelper
                             ),
                 new Menüeintrag(
                     "Wiki: Diverse SQLite-Dateien (Organigramm, Praktikum etc.) erstellen",
-                    quelldateien.Notwendige(configuration, ["schuelerzusatzdaten,dat", "absenceperstudent,csv", "GPU006,txt", "GPU002,txt", "GPU003,txt", "klassen,dat"]),
+                    quelldateien.Notwendige(configuration, ["schuelervermerke,dat", "schuelerzusatzdaten,dat", "absenceperstudent,csv", "GPU006,txt", "GPU002,txt", "GPU003,txt", "klassen,dat"]),
                     students,
                     klassen,
                     [
@@ -295,12 +296,38 @@ public static class MenueHelper
                         $"[{Global.GetColor(Global.ColorHinweise)}]#1[/] Das Beförderungsamt wird ausgelesen. Bsp.: A14",
                         $"[{Global.GetColor(Global.ColorHinweise)}]#2[/] Hinweise werden aus eckigen Klammern ausgelesen. Bsp.: Fortbildung 2024",
                         $"[{Global.GetColor(Global.ColorHinweise)}]#3[/] Kategorien werden aus geschweiften Klammern ausgelesen. Bsp.: Technik, Beratung",
-                        $"[{Global.GetColor(Global.ColorHinweise)}]#4[/] Bildungsgänge werden daran identifiziert, dass im Text [aqua]Bildungsgangleitung[/] steht und die Beschreibung mit [aqua]bildunggaenge:[/] beginnt, "
+                        $"[{Global.GetColor(Global.ColorHinweise)}]#4[/] Bildungsgänge werden daran identifiziert, dass im Text [aqua]Bildungsgangleitung[/] steht und die Beschreibung mit [aqua]bildunggaenge:[/] beginnt, ",
+                        $"Schulpfichtüberwachung:",
+                        $"[{Global.GetColor(Global.ColorHinweise)}]#1[/] Alle SuS mit mehr als 8 unentsch. Fehlstunden werden angezeigt.",
                     ],
                     m =>
                     {
                         var anrechnungen = new Anrechnungen(lehrers, configuration);
 
+                        m.Schulpflichtüberwachung(
+                            configuration,
+                            "schulpflichtueberwachung",
+                            [
+                                "Ordnungsmaßnahme", // Wenn eine Datei in der Dokumentenverwaltung einen  
+                                "Bußgeld",          // dieser Bezeichner enthält, dann wird die Datei 
+                                "Attestpflicht",    // mit dem Creation-Datum hier übernommen.
+                                "Mahnung",
+                                "Familienkasse",
+                                "Versäumnisanzeige",
+                                "Suspendierung",
+                                "Ausschluss"
+                            ],
+                            8,  // Mindestanzahl unentschuldigte Fehlstunden               
+                            10, // Schonfrist: So viele Tage hat die Klassenleitung Zeit offene Stunden
+                                // zu bearbeiten, bevor eine Warnung ausgelöst wird.
+                            20, // Nach so vielen unent. Stunden ohne Maßnahme wird eine Warnung ausgelöst.
+                            30, // Nach so vielen Tagen verjähren unentschuldigte Fehlstunden für Unbescholtene.
+                            90, // Nach so vielen Tagen verjähren unentschuldigte Fehlstunden für SuS mit Maßnahme
+                            lehrers,
+                            [
+                                datei => datei.PutPage(),
+                                datei => datei.OeffneWebseite("https://bkb.wiki/schulpflichtueberwachung")
+                            ]);
                         m.GetGruppen(
                             configuration,
                             [
@@ -346,13 +373,7 @@ public static class MenueHelper
                                 zieldatei => zieldatei.Erstellen(),
                                 datei => datei.OeffneWebseite("https://bkb.wiki/oeffentlich:organigramm?do=admin&page=struct_schemas&table=klassen"),
                             ],
-                            Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + @"-klassen-utf8OhneBom-einmalig-vor-SJ-Beginn.csv"), ",", '\"', new UTF8Encoding(false), true);
-                        m.Schulpflichtüberwachung(
-                            configuration,
-                            [
-                                zieldatei => zieldatei.Erstellen(),
-                                datei => datei.PutPage()
-                            ]);
+                            Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + @"-klassen-utf8OhneBom-einmalig-vor-SJ-Beginn.csv"), ",", '\"', new UTF8Encoding(false), true);                        
                         m.GetFaecher(
                             configuration,
                             [

@@ -466,7 +466,7 @@ public static class Global
 
         // Der Wert aus der JSON hat Vorrang vor dem defaultwert. Nur wenn die JSON keinen Wert enthält oder der Wert nicht zulässig ist, wird der defaultwert verwendet.
         
-        defaultValue = !string.IsNullOrEmpty(configuration[parameter])
+        defaultValue = configuration != null && !string.IsNullOrEmpty(configuration[parameter])
             ? configuration[parameter] ?? defaultValue
             : defaultValue;
 

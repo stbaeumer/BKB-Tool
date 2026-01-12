@@ -3117,8 +3117,6 @@ public class Menüeintrag
                 @"Verfügbare, freie Räume für den Sprechtag: ",
                 (current, raum) => current + (raum.Raumnummer + " "));
 
-       
-
         var panel = new Panel(freieR)
                         .HeaderAlignment(Justify.Left)
                         .SquareBorder()
@@ -3483,55 +3481,59 @@ public class Menüeintrag
     }
 
     public void Schulpflichtüberwachung(
-        IConfiguration configuration,
-        List<Action<Datei>> funktionen
+            IConfiguration configuration,
+            string zieldateiname,
+            List<string> maßnahmen,
+            int anzahlUnentschFehlstunden,
+            int schonfrist,
+            int warnungAbAnzahl,
+            int verjaehrungUnbescholtene,
+            int nachSovielenTagenVerjährenFehlzeitenBeiMaßnahme,
+            Lehrers lehrers,
+            List<Action<Datei>> funktionen        
         )
     {
-        var schuelerMitAbwesenheitenUndMaßnahmen = GetMaßnahmenUndFehlzeiten(configuration,
-            [
-                "Ordnungsmaßnahme",
-                "Anhörung",
-                "Bußgeldverfahren",
-                "Attestpflicht",
-                "Mahnung",
-                "Familienkasse",
-                "Versäumnisanzeige",
-                "Suspendierung",
-                "ausschluss"
-            ]
-        );
-
-        schuelerMitAbwesenheitenUndMaßnahmen.SchulpflichtüberwachungTxt(
+        Students schuelerMitAbwesenheiten = GetSchuelerMitSovielenUnentschFehlzeiten(configuration, anzahlUnentschFehlstunden);
+        schuelerMitAbwesenheiten.GetMassnahmen(configuration, maßnahmen, Quelldateien);
+        schuelerMitAbwesenheiten.SchulpflichtüberwachungTxt(
             configuration,
-            "ImportNachWiki/schulpflichtueberwachung.txt",
-            10, // Schonfrist: So viele Tage hat die Klassenleitung Zeit offene Stunden
-                // zu bearbeiten, bevor eine Warnung ausgelöst wird.
-            20, // Nach so vielen unent. Stunden ohne Maßnahme wird eine Warnung ausgelöst.
-            30, // Nach so vielen Tagen verjähren unentschuldigte Fehlstunden für Unbescholtene.
-            90, // Nach so vielen Tagen verjähren unentschuldigte Fehlstunden für SuS mit Maßnahme
+            funktionen,
+            zieldateiname,
+            schonfrist,                                         // Schonfrist: So viele Tage hat die Klassenleitung Zeit offene Stunden
+                                                                // zu bearbeiten, bevor eine Warnung ausgelöst wird.
+            warnungAbAnzahl,                                    // Nach so vielen unent. Stunden ohne Maßnahme wird eine Warnung ausgelöst.
+            verjaehrungUnbescholtene,                           // Nach so vielen Tagen verjähren unentschuldigte Fehlstunden für Unbescholtene.
+            nachSovielenTagenVerjährenFehlzeitenBeiMaßnahme,    // Nach so vielen Tagen verjähren unentschuldigte Fehlstunden für SuS mit Maßnahme
             Klassen,
+            lehrers,
             Quelldateien
         );
-        //foreach (var aktion in zieldatei.Funktionen) aktion(zieldatei);
     }
 
-    public Students GetMaßnahmenUndFehlzeiten(IConfiguration configuration, List<string> maßnahmenString)
+    public Students GetSchuelerMitSovielenUnentschFehlzeiten(IConfiguration configuration, int anzahl)
     {
         var sMitAbwesenheiten = new Students();
 
-        var schuelerZusatzdaten = Quelldateien.GetMatchingList(configuration, "schuelerzusatzdaten", IStudents, Klassen);
-        //.Where(datei => datei != null && !string.IsNullOrEmpty(datei!.UnterordnerUndDateiname))
-        //.FirstOrDefault(datei => datei!.UnterordnerUndDateiname.Contains("SchuelerZusatzdaten"));
-
-        foreach (Student student in Students)
+        AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("SuS mit mehr als " + anzahl + " unentschuldigten Fehlstunden ermitteln ...", ctx =>
         {
-            var id = student.Id;
-            student.GetMaßnahmen(Quelldateien, maßnahmenString);
-            student.GetAbwesenheiten(Quelldateien, id);
+            var absencePerStudent = Quelldateien.GetMatchingList(configuration, "absenceperstudent", IStudents, Klassen);
 
-            if (student.Abwesenheiten.Count != 0)
-                sMitAbwesenheiten.Add(student);
-        }
+            foreach (Student student in Students)
+            {
+                if(student.Vorname.StartsWith("Ju") && student.Nachname.StartsWith("Bä"))
+                {
+                    string aa = "";
+                }
+
+                student.GetUnentschFehlzeiten(absencePerStudent);
+
+                if (student.Abwesenheiten.Count != 0)                    
+                    if(student.MehrAlsSovieleUnentschuldigteFehlstunden(12))
+                        sMitAbwesenheiten.Add(student);
+            }
+        });
+
+        Global.ZeileSchreiben($"SuS mit mehr als " + anzahl + " unentschuldigten Fehlstunden:", $"{sMitAbwesenheiten.Count}");
 
         return sMitAbwesenheiten;
     }

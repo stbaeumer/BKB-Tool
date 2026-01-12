@@ -56,7 +56,7 @@ public class Datei : List<dynamic>
     private string[] ZuIgnorierendeEigenschaften { get; set; } = null!;
 
     public string? AbsoluterPfad { get; set; } = "";
-    public List<Action<Datei>> Funktionen { get; private set; }
+    public List<Action<Datei>> Funktionen { get; set; }
     public IConfiguration Konfiguration { get; private set; }
     public string Dateiname { get; set; } = null!;
     public string ZipPfad { get; private set; }

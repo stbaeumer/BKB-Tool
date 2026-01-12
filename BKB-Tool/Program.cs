@@ -1,4 +1,4 @@
-﻿// Stefan Bäumer 2025
+﻿// Stefan Bäumer 2026
 using System;
 using System.Diagnostics;
 using System.Reflection;
