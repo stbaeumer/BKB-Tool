@@ -1683,7 +1683,7 @@ public class Menüeintrag
                         continue;
                     }
 
-                    if(schildStudent.Nachname == "Sadiku" && schildStudent.Vorname == "Almir")
+                    if(schildStudent.Nachname == "Schmitz" && schildStudent.Vorname == "Leon Noel")
                     {
                         var debug = 1;
                     }
@@ -1741,6 +1741,20 @@ public class Menüeintrag
                                     {
                                         susMitÄnderung.Add((i + ". ").PadRight(5) + schildStudentMeldung + " " + schildStudent.Status + "      Austritt: " + schildStudent.ZeugnisdatumLetztesZeugnisInDieserKlasse.ToShortDateString());
 
+                                        // Das Entlassdatum wird einen Tag nach der Zeugnisausgabe bzw. einen Tag nach heute gesetzt. 
+                                        var entlassdatum = DateTime.Now.Date;
+                                        // Der spätere der Termine gewinnt.
+                                        if (entlassdatum > schildStudent.ZeugnisdatumLetztesZeugnisInDieserKlasse)
+                                        {
+                                            entlassdatum = entlassdatum.AddDays(1);
+                                        }
+                                        else
+                                        {
+                                            entlassdatum = schildStudent.ZeugnisdatumLetztesZeugnisInDieserKlasse.AddDays(1);
+                                        }   
+
+                                        schildStudent.Entlassdatum = entlassdatum.ToShortDateString();
+
                                         table.AddRow(new Text[]{
                                             new Text(i+".").RightJustified(),
                                             new Text(schildStudent.Nachname).LeftJustified(),
@@ -1748,9 +1762,9 @@ public class Menüeintrag
                                             new Text(id).LeftJustified(),
                                             new Text(schildStudent.Klasse).LeftJustified(),
                                             new Text(schildStudent.Status).LeftJustified(),
-                                            new Text("Austritt: " + schildStudent.ZeugnisdatumLetztesZeugnisInDieserKlasse.ToShortDateString())});
+                                            new Text("Austritt: " + entlassdatum.ToShortDateString())});
 
-                                        schildStudent.Entlassdatum = DateTime.Now.ToShortDateString();
+
                                     }
                                     else
                                     {
@@ -3528,7 +3542,7 @@ public class Menüeintrag
                 student.GetUnentschFehlzeiten(absencePerStudent);
 
                 if (student.Abwesenheiten.Count != 0)                    
-                    if(student.MehrAlsSovieleUnentschuldigteFehlstunden(12))
+                    if(student.MehrAlsSovieleUnentschuldigteFehlstunden(anzahl))
                         sMitAbwesenheiten.Add(student);
             }
         });
