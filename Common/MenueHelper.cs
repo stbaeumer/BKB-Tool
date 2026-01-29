@@ -836,9 +836,14 @@ public static class MenueHelper
                         students,
                         klassen,
                         [
-                            $"Es wird für jede Klasse eine Wiki-Seite erstellt. Die Seite enthält eine Tabelle mit allen Schüler*innen der Klasse und allen Fächern, die die Schüler*innen belegen. Klassenleitungen können dort einfach alle Belegungen eintragen. Am besten wird die Tabelle von Klassenleitungen vor den Sommerferien erstellt.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise:[/]",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]#1[/] Für das Erstellen wird die Schuelerleistungsdaten.dat ausgelesen."
+                            $"Es wird für jede Klasse eine Wiki-Seite erstellt unterhalb von https://bkb.wiki/oeffentlich:klausurbelegung:start. Die Seite enthält eine Tabelle mit allen Schüler*innen der Klasse und allen Fächern, die die Schüler*innen belegen. Klassenleitungen können dort einfach alle Belegungen eintragen. Am besten wird die Tabelle von Klassenleitungen vor den Sommerferien erstellt.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Verarbeitungsoptionen:[/]",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#1[/] Tabelle aus der GPU002 erstellen und in Wiki als Seite anlegen:",
+                            $"   Diese Option ist direkt vor den Sommerferien sinnvoll, damit Kurswahlen durchgeführt werden können.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#2[/] Tabelle aus Leistungsdaten erstellen und inkl. alle Einträge in Wiki anlegen:",
+                            $"   Diese Option ist nach den Sommerferien sinnvoll, um bestehende Leistungsdaten in SchILD zu aktualisieren.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#3[/] Tabelle aus Wiki auslesen:",
+                            $"   SchuelerLeistungsdaten werden für den Re-Import nach SchILD erstellt."
                         ],
                         m =>
                         {
