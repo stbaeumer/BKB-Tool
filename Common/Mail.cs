@@ -143,7 +143,10 @@ private bool IstMailadresseGültig(string email)
 
                 if (!string.IsNullOrEmpty(bcc))
                 {
-                    email.Bcc.Add(new MailboxAddress("Empfänger", bcc));
+                    foreach(var m in bcc.Split(','))
+                    {
+                        email.Bcc.Add(new MailboxAddress("Empfänger", m.Trim()));
+                    }                    
                 }
 
                 // 1️⃣ Erstelle den Haupttext der E-Mail

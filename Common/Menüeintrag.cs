@@ -1949,7 +1949,14 @@ public class Menüeintrag
                                     return dict["InternKrz"].ToString() == klasse["Klassenlehrer"].ToString();
                                 }).LastOrDefault() as IDictionary<string, object>;
 
-                            klassenleitung = dictklassenleitung["Vorname"] + " " + dictklassenleitung["Nachname"];
+                            if(dictklassenleitung == null)
+                            {
+                                throw new Exception("Kein Klassenleitung in SchILD in Klasse " + student.Klasse + ". Bitte zuerst korrigieren und dann erneut aus SchILD exportieren.");
+                            }
+                            else
+                            {
+                                klassenleitung = dictklassenleitung["Vorname"] + " " + dictklassenleitung["Nachname"];
+                            }
                         }
 
                         int alter = -1;

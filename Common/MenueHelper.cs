@@ -181,7 +181,7 @@ public static class MenueHelper
                                         [
                                             datei => datei.Erstellen(),
                                             datei => datei.ZippenMitKennwort(configuration),
-                                            datei => datei.Mailen(datei.ZipPfad, datei.ZipPfad, configuration, datei.ZipPfad),
+                                            datei => datei.Mailen("Webuntis-Import durchgeführt", "SuS, Eltern, Betriebszugehörigkeiten und Fotos nach Webuntis und Geevoo importiert. Importdatei für o365 und Littera bereitgestellt.", configuration, datei.ZipPfad)                                            
                                         ],
                                         [
                                             $"Es wird jetzt die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd") + "-ImportNachNetman.csv")}[/] erstellt.",
