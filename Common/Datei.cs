@@ -1251,6 +1251,69 @@ public class Datei : List<dynamic>
                 }
             });
             Global.ZeileSchreiben("Fotos gezippt (Geevoo-Mail)", geevooZipPfad, ConsoleColor.Green, ConsoleColor.White);
+            // Zweite Zip-Datei: Netman-Kurzname
+            var netmanZipPfad = Path.Combine(Path.GetDirectoryName(AbsoluterPfad),
+                Path.GetFileNameWithoutExtension(AbsoluterPfad) + "_Netman-Kurzname.zip");
+
+            AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start($"Fotos zippen (Netman-Kurzname) ...", ctx =>
+            {
+                using (FileStream zipStream = File.Create(geevooZipPfad))
+                using (ZipOutputStream zip = new ZipOutputStream(zipStream))
+                {
+                    zip.SetLevel(kompressionsLevel);
+
+                    if (!string.IsNullOrEmpty(kennwort) && kennwort != " ")
+                    {
+                        zip.Password = kennwort;
+                    }
+
+                    foreach (var student in studentsMitNeuenFotos)
+                    {
+                        var tempDatei = Path.Combine(Path.GetTempPath(), student.MailSchulisch + ".jpg");
+
+                        using (var image = Image.Load(student.ZielFotoPfad))
+                        {
+                            image.Mutate(x => x.Resize(160, 160));
+                            image.Mutate(x => x.Rotate(Convert.ToInt32(configuration["RotateFotos"])));
+                            image.Save(tempDatei);
+                        }
+
+                        byte[] buffer = new byte[4096];
+                        string dateiName = Path.GetFileName(tempDatei);
+
+                        ZipEntry entry = new ZipEntry(dateiName)
+                        {
+                            DateTime = DateTime.Now,
+                            CompressionMethod = CompressionMethod.Stored
+                        };
+
+                        zip.PutNextEntry(entry);
+
+                        using (FileStream dateiStream = File.OpenRead(tempDatei))
+                        {
+                            int bytesRead;
+                            while ((bytesRead = dateiStream.Read(buffer, 0, buffer.Length)) > 0)
+                            {
+                                zip.Write(buffer, 0, bytesRead);
+                            }
+                        }
+
+                        File.Delete(tempDatei);
+                    }
+
+                    try
+                    {
+                        zip.CloseEntry();
+                    }
+                    catch
+                    {
+                        throw new Exception("Fehler beim Erstellen des Zip-Archivs (Netman). Möglicherweise wurden keine Fotos gefunden.");
+                    }
+
+                    zip.IsStreamOwner = true;
+                }
+            });
+            Global.ZeileSchreiben("Fotos gezippt (Geevoo-Mail)", geevooZipPfad, ConsoleColor.Green, ConsoleColor.White);
         }
         catch (Exception ex)
         {

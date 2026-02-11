@@ -116,6 +116,33 @@ public static class MenueHelper
                         Global.NurBeiDiesenSchulnummern.Alle
                     ),
                     new Menüeintrag(
+                        "Fotos (c): Schüler*innenfotos aus SchILD für Webuntis, Geevoo und Netman bereitstellen",
+                        quelldateien.Notwendige(configuration, ["schuelerZusatzdaten,dat"]),
+                        students,
+                        klassen,
+                        [
+                            $"Es wird die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(configuration["PfadDownloads"] ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-Import-Fotos.zip")}[/] erstellt.",
+                            $"[{Global.GetColor(Global.ColorUnterschrift)}]Voraussetzung: [/]Die Fotos müssen zuvor aus SchILD exportiert werden: ([{Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadFotosAusSchild"]}[/].",
+                            $"Dazu in SchILD den Weg gehen: [{Global.GetColor(Global.ColorActionInMenüs)}]Datenaustausch > Fotos > Fotos exportieren[/]",
+                            $"Wahlweise können alle Fotos bereitgestellt werden oder nur diejenigen, die in SchILD seit dem letzten Fotoexport hinzugefügt wurden.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1: [/]Nach dem Start dieser Funktion werden alle aus SchILD exportierten Fotos nach PfadFotosAusSchild-{DateTime.Now.ToString("yyyyMMdd-HHmm")} verschoben. Somit können die verschiedenen Fotoexporte verglichen werden, um die Differenz für Webuntis zu ermitteln."
+                        ],
+                        m =>
+                        {
+                            if(m.NichtAlleSusHabenEineEindeutigeMailAdresse(configuration, m.Students)) return;
+                            m.FilterInteressierendeStudentsUndKlassen(configuration);
+                            m.IStudents = m.IStudents.AlleOderNeueFotopfadeAnStudentsZuweisen(configuration);
+                            m.Zieldatei = new Datei(Path.Combine(configuration["PfadDownloads"] ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-" + (string.Join("-", m.IKlassen).Substring(0, Math.Min(25, string.Join("-", m.IKlassen).Length)) + "-Fotos.zip")));
+                            m.Zieldatei?.FotosZippen(configuration, "", 0, m.IStudents);
+                            m.Zieldatei.OrdnerOeffnen();
+                            m.OeffneWebseite("https://bk-borken.webuntis.com/students");
+                            m.OeffneWebseite("https://management.geevoo.de/import/");
+                            m.NeueFotosAusSchildOrdnerErstellenUndAlteFotosVerschieben(configuration);
+                        },
+                        Global.Rubrik.WöchtentlicheArbeiten,
+                        Global.NurBeiDiesenSchulnummern.Nur177659
+                    ),
+                    new Menüeintrag(
                         "Webuntis & Co.: Importdateien für Webuntis, Littera, Netman erstellen",
                         quelldateien.Notwendige(configuration, ["legalguardian_,csv,optional","apprenticerepresentative_,csv,optional","student_,csv","schuelerlernabschnittsdaten,dat", "schuelerzusatzdaten,dat", "schuelererzieher,dat", "schuelerAdressen,dat", "lehrkraefte,dat", "klassen,dat", "schuelerTelefonnummern,dat"]),
                         students,
@@ -208,33 +235,7 @@ public static class MenueHelper
                         Global.Rubrik.WöchtentlicheArbeiten,
                         Global.NurBeiDiesenSchulnummern.Alle
                     ),
-                    new Menüeintrag(
-                        "Fotos (c): Schüler*innenfotos aus SchILD für Webuntis und Geevoo bereitstellen",
-                        quelldateien.Notwendige(configuration, ["schuelerZusatzdaten,dat"]),
-                        students,
-                        klassen,
-                        [
-                            $"Es wird die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(configuration["PfadDownloads"] ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-Import-Fotos.zip")}[/] erstellt.",
-                            $"[{Global.GetColor(Global.ColorUnterschrift)}]Voraussetzung: [/]Die Fotos müssen zuvor aus SchILD exportiert werden: ([{Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadFotosAusSchild"]}[/].",
-                            $"Dazu in SchILD den Weg gehen: [{Global.GetColor(Global.ColorActionInMenüs)}]Datenaustausch > Fotos > Fotos exportieren[/]",
-                            $"Wahlweise können alle Fotos bereitgestellt werden oder nur diejenigen, die in SchILD seit dem letzten Fotoexport hinzugefügt wurden.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1: [/]Nach dem Start dieser Funktion werden alle aus SchILD exportierten Fotos nach PfadFotosAusSchild-{DateTime.Now.ToString("yyyyMMdd-HHmm")} verschoben. Somit können die verschiedenen Fotoexporte verglichen werden, um die Differenz für Webuntis zu ermitteln."
-                        ],
-                        m =>
-                        {
-                            if(m.NichtAlleSusHabenEineEindeutigeMailAdresse(configuration, m.Students)) return;
-                            m.FilterInteressierendeStudentsUndKlassen(configuration);
-                            m.IStudents = m.IStudents.AlleOderNeueFotopfadeAnStudentsZuweisen(configuration);
-                            m.Zieldatei = new Datei(Path.Combine(configuration["PfadDownloads"] ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-" + (string.Join("-", m.IKlassen).Substring(0, Math.Min(25, string.Join("-", m.IKlassen).Length)) + "-Fotos.zip")));
-                            m.Zieldatei?.FotosZippen(configuration, "", 0, m.IStudents);
-                            m.Zieldatei.OrdnerOeffnen();
-                            m.OeffneWebseite("https://bk-borken.webuntis.com/students");
-                            m.OeffneWebseite("https://management.geevoo.de/import/");
-                            m.NeueFotosAusSchildOrdnerErstellenUndAlteFotosVerschieben(configuration);
-                        },
-                        Global.Rubrik.WöchtentlicheArbeiten,
-                        Global.NurBeiDiesenSchulnummern.Nur177659
-                    ),
+                    
                     new Menüeintrag(
                     "Klassen: Neue Klassen von Untis nach SchILD übergeben und Eigenschaften anpassen",
                     quelldateien.Notwendige(configuration, ["klassen,dat", "GPU003,txt", "GPU002,txt"]),

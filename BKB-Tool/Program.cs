@@ -271,37 +271,66 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
 
                     AnsiConsole.MarkupLine($"[gray]Updater-Skript:[/] [bold {Global.GetColor(Global.ColorPfadInDateien)}]{updaterScript}[/]");
 
-                    // Terminal-Erkennung: alacritty > gnome-terminal
+                    // 1. Terminal-Erkennung (Diesen Teil musst du ausführen!)
                     bool hasAlacritty = false;
                     bool hasGnomeTerminal = false;
+
                     try
                     {
-                        var checkAlacritty = Process.Start(new ProcessStartInfo
+                        using (var p = Process.Start(new ProcessStartInfo("which", "alacritty") { RedirectStandardOutput = true, UseShellExecute = false }))
                         {
-                            FileName = "which",
-                            Arguments = "alacritty",
-                            UseShellExecute = false,
-                            RedirectStandardOutput = true,
-                            CreateNoWindow = true
-                        });
-                        checkAlacritty?.WaitForExit();
-                        hasAlacritty = checkAlacritty?.ExitCode == 0;
-
+                            p?.WaitForExit();
+                            hasAlacritty = p?.ExitCode == 0;
+                        }
                         if (!hasAlacritty)
                         {
-                            var checkGnome = Process.Start(new ProcessStartInfo
+                            using (var p = Process.Start(new ProcessStartInfo("which", "gnome-terminal") { RedirectStandardOutput = true, UseShellExecute = false }))
                             {
-                                FileName = "which",
-                                Arguments = "gnome-terminal",
-                                UseShellExecute = false,
-                                RedirectStandardOutput = true,
-                                CreateNoWindow = true
-                            });
-                            checkGnome?.WaitForExit();
-                            hasGnomeTerminal = checkGnome?.ExitCode == 0;
+                                p?.WaitForExit();
+                                hasGnomeTerminal = p?.ExitCode == 0;
+                            }
                         }
                     }
-                    catch { }
+                    catch { /* Ignorieren */ }
+
+                    // 2. Terminal-Befehl zusammenbauen
+                    string terminalCmd = "";
+                    string terminalArgs = "";
+
+                    if (hasAlacritty)
+                    {
+                        terminalCmd = "alacritty";
+                        // Alacritty braucht den absoluten Pfad oder bash -c
+                        terminalArgs = $"-e /bin/bash \"{updaterScript}\"";
+                    }
+                    else if (hasGnomeTerminal)
+                    {
+                        terminalCmd = "gnome-terminal";
+                        // WICHTIG: gnome-terminal erwartet oft das -- vor dem Skriptpfad
+                        terminalArgs = $"-- /bin/bash \"{updaterScript}\"";
+                    }
+                    else
+                    {
+                        // Fallback: xterm ist auf fast allen Linux-Systemen als kleinster Nenner installiert
+                        terminalCmd = "/bin/bash";
+                        terminalArgs = $"\"{updaterScript}\"";
+                    }
+
+                    // 3. Starten
+                    try
+                    {
+                        Process.Start(new ProcessStartInfo
+                        {
+                            FileName = terminalCmd,
+                            Arguments = terminalArgs,
+                            UseShellExecute = false,
+                            CreateNoWindow = false // Wir WOLLEN ein Fenster sehen
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        AnsiConsole.MarkupLine($"[red]Fehler beim Starten des Skripts:[/] {ex.Message}");
+                    }
 
                     if (!hasAlacritty && !hasGnomeTerminal)
                     {
@@ -320,7 +349,6 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                         AnsiConsole.Write(terminalWarning);                        
                         return configuration;
                     }
-                    // ...existing code...
                     try
                     {
                         // Terminal unabhängig vom Parent-Prozess starten (detached)
@@ -347,7 +375,6 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                     // Hauptprozess beenden, damit das Skript ersetzen kann
                     Environment.Exit(0);
                     return configuration; // unreachable
-                    // ...existing code...
                 }
                 else if (os == "Windows")
                 {
