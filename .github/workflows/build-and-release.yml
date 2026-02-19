@@ -101,7 +101,6 @@ jobs:
       shell: pwsh
       run: |
         $msg = git log -1 --pretty=%B
-        # Wenn die Nachricht "[skip ci]" oder "chore: bump version" enthält, nehme die vorherige
         if ($msg -match "\[skip ci\]" -or $msg -match "chore: bump version") {
           $msg = git log -2 --pretty=%B --skip=1 | Select-Object -First 1
         }
@@ -140,29 +139,26 @@ jobs:
           -p:IncludeNativeLibrariesForSelfExtract=true `
           -p:PublishTrimmed=false `
           -o ./publish/linux
-    
+
+    - name: Prepare Linux Binary for Release
+      shell: pwsh
+      run: |
+        # Kopiert die nackte Binärdatei mit einem eindeutigen Namen für das Release
+        Copy-Item "./publish/linux/BKB-Tool" -Destination "./publish/linux/BKB-Tool-linux-x64"
+
     - name: Create AppImage structure
       shell: pwsh
       run: |
-        # AppDir erstellen (minimale Struktur)
         New-Item -ItemType Directory -Force -Path "AppDir/usr/bin"
         New-Item -ItemType Directory -Force -Path "AppDir/usr/share/applications"
-        
-        # Binary kopieren
         Copy-Item "./publish/linux/BKB-Tool" -Destination "AppDir/usr/bin/"
-        
-        # Icons kopieren (optional, für AppImage-Icon)
         if (Test-Path "BKB-Tool/Icons/BKB-Tool_256.png") {
           Copy-Item "BKB-Tool/Icons/BKB-Tool_256.png" -Destination "AppDir/bkb-tool.png"
         }
-        
-        # Desktop-Datei erstellen (WICHTIG: Terminal=true und richtige Position)
         $desktopContent = "[Desktop Entry]`nType=Application`nName=BKB-Tool`nComment=Ein Werkzeug an der Schnittstelle zwischen SchILD und Webuntis`nExec=BKB-Tool`nIcon=bkb-tool`nCategories=Utility;`nTerminal=true`nVersion=1.0`n"
         $utf8NoBom = New-Object System.Text.UTF8Encoding $false
         [System.IO.File]::WriteAllText("AppDir/bkb-tool.desktop", $desktopContent, $utf8NoBom)
         Copy-Item "AppDir/bkb-tool.desktop" -Destination "AppDir/usr/share/applications/"
-        
-        # AppRun erstellen (mit Terminal-Titel)
         $apprunContent = "#!/bin/bash`nSELF=`$(readlink -f `"`$0`")`nHERE=`${SELF%/*}`nexport PATH=`"`${HERE}/usr/bin:`${PATH}`"`nexport LD_LIBRARY_PATH=`"`${HERE}/usr/lib:`${LD_LIBRARY_PATH}`"`necho -ne `"\033]0;BKB-Tool\007`"`nexec `"`${HERE}/usr/bin/BKB-Tool`" `"`$@`"`n"
         [System.IO.File]::WriteAllText("AppDir/AppRun", $apprunContent, $utf8NoBom)
     
@@ -174,32 +170,16 @@ jobs:
     - name: Build AppImage
       shell: wsl-bash {0}
       run: |
-        # Dateien ausführbar machen
         chmod +x AppDir/AppRun
         chmod +x AppDir/usr/bin/BKB-Tool
-        
-        # CRLF zu LF konvertieren
         sed -i 's/\r$//' AppDir/bkb-tool.desktop || true
         sed -i 's/\r$//' AppDir/AppRun || true
-        
-        # AppImageTool herunterladen und extrahieren
         wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
         chmod +x appimagetool
         ./appimagetool --appimage-extract
-        
-        # AppImage erstellen (ohne Versionsnummer im Dateinamen)
-        # -u "gh-releases-zsync|OWNER|REPO|latest|BKB-Tool.AppImage.zsync" erstellt automatisch die .zsync-Datei
         ARCH=x86_64 ./squashfs-root/AppRun --no-appstream \
           -u "gh-releases-zsync|${{ github.repository_owner }}|${{ github.event.repository.name }}|${{ steps.get_version.outputs.version }}|BKB-Tool.AppImage.zsync" \
           AppDir BKB-Tool.AppImage
-        
-        # Prüfen ob .zsync-Datei erstellt wurde
-        if [ -f "BKB-Tool.AppImage.zsync" ]; then
-          echo "✓ .zsync-Datei erfolgreich erstellt"
-          ls -lh BKB-Tool.AppImage*
-        else
-          echo "⚠ Warnung: .zsync-Datei wurde nicht erstellt"
-        fi
     
     - name: Create Release
       uses: softprops/action-gh-release@v1
@@ -213,14 +193,16 @@ jobs:
           
           ---
           
-          **Assets - Downloads:**          
-          - `BKB-Tool.AppImage` - Linux x64
-          - `BKB-Tool.AppImage.zsync` - für Linux-AppImage-Updates
+          **Assets - Downloads:**
           - `BKB-Tool.exe` - Windows x64
+          - `BKB-Tool.AppImage` - Linux x64 (Bundle)
+          - `BKB-Tool-linux-x64` - Linux x64 (Standalone Binary)
+          - `BKB-Tool.AppImage.zsync` - für Linux-AppImage-Updates
         draft: false
         prerelease: true
         files: |
           ./publish/windows/BKB-Tool.exe
+          ./publish/linux/BKB-Tool-linux-x64
           ./BKB-Tool.AppImage
           ./BKB-Tool.AppImage.zsync
       env:
