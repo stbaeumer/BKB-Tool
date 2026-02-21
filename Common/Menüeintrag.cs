@@ -673,7 +673,6 @@ public class Menüeintrag
             Console.ReadKey();
         }
     }
-
     public void LeistungsdatenStatistik(
         IConfiguration configuration,
         string zieldateiname,
@@ -4391,7 +4390,7 @@ public class Menüeintrag
             return;
         }
 
-        var mailDomain = configuration["MailDomain"].Trim();        
+        var mailDomain = configuration["MailDomain"].Trim();
         var mehrfachVorhanden = new List<dynamic>();
 
         AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Schuelerzusatzdaten: Mails anpassen ...", ctx =>
@@ -4403,12 +4402,6 @@ public class Menüeintrag
 
                 // Wenn der Schüler nicht aktiv oder extern ist, überspringe diese Zeile
                 if (!(dictSb["Status"].ToString() == "2" || dictSb["Status"].ToString() == "6")) continue;
-
-                // Wenn der Nachname fehlt, überspringe diese Zeile
-                if (dictSz["Nachname"].ToString().StartsWith("Wilgenbus"))
-                { 
-                    string a = "";
-                }
 
                 if (string.IsNullOrEmpty(dictSb["Geburtsdatum"].ToString()))
                 {

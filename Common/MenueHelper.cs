@@ -566,6 +566,82 @@ public static class MenueHelper
                         Global.Rubrik.Leistungsdaten,
                         Global.NurBeiDiesenSchulnummern.Alle
                     ),
+
+                    new Menüeintrag(
+                        $"14 Tage vor Zeugnis: Unterrichte schülergenau anlegen.",
+                        new Dateien(),
+                        students,
+                        klassen,
+                        [
+                            $"Die Lerabschnittsdaten müssen zuvor angelegt worden sein.",
+                            $"Die Unterrichte werden für jeden Schüler neu angelegt und unter Leistungsdaten eingetragen.",
+                            $"Kurse werden angelegt.",
+                            $"Zu jedem angelegten Unterricht muss am Tag vor der Konferenz eine Note hinzugefügt werden."
+                        ],
+                        _ =>
+                        {
+                            var pdfDateien = new PdfDateien();
+                            pdfDateien.KennwortSetzen(configuration);
+                        },
+                        Global.Rubrik.Allgemein,
+                        Global.NurBeiDiesenSchulnummern.Nur177659
+                    ),
+                    new Menüeintrag(
+                        $"4 Tage vor Zeugnis: Die Fehlzeiten werden in bestehende Lernabschnittsdaten eingefügt",
+                        new Dateien(),
+                        students,
+                        klassen,
+                        [
+                            $"Von allen PDF-Dateien in [{Global.GetColor(Global.ColorPfadInDateien)}]" + configuration["PfadDownloads"] + "[/] werden verschlüsselte Kopien erstellt.",
+                            $"Es werden nur Dateien berücksichtigt, die nicht bereits die Endung [{Global.GetColor(Global.ColorPfadInDateien)}]-kennwort.pdf[/] haben.",
+                            $"Kopien bekommen die Dateiendung [{Global.GetColor(Global.ColorPfadInDateien)}]-kennwort.pdf[/]."
+                        ],
+                        _ =>
+                        {
+                            var pdfDateien = new PdfDateien();
+                            pdfDateien.KennwortSetzen(configuration);
+                        },
+                        Global.Rubrik.Allgemein,
+                        Global.NurBeiDiesenSchulnummern.Nur177659
+                    ),
+                    new Menüeintrag(
+                        $"3 Tage vor Zeugnis: Fehlende Noten in Webuntis anmahnen",
+                        new Dateien(),
+                        students,
+                        klassen,
+                        [
+                            $"Von allen PDF-Dateien in [{Global.GetColor(Global.ColorPfadInDateien)}]" + configuration["PfadDownloads"] + "[/] werden verschlüsselte Kopien erstellt.",
+                            $"Es werden nur Dateien berücksichtigt, die nicht bereits die Endung [{Global.GetColor(Global.ColorPfadInDateien)}]-kennwort.pdf[/] haben.",
+                            $"Kopien bekommen die Dateiendung [{Global.GetColor(Global.ColorPfadInDateien)}]-kennwort.pdf[/]."
+                        ],
+                        _ =>
+                        {
+                            var pdfDateien = new PdfDateien();
+                            pdfDateien.KennwortSetzen(configuration);
+                        },
+                        Global.Rubrik.Allgemein,
+                        Global.NurBeiDiesenSchulnummern.Nur177659
+                    ),
+                    new Menüeintrag(
+                        $"1 Tag vor Zeugnis: Noten aus Webuntis nach SchILD importieren",
+                        new Dateien(),
+                        students,
+                        klassen,
+                        [
+                            $"Von allen PDF-Dateien in [{Global.GetColor(Global.ColorPfadInDateien)}]" + configuration["PfadDownloads"] + "[/] werden verschlüsselte Kopien erstellt.",
+                            $"Es werden nur Dateien berücksichtigt, die nicht bereits die Endung [{Global.GetColor(Global.ColorPfadInDateien)}]-kennwort.pdf[/] haben.",
+                            $"Kopien bekommen die Dateiendung [{Global.GetColor(Global.ColorPfadInDateien)}]-kennwort.pdf[/]."
+                        ],
+                        _ =>
+                        {
+                            var pdfDateien = new PdfDateien();
+                            pdfDateien.KennwortSetzen(configuration);
+                        },
+                        Global.Rubrik.Allgemein,
+                        Global.NurBeiDiesenSchulnummern.Nur177659
+                    ),
+
+
                     new Menüeintrag(
                         $"Altersermäßigung: berechnen für {int.Parse(Global.AktSj[0])}/{int.Parse(Global.AktSj[0]) + 1} und {int.Parse(Global.AktSj[0]) + 1}/{int.Parse(Global.AktSj[0]) + 2}",
                         quelldateien.Notwendige(configuration, ["lehrkraefte,dat", "lehrkraeftesonderzeiten,dat,optional", "GPU020,txt,optional", "GPU004,txt,optional"]),
@@ -662,7 +738,7 @@ public static class MenueHelper
                         },
                         Global.Rubrik.Allgemein,
                         Global.NurBeiDiesenSchulnummern.Nur177659
-                    ),
+                    ),                    
                     new Menüeintrag(
                             $"PDF-Seiten mailen: PDF-Seiten an darauf enthaltene E-Mail-Adressen mailen",
                             quelldateien.Notwendige(configuration, ["lehrkraefte,dat"]),

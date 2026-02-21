@@ -68,8 +68,8 @@ namespace Common
                 if (string.IsNullOrWhiteSpace(existierendeMail))
                 {
                     var gebPart = ParseGeburtsdatumZuYYMMDD(geb);
-                    var n = BereinigenNachnameFürMail(nachname);
-                    var v = BereinigenVornameFürMail(vorname);
+                    var n = BereinigenNachnameFuerMail(nachname);
+                    var v = BereinigenVornameFuerMail(vorname);
 
                     if (!string.IsNullOrEmpty(n) && !string.IsNullOrEmpty(v) && !string.IsNullOrEmpty(gebPart) && !string.IsNullOrEmpty(mailDomain))
                     {
@@ -143,7 +143,7 @@ namespace Common
             return "";
         }
 
-        private static string BereinigenNachnameFürMail(string nachname)
+        private static string BereinigenNachnameFuerMail(string nachname)
         {
             if (string.IsNullOrWhiteSpace(nachname)) return "";
             var n = UmlauteErsetzen(nachname.Trim().ToLowerInvariant());
@@ -151,7 +151,7 @@ namespace Common
             return string.IsNullOrEmpty(cleaned) ? "" : cleaned;
         }
 
-        private static string BereinigenVornameFürMail(string vorname)
+        private static string BereinigenVornameFuerMail(string vorname)
         {
             if (string.IsNullOrWhiteSpace(vorname)) return "";
             var v = UmlauteErsetzen(vorname.Trim().ToLowerInvariant());
@@ -163,13 +163,13 @@ namespace Common
         {
             if (string.IsNullOrEmpty(s)) return s;
             return s
-                .Replace("ä", "a")
-                .Replace("ö", "o")
-                .Replace("ü", "u")
-                .Replace("Ä", "A")
-                .Replace("Ö", "O")
-                .Replace("Ü", "U")
-                .Replace("ß", "ss");
+                .Replace("Ã¤", "ae")
+                .Replace("Ã¶", "oe")
+                .Replace("Ã¼", "ue")
+                .Replace("Ã„", "Ae")
+                .Replace("Ã–", "Oe")
+                .Replace("Ãœ", "Ue")
+                .Replace("ÃŸ", "ss");
         }
     }
 }
