@@ -2076,4 +2076,14 @@ public class Datei : List<dynamic>
         this.UrlRechts = "&message=" + Uri.EscapeDataString(message);            
         return this;
     }
+
+    internal void Mailen(IConfiguration configuration)
+    {
+        foreach (var l in this.Lehrers.Where(l => !string.IsNullOrEmpty(l.Mail)))
+        {
+            var mail = new Mail();
+            mail.Senden("Schulpflichtüberwachung KW " + ISOWeek.GetWeekOfYear(DateTime.Now) + l.Kürzel, configuration, 
+            @$"Hallo {l.Vorname} {l.Nachname}\n\nbitte folgen Sie dem Link für weitere Informationen: https://bkb.wiki/schulpflichtueberwachung\n\nIhr Webuntis-Team", "", l.Mail);
+        }
+    }
 }

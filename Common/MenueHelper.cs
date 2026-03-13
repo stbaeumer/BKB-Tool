@@ -114,34 +114,7 @@ public static class MenueHelper
                         },
                         Global.Rubrik.WöchtentlicheArbeiten,
                         Global.NurBeiDiesenSchulnummern.Alle
-                    ),
-                    new Menüeintrag(
-                        "Fotos (c): Schüler*innenfotos aus SchILD für Webuntis, Geevoo und Netman bereitstellen",
-                        quelldateien.Notwendige(configuration, ["schuelerZusatzdaten,dat"]),
-                        students,
-                        klassen,
-                        [
-                            $"Es wird die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(configuration["PfadDownloads"] ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-Import-Fotos.zip")}[/] erstellt.",
-                            $"[{Global.GetColor(Global.ColorUnterschrift)}]Voraussetzung: [/]Die Fotos müssen zuvor aus SchILD exportiert werden: ([{Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadFotosAusSchild"]}[/].",
-                            $"Dazu in SchILD den Weg gehen: [{Global.GetColor(Global.ColorActionInMenüs)}]Datenaustausch > Fotos > Fotos exportieren[/]",
-                            $"Wahlweise können alle Fotos bereitgestellt werden oder nur diejenigen, die in SchILD seit dem letzten Fotoexport hinzugefügt wurden.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1: [/]Nach dem Start dieser Funktion werden alle aus SchILD exportierten Fotos nach PfadFotosAusSchild-{DateTime.Now.ToString("yyyyMMdd-HHmm")} verschoben. Somit können die verschiedenen Fotoexporte verglichen werden, um die Differenz für Webuntis zu ermitteln."
-                        ],
-                        m =>
-                        {
-                            if(m.NichtAlleSusHabenEineEindeutigeMailAdresse(configuration, m.Students)) return;
-                            m.FilterInteressierendeStudentsUndKlassen(configuration);
-                            m.IStudents = m.IStudents.AlleOderNeueFotopfadeAnStudentsZuweisen(configuration);
-                            m.Zieldatei = new Datei(Path.Combine(configuration["PfadDownloads"] ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-" + (string.Join("-", m.IKlassen).Substring(0, Math.Min(25, string.Join("-", m.IKlassen).Length)) + "-Fotos.zip")));
-                            m.Zieldatei?.FotosZippen(configuration, "", 0, m.IStudents);
-                            m.Zieldatei.OrdnerOeffnen();
-                            m.OeffneWebseite("https://bk-borken.webuntis.com/students");
-                            m.OeffneWebseite("https://management.geevoo.de/import/");
-                            m.NeueFotosAusSchildOrdnerErstellenUndAlteFotosVerschieben(configuration);
-                        },
-                        Global.Rubrik.WöchtentlicheArbeiten,
-                        Global.NurBeiDiesenSchulnummern.Nur177659
-                    ),
+                    ),                    
                     new Menüeintrag(
                         "Webuntis & Co.: Importdateien für Webuntis, Littera, Netman erstellen",
                         quelldateien.Notwendige(configuration, ["legalguardian_,csv,optional","apprenticerepresentative_,csv,optional","student_,csv","schuelerlernabschnittsdaten,dat", "schuelerzusatzdaten,dat", "schuelererzieher,dat", "schuelerAdressen,dat", "lehrkraefte,dat", "klassen,dat", "schuelerTelefonnummern,dat"]),
@@ -208,7 +181,7 @@ public static class MenueHelper
                                         [
                                             datei => datei.Erstellen(),
                                             datei => datei.ZippenMitKennwort(configuration),
-                                            datei => datei.Mailen("Webuntis-Import durchgeführt", "SuS, Eltern, Betriebszugehörigkeiten und Fotos nach Webuntis und Geevoo importiert. Importdatei für o365 und Littera bereitgestellt.", configuration, datei.ZipPfad)                                            
+                                            datei => datei.Mailen("Webuntis-Import durchgeführt", "SuS, Eltern, Betriebszugehörigkeiten und Fotos nach Webuntis und Geevoo importiert. Importdatei für o365 und Littera bereitgestellt.", configuration, datei.ZipPfad)
                                         ],
                                         [
                                             $"Es wird jetzt die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd") + "-ImportNachNetman.csv")}[/] erstellt.",
@@ -235,159 +208,203 @@ public static class MenueHelper
                         Global.Rubrik.WöchtentlicheArbeiten,
                         Global.NurBeiDiesenSchulnummern.Alle
                     ),
-                    
                     new Menüeintrag(
-                    "Klassen: Neue Klassen von Untis nach SchILD übergeben und Eigenschaften anpassen",
-                    quelldateien.Notwendige(configuration, ["klassen,dat", "GPU003,txt", "GPU002,txt"]),
-                    students,
-                    klassen,
-                    [
-                        $"Nachdem die Schule in das neue Schuljahr versetzt worden ist, kann diese Funktion Folgendes:",
-                        $"#1 Fehlende Klassen aus Untis werden in den Schuelerzusatzdaten angelegt. Klassenleitung und Jahrgang werden aus Untis übernommen. Andere Eigenschaften werden aus Klassen des selben Jahrgangs der bisherigen Schuelerzusatzdaten übernommen.",
-                        $"#2 In bestehenden Klassen werden Klassenleitung und Jahrgang aus Untis in die Schuelerzusatzdaten übernommen.",
-                        $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1:[/] Die stellvertretenden Klassenleitungen und die Prüfungsordnung müssen manuell angepasst werden.",
-                        $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #2:[/] Klassen ohne Unterrichte werden ignoriert.",
-                    ],
-                    m =>
-                    {
-                        m.KlassenErstellen(
-                            configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Klassen.dat"),
-                            [
-                                datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
-                                datei => datei.Verarbeiten(quelldateien, Global.Modus.Filtern),
-                                datei => datei.OrdnerOeffnen(),
-                                datei => datei.Erstellen()
-                            ],
-                            ["InternBez"],
-                            ["SonstigeBez", "Folgeklasse"],
-                            "|", '\0', new UTF8Encoding(true), false);
-                    },
-                    Global.Rubrik.Allgemein,
-                    Global.NurBeiDiesenSchulnummern.Nur177659
-                ),
-                new Menüeintrag(
-                                "Klassenbucheinträge: Säumige Lehrer*innen erinnern",
-                                quelldateien.Notwendige(configuration, ["lehrkraefte,dat", "openperiod,pdf"]),
-                                students,
-                                klassen,
+                        "Fotos (c): Schüler*innenfotos aus SchILD für Webuntis, Geevoo und Netman bereitstellen",
+                        quelldateien.Notwendige(configuration, ["schuelerZusatzdaten,dat"]),
+                        students,
+                        klassen,
+                        [
+                            $"Es wird die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(configuration["PfadDownloads"] ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-Import-Fotos.zip")}[/] erstellt.",
+                            $"[{Global.GetColor(Global.ColorUnterschrift)}]Voraussetzung: [/]Die Fotos müssen zuvor aus SchILD exportiert werden: ([{Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadFotosAusSchild"]}[/].",
+                            $"Dazu in SchILD den Weg gehen: [{Global.GetColor(Global.ColorActionInMenüs)}]Datenaustausch > Fotos > Fotos exportieren[/]",
+                            $"Wahlweise können alle Fotos bereitgestellt werden oder nur diejenigen, die in SchILD seit dem letzten Fotoexport hinzugefügt wurden.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1: [/]Nach dem Start dieser Funktion werden alle aus SchILD exportierten Fotos nach PfadFotosAusSchild-{DateTime.Now.ToString("yyyyMMdd-HHmm")} verschoben. Somit können die verschiedenen Fotoexporte verglichen werden, um die Differenz für Webuntis zu ermitteln."
+                        ],
+                        m =>
+                        {
+                            if(m.NichtAlleSusHabenEineEindeutigeMailAdresse(configuration, m.Students)) return;
+                            m.FilterInteressierendeStudentsUndKlassen(configuration);
+                            m.IStudents = m.IStudents.AlleOderNeueFotopfadeAnStudentsZuweisen(configuration);
+                            m.Zieldatei = new Datei(Path.Combine(configuration["PfadDownloads"] ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-" + (string.Join("-", m.IKlassen).Substring(0, Math.Min(25, string.Join("-", m.IKlassen).Length)) + "-Fotos.zip")));
+                            m.Zieldatei?.FotosZippen(configuration, "", 0, m.IStudents);
+                            m.Zieldatei.OrdnerOeffnen();
+                            m.OeffneWebseite("https://bk-borken.webuntis.com/students");
+                            m.OeffneWebseite("https://management.geevoo.de/import/");
+                            m.NeueFotosAusSchildOrdnerErstellenUndAlteFotosVerschieben(configuration);
+                        },
+                        Global.Rubrik.WöchtentlicheArbeiten,
+                        Global.NurBeiDiesenSchulnummern.Nur177659
+                    ),
+                    new Menüeintrag(
+                        "Schulpflichtüberwachung: Klassenleitungen über schulpflichtverletzende Schüler*innen informieren",
+                        quelldateien.Notwendige(configuration, ["schuelervermerke,dat", "schuelerzusatzdaten,dat", "absenceperstudent,csv", "GPU003,txt"]),
+                        students,
+                        klassen,
+                        [                            
+                            $"Schulpfichtüberwachung:",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#1[/] Alle SuS mit mehr als 8 unentsch. Fehlstunden werden angezeigt.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#1[/] Klassenleitungen werden per Mail informiert."
+                        ],
+                        m =>
+                        {
+                            m.Schulpflichtüberwachung(
+                                configuration,
+                                "schulpflichtueberwachung",
                                 [
-                                    "Die 10% der KuK mit den meisten offenen Klassenbucheinträgen werden (mit folgender Einschränkung) angemahnt: Mit weniger als 10 offenen Eintragungen wird nicht gemahnt. ",
-                                    "Ab 20 oder mehr Stunden wird die Schulleitung in CC informiert.",
-                                    $"Die Anzahl der offenen Klassenbucheinträge wird aus der Datei [{Global.GetColor(Global.ColorPfadInDateien)}]OpenPeriods[/] ausgelesen. Dazu am besten den Bericht auf 'Beginn des Schuljares' stellen.",
-                                    "Die KuK werden zuerst angezeigt. Vor dem Mailversand wird nochmal explizit nach Bestätigung gefragt."
+                                    "Ordnungsmaßnahme", // Wenn eine Datei in der Dokumentenverwaltung einen  
+                                    "Bußgeld",          // dieser Bezeichner enthält, dann wird die Datei 
+                                    "Attestpflicht",    // mit dem Creation-Datum hier übernommen.
+                                    "Mahnung",
+                                    "Familienkasse",
+                                    "Versäumnisanzeige",
+                                    "Suspendierung",
+                                    "Ausschluss",
+                                    "Anhörung",
+                                    "Verweis"
                                 ],
-                                m =>
-                                {
-                                    lehrers = new Lehrers(configuration, m.Quelldateien);
-                                    lehrers.OffeneKlassenbuchEinträgeMahnen(m.Quelldateien, configuration);
-                                },
-                                Global.Rubrik.Allgemein,
-                                Global.NurBeiDiesenSchulnummern.Nur177659
-                            ),
-                new Menüeintrag(
-                    "Wiki: Diverse SQLite-Dateien (Organigramm, Praktikum etc.) erstellen",
-                    quelldateien.Notwendige(configuration, ["schuelervermerke,dat", "schuelerzusatzdaten,dat", "absenceperstudent,csv", "GPU006,txt", "GPU002,txt", "GPU003,txt", "klassen,dat"]),
-                    students,
-                    klassen,
-                    [
-                        $"Das Organigramm wird aus Untisanrechnungen gebildet. Beispiele: {{...}} = KATEGORIE; [[...]] = HINWEIS, Text ohne Klammern wird zur ROLLE; A14, A15, A16 ohne Klammern > AMT; Untis-Beschreibung > AUFGABE. Im Organigramm wird nach Kategorie, Aufgabe oder Beschreibung gruppiert.",
-                        $"Untisanrechnungen: 1.Struct Schema Editor > Untisanrechnungen > Löschen/Leeren > 'untisanrechnungen' eingeben, dann Leeren",
-                        $"Untisanrechnungen: 2.Struct Schema Editor > Untisanrechnungen > Importieren/Exportieren > Importieren von Rohdaten > Global > Durchsuchen",
-                        $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise zum Text in Anrechnungen:[/]",
-                        $"[{Global.GetColor(Global.ColorHinweise)}]#1[/] Das Beförderungsamt wird ausgelesen. Bsp.: A14",
-                        $"[{Global.GetColor(Global.ColorHinweise)}]#2[/] Hinweise werden aus eckigen Klammern ausgelesen. Bsp.: Fortbildung 2024",
-                        $"[{Global.GetColor(Global.ColorHinweise)}]#3[/] Kategorien werden aus geschweiften Klammern ausgelesen. Bsp.: Technik, Beratung",
-                        $"[{Global.GetColor(Global.ColorHinweise)}]#4[/] Bildungsgänge werden daran identifiziert, dass im Text [aqua]Bildungsgangleitung[/] steht und die Beschreibung mit [aqua]bildunggaenge:[/] beginnt, ",
-                        $"Schulpfichtüberwachung:",
-                        $"[{Global.GetColor(Global.ColorHinweise)}]#1[/] Alle SuS mit mehr als 8 unentsch. Fehlstunden werden angezeigt.",
-                    ],
-                    m =>
-                    {
-                        var anrechnungen = new Anrechnungen(lehrers, configuration);
-
-                        m.Schulpflichtüberwachung(
-                            configuration,
-                            "schulpflichtueberwachung",
-                            [
-                                "Ordnungsmaßnahme", // Wenn eine Datei in der Dokumentenverwaltung einen  
-                                "Bußgeld",          // dieser Bezeichner enthält, dann wird die Datei 
-                                "Attestpflicht",    // mit dem Creation-Datum hier übernommen.
-                                "Mahnung",
-                                "Familienkasse",
-                                "Versäumnisanzeige",
-                                "Suspendierung",
-                                "Ausschluss"
-                            ],
-                            8,  // Mindestanzahl unentschuldigte Fehlstunden               
-                            10, // Schonfrist: So viele Tage hat die Klassenleitung Zeit offene Stunden
-                                // zu bearbeiten, bevor eine Warnung ausgelöst wird.
-                            20, // Nach so vielen unent. Stunden ohne Maßnahme wird eine Warnung ausgelöst.
-                            30, // Nach so vielen Tagen verjähren unentschuldigte Fehlstunden für Unbescholtene.
-                            90, // Nach so vielen Tagen verjähren unentschuldigte Fehlstunden für SuS mit Maßnahme
-                            lehrers,
-                            [
-                                datei => datei.PutPage(),
-                                datei => datei.OeffneWebseite("https://bkb.wiki/schulpflichtueberwachung")
-                            ]);
-                        m.GetGruppen(
-                            configuration,
-                            [
-                                zieldatei => zieldatei.Erstellen(),
-                                datei => datei.OeffneWebseite("https://bkb.wiki/oeffentlich:organigramm?do=admin&page=struct_schemas&table=gruppen"),
-                            ],
-                            anrechnungen,
-                            Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-gruppen.csv"),
-                            lehrers,
-                            ",", '\"', new UTF8Encoding(false), true);
-                        m.GetUntisAnrechnungen(
-                            anrechnungen,
-                            Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-untisanrechnungen.csv"),
-                            [
-                                zieldatei => zieldatei.Erstellen(),
-                                datei => datei.OeffneWebseite("https://bkb.wiki/oeffentlich:organigramm?do=admin&page=struct_schemas&table=untisanrechnungen"),
-                            ],
-                            [500, 510, 530, 590, 900],
-                            [500, 510, 530, 590],
-                            ["PLA", "BM"],
-                            ",", '\"', new UTF8Encoding(false), true);
-                        m.GetLehrer(
-                            anrechnungen,
-                            [
-                                zieldatei => zieldatei.Erstellen()
-                            ],
-                            lehrers,
-                            Path.Combine(Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-lul-utf8OhneBom-einmalig-vor-SJ-Beginn.csv")),
-                            ",", '\'', new UTF8Encoding(false), false);
-                        m.Praktikanten(
-                            [
-                                zieldatei => zieldatei.Erstellen(),
-                                datei => datei.OeffneWebseite("https://bkb.wiki/oeffentlich:organigramm?do=admin&page=struct_schemas&table=praktikanten"),
-                            ],
-                            [
-                                "BW,1,2", "BT,1,2", "BS,1,2", "BS,2,2", "HBG,1,2", "HBT,1,2", "HBT,2,2", "HBW,1,1", "GG,1,1", "GT,1,1", "GW,1,1", "IFK,1,2" // Klasse, Jg, Anzahl Praktika
-                            ],
-                            Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + @"-praktikanten-utf8OhneBom-einmalig-vor-SJ-Beginn.csv"),
-                            ",", '\"', new UTF8Encoding(false), true);
-                        m.KlassenAnlegen(
-                            configuration,
-                            [
-                                zieldatei => zieldatei.Erstellen(),
-                                datei => datei.OeffneWebseite("https://bkb.wiki/oeffentlich:organigramm?do=admin&page=struct_schemas&table=klassen"),
-                            ],
-                            Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + @"-klassen-utf8OhneBom-einmalig-vor-SJ-Beginn.csv"), ",", '\"', new UTF8Encoding(false), true);                        
-                        m.GetFaecher(
-                            configuration,
-                            [
-                                zieldatei => zieldatei.Erstellen(),
-                                datei => datei.OeffneWebseite("https://bkb.wiki/oeffentlich:organigramm?do=admin&page=struct_schemas&table=gruppen"),
-                            ],
-                            Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-faecher.csv"),
-                            ",", '\'', new UTF8Encoding(false), false);
-                    },
-                    Global.Rubrik.Wiki,
-                    Global.NurBeiDiesenSchulnummern.Nur177659
-                ),
-                new Menüeintrag(
+                                8,  // Mindestanzahl unentschuldigte Fehlstunden               
+                                10, // Schonfrist: So viele Tage hat die Klassenleitung Zeit offene Stunden
+                                    // zu bearbeiten, bevor eine Warnung ausgelöst wird.
+                                20, // Nach so vielen unent. Stunden ohne Maßnahme wird eine Warnung ausgelöst.
+                                30, // Nach so vielen Tagen verjähren unentschuldigte Fehlstunden für Unbescholtene.
+                                90, // Nach so vielen Tagen verjähren unentschuldigte Fehlstunden für SuS mit Maßnahme
+                                lehrers,
+                                [
+                                    datei => datei.PutPage(),
+                                    datei => datei.OeffneWebseite("https://bkb.wiki/schulpflichtueberwachung"),
+                                    datei => datei.Mailen(configuration)
+                                ]
+                            ); 
+                        },
+                        Global.Rubrik.Allgemein,
+                        Global.NurBeiDiesenSchulnummern.Nur177659
+                    ),
+                    new Menüeintrag(
+                        "Klassen: Neue Klassen von Untis nach SchILD übergeben und Eigenschaften anpassen",
+                        quelldateien.Notwendige(configuration, ["klassen,dat", "GPU003,txt", "GPU002,txt"]),
+                        students,
+                        klassen,
+                        [
+                            $"Nachdem die Schule in das neue Schuljahr versetzt worden ist, kann diese Funktion Folgendes:",
+                            $"#1 Fehlende Klassen aus Untis werden in den Schuelerzusatzdaten angelegt. Klassenleitung und Jahrgang werden aus Untis übernommen. Andere Eigenschaften werden aus Klassen des selben Jahrgangs der bisherigen Schuelerzusatzdaten übernommen.",
+                            $"#2 In bestehenden Klassen werden Klassenleitung und Jahrgang aus Untis in die Schuelerzusatzdaten übernommen.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1:[/] Die stellvertretenden Klassenleitungen und die Prüfungsordnung müssen manuell angepasst werden.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #2:[/] Klassen ohne Unterrichte werden ignoriert.",
+                        ],
+                        m =>
+                        {
+                            m.KlassenErstellen(
+                                configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Klassen.dat"),
+                                [
+                                    datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
+                                    datei => datei.Verarbeiten(quelldateien, Global.Modus.Filtern),
+                                    datei => datei.OrdnerOeffnen(),
+                                    datei => datei.Erstellen()
+                                ],
+                                ["InternBez"],
+                                ["SonstigeBez", "Folgeklasse"],
+                                "|", '\0', new UTF8Encoding(true), false);
+                        },
+                        Global.Rubrik.Allgemein,
+                        Global.NurBeiDiesenSchulnummern.Nur177659
+                    ),
+                    new Menüeintrag(
+                        "Klassenbucheinträge: Säumige Lehrer*innen erinnern",
+                        quelldateien.Notwendige(configuration, ["lehrkraefte,dat", "openperiod,pdf"]),
+                        students,
+                        klassen,
+                        [
+                            "Die 10% der KuK mit den meisten offenen Klassenbucheinträgen werden (mit folgender Einschränkung) angemahnt: Mit weniger als 10 offenen Eintragungen wird nicht gemahnt. ",
+                            "Ab 20 oder mehr Stunden wird die Schulleitung in CC informiert.",
+                            $"Die Anzahl der offenen Klassenbucheinträge wird aus der Datei [{Global.GetColor(Global.ColorPfadInDateien)}]OpenPeriods[/] ausgelesen. Dazu am besten den Bericht auf 'Beginn des Schuljares' stellen.",
+                            "Die KuK werden zuerst angezeigt. Vor dem Mailversand wird nochmal explizit nach Bestätigung gefragt."
+                        ],
+                        m =>
+                        {
+                            lehrers = new Lehrers(configuration, m.Quelldateien);
+                            lehrers.OffeneKlassenbuchEinträgeMahnen(m.Quelldateien, configuration);
+                        },
+                        Global.Rubrik.Allgemein,
+                        Global.NurBeiDiesenSchulnummern.Nur177659
+                    ),
+                    new Menüeintrag(
+                        "Wiki: Diverse SQLite-Dateien (Organigramm, Praktikum etc.) erstellen",
+                        quelldateien.Notwendige(configuration, ["schuelervermerke,dat", "schuelerzusatzdaten,dat", "absenceperstudent,csv", "GPU006,txt", "GPU002,txt", "GPU003,txt", "klassen,dat"]),
+                        students,
+                        klassen,
+                        [
+                            $"Das Organigramm wird aus Untisanrechnungen gebildet. Beispiele: {{...}} = KATEGORIE; [[...]] = HINWEIS, Text ohne Klammern wird zur ROLLE; A14, A15, A16 ohne Klammern > AMT; Untis-Beschreibung > AUFGABE. Im Organigramm wird nach Kategorie, Aufgabe oder Beschreibung gruppiert.",
+                            $"Untisanrechnungen: 1.Struct Schema Editor > Untisanrechnungen > Löschen/Leeren > 'untisanrechnungen' eingeben, dann Leeren",
+                            $"Untisanrechnungen: 2.Struct Schema Editor > Untisanrechnungen > Importieren/Exportieren > Importieren von Rohdaten > Global > Durchsuchen",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise zum Text in Anrechnungen:[/]",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#1[/] Das Beförderungsamt wird ausgelesen. Bsp.: A14",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#2[/] Hinweise werden aus eckigen Klammern ausgelesen. Bsp.: Fortbildung 2024",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#3[/] Kategorien werden aus geschweiften Klammern ausgelesen. Bsp.: Technik, Beratung",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#4[/] Bildungsgänge werden daran identifiziert, dass im Text [aqua]Bildungsgangleitung[/] steht und die Beschreibung mit [aqua]bildunggaenge:[/] beginnt, ",                            
+                        ],
+                        m =>
+                        {
+                            var anrechnungen = new Anrechnungen(lehrers, configuration);
+                            
+                            m.GetGruppen(
+                                configuration,
+                                [
+                                    zieldatei => zieldatei.Erstellen(),
+                                    datei => datei.OeffneWebseite("https://bkb.wiki/oeffentlich:organigramm?do=admin&page=struct_schemas&table=gruppen"),
+                                ],
+                                anrechnungen,
+                                Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-gruppen.csv"),
+                                lehrers,
+                                ",", '\"', new UTF8Encoding(false), true);
+                            m.GetUntisAnrechnungen(
+                                anrechnungen,
+                                Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-untisanrechnungen.csv"),
+                                [
+                                    zieldatei => zieldatei.Erstellen(),
+                                    datei => datei.OeffneWebseite("https://bkb.wiki/oeffentlich:organigramm?do=admin&page=struct_schemas&table=untisanrechnungen"),
+                                ],
+                                [500, 510, 530, 590, 900],
+                                [500, 510, 530, 590],
+                                ["PLA", "BM"],
+                                ",", '\"', new UTF8Encoding(false), true);
+                            m.GetLehrer(
+                                anrechnungen,
+                                [
+                                    zieldatei => zieldatei.Erstellen()
+                                ],
+                                lehrers,
+                                Path.Combine(Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-lul-utf8OhneBom-einmalig-vor-SJ-Beginn.csv")),
+                                ",", '\'', new UTF8Encoding(false), false);
+                            m.Praktikanten(
+                                [
+                                    zieldatei => zieldatei.Erstellen(),
+                                    datei => datei.OeffneWebseite("https://bkb.wiki/oeffentlich:organigramm?do=admin&page=struct_schemas&table=praktikanten"),
+                                ],
+                                [
+                                    "BW,1,2", "BT,1,2", "BS,1,2", "BS,2,2", "HBG,1,2", "HBT,1,2", "HBT,2,2", "HBW,1,1", "GG,1,1", "GT,1,1", "GW,1,1", "IFK,1,2" // Klasse, Jg, Anzahl Praktika
+                                ],
+                                Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + @"-praktikanten-utf8OhneBom-einmalig-vor-SJ-Beginn.csv"),
+                                ",", '\"', new UTF8Encoding(false), true);
+                            m.KlassenAnlegen(
+                                configuration,
+                                [
+                                    zieldatei => zieldatei.Erstellen(),
+                                    datei => datei.OeffneWebseite("https://bkb.wiki/oeffentlich:organigramm?do=admin&page=struct_schemas&table=klassen"),
+                                ],
+                                Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + @"-klassen-utf8OhneBom-einmalig-vor-SJ-Beginn.csv"), ",", '\"', new UTF8Encoding(false), true);                        
+                            m.GetFaecher(
+                                configuration,
+                                [
+                                    zieldatei => zieldatei.Erstellen(),
+                                    datei => datei.OeffneWebseite("https://bkb.wiki/oeffentlich:organigramm?do=admin&page=struct_schemas&table=gruppen"),
+                                ],
+                                Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-faecher.csv"),
+                                ",", '\'', new UTF8Encoding(false), false);
+                        },
+                        Global.Rubrik.Wiki,
+                        Global.NurBeiDiesenSchulnummern.Nur177659
+                    ),
+                    new Menüeintrag(
                         "Outlook: CSV-Terminexporte für Wiki aufbereiten",
                         quelldateien.Notwendige(configuration,["termine_fhr,csv,optional", "termine_verwaltung,csv,optional", "termine_berufliches_gymnasium,csv,optional", "termine_kollegium,csv,optional"]),
                         students,

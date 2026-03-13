@@ -616,8 +616,7 @@ public partial class Student
     {
         Massnahmen = new List<dynamic>();
 
-        var ordnerDesSchuelers = configuration["PfadDokumentenverwaltung"] + "\\" + Nachname.Substring(0, 1) + "\\" +
-                                 Nachname + ", " + Vorname + ", " + Geburtsdatum.Replace(".", "_");
+        var ordnerDesSchuelers = Path.Combine(configuration["PfadDokumentenverwaltung"], Nachname.Substring(0, 1), Nachname + ", " + Vorname + ", " + Geburtsdatum.Replace(".", "_"));
 
         // Word und Pdf Dateien im Ordner des Schülers suchen. Die Dateien vorher aufsteigend nach Datum sortieren
         if (!Directory.Exists(ordnerDesSchuelers)) return;

@@ -185,6 +185,7 @@ public class Students : List<Student>
         if (gpu003 == null || gpu003.Count == 0) return;
 
         var zieldatei = new Datei(dateiname, funktionen, configuration);
+        zieldatei.Lehrers = new Lehrers();        
 
         zieldatei.Add("====== Schulpflichtüberwachung ======");
 
@@ -194,7 +195,7 @@ public class Students : List<Student>
         zieldatei.Add(@"**Hallo Klassenleitung,**");
         zieldatei.Add(@"");
         zieldatei.Add(
-            @"Du wurdest von Teams hierher verlinkt, weil bei der automatisierten, wöchentlichen Durchsicht der Fehlzeiten eine mögliche Schulpflichtverletzung in Deiner Klasse aufgepoppt ist. Können wir Dir Arbeit abnehmen?");
+            @"Du wurdest hierher verlinkt, weil bei der automatisierten, wöchentlichen Durchsicht der Fehlzeiten eine mögliche Schulpflichtverletzung in Deiner Klasse aufgepoppt ist. Können wir Dir Arbeit abnehmen?");
         zieldatei.Add(@"");
         zieldatei.Add(@"**Fragen & Antworten**");
         zieldatei.Add(@"");
@@ -373,6 +374,8 @@ public class Students : List<Student>
                             if (!mailliste.Contains(Klassenlehrer.Mail))
                             {
                                 mailliste += Klassenlehrer.Mail + ";";
+                                if(Klassenlehrer != null)
+                                    zieldatei.Lehrers.Add(Klassenlehrer);
                             }
 
                             if (!teamsChatLink.Contains(Klassenlehrer.Mail))
@@ -1675,7 +1678,7 @@ public class Students : List<Student>
 
             foreach (Student student in this)
             {
-                if (student.Nachname.StartsWith("Li") && student.Vorname.StartsWith("De"))
+                if (student.Nachname.StartsWith("Kov") && student.Vorname.StartsWith("Lau"))
                 {
                     string aa = "";
                 }
