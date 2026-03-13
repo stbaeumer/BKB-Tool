@@ -616,17 +616,25 @@ public partial class Student
     {
         Massnahmen = new List<dynamic>();
 
+        // Word und Pdf Dateien im Ordner des Schülers suchen. Die Dateien vorher aufsteigend nach Datum sortieren
+        if (!Directory.Exists(configuration["PfadDokumentenverwaltung"]))
+        {
+            throw new DirectoryNotFoundException("Der Ordner " + configuration["PfadDokumentenverwaltung"] + " wurde nicht gefunden. Es werden keine Maßnahmen eingelesen.");
+        }
+
         var ordnerDesSchuelers = Path.Combine(configuration["PfadDokumentenverwaltung"], Nachname.Substring(0, 1), Nachname + ", " + Vorname + ", " + Geburtsdatum.Replace(".", "_"));
 
         // Word und Pdf Dateien im Ordner des Schülers suchen. Die Dateien vorher aufsteigend nach Datum sortieren
-        if (!Directory.Exists(ordnerDesSchuelers)) return;
+        if (!Directory.Exists(ordnerDesSchuelers))
+            return;
+                        
         var dateien = Directory
-    .GetFiles(ordnerDesSchuelers, "*.*", SearchOption.TopDirectoryOnly)
-    .Where(s => s.EndsWith(".pdf") || s.EndsWith(".docx") || s.EndsWith(".doc"))
-    .Select(p => new FileInfo(p))
-    .OrderBy(f => f.CreationTime)
-    .Select(f => f.FullName)
-    .ToList();
+            .GetFiles(ordnerDesSchuelers, "*.*", SearchOption.TopDirectoryOnly)
+            .Where(s => s.EndsWith(".pdf") || s.EndsWith(".docx") || s.EndsWith(".doc"))
+            .Select(p => new FileInfo(p))
+            .OrderBy(f => f.CreationTime)
+            .Select(f => f.FullName)
+            .ToList();
 
         foreach (var file in dateien) 
         {

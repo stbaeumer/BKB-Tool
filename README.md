@@ -6,7 +6,7 @@
                     | |_) | | . \  | |_) | |_____|   | |   | (_) | | (_) | | |
                     |____/  |_|\_\ |____/            |_|    \___/   \___/  |_|
                                                                               
-┌─────────────────── https://github.com/stbaeumer/BKB-Tool | GPLv3 | v0.1.0 ────────────────────┐
+┌─────────────────── https://github.com/stbaeumer/BKB-Tool | GPLv2 | v0.1.0 ────────────────────┐
 │ 3023 Schüler*innen: 2104 Aktive, 18 Externe, 618 mit Abschluss, 283 abgegangen                │
 └───────────────────────────────────────────────────────────────────────────────────────────────┘
  1  Mailadressen         Fehlende Schulinterne Mailadressen in den Individualdaten I ergänzen

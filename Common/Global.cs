@@ -239,7 +239,7 @@ public static class Global
 
         var unterschrift = GetColor(ColorUnterschrift);
         var contentString = ""; //configuration["AppDescription"] ?? "BKB-Tool - Ein Werkzeug an der Schnittstelle zwischen SchILD & WebUntis";
-        var header = $"[{unterschrift} link=https://github.com/stbaeumer/BKB-Tool] https://github.com/stbaeumer/BKB-Tool[/] | [{unterschrift}]GPLv3[/] | [{unterschrift}]v{AppVersion} [/]";
+        var header = $"[{unterschrift} link=https://github.com/stbaeumer/BKB-Tool] https://github.com/stbaeumer/BKB-Tool[/] | [{unterschrift}]GPLv2[/] | [{unterschrift}]v{AppVersion} [/]";
 
         if (content != null && content.Count > 0)
         {
@@ -2027,9 +2027,9 @@ public static class KonfigHelper
             Key = "PfadLitteraImport",
             DefaultValue = @"\\fs01\Littera\Atlantis Import Daten",
             Aufforderung = $"[green]■[/]",
-            Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]Ziel-Pfad[/] an, wohin die neue Datei nach dem Erstellen verschoben werden soll.",
+            Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]Littera-Ziel-Pfad[/] an, wohin die neue Datei nach dem Erstellen verschoben werden soll.",
             Datentyp = Global.Datentyp.Pfad,
-            InGrundeinstellungAbfragen = true,
+            InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
@@ -2040,7 +2040,7 @@ public static class KonfigHelper
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Sie können vor dem Hochladen die Fotos drehen. Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]Drehwinkel in Grad[/] an. Beispiel: [{Global.GetColor(Global.ColorZahlen)}]90[/] für 90 Grad im Uhrzeigersinn. [{Global.GetColor(Global.ColorZahlen)}]0[/] bedeutet keine Drehung.",
             Datentyp = Global.Datentyp.Int,
-            InGrundeinstellungAbfragen = true,
+            InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
@@ -2335,14 +2335,14 @@ public static class KonfigHelper
             Key = "ZustimmungLizenz",
             DefaultValue = "nein",
             Aufforderung = $"Sie müssen der Lizenz mit [bold {Global.GetColor(Global.ColorÜberschrift)}]ja[/] zustimmen",
-            Hinweise = $"[bold {Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] steht unter der GNU General Public License Version 3 (GPLv3). " +
-            "Die GPLv3 ist eine freie Softwarelizenz, die es Ihnen erlaubt, die Software zu verwenden, zu modifizieren und weiterzugeben, solange Sie die Bedingungen der Lizenz einhalten. " +
+            Hinweise = $"[bold {Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] steht unter der GNU General Public License Version 2 (GPLv2). " +
+            "Die GPLv2 ist eine freie Softwarelizenz, die es Ihnen erlaubt, die Software zu verwenden, zu modifizieren und weiterzugeben, solange Sie die Bedingungen der Lizenz einhalten. " +
             "Die wichtigsten Bedingungen dieser Lizenz sind:\n" +
-            $"[{Global.GetColor(Global.ColorHinweise)}]Freiheit zur Nutzung, Änderung und Weiterverbreitung:[/] Sie dürfen diese Software frei verwenden, anpassen und weitergeben, solange alle abgeleiteten Werke ebenfalls unter der GPLv3 stehen.\n" +
+            $"[{Global.GetColor(Global.ColorHinweise)}]Freiheit zur Nutzung, Änderung und Weiterverbreitung:[/] Sie dürfen diese Software frei verwenden, anpassen und weitergeben, solange alle abgeleiteten Werke ebenfalls unter der GPLv2 stehen.\n" +
             $"[{Global.GetColor(Global.ColorHinweise)}]Keine Garantie:[/] Diese Software wird \"wie sie ist\" bereitgestellt, ohne jede ausdrückliche oder stillschweigende Gewährleistung, insbesondere ohne Garantie auf Fehlerfreiheit oder Eignung für einen bestimmten Zweck.\n" +
             $"[{Global.GetColor(Global.ColorHinweise)}]Keine Haftung:[/] Der Entwickler haftet nicht für direkte oder indirekte Schäden, Datenverluste oder andere Konsequenzen, die durch die Nutzung oder Fehlfunktion dieser Software entstehen.\n" +
             $"[{Global.GetColor(Global.ColorHinweise)}]Verwendung auf eigene Gefahr:[/] Die Nutzung erfolgt ausschließlich auf eigenes Risiko.\n" +
-            $"[{Global.GetColor(Global.ColorHinweise)}]Vollständige Lizenz unter:[/] [lightskyblue3_1 link=https://www.gnu.org/licenses/gpl-3.0.de.html]https://www.gnu.org/licenses/gpl-3.0.de.html[/].",
+            $"[{Global.GetColor(Global.ColorHinweise)}]Vollständige Lizenz unter:[/] [lightskyblue3_1 link=https://www.gnu.org/licenses/gpl-2.0.de.html]https://www.gnu.org/licenses/gpl-2.0.de.html[/].",
             Datentyp = Global.Datentyp.JaNein,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,

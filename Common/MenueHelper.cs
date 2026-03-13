@@ -209,7 +209,7 @@ public static class MenueHelper
                         Global.NurBeiDiesenSchulnummern.Alle
                     ),
                     new Menüeintrag(
-                        "Fotos (c): Schüler*innenfotos aus SchILD für Webuntis, Geevoo und Netman bereitstellen",
+                        "Fotos aus SchILD: Schüler*innenfotos aus SchILD für Webuntis, Geevoo und Netman bereitstellen",
                         quelldateien.Notwendige(configuration, ["schuelerZusatzdaten,dat"]),
                         students,
                         klassen,
@@ -241,9 +241,11 @@ public static class MenueHelper
                         students,
                         klassen,
                         [                            
-                            $"Schulpfichtüberwachung:",
+                            $"Montags: Schulpfichtüberwachung:",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise:[/]",
                             $"[{Global.GetColor(Global.ColorHinweise)}]#1[/] Alle SuS mit mehr als 8 unentsch. Fehlstunden werden angezeigt.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]#1[/] Klassenleitungen werden per Mail informiert."
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#2[/] Maßnahmen werden aus den Dateinamen in der Dokumentenverwaltung ausgelesen. Das Create-Datum wird zum Datum der Maßnahme.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#3[/] Klassenleitungen werden per Mail in cc informiert."
                         ],
                         m =>
                         {
@@ -257,6 +259,7 @@ public static class MenueHelper
                                     "Mahnung",
                                     "Familienkasse",
                                     "Versäumnisanzeige",
+                                    "Versaeumnisanzeige",
                                     "Suspendierung",
                                     "Ausschluss",
                                     "Anhörung",
@@ -278,38 +281,9 @@ public static class MenueHelper
                         },
                         Global.Rubrik.Allgemein,
                         Global.NurBeiDiesenSchulnummern.Nur177659
-                    ),
+                    ),                    
                     new Menüeintrag(
-                        "Klassen: Neue Klassen von Untis nach SchILD übergeben und Eigenschaften anpassen",
-                        quelldateien.Notwendige(configuration, ["klassen,dat", "GPU003,txt", "GPU002,txt"]),
-                        students,
-                        klassen,
-                        [
-                            $"Nachdem die Schule in das neue Schuljahr versetzt worden ist, kann diese Funktion Folgendes:",
-                            $"#1 Fehlende Klassen aus Untis werden in den Schuelerzusatzdaten angelegt. Klassenleitung und Jahrgang werden aus Untis übernommen. Andere Eigenschaften werden aus Klassen des selben Jahrgangs der bisherigen Schuelerzusatzdaten übernommen.",
-                            $"#2 In bestehenden Klassen werden Klassenleitung und Jahrgang aus Untis in die Schuelerzusatzdaten übernommen.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1:[/] Die stellvertretenden Klassenleitungen und die Prüfungsordnung müssen manuell angepasst werden.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #2:[/] Klassen ohne Unterrichte werden ignoriert.",
-                        ],
-                        m =>
-                        {
-                            m.KlassenErstellen(
-                                configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Klassen.dat"),
-                                [
-                                    datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
-                                    datei => datei.Verarbeiten(quelldateien, Global.Modus.Filtern),
-                                    datei => datei.OrdnerOeffnen(),
-                                    datei => datei.Erstellen()
-                                ],
-                                ["InternBez"],
-                                ["SonstigeBez", "Folgeklasse"],
-                                "|", '\0', new UTF8Encoding(true), false);
-                        },
-                        Global.Rubrik.Allgemein,
-                        Global.NurBeiDiesenSchulnummern.Nur177659
-                    ),
-                    new Menüeintrag(
-                        "Klassenbucheinträge: Säumige Lehrer*innen erinnern",
+                        "Klassenbuchpflege: Säumige Lehrer*innen erinnern",
                         quelldateien.Notwendige(configuration, ["lehrkraefte,dat", "openperiod,pdf"]),
                         students,
                         klassen,
@@ -326,9 +300,165 @@ public static class MenueHelper
                         },
                         Global.Rubrik.Allgemein,
                         Global.NurBeiDiesenSchulnummern.Nur177659
+                    ),                    
+                    new Menüeintrag(
+                        "Gruppen & Organigramm: Gruppen & Organigramm aus Untisanrechnungen und Unterrichten als SQLite-Dateien für Wiki-Import erstellen",
+                        quelldateien.Notwendige(configuration, ["schuelervermerke,dat", "schuelerzusatzdaten,dat", "absenceperstudent,csv", "GPU006,txt", "GPU002,txt", "GPU003,txt", "klassen,dat"]),
+                        students,
+                        klassen,
+                        [
+                            $"Das Organigramm wird aus Untisanrechnungen gebildet. Beispiele: {{...}} = KATEGORIE; [[...]] = HINWEIS, Text ohne Klammern wird zur ROLLE; A14, A15, A16 ohne Klammern > AMT; Untis-Beschreibung > AUFGABE. Im Organigramm wird nach Kategorie, Aufgabe oder Beschreibung gruppiert.",
+                            $"Untisanrechnungen: 1.Struct Schema Editor > Untisanrechnungen > Löschen/Leeren > 'untisanrechnungen' eingeben, dann Leeren",
+                            $"Untisanrechnungen: 2.Struct Schema Editor > Untisanrechnungen > Importieren/Exportieren > Importieren von Rohdaten > Global > Durchsuchen",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise zum Text in Anrechnungen:[/]",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#1[/] Das Beförderungsamt wird ausgelesen. Bsp.: A14",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#2[/] Hinweise werden aus eckigen Klammern ausgelesen. Bsp.: Fortbildung 2024",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#3[/] Kategorien werden aus geschweiften Klammern ausgelesen. Bsp.: Technik, Beratung",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#4[/] Bildungsgänge werden daran identifiziert, dass im Text [aqua]Bildungsgangleitung[/] steht und die Beschreibung mit [aqua]bildunggaenge:[/] beginnt, ",                            
+                        ],
+                        m =>
+                        {
+                            var anrechnungen = new Anrechnungen(lehrers, configuration);
+                            
+                            m.GetGruppen(
+                                configuration,
+                                [
+                                    zieldatei => zieldatei.Erstellen(),
+                                    datei => datei.OeffneWebseite("https://bkb.wiki/oeffentlich:organigramm?do=admin&page=struct_schemas&table=gruppen"),
+                                ],
+                                anrechnungen,
+                                Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-gruppen.csv"),
+                                lehrers,
+                                ",", '\"', new UTF8Encoding(false), true);
+                            m.GetUntisAnrechnungen(
+                                anrechnungen,
+                                Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-untisanrechnungen.csv"),
+                                [
+                                    zieldatei => zieldatei.Erstellen(),
+                                    datei => datei.OeffneWebseite("https://bkb.wiki/oeffentlich:organigramm?do=admin&page=struct_schemas&table=untisanrechnungen"),
+                                ],
+                                [500, 510, 530, 590, 900],
+                                [500, 510, 530, 590],
+                                ["PLA", "BM"],
+                                ",", '\"', new UTF8Encoding(false), true);                            
+                        },
+                        Global.Rubrik.Wiki,
+                        Global.NurBeiDiesenSchulnummern.Nur177659
                     ),
                     new Menüeintrag(
-                        "Wiki: Diverse SQLite-Dateien (Organigramm, Praktikum etc.) erstellen",
+                        "Outlook: CSV-Terminexporte für Wiki aufbereiten",
+                        quelldateien.Notwendige(configuration,["termine_fhr,csv,optional", "termine_verwaltung,csv,optional", "termine_berufliches_gymnasium,csv,optional", "termine_kollegium,csv,optional"]),
+                        students,
+                        klassen,
+                        [
+                            $"Termine aus Outlook (Kollegium, FHR, Berufliches Gymnasium, Verwaltung) werden nach {Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachWiki-Kalendername.csv")} exportiert.",
+                            $"[{Global.GetColor(Global.ColorActionInMenüs)}]Vorgehen:[/]",
+                            $"[{Global.GetColor(Global.ColorActionInMenüs)}]#1[/] Die Kalender in Listenansicht anzeigen. Notwendige Spalten: [{Global.GetColor(Global.ColorActionInMenüs)}]Beginn, Ende, Betreff, Kategorien, Ressourcen, Ort, Nachricht[/]",
+                            $"[{Global.GetColor(Global.ColorActionInMenüs)}]#2[/] Kalender aufsteigend nach Beginn sortieren.",
+                            $"[{Global.GetColor(Global.ColorActionInMenüs)}]#3[/] Mit Copy&Paste (Strg+A, Strg+C) die Termine aus Outlook in die CSV-Dateien im Download-Ordner kopieren. Codierung UTF8",
+                            $"[{Global.GetColor(Global.ColorActionInMenüs)}]#4[/] Die Kalender im Wiki zuerst leeren ([{Global.GetColor(Global.ColorPfadInProgrammen)}]Admin > Struct Schema Editor > Leeren[/]). Anschließend die neuen CSV als Global importieren.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise:[/]",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#1[/] Falls der Inhalt im Body (Spalte Nachricht) mehrzeilig ist, wird nur die erste Zeile berücksichtigt.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#2[/] Es werden nur Termine berücksichtigt, die mindestens eine Kategorie haben. Kategorien werden zu Links in Wiki.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#3[/] Termine aus vergangenen Schuljahren werden nicht mit übertragen.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#4[/] Falls in der Nachricht ein Link zu bkb.wiki enthalten ist, dann wird der Link zum Seitenlink. Ansonsten wird die erste Kategorie zum Seitenlink.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#5[/] Falls in der Nachricht ein Link zu bkb.wiki enthalten ist, wird der Link zur ersten Kategorie.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#6[/] Die Anzahl der Kategorien ist in Outlook begrenzt. Mehr als 6 Kategorien sind evtl. problematisch.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#7[/] Mehrtägige Termine: Nur bei ganztägigen Terminen wird der erste und letzte Tag richtig angezeigt. Wenn Uhrzeiten angegeben werden, wird nur der erste Tag angezeigt."
+                        ],
+                        m =>
+                        {
+                            m.OeffneDateienInEditor(configuration, ["termine_fhr.csv", "termine_berufliches_gymnasium.csv", "termine_kollegium.csv", "termine_verwaltung.csv"]);
+                            foreach (var kalender in new List<string>(){"termine_berufliches_gymnasium", "termine_kollegium", "termine_fhr", "termine_verwaltung" })
+                            {
+                                m.Kalender2Wiki(configuration,
+                                [
+                                    datei => datei.OrdnerOeffnen(),
+                                    datei => datei.Erstellen(),
+                                    datei => datei.OeffneWebseite($"https://bkb.wiki/start?do=admin&page=struct_schemas&table=" + kalender),
+                                    datei => datei.OeffneWebseite($"https://bkb.wiki/start?do=admin&page=struct_schemas&table=" + kalender)
+                                ],
+                                kalender, Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachWiki-" + kalender), ",", '\"', new UTF8Encoding(false), true);
+                            }
+                        },
+                        Global.Rubrik.Wiki,
+                        Global.NurBeiDiesenSchulnummern.Nur177659
+                    ),
+                    new Menüeintrag(
+                        $"Zeugnisse 14 Tage vorher: Unterrichte schülergenau anlegen.",
+                        new Dateien(),
+                        students,
+                        klassen,
+                        [
+                            $"Die Lerabschnittsdaten müssen zuvor angelegt worden sein.",
+                            $"Die Unterrichte werden für jeden Schüler neu angelegt und unter Leistungsdaten eingetragen.",
+                            $"Kurse werden angelegt.",
+                            $"Zu jedem angelegten Unterricht muss am Tag vor der Konferenz eine Note hinzugefügt werden."
+                        ],
+                        _ =>
+                        {
+                            var pdfDateien = new PdfDateien();
+                            pdfDateien.KennwortSetzen(configuration);
+                        },
+                        Global.Rubrik.Allgemein,
+                        Global.NurBeiDiesenSchulnummern.Nur177659
+                    ),
+                    new Menüeintrag(
+                        $"Zeugnisse  4 Tage vorher: Die Fehlzeiten werden in bestehende Lernabschnittsdaten eingefügt",
+                        new Dateien(),
+                        students,
+                        klassen,
+                        [
+                            $"Von allen PDF-Dateien in [{Global.GetColor(Global.ColorPfadInDateien)}]" + configuration["PfadDownloads"] + "[/] werden verschlüsselte Kopien erstellt.",
+                            $"Es werden nur Dateien berücksichtigt, die nicht bereits die Endung [{Global.GetColor(Global.ColorPfadInDateien)}]-kennwort.pdf[/] haben.",
+                            $"Kopien bekommen die Dateiendung [{Global.GetColor(Global.ColorPfadInDateien)}]-kennwort.pdf[/]."
+                        ],
+                        _ =>
+                        {
+                            var pdfDateien = new PdfDateien();
+                            pdfDateien.KennwortSetzen(configuration);
+                        },
+                        Global.Rubrik.Allgemein,
+                        Global.NurBeiDiesenSchulnummern.Nur177659
+                    ),
+                    new Menüeintrag(
+                        $"Zeugnisse  3 Tage vorher: Fehlende Noten in Webuntis anmahnen",
+                        new Dateien(),
+                        students,
+                        klassen,
+                        [
+                            $"Von allen PDF-Dateien in [{Global.GetColor(Global.ColorPfadInDateien)}]" + configuration["PfadDownloads"] + "[/] werden verschlüsselte Kopien erstellt.",
+                            $"Es werden nur Dateien berücksichtigt, die nicht bereits die Endung [{Global.GetColor(Global.ColorPfadInDateien)}]-kennwort.pdf[/] haben.",
+                            $"Kopien bekommen die Dateiendung [{Global.GetColor(Global.ColorPfadInDateien)}]-kennwort.pdf[/]."
+                        ],
+                        _ =>
+                        {
+                            var pdfDateien = new PdfDateien();
+                            pdfDateien.KennwortSetzen(configuration);
+                        },
+                        Global.Rubrik.Allgemein,
+                        Global.NurBeiDiesenSchulnummern.Nur177659
+                    ),
+                    new Menüeintrag(
+                        $"Zeugnisse  1 Tag  vorher: Noten aus Webuntis nach SchILD importieren",
+                        new Dateien(),
+                        students,
+                        klassen,
+                        [
+                            $"Von allen PDF-Dateien in [{Global.GetColor(Global.ColorPfadInDateien)}]" + configuration["PfadDownloads"] + "[/] werden verschlüsselte Kopien erstellt.",
+                            $"Es werden nur Dateien berücksichtigt, die nicht bereits die Endung [{Global.GetColor(Global.ColorPfadInDateien)}]-kennwort.pdf[/] haben.",
+                            $"Kopien bekommen die Dateiendung [{Global.GetColor(Global.ColorPfadInDateien)}]-kennwort.pdf[/]."
+                        ],
+                        _ =>
+                        {
+                            var pdfDateien = new PdfDateien();
+                            pdfDateien.KennwortSetzen(configuration);
+                        },
+                        Global.Rubrik.Allgemein,
+                        Global.NurBeiDiesenSchulnummern.Nur177659
+                    ),
+                    new Menüeintrag(
+                        "Wiki: Diverse SQLite-Dateien (Praktikum etc.) erstellen",
                         quelldateien.Notwendige(configuration, ["schuelervermerke,dat", "schuelerzusatzdaten,dat", "absenceperstudent,csv", "GPU006,txt", "GPU002,txt", "GPU003,txt", "klassen,dat"]),
                         students,
                         klassen,
@@ -400,45 +530,6 @@ public static class MenueHelper
                                 ],
                                 Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-faecher.csv"),
                                 ",", '\'', new UTF8Encoding(false), false);
-                        },
-                        Global.Rubrik.Wiki,
-                        Global.NurBeiDiesenSchulnummern.Nur177659
-                    ),
-                    new Menüeintrag(
-                        "Outlook: CSV-Terminexporte für Wiki aufbereiten",
-                        quelldateien.Notwendige(configuration,["termine_fhr,csv,optional", "termine_verwaltung,csv,optional", "termine_berufliches_gymnasium,csv,optional", "termine_kollegium,csv,optional"]),
-                        students,
-                        klassen,
-                        [
-                            $"Termine aus Outlook (Kollegium, FHR, Berufliches Gymnasium, Verwaltung) werden nach {Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachWiki-Kalendername.csv")} exportiert.",
-                            $"[{Global.GetColor(Global.ColorActionInMenüs)}]Vorgehen:[/]",
-                            $"[{Global.GetColor(Global.ColorActionInMenüs)}]#1[/] Die Kalender in Listenansicht anzeigen. Notwendige Spalten: [{Global.GetColor(Global.ColorActionInMenüs)}]Beginn, Ende, Betreff, Kategorien, Ressourcen, Ort, Nachricht[/]",
-                            $"[{Global.GetColor(Global.ColorActionInMenüs)}]#2[/] Kalender aufsteigend nach Beginn sortieren.",
-                            $"[{Global.GetColor(Global.ColorActionInMenüs)}]#3[/] Mit Copy&Paste (Strg+A, Strg+C) die Termine aus Outlook in die CSV-Dateien im Download-Ordner kopieren. Codierung UTF8",
-                            $"[{Global.GetColor(Global.ColorActionInMenüs)}]#4[/] Die Kalender im Wiki zuerst leeren ([{Global.GetColor(Global.ColorPfadInProgrammen)}]Admin > Struct Schema Editor > Leeren[/]). Anschließend die neuen CSV als Global importieren.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise:[/]",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]#1[/] Falls der Inhalt im Body (Spalte Nachricht) mehrzeilig ist, wird nur die erste Zeile berücksichtigt.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]#2[/] Es werden nur Termine berücksichtigt, die mindestens eine Kategorie haben. Kategorien werden zu Links in Wiki.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]#3[/] Termine aus vergangenen Schuljahren werden nicht mit übertragen.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]#4[/] Falls in der Nachricht ein Link zu bkb.wiki enthalten ist, dann wird der Link zum Seitenlink. Ansonsten wird die erste Kategorie zum Seitenlink.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]#5[/] Falls in der Nachricht ein Link zu bkb.wiki enthalten ist, wird der Link zur ersten Kategorie.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]#6[/] Die Anzahl der Kategorien ist in Outlook begrenzt. Mehr als 6 Kategorien sind evtl. problematisch.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]#7[/] Mehrtägige Termine: Nur bei ganztägigen Terminen wird der erste und letzte Tag richtig angezeigt. Wenn Uhrzeiten angegeben werden, wird nur der erste Tag angezeigt."
-                        ],
-                        m =>
-                        {
-                            m.OeffneDateienInEditor(configuration, ["termine_fhr.csv", "termine_berufliches_gymnasium.csv", "termine_kollegium.csv", "termine_verwaltung.csv"]);
-                            foreach (var kalender in new List<string>(){"termine_berufliches_gymnasium", "termine_kollegium", "termine_fhr", "termine_verwaltung" })
-                            {
-                                m.Kalender2Wiki(configuration,
-                                [
-                                    datei => datei.OrdnerOeffnen(),
-                                    datei => datei.Erstellen(),
-                                    datei => datei.OeffneWebseite($"https://bkb.wiki/start?do=admin&page=struct_schemas&table=" + kalender),
-                                    datei => datei.OeffneWebseite($"https://bkb.wiki/start?do=admin&page=struct_schemas&table=" + kalender)
-                                ],
-                                kalender, Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachWiki-" + kalender), ",", '\"', new UTF8Encoding(false), true);
-                            }
                         },
                         Global.Rubrik.Wiki,
                         Global.NurBeiDiesenSchulnummern.Nur177659
@@ -583,82 +674,35 @@ public static class MenueHelper
                         Global.Rubrik.Leistungsdaten,
                         Global.NurBeiDiesenSchulnummern.Alle
                     ),
-
                     new Menüeintrag(
-                        $"14 Tage vor Zeugnis: Unterrichte schülergenau anlegen.",
-                        new Dateien(),
+                        "Klassen anlegen: Neue Klassen von Untis nach SchILD übergeben und Eigenschaften anpassen",
+                        quelldateien.Notwendige(configuration, ["klassen,dat", "GPU003,txt", "GPU002,txt"]),
                         students,
                         klassen,
                         [
-                            $"Die Lerabschnittsdaten müssen zuvor angelegt worden sein.",
-                            $"Die Unterrichte werden für jeden Schüler neu angelegt und unter Leistungsdaten eingetragen.",
-                            $"Kurse werden angelegt.",
-                            $"Zu jedem angelegten Unterricht muss am Tag vor der Konferenz eine Note hinzugefügt werden."
+                            $"Nachdem die Schule in das neue Schuljahr versetzt worden ist, kann diese Funktion Folgendes:",
+                            $"#1 Fehlende Klassen aus Untis werden in den Schuelerzusatzdaten angelegt. Klassenleitung und Jahrgang werden aus Untis übernommen. Andere Eigenschaften werden aus Klassen des selben Jahrgangs der bisherigen Schuelerzusatzdaten übernommen.",
+                            $"#2 In bestehenden Klassen werden Klassenleitung und Jahrgang aus Untis in die Schuelerzusatzdaten übernommen.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1:[/] Die stellvertretenden Klassenleitungen und die Prüfungsordnung müssen manuell angepasst werden.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #2:[/] Klassen ohne Unterrichte werden ignoriert.",
                         ],
-                        _ =>
+                        m =>
                         {
-                            var pdfDateien = new PdfDateien();
-                            pdfDateien.KennwortSetzen(configuration);
+                            m.KlassenErstellen(
+                                configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Klassen.dat"),
+                                [
+                                    datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
+                                    datei => datei.Verarbeiten(quelldateien, Global.Modus.Filtern),
+                                    datei => datei.OrdnerOeffnen(),
+                                    datei => datei.Erstellen()
+                                ],
+                                ["InternBez"],
+                                ["SonstigeBez", "Folgeklasse"],
+                                "|", '\0', new UTF8Encoding(true), false);
                         },
                         Global.Rubrik.Allgemein,
                         Global.NurBeiDiesenSchulnummern.Nur177659
                     ),
-                    new Menüeintrag(
-                        $"4 Tage vor Zeugnis: Die Fehlzeiten werden in bestehende Lernabschnittsdaten eingefügt",
-                        new Dateien(),
-                        students,
-                        klassen,
-                        [
-                            $"Von allen PDF-Dateien in [{Global.GetColor(Global.ColorPfadInDateien)}]" + configuration["PfadDownloads"] + "[/] werden verschlüsselte Kopien erstellt.",
-                            $"Es werden nur Dateien berücksichtigt, die nicht bereits die Endung [{Global.GetColor(Global.ColorPfadInDateien)}]-kennwort.pdf[/] haben.",
-                            $"Kopien bekommen die Dateiendung [{Global.GetColor(Global.ColorPfadInDateien)}]-kennwort.pdf[/]."
-                        ],
-                        _ =>
-                        {
-                            var pdfDateien = new PdfDateien();
-                            pdfDateien.KennwortSetzen(configuration);
-                        },
-                        Global.Rubrik.Allgemein,
-                        Global.NurBeiDiesenSchulnummern.Nur177659
-                    ),
-                    new Menüeintrag(
-                        $"3 Tage vor Zeugnis: Fehlende Noten in Webuntis anmahnen",
-                        new Dateien(),
-                        students,
-                        klassen,
-                        [
-                            $"Von allen PDF-Dateien in [{Global.GetColor(Global.ColorPfadInDateien)}]" + configuration["PfadDownloads"] + "[/] werden verschlüsselte Kopien erstellt.",
-                            $"Es werden nur Dateien berücksichtigt, die nicht bereits die Endung [{Global.GetColor(Global.ColorPfadInDateien)}]-kennwort.pdf[/] haben.",
-                            $"Kopien bekommen die Dateiendung [{Global.GetColor(Global.ColorPfadInDateien)}]-kennwort.pdf[/]."
-                        ],
-                        _ =>
-                        {
-                            var pdfDateien = new PdfDateien();
-                            pdfDateien.KennwortSetzen(configuration);
-                        },
-                        Global.Rubrik.Allgemein,
-                        Global.NurBeiDiesenSchulnummern.Nur177659
-                    ),
-                    new Menüeintrag(
-                        $"1 Tag vor Zeugnis: Noten aus Webuntis nach SchILD importieren",
-                        new Dateien(),
-                        students,
-                        klassen,
-                        [
-                            $"Von allen PDF-Dateien in [{Global.GetColor(Global.ColorPfadInDateien)}]" + configuration["PfadDownloads"] + "[/] werden verschlüsselte Kopien erstellt.",
-                            $"Es werden nur Dateien berücksichtigt, die nicht bereits die Endung [{Global.GetColor(Global.ColorPfadInDateien)}]-kennwort.pdf[/] haben.",
-                            $"Kopien bekommen die Dateiendung [{Global.GetColor(Global.ColorPfadInDateien)}]-kennwort.pdf[/]."
-                        ],
-                        _ =>
-                        {
-                            var pdfDateien = new PdfDateien();
-                            pdfDateien.KennwortSetzen(configuration);
-                        },
-                        Global.Rubrik.Allgemein,
-                        Global.NurBeiDiesenSchulnummern.Nur177659
-                    ),
-
-
                     new Menüeintrag(
                         $"Altersermäßigung: berechnen für {int.Parse(Global.AktSj[0])}/{int.Parse(Global.AktSj[0]) + 1} und {int.Parse(Global.AktSj[0]) + 1}/{int.Parse(Global.AktSj[0]) + 2}",
                         quelldateien.Notwendige(configuration, ["lehrkraefte,dat", "lehrkraeftesonderzeiten,dat,optional", "GPU020,txt,optional", "GPU004,txt,optional"]),

@@ -131,14 +131,20 @@ private bool IstMailadresseGültig(string email)
 
                 var email = new MimeMessage();
                 email.From.Add(new MailboxAddress(configuration["SmtpUser"], senderEmail));
-                email.To.Add(new MailboxAddress("Empfänger", receiverEmail));
-                //email.To.Add(new MailboxAddress("Empfänger", "stefan.baeumer@berufskolleg-borken.de"));
+                
+                foreach(var m in receiverEmail.Split(','))
+                {
+                    email.To.Add(new MailboxAddress("Empfänger", m.Trim()));    
+                }
 
                 email.Subject = subject;
 
                 if (!string.IsNullOrEmpty(cc))
                 {
-                    email.Cc.Add(new MailboxAddress("Empfänger", cc));
+                    foreach(var m in cc.Split(','))
+                    {
+                        email.Cc.Add(new MailboxAddress("Empfänger", m.Trim()));
+                    }
                 }
 
                 if (!string.IsNullOrEmpty(bcc))

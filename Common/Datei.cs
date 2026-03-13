@@ -2079,11 +2079,13 @@ public class Datei : List<dynamic>
 
     internal void Mailen(IConfiguration configuration)
     {
+        var cc = "";
         foreach (var l in this.Lehrers.Where(l => !string.IsNullOrEmpty(l.Mail)))
         {
-            var mail = new Mail();
-            mail.Senden("Schulpflichtüberwachung KW " + ISOWeek.GetWeekOfYear(DateTime.Now) + l.Kürzel, configuration, 
-            @$"Hallo {l.Vorname} {l.Nachname}\n\nbitte folgen Sie dem Link für weitere Informationen: https://bkb.wiki/schulpflichtueberwachung\n\nIhr Webuntis-Team", "", l.Mail);
+            cc += l.Mail + ",";
         }
+        var mail = new Mail();
+            mail.Senden("Schulpflichtüberwachung KW " + ISOWeek.GetWeekOfYear(DateTime.Now), configuration, 
+            $"Hallo Klassenleitung,\n\nDu wurdest hierher verlinkt, weil bei der automatisierten, wöchentlichen Durchsicht der Fehlzeiten eine mögliche Schulpflichtverletzung in Deiner Klasse aufgepoppt ist. Siehe hier: https://bkb.wiki/schulpflichtueberwachung\n\nVielen Dank!\n\nIhr Webuntis-Team", "", "sina.milewski@berufskolleg-borken.de,stefan.gantefort@berufskolleg-borken.de,ursula.moritz@berufskolleg-borken.de", cc.TrimEnd(','), "stefan.baeumer@berufskolleg-borken.de");
     }
 }
