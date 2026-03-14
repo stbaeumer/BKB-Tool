@@ -391,6 +391,238 @@ public class Menüeintrag
         return lk1faecher.Contains(linkerTeil) ? "LK1" : "LK2";
     }
 
+    public void LernabschnittsdatenAnlegen(
+        Lehrers lehrers,
+        IConfiguration configuration,
+        Global.Zweck art,
+        string zieldateiname,        
+        List<Action<Datei>> funktionen,
+        string[] anhandDieserAttributeWirdVerglichen,
+        string[] dieseAttributeWerdenBeimVergleichIgnoriert,
+        string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
+    {
+        var zieldatei = new Datei(zieldateiname, funktionen, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+
+        var schuelerLernab = Quelldateien.GetMatchingList(configuration, "schuelerlernabschnittsdaten", IStudents, Klassen);
+        if (schuelerLernab == null || !schuelerLernab.Any()) return;
+
+        var schuelerBasisd = Quelldateien.GetMatchingList(configuration, "schuelerbasisdate", IStudents, Klassen);
+        if (schuelerBasisd == null || !schuelerBasisd.Any()) return;
+
+        var absencePerStud = new List<dynamic>();
+
+        var konferenzdatum = DateTime.Now;
+        var zeugnisdatum = DateTime.Now;
+
+        configuration = Global.Konfig("Abschnitt", Global.Modus.Read, configuration);
+        configuration = Global.Konfig("Abschnittswechsel", Global.Modus.Read, configuration);
+
+        if (art != Global.Zweck.Statistik)
+        {
+            var konferenzart = "";
+            switch (configuration["Abschnitt"])
+            {
+                case "1":
+                    konferenzart = "Halbjahres";
+                    break;
+                case "2":
+                    konferenzart = "Jahres";
+                    break;
+                default:
+                    throw new Exception("Ungültiger Abschnitt. Bitte geben Sie 1 oder 2 ein.");
+            }
+
+            configuration = Global.Konfig($"Konferenzdatum", Global.Modus.Update, configuration);
+            konferenzdatum = DateTime.Parse(configuration["Konferenzdatum"]);
+            configuration = Global.Konfig($"ZeugnisDatum", Global.Modus.Update, configuration);
+            zeugnisdatum = DateTime.Parse(configuration["ZeugnisDatum"]);
+            configuration = Global.Konfig("MaximaleAnzahlFehlstundenProTag", Global.Modus.Read, configuration);
+            configuration = Global.Konfig("FehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt", Global.Modus.Read, configuration);
+        }
+
+        try
+        {
+            AnsiConsole.Status()
+            .Spinner(Spinner.Known.Dots)
+            .Start("Lernabschnittsdaten.dat verarbeiten ...", ctx =>
+            {
+                foreach (var student in IStudents)
+                {
+                    var abschnittswechsel = DateTime.Parse(configuration["Abschnittswechsel"]);
+                    var abschnittswechelInderZukunft = abschnittswechsel > DateTime.Now;
+
+                    var dictBasisdaten = schuelerBasisd
+                        .Where(recBasis =>
+                        {
+                            var dictBasis = (IDictionary<string, object>)recBasis;
+                            return dictBasis["Nachname"].ToString() == student.Nachname &&
+                                dictBasis["Vorname"].ToString() == student.Vorname &&
+                                dictBasis["Geburtsdatum"].ToString() == student.Geburtsdatum &&
+                                dictBasis["Jahr"].ToString() == Global.AktSj[0] &&
+                                ((art == Global.Zweck.Statistik || abschnittswechelInderZukunft) ? true : dictBasis["Abschnitt"].ToString() == configuration["Abschnitt"]);
+                        }).FirstOrDefault() as IDictionary<string, object>;
+
+                    if (dictBasisdaten != null)
+                    {
+                        //if (dictBasisdaten["Status"] == "2")
+                        if (true)
+                        {
+                            var versetzung = "";
+                            var abschluss = "";
+                            var klassenlehrer = Klassen.Where(rec => rec.Name == student.Klasse)
+                                .Select(rec => rec.Klassenlehrer).FirstOrDefault();
+                            var jahrgang = string.IsNullOrEmpty(dictBasisdaten!["Jahrgang"].ToString())
+                                ? ""
+                                : dictBasisdaten["Jahrgang"].ToString();
+                            var schulgliederung = string.IsNullOrEmpty(dictBasisdaten["Schulgliederung"].ToString())
+                                ? ""
+                                : dictBasisdaten["Schulgliederung"].ToString();
+                            var orgForm = string.IsNullOrEmpty(dictBasisdaten["OrgForm"].ToString())
+                                ? ""
+                                : dictBasisdaten["OrgForm"].ToString();
+                            var klassenart = string.IsNullOrEmpty(dictBasisdaten["Klassenart"].ToString())
+                                ? ""
+                                : dictBasisdaten["Klassenart"].ToString();
+                            var fachklasse = string.IsNullOrEmpty(dictBasisdaten["Fachklasse"].ToString())
+                                ? ""
+                                : dictBasisdaten["Fachklasse"].ToString();
+                            var zeugnisart = "";
+                            var schwerstbehinderung = student.Schwerstbehinderung;
+                            var wiederholung = "";
+
+                            var dictLernabschnitt = schuelerLernab
+                                .Where(recLern =>
+                                {
+                                    var dictLern = (IDictionary<string, object>)recLern;
+                                    return dictLern["Nachname"].ToString() == student.Nachname &&
+                                        dictLern["Vorname"].ToString() == student.Vorname &&
+                                        dictLern["Geburtsdatum"].ToString() == student.Geburtsdatum &&
+                                        dictLern["Jahr"].ToString() == Global.AktSj[0] &&
+                                        dictLern["Abschnitt"].ToString() == configuration["Abschnitt"];
+                                }).FirstOrDefault() as IDictionary<string, object>;
+
+                            var fehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt = Global.FehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt;
+
+                            // Wenn bereits Lernabschnittsdaten existieren, werden die Daten dort entnommen.
+                            if (dictLernabschnitt != null)
+                            {
+                                konferenzdatum = konferenzdatum.Year == 1
+                                    ? string.IsNullOrEmpty(dictLernabschnitt["Konferenzdatum"].ToString())
+                                        ? konferenzdatum
+                                        : Convert.ToDateTime(dictLernabschnitt["Konferenzdatum"].ToString())
+                                    : konferenzdatum;
+                                zeugnisdatum = zeugnisdatum.Year == 1
+                                    ? string.IsNullOrEmpty(dictLernabschnitt["Zeugnisdatum"].ToString())
+                                        ? zeugnisdatum
+                                        : Convert.ToDateTime(dictLernabschnitt["Zeugnisdatum"].ToString())
+                                    : zeugnisdatum;
+                                jahrgang = string.IsNullOrEmpty(jahrgang)
+                                    ? string.IsNullOrEmpty(dictLernabschnitt["Jahrgang"].ToString())
+                                        ? jahrgang
+                                        : dictLernabschnitt["Jahrgang"].ToString()
+                                    : jahrgang;
+                                orgForm = string.IsNullOrEmpty(orgForm)
+                                    ? string.IsNullOrEmpty(dictLernabschnitt["OrgForm"].ToString())
+                                        ? orgForm
+                                        : dictLernabschnitt["OrgForm"].ToString()
+                                    : orgForm;
+                                klassenart = string.IsNullOrEmpty(klassenart)
+                                    ? string.IsNullOrEmpty(dictLernabschnitt["Klassenart"].ToString())
+                                        ? klassenart
+                                        : dictLernabschnitt["Klassenart"].ToString()
+                                    : klassenart;
+                                schulgliederung = string.IsNullOrEmpty(schulgliederung)
+                                    ? string.IsNullOrEmpty(dictLernabschnitt["Schulgliederung"].ToString())
+                                        ? schulgliederung
+                                        : dictLernabschnitt["Schulgliederung"].ToString()
+                                    : schulgliederung;
+                                klassenlehrer = string.IsNullOrEmpty(klassenlehrer)
+                                    ? string.IsNullOrEmpty(dictLernabschnitt["Klassenlehrer"].ToString())
+                                        ? klassenlehrer
+                                        : dictLernabschnitt["Klassenlehrer"].ToString()
+                                    : klassenlehrer;
+                                versetzung = string.IsNullOrEmpty(versetzung)
+                                    ? string.IsNullOrEmpty(dictLernabschnitt["Versetzung"].ToString())
+                                        ? versetzung
+                                        : dictLernabschnitt["Versetzung"].ToString()
+                                    : versetzung;
+                                abschluss = string.IsNullOrEmpty(abschluss)
+                                    ? string.IsNullOrEmpty(dictLernabschnitt["Abschluss"].ToString())
+                                        ? abschluss
+                                        : dictLernabschnitt["Abschluss"].ToString()
+                                    : abschluss;
+                                fachklasse = string.IsNullOrEmpty(fachklasse)
+                                    ? string.IsNullOrEmpty(dictLernabschnitt["Fachklasse"].ToString())
+                                        ? fachklasse
+                                        : dictLernabschnitt["Fachklasse"].ToString()
+                                    : fachklasse;
+                                zeugnisart = string.IsNullOrEmpty(zeugnisart)
+                                    ? string.IsNullOrEmpty(dictLernabschnitt["Zeugnisart"].ToString())
+                                        ? zeugnisart
+                                        : dictLernabschnitt["Zeugnisart"].ToString()
+                                    : zeugnisart;
+                                schwerstbehinderung = string.IsNullOrEmpty(schwerstbehinderung)
+                                    ? string.IsNullOrEmpty(dictLernabschnitt["Schwerstbehinderung"].ToString())
+                                        ? schwerstbehinderung
+                                        : dictLernabschnitt["Schwerstbehinderung"].ToString()
+                                    : schwerstbehinderung;
+                                wiederholung = string.IsNullOrEmpty(wiederholung)
+                                    ? string.IsNullOrEmpty(dictLernabschnitt["Wiederholung"].ToString())
+                                        ? wiederholung
+                                        : dictLernabschnitt["Wiederholung"].ToString()
+                                    : wiederholung;
+                            }
+
+                            dynamic record = new ExpandoObject();
+                            record.Nachname = $"{student.Nachname}#{student.Klasse}";
+                            record.Vorname = student.Vorname;
+                            record.Geburtsdatum = student.Geburtsdatum;
+                            record.Jahr = Global.AktSj[0];
+                            record.Abschnitt = art == Global.Zweck.Statistik ? "1" : configuration["Abschnitt"];
+                            record.Jahrgang = jahrgang;
+                            record.Klasse = student.Klasse;
+                            record.Schulgliederung = schulgliederung;
+                            record.OrgForm = orgForm;
+                            record.Klassenart = klassenart;
+                            record.Fachklasse = fachklasse;
+                            record.Förderschwerpunkt = "";
+                            record.ZWEIPUNKTLEERZEICHENFörderschwerpunkt = "";
+                            record.Schwerstbehinderung = schwerstbehinderung;
+                            record.Wertung = "J";
+                            record.Wiederholung = wiederholung;
+                            record.Klassenlehrer = klassenlehrer;
+                            record.Versetzung = versetzung;
+                            record.Abschluss = abschluss;
+                            record.Schwerpunkt = "";
+                            record.Konferenzdatum = art == Global.Zweck.Statistik ? "" : konferenzdatum.ToShortDateString();
+                            record.Zeugnisdatum = art == Global.Zweck.Statistik ? "" : zeugnisdatum.ToShortDateString();
+                            record.SummeFehlstd = art == Global.Zweck.Statistik ? "" : student.GetFehlstd(absencePerStud, configuration);
+                            record.SummeFehlstdUNTERSTRICHunentschuldigt = art == Global.Zweck.Statistik ? "" : student.GetUnentFehlstd(absencePerStud, configuration);
+                            record.allgPUNKTMINUSbildenderLEERZEICHENAbschluss = "";
+                            record.berufsbezPUNKTLEERZEICHENAbschluss = "";
+                            record.Zeugnisart = zeugnisart;
+                            record.FehlstundenMINUSGrenzwert = "";
+                            record.DatumLEERZEICHENvon = "";
+                            record.DatumLEERZEICHENbis = "";
+                            zieldatei.Add(record);
+                        }
+                    }
+                }
+                Global.ZeileSchreiben("Lernabschnittsdaten.dat", zieldatei.Count().ToString());
+            });
+            
+            foreach (var aktion in zieldatei.Funktionen)
+                aktion(zieldatei);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            while (Console.KeyAvailable) Console.ReadKey(true);
+
+            Console.ReadKey();
+        }
+    }
+
     public void Lernabschnittsdaten(
         Lehrers lehrers,
         IConfiguration configuration,
@@ -673,6 +905,7 @@ public class Menüeintrag
             Console.ReadKey();
         }
     }
+
     public void LeistungsdatenStatistik(
         IConfiguration configuration,
         string zieldateiname,
@@ -748,6 +981,90 @@ public class Menüeintrag
                     record.Kursart = kursart;
                     record.Kurs = unt.KursBez;
                     record.Note = art == Global.Zweck.Statistik ? "" : note;
+                    record.Abiturfach = abiturfach;
+                    record.WochenstdPUNKT = unt.Wochenstunden.ToString();
+                    record.ExterneLEERZEICHENSchulnrPUNKT = "";
+                    record.Zusatzkraft = "";
+                    record.WochenstdPUNKTLEERZEICHENZK = "";
+                    record.Jahrgang = "";
+                    record.Jahrgänge = "";
+                    record.FehlstdPUNKT = "";
+                    record.unentschPUNKTLEERZEICHENFehlstdPUNKT = "";
+                    zieldatei.Add(record);
+                }
+            }
+            Global.ZeileSchreiben("SchuelerLeistungsdaten.dat", zieldatei.Count().ToString());
+        });
+
+        foreach (var aktion in zieldatei.Funktionen)
+            aktion(zieldatei);
+    }
+
+    public void UnterrichteAnlegen(
+        IConfiguration configuration,
+        string zieldateiname,
+        List<Action<Datei>> funktionen,
+        string[] anhandDieserAttributeWirdVerglichen,
+        string[] dieseAttributeWerdenBeimVergleichIgnoriert,
+        string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null, Global.Zweck art = Global.Zweck.Statistik)
+    {
+        var unterrichte = this.Unterrichte;
+
+        List<dynamic>? schuelerLeistungsdaten = null;
+        List<dynamic>? marksPerLs = null;
+
+        List<dynamic> schBasisds = Quelldateien.GetMatchingList(configuration, "schuelerbasisdaten", IStudents, Klassen);
+        if (art == null && (schBasisds == null || schBasisds.Count == 0)) return;
+
+        List<dynamic> schLeistus = Quelldateien.GetMatchingList(configuration, "schuelerleistungsdaten", IStudents, Klassen);
+        if (art == null && (schLeistus == null || schLeistus.Count == 0)) return;
+
+        if(art == Global.Zweck.Zeugnis)
+            schuelerLeistungsdaten = Quelldateien.GetMatchingList(configuration, "schuelerleistungsdaten", IStudents, Klassen);        
+        
+        var zieldatei = new Datei(zieldateiname, funktionen, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+
+        AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start($"{zieldateiname} ...", ctx =>
+        {
+            foreach (var unt in this.Unterrichte)
+            {
+                foreach (var student in unt.Students.OrderBy(x => x.Nachname).ThenBy(x => x.Vorname))
+                {
+                    var kursart = unt.Kursart;
+                    var abiturfach = "";
+
+                    // Kursart und Abiturfach werden in SchILD direkt gepflegt und dürfen von BKB-Tool nicht überschrieben werden.
+                    // Sie müssen aus den bisherigen schuelerleistungsdaten entnommen werden.
+                    var leistungsdaten = schuelerLeistungsdaten
+                            .Where(rec =>
+                            {
+                                var dict = (IDictionary<string, object>)rec;
+                                return dict["Nachname"].ToString() == student.Nachname &&
+                                    dict["Vorname"].ToString() == student.Vorname &&
+                                    // Vergleiche nur den ersten Teil des Fachnamens, da es z.B. "E L1" und "E L2" geben kann.
+                                    dict["Fach"].ToString().Split(' ')[0] == unt.Fach.Split(' ')[0] &&
+                                    dict["Geburtsdatum"].ToString() == student.Geburtsdatum;
+                            }).LastOrDefault() as IDictionary<string, object>;
+
+                    if (leistungsdaten != null && !string.IsNullOrEmpty(leistungsdaten["Kursart"].ToString()))                    
+                        kursart = leistungsdaten["Kursart"].ToString();
+                    if (leistungsdaten != null && !string.IsNullOrEmpty(leistungsdaten["Abiturfach"].ToString()))
+                        abiturfach = leistungsdaten["Abiturfach"].ToString();
+                    
+                    string jahrgang = student.GetJahrgang(schBasisds);
+                    string note = "";
+
+                    dynamic record = new ExpandoObject();
+                    record.Nachname = $"{student.Nachname}#{student.Klasse}";
+                    record.Vorname = student.Vorname;
+                    record.Geburtsdatum = student.Geburtsdatum;
+                    record.Jahr = Global.AktSj[0];
+                    record.Abschnitt = configuration["Abschnitt"];
+                    record.Fach = unt.Fach;
+                    record.Fachlehrer = unt.Kursleiter;
+                    record.Kursart = kursart;
+                    record.Kurs = unt.KursBez;
+                    record.Note = "";
                     record.Abiturfach = abiturfach;
                     record.WochenstdPUNKT = unt.Wochenstunden.ToString();
                     record.ExterneLEERZEICHENSchulnrPUNKT = "";
@@ -5312,8 +5629,8 @@ public class Menüeintrag
 
         foreach (var klasse in verschiedeneKlassenDerStudents)
         {
-            zieldatei.Name = $"oeffentlich:Klausurbelegung:{configuration["InteressierendesSchuljahr"]}:{klasse}";
-            zieldatei.Add($"====== Klausurbelegung {klasse} ======");
+            zieldatei.Name = $"oeffentlich:Klausurbelegung:{klasse}-{configuration["InteressierendesSchuljahr"]}-{configuration["Abschnitt"]}";
+            zieldatei.Add($"====== Klausurbelegung {klasse} Schuljahr: {configuration["InteressierendesSchuljahr"]} Abschnitt: {configuration["Abschnitt"]} ======");
             zieldatei.Add("");
 
             var kopfzeile = "^  Name  ^ ";
@@ -5483,7 +5800,7 @@ public class Menüeintrag
         foreach (var klasse in verschiedeneKlassenDerStudents)
         {
             // Wiki-Seite lesen
-            string seitenName = $"oeffentlich:Klausurbelegung:{configuration["InteressierendesSchuljahr"]}:{klasse}"; // Pfad im Wiki
+            string seitenName = $"oeffentlich:Klausurbelegung:{klasse}-{configuration["InteressierendesSchuljahr"]}-{configuration["Abschnitt"]}"; // Pfad im Wiki
             var seitenInhalt = dokuwikiZugriff.Proxy.GetPage(seitenName);
 
             // Tabelle parsen
@@ -5491,6 +5808,7 @@ public class Menüeintrag
 
             var maxSpalten = 9; // Maximal 9 Spalten anzeigen
             var table = new Spectre.Console.Table();
+            table.Title = new TableTitle($"Tabelle [{Global.GetColor(Global.ColorPfadInDateien)}]{seitenName}[/] aus Wiki");
             table.Border(TableBorder.Rounded);
             table.Expand();
             
@@ -5527,56 +5845,87 @@ public class Menüeintrag
             // Beispiel: Zugriff auf einzelne Zelle
             //Console.WriteLine("\nZelle [2][0] = " + tabelle[2][0]);
 
-            // Durchlaufe alle Zeilen der bisherigen leistungsdaten mit dem Ziel die Kursart zu aktualisieren
-            foreach (var leistung in leistungsdaten)
+            AnsiConsole.Status()
+            .Spinner(Spinner.Known.Dots)
+            .Start("Durchlaufe alle Zeilen der bisherigen Leistungsdaten mit dem Ziel die Kursart zu aktualisieren ...", ctx =>
             {
-                var dict = (IDictionary<string, object>)leistung;
+                var zeile = 1;
+                var title = $"Vergleich Leistungsdaten alt mit neu (aus Wiki-Seite) [{Global.GetColor(Global.ColorPfadInDateien)}]{seitenName}[/] für Klasse {klasse}";
+                var table = new Table();
+                table.Expand();
+                table.Border(TableBorder.Rounded);
+                if (!string.IsNullOrEmpty(title))
+                    table.Title = new TableTitle(title);
+                
+                table.Expand();                
+                table.AddColumn("Nr.");
+                table.AddColumn("Klasse, Schüler und Fach");
+                table.AddColumn("alt");
+                table.AddColumn("neu");
 
-                // suche den Spaltenindex aus Tabelle, der dem Fach entspricht
-                var fach = dict["Fach"].ToString();
-                var spaltenIndex = tabelle[0].IndexOf(fach);
-                if (spaltenIndex == -1)
+                foreach (var leistung in leistungsdaten)
                 {
-                    // Fach nicht gefunden, überspringe diesen Eintrag
-                    continue;
+                    var dict = (IDictionary<string, object>)leistung;
+
+                    // suche den Spaltenindex aus Tabelle, der dem Fach entspricht
+                    var fach = dict["Fach"].ToString();
+                    var spaltenIndex = tabelle[0].IndexOf(fach);
+                    if (spaltenIndex == -1)
+                    {
+                        // Fach nicht gefunden, überspringe diesen Eintrag
+                        continue;
+                    }
+                    // suche den Zeilenindex aus Tabelle, der dem Schüler entspricht
+                    var schuelername = dict["Nachname"].ToString().Substring(0, laengeDesNamens) + "." + dict["Vorname"].ToString().Substring(0, laengeDesNamens) + "."; // Nur erstes Zeichen des Vornamens
+                    var zeilenIndex = tabelle.FindIndex(row =>
+                        row.Count > 0 &&
+                        row[0] == schuelername
+                    );
+                    if (zeilenIndex == -1)
+                    {
+                        // Schüler nicht gefunden, überspringe diesen Eintrag
+                        continue;
+                    }
+
+                    dynamic record = new ExpandoObject();
+
+                    var kursartNeu = "";
+                    var alt = "";
+                    var neu = "";
+
+                    foreach (var prop in dict)
+                    {
+                        var name = prop.Key;
+                        alt = prop.Value.ToString();
+
+                        if (name == "Kursart")
+                            if (spaltenIndex < tabelle[zeilenIndex].Count)
+                            {
+                                kursartNeu = tabelle[zeilenIndex][spaltenIndex].Trim();
+                                if (alt != kursartNeu)
+                                {
+                                    table.AddRow(new Text(zeile.ToString()), new Text(schuelername + ", " + fach), new Text(alt), new Text(kursartNeu)); zeile++;
+                                }                                    
+                                alt = kursartNeu;
+                            }
+
+                        if (name == "Abiturfach")
+                            if (spaltenIndex < tabelle[zeilenIndex].Count)                                                    
+                                if (new List<string> { "LK1", "LK2", "AB3", "AB4" }.Contains(kursartNeu))
+                                {
+                                    if (alt != kursartNeu.Substring(2, 1))
+                                    {
+                                        table.AddRow(new Text(zeile.ToString()), new Text(schuelername + ", " + fach), new Text(alt), new Text(kursartNeu)); zeile++;
+                                    }
+                                    alt = kursartNeu.Substring(2, 1); // Nur die Ziffer     
+                                }
+                                                
+                        ((IDictionary<string, object>)record)[name] = alt;
+                    }
+                    zieldatei.Add(record);
                 }
-                // suche den Zeilenindex aus Tabelle, der dem Schüler entspricht
-                var schuelername = dict["Nachname"].ToString().Substring(0, laengeDesNamens) + "." + dict["Vorname"].ToString().Substring(0, laengeDesNamens) + "."; // Nur erstes Zeichen des Vornamens
-                var zeilenIndex = tabelle.FindIndex(row =>
-                    row.Count > 0 &&
-                    row[0] == schuelername
-                );
-                if (zeilenIndex == -1)
-                {
-                    // Schüler nicht gefunden, überspringe diesen Eintrag
-                    continue;
-                }
-
-                dynamic record = new ExpandoObject();
-
-                var kursart = "";
-
-                foreach (var prop in dict)
-                {
-                    var name = prop.Key;
-                    var value = prop.Value;
-
-                    if (name == "Kursart")
-                        if (spaltenIndex < tabelle[zeilenIndex].Count)
-                        {
-                            kursart = tabelle[zeilenIndex][spaltenIndex].Trim();
-                            value = kursart;
-                        }
-
-                    if (name == "Abiturfach")
-                        if (spaltenIndex < tabelle[zeilenIndex].Count)                                                    
-                            if (new List<string> { "LK1", "LK2", "AB3", "AB4" }.Contains(kursart))
-                                value = kursart.Substring(2, 1); // Nur die Ziffer  
-                        
-                    ((IDictionary<string, object>)record)[name] = value;
-                }
-                zieldatei.Add(record);
-            }
+                AnsiConsole.Write(table);
+            });
         }
         foreach (var aktion in zieldatei.Funktionen)
             aktion(zieldatei);

@@ -385,26 +385,183 @@ public static class MenueHelper
                         Global.NurBeiDiesenSchulnummern.Nur177659
                     ),
                     new Menüeintrag(
-                        $"Zeugnisse 14 Tage vorher: Unterrichte schülergenau anlegen.",
+                        $"Stammdatenabgleiche: Stammdaten zwischen SchILD und Untis abgleichen..",
                         new Dateien(),
                         students,
                         klassen,
                         [
-                            $"Die Lerabschnittsdaten müssen zuvor angelegt worden sein.",
-                            $"Die Unterrichte werden für jeden Schüler neu angelegt und unter Leistungsdaten eingetragen.",
-                            $"Kurse werden angelegt.",
-                            $"Zu jedem angelegten Unterricht muss am Tag vor der Konferenz eine Note hinzugefügt werden."
+                            $"..."
                         ],
                         _ =>
                         {
-                            var pdfDateien = new PdfDateien();
-                            pdfDateien.KennwortSetzen(configuration);
+                            
                         },
                         Global.Rubrik.Allgemein,
                         Global.NurBeiDiesenSchulnummern.Nur177659
                     ),
                     new Menüeintrag(
-                        $"Zeugnisse  4 Tage vorher: Die Fehlzeiten werden in bestehende Lernabschnittsdaten eingefügt",
+                        "Klausurbelegung: Vor & nach den Sommerferien, nach dem Hj.: Wiki-Seite (mit Zuordnung der SuS zu allen Fächern) erstellen / auslesen",
+                        quelldateien.Notwendige(configuration, ["faecher,dat","gpu002,txt","kurse.,dat","studentgroupstudents,csv", "schuelerleistungsdaten,dat"]),
+                        students,
+                        klassen,
+                        [
+                            $"Es wird für jede Klasse eine Wiki-Seite erstellt unterhalb von https://bkb.wiki/oeffentlich:klausurbelegung:start. Die Seite enthält eine Tabelle mit allen Schüler*innen der Klasse und allen Fächern, die die Schüler*innen belegen. Klassenleitungen können dort einfach alle Belegungen eintragen. Am besten wird die Tabelle von Klassenleitungen vor den Sommerferien erstellt.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]Verarbeitungsoptionen:[/]",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#1[/] Wiki-Tabelle aus der GPU002 erstellen und als Seite anlegen:",
+                            $"   Diese Option ist direkt vor den Sommerferien sinnvoll, damit Kurswahlen durchgeführt werden können.",
+                            $"   Es wird eine leere Wiki-Tabelle erstellt. Man kann die leere Wiki-Tabelle am besten mit Copy&Paste in eine Word-Online-Seite werfen und den Link an die SuS austeilen. Die SuS können dann direkt zeitgleich selbst die Tabelle füllen lassen. Die Word-Tabelle wird dann wieder nach Wiki konvertiert. Spätere Änderungen passieren dann direkt in Wiki.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#2[/] Tabelle aus Wiki auslesen:",
+                            $"   SchuelerLeistungsdaten werden für den Re-Import nach SchILD erstellt.",
+                            $"[{Global.GetColor(Global.ColorHinweise)}]#3[/] Tabelle aus SchuelerLeistungsdaten.dat erstellen und inkl. [{Global.GetColor(Global.ColorActionInMenüs)}]LK1, LK2, GKS usw.[/] in Wiki anlegen:",
+                            $"   Diese Option ist nach den Sommerferien bzw. nach dem Halbjahrswechsel sinnvoll, um bestehende Leistungsdaten in SchILD zu aktualisieren."
+                        ],
+                        m =>
+                        {
+                            m.FilterInteressierendeStudentsUndKlassen(configuration);
+                            m.Unterrichte = new Unterrichte(configuration, m, Global.Zweck.Zeugnis, Global.Art.KursUnterrichte);
+                            m.Unterrichte.AddRange(new Unterrichte(configuration, m, Global.Zweck.Zeugnis, Global.Art.NichtKursUnterrichte));
+                            Global.Konfig("Klausurbelegung", Global.Modus.Update, configuration, "", -1, -1, "", "1", null, "1,2,3");
+                            Global.Konfig("InteressierendesSchuljahr", Global.Modus.Update, configuration, "", -1, -1, "", "1", null, "25-26,26-27,27-28");
+                            Global.Konfig("Abschnitt", Global.Modus.Update, configuration, "", -1, -1, "", "1", null, "1,2");
+                            if(configuration["Klausurbelegung"] == "1" || configuration["Klausurbelegung"] == "3")
+                                m.KlausurbelegungWikiSeiteErstellen(
+                                    configuration,
+                                    $"oeffentlich:klausurbelegung:{configuration["InteressierendesSchuljahr"]}:",
+                                    [
+                                        datei => datei.PutPage(),
+                                        datei => datei.OeffneWebseite($"https://bkb.wiki/{datei.Name}"),
+                                    ]);
+                            if(configuration["Klausurbelegung"] == "2")
+                                m.KlausurbelegungAusWikiNachSchildEinlesen(
+                                    configuration,
+                                    Path.Combine(pfadSchilddatenaustausch ?? "", "schuelerLeistungsdaten.dat"),
+                                    [
+                                        datei => datei.OrdnerOeffnen(),
+                                        datei => datei.Erstellen()
+                                    ],
+                                    ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt"],
+                                    [],
+                                    "|", '\0', new UTF8Encoding(true), false);
+                        },
+                        Global.Rubrik.Leistungsdaten,
+                        Global.NurBeiDiesenSchulnummern.Nur177659
+                    ),
+                    new Menüeintrag(
+                        $"14 Tage vor Zeugnis: Unterrichte/Kurse schülergenau von Webuntis nach SchILD übertragen.",
+                        quelldateien.Notwendige(configuration, ["studentgroupstudents,csv", "klassen,dat", "schuelerlernabschnitt,dat,optional", "schuelerleistungsdaten,dat", "lehrkraefte,dat", "kurse,dat", "schuelerbasisdaten,dat", "faecher,dat", "GPU002,txt"]),
+                        students,
+                        klassen,
+                        [
+                            $"Die Lernabschnittsdaten müssen zuvor angelegt worden sein.",
+                            $"Die Unterrichte ([{Global.GetColor(Global.ColorActionInMenüs)}]GPU002[/]) und Kurse ([{Global.GetColor(Global.ColorActionInMenüs)}]studentgoupstudents[/]) werden aus den (Web-)Untis für jeden Schüler neu angelegt und unter Leistungsdaten eingetragen.",                            
+                            $"[{Global.GetColor(Global.ColorActionInMenüs)}]Hinweise zum Beruflichen Gymnasium:[/]",
+                            $"[{Global.GetColor(Global.ColorActionInMenüs)}]#1[/] Die Kurswahlen sollten auf der Wiki-Seite zu Halbjahresbeginn erfolgt sein. Aus den Kurswahlen werden [{Global.GetColor(Global.ColorActionInMenüs)}]LK1, LK2, GKS usw.[/] übernommen.",
+                            $"[{Global.GetColor(Global.ColorActionInMenüs)}]#2[/] Es empfiehlt sich, dass die SuS die Kurswahlen vor der Zeugniskonferenz nochmal überprüfen."                            
+                        ],
+                        m =>
+                        {
+                            m.FilterInteressierendeStudentsUndKlassen(configuration);
+                            configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration);
+                            configuration = Global.Konfig("Schulnummer", Global.Modus.Update, configuration);
+                            configuration = Global.Konfig("ZeugnisDatum", Global.Modus.Update, configuration);
+                            configuration = Global.Konfig("Kursarten", Global.Modus.Update, configuration);
+
+                            m.Unterrichte = new Unterrichte(configuration, m, Global.Zweck.Zeugnis, Global.Art.KursUnterrichte);
+                            m.Unterrichte.AddRange(new Unterrichte(configuration, m, Global.Zweck.Zeugnis, Global.Art.NichtKursUnterrichte));
+                            
+                            m.Kurse(
+                                configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Kurse.dat"),
+                                [
+                                    datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
+                                    datei => datei.Verarbeiten(quelldateien, Global.Modus.Filtern),
+                                    datei => datei.Erstellen()
+                                ],
+                                ["KursBez", "Jahr", "Abschnitt"],
+                                [],
+                                "|", '\0', new UTF8Encoding(true), false);
+                            m.UnterrichteAnlegen(
+                                configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat", ""),
+                                [
+                                    datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
+                                    datei => datei.Verarbeiten(quelldateien, Global.Modus.Filtern),
+                                    datei => datei.Erstellen()
+                                ],
+                                ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach", "Kurs"],
+                                [],
+                                "|", '\0', new UTF8Encoding(true), false, null,
+                                Global.Zweck.Zeugnis);
+                            m.Faecher(
+                                configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Faecher.dat"),
+                                [
+                                    datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
+                                    datei => datei.Verarbeiten(quelldateien, Global.Modus.Filtern),
+                                    datei => datei.Erstellen()
+                                ],
+                                ["InternKrz"],
+                                [],
+                                "|", '\0', new UTF8Encoding(true), false);
+                        },
+                        Global.Rubrik.Allgemein,
+                        Global.NurBeiDiesenSchulnummern.Nur177659
+                    ),
+                    new Menüeintrag(
+                        $"13 Tage vor Zeugnis: In den Klassen des Beruflichen Gymnasiums die Klausurbelegung aus Wiki in die SchiLD-Leistungsdaten übernehmen.",
+                        quelldateien.Notwendige(configuration, ["studentgroupstudents,csv", "klassen,dat", "schuelerlernabschnitt,dat,optional", "schuelerleistungsdaten,dat", "lehrkraefte,dat", "kurse,dat", "schuelerbasisdaten,dat", "faecher,dat", "GPU002,txt"]),
+                        students,
+                        klassen,
+                        [
+                            $"Alle Leistungsdaten müssen bereits in SchILD vorliegen. Die Klausurbelegung sollten auf der Wiki-Seite bereits nach dem vorangegangenen Halbjahresbeginn erfolgt sein. Idealerweise werden die SuS unmittelbar vor den Zeugnissen nochmals zur Kontrolle aufgefordert. Folgendes wird in dieser Funktion durchgeführt:",
+                            $"[{Global.GetColor(Global.ColorActionInMenüs)}]#1[/] Aus den Klausurbelegungen in Wiki werden [{Global.GetColor(Global.ColorActionInMenüs)}]LK1, LK2, GKS, GKM, AB3, AB4[/] in die SchILD-Leistungsdaten übernommen.",
+                            $"[{Global.GetColor(Global.ColorActionInMenüs)}]#2[/] Unstimmigkeiten zwischen Wiki und SchILD werden angezeigt."
+                        ],
+                        m =>
+                        {
+                            m.FilterInteressierendeStudentsUndKlassen(configuration);
+                            configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration);
+                            configuration = Global.Konfig("Schulnummer", Global.Modus.Update, configuration);
+                            configuration = Global.Konfig("ZeugnisDatum", Global.Modus.Update, configuration);
+                            configuration = Global.Konfig("Kursarten", Global.Modus.Update, configuration);
+
+                            m.Unterrichte = new Unterrichte(configuration, m, Global.Zweck.Zeugnis, Global.Art.KursUnterrichte);
+                            m.Unterrichte.AddRange(new Unterrichte(configuration, m, Global.Zweck.Zeugnis, Global.Art.NichtKursUnterrichte));
+                            
+                            m.Kurse(
+                                configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Kurse.dat"),
+                                [
+                                    datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
+                                    datei => datei.Verarbeiten(quelldateien, Global.Modus.Filtern),
+                                    datei => datei.Erstellen()
+                                ],
+                                ["KursBez", "Jahr", "Abschnitt"],
+                                [],
+                                "|", '\0', new UTF8Encoding(true), false);
+                            m.UnterrichteAnlegen(
+                                configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat", ""),
+                                [
+                                    datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
+                                    datei => datei.Verarbeiten(quelldateien, Global.Modus.Filtern),
+                                    datei => datei.Erstellen()
+                                ],
+                                ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach", "Kurs"],
+                                [],
+                                "|", '\0', new UTF8Encoding(true), false, null,
+                                Global.Zweck.Zeugnis);
+                            m.Faecher(
+                                configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Faecher.dat"),
+                                [
+                                    datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
+                                    datei => datei.Verarbeiten(quelldateien, Global.Modus.Filtern),
+                                    datei => datei.Erstellen()
+                                ],
+                                ["InternKrz"],
+                                [],
+                                "|", '\0', new UTF8Encoding(true), false);
+                        },
+                        Global.Rubrik.Allgemein,
+                        Global.NurBeiDiesenSchulnummern.Nur177659
+                    ),
+                    new Menüeintrag(
+                        $" 4 Tage vor Zeugnis: Die Fehlzeiten werden in bestehende Lernabschnittsdaten eingefügt",
                         new Dateien(),
                         students,
                         klassen,
@@ -422,7 +579,7 @@ public static class MenueHelper
                         Global.NurBeiDiesenSchulnummern.Nur177659
                     ),
                     new Menüeintrag(
-                        $"Zeugnisse  3 Tage vorher: Fehlende Noten in Webuntis anmahnen",
+                        $" 3 Tage vor Zeugnis: Fehlende Noten in Webuntis anmahnen",
                         new Dateien(),
                         students,
                         klassen,
@@ -440,7 +597,7 @@ public static class MenueHelper
                         Global.NurBeiDiesenSchulnummern.Nur177659
                     ),
                     new Menüeintrag(
-                        $"Zeugnisse  1 Tag  vorher: Noten aus Webuntis nach SchILD importieren",
+                        $" 1 Tage vor Zeugnis: Noten aus Webuntis nach SchILD importieren",
                         new Dateien(),
                         students,
                         klassen,
@@ -968,51 +1125,7 @@ public static class MenueHelper
                         Global.Rubrik.Leistungsdaten,
                         Global.NurBeiDiesenSchulnummern.Alle
                     ),
-                    new Menüeintrag(
-                        "Klausurbelegung: Wiki-Seite (mit Zuordnung der SuS zu allen Fächern) erstellen",
-                        quelldateien.Notwendige(configuration, ["faecher,dat","gpu002,txt","kurse.,dat","studentgroupstudents,csv", "schuelerleistungsdaten,dat"]),
-                        students,
-                        klassen,
-                        [
-                            $"Es wird für jede Klasse eine Wiki-Seite erstellt unterhalb von https://bkb.wiki/oeffentlich:klausurbelegung:start. Die Seite enthält eine Tabelle mit allen Schüler*innen der Klasse und allen Fächern, die die Schüler*innen belegen. Klassenleitungen können dort einfach alle Belegungen eintragen. Am besten wird die Tabelle von Klassenleitungen vor den Sommerferien erstellt.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]Verarbeitungsoptionen:[/]",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]#1[/] Tabelle aus der GPU002 erstellen und in Wiki als Seite anlegen:",
-                            $"   Diese Option ist direkt vor den Sommerferien sinnvoll, damit Kurswahlen durchgeführt werden können.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]#2[/] Tabelle aus Leistungsdaten erstellen und inkl. alle Einträge in Wiki anlegen:",
-                            $"   Diese Option ist nach den Sommerferien sinnvoll, um bestehende Leistungsdaten in SchILD zu aktualisieren.",
-                            $"[{Global.GetColor(Global.ColorHinweise)}]#3[/] Tabelle aus Wiki auslesen:",
-                            $"   SchuelerLeistungsdaten werden für den Re-Import nach SchILD erstellt."
-                        ],
-                        m =>
-                        {
-                            m.FilterInteressierendeStudentsUndKlassen(configuration);
-                            m.Unterrichte = new Unterrichte(configuration, m, Global.Zweck.Zeugnis, Global.Art.KursUnterrichte);
-                            m.Unterrichte.AddRange(new Unterrichte(configuration, m, Global.Zweck.Zeugnis, Global.Art.NichtKursUnterrichte));
-                            Global.Konfig("Klausurbelegung", Global.Modus.Update, configuration, "", -1, -1, "", "1", null, "1,2,3");
-                            Global.Konfig("InteressierendesSchuljahr", Global.Modus.Update, configuration, "", -1, -1, "", "1", null, "25-26,26-27,27-28");
-                            if(configuration["Klausurbelegung"] == "1" || configuration["Klausurbelegung"] == "2")
-                                m.KlausurbelegungWikiSeiteErstellen(
-                                    configuration,
-                                    $"oeffentlich:klausurbelegung:{configuration["InteressierendesSchuljahr"]}:",
-                                    [
-                                        datei => datei.PutPage(),
-                                        datei => datei.OeffneWebseite($"https://bkb.wiki/{datei.Name}"),
-                                    ]);
-                            if(configuration["Klausurbelegung"] == "3")
-                                m.KlausurbelegungAusWikiNachSchildEinlesen(
-                                    configuration,
-                                    Path.Combine(pfadSchilddatenaustausch ?? "", "schuelerLeistungsdaten.dat"),
-                                    [
-                                        datei => datei.OrdnerOeffnen(),
-                                        datei => datei.Erstellen()
-                                    ],
-                                    ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt"],
-                                    [],
-                                    "|", '\0', new UTF8Encoding(true), false);
-                        },
-                        Global.Rubrik.Leistungsdaten,
-                        Global.NurBeiDiesenSchulnummern.Nur177659
-                    ),
+                    
                         new Menüeintrag(
                             "Teams-Chat: Teams-Chat mit Gruppe von Lehrkräften beginnen",
                             quelldateien.Notwendige(configuration, ["gpu002,txt","gpu003,txt"]),
