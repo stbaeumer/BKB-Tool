@@ -73,7 +73,7 @@ do
         {
             Global.DisplayHeader(configuration);
             menuGefiltert[i].RenderAuswahlÜberschrift(configuration);        
-            if (menuGefiltert[i].Quelldateien.Any(q => !string.IsNullOrEmpty(q.Fehlermeldung)))
+            if (menuGefiltert[i].Quelldateien.Any(q => !string.IsNullOrEmpty(q.Fehlermeldung) && !q.IstOptional))
                 throw new Exception($"[bold {Global.GetColor(Global.ColorHinweise)}]{menuGefiltert[i].Quelldateien.FirstOrDefault(q => !string.IsNullOrEmpty(q.Fehlermeldung)).Fehlermeldung}[/]\n[gray]{string.Join("\n", menuGefiltert[i].Quelldateien.FirstOrDefault(q => !string.IsNullOrEmpty(q.Fehlermeldung)).Hinweise)}[/]");
             //menuGefiltert[i].Quelldateien.FehlermeldungRendern(configuration);
 

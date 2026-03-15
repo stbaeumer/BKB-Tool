@@ -3952,140 +3952,140 @@ public class Menüeintrag
             aktion(zieldatei);
     }
 
-    public void Kalender2Wiki(
-        IConfiguration configuration,
-        List<Action<Datei>> funktionen,
-        string kalender,
-        string zieldateiname,
-        string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
+ public void Kalender2Wiki(
+  IConfiguration configuration,
+  List<Action<Datei>> funktionen,
+  string kalender,
+  string zieldateiname,
+  string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
+ {
+  var zieldatei = new Datei(zieldateiname + ".csv", funktionen, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+
+  var kalenderRec = Quelldateien.GetMatchingList(configuration, kalender, Students, Klassen);
+
+  if (kalenderRec?.Count != 0)
+  {
+   var records = new List<dynamic>();
+
+   var sortedRecords = kalenderRec?
+    .Where(rec =>
     {
-        var zieldatei = new Datei(zieldateiname + ".csv", funktionen, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+     var beginnString = (string)((IDictionary<string, object>)rec)["Beginn"];
+     var kategorienString = (string)((IDictionary<string, object>)rec)["Kategorien"] ?? "";
 
-        var kalenderRec = Quelldateien.GetMatchingList(configuration, kalender, Students, Klassen);
+     return beginnString.Split(" ").Length > 0
+     && !string.IsNullOrEmpty(kategorienString)
+     && DateTime.ParseExact(beginnString.Split(" ")[1], "dd.MM.yyyy", new CultureInfo("de-DE")) >=
+         new DateTime(Convert.ToInt32(Global.AktSj[0]), 07, 31); // keine alten SJ
+    })
+    .OrderBy(rec =>
+    {
+     var beginnString = (string)((IDictionary<string, object>)rec)["Beginn"];
+     return DateTime.ParseExact(beginnString.Substring(3, beginnString.Length - 3), "dd.MM.yyyy HH:mm",
+      new CultureInfo("de-DE"));
+    })
+    .ToList();
 
-        if (kalenderRec?.Count != 0)
-        {
-            var records = new List<dynamic>();
+   if (sortedRecords != null)
+   {
+    foreach (var rec in sortedRecords)
+    {
+     var dict = (IDictionary<string, object>)rec;
+     var beginnString = (string)((IDictionary<string, object>)rec)["Beginn"];
+     var endeString = (string)((IDictionary<string, object>)rec)["Ende"];
+     var beginnDatum = DateTime.ParseExact(beginnString.Substring(3, beginnString.Length - 3),
+      "dd.MM.yyyy HH:mm", new CultureInfo("de-DE"));
+     var endeDatum = DateTime.ParseExact(endeString.Substring(3, endeString.Length - 3), "dd.MM.yyyy HH:mm",
+      new CultureInfo("de-DE"));
+     var dat = beginnDatum.ToString("ddd dd.MM.yyyy", new CultureInfo("de-DE"));
+     var zeit = "";
 
-            var sortedRecords = kalenderRec?
-                .Where(rec =>
-                {
-                    var beginnString = (string)((IDictionary<string, object>)rec)["Beginn"];
-                    var kategorienString = (string)((IDictionary<string, object>)rec)["Kategorien"] ?? "";
+     // Wenn zwischen beginn und ende exakt 24 Stunden oder ein Vielfaches von 24 liegen, dann ist das Ereignis ganztägig
+     bool ganztaegig = (endeDatum - beginnDatum).TotalHours % 24 == 0;
 
-                    return beginnString.Split(" ").Length > 0
-                    && !string.IsNullOrEmpty(kategorienString)
-                    && DateTime.ParseExact(beginnString.Split(" ")[1], "dd.MM.yyyy", new CultureInfo("de-DE")) >=
-                           new DateTime(Convert.ToInt32(Global.AktSj[0]), 07, 31); // keine alten SJ
-                })
-                .OrderBy(rec =>
-                {
-                    var beginnString = (string)((IDictionary<string, object>)rec)["Beginn"];
-                    return DateTime.ParseExact(beginnString.Substring(3, beginnString.Length - 3), "dd.MM.yyyy HH:mm",
-                        new CultureInfo("de-DE"));
-                })
-                .ToList();
+     // Bei mehrtägiges, ganztägigen Ereignissen muss das Endedatum um einen Tag nach vorne geschoben werden
 
-            if (sortedRecords != null)
-            {
-                foreach (var rec in sortedRecords)
-                {
-                    var dict = (IDictionary<string, object>)rec;
-                    var beginnString = (string)((IDictionary<string, object>)rec)["Beginn"];
-                    var endeString = (string)((IDictionary<string, object>)rec)["Ende"];
-                    var beginnDatum = DateTime.ParseExact(beginnString.Substring(3, beginnString.Length - 3),
-                        "dd.MM.yyyy HH:mm", new CultureInfo("de-DE"));
-                    var endeDatum = DateTime.ParseExact(endeString.Substring(3, endeString.Length - 3), "dd.MM.yyyy HH:mm",
-                        new CultureInfo("de-DE"));
-                    var dat = beginnDatum.ToString("ddd dd.MM.yyyy", new CultureInfo("de-DE"));
-                    var zeit = "";
+     if ((endeDatum - beginnDatum).TotalHours >= 24 && endeDatum.Hour == 0 && endeDatum.Minute == 0 &&
+      endeDatum.Second == 0)
+     {
+      endeDatum = endeDatum.AddDays(-1);
+     }
 
-                    // Wenn zwischen beginn und ende exakt 24 Stunden oder ein Vielfaches von 24 liegen, dann ist das Ereignis ganztägig
-                    bool ganztaegig = (endeDatum - beginnDatum).TotalHours % 24 == 0;
+     if (beginnDatum.Hour != 0)
+     {
+      zeit = ", " + beginnDatum.ToShortTimeString();
 
-                    // Bei mehrtägiges, ganztägigen Ereignissen muss das Endedatum um einen Tag nach vorne geschoben werden
+      if (endeDatum.Hour != 0)
+      {
+       zeit += " - " + endeDatum.ToShortTimeString();
+      }
 
-                    if ((endeDatum - beginnDatum).TotalHours >= 24 && endeDatum.Hour == 0 && endeDatum.Minute == 0 &&
-                        endeDatum.Second == 0)
-                    {
-                        endeDatum = endeDatum.AddDays(-1);
-                    }
+      zeit += " Uhr";
+     }
 
-                    if (beginnDatum.Hour != 0)
-                    {
-                        zeit = ", " + beginnDatum.ToShortTimeString();
+     if (ganztaegig && beginnDatum.Date != endeDatum.Date)
+     {
+      dat += " - " + endeDatum.ToString("ddd dd.MM.yyyy", new CultureInfo("de-DE"));
+     }
 
-                        if (endeDatum.Hour != 0)
-                        {
-                            zeit += " - " + endeDatum.ToShortTimeString();
-                        }
+     var sj = "vergangene";
 
-                        zeit += " Uhr";
-                    }
+     if (new DateTime(Convert.ToInt32(Global.AktSj[0]), 8, 1) < beginnDatum &&
+      beginnDatum < new DateTime(Convert.ToInt32(Global.AktSj[1]), 7, 31))
+     {
+      sj = "aktuelles";
+     }
+     if (beginnDatum > new DateTime(Convert.ToInt32(Global.AktSj[1]), 7, 31))
+     {
+      sj = "kommendes";
+     }
 
-                    if (ganztaegig && beginnDatum.Date != endeDatum.Date)
-                    {
-                        dat += " - " + endeDatum.ToString("ddd dd.MM.yyyy", new CultureInfo("de-DE"));
-                    }
+     if (dict["Betreff"].ToString().Contains("QA"))
+     {
+      string a = "";
+     }
+     // Wenn in der Nachricht ein Hyperlink enthalten ist, der nach bkb.wiki zeigt, dann wird der Hyperlink aus dem Inhalt der Seite isoliert und einer Variablen namen link zugewiesen.
+     var link = dict["Nachricht"].ToString()!.Split(' ').FirstOrDefault(x => x.Contains("bkb.wiki"));
 
-                    var sj = "vergangene";
+     // Vom link wird nur der Teil hinter dem letzten Slash behalten
+     if (link != null && link.Contains("/"))
+     {
+      link = link.Substring(link.LastIndexOf('/') + 1);
+     }
+     else
+     {
+      link = null;
+     }
 
-                    if (new DateTime(Convert.ToInt32(Global.AktSj[0]), 8, 1) < beginnDatum &&
-                        beginnDatum < new DateTime(Convert.ToInt32(Global.AktSj[1]), 7, 31))
-                    {
-                        sj = "aktuelles";
-                    }
-                    if (beginnDatum > new DateTime(Convert.ToInt32(Global.AktSj[1]), 7, 31))
-                    {
-                        sj = "kommendes";
-                    }
+     dynamic record = new ExpandoObject();
+     record.Betreff = dict["Betreff"].ToString()!.Trim();
+     record.Seite = string.IsNullOrEmpty(link) ? dict["Kategorien"].ToString().Split(';')[0] : link;
+     record.Hinweise = "";
+     record.Datum = dat + zeit;
+     record.Kategorien = GetKategorien(link, dict["Kategorien"].ToString());
+     record.Verantwortlich = "";
+     record.Ort = dict["Ort"].ToString()!.Trim();
+     record.Ressourcen = dict["Ressourcen"].ToString()!.Trim();
+     record.SJ = sj;
 
-                    if (dict["Betreff"].ToString().Contains("QA"))
-                    {
-                        string a = "";
-                    }
-                    // Wenn in der Nachricht ein Hyperlink enthalten ist, der nach bkb.wiki zeigt, dann wird der Hyperlink aus dem Inhalt der Seite isoliert und einer Variablen namen link zugewiesen.
-                    var link = dict["Nachricht"].ToString()!.Split(' ').FirstOrDefault(x => x.Contains("bkb.wiki"));
+     if (zieldatei.AbsoluterPfad != null && !zieldatei.AbsoluterPfad.Contains("kollegium"))
+     {
+     }
+     else
+     {
+      record.Links = "";
+     }
 
-                    // Vom link wird nur der Teil hinter dem letzten Slash behalten
-                    if (link != null && link.Contains("/"))
-                    {
-                        link = link.Substring(link.LastIndexOf('/') + 1);
-                    }
-                    else
-                    {
-                        link = null;
-                    }
-
-                    dynamic record = new ExpandoObject();
-                    record.Betreff = dict["Betreff"].ToString()!.Trim();
-                    record.Seite = string.IsNullOrEmpty(link) ? dict["Kategorien"].ToString().Split(';')[0] : link;
-                    record.Hinweise = "";
-                    record.Datum = dat + zeit;
-                    record.Kategorien = GetKategorien(link, dict["Kategorien"].ToString());
-                    record.Verantwortlich = "";
-                    record.Ort = dict["Ort"].ToString()!.Trim();
-                    record.Ressourcen = dict["Ressourcen"].ToString()!.Trim();
-                    record.SJ = sj;
-
-                    if (zieldatei.AbsoluterPfad != null && !zieldatei.AbsoluterPfad.Contains("kollegium"))
-                    {
-                    }
-                    else
-                    {
-                        record.Links = "";
-                    }
-
-                    zieldatei.Add(record);
-                }
-            }
-
-            // Zeige den Link in spectre console            
-            AnsiConsole.MarkupLine($"[link=https://bkb.wiki/start?do=admin&page=struct_schemas&table={kalender}#plugin__struct_delete][{Global.GetColor(Global.ColorHyperlink)}]https://bkb.wiki/start?do=admin&page=struct_schemas&table={kalender}[/][/]");
-
-            foreach (var aktion in zieldatei.Funktionen) aktion(zieldatei);
-        }
+     zieldatei.Add(record);
     }
+   }
+
+   // Zeige den Link in spectre console   
+   AnsiConsole.MarkupLine($"[link=https://bkb.wiki/start?do=admin&page=struct_schemas&table={kalender}#plugin__struct_delete][{Global.GetColor(Global.ColorHyperlink)}]https://bkb.wiki/start?do=admin&page=struct_schemas&table={kalender}[/][/]");
+
+   foreach (var aktion in zieldatei.Funktionen) aktion(zieldatei);
+  }
+ }
 
     private string GetKategorien(string? link, string? toString)
     {
@@ -5215,132 +5215,147 @@ public class Menüeintrag
         Global.ZeileSchreiben($"Alte Fotos verschoben:", dateien.Length.ToString());
     }
 
-    internal void OeffneDateienInEditor(IConfiguration configuration, List<string> dateien)
+ internal void OeffneExistierendeDateienOderNeueInEditor(IConfiguration configuration, List<string> dateien)
+ {
+  var notepadPlusPlusCandidates = new[]
+  {
+   @"C:\Program Files\Notepad++\notepad++.exe",
+   @"C:\Program Files (x86)\Notepad++\notepad++.exe"
+  };
+
+  var pfadDownloads = configuration["PfadDownloads"];
+  if (string.IsNullOrEmpty(pfadDownloads) || !Directory.Exists(pfadDownloads))
+  {
+   AnsiConsole.MarkupLine($"[red]Der Ordner {pfadDownloads} existiert nicht.[/]");
+   return;
+  }
+
+  // Baue die vollständigen Pfade zusammen
+  var vollstaendigeDateien = dateien
+   .Select(datei => Path.Combine(pfadDownloads, datei))
+   .Where(File.Exists)
+   .ToList();
+
+  if (vollstaendigeDateien.Count == 0)
+  {
+   if (this.Quelldateien.Where(q => !string.IsNullOrEmpty(q.Fehlermeldung) && !q.IstOptional && !q.Nur177659).Any())
+   {
+    AnsiConsole.MarkupLine($"[red]Keine der angegebenen Dateien wurde im Ordner {pfadDownloads} gefunden.[/]");
+    // Falls nicht optinale Dateen fehlen, dann Abbruch
+    return;
+   }
+   else
+   {
+    AnsiConsole.MarkupLine($"[yellow]Keine der angegebenen Dateien wurde im Ordner {pfadDownloads} gefunden. Sie werden jetzt erstellt.[/]");
+    // Fehlende optinale Dateien werden erstellt
+    vollstaendigeDateien = dateien
+     .Select(datei => Path.Combine(pfadDownloads, datei))
+     .ToList();
+     foreach (var datei in vollstaendigeDateien)     
+     {
+      File.WriteAllText(datei, "", Encoding.UTF8);
+     }
+   }}
+
+  // Prüfe auf veraltete Dateien (bestehendes Verhalten beibehalten)
+  var maxAlter = DateTime.Now.Date.AddDays(-0);
+  var dateienDieAelterSind = vollstaendigeDateien
+   .Where(datei => File.GetLastWriteTime(datei) < maxAlter)
+   .ToList();
+
+  if (dateienDieAelterSind.Count > 0)
+  {
+   AnsiConsole.MarkupLine($"[yellow]Die folgenden Dateien sind älter als vom {maxAlter:dd.MM.yyyy} Tage:[/]");
+   foreach (var datei in dateienDieAelterSind)
+   {
+    AnsiConsole.MarkupLine($"[yellow]- {Path.GetFileName(datei)} (letzte Änderung: {File.GetLastWriteTime(datei)})[/]");
+   }
+   throw new Exception("Aktualisieren Sie die Dateien. Kehren Sie dann hierher zurück.");
+  }
+
+  try
+  {
+   // Windows: versuche Notepad++ zuerst, sonst Standardeditor
+   if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
+   {
+    var notepadPlusPlusPath = notepadPlusPlusCandidates.FirstOrDefault(File.Exists);
+
+    if (!string.IsNullOrEmpty(notepadPlusPlusPath))
     {
-        var notepadPlusPlusCandidates = new[]
-        {
-            @"C:\Program Files\Notepad++\notepad++.exe",
-            @"C:\Program Files (x86)\Notepad++\notepad++.exe"
-        };
-
-        var pfadDownloads = configuration["PfadDownloads"];
-        if (string.IsNullOrEmpty(pfadDownloads) || !Directory.Exists(pfadDownloads))
-        {
-            AnsiConsole.MarkupLine($"[red]Der Ordner {pfadDownloads} existiert nicht.[/]");
-            return;
-        }
-
-        // Baue die vollständigen Pfade zusammen
-        var vollstaendigeDateien = dateien
-            .Select(datei => Path.Combine(pfadDownloads, datei))
-            .Where(File.Exists)
-            .ToList();
-
-        if (vollstaendigeDateien.Count == 0)
-        {
-            AnsiConsole.MarkupLine($"[yellow]Keine der angegebenen Dateien wurde im Ordner {pfadDownloads} gefunden.[/]");
-            return;
-        }
-
-        // Prüfe auf veraltete Dateien (bestehendes Verhalten beibehalten)
-        var maxAlter = DateTime.Now.Date.AddDays(-0);
-        var dateienDieAelterSind = vollstaendigeDateien
-            .Where(datei => File.GetLastWriteTime(datei) < maxAlter)
-            .ToList();
-
-        if (dateienDieAelterSind.Count > 0)
-        {
-            AnsiConsole.MarkupLine($"[yellow]Die folgenden Dateien sind älter als vom {maxAlter:dd.MM.yyyy} Tage:[/]");
-            foreach (var datei in dateienDieAelterSind)
-            {
-                AnsiConsole.MarkupLine($"[yellow]- {Path.GetFileName(datei)} (letzte Änderung: {File.GetLastWriteTime(datei)})[/]");
-            }
-            throw new Exception("Aktualisieren Sie die Dateien. Kehren Sie dann hierher zurück.");
-        }
-
-        try
-        {
-            // Windows: versuche Notepad++ zuerst, sonst Standardeditor
-            if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows))
-            {
-                var notepadPlusPlusPath = notepadPlusPlusCandidates.FirstOrDefault(File.Exists);
-
-                if (!string.IsNullOrEmpty(notepadPlusPlusPath))
-                {
-                    // Notepad++ kann mehrere Dateien in einem Aufruf öffnen
-                    var args = string.Join(" ", vollstaendigeDateien.Select(f => $"\"{f}\""));
-                    Process.Start(new ProcessStartInfo
-                    {
-                        FileName = notepadPlusPlusPath,
-                        Arguments = args,
-                        UseShellExecute = false
-                    });
-                    return;
-                }
-
-                // Fallback: Standardeditor (Dateizuordnung) verwenden
-                foreach (var file in vollstaendigeDateien)
-                {
-                    Process.Start(new ProcessStartInfo
-                    {
-                        FileName = file,
-                        UseShellExecute = true
-                    });
-                }
-                return;
-            }
-
-            // Linux: öffne mit xdg-open (Standardanwendung). Falls xdg-open nicht verfügbar, versuche UseShellExecute.
-            if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux))
-            {
-                foreach (var file in vollstaendigeDateien)
-                {
-                    try
-                    {
-                        Process.Start(new ProcessStartInfo
-                        {
-                            FileName = "xdg-open",
-                            Arguments = $"\"{file}\"",
-                            UseShellExecute = false
-                        });
-                    }
-                    catch (Exception)
-                    {
-                        // Fallback: direkte Shell-Öffnung (funktioniert auf einigen Umgebungen)
-                        try
-                        {
-                            Process.Start(new ProcessStartInfo
-                            {
-                                FileName = file,
-                                UseShellExecute = true
-                            });
-                        }
-                        catch (Exception ex)
-                        {
-                            AnsiConsole.MarkupLine($"[red]Datei konnte nicht geöffnet werden: {file} — {ex.Message}[/]");
-                        }
-                    }
-                }
-                return;
-            }
-
-            // Sonstige OS: Standardöffner verwenden
-            foreach (var file in vollstaendigeDateien)
-            {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = file,
-                    UseShellExecute = true
-                });
-            }
-        }
-        catch (Exception ex)
-        {
-            AnsiConsole.MarkupLine($"[red]Fehler beim Öffnen der Datei(en): {ex.Message}[/]");
-        }
+     // Notepad++ kann mehrere Dateien in einem Aufruf öffnen
+     var args = string.Join(" ", vollstaendigeDateien.Select(f => $"\"{f}\""));
+     Process.Start(new ProcessStartInfo
+     {
+      FileName = notepadPlusPlusPath,
+      Arguments = args,
+      UseShellExecute = false
+     });
+     return;
     }
 
-    internal void OeffneWebseite(string url)
+    // Fallback: Standardeditor (Dateizuordnung) verwenden
+    foreach (var file in vollstaendigeDateien)
+    {
+     Process.Start(new ProcessStartInfo
+     {
+      FileName = file,
+      UseShellExecute = true
+     });
+    }
+    return;
+   }
+
+   // Linux: öffne mit xdg-open (Standardanwendung). Falls xdg-open nicht verfügbar, versuche UseShellExecute.
+   if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux))
+   {
+    foreach (var file in vollstaendigeDateien)
+    {
+     try
+     {
+      Process.Start(new ProcessStartInfo
+      {
+       FileName = "xdg-open",
+       Arguments = $"\"{file}\"",
+       UseShellExecute = false
+      });
+     }
+     catch (Exception)
+     {
+      // Fallback: direkte Shell-Öffnung (funktioniert auf einigen Umgebungen)
+      try
+      {
+       Process.Start(new ProcessStartInfo
+       {
+        FileName = file,
+        UseShellExecute = true
+       });
+      }
+      catch (Exception ex)
+      {
+       AnsiConsole.MarkupLine($"[red]Datei konnte nicht geöffnet werden: {file} — {ex.Message}[/]");
+      }
+     }
+    }
+    return;
+   }
+
+   // Sonstige OS: Standardöffner verwenden
+   foreach (var file in vollstaendigeDateien)
+   {
+    Process.Start(new ProcessStartInfo
+    {
+     FileName = file,
+     UseShellExecute = true
+    });
+   }
+  }
+  catch (Exception ex)
+  {
+   AnsiConsole.MarkupLine($"[red]Fehler beim Öffnen der Datei(en): {ex.Message}[/]");
+  }
+ }
+
+ internal void OeffneWebseite(string url)
     {
         try
         {

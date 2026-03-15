@@ -54,27 +54,38 @@ public class Menue : List<Menüeintrag>
     }
 
     public void AuswahlGridRendern()
-    {
+    {        
         var grid = new Grid();
         grid.Expand();
 
         grid.AddColumn();
         grid.AddColumn();
         grid.AddColumn();
+        grid.AddColumn();
 
-        
         for (int i = 0; i < this.Count(); i++)
         {
-            var links = this[i].Titel.Split(':')[0].Trim();
-            var rechts = this[i].Titel.Split(':')[1].Trim();
-            if (this[i].Titel.Split(':').Count() > 2)
+            try            {
+                var test = this[i].Titel.Split(':');
+            }
+            catch (Exception ex)
             {
-                rechts = string.Join(":", this[i].Titel.Split(':').Skip(1).ToArray()).Trim();
+                AnsiConsole.MarkupLine($"[red]Fehler bei Menüeintrag {i + 1}: {ex.Message}[/]");
+                continue; // Überspringt diesen Eintrag und fährt mit dem nächsten fort
+            }
+            var links = this[i].Titel.Split(':')[0].Trim();
+            var mitte = this[i].Titel.Split(':')[1].Trim();
+            var rechts = this[i].Titel.Split(':')[2].Trim();
+
+            if (this[i].Titel.Split(':').Count() > 3)
+            {
+                rechts = string.Join(":", this[i].Titel.Split(':').Skip(2).ToArray()).Trim();
             }
 
             grid.AddRow(new Text[]{
                 new Text((i + 1).ToString(), new Style(Color.White, Color.Black)).RightJustified(),
-                new Text(links, new Style(Color.SpringGreen2, Color.Black)).LeftJustified(),
+                new Text(links, new Style(Color.Aqua, Color.Black)).LeftJustified(),
+                new Text(mitte, new Style(Color.Chartreuse4, Color.Black)).LeftJustified(),
                 new Text(rechts, new Style(Color.White , Color.Black)).LeftJustified()
             });
         }
