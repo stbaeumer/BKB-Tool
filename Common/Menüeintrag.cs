@@ -4677,202 +4677,202 @@ public class Menüeintrag
         AnsiConsole.Write(panel3);
     }
 
-    internal void SchuelerZusatzdatenUmMailAdresseErgaenzen(
-        IConfiguration configuration,
-        string zieldateiname,
-        List<Action<Datei>> funktionen,
-        string[] anhandDieserAttributeWirdVerglichen,
-        string[] dieseAttributeWerdenBeimVergleichIgnoriert,
-        string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
+ internal void SchuelerZusatzdatenUmMailAdresseErgaenzen(
+  IConfiguration configuration,
+  string zieldateiname,
+  List<Action<Datei>> funktionen,
+  string[] anhandDieserAttributeWirdVerglichen,
+  string[] dieseAttributeWerdenBeimVergleichIgnoriert,
+  string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
+ {
+  var schuelerZusatzdaten = Quelldateien.GetMatchingList(configuration, "schuelerzusatzdaten", IStudents, Klassen);
+  if (schuelerZusatzdaten == null || !schuelerZusatzdaten.Any()) throw new Exception("Keine SchuelerZusatzdaten.dat");
+
+  var schuelerBasisdaten = Quelldateien.GetMatchingList(configuration, "schuelerbasisdaten", IStudents, Klassen);
+  if (schuelerBasisdaten == null || !schuelerBasisdaten.Any()) throw new Exception("Keine SchuelerBasisdaten.dat");
+
+  bool problem = false;
+
+  var zieldatei = new Datei(zieldateiname, funktionen, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+
+  if (schuelerZusatzdaten.Count != Students.Count)
+  {
+   var panel = new Panel($"Die Anzahl der in der Datei SchuelerZusatzdaten.dat ({schuelerZusatzdaten.Count}) stimmt nicht mit der Anzahl der SchuelerBasisdaten.dat ({Students.Count}) überein. Exportieren Sie die Dateien erneut. Anschließend kehren Sie hierher zurück!")
+      .HeaderAlignment(Justify.Left)
+      .SquareBorder()
+      .Expand()
+      .BorderColor(Global.ColorFehler);
+
+   AnsiConsole.Write(panel);
+   return;
+  }
+
+  var mailDomain = configuration["MailDomain"].Trim();
+  var mehrfachVorhanden = new List<dynamic>();
+
+  AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Schuelerzusatzdaten: Mails anpassen ...", ctx =>
+  {
+   for (int i = 0; i < schuelerZusatzdaten.Count; i++)
+   {    
+    var dictSz = (IDictionary<string, object>)schuelerZusatzdaten[i];
+    var dictSb = (IDictionary<string, object>)schuelerBasisdaten[i];
+
+    // Wenn der Schüler nicht aktiv oder extern ist, überspringe diese Zeile
+    if (!(dictSb["Status"].ToString() == "2" || dictSb["Status"].ToString() == "6")) continue;
+
+    if (string.IsNullOrEmpty(dictSb["Geburtsdatum"].ToString()))
     {
-        var schuelerZusatzdaten = Quelldateien.GetMatchingList(configuration, "schuelerzusatzdaten", IStudents, Klassen);
-        if (schuelerZusatzdaten == null || !schuelerZusatzdaten.Any()) throw new Exception("Keine SchuelerZusatzdaten.dat");
-
-        var schuelerBasisdaten = Quelldateien.GetMatchingList(configuration, "schuelerbasisdaten", IStudents, Klassen);
-        if (schuelerBasisdaten == null || !schuelerBasisdaten.Any()) throw new Exception("Keine SchuelerBasisdaten.dat");
-
-        bool problem = false;
-
-        var zieldatei = new Datei(zieldateiname, funktionen, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
-
-        if (schuelerZusatzdaten.Count != Students.Count)
-        {
-            var panel = new Panel($"Die Anzahl der in der Datei SchuelerZusatzdaten.dat ({schuelerZusatzdaten.Count}) stimmt nicht mit der Anzahl der SchuelerBasisdaten.dat ({Students.Count}) überein. Exportieren Sie die Dateien erneut. Anschließend kehren Sie hierher zurück!")
-                        .HeaderAlignment(Justify.Left)
-                        .SquareBorder()
-                        .Expand()
-                        .BorderColor(Global.ColorFehler);
-
-            AnsiConsole.Write(panel);
-            return;
-        }
-
-        var mailDomain = configuration["MailDomain"].Trim();
-        var mehrfachVorhanden = new List<dynamic>();
-
-        AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Schuelerzusatzdaten: Mails anpassen ...", ctx =>
-        {
-            for (int i = 0; i < schuelerZusatzdaten.Count; i++)
-            {                
-                var dictSz = (IDictionary<string, object>)schuelerZusatzdaten[i];
-                var dictSb = (IDictionary<string, object>)schuelerBasisdaten[i];
-
-                // Wenn der Schüler nicht aktiv oder extern ist, überspringe diese Zeile
-                if (!(dictSb["Status"].ToString() == "2" || dictSb["Status"].ToString() == "6")) continue;
-
-                if (string.IsNullOrEmpty(dictSb["Geburtsdatum"].ToString()))
-                {
-                    var panel = new Panel($"Der Schüler {dictSz["Nachname"]} {dictSz["Vorname"]} hat kein Geburtsdatum in den Individualdaten I hinterlegt. Bitte ergänzen Sie das Geburtsdatum in SchILD, damit eine schulische E-Mail-Adresse generiert werden kann.")
-                            .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] !? [/]")
-                            .HeaderAlignment(Justify.Left)
-                            .SquareBorder()
-                            .Expand()
-                            .BorderColor(Global.ColorFehler);
-                    AnsiConsole.Write(panel);
-                    problem = true;
-                    continue;
-                }
-
-                dynamic record = new ExpandoObject();
-
-                if (MehrfachVorhanden(
-                    schuelerZusatzdaten,
-                    dictSz["schulische E-Mail"].ToString(),
-                    dictSz["Nachname"].ToString(),
-                    dictSz["Vorname"].ToString(),
-                    dictSz["Geburtsdatum"].ToString()))
-                {
-                    mehrfachVorhanden.Add(schuelerZusatzdaten[i]);
-                }
-
-                foreach (var prop in dictSz)
-                {
-                    var name = prop.Key;
-                    var value = prop.Value;
-
-                    if (name == "Nachname")
-                    {
-                        var klasse = dictSb["Klasse"].ToString();
-
-                        ((IDictionary<string, object>)record)[name] = $"{value}#{klasse}";
-                    }
-                    else if (name == "schulische E-Mail")
-                    {
-                        // Schüler mit vorhandener Mail überspringen
-                        if (!string.IsNullOrEmpty(value.ToString()))
-                        {
-                            ((IDictionary<string, object>)record)[name] = value;
-                        }
-                        else
-                        {   
-                            var student = Students.FirstOrDefault(s => (s.Status == "2" || s.Status == "6") && s.Nachname == dictSz["Nachname"].ToString() && s.Vorname == dictSz["Vorname"].ToString() && s.Geburtsdatum == dictSz["Geburtsdatum"].ToString());
-
-                            if (student == null)
-                            {
-                                // Wenn der Schüler nicht gefunden wurde, überspringe diese Zeile
-                                ((IDictionary<string, object>)record)[name] = value;
-                                continue;
-                            }
-                            else
-                            {
-                                // Wenn es in den Zusatzdaten einen Schüler gibt, mit identischem Namen, Vornamen, Geburtsdatum,
-                                // und bei dem die schulische E-Mail-Adresse ebenfalls übereinstimmt, dann gib die Mail-Adresse aus:
-                                var mail = schuelerZusatzdaten
-                                    .Where(s =>
-                                    {
-                                        var dic = s as IDictionary<string, object>;
-                                        return dic != null &&
-                                            dic["Nachname"].ToString() == dictSz["Nachname"].ToString() &&
-                                            dic["Vorname"].ToString() == dictSz["Vorname"].ToString() &&
-                                            dic["Geburtsdatum"].ToString() == dictSz["Geburtsdatum"].ToString() &&
-                                            !string.IsNullOrEmpty(dic["schulische E-Mail"].ToString());
-                                    })
-                                    .Select(s => ((IDictionary<string, object>)s)["schulische E-Mail"].ToString())
-                                    .FirstOrDefault();
-
-                                if (!string.IsNullOrEmpty(mail))
-                                {
-                                    ((IDictionary<string, object>)record)["schulische E-Mail"] = mail;
-                                }
-                                else
-                                {
-                                    if (DateTime.TryParse(student.Geburtsdatum, out DateTime gebDatum))
-                                    {
-                                        var n = student.Bereinigen(student.Nachname.ToLower()).Substring(0, 1);
-                                        var v = student.Bereinigen(student.Vorname.ToLower()).Substring(0, 1);
-                                        var geburtsjahr = gebDatum.Year.ToString().Substring(2, 2);
-                                        var geburtsmonat = gebDatum.Month.ToString("D2");
-                                        var geburtstag = gebDatum.Day.ToString("D2");
-
-                                        var schulischeEmail = $"{n}{v}{geburtsjahr}{geburtsmonat}{geburtstag}{mailDomain}";
-
-                                        // Wenn die E-Mail-Adresse bereits existiert, dann hänge eine Zahl an                            
-                                        var counter = 1;
-                                        while (schuelerZusatzdaten.Any(s => ((IDictionary<string, object>)s)["schulische E-Mail"].ToString() == schulischeEmail))
-                                        {
-                                            schulischeEmail = $"{n}{v}{geburtsjahr}{geburtsmonat}{geburtstag}{counter}{mailDomain}";
-                                            counter++;
-                                        }
-
-                                        // Wenn der Counter größer als 1 ist, dann gib ein Panel aus
-                                        if (counter > 1)
-                                        {
-                                            var panel = new Panel($"Die E-Mail-Adresse für {student.Vorname} {student.Nachname} ({student.Geburtsdatum}) soll neu angelegt werden, wurde aber bereits zuvor in SchILD vergeben. Deswegen schreibt [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] jetzt für {student.Vorname} {student.Nachname} einen Zähler vor das [{Global.GetColor(Global.ColorHinweise)}]@[/]: [{Global.GetColor(Global.ColorZahlen)}]{schulischeEmail}[/]. So wird Eindeutigkeit gewährleistet.\nOptional können Sie nach dem SchILD-Import die E-Mail-Adresse von {student.Vorname} nochmal ändern, wenn Sie anderweitig Eindeutigkeit herstellen wollen (z.B. Buchstabe statt Zähler).\nWeiter mit [{Global.GetColor(Global.ColorActionInMenüs)}]ENTER[/].")
-                                                .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] Hinweis: Doppelung bei E-Mail-Adresse [/]")
-                                                .HeaderAlignment(Justify.Left)
-                                                .SquareBorder()
-                                                .Expand()
-                                                .BorderColor(Global.ColorHinweise);
-                                            AnsiConsole.Write(panel);
-                                            Console.ReadKey(true);
-                                        }
-
-                                        student.MailSchulisch = schulischeEmail;
-
-                                        ((IDictionary<string, object>)record)[name] = schulischeEmail;
-
-                                        if (MehrfachVorhanden(
-                                            schuelerZusatzdaten,
-                                            dictSz["schulische E-Mail"].ToString(),
-                                            dictSz["Nachname"].ToString(), dictSz["Vorname"].ToString(), dictSz["Geburtsdatum"].ToString()))
-                                        {
-                                            mehrfachVorhanden.Add(schuelerZusatzdaten[i]);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        ((IDictionary<string, object>)record)[name] = value;
-                    }
-                }
-
-                zieldatei.Add(record);
-            }        
-        });
-
-        Global.ZeileSchreiben("Schuelerzusatzdaten: Mails überprüft", zieldatei.Count.ToString());
-
-        foreach (var aktion in zieldatei.Funktionen)
-            aktion(zieldatei);
-
-        // Sortiere mehrfachVorhanden nach Geburtsdatum
-        mehrfachVorhanden = mehrfachVorhanden.OrderBy(s => s.Geburtsdatum).ToList();
-
-        if (mehrfachVorhanden.Count > 0)
-        {
-            var schüler = string.Join("\n ", mehrfachVorhanden.Select(s => $"{s.Geburtsdatum} {s.Nachname} {s.Vorname}"));
-            var fehler = $"Unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Individualdaten I[/] haben mehrere dieselbe schulinterne Mailadresse: \n {schüler} \nLösen Sie das Problem, indem Sie in SchILD unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Individualdaten I[/] händisch Eindeutigkeit herstellen. Sie könnten z.B. bei einer/einem Schüler*in händisch eine [{Global.GetColor(Global.ColorZahlen)}]1[/] anhängen.\nAnschließend exportieren Sie alle *.dat-Dateien erneut und kehren hierher zurück.";
-            throw new Exception(fehler);
-        }
-
-        if (problem)
-        {
-            throw new Exception($"[grey]  Zuerst die Hinweise [/][bold red]!?[/][grey] bearbeiten, dann hierher zurückkehren![/]");
-        }
+     var panel = new Panel($"Der Schüler {dictSz["Nachname"]} {dictSz["Vorname"]} hat kein Geburtsdatum in den Individualdaten I hinterlegt. Bitte ergänzen Sie das Geburtsdatum in SchILD, damit eine schulische E-Mail-Adresse generiert werden kann.")
+       .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] !? [/]")
+       .HeaderAlignment(Justify.Left)
+       .SquareBorder()
+       .Expand()
+       .BorderColor(Global.ColorFehler);
+     AnsiConsole.Write(panel);
+     problem = true;
+     continue;
     }
+
+    dynamic record = new ExpandoObject();
+
+    if (MehrfachVorhanden(
+     schuelerZusatzdaten,
+     dictSz["schulische E-Mail"].ToString(),
+     dictSz["Nachname"].ToString(),
+     dictSz["Vorname"].ToString(),
+     dictSz["Geburtsdatum"].ToString()))
+    {
+     mehrfachVorhanden.Add(schuelerZusatzdaten[i]);
+    }
+
+    foreach (var prop in dictSz)
+    {
+     var name = prop.Key;
+     var value = prop.Value;
+
+     if (name == "Nachname")
+     {
+      var klasse = dictSb["Klasse"].ToString();
+
+      ((IDictionary<string, object>)record)[name] = $"{value}#{klasse}";
+     }
+     else if (name == "schulische E-Mail")
+     {
+      // Schüler mit vorhandener Mail überspringen
+      if (!string.IsNullOrEmpty(value.ToString()))
+      {
+       ((IDictionary<string, object>)record)[name] = value;
+      }
+      else
+      {   
+       var student = Students.FirstOrDefault(s => (s.Status == "2" || s.Status == "6") && s.Nachname == dictSz["Nachname"].ToString() && s.Vorname == dictSz["Vorname"].ToString() && s.Geburtsdatum == dictSz["Geburtsdatum"].ToString());
+
+       if (student == null)
+       {
+        // Wenn der Schüler nicht gefunden wurde, überspringe diese Zeile
+        ((IDictionary<string, object>)record)[name] = value;
+        continue;
+       }
+       else
+       {
+        // Wenn es in den Zusatzdaten einen Schüler gibt, mit identischem Namen, Vornamen, Geburtsdatum,
+        // und bei dem die schulische E-Mail-Adresse ebenfalls übereinstimmt, dann gib die Mail-Adresse aus:
+        var mail = schuelerZusatzdaten
+         .Where(s =>
+         {
+          var dic = s as IDictionary<string, object>;
+          return dic != null &&
+           dic["Nachname"].ToString() == dictSz["Nachname"].ToString() &&
+           dic["Vorname"].ToString() == dictSz["Vorname"].ToString() &&
+           dic["Geburtsdatum"].ToString() == dictSz["Geburtsdatum"].ToString() &&
+           !string.IsNullOrEmpty(dic["schulische E-Mail"].ToString());
+         })
+         .Select(s => ((IDictionary<string, object>)s)["schulische E-Mail"].ToString())
+         .FirstOrDefault();
+
+        if (!string.IsNullOrEmpty(mail))
+        {
+         ((IDictionary<string, object>)record)["schulische E-Mail"] = mail;
+        }
+        else
+        {
+         if (DateTime.TryParse(student.Geburtsdatum, out DateTime gebDatum))
+         {
+          var n = student.Bereinigen(student.Nachname.ToLower()).Substring(0, 1);
+          var v = student.Bereinigen(student.Vorname.ToLower()).Substring(0, 1);
+          var geburtsjahr = gebDatum.Year.ToString().Substring(2, 2);
+          var geburtsmonat = gebDatum.Month.ToString("D2");
+          var geburtstag = gebDatum.Day.ToString("D2");
+
+          var schulischeEmail = $"{n}{v}{geburtsjahr}{geburtsmonat}{geburtstag}{mailDomain}";
+
+          // Wenn die E-Mail-Adresse bereits existiert, dann hänge eine Zahl an       
+          var counter = 1;
+          while (schuelerZusatzdaten.Any(s => ((IDictionary<string, object>)s)["schulische E-Mail"].ToString() == schulischeEmail))
+          {
+           schulischeEmail = $"{n}{v}{geburtsjahr}{geburtsmonat}{geburtstag}{counter}{mailDomain}";
+           counter++;
+          }
+
+          // Wenn der Counter größer als 1 ist, dann gib ein Panel aus
+          if (counter > 1)
+          {
+           var panel = new Panel($"Die E-Mail-Adresse für {student.Vorname} {student.Nachname} ({student.Geburtsdatum}) soll neu angelegt werden, wurde aber bereits zuvor in SchILD vergeben. Deswegen schreibt [{Global.GetColor(Global.ColorÜberschrift)}]BKB-Tool[/] jetzt für {student.Vorname} {student.Nachname} einen Zähler vor das [{Global.GetColor(Global.ColorHinweise)}]@[/]: [{Global.GetColor(Global.ColorZahlen)}]{schulischeEmail}[/]. So wird Eindeutigkeit gewährleistet.\nOptional können Sie nach dem SchILD-Import die E-Mail-Adresse von {student.Vorname} nochmal ändern, wenn Sie anderweitig Eindeutigkeit herstellen wollen (z.B. Buchstabe statt Zähler).\nWeiter mit [{Global.GetColor(Global.ColorActionInMenüs)}]ENTER[/].")
+            .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] Hinweis: Doppelung bei E-Mail-Adresse [/]")
+            .HeaderAlignment(Justify.Left)
+            .SquareBorder()
+            .Expand()
+            .BorderColor(Global.ColorHinweise);
+           AnsiConsole.Write(panel);
+           Console.ReadKey(true);
+          }
+
+          student.MailSchulisch = schulischeEmail;
+
+          ((IDictionary<string, object>)record)[name] = schulischeEmail;
+
+          if (MehrfachVorhanden(
+           schuelerZusatzdaten,
+           dictSz["schulische E-Mail"].ToString(),
+           dictSz["Nachname"].ToString(), dictSz["Vorname"].ToString(), dictSz["Geburtsdatum"].ToString()))
+          {
+           mehrfachVorhanden.Add(schuelerZusatzdaten[i]);
+          }
+         }
+        }
+       }
+      }
+     }
+     else
+     {
+      ((IDictionary<string, object>)record)[name] = value;
+     }
+    }
+
+    zieldatei.Add(record);
+   }  
+  });
+
+  Global.ZeileSchreiben("Schuelerzusatzdaten: Mails überprüft", zieldatei.Count.ToString());
+
+  foreach (var aktion in zieldatei.Funktionen)
+   aktion(zieldatei);
+
+  // Sortiere mehrfachVorhanden nach Geburtsdatum
+  mehrfachVorhanden = mehrfachVorhanden.OrderBy(s => s.Geburtsdatum).ToList();
+
+  if (mehrfachVorhanden.Count > 0)
+  {
+   var schüler = string.Join("\n ", mehrfachVorhanden.Select(s => $"{s.Geburtsdatum} {s.Nachname} {s.Vorname}"));
+   var fehler = $"Unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Individualdaten I[/] haben mehrere dieselbe schulinterne Mailadresse: \n {schüler} \nLösen Sie das Problem, indem Sie in SchILD unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Individualdaten I[/] händisch Eindeutigkeit herstellen. Sie könnten z.B. bei einer/einem Schüler*in händisch eine [{Global.GetColor(Global.ColorZahlen)}]1[/] anhängen.\nAnschließend exportieren Sie alle *.dat-Dateien erneut und kehren hierher zurück.";
+   throw new Exception(fehler);
+  }
+
+  if (problem)
+  {
+   throw new Exception($"[grey]  Zuerst die Hinweise [/][bold red]!?[/][grey] bearbeiten, dann hierher zurückkehren![/]");
+  }
+ }
 
     private string TelefonNummerFormatieren(string? v)
     {
@@ -5581,355 +5581,332 @@ public class Menüeintrag
         }
     }
 
-    internal void KlausurbelegungWikiSeiteErstellen(
-        IConfiguration configuration,
-        string zieldateiname,
-        List<Action<Datei>> funktionen)
+ internal void KlausurbelegungWikiSeiteErstellen(
+  IConfiguration configuration,
+  string zieldateiname,
+  List<Action<Datei>> funktionen)
+ {
+  var leistungsdaten = Quelldateien.GetMatchingList(configuration, "schuelerleistungsdaten", IStudents, Klassen);
+  if (leistungsdaten == null || !leistungsdaten.Any()) return;
+
+  var gpu002 = Quelldateien.GetMatchingList(configuration, "gpu002", IStudents, Klassen);
+  if (gpu002 == null || !gpu002.Any()) return;
+
+  var faecher = Quelldateien.GetMatchingList(configuration, "faecher", IStudents, Klassen);
+  if (faecher == null || !faecher.Any()) return;
+
+  var zieldatei = new Datei(zieldateiname, funktionen, configuration);
+
+  // Gib alle Fächer distinct als List<string> zurück, sortiert nach Sortierung S2
+  var alleFaecherDistinct = faecher
+   .Select(rec => (IDictionary<string, object>)rec)
+   .OrderBy(dict => dict["Sortierung S2"].ToString())
+   .Select(dict => dict["InternKrz"].ToString()) // Nur Teil vor Leerzeichen
+   .Distinct()   
+   .ToList();
+
+  var faecherInDieserKlasseAusLeistungsdaten = alleFaecherDistinct
+   .Where(fach =>
+    leistungsdaten.Any(rec =>
     {
-        var leistungsdaten = Quelldateien.GetMatchingList(configuration, "schuelerleistungsdaten", IStudents, Klassen);
-        if (leistungsdaten == null || !leistungsdaten.Any()) return;
+     var dict = (IDictionary<string, object>)rec;
+     // Nur Teil vor Leerzeichen vergleichen
+     return dict.ContainsKey("Fach") && dict["Fach"].ToString() == fach;
+    }))
+   .ToList();
 
-        var gpu002 = Quelldateien.GetMatchingList(configuration, "gpu002", IStudents, Klassen);
-        if (gpu002 == null || !gpu002.Any()) return;
+  var faecherInDieserKlasseAusGpu002 = alleFaecherDistinct
+   .Where(fach =>
+    gpu002.Any(rec =>
+    {
+     var dict = (IDictionary<string, object>)rec;
+     // Nur Teil vor Leerzeichen vergleichen
+     return dict.ContainsKey("Field7") && dict["Field7"].ToString() == fach;
+    }))
+   .ToList();
 
-        var faecher = Quelldateien.GetMatchingList(configuration, "faecher", IStudents, Klassen);
-        if (faecher == null || !faecher.Any()) return;
+  var verschiedeneKlassenDerStudents = IStudents.Select(s => s.Klasse).Distinct().OrderBy(k => k).ToList();
 
-        var zieldatei = new Datei(zieldateiname, funktionen, configuration);
+  foreach (var klasse in verschiedeneKlassenDerStudents)
+  {
+   zieldatei.Name = $"oeffentlich:Klausurbelegung:{klasse}-{configuration["InteressierendesSchuljahr"]}-{configuration["Abschnitt"]}";
+   zieldatei.Add($"====== Klausurbelegung {klasse} Schuljahr: {configuration["InteressierendesSchuljahr"]} Abschnitt: {configuration["Abschnitt"]} ======");
+   zieldatei.Add("");
 
-        // Gib alle Fächer distinct als List<string> zurück, sortiert nach Sortierung S2
-        var alleFaecherDistinct = faecher
-            .Select(rec => (IDictionary<string, object>)rec)
-            .OrderBy(dict => dict["Sortierung S2"].ToString())
-            .Select(dict => dict["InternKrz"].ToString()) // Nur Teil vor Leerzeichen
-            .Distinct()            
-            .ToList();
+   var kopfzeile = "^  Name  ^ ";
+   var kopfzeile2 = "^  ^";
 
-        var faecherInDieserKlasseAusLeistungsdaten = alleFaecherDistinct
-            .Where(fach =>
-                leistungsdaten.Any(rec =>
-                {
-                    var dict = (IDictionary<string, object>)rec;
-                    // Nur Teil vor Leerzeichen vergleichen
-                    return dict.ContainsKey("Fach") && dict["Fach"].ToString() == fach;
-                }))
-            .ToList();
+   // Prüfe für alle IStudents dieser Klasse, ob die Initialen (z.B. A.B.) mehrfach vorkommen.
+   // Wenn ja, dann muss für diese Klasse die Initialen soweit verlängert werden, bis der Wert eindeutig ist.
+   int anzahlZeichen = 1;
+   for (int i = 1; i <= 5; i++) // Maximal bis 5 Zeichen
+   {
+    var initialenGruppiert = IStudents
+     .Where(s => s.Klasse == klasse)
+     .Select(s => new
+     {
+      Student = s,
+      Initialen = s.Nachname.Substring(0, i) + "." + s.Vorname.Substring(0, i) + "."
+     })
+     .GroupBy(x => x.Initialen)
+     .Where(g => g.Count() > 1)
+     .ToList();
 
-        var faecherInDieserKlasseAusGpu002 = alleFaecherDistinct
-            .Where(fach =>
-                gpu002.Any(rec =>
-                {
-                    var dict = (IDictionary<string, object>)rec;
-                    // Nur Teil vor Leerzeichen vergleichen
-                    return dict.ContainsKey("Field7") && dict["Field7"].ToString() == fach;
-                }))
-            .ToList();
+    if (initialenGruppiert.Count == 0)
+    {
+     anzahlZeichen = i;
+     break; // Alle Initialen sind eindeutig
+    }
+   }
 
-        var verschiedeneKlassenDerStudents = IStudents.Select(s => s.Klasse).Distinct().OrderBy(k => k).ToList();
+   if (configuration["Klausurbelegung"] == "1")
+   {
+    foreach (var fach in faecherInDieserKlasseAusGpu002)
+    {
+     // Alle verschiedenen Lehrerkürzel, die das Fach (ohne Ziffer und nur vor dem Leerzeichen) unterrichten
+     var alleLehrerDiesesFachs = gpu002
+      .Where(rec =>
+      {
+       var dict = (IDictionary<string, object>)rec;
+       return dict["Field7"].ToString().StartsWith(fach);
+      })
+      .Select(rec => (IDictionary<string, object>)rec)
+      .GroupBy(dict => dict["Field6"].ToString())
+      .Select(g => g.First())
+      .Select(dict => new
+      {
+       Kürzel = dict["Field6"].ToString()
+      })
+      .OrderBy(l => l.Kürzel)
+      .ToList();
 
-        foreach (var klasse in verschiedeneKlassenDerStudents)
-        {
-            zieldatei.Name = $"oeffentlich:Klausurbelegung:{klasse}-{configuration["InteressierendesSchuljahr"]}-{configuration["Abschnitt"]}";
-            zieldatei.Add($"====== Klausurbelegung {klasse} Schuljahr: {configuration["InteressierendesSchuljahr"]} Abschnitt: {configuration["Abschnitt"]} ======");
-            zieldatei.Add("");
+     foreach (var lehrer in alleLehrerDiesesFachs)
+     {
+      kopfzeile2 += lehrer.Kürzel + " ";
+     }
+     kopfzeile += fach + "  ^  ";
+     kopfzeile2 += "^";
+    }
+   }
+   else if (configuration["Klausurbelegung"] == "2")
+   {
+    foreach (var fach in faecherInDieserKlasseAusLeistungsdaten)
+    {
+     // Alle verschiedenen Lehrerkürzel, die das Fach (ohne Ziffer und nur vor dem Leerzeichen) unterrichten
+     var alleLehrerDiesesFachs = leistungsdaten
+      .Where(rec =>
+      {
+       var dict = (IDictionary<string, object>)rec;
+       return dict["Fach"].ToString() == fach;
+      })
+      .Select(rec => (IDictionary<string, object>)rec)
+      .GroupBy(dict => dict["Fachlehrer"].ToString().Split(' ')[0])
+      .Select(g => g.First())
+      .Select(dict => new
+      {
+       Kürzel = dict["Fachlehrer"].ToString().Split(' ')[0]
+      })
+      .OrderBy(l => l.Kürzel)
+      .ToList();
 
-            var kopfzeile = "^  Name  ^ ";
-            var kopfzeile2 = "^  ^";
+     foreach (var lehrer in alleLehrerDiesesFachs)
+     {
+      kopfzeile2 += lehrer.Kürzel + " ";
+     }
+     kopfzeile += fach + "  ^  ";
+     kopfzeile2 += "  ^  ";
+    }
+   }
+   
+   zieldatei.Add(kopfzeile);
+   zieldatei.Add(kopfzeile2);
 
-            // Prüfe für alle IStudents dieser Klasse, ob die Initialen (z.B. A.B.) mehrfach vorkommen.
-            // Wenn ja, dann muss für diese Klasse die Initialen soweit verlängert werden, bis der Wert eindeutig ist.
-            int anzahlZeichen = 1;
-            for (int i = 1; i <= 5; i++) // Maximal bis 5 Zeichen
-            {
-                var initialenGruppiert = IStudents
-                    .Where(s => s.Klasse == klasse)
-                    .Select(s => new
-                    {
-                        Student = s,
-                        Initialen = s.Nachname.Substring(0, i) + "." + s.Vorname.Substring(0, i) + "."
-                    })
-                    .GroupBy(x => x.Initialen)
-                    .Where(g => g.Count() > 1)
-                    .ToList();
+   foreach (var student in IStudents.Where(s => s.Klasse == klasse).OrderBy(s => s.Nachname).ThenBy(s => s.Vorname))
+   {
+    var nameKurz = student.Nachname.Substring(0, anzahlZeichen) + "." + student.Vorname.Substring(0, anzahlZeichen) + ".";
 
-                if (initialenGruppiert.Count == 0)
-                {
-                    anzahlZeichen = i;
-                    break; // Alle Initialen sind eindeutig
-                }
-            }
+    var zeile = "| " + nameKurz;
 
-            if (configuration["Klausurbelegung"] == "1")
-            {
-                foreach (var fach in faecherInDieserKlasseAusGpu002)
-                {
-                    // Alle verschiedenen Lehrerkürzel, die das Fach (ohne Ziffer und nur vor dem Leerzeichen) unterrichten
-                    var alleLehrerDiesesFachs = gpu002
-                        .Where(rec =>
-                        {
-                            var dict = (IDictionary<string, object>)rec;
-                            return dict["Field7"].ToString().StartsWith(fach);
-                        })
-                        .Select(rec => (IDictionary<string, object>)rec)
-                        .GroupBy(dict => dict["Field6"].ToString())
-                        .Select(g => g.First())
-                        .Select(dict => new
-                        {
-                            Kürzel = dict["Field6"].ToString()
-                        })
-                        .OrderBy(l => l.Kürzel)
-                        .ToList();
+    if (configuration["Klausurbelegung"] == "1")
+    {
+     foreach (var fach in faecherInDieserKlasseAusGpu002)
+     {
+      zeile += "| ";
+     }
+    }
+    else if (configuration["Klausurbelegung"] == "2")
+    {   // Wenn Leistungsdaten genutzt werden, dann auch die Inhalte in die Zellen übergeben
+     foreach (var fach in faecherInDieserKlasseAusLeistungsdaten)
+     {
+      // Suche die Kursart aus den Leistungsdaten für diesen Schüler
+      var kursart = leistungsdaten
+       .Where(rec =>
+       {
+        var dict = (IDictionary<string, object>)rec;
+        return dict["Fach"].ToString() == fach &&
+            dict["Nachname"].ToString() == student.Nachname &&
+            dict["Vorname"].ToString() == student.Vorname &&
+            dict["Geburtsdatum"].ToString() == student.Geburtsdatum;
+       })
+       .Select(rec => (IDictionary<string, object>)rec)
+       .Select(dict => dict["Kursart"].ToString())
+       .FirstOrDefault();
+      kursart = kursart;// (kursart == null ? "" : new List<string> { "PUK", "GK" }.Contains(kursart) ? "X" : kursart);
 
-                    foreach (var lehrer in alleLehrerDiesesFachs)
-                    {
-                        kopfzeile2 += lehrer.Kürzel + " ";
-                    }
-                    kopfzeile += fach + "  ^  ";
-                    kopfzeile2 += "^";
-                }
-            }
-            else if (configuration["Klausurbelegung"] == "2")
-            {
-                foreach (var fach in faecherInDieserKlasseAusLeistungsdaten)
-                {
-                    // Alle verschiedenen Lehrerkürzel, die das Fach (ohne Ziffer und nur vor dem Leerzeichen) unterrichten
-                    var alleLehrerDiesesFachs = leistungsdaten
-                        .Where(rec =>
-                        {
-                            var dict = (IDictionary<string, object>)rec;
-                            return dict["Fach"].ToString() == fach;
-                        })
-                        .Select(rec => (IDictionary<string, object>)rec)
-                        .GroupBy(dict => dict["Fachlehrer"].ToString().Split(' ')[0])
-                        .Select(g => g.First())
-                        .Select(dict => new
-                        {
-                            Kürzel = dict["Fachlehrer"].ToString().Split(' ')[0]
-                        })
-                        .OrderBy(l => l.Kürzel)
-                        .ToList();
+      zeile += "| " + kursart + " ";
+     }
+    }
+    else if (configuration["Klausurbelegung"] == "3")
+    {
+     throw new Exception("Unbekannte Einstellung für Klausurbelegung: " + configuration["Klausurbelegung"]);
+    }
+    
+    zeile += "| ";
+    zieldatei.Add(zeile);
+   }
+   zieldatei.Add("Klassenleitungen (zusammen mit Schüler*innen) nehmen hier im Wiki die Klausurbelegung vor. Unmittelbar vor den Zeugnissen wird die Tabelle nach SchILD importiert. Zulässige Werte:");
+   zieldatei.Add("  * LK1, LK2, AB3, AB4 (für die 4 Abiturfächer)");
+   zieldatei.Add("  * GKS, GKM (für schriftliche und mündliche Grundkurse)");
 
-                    foreach (var lehrer in alleLehrerDiesesFachs)
-                    {
-                        kopfzeile2 += lehrer.Kürzel + " ";
-                    }
-                    kopfzeile += fach + "  ^  ";
-                    kopfzeile2 += "  ^  ";
-                }
-            }
-            
-            zieldatei.Add(kopfzeile);
-            zieldatei.Add(kopfzeile2);
+   foreach (var aktion in zieldatei.Funktionen)
+    aktion(zieldatei);
+  }
+ }
 
-            foreach (var student in IStudents.Where(s => s.Klasse == klasse).OrderBy(s => s.Nachname).ThenBy(s => s.Vorname))
-            {
-                var nameKurz = student.Nachname.Substring(0, anzahlZeichen) + "." + student.Vorname.Substring(0, anzahlZeichen) + ".";
+ internal void KlausurbelegungAusWikiNachSchildEinlesen(
+  IConfiguration configuration,
+  string zieldateiname,
+  List<Action<Datei>> funktionen,
+  string[] anhandDieserAttributeWirdVerglichen,
+  string[] dieseAttributeWerdenBeimVergleichIgnoriert,
+  string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
+ {
+  var zieldatei = new Datei(zieldateiname, funktionen, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
-                var zeile = "| " + nameKurz;
+  var leistungsdaten = Quelldateien.GetMatchingList(configuration, "schuelerleistungsdaten", IStudents, Klassen);
+  if (!leistungsdaten.Any())
+   throw new Exception("Es sind keine Leistungsdaten vorhanden.");  
 
-                if (configuration["Klausurbelegung"] == "1")
-                {
-                    foreach (var fach in faecherInDieserKlasseAusGpu002)
-                    {
-                        zeile += "| ";
-                    }
-                }
-                else if (configuration["Klausurbelegung"] == "2")
-                {   // Wenn Leistungsdaten genutzt werden, dann auch die Inhalte in die Zellen übergeben
-                    foreach (var fach in faecherInDieserKlasseAusLeistungsdaten)
-                    {
-                        // Suche die Kursart aus den Leistungsdaten für diesen Schüler
-                        var kursart = leistungsdaten
-                            .Where(rec =>
-                            {
-                                var dict = (IDictionary<string, object>)rec;
-                                return dict["Fach"].ToString() == fach &&
-                                       dict["Nachname"].ToString() == student.Nachname &&
-                                       dict["Vorname"].ToString() == student.Vorname &&
-                                       dict["Geburtsdatum"].ToString() == student.Geburtsdatum;
-                            })
-                            .Select(rec => (IDictionary<string, object>)rec)
-                            .Select(dict => dict["Kursart"].ToString())
-                            .FirstOrDefault();
-                        kursart = kursart;// (kursart == null ? "" : new List<string> { "PUK", "GK" }.Contains(kursart) ? "X" : kursart);
+  var dokuwikiZugriff = new DokuwikiZugriff(configuration);
 
-                        zeile += "| " + kursart + " ";
-                    }
-                }
-                else if (configuration["Klausurbelegung"] == "3")
-                {
-                    throw new Exception("Unbekannte Einstellung für Klausurbelegung: " + configuration["Klausurbelegung"]);
-                }
-                
-                zeile += "| ";
-                zieldatei.Add(zeile);
-            }
-            zieldatei.Add("Klassenleitungen (zusammen mit Schüler*innen) nehmen hier im Wiki die Klausurbelegung vor. Unmittelbar vor den Zeugnissen wird die Tabelle nach SchILD importiert. Zulässige Werte:");
-            zieldatei.Add("  * LK1, LK2, AB3, AB4 (für die 4 Abiturfächer)");
-            zieldatei.Add("  * GKS, GKM (für schriftliche und mündliche Grundkurse)");
+  dokuwikiZugriff.Options = new XmlRpcStruct
+  {
+   { "sum", "Automatische Aktualisierung" },
+   { "minor", Global.WikiSprechtagKleineAenderung } // Kein Minor-Edit
+  };
 
-            foreach (var aktion in zieldatei.Funktionen)
-                aktion(zieldatei);
-        }
+  var verschiedeneKlassenDerStudents = IStudents.Select(s => s.Klasse).Distinct().OrderBy(k => k).ToList();
+
+  foreach (var klasse in verschiedeneKlassenDerStudents)
+  {
+   // Wiki-Seite lesen
+   string seitenName = $"oeffentlich:Klausurbelegung:{klasse}-{configuration["InteressierendesSchuljahr"]}-{configuration["Abschnitt"]}"; // Pfad im Wiki
+   var seitenInhalt = dokuwikiZugriff.Proxy.GetPage(seitenName);
+
+   // Tabelle parsen
+   var tabelle = ParseDokuWikiTable(seitenInhalt);
+
+   var maxSpalten = 20; // Maximal 9 Spalten anzeigen
+   var table = new Spectre.Console.Table();
+   table.Title = new TableTitle($"Tabelle [{Global.GetColor(Global.ColorPfadInDateien)}]{seitenName}[/] aus Wiki");
+   table.Border(TableBorder.Rounded);
+   table.Expand();
+   
+   // Die ersten beiden Zeilen als Header verwenden
+   int spalten = Math.Min(tabelle[0].Count, maxSpalten);
+   for (int j = 0; j < spalten; j++)
+   {
+    var header = tabelle[0][j];
+    if (tabelle.Count > 1 && tabelle[1].Count > j)
+     header += "\n" + tabelle[1][j];
+    table.AddColumn(header);
+   }
+   if (tabelle[0].Count > maxSpalten)
+   {
+    table.AddColumn("...");
+   }
+   
+   int laengeDesNamens = 0;
+
+   // Ab Zeile 2 die Daten einfügen
+   for (int i = 2; i < tabelle.Count; i++)
+   {
+    var row = tabelle[i].Take(maxSpalten).ToList();
+
+    laengeDesNamens = row[0].Split('.')[0].Length;
+
+    if (tabelle[i].Count > maxSpalten)
+     row.Add("...");
+    table.AddRow(row.ToArray());
+   }
+   
+   AnsiConsole.Write(table);
+
+   // Beispiel: Zugriff auf einzelne Zelle
+   //Console.WriteLine("\nZelle [2][0] = " + tabelle[2][0]);
+
+   //"Durchlaufe alle Zeilen der bisherigen Leistungsdaten mit dem Ziel die Kursart zu aktualisieren"
+   
+   foreach (var leistung in leistungsdaten)
+   {
+    var dict = (IDictionary<string, object>)leistung;
+
+    // suche den Spaltenindex aus Tabelle, der dem Fach entspricht
+    var fach = dict["Fach"].ToString();
+    var spaltenIndex = tabelle[0].IndexOf(fach);
+    if (spaltenIndex == -1)
+    {
+     // Fach nicht gefunden, überspringe diesen Eintrag
+     continue;
+    }
+    // suche den Zeilenindex aus Tabelle, der dem Schüler entspricht
+    var schuelername = dict["Nachname"].ToString().Substring(0, laengeDesNamens) + "." + dict["Vorname"].ToString().Substring(0, laengeDesNamens) + "."; // Nur erstes Zeichen des Vornamens
+    var zeilenIndex = tabelle.FindIndex(row =>
+     row.Count > 0 &&
+     row[0] == schuelername
+    );
+    if (zeilenIndex == -1)
+    {
+     // Schüler nicht gefunden, überspringe diesen Eintrag
+     continue;
     }
 
-    internal void KlausurbelegungAusWikiNachSchildEinlesen(
-        IConfiguration configuration,
-        string zieldateiname,
-        List<Action<Datei>> funktionen,
-        string[] anhandDieserAttributeWirdVerglichen,
-        string[] dieseAttributeWerdenBeimVergleichIgnoriert,
-        string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
+    dynamic record = new ExpandoObject();
+    
+    var valKursart = "";
+    var abschnitt = "";
+    
+    foreach (var prop in dict)
     {
-        var zieldatei = new Datei(zieldateiname, funktionen, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+     var key = prop.Key;
+     var val = prop.Value.ToString();
 
-        var leistungsdaten = Quelldateien.GetMatchingList(configuration, "schuelerleistungsdaten", IStudents, Klassen);
-        if (!leistungsdaten.Any())
-            throw new Exception("Es sind keine Leistungsdaten vorhanden.");        
+     // Es werden nur Veränderungen im interessierenden Abschnitt vorgenommen.
+     if(key == "Abschnitt")
+      abschnitt = key;
 
-        var dokuwikiZugriff = new DokuwikiZugriff(configuration);
-
-        dokuwikiZugriff.Options = new XmlRpcStruct
-        {
-            { "sum", "Automatische Aktualisierung" },
-            { "minor", Global.WikiSprechtagKleineAenderung } // Kein Minor-Edit
-        };
-
-        var verschiedeneKlassenDerStudents = IStudents.Select(s => s.Klasse).Distinct().OrderBy(k => k).ToList();
-
-        foreach (var klasse in verschiedeneKlassenDerStudents)
-        {
-            // Wiki-Seite lesen
-            string seitenName = $"oeffentlich:Klausurbelegung:{klasse}-{configuration["InteressierendesSchuljahr"]}-{configuration["Abschnitt"]}"; // Pfad im Wiki
-            var seitenInhalt = dokuwikiZugriff.Proxy.GetPage(seitenName);
-
-            // Tabelle parsen
-            var tabelle = ParseDokuWikiTable(seitenInhalt);
-
-            var maxSpalten = 9; // Maximal 9 Spalten anzeigen
-            var table = new Spectre.Console.Table();
-            table.Title = new TableTitle($"Tabelle [{Global.GetColor(Global.ColorPfadInDateien)}]{seitenName}[/] aus Wiki");
-            table.Border(TableBorder.Rounded);
-            table.Expand();
-            
-            // Die ersten beiden Zeilen als Header verwenden
-            int spalten = Math.Min(tabelle[0].Count, maxSpalten);
-            for (int j = 0; j < spalten; j++)
-            {
-                var header = tabelle[0][j];
-                if (tabelle.Count > 1 && tabelle[1].Count > j)
-                    header += "\n" + tabelle[1][j];
-                table.AddColumn(header);
-            }
-            if (tabelle[0].Count > maxSpalten)
-            {
-                table.AddColumn("...");
-            }
-            
-            int laengeDesNamens = 0;
-
-            // Ab Zeile 2 die Daten einfügen
-            for (int i = 2; i < tabelle.Count; i++)
-            {
-                var row = tabelle[i].Take(maxSpalten).ToList();
-
-                laengeDesNamens = row[0].Split('.')[0].Length;
-
-                if (tabelle[i].Count > maxSpalten)
-                    row.Add("...");
-                table.AddRow(row.ToArray());
-            }
-            
-            AnsiConsole.Write(table);
-
-            // Beispiel: Zugriff auf einzelne Zelle
-            //Console.WriteLine("\nZelle [2][0] = " + tabelle[2][0]);
-
-            AnsiConsole.Status()
-            .Spinner(Spinner.Known.Dots)
-            .Start("Durchlaufe alle Zeilen der bisherigen Leistungsdaten mit dem Ziel die Kursart zu aktualisieren ...", ctx =>
-            {
-                var zeile = 1;
-                var title = $"Vergleich Leistungsdaten alt mit neu (aus Wiki-Seite) [{Global.GetColor(Global.ColorPfadInDateien)}]{seitenName}[/] für Klasse {klasse}";
-                var table = new Table();
-                table.Expand();
-                table.Border(TableBorder.Rounded);
-                if (!string.IsNullOrEmpty(title))
-                    table.Title = new TableTitle(title);
-                
-                table.Expand();                
-                table.AddColumn("Nr.");
-                table.AddColumn("Klasse, Schüler und Fach");
-                table.AddColumn("alt");
-                table.AddColumn("neu");
-
-                foreach (var leistung in leistungsdaten)
-                {
-                    var dict = (IDictionary<string, object>)leistung;
-
-                    // suche den Spaltenindex aus Tabelle, der dem Fach entspricht
-                    var fach = dict["Fach"].ToString();
-                    var spaltenIndex = tabelle[0].IndexOf(fach);
-                    if (spaltenIndex == -1)
-                    {
-                        // Fach nicht gefunden, überspringe diesen Eintrag
-                        continue;
-                    }
-                    // suche den Zeilenindex aus Tabelle, der dem Schüler entspricht
-                    var schuelername = dict["Nachname"].ToString().Substring(0, laengeDesNamens) + "." + dict["Vorname"].ToString().Substring(0, laengeDesNamens) + "."; // Nur erstes Zeichen des Vornamens
-                    var zeilenIndex = tabelle.FindIndex(row =>
-                        row.Count > 0 &&
-                        row[0] == schuelername
-                    );
-                    if (zeilenIndex == -1)
-                    {
-                        // Schüler nicht gefunden, überspringe diesen Eintrag
-                        continue;
-                    }
-
-                    dynamic record = new ExpandoObject();
-
-                    var kursartNeu = "";
-                    var alt = "";
-                    var neu = "";
-
-                    foreach (var prop in dict)
-                    {
-                        var name = prop.Key;
-                        alt = prop.Value.ToString();
-
-                        if (name == "Kursart")
-                            if (spaltenIndex < tabelle[zeilenIndex].Count)
-                            {
-                                kursartNeu = tabelle[zeilenIndex][spaltenIndex].Trim();
-                                if (alt != kursartNeu)
-                                {
-                                    table.AddRow(new Text(zeile.ToString()), new Text(schuelername + ", " + fach), new Text(alt), new Text(kursartNeu)); zeile++;
-                                }                                    
-                                alt = kursartNeu;
-                            }
-
-                        if (name == "Abiturfach")
-                            if (spaltenIndex < tabelle[zeilenIndex].Count)                                                    
-                                if (new List<string> { "LK1", "LK2", "AB3", "AB4" }.Contains(kursartNeu))
-                                {
-                                    if (alt != kursartNeu.Substring(2, 1))
-                                    {
-                                        table.AddRow(new Text(zeile.ToString()), new Text(schuelername + ", " + fach), new Text(alt), new Text(kursartNeu)); zeile++;
-                                    }
-                                    alt = kursartNeu.Substring(2, 1); // Nur die Ziffer     
-                                }
-                                                
-                        ((IDictionary<string, object>)record)[name] = alt;
-                    }
-                    zieldatei.Add(record);
-                }
-                AnsiConsole.Write(table);
-            });
-        }
-        foreach (var aktion in zieldatei.Funktionen)
-            aktion(zieldatei);
+     // Die Spalte "Kursart" & "Abiturfach" wird im interessierenden Abschnitt angepasst.
+     if(abschnitt == configuration["Abschnitt"])
+      if (key == "Kursart" || key == "Abiturfach")
+       if (spaltenIndex < tabelle[zeilenIndex].Count)
+         if(key == "Kursart")
+         {
+          // Der val wird aus Wiki genommen.
+          val = tabelle[zeilenIndex][spaltenIndex].Trim();
+          valKursart = val;
+         }
+         if(key == "Abiturfach" && new List<string> { "LK1", "LK2", "AB3", "AB4" }.Contains(valKursart))
+         {
+          val = valKursart.ToString().Substring(2, 1); // Nur die Ziffer  
+         }
+     ((IDictionary<string, object>)record)[key] = val;
     }
+     zieldatei.Add(record);
+    }
+  }
+  foreach (var aktion in zieldatei.Funktionen)
+   aktion(zieldatei);
+ }
 
     static List<List<string>> ParseDokuWikiTable(string wikiText)
     {

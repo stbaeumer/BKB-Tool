@@ -1250,7 +1250,7 @@ public class Students : List<Student>
 
         if (this.Select(x => x.Status).Distinct().Count() == 1)
         {
-            return $"[{Global.GetColor(Global.ColorZahlen)}]{this.Count().ToString()}[/] Schüler*innen:[springGreen2] nur aktive Schüler exportiert[/]";
+            return $"[{Global.GetColor(Global.ColorZahlen)}]{this.Count().ToString()}[/] Schüler*innen:[springGreen2] nur aktive exportiert[/]";
         }
 
         return statusstring.TrimEnd(' ').TrimEnd(',').TrimEnd(' ').TrimEnd(',');

@@ -1,0 +1,11 @@
+root = true
+
+[*.cs]
+indent_style = space
+indent_size = 1
+tab_width = 1
+
+[*.razor]
+indent_style = space
+indent_size = 1
+tab_width = 1

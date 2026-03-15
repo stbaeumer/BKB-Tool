@@ -917,9 +917,9 @@ public class Datei : List<dynamic>
             if (wert.Length > 0)
             {
                 linkeSeite += wert + ", ";
-                if (linkeSeite.Length > 30)
+                if (linkeSeite.Length > 60)
                 {
-                    linkeSeite = linkeSeite.Substring(0, 27) + "...";
+                    linkeSeite = linkeSeite.Substring(0, 60) + "...";
                     break;
                 }
             }
@@ -1744,7 +1744,7 @@ public class Datei : List<dynamic>
         // .dat-Quelldateien haben denselben Namen wie die Zieldatei
         foreach (var vorhandeneDatei in quelldateien)
         {
-            if (Path.GetFileName(vorhandeneDatei.AbsoluterPfad) == Path.GetFileName(AbsoluterPfad))
+            if (Path.GetFileName(vorhandeneDatei.AbsoluterPfad.ToLower()) == Path.GetFileName(AbsoluterPfad.ToLower()))
             {
                 return vorhandeneDatei.AbsoluterPfad;
                 break; // Schleife abbrechen, wenn die Datei gefunden wurde
@@ -1753,7 +1753,7 @@ public class Datei : List<dynamic>
         // Neue .csv-Dateien beginnen mit demselben Namen wie die Zieldatei, bis zum Unterstrich
         foreach (var vorhandeneDatei in quelldateien)
         {
-            if (Path.GetFileNameWithoutExtension(vorhandeneDatei.AbsoluterPfad).Split('_')[0] == Path.GetFileNameWithoutExtension(AbsoluterPfad).Split('_')[0])
+            if (Path.GetFileNameWithoutExtension(vorhandeneDatei.AbsoluterPfad.ToLower()).Split('_')[0] == Path.GetFileNameWithoutExtension(AbsoluterPfad.ToLower()).Split('_')[0])
             {
                 return vorhandeneDatei.AbsoluterPfad;
                 break; // Schleife abbrechen, wenn die Datei gefunden wurde
