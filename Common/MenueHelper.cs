@@ -490,25 +490,61 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
-      $"Zeugnis 4-Anmahnen:2  Tg davor:LuL wegen fehlender Noten in Webuntis anmahnen",
-      new Dateien(),
+      $"Zeugnis 4-Noten:1  Tg davor:Noten aus Webuntis (MarksPerLesson) nach SchILD (SchuelerLeistungsdaten) schreiben",
+      quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "schuelerleistungsdaten,dat", "marksperlesson,csv"]),
       students,
       klassen,
       [
-       $"Von allen PDF-Dateien in [{Global.GetColor(Global.ColorPfadInDateien)}]" + configuration["PfadDownloads"] + "[/] werden verschlüsselte Kopien erstellt.",
-       $"Es werden nur Dateien berücksichtigt, die nicht bereits die Endung [{Global.GetColor(Global.ColorPfadInDateien)}]-kennwort.pdf[/] haben.",
-       $"Kopien bekommen die Dateiendung [{Global.GetColor(Global.ColorPfadInDateien)}]-kennwort.pdf[/]."
-      ],
-      _ =>
-      {
-       var pdfDateien = new PdfDateien();
-       pdfDateien.KennwortSetzen(configuration);
+      $"Es wird die [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "Leistungsdaten.dat")}[/] um die Noten aus MarksPerLesson.csv ergänzt:",
+      $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise:[/]",
+      $"[{Global.GetColor(Global.ColorHinweise)}]#3[/] Zähler im Anschluss an Fächer (M1, M2, ...) werden abgeschnitten (also zu M).",
+      $"[{Global.GetColor(Global.ColorHinweise)}]#1[/] Die Kursbezeichnungen setzen sich zusammen aus dem Kursleiterkürzel plus alle beteiligten Untis-Unterrichtsnummern (bis maximal 20 Zeichen).",
+      $"[{Global.GetColor(Global.ColorHinweise)}]#2[/] Kurse werden gebildet aus: Kopplungen in Untis, Schülergruppen in Untis, identischen Fächern mit unterschiedliche LuL",
+      $"[{Global.GetColor(Global.ColorHinweise)}]#4[/] Bei mehreren beteiligten Lehrkräften wird das alphabetisch erste Lehrkraftkürzel zum Kursleiter.",
+      $"[{Global.GetColor(Global.ColorHinweise)}]#5[/] Team-Teaching ist daran erkennbar, dass die Summe der Kurs-Wochenstunden kleiner ist als die Summe der Lehrkräfte-Wochenstunden.",
+      $"[{Global.GetColor(Global.ColorHinweise)}]#6[/] Wenn zwei ansonsten identische Unterrichte einmal mit und einmal ohne Schülergruppe vorliegen, werden zwei unterschiedliche Einträge erstellt.",
+      $"[{Global.GetColor(Global.ColorHinweise)}]#7[/] Sobald einem Fach bei einem Schüler in SchILD eine Kursart (AB3,AB4,GKS,GKM) zugewiesen wurde, wird das in die zu erstellenden Leistungsdaten übernommen.",
+      $"[{Global.GetColor(Global.ColorHinweise)}]#8[/] Fehlzeiten pro Schüler*in pro Tag: [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Fehlzeiten[/], [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Verspätungen[/] und [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Nur zählende Abwesenheiten[/] anhaken."
+     ],
+     m =>
+     {
+      m.FilterInteressierendeStudentsUndKlassen(configuration);
+      configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration);      
+      m.NotenInLeistungsdatenErgaenzen(
+       configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat", ""),
+       [
+        datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
+        datei => datei.Verarbeiten(quelldateien, Global.Modus.Filtern),
+        datei => datei.Erstellen()
+       ],
+       ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach", "Kurs"],
+       [],
+       "|", '\0', new UTF8Encoding(true), false, null,
+       Global.Zweck.Zeugnis);
+      m.Faecher(
+       configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Faecher.dat"),
+       [
+        datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
+        datei => datei.Verarbeiten(quelldateien, Global.Modus.Filtern),
+        datei => datei.Erstellen()
+       ],
+       ["InternKrz"],
+       [],
+       "|", '\0', new UTF8Encoding(true), false);
+      m.Chat(configuration,
+        [
+         datei => datei.Auswählen(configuration, m, lehrers, Global.Modus.NurEineKlasse),
+         datei => datei.OeffneWebseite("https://teams.microsoft.com/l/chat/0/0?users=", datei.UrlMitte, datei.UrlRechts),
+        ],
+        Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-chat.csv"),
+        lehrers,
+        ",", '\"', new UTF8Encoding(false), true);
       },
       Global.Rubrik.Allgemein,
       Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
-      $"Zeugnis 5-Noten:1  Tg davor:Noten aus Webuntis nach SchILD importieren",
+      $"Zeugnis 5-Anmahnen:1  Tg davor:LuL wegen fehlender Noten in Webuntis anmahnen",
       new Dateien(),
       students,
       klassen,
@@ -524,7 +560,7 @@ public static class MenueHelper
       },
       Global.Rubrik.Allgemein,
       Global.NurBeiDiesenSchulnummern.Nur177659
-     ),
+     ),     
      new Menüeintrag(
       "Wiki::Diverse SQLite-Dateien (Praktikum etc.) erstellen",
       quelldateien.Notwendige(configuration, ["schuelervermerke,dat", "schuelerzusatzdaten,dat", "absenceperstudent,csv", "GPU006,txt", "GPU002,txt", "GPU003,txt", "klassen,dat"]),

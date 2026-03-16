@@ -1399,4 +1399,11 @@ public partial class Student
 
         return false;
     }
+
+ internal void Warnung(string v)
+ {
+    var linkeSeite = Nachname + ", " + Vorname + " (" + Klasse + "):";
+    linkeSeite = (linkeSeite.PadRight(30, ' ')).Substring(0, 30) + ": Widersprechende Gesamtnoten: ";
+            Global.ZeileSchreiben(linkeSeite, v, ConsoleColor.Yellow, ConsoleColor.Gray);
+ }
 }

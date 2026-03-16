@@ -999,7 +999,70 @@ public class Menüeintrag
         foreach (var aktion in zieldatei.Funktionen)
             aktion(zieldatei);
     }
+    public void NotenInLeistungsdatenErgaenzen(
+        IConfiguration configuration,
+        string zieldateiname,
+        List<Action<Datei>> funktionen,
+        string[] anhandDieserAttributeWirdVerglichen,
+        string[] dieseAttributeWerdenBeimVergleichIgnoriert,
+        string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null, Global.Zweck art = Global.Zweck.Statistik)
+    {   
+        List<dynamic> schuelerLeistungsdaten = Quelldateien.GetMatchingList(configuration, "schuelerleistungsdaten", IStudents, Klassen);
+        if (art == null && (schuelerLeistungsdaten == null || schuelerLeistungsdaten.Count == 0)) return;
 
+        List<dynamic> schuelerBasisdaten = Quelldateien.GetMatchingList(configuration, "schuelerbasisdaten", IStudents, Klassen);
+        if (art == null && (schuelerBasisdaten == null || schuelerBasisdaten.Count == 0)) return;
+  
+        List<dynamic>? marksPerLs = Quelldateien.GetMatchingList(configuration, "marksperlesson", IStudents, Klassen);
+        if (marksPerLs == null || marksPerLs.Count == 0) return;
+  
+        var zieldatei = new Datei(zieldateiname, funktionen, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+
+        AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start($"{zieldateiname} ...", ctx =>
+        {
+            for (int i = 0; i < schuelerLeistungsdaten.Count; i++)
+            {
+                var dictLeist = (IDictionary<string, object>)schuelerLeistungsdaten[i];                
+                var dictMarks = (IDictionary<string, object>)marksPerLs[i];
+                var student = Students.Where(s => s.Nachname == dictLeist["Nachname"].ToString() && s.Vorname == dictLeist["Vorname"].ToString() && s.Geburtsdatum == dictLeist["Geburtsdatum"].ToString()).FirstOrDefault();    
+
+                // Wenn der Schüler nicht aktiv oder extern ist, überspringe diese Zeile
+                if (!(student.Status.ToString() == "2" || student.Status.ToString() == "6")) continue;
+
+                dynamic record = new ExpandoObject();
+
+                foreach (var prop in dictLeist)
+                {
+                    var name = prop.Key;
+                    var value = prop.Value;
+
+                    if (name == "Nachname")
+                    {
+                        var klasse = student.Klasse;
+                        if(string.IsNullOrEmpty(klasse)){student.Warnung("Der Schüler hat keine Klasse in Schild."); continue;}
+                        
+                        //((IDictionary<string, object>)record)[name] = $"{value}#{klasse}";
+                    }
+                    else if (name == "Note")
+                    {
+                        var jahrgang = student.Jahrgang;
+                        if(string.IsNullOrEmpty(jahrgang)){student.Warnung("Der Schüler hat keinen Jahrgang in Schild."); continue;}
+                        
+                        var fach = dictLeist["Fach"].ToString();
+
+                        string note = student.GetNote(jahrgang, marksPerLs, fach, art);
+                        if(string.IsNullOrEmpty(note)){student.Warnung($"Der Schüler hat keine Note bekommen im Fach {fach}.");}
+                        
+                        ((IDictionary<string, object>)record)[name] = note;
+                    }
+                }
+                zieldatei.Add(record);
+            }
+            Global.ZeileSchreiben("SchuelerLeistungsdaten.dat", zieldatei.Count().ToString());
+        });
+        foreach (var aktion in zieldatei.Funktionen)
+            aktion(zieldatei);
+    }
     public void UnterrichteAnlegen(
         IConfiguration configuration,
         string zieldateiname,

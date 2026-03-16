@@ -331,47 +331,76 @@ public static class Global
     }
 
     public static void Speichern(string key, string value)
+{
+    // Nutzt den plattformspezifischen Pfad (AppData oder .config)
+    string folderPath = GetConfigDirectory();
+    string configFilePath = Path.Combine(folderPath, "BKB-Tool.json");
+
+    // Sicherstellen, dass die Datei existiert, bevor wir sie lesen
+    if (!File.Exists(configFilePath))
     {
-        var json = File.ReadAllText(Path.Combine(Directory.GetCurrentDirectory(), "BKB-Tool.json"));
-        var jsonDoc = JsonDocument.Parse(json);
-        var jsonRoot = jsonDoc.RootElement;
-
-        string finalValue = Verschluesseln(value);
-
-        // Neuen Wert setzen
-        using (var stream = new MemoryStream())
-        {
-            using (var writer = new Utf8JsonWriter(stream, new JsonWriterOptions { Indented = true }))
-            {
-                writer.WriteStartObject();
-                foreach (var property in jsonRoot.EnumerateObject())
-                {
-                    if (property.NameEquals(key))
-                    {
-                        writer.WriteString(key, finalValue);
-                    }
-                    else
-                    {
-                        property.WriteTo(writer);
-                    }
-                }
-
-                // Falls der Key nicht existiert, fügen wir ihn hinzu
-                if (!jsonRoot.TryGetProperty(key, out _))
-                {
-                    writer.WriteString(key, finalValue);
-                }
-
-                writer.WriteEndObject();
-            }
-
-            // Neue JSON-Daten in die Datei schreiben
-            File.WriteAllText(Path.Combine(Directory.GetCurrentDirectory(), "BKB-Tool.json"), Encoding.UTF8.GetString(stream.ToArray()));
-        }
+        // Falls die Datei noch nicht existiert (theoretisch durch EinstellungenDurchlaufen abgefangen)
+        // Erstellen wir hier ein leeres Objekt als Basis
+        File.WriteAllText(configFilePath, "{}", Encoding.UTF8);
     }
 
-    // Hilfsmethode zur Verschlüsselung
-    public static string Verschluesseln(string value)
+    var json = File.ReadAllText(configFilePath);
+    var jsonDoc = JsonDocument.Parse(json);
+    var jsonRoot = jsonDoc.RootElement;
+
+    string finalValue = Verschluesseln(value);
+
+    // Neuen Wert setzen
+    using (var stream = new MemoryStream())
+    {
+        using (var writer = new Utf8JsonWriter(stream, new JsonWriterOptions { Indented = true }))
+        {
+            writer.WriteStartObject();
+            bool keyFound = false;
+
+            foreach (var property in jsonRoot.EnumerateObject())
+            {
+                if (property.NameEquals(key))
+                {
+                    writer.WriteString(key, finalValue);
+                    keyFound = true;
+                }
+                else
+                {
+                    property.WriteTo(writer);
+                }
+            }
+
+            // Falls der Key nicht existiert, fügen wir ihn am Ende hinzu
+            if (!keyFound)
+            {
+                writer.WriteString(key, finalValue);
+            }
+
+            writer.WriteEndObject();
+        }
+
+        // Neue JSON-Daten in die Datei schreiben (im korrekten Verzeichnis!)
+        File.WriteAllText(configFilePath, Encoding.UTF8.GetString(stream.ToArray()));
+    }
+}
+
+ private static string GetConfigDirectory()
+{
+    if (OperatingSystem.IsWindows())
+    {
+        // Windows: C:\Users\Name\AppData\Roaming\BKB-Tool
+        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "BKB-Tool");
+    }
+    else
+    {
+        // Linux/macOS: /home/name/.config/BKB-Tool
+        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", "BKB-Tool");
+    }
+}
+
+ // Hilfsmethode zur Verschlüsselung
+ public static string Verschluesseln(string value)
     {
         // Beispiel für eine einfache Verschlüsselung (Base64)
         byte[] data = Encoding.UTF8.GetBytes(value);
@@ -1166,113 +1195,124 @@ public static class Global
     }
 
     public static IConfiguration EinstellungenDurchlaufen(IConfiguration configuration, Global.Modus modus = Global.Modus.Read)
+{
+    bool isFirstRun = false;
+
+    // 1. Pfad-Logik festlegen
+    string folderPath;
+    if (OperatingSystem.IsWindows())
     {
-        bool isFirstRun = false;
+        // Windows: AppData/Roaming/BKB-Tool
+        folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "BKB-Tool");
+    }
+    else
+    {
+        // Linux/macOS: ~/.config/BKB-Tool
+        folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", "BKB-Tool");
+    }
 
-        // Wenn BKB-Tool.json noch nicht existiert, dann erstellen
-        if (!File.Exists(Path.Combine(Directory.GetCurrentDirectory(), "BKB-Tool.json")))
+    string configFilePath = Path.Combine(folderPath, "BKB-Tool.json");
+
+    // 2. Verzeichnis sicherstellen
+    if (!Directory.Exists(folderPath))
+    {
+        try 
         {
-            var existiertnichtOderNichtBeschreibbar = true;
+            Directory.CreateDirectory(folderPath);
+        }
+        catch (Exception ex)
+        {
+            AnsiConsole.MarkupLine($"[red]Fehler beim Erstellen des Verzeichnisses: {ex.Message}[/]");
+            return configuration;
+        }
+    }
 
-            do
-            {
-                if (!Directory.Exists(Directory.GetCurrentDirectory()) || !IsDirectoryWritable(Directory.GetCurrentDirectory()))
-                {
-                    AnsiConsole.MarkupLine($"[red]Das Verzeichnis [bold {Global.GetColor(Global.ColorPfadInDateien)}]" + Directory.GetCurrentDirectory() + "[/] existiert nicht oder ist nicht beschreibbar. Das muss korrigiert werden.[/]");
-                    AnsiConsole.MarkupLine($"[red]Drücken Sie eine beliebige Taste, um fortzufahren...[/]");
-                    while (Console.KeyAvailable) Console.ReadKey(true);
-
-                    Console.ReadKey();
-                    return configuration;
-                }
-                else
-                {
-                    existiertnichtOderNichtBeschreibbar = false;
-                }
-            } while (existiertnichtOderNichtBeschreibbar);
-
-            // BKB-Tool.json mit Standardinhalten füllen
-            var bkbJsonContent = CreateBkbJsonContent();
-            var json = JsonSerializer.Serialize(bkbJsonContent, new JsonSerializerOptions { WriteIndented = true });
-            File.WriteAllText(Path.Combine(Directory.GetCurrentDirectory(), "BKB-Tool.json"), json);
+    // 3. Prüfen, ob die Datei existiert
+    if (!File.Exists(configFilePath))
+    {
+        if (!IsDirectoryWritable(folderPath))
+        {
+            AnsiConsole.MarkupLine($"[red]Das Verzeichnis [bold {Global.GetColor(Global.ColorPfadInDateien)}]{folderPath}[/] ist nicht beschreibbar.[/]");
+            AnsiConsole.MarkupLine($"[red]Drücken Sie eine beliebige Taste, um fortzufahren...[/]");
+            while (Console.KeyAvailable) Console.ReadKey(true);
+            Console.ReadKey();
+            return configuration;
         }
 
-        // Konfiguration aus BKB-Tool.json laden
-        configuration = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("BKB-Tool.json", optional: false, reloadOnChange: false)
-            .Build();
+        // BKB-Tool.json mit Standardinhalten füllen
+        var bkbJsonContent = CreateBkbJsonContent();
+        var json = JsonSerializer.Serialize(bkbJsonContent, new JsonSerializerOptions { WriteIndented = true });
+        File.WriteAllText(configFilePath, json);
+    }
 
-        // Alle Values entschlüsseln (robuster, ohne viele Exceptions)
-        // Alle Values entschlüsseln (robuster, ohne viele Exceptions)
-        // Erst Werte sammeln, dann setzen – vermeidet Änderungen während der Enumeration.
-        var sw = Stopwatch.StartNew();
-        var items = configuration.AsEnumerable().Where(kv => !string.IsNullOrEmpty(kv.Value)).ToList();
-        foreach (var kv in items)
-        {
-            configuration[kv.Key] = Entschluesseln(kv.Value);
-        }
-        sw.Stop();
-        //AnsiConsole.MarkupLine($"[grey]Konfiguration dekodiert in {sw.ElapsedMilliseconds} ms[/]");
+    // 4. Konfiguration aus dem neuen Pfad laden
+    configuration = new ConfigurationBuilder()
+        .SetBasePath(folderPath) // Wichtig: BasePath auf den neuen Ordner setzen
+        .AddJsonFile("BKB-Tool.json", optional: false, reloadOnChange: false)
+        .Build();
 
-        while (string.IsNullOrEmpty(configuration["ZustimmungLizenz"]) ||
-               (configuration["ZustimmungLizenz"]?.ToLower() != "ja" && configuration["ZustimmungLizenz"]?.ToLower() != "j"))
-        {
-            DisplayHeader(configuration);
-            configuration = Global.Konfig("ZustimmungLizenz", Global.Modus.Read, configuration);
-            
-            // Sobald der Lizenz zugestimmt wurde, werden alle Env-Werte verschlüsselt in die .json geschrieben.
-            if (configuration["ZustimmungLizenz"]?.ToLower() == "ja" || configuration["ZustimmungLizenz"]?.ToLower() == "j")
-            {
-                isFirstRun = true;
-            }
-        }
+    // --- Restlicher Code bleibt logisch gleich, achte nur auf Speichern() ---
+    
+    var sw = Stopwatch.StartNew();
+    var items = configuration.AsEnumerable().Where(kv => !string.IsNullOrEmpty(kv.Value)).ToList();
+    foreach (var kv in items)
+    {
+        configuration[kv.Key] = Entschluesseln(kv.Value);
+    }
+    sw.Stop();
+
+    while (string.IsNullOrEmpty(configuration["ZustimmungLizenz"]) ||
+           (configuration["ZustimmungLizenz"]?.ToLower() != "ja" && configuration["ZustimmungLizenz"]?.ToLower() != "j"))
+    {
+        DisplayHeader(configuration);
+        configuration = Global.Konfig("ZustimmungLizenz", Global.Modus.Read, configuration);
         
-        var kon = KonfigMetadaten.Where(e =>
-            e.Value.InitialAbfragen == true || // nur solche, die initial abgefragt werden sollen
-            (
-                e.Value.InGrundeinstellungAbfragen == true && // nur solche, die in Grundeinstellung abgefragt werden sollen
-                //e.Value.NurBeiDiesenSchulnummern != null && // nur solche, die für bestimmte Schulnummern abgefragt werden sollen
-                //e.Value.NurBeiDiesenSchulnummern.Contains(configuration["Schulnummer"]) &&
-                configuration[e.Key] != null && // nur solche, die in der Konfiguration gespeichert sind
-                configuration[e.Key] != ""
-            )).ToList();
-
-        // Durchlaufe alle Einstellungen gemäß KonfigHelper
-        for (var i = 0; i < kon.Count(); i++)
-        {   
-            if(modus == Modus.ReadSilent && !string.IsNullOrEmpty(configuration[kon[i].Key]))
-                continue; // Im Silent-Modus werden nur die Einstellungen abgefragt, die noch keinen Wert haben.
-            DisplayHeader(configuration);         
-            configuration = Konfig(kon[i].Key, modus, configuration, kon[i].Value.Aufforderung, i + 1, kon.Count(), kon[i].Value.Hinweise, kon[i].Value.DefaultValue);
-        }
-
-        if (isFirstRun)
+        if (configuration["ZustimmungLizenz"]?.ToLower() == "ja" || configuration["ZustimmungLizenz"]?.ToLower() == "j")
         {
-            if (configuration["ZustimmungLizenz"]?.ToLower() == "ja" || configuration["ZustimmungLizenz"]?.ToLower() == "j")
-            {
-                kon = KonfigMetadaten.ToList();
+            isFirstRun = true;
+        }
+    }
+    
+    var kon = KonfigMetadaten.Where(e =>
+        e.Value.InitialAbfragen == true || 
+        (
+            e.Value.InGrundeinstellungAbfragen == true && 
+            configuration[e.Key] != null && 
+            configuration[e.Key] != ""
+        )).ToList();
 
-                for (var i = 0; i < kon.Count(); i++)
+    for (var i = 0; i < kon.Count(); i++)
+    {   
+        if(modus == Modus.ReadSilent && !string.IsNullOrEmpty(configuration[kon[i].Key]))
+            continue; 
+        DisplayHeader(configuration);         
+        configuration = Konfig(kon[i].Key, modus, configuration, kon[i].Value.Aufforderung, i + 1, kon.Count(), kon[i].Value.Hinweise, kon[i].Value.DefaultValue);
+    }
+
+    if (isFirstRun)
+    {
+        if (configuration["ZustimmungLizenz"]?.ToLower() == "ja" || configuration["ZustimmungLizenz"]?.ToLower() == "j")
+        {
+            kon = KonfigMetadaten.ToList();
+
+            for (var i = 0; i < kon.Count(); i++)
+            {
+                if (!string.IsNullOrEmpty(kon[i].Value.DefaultValue))
                 {
-                    // wenn der defaultValue nicht leer ist
-                    if (!string.IsNullOrEmpty(kon[i].Value.DefaultValue))
+                    if (kon[i].Key != "ZustimmungLizenz")
                     {
-                        // Zustimmung wird übersprungen
-                        if (kon[i].Key != "ZustimmungLizenz")
-                        {
-                            //configuration = Konfig(kon[i].Key, Modus.InitialEnumEinlesen, configuration, kon[i].Value.Aufforderung, i + 1, kon.Count(), kon[i].Value.Hinweise, kon[i].Value.DefaultValue);
-                            kon[i].Value.InGrundeinstellungAbfragen = false;
-                            configuration[kon[i].Key] = kon[i].Value.DefaultValue;
-                            Speichern(kon[i].Key, kon[i].Value.DefaultValue);
-                        }
+                        kon[i].Value.InGrundeinstellungAbfragen = false;
+                        configuration[kon[i].Key] = kon[i].Value.DefaultValue;
+                        // Hinweis: Die Speichern-Methode muss ggf. auch den neuen Pfad kennen!
+                        Speichern(kon[i].Key, kon[i].Value.DefaultValue); 
                     }
                 }
             }
         }
-
-        return configuration;
     }
+
+    return configuration;
+}
 
     static object CreateBkbJsonContent()
     {
