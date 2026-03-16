@@ -2088,4 +2088,30 @@ public class Datei : List<dynamic>
             mail.Senden("Schulpflichtüberwachung KW " + ISOWeek.GetWeekOfYear(DateTime.Now), configuration, 
             $"Hallo Klassenleitung,\n\nDu wurdest hierher verlinkt, weil bei der automatisierten, wöchentlichen Durchsicht der Fehlzeiten eine mögliche Schulpflichtverletzung in Deiner Klasse aufgepoppt ist. Siehe hier: https://bkb.wiki/schulpflichtueberwachung\n\nVielen Dank!\n\nIhr Webuntis-Team", "", "sina.milewski@berufskolleg-borken.de,stefan.gantefort@berufskolleg-borken.de,ursula.moritz@berufskolleg-borken.de", cc.TrimEnd(','), "stefan.baeumer@berufskolleg-borken.de");
     }
+
+ internal void LulÜberFehlendeEinträgeInformieren(
+    string[] interessierendeAttribute, 
+    string lehrerkürzel, 
+    IConfiguration configuration,
+    string betreff, 
+    string body)
+ {
+  if (this.Count == 0)
+    {
+        return;
+    }
+
+    
+
+        configuration = Global.Konfig("SmtpUser", Global.Modus.Update, configuration);
+        configuration = Global.Konfig("SmtpKennwort", Global.Modus.Update, configuration);
+        configuration = Global.Konfig("SmtpPort", Global.Modus.Update, configuration);
+        configuration = Global.Konfig("SmtpServer", Global.Modus.Update, configuration);
+        //configuration = Global.Konfig("BccAdresse", Global.Modus.Update, configuration);
+        configuration = Global.Konfig("NetmanMailReceiver", Global.Modus.Update, configuration);
+        configuration = Global.Konfig("NetmanMailBccReceiver", Global.Modus.Update, configuration);
+
+        var mail = new Mail();
+        mail.Senden(subject, configuration, body, attachment, configuration["NetmanMailReceiver"], "", configuration["NetmanMailBccReceiver"]);
+ }
 }

@@ -1009,9 +1009,6 @@ public class Menüeintrag
     {   
         List<dynamic> schuelerLeistungsdaten = Quelldateien.GetMatchingList(configuration, "schuelerleistungsdaten", IStudents, Klassen);
         if (art == null && (schuelerLeistungsdaten == null || schuelerLeistungsdaten.Count == 0)) return;
-
-        List<dynamic> schuelerBasisdaten = Quelldateien.GetMatchingList(configuration, "schuelerbasisdaten", IStudents, Klassen);
-        if (art == null && (schuelerBasisdaten == null || schuelerBasisdaten.Count == 0)) return;
   
         List<dynamic>? marksPerLs = Quelldateien.GetMatchingList(configuration, "marksperlesson", IStudents, Klassen);
         if (marksPerLs == null || marksPerLs.Count == 0) return;
@@ -1022,10 +1019,12 @@ public class Menüeintrag
         {
             for (int i = 0; i < schuelerLeistungsdaten.Count; i++)
             {
-                var dictLeist = (IDictionary<string, object>)schuelerLeistungsdaten[i];                
-                var dictMarks = (IDictionary<string, object>)marksPerLs[i];
+                var dictLeist = (IDictionary<string, object>)schuelerLeistungsdaten[i];
                 var student = Students.Where(s => s.Nachname == dictLeist["Nachname"].ToString() && s.Vorname == dictLeist["Vorname"].ToString() && s.Geburtsdatum == dictLeist["Geburtsdatum"].ToString()).FirstOrDefault();    
 
+                // Nur Zeilen des interessierenden Abschnitts berücksichtigen
+                if(dictLeist["Abschnitt"].ToString() != configuration["Abschnitt"]) continue;
+                
                 // Wenn der Schüler nicht aktiv oder extern ist, überspringe diese Zeile
                 if (!(student.Status.ToString() == "2" || student.Status.ToString() == "6")) continue;
 
@@ -1039,21 +1038,29 @@ public class Menüeintrag
                     if (name == "Nachname")
                     {
                         var klasse = student.Klasse;
-                        if(string.IsNullOrEmpty(klasse)){student.Warnung("Der Schüler hat keine Klasse in Schild."); continue;}
+                        if(string.IsNullOrEmpty(klasse)){student.Warnung("hat keine Klasse in Schild."); continue;}
                         
-                        //((IDictionary<string, object>)record)[name] = $"{value}#{klasse}";
+                        ((IDictionary<string, object>)record)[name] = $"{value}#{klasse}";
                     }
                     else if (name == "Note")
                     {
                         var jahrgang = student.Jahrgang;
-                        if(string.IsNullOrEmpty(jahrgang)){student.Warnung("Der Schüler hat keinen Jahrgang in Schild."); continue;}
+                        if(string.IsNullOrEmpty(jahrgang)){student.Warnung("hat keinen Jahrgang in Schild."); continue;}
                         
                         var fach = dictLeist["Fach"].ToString();
 
                         string note = student.GetNote(jahrgang, marksPerLs, fach, art);
-                        if(string.IsNullOrEmpty(note)){student.Warnung($"Der Schüler hat keine Note bekommen im Fach {fach}.");}
+                        if(string.IsNullOrEmpty(note))
+                        {
+                            var lol = dictLeist["Fachlehrer"].ToString();
+                            student.Warnung($"{lol} hat keine Note erteilt in {fach}.");
+                        }
                         
                         ((IDictionary<string, object>)record)[name] = note;
+                    }
+                    else
+                    {
+                        ((IDictionary<string, object>)record)[name] = value;
                     }
                 }
                 zieldatei.Add(record);

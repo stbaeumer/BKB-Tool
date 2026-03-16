@@ -498,7 +498,7 @@ public static class MenueHelper
       $"Es wird die [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "Leistungsdaten.dat")}[/] um die Noten aus MarksPerLesson.csv ergänzt:",
       $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise:[/]",
       $"[{Global.GetColor(Global.ColorHinweise)}]#3[/] Zähler im Anschluss an Fächer (M1, M2, ...) werden abgeschnitten (also zu M).",
-      $"[{Global.GetColor(Global.ColorHinweise)}]#1[/] Die Kursbezeichnungen setzen sich zusammen aus dem Kursleiterkürzel plus alle beteiligten Untis-Unterrichtsnummern (bis maximal 20 Zeichen).",
+      $"[{Global.GetColor(Global.ColorHinweise)}]#1[/] Die MarksPerLesson-Daten müssen in Webuntis auf den interessierenden Zeitraum begrenzt werden.",
       $"[{Global.GetColor(Global.ColorHinweise)}]#2[/] Kurse werden gebildet aus: Kopplungen in Untis, Schülergruppen in Untis, identischen Fächern mit unterschiedliche LuL",
       $"[{Global.GetColor(Global.ColorHinweise)}]#4[/] Bei mehreren beteiligten Lehrkräften wird das alphabetisch erste Lehrkraftkürzel zum Kursleiter.",
       $"[{Global.GetColor(Global.ColorHinweise)}]#5[/] Team-Teaching ist daran erkennbar, dass die Summe der Kurs-Wochenstunden kleiner ist als die Summe der Lehrkräfte-Wochenstunden.",
@@ -515,9 +515,13 @@ public static class MenueHelper
        [
         datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
         datei => datei.Verarbeiten(quelldateien, Global.Modus.Filtern),
+        datei => datei.LulÜberFehlendeEinträgeInformieren(
+         ["Note"], "Fachlehrer", configuration,
+         "Fehlende Noten nach Ablauf der Frist",
+         "Sie erhalten diese Nachricht, weil nach Ablauf der Frist Noten fehlen. Holen Sie das bitte schnellstens nach:"),
         datei => datei.Erstellen()
        ],
-       ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach", "Kurs"],
+       ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach"],
        [],
        "|", '\0', new UTF8Encoding(true), false, null,
        Global.Zweck.Zeugnis);

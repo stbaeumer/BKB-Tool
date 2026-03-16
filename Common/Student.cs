@@ -1403,7 +1403,7 @@ public partial class Student
  internal void Warnung(string v)
  {
     var linkeSeite = Nachname + ", " + Vorname + " (" + Klasse + "):";
-    linkeSeite = (linkeSeite.PadRight(30, ' ')).Substring(0, 30) + ": Widersprechende Gesamtnoten: ";
+    linkeSeite = (linkeSeite.PadRight(30, ' ')).Substring(0, 30);
             Global.ZeileSchreiben(linkeSeite, v, ConsoleColor.Yellow, ConsoleColor.Gray);
  }
 }
