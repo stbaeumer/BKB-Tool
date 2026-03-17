@@ -380,7 +380,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
-      $"Zeugnis 1.Unterr.:14 Tg davor:Unterrichte und Kurse schülergenau von Webuntis nach SchILD übertragen",
+      $"Zeugnis#1 Unterr.:14 Tage vorher:Unterrichte und Kurse schülergenau von Webuntis nach SchILD übertragen",
       quelldateien.Notwendige(configuration, ["studentgroupstudents,csv", "klassen,dat", "schuelerlernabschnitt,dat,optional", "schuelerleistungsdaten,dat", "lehrkraefte,dat", "kurse,dat", "schuelerbasisdaten,dat", "faecher,dat", "GPU002,txt"]),
       students,
       klassen,
@@ -438,7 +438,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
-      $"Zeugnis 2.Belegung:13 Tg davor:In den Klassen des Beruflichen Gymnasiums die Klausurbelegung aus Wiki in die SchILD-Leistungsdaten übernehmen",
+      $"Zeugnis#2 Belegung:13 Tage vorher:In den Klassen des Beruflichen Gymnasiums die Klausurbelegung aus Wiki in die SchILD-Leistungsdaten übernehmen",
       quelldateien.Notwendige(configuration, ["schuelerleistungsdaten,dat"]),
       students,
       klassen,
@@ -472,7 +472,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
-      $"Zeugnis 3.Fehlz.:3  Tg davor:Die Fehlzeiten werden in bestehende Lernabschnittsdaten eingefügt",
+      $"Zeugnis#3 Fehlz.:3 Tage vorher:Die Fehlzeiten werden in bestehende Lernabschnittsdaten eingefügt",
       new Dateien(),
       students,
       klassen,
@@ -490,21 +490,13 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
-      $"Zeugnis 4.Noten:1  Tg davor:Noten aus Webuntis (MarksPerLesson) nach SchILD (SchuelerLeistungsdaten) schreiben",
+      $"Zeugnis#4 Noten:1 Tag vorher:Noten aus Webuntis (MarksPerLesson) nach SchILD (SchuelerLeistungsdaten) schreiben",
       quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "schuelerleistungsdaten,dat", "marksperlesson,csv"]),
       students,
       klassen,
       [
       $"Es wird die [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "Leistungsdaten.dat")}[/] um die Noten aus MarksPerLesson.csv ergänzt:",
-      $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise:[/]",
-      $"[{Global.GetColor(Global.ColorHinweise)}]#3[/] Zähler im Anschluss an Fächer (M1, M2, ...) werden abgeschnitten (also zu M).",
-      $"[{Global.GetColor(Global.ColorHinweise)}]#1[/] Die MarksPerLesson-Daten müssen in Webuntis auf den interessierenden Zeitraum begrenzt werden.",
-      $"[{Global.GetColor(Global.ColorHinweise)}]#2[/] Kurse werden gebildet aus: Kopplungen in Untis, Schülergruppen in Untis, identischen Fächern mit unterschiedliche LuL",
-      $"[{Global.GetColor(Global.ColorHinweise)}]#4[/] Bei mehreren beteiligten Lehrkräften wird das alphabetisch erste Lehrkraftkürzel zum Kursleiter.",
-      $"[{Global.GetColor(Global.ColorHinweise)}]#5[/] Team-Teaching ist daran erkennbar, dass die Summe der Kurs-Wochenstunden kleiner ist als die Summe der Lehrkräfte-Wochenstunden.",
-      $"[{Global.GetColor(Global.ColorHinweise)}]#6[/] Wenn zwei ansonsten identische Unterrichte einmal mit und einmal ohne Schülergruppe vorliegen, werden zwei unterschiedliche Einträge erstellt.",
-      $"[{Global.GetColor(Global.ColorHinweise)}]#7[/] Sobald einem Fach bei einem Schüler in SchILD eine Kursart (AB3,AB4,GKS,GKM) zugewiesen wurde, wird das in die zu erstellenden Leistungsdaten übernommen.",
-      $"[{Global.GetColor(Global.ColorHinweise)}]#8[/] Fehlzeiten pro Schüler*in pro Tag: [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Fehlzeiten[/], [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Verspätungen[/] und [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Nur zählende Abwesenheiten[/] anhaken."
+      $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise:[/]",      
      ],
      m =>
      {
@@ -521,54 +513,34 @@ public static class MenueHelper
        [],
        "|", '\0', new UTF8Encoding(true), false, null,
        Global.Zweck.Zeugnis);
-      
-      m.Faecher(
-       configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Faecher.dat"),
-       [
-        datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
-        datei => datei.Verarbeiten(quelldateien, Global.Modus.Filtern),
-        datei => datei.Erstellen()
-       ],
-       ["InternKrz"],
-       [],
-       "|", '\0', new UTF8Encoding(true), false);
-      m.Chat(configuration,
-        [
-         datei => datei.Auswählen(configuration, m, lehrers, Global.Modus.NurEineKlasse),
-         datei => datei.OeffneWebseite("https://teams.microsoft.com/l/chat/0/0?users=", datei.UrlMitte, datei.UrlRechts),
-        ],
-        Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-chat.csv"),
-        lehrers,
-        ",", '\"', new UTF8Encoding(false), true);
+            
       },
       Global.Rubrik.Allgemein,
       Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
-      $"Zeugnis 5.Anmahnen:1  Tg davor:LuL wegen fehlender Noten in Webuntis anmahnen",
-      quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "schuelerleistungsdaten,dat"]),
+      $"Zeugnis#5 Listen:1 Tag vorher:Notenlisten werden in Wiki veröffentlicht. Fehlende Noten werden markiert.",
+      quelldateien.Notwendige(configuration, ["faecher,dat","schuelerbasisdaten,dat", "schuelerleistungsdaten,dat"]),
       students,
       klassen,
       [
-       $"1. Exportieren Sie die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]SchuelerLeistungsdaten.dat[/] zuerst frisch aus SchILD.",
-       $"2. Legen Sie fest, für welche Klasse(n) gemahnt werden soll.",
-       $"2. Legen Sie fest, für welche Klasse(n) gemahnt werden soll.",
-       $"Sobald Sie die Auswahl bestätigen, wird ein Mahnung der LuL per Mail herausgeschickt."
+       $"1. Exportieren Sie alle Dateien ([{Global.GetColor(Global.ColorPfadInDateien)}]SchuelerLeistungsdaten.dat[/] etc.) frisch aus SchILD.",
+       $"2. Wählen Sie die Klasse(n), für die die Notenlisten veröffentlicht werden sollen.",
+       $"3. Die Liste wird erstellt und die Wiki-Seite geöffnet. Der Teams-Chat wird geöffnet, aber erst verschickt, wenn Sie in Teams absenden."
       ],
       m =>
      {
       m.FilterInteressierendeStudentsUndKlassen(configuration);
-      configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration);      
-      m.LulÜberFehlendeEinträgeInformieren(
-       configuration, lehrers, Path.Combine(pfadDownloads ?? "", "fehlende-noten-mahnen", ""),
-       [
-        datei => datei.SpectreTabelleErstellen(),
-        datei => datei.Mailen("Fehlende Noten in Webuntis", "Liebe Kolleginnen und Kollegen,\n\nSie erhalten diese Mail, weil Ihre Noten in Webuntis nicht fristgerecht vorliegen. Bitte umgehend nachholen. Details im Anhang.\n\nIhr Webuntis Team", configuration, datei.Lehrers, datei.AbsoluterPfad),
-       ],
-       [],
-       [],
-       " ", '\0', new UTF8Encoding(true), false, null,
-       Global.Zweck.Zeugnis);      
+      Global.Konfig("InteressierendesSchuljahr", Global.Modus.Update, configuration, "", -1, -1, "", "1", null, "25-26,26-27,27-28");
+      Global.Konfig("Abschnitt", Global.Modus.Update, configuration, "", -1, -1, "", "1", null, "1,2");       
+      m.NotenlistenAnlegen(
+       configuration, lehrers,
+         $"notenlisten:",
+         [
+          datei => datei.PutPage(),
+          datei => datei.OeffneWebseite($"https://bkb.wiki/{datei.Name}"),
+         ]
+        );       
       },
       Global.Rubrik.Allgemein,
       Global.NurBeiDiesenSchulnummern.Nur177659

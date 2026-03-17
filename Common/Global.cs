@@ -2271,12 +2271,12 @@ public static class KonfigHelper
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
-        ["WikiSprechtagKleineAenderung"] = new KonfigMeta
+        ["WikiKleineAenderung"] = new KonfigMeta
         {
-            Key = "WikiSprechtagKleineAenderung",
+            Key = "WikiKleineAenderung",
             DefaultValue = "j",
             Aufforderung = $"[green]■[/]",
-            Hinweise = $"Handelt es sich um eine [{Global.GetColor(Global.ColorInfoBox)}]kleine Änderung[/]? Kleine Änderungen erzeugen keine neue Version. (j/n)",
+            Hinweise = $"Handelt es sich um eine [{Global.GetColor(Global.ColorInfoBox)}]kleine Änderung[/] in Wiki? Kleine Änderungen erzeugen keine neue Version. (j/n)",
             Datentyp = Global.Datentyp.JaNein,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,

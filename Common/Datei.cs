@@ -2083,7 +2083,7 @@ public class Datei : List<dynamic>
 
     internal void PutPage()
     {
-        var configuration = Global.Konfig("WikiSprechtagKleineAenderung", Global.Modus.Update, Konfiguration);
+        var configuration = Global.Konfig("WikiKleineAenderung", Global.Modus.Read, Konfiguration);
         DokuwikiZugriff = new DokuwikiZugriff(configuration);
 
         DokuwikiZugriff.Options = new XmlRpcStruct

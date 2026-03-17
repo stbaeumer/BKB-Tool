@@ -6170,104 +6170,146 @@ public class Menüeintrag
         }
     }
 
- internal void LulÜberFehlendeEinträgeInformieren(IConfiguration configuration,
+    internal void NotenlistenAnlegen(IConfiguration configuration,
         Lehrers lehrers,
         string zieldateiname,        
-        List<Action<Datei>> funktionen,
-        string[] anhandDieserAttributeWirdVerglichen,
-        string[] dieseAttributeWerdenBeimVergleichIgnoriert,
-        string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null, Global.Zweck art = Global.Zweck.Statistik)
+        List<Action<Datei>> funktionen)
     {   
-        List<dynamic> schuelerLeistungsdaten = Quelldateien.GetMatchingList(configuration, "schuelerleistungsdaten", IStudents, Klassen);
-        if (art == null && (schuelerLeistungsdaten == null || schuelerLeistungsdaten.Count == 0)) return;
-    
-        // Gib die verschiedenen Klassen der interessierenden Schüler zurück
-        var klassen = IStudents.Select(s => s.Klasse).Distinct().ToList();
+        var leistungsdaten = Quelldateien.GetMatchingList(configuration, "schuelerleistungsdaten", IStudents, Klassen);
+        if (leistungsdaten == null || !leistungsdaten.Any()) return;
+        
+        var faecher = Quelldateien.GetMatchingList(configuration, "faecher", IStudents, Klassen);
+        if (faecher == null || !faecher.Any()) return;
 
-        var klassenstring = "-";
+        var zieldatei = new Datei(zieldateiname, funktionen, configuration);
 
-        foreach (var klasse in klassen)
-        {
-            klassenstring += klasse + "-";
-        }
+        var beteiligteLul = "";
 
-        zieldateiname = zieldateiname + klassenstring.TrimEnd('-') + ".txt";
+  // Gib alle Fächer distinct als List<string> zurück, sortiert nach Sortierung S2
+  var alleFaecherDistinct = faecher
+   .Select(rec => (IDictionary<string, object>)rec)
+   .OrderBy(dict => dict["Sortierung S2"].ToString())
+   .Select(dict => dict["InternKrz"].ToString()) // Nur Teil vor Leerzeichen
+   .Distinct()   
+   .ToList();
 
-        var zieldatei = new Datei(zieldateiname, funktionen, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+  var faecherInDieserKlasseAusLeistungsdaten = alleFaecherDistinct
+   .Where(fach =>
+    leistungsdaten.Any(rec =>
+    {
+     var dict = (IDictionary<string, object>)rec;
+     // Nur Teil vor Leerzeichen vergleichen
+     return dict.ContainsKey("Fach") && dict["Fach"].ToString() == fach;
+    }))
+   .ToList();
 
-        zieldatei.Lehrers = lehrers;
+  var verschiedeneKlassenDerStudents = IStudents.Select(s => s.Klasse).Distinct().OrderBy(k => k).ToList();
 
-        // Gib mir alle verschiedenen Fachlehrer aus Leistungsdaten zurück, bei denen die Spalte Note leer ist.
+  foreach (var klasse in verschiedeneKlassenDerStudents)
+  {
+   zieldatei.Name = $"notenlisten:{klasse}-{configuration["InteressierendesSchuljahr"]}-{configuration["Abschnitt"]}";
+   zieldatei.Add($"====== {klasse} Notenliste {configuration["InteressierendesSchuljahr"]}/{configuration["Abschnitt"]} ======");
+   zieldatei.Add("");
 
-        var verschiedeneLehrerOhneNote = new List<string>();
+   var kopfzeile = "^  Name  ^ ";
+   var kopfzeile2 = "^  ^";
 
-        AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start($"{zieldateiname} ...", ctx =>
-        {
-            for (int i = 0; i < schuelerLeistungsdaten.Count; i++)
-            {
-                var dictLeist = (IDictionary<string, object>)schuelerLeistungsdaten[i];                
+   // Prüfe für alle IStudents dieser Klasse, ob die Initialen (z.B. A.B.) mehrfach vorkommen.
+   // Wenn ja, dann muss für diese Klasse die Initialen soweit verlängert werden, bis der Wert eindeutig ist.
+   int anzahlZeichen = 1;
+   for (int i = 1; i <= 5; i++) // Maximal bis 5 Zeichen
+   {
+    var initialenGruppiert = IStudents
+     .Where(s => s.Klasse == klasse)
+     .Select(s => new
+     {
+      Student = s,
+      Initialen = s.Nachname.Substring(0, i) + "." + s.Vorname.Substring(0, i) + "."
+     })
+     .GroupBy(x => x.Initialen)
+     .Where(g => g.Count() > 1)
+     .ToList();
 
-                // Nur Zeilen des interessierenden Abschnitts berücksichtigen
-                if(dictLeist["Abschnitt"].ToString() != configuration["Abschnitt"]) continue;
-                
-                var student = Students.Where(s => s.Nachname == dictLeist["Nachname"].ToString() && s.Vorname == dictLeist["Vorname"].ToString() && s.Geburtsdatum == dictLeist["Geburtsdatum"].ToString()).FirstOrDefault();    
+    if (initialenGruppiert.Count == 0)
+    {
+     anzahlZeichen = i;
+     break; // Alle Initialen sind eindeutig
+    }
+   }
 
-                // Wenn der Schüler nicht aktiv oder extern ist, überspringe diese Zeile
-                if (!(student.Status.ToString() == "2" || student.Status.ToString() == "6")) continue;
+    foreach (var fach in faecherInDieserKlasseAusLeistungsdaten)
+    {
+     // Alle verschiedenen Lehrerkürzel, die das Fach (ohne Ziffer und nur vor dem Leerzeichen) unterrichten
+     var alleLehrerDiesesFachs = leistungsdaten
+      .Where(rec =>
+      {
+       var dict = (IDictionary<string, object>)rec;
+       return dict["Fach"].ToString() == fach;
+      })
+      .Select(rec => (IDictionary<string, object>)rec)
+      .GroupBy(dict => dict["Fachlehrer"].ToString().Split(' ')[0])
+      .Select(g => g.First())
+      .Select(dict => new
+      {
+       Kürzel = dict["Fachlehrer"].ToString().Split(' ')[0]
+      })
+      .OrderBy(l => l.Kürzel)
+      .ToList();
 
-                dynamic record = new ExpandoObject();
+     foreach (var lehrer in alleLehrerDiesesFachs)
+     {
+      kopfzeile2 += lehrer.Kürzel + " ";
+      beteiligteLul += lehrers.Where(l => l.Kürzel == lehrer.Kürzel).Select(l => l.Mail).FirstOrDefault() + ";";
+     }
+     kopfzeile += fach + "  ^  ";
+     kopfzeile2 += "  ^  ";
+    }
+      
+   zieldatei.Add(kopfzeile);
+   zieldatei.Add(kopfzeile2);
 
-                if(string.IsNullOrEmpty(dictLeist["Note"].ToString()))
-                {
-                    if(!verschiedeneLehrerOhneNote.Contains(dictLeist["Fachlehrer"].ToString()))
-                    {
-                        verschiedeneLehrerOhneNote.Add(dictLeist["Fachlehrer"].ToString());
-                    }
-                }
-            }
+   foreach (var student in IStudents.Where(s => s.Klasse == klasse).OrderBy(s => s.Nachname).ThenBy(s => s.Vorname))
+   {
+    var nameKurz = student.Nachname.Substring(0, anzahlZeichen) + "." + student.Vorname.Substring(0, anzahlZeichen) + ".";
 
-            foreach (var l in verschiedeneLehrerOhneNote.OrderBy(l => l))
-            {
-                var lehrer = lehrers.Where(le => le.Kürzel == l).FirstOrDefault();
-                lehrer.NichtEingetrageneNotenKlassen = new List<string>();                
+    var zeile = "| " + nameKurz;
 
-                for (int i = 0; i < schuelerLeistungsdaten.Count; i++)
-                {
-                    var dictLeist = (IDictionary<string, object>)schuelerLeistungsdaten[i];                
+    // Wenn Leistungsdaten genutzt werden, dann auch die Inhalte in die Zellen übergeben
+     foreach (var fach in faecherInDieserKlasseAusLeistungsdaten)
+     {
+      // Suche die Kursart aus den Leistungsdaten für diesen Schüler
+      var note = leistungsdaten
+       .Where(rec =>
+       {
+        var dict = (IDictionary<string, object>)rec;
+        return dict["Fach"].ToString() == fach &&
+            dict["Nachname"].ToString() == student.Nachname &&
+            dict["Vorname"].ToString() == student.Vorname &&
+            dict["Geburtsdatum"].ToString() == student.Geburtsdatum && 
+            dict["Abschnitt"].ToString() == configuration["Abschnitt"];
+       })
+       .Select(rec => (IDictionary<string, object>)rec)
+       .Select(dict => dict["Note"].ToString())
+       .FirstOrDefault();
+      
+      // Wenn die Note leer ist, dann wird ein Platzhalter eingesetzt, damit die Zelle in der Wiki-Tabelle nicht verschwindet.
+      if(note == null)
+       note = " ";      
+      else if(note == "")
+       note = "FIXME";
 
-                    // Nur Zeilen des interessierenden Abschnitts berücksichtigen
-                    if(dictLeist["Abschnitt"].ToString() != configuration["Abschnitt"]) continue;
-                    
-                    var student = Students.Where(s => s.Nachname == dictLeist["Nachname"].ToString() && s.Vorname == dictLeist["Vorname"].ToString() && s.Geburtsdatum == dictLeist["Geburtsdatum"].ToString()).FirstOrDefault();    
+      zeile += "| " + note;
+     }
+        
+    zeile += "| ";
+    zieldatei.Add(zeile);
+   }    
+   zieldatei.Add("Hier können keine Änderungen vorgenommen werden. Tragen Sie die Noten in Webuntis ein!");
 
-                    // Wenn der Schüler nicht aktiv oder extern ist, überspringe diese Zeile
-                    if (!(student.Status.ToString() == "2" || student.Status.ToString() == "6")) continue;
-
-                    dynamic record = new ExpandoObject();
-
-                    if(string.IsNullOrEmpty(dictLeist["Note"].ToString()) && dictLeist["Fachlehrer"].ToString() == l)
-                    {
-                        if(!lehrer.NichtEingetrageneNotenKlassen.Contains(student.Klasse))
-                        {
-                            lehrer.NichtEingetrageneNotenKlassen.Add(student.Klasse);
-                        }
-                    }
-                }
-            }
-
-            foreach (var l in lehrers.Where(x=>x.NichtEingetrageneNotenKlassen != null).OrderBy(x=>x.Kürzel))
-            {
-                dynamic record = new ExpandoObject();   
-                ((IDictionary<string, object>)record)["Lehrkraft"] = l.Kürzel;
-                ((IDictionary<string, object>)record)["Klassen"] = string.Join(", ", l.NichtEingetrageneNotenKlassen);                
-                ((IDictionary<string, object>)record)["Hinweis"] = "fehlende Noten";
-                zieldatei.Add(record);
-            }
-                
-            Global.ZeileSchreiben(zieldateiname, zieldatei.Count().ToString());
-        });
-        foreach (var aktion in zieldatei.Funktionen)
-            aktion(zieldatei);
+   lehrers.GetTeamsUrl(beteiligteLul.Split(';'), String.Join(';', klasse));            
+   
+   foreach (var aktion in zieldatei.Funktionen)
+    aktion(zieldatei);}
  }
 
 
