@@ -47,8 +47,9 @@ public class Lehrer
     public string? Beschäftigungsart { get; internal set; }
     public string? StatistikRelevant { get; internal set; }
     public string? Anrede { get; internal set; }
+ public List<string> NichtEingetrageneNotenKlassen { get; internal set; }
 
-    internal int GetAlterAmErstenSchultagDesSchuljahres(int jahr)
+ internal int GetAlterAmErstenSchultagDesSchuljahres(int jahr)
     {
         int years = jahr - Geburtsdatum.Year;
         DateTime birthday = Geburtsdatum.AddYears(years);

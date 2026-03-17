@@ -380,7 +380,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
-      $"Zeugnis 1-Unterr.:14 Tg davor:Unterrichte und Kurse schülergenau von Webuntis nach SchILD übertragen",
+      $"Zeugnis 1.Unterr.:14 Tg davor:Unterrichte und Kurse schülergenau von Webuntis nach SchILD übertragen",
       quelldateien.Notwendige(configuration, ["studentgroupstudents,csv", "klassen,dat", "schuelerlernabschnitt,dat,optional", "schuelerleistungsdaten,dat", "lehrkraefte,dat", "kurse,dat", "schuelerbasisdaten,dat", "faecher,dat", "GPU002,txt"]),
       students,
       klassen,
@@ -438,7 +438,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
-      $"Zeugnis 2-Belegung:13 Tg davor:In den Klassen des Beruflichen Gymnasiums die Klausurbelegung aus Wiki in die SchILD-Leistungsdaten übernehmen",
+      $"Zeugnis 2.Belegung:13 Tg davor:In den Klassen des Beruflichen Gymnasiums die Klausurbelegung aus Wiki in die SchILD-Leistungsdaten übernehmen",
       quelldateien.Notwendige(configuration, ["schuelerleistungsdaten,dat"]),
       students,
       klassen,
@@ -472,7 +472,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
-      $"Zeugnis 3-Fehlz.:3  Tg davor:Die Fehlzeiten werden in bestehende Lernabschnittsdaten eingefügt",
+      $"Zeugnis 3.Fehlz.:3  Tg davor:Die Fehlzeiten werden in bestehende Lernabschnittsdaten eingefügt",
       new Dateien(),
       students,
       klassen,
@@ -490,7 +490,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
-      $"Zeugnis 4-Noten:1  Tg davor:Noten aus Webuntis (MarksPerLesson) nach SchILD (SchuelerLeistungsdaten) schreiben",
+      $"Zeugnis 4.Noten:1  Tg davor:Noten aus Webuntis (MarksPerLesson) nach SchILD (SchuelerLeistungsdaten) schreiben",
       quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "schuelerleistungsdaten,dat", "marksperlesson,csv"]),
       students,
       klassen,
@@ -511,20 +511,17 @@ public static class MenueHelper
       m.FilterInteressierendeStudentsUndKlassen(configuration);
       configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration);      
       m.NotenInLeistungsdatenErgaenzen(
-       configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat", ""),
+       configuration, lehrers, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat", ""),
        [
         datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
         datei => datei.Verarbeiten(quelldateien, Global.Modus.Filtern),
-        datei => datei.LulÜberFehlendeEinträgeInformieren(
-         ["Note"], "Fachlehrer", configuration,
-         "Fehlende Noten nach Ablauf der Frist",
-         "Sie erhalten diese Nachricht, weil nach Ablauf der Frist Noten fehlen. Holen Sie das bitte schnellstens nach:"),
         datei => datei.Erstellen()
        ],
        ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach"],
        [],
        "|", '\0', new UTF8Encoding(true), false, null,
        Global.Zweck.Zeugnis);
+      
       m.Faecher(
        configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Faecher.dat"),
        [
@@ -548,23 +545,34 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
-      $"Zeugnis 5-Anmahnen:1  Tg davor:LuL wegen fehlender Noten in Webuntis anmahnen",
-      new Dateien(),
+      $"Zeugnis 5.Anmahnen:1  Tg davor:LuL wegen fehlender Noten in Webuntis anmahnen",
+      quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "schuelerleistungsdaten,dat"]),
       students,
       klassen,
       [
-       $"Von allen PDF-Dateien in [{Global.GetColor(Global.ColorPfadInDateien)}]" + configuration["PfadDownloads"] + "[/] werden verschlüsselte Kopien erstellt.",
-       $"Es werden nur Dateien berücksichtigt, die nicht bereits die Endung [{Global.GetColor(Global.ColorPfadInDateien)}]-kennwort.pdf[/] haben.",
-       $"Kopien bekommen die Dateiendung [{Global.GetColor(Global.ColorPfadInDateien)}]-kennwort.pdf[/]."
+       $"1. Exportieren Sie die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]SchuelerLeistungsdaten.dat[/] zuerst frisch aus SchILD.",
+       $"2. Legen Sie fest, für welche Klasse(n) gemahnt werden soll.",
+       $"2. Legen Sie fest, für welche Klasse(n) gemahnt werden soll.",
+       $"Sobald Sie die Auswahl bestätigen, wird ein Mahnung der LuL per Mail herausgeschickt."
       ],
-      _ =>
-      {
-       var pdfDateien = new PdfDateien();
-       pdfDateien.KennwortSetzen(configuration);
+      m =>
+     {
+      m.FilterInteressierendeStudentsUndKlassen(configuration);
+      configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration);      
+      m.LulÜberFehlendeEinträgeInformieren(
+       configuration, lehrers, Path.Combine(pfadDownloads ?? "", "fehlende-noten-mahnen", ""),
+       [
+        datei => datei.SpectreTabelleErstellen(),
+        datei => datei.Mailen("Fehlende Noten in Webuntis", "Liebe Kolleginnen und Kollegen,\n\nSie erhalten diese Mail, weil Ihre Noten in Webuntis nicht fristgerecht vorliegen. Bitte umgehend nachholen. Details im Anhang.\n\nIhr Webuntis Team", configuration, datei.Lehrers, datei.AbsoluterPfad),
+       ],
+       [],
+       [],
+       " ", '\0', new UTF8Encoding(true), false, null,
+       Global.Zweck.Zeugnis);      
       },
       Global.Rubrik.Allgemein,
       Global.NurBeiDiesenSchulnummern.Nur177659
-     ),     
+     ),
      new Menüeintrag(
       "Wiki::Diverse SQLite-Dateien (Praktikum etc.) erstellen",
       quelldateien.Notwendige(configuration, ["schuelervermerke,dat", "schuelerzusatzdaten,dat", "absenceperstudent,csv", "GPU006,txt", "GPU002,txt", "GPU003,txt", "klassen,dat"]),

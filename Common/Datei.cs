@@ -14,7 +14,12 @@ using System.Diagnostics;
 using CookComputing.XmlRpc;
 using System.Dynamic;
 using System.Reflection;
+using iText.Kernel.Font;
+using iText.IO.Font.Constants;
+using iText.Kernel.Pdf;
+using iText.Layout;
 
+//using iText.Layout.Element;
 namespace Common;
 
 #pragma warning disable CS8603 // Mögliche Null-Verweis-Rückgabe
@@ -615,6 +620,76 @@ public class Datei : List<dynamic>
                 Global.ZeileSchreiben(AbsoluterPfad, "", ConsoleColor.White, ConsoleColor.Blue);
             }
         }
+                else if (AbsoluterPfad.ToLower().EndsWith(".html"))
+        {
+            try
+            {
+                var sb = new StringBuilder();
+        
+                sb.AppendLine("<!DOCTYPE html>");
+                sb.AppendLine("<html>");
+                sb.AppendLine("<head>");
+                sb.AppendLine("  <meta charset=\"utf-8\" />");
+                sb.AppendLine("  <title>Export</title>");
+                sb.AppendLine("</head>");
+                sb.AppendLine("<body>");
+                sb.AppendLine("  <table border=\"1\">");
+        
+                var firstRecord = this.FirstOrDefault() as IDictionary<string, object>;
+                if (firstRecord != null)
+                {
+                    // Kopfzeile
+                    sb.AppendLine("    <tr>");
+                    foreach (var header in firstRecord.Keys)
+                    {
+                        var adjustedHeader = header
+                            .Replace("DOPPELPUNKT", ":")
+                            .Replace("PUNKT", ".")
+                            .Replace("MINUS", "-")
+                            .Replace("ZWEI", "2")
+                            .Replace("EINS", "1")
+                            .Replace("UNTERSTRICH", "_")
+                            .Replace("SLASH", "/")
+                            .Replace("LEERZEICHEN", " ")
+                            .Replace("KLAMMERAUF", "(")
+                            .Replace("KLAMMERZU", ")");
+        
+                        sb.AppendLine($"      <th>{System.Net.WebUtility.HtmlEncode(adjustedHeader)}</th>");
+                    }
+                    sb.AppendLine("    </tr>");
+        
+                    // Datenzeilen
+                    foreach (var record in this)
+                    {
+                        var recordDict = record as IDictionary<string, object>;
+                        if (recordDict == null) continue;
+        
+                        sb.AppendLine("    <tr>");
+                        foreach (var header in firstRecord.Keys)
+                        {
+                            recordDict.TryGetValue(header, out var value);
+                            sb.AppendLine($"      <td>{System.Net.WebUtility.HtmlEncode(value?.ToString() ?? string.Empty)}</td>");
+                        }
+                        sb.AppendLine("    </tr>");
+                    }
+                }
+        
+                sb.AppendLine("  </table>");
+                sb.AppendLine("</body>");
+                sb.AppendLine("</html>");
+        
+                File.Delete(AbsoluterPfad);
+                File.WriteAllText(AbsoluterPfad, sb.ToString(), this.Encoding ?? Encoding.UTF8);
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Fehler beim Schreiben der HTML-Datei: {ex.Message}");
+            }
+            finally
+            {
+                Global.ZeileSchreiben(AbsoluterPfad, "", ConsoleColor.White, ConsoleColor.Blue);
+            }
+        }
         else
         {
             try
@@ -687,6 +762,92 @@ public class Datei : List<dynamic>
             }
         }
     }
+
+        public void SpectreTabelleErstellen()
+    {
+        if (string.IsNullOrWhiteSpace(AbsoluterPfad))
+        {
+            AnsiConsole.Write(new Panel($"[red]Datei nicht erstellt: Pfad leer: [/]{AbsoluterPfad}")
+                .HeaderAlignment(Justify.Left)
+                .SquareBorder()
+                .Expand()
+                .BorderColor(Color.Red));
+            return;
+        }
+    
+        if (Count == 0)
+        {
+            AnsiConsole.Write(new Panel($"[red]Datei nicht erstellt (0 Zeilen): [/]{AbsoluterPfad}")
+                .HeaderAlignment(Justify.Left)
+                .SquareBorder()
+                .Expand()
+                .BorderColor(Color.Red));
+            return;
+        }
+    
+        try
+        {
+            var firstRecord = this[0] as IDictionary<string, object>;
+            if (firstRecord == null || firstRecord.Count == 0)
+                return;
+    
+            var originalHeaders = firstRecord.Keys.ToList();
+            var adjustedHeaders = originalHeaders
+                .Select(header => header
+                    .Replace("DOPPELPUNKT", ":")
+                    .Replace("PUNKT", ".")
+                    .Replace("MINUS", "-")
+                    .Replace("ZWEI", "2")
+                    .Replace("EINS", "1")
+                    .Replace("UNTERSTRICH", "_")
+                    .Replace("SLASH", "/")
+                    .Replace("LEERZEICHEN", " ")
+                    .Replace("KLAMMERAUF", "(")
+                    .Replace("KLAMMERZU", ")"))
+                .ToList();
+    
+            var table = new Table().Border(TableBorder.Ascii);
+            foreach (var header in adjustedHeaders)
+                table.AddColumn(header);
+    
+            foreach (var record in this)
+            {
+                var recordDict = record as IDictionary<string, object>;
+                if (recordDict == null) continue;
+    
+                var row = originalHeaders
+                    .Select(h => recordDict.TryGetValue(h, out var value) ? value?.ToString() ?? "" : "")
+                    .ToArray();
+    
+                table.AddRow(row);
+            }
+    
+            var sw = new StringWriter();
+            var console = AnsiConsole.Create(new AnsiConsoleSettings
+            {
+                Out = new AnsiConsoleOutput(sw),
+                Ansi = AnsiSupport.No,
+                ColorSystem = ColorSystemSupport.NoColors
+            });
+    
+            AnsiConsole.Write(table);
+    
+            if (File.Exists(AbsoluterPfad))
+                File.Delete(AbsoluterPfad);
+    
+            File.WriteAllText(AbsoluterPfad, sw.ToString(), this.Encoding ?? Encoding.UTF8);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Fehler beim Schreiben der Tabelle: {ex.Message}");
+        }
+        finally
+        {
+            var rechteSeite = Importhinweise != null && Importhinweise.Any() ? string.Join("\n", Importhinweise) : "";
+            Global.ZeileSchreiben(AbsoluterPfad, rechteSeite, ConsoleColor.White, ConsoleColor.Blue);
+        }
+    }
+
 
     public Datei? VergleichenUndFiltern(Dateien quelldateien)
     {
@@ -1374,6 +1535,32 @@ public class Datei : List<dynamic>
         }
     }
 
+    internal void Mailen(string subject, string body, IConfiguration configuration, Lehrers lehrers, string attachment = "")
+    {
+        if (this.Count == 0)
+        {
+            return;
+        }
+
+        var empfänger = "";
+        foreach (var lehrer in lehrers)
+        {
+            empfänger += lehrer.Mail + ",";
+        }
+
+        empfänger = "stefan.baeumer@berufskolleg-borken.de";
+
+        configuration = Global.Konfig("SmtpUser", Global.Modus.Update, configuration);
+        configuration = Global.Konfig("SmtpKennwort", Global.Modus.Update, configuration);
+        configuration = Global.Konfig("SmtpPort", Global.Modus.Update, configuration);
+        configuration = Global.Konfig("SmtpServer", Global.Modus.Update, configuration);
+        //configuration = Global.Konfig("BccAdresse", Global.Modus.Update, configuration);
+        
+
+        var mail = new Mail();
+        mail.Senden(subject, configuration, body, attachment, empfänger, "", "");
+    }
+
     internal void Mailen(string subject, string body, IConfiguration configuration, string attachment = "")
     {
         if (this.Count == 0)
@@ -1728,6 +1915,7 @@ public class Datei : List<dynamic>
         if (Global.Modus.Vergleichen == modus)
         {
             AnsiConsole.Write(table);
+            Console.WriteLine("Anzahl Zeilen:" + table.Rows.Count);
             return this;
         }            
 
@@ -2088,30 +2276,4 @@ public class Datei : List<dynamic>
             mail.Senden("Schulpflichtüberwachung KW " + ISOWeek.GetWeekOfYear(DateTime.Now), configuration, 
             $"Hallo Klassenleitung,\n\nDu wurdest hierher verlinkt, weil bei der automatisierten, wöchentlichen Durchsicht der Fehlzeiten eine mögliche Schulpflichtverletzung in Deiner Klasse aufgepoppt ist. Siehe hier: https://bkb.wiki/schulpflichtueberwachung\n\nVielen Dank!\n\nIhr Webuntis-Team", "", "sina.milewski@berufskolleg-borken.de,stefan.gantefort@berufskolleg-borken.de,ursula.moritz@berufskolleg-borken.de", cc.TrimEnd(','), "stefan.baeumer@berufskolleg-borken.de");
     }
-
- internal void LulÜberFehlendeEinträgeInformieren(
-    string[] interessierendeAttribute, 
-    string lehrerkürzel, 
-    IConfiguration configuration,
-    string betreff, 
-    string body)
- {
-  if (this.Count == 0)
-    {
-        return;
-    }
-
-    
-
-        configuration = Global.Konfig("SmtpUser", Global.Modus.Update, configuration);
-        configuration = Global.Konfig("SmtpKennwort", Global.Modus.Update, configuration);
-        configuration = Global.Konfig("SmtpPort", Global.Modus.Update, configuration);
-        configuration = Global.Konfig("SmtpServer", Global.Modus.Update, configuration);
-        //configuration = Global.Konfig("BccAdresse", Global.Modus.Update, configuration);
-        configuration = Global.Konfig("NetmanMailReceiver", Global.Modus.Update, configuration);
-        configuration = Global.Konfig("NetmanMailBccReceiver", Global.Modus.Update, configuration);
-
-        var mail = new Mail();
-        mail.Senden(subject, configuration, body, attachment, configuration["NetmanMailReceiver"], "", configuration["NetmanMailBccReceiver"]);
- }
 }
