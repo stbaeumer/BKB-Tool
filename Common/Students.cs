@@ -11,6 +11,7 @@ using ICSharpCode.SharpZipLib.Zip;
 using Common;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
+using Org.BouncyCastle.Bcpg.OpenPgp;
 
 #pragma warning disable CS8602 // Dereferenzierung eines möglicherweise null-Objekts.
 #pragma warning disable CS8604 // Möglicher Null-Verweis-Argument
@@ -232,8 +233,27 @@ public class Students : List<Student>
             foreach (var kl in (from k in this.OrderBy(x => x.Klasse) select k.Klasse).Distinct().ToList())
             {
                 var klassenlehrerKürzel = (from k in klasses where k.Name == kl select k.Klassenlehrer).FirstOrDefault();
+                var klassenlehrerKürzels = gpu003.Where(rec =>
+                    {
+                        var dict = (IDictionary<string, object>)rec;
+                        return kl == dict["Field1"].ToString();
+                    }).Select(rec =>
+                    {
+                        var dict = (IDictionary<string, object>)rec;
+                        return dict["Field30"].ToString();
+                    }).FirstOrDefault()?.Split(',').Select(k => k.Trim()).ToList() ?? new List<string>();
 
                 var Klassenlehrer = lehrers.FirstOrDefault(l => l.Kürzel == klassenlehrerKürzel);
+                var Klassenlehrers = new Lehrers();
+                foreach (var klassenlehrerKü in klassenlehrerKürzels)
+                {
+                    var klassenlehrer = lehrers.FirstOrDefault(l => l.Kürzel == klassenlehrerKü.ToString());
+                    if (klassenlehrer != null)
+                    {
+                        Klassenlehrers.Add(klassenlehrer);
+                    }
+                }
+                
 
                 foreach (var student in this.OrderBy(x => x.Nachname))
                 {
@@ -365,11 +385,12 @@ public class Students : List<Student>
                         }
 
                         student.MaßnahmenAlsWikiLinkAufzählung = student.GetMaßnahmenAlsWikiLinkAufzählung();
-                        var klassenleitungenString = "";
+                        var klassenleitungString = "";
 
                         if (aussage.Length > 0)
                         {
-                            klassenleitungenString += Klassenlehrer.Kürzel + ",";
+                            //klassenleitungString += Klassenlehrer.Kürzel + ",";
+                            klassenleitungString += string.Join(",", Klassenlehrers.Select(klassenlehrer => klassenlehrer.Kürzel));
 
                             if (!mailliste.Contains(Klassenlehrer.Mail))
                             {
@@ -380,14 +401,8 @@ public class Students : List<Student>
 
                             if (!teamsChatLink.Contains(Klassenlehrer.Mail))
                             {
-                                teamsChatLink += Klassenlehrer.Mail + ",";
+                                teamsChatLink += string.Join(",", Klassenlehrers.Select(klassenlehrer => klassenlehrer.Mail));
                             }
-                            zieldatei.Add("|" + student.Klasse.PadRight(10) + "|" + klassenleitungenString.TrimEnd(',').PadRight(16) + "  |" + name.PadRight(8) + "|" +
-                                   alter + "|" +
-                                   student.MaßnahmenAlsWikiLinkAufzählung + "  |" + aussage +
-                                   "  |[[:eskalationsstufen_erzieherische_einwirkung_ordnungsmassnahmen|Erz.Einwirkung]] " +
-                                   attestpflichtWikiLink + " " + mahnungWikiLink + " " + bußgeldverfahren + " " +
-                                   teilkonferenz + "|");
                         }                        
                     }
                 }

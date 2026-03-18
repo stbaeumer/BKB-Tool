@@ -245,7 +245,6 @@ public static class Global
         {
             contentString = content.LastOrDefault() ?? string.Empty;   
         }
-
         //contentString = "\n"; // $"\n\n";
         var panel = new Panel(contentString)
                 .Header(header)
@@ -1212,7 +1211,7 @@ public static class Global
     }
 
     string configFilePath = Path.Combine(folderPath, "BKB-Tool.json");
-
+    
     // 2. Verzeichnis sicherstellen
     if (!Directory.Exists(folderPath))
     {
@@ -1284,7 +1283,7 @@ public static class Global
     for (var i = 0; i < kon.Count(); i++)
     {   
         if(modus == Modus.ReadSilent && !string.IsNullOrEmpty(configuration[kon[i].Key]))
-            continue; 
+            continue;         
         DisplayHeader(configuration);         
         configuration = Konfig(kon[i].Key, modus, configuration, kon[i].Value.Aufforderung, i + 1, kon.Count(), kon[i].Value.Hinweise, kon[i].Value.DefaultValue);
     }
@@ -1339,7 +1338,7 @@ public static class Global
 
     public static void WeiterMitAnykey(IConfiguration configuration, Menüeintrag menüeintrag = null)
     {
-        var panel = new Panel($"Zur Menüauswahl mit [bold {Global.GetColor(Global.ColorActionInMenüs)}]Anykey[/], mit [bold {Global.GetColor(Global.ColorActionInMenüs)}]e[/] zu den Einstellungen, mit [bold {Global.GetColor(Global.ColorActionInMenüs)}]x[/] abbrechen, mit [bold {Global.GetColor(Global.ColorActionInMenüs)}]h[/] zur Onlinehilfe.")
+        var panel = new Panel($"Zur Menüauswahl mit [bold {Global.GetColor(Global.ColorActionInMenüs)}]Anykey[/], mit [bold {Global.GetColor(Global.ColorActionInMenüs)}]e[/] zu den Einstellungen, mit [bold {Global.GetColor(Global.ColorActionInMenüs)}]x[/] abbrechen und Dateien neu einlesen, mit [bold {Global.GetColor(Global.ColorActionInMenüs)}]h[/] zur Onlinehilfe.")
                         .HeaderAlignment(Justify.Left)
                         .SquareBorder()
                         .Expand()

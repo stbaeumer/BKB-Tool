@@ -48,463 +48,458 @@ public class Dateien : List<Datei>
     {
         configuration = Global.Konfig("PfadDownloads", Global.Modus.ReadSilent, configuration);
         configuration = Global.Konfig("PfadSchilddatenaustausch", Global.Modus.ReadSilent, configuration);
-
-        AnsiConsole.Status()
-            .Spinner(Spinner.Known.Dots)
-            .Start("Dateien einlesen ...", ctx =>
+    
+        var schildhinweise = new string[]
         {
-            var schildhinweise = new string[]
-            {
-                "Exportieren Sie alle *.dat-Dateien aus SchILD, indem Sie den Pfad gehen:",
-                $"1. [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Datenaustausch > Schnittstelle SchILD NRW > Export[/]",
-                $"2. [bold silver]Ausgabeverzeichnis[/]: [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadSchilddatenaustausch"]}[/]",
-                $"3. [bold {Global.GetColor(Global.ColorActionInMenüs)}]Export starten[/]"
-            };
+            "Exportieren Sie alle *.dat-Dateien aus SchILD, indem Sie den Pfad gehen:",
+            $"1. [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Datenaustausch > Schnittstelle SchILD NRW > Export[/]",
+            $"2. [bold silver]Ausgabeverzeichnis[/]: [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadSchilddatenaustausch"]}[/]",
+            $"3. [bold {Global.GetColor(Global.ColorActionInMenüs)}]Export starten[/]"
+        };
 
-            var untishinweise = new string[]
-            {
-                "Exportieren Sie die Datei aus Untis, indem Sie den Pfad gehen:",
-                $"1. [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Datei > Import/Export > Export TXT Datei[/]",
-                $"2. Als Delimiter muss '|' ausgewählt werden.",
-                $"3. Die Datei auswählen.",
+        var untishinweise = new string[]
+        {
+            "Exportieren Sie die Datei aus Untis, indem Sie den Pfad gehen:",
+            $"1. [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Datei > Import/Export > Export TXT Datei[/]",
+            $"2. Als Delimiter muss '|' ausgewählt werden.",
+            $"3. Die Datei auswählen.",
+            $"4. Die Datei in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/] speichern."
+        };
+
+        Add(new Datei(
+            "SchuelerBasisdaten",
+            "Beschreibung",
+            schildhinweise,
+            [""],
+            true,
+            d => d.FilternDatDatei()
+        ));
+        Add(new Datei(
+            "OpenPeriod",
+            "Beschreibung",
+            [
+                "Exportieren Sie die Datei aus Webuntis, indem Sie den Pfad gehen:",
+                $"[bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Klassenbuch > Offene Stunden > Bericht[/]",
+                $"Die PDF-Datei in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/] speichern."
+            ],
+            [""],
+            true,
+            d => d.FilterOpenPeriod(),
+            "*.pdf"
+        ));
+        Add(new Datei(
+            "Student_",
+            "Beschreibung",
+            [
+                "Exportieren Sie die Datei aus Webuntis, indem Sie als Administrator den Pfad gehen:",
+                $"1. [bold {Global.GetColor(Global.ColorKopfzeileInCSV)}]Stammdaten > Schüler*innen > Berichte > Schüler > CSV-Ausgabe[/]",
+                $"2. Die Datei in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/] speichern."
+            ],
+            [""],
+            true,
+            d => d.FilternWebuntisStudent(),
+            "*.csv",
+            "\t"
+        ));
+        Add(new Datei(
+            "ApprenticeRepresentative_",
+            "Beschreibung",
+            [
+                "Exportieren Sie die Datei aus Webuntis, indem Sie als Administrator den Pfad gehen:",
+                $"1. [bold {Global.GetColor(Global.ColorKopfzeileInCSV)}]Stammdaten > Ausbildungsbeauftragte > Berichte > Ausbildungsbeauftragte > CSV-Ausgabe[/]",
+                $"2. Die Datei in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/] speichern."
+            ],
+            [""],
+            true,
+            d => d.FilternWebuntisStudent(),
+            "*.csv",
+            "\t"
+        ));
+        Add(new Datei(
+            "LegalGuardian_",
+            "Beschreibung",
+            [
+                "Exportieren Sie die Datei aus Webuntis, indem Sie als Administrator den Pfad gehen:",
+                $"1. [bold {Global.GetColor(Global.ColorKopfzeileInCSV)}]Stammdaten > Erziehungsberechtigte > Berichte > Erziehungsberechtigte > CSV-Ausgabe[/]",
+                $"2. Die Datei in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/] speichern."
+            ],
+            [""],
+            true,
+            d => d.FilternWebuntisStudent(),
+            "*.csv",
+            "\t"
+        ));
+        Add(new Datei(
+            "GPU002",
+            "Beschreibung",
+            [
+                "Exportieren Sie die Datei aus Untis, indem Sie als Admin den Pfad gehen:",
+                $"[bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Datei > Import/Export > Export TXT Datei > Unterricht[/]",
+                $"Trennzeichen: [{Global.GetColor(Global.ColorPfadInDateien)}]|[/]",
+                $"Textbegrenzung: [{Global.GetColor(Global.ColorPfadInDateien)}]\"[/]",
+                $"Encoding: [{Global.GetColor(Global.ColorPfadInDateien)}]UTF-8[/]",
+                $"Die Datei speichern: [{Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}GPU002.TXT[/]"
+            ],
+            [""],
+            false,
+            d => d.FilternKlassenGPU002(),
+            "*.TXT",
+            "|"
+        ));
+        Add(new Datei(
+            "GPU003",
+            "Beschreibung",
+            untishinweise,
+            [""],
+            false,
+            d => d.FilternKlassenGPU003(),
+            "*.TXT",
+            "|"
+        ));
+        Add(new Datei(
+            "GPU004",
+            "Beschreibung: Lehrkraefte",
+            untishinweise,
+            [""],
+            false,
+            d => d.FilternLehrkraefteGPU004(),
+            "*.TXT",
+            "|"
+        ));
+        Add(new Datei(
+            "GPU005",
+            "Beschreibung: Lehrkraefte",
+            untishinweise,
+            [""],
+            false,
+            d => d.FilternLehrkraefteGPU004(),
+            "*.TXT",
+            "|"
+        ));
+        Add(new Datei(
+            "GPU006",
+            "Beschreibung: Fächer",
+            untishinweise,
+            [""],
+            false,
+            d => d.FilternFaecherGPU006(),
+            "*.TXT",
+            "|"
+        ));
+        Add(new Datei(
+            "GPU020",
+            "Beschreibung",
+            untishinweise,
+            [""],
+            false,
+            d => d.FilternGPU020(),
+            "*.TXT",
+            "|",
+            true
+        ));
+        Add(new Datei(
+            "Lehrkraefte.dat",
+            "Beschreibung",
+            schildhinweise,
+            [""],
+            true,
+            d => d.FilterLehrkraefte()
+        ));
+        Add(new Datei(
+            "LehrkraefteSonderzeiten.dat",
+            "Beschreibung",
+            schildhinweise,
+            [""],
+            true,
+            d => d.FilterLehrkraefte(),
+            "*.dat",
+            "|",
+            true
+        ));
+        Add(new Datei(
+            @"Gost.csv",
+            "Beschreibung",
+            [""],
+            [""],
+            false,
+            d => d.FilterGost(),
+            "*.csv",
+            ","
+        ));
+        Add(new Datei(
+            "ExportLessons",
+            "Beschreibung",
+            untishinweise,
+            [""],
+            true,
+            d => d.FilterExportLessons(),
+            "*.csv",
+            "\t"
+        ));
+        Add(new Datei(
+            "Kurse.",
+            "Beschreibung",
+            schildhinweise,
+            [""],
+            true,
+            d => d.FilterKurse(),
+            "*.dat",
+            "|",
+            true
+        ));
+        Add(new Datei(
+            @"DatumsAusAtlantis.csv",
+            "Beschreibung",
+            [],
+            [""],
+            true,
+            d => d.FilterDatumsAusAtlantis(),
+            "*.csv",
+            ","
+        ));
+        Add(new Datei(
+            "AbsencePerStudent",
+            "Beschreibung",
+            [
+                "Exportieren Sie die Datei aus Webuntis, indem Sie als Admin den Pfad gehen:",
+                $"1. [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Klassenbuch > Berichte[/]",
+                $"2. Evtl. Klasse auswählen. Evtl. den Zeitraum eingrenzen. Beides ist nicht zwingend notwendig.",
+                $"3. [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Fehlzeiten[/], [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Verspätungen[/] und [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Nur zählende Abwesenheiten[/] anhaken.",
+                $"4. Auf das CSV-Symbol hinter [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Fehlzeiten pro Schüler*in[/] [bold {Global.GetColor(Global.ColorFehler)}]pro Tag[/] klicken.",
+                $"5. Die Datei in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/] speichern."
+
+            ],
+            [""],
+            true,
+            d => d.FilternAbsencePerLessons(),
+            "*.csv",
+            "\t"
+        ));
+        Add(new Datei(
+            @"Adressen.csv",
+            "Beschreibung",
+            [
+                "Exportieren Sie die Datei aus Outlook, indem Sie:",
+            "den Kalender in Listenansicht anzeigen",
+            "Mit Strg+A alles markieren",
+            "Mit Strg+C kopieren",
+            "Die Datei " + Path.Combine(configuration["PfadDownloads"],"termine_kollegium.csv") + " überschreiben oder neu anlegen."
+            ],
+            [""],
+            true,
+            d => d.FilternAdressenAtlantis(),
+            "*.csv",
+            ";"
+        ));
+        Add(new Datei(
+            @"termine_kollegium.csv",
+            "Beschreibung",
+            [
+                "Exportieren Sie die Datei aus Outlook, indem Sie:",
+            "den Kalender in Listenansicht anzeigen",
+            "Mit Strg+A alles markieren",
+            "Mit Strg+C kopieren",
+            $"Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]" + Path.Combine(configuration["PfadDownloads"],"termine_kollegium.csv") + "[/] überschreiben oder neu anlegen."
+            ],
+            [""],
+            true,
+            d => d.FilternTermineKollegium(),
+            "*.csv",
+            "\t"
+        ));
+        Add(new Datei(
+            @"termine_fhr.csv",
+            "Beschreibung",
+            [
+                "Exportieren Sie die Datei aus Outlook, indem Sie:",
+            "den Kalender in Listenansicht anzeigen",
+            "Mit Strg+A alles markieren",
+            "Mit Strg+C kopieren",
+            $"Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]" + Path.Combine(configuration["PfadDownloads"],"termine_fhr.csv") + "[/] überschreiben oder neu anlegen."
+            ],
+            [""],
+            true,
+            d => d.FilternTermineFhr(),
+            "*.csv",
+            "\t"
+        ));
+        Add(new Datei(
+            @"termine_verwaltung.csv",
+            "Beschreibung",
+            [
+                "Exportieren Sie die Datei aus Outlook, indem Sie:",
+            "den Kalender in Listenansicht anzeigen",
+            "Mit Strg+A alles markieren",
+            "Mit Strg+C kopieren",
+            $"Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]" + Path.Combine(configuration["PfadDownloads"],"termine_verwaltung.csv") + "[/] überschreiben oder neu anlegen."
+            ],
+            [""],
+            true,
+            d => d.FilternTermineVerwaltung(),
+            "*.csv",
+            "\t"
+        ));
+        Add(new Datei(
+            @"termine_berufliches_gymnasium.csv",
+            "Beschreibung",
+                [
+                "Exportieren Sie die Datei aus Outlook, indem Sie:",
+            "den Kalender in Listenansicht anzeigen",
+            "Mit Strg+A alles markieren",
+            "Mit Strg+C kopieren",
+            $"Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]" + Path.Combine(configuration["PfadDownloads"],"termine_berufliches_gymnasium.csv") + "[/] überschreiben oder neu anlegen."
+            ],
+            [""],
+            true,
+            d => d.FilternTermineBeruflichesGymnasium(),
+            "*.csv",
+            "\t"
+        ));
+        Add(new Datei(
+            @"Atlantis-Zeugnisse-Noten.csv",
+            "Beschreibung",
+            [""],
+            [""],
+            false,
+            d => d.FilternAtlantisZeugnisseNoten(),
+            "*.csv",
+            ","
+        ));
+        Add(new Datei(
+            "SchuelerLeistungsdaten",
+            "Beschreibung",
+            schildhinweise,
+            ["Mahnung", "Mahndatum", "Sortierung"],
+            true,
+            d => d.FilternDatDatei()
+        ));
+        Add(new Datei(
+            "SchuelerErzieher",
+            "Beschreibung",
+            schildhinweise,
+            [""],
+            true,
+            d => d.FilternDatDatei()
+        ));
+        Add(new Datei(
+            "SchuelerTelefonnummern",
+            "Beschreibung",
+            schildhinweise,
+            [""],
+            true,
+            d => d.FilternDatDatei()
+        ));
+        Add(new Datei(
+            "SchuelerAdressen",
+            "Beschreibung",
+            schildhinweise,
+            [""],
+            true,
+            d => d.FilternDatDatei()
+        ));
+        Add(new Datei(
+            "Adressen",
+            "Beschreibung",
+            schildhinweise,
+            [""],
+            true,
+            d => d.FilternDatDatei()
+        ));
+        Add(new Datei(
+            "Klassen",
+            "Beschreibung",
+            schildhinweise,
+            [""],
+            true,
+            d => d.FilternSchildKlassen()
+        ));
+        Add(new Datei(
+            "SchuelerZusatzdaten",
+            "Beschreibung",
+            schildhinweise,
+            [""],
+            true,
+            d => d.FilternDatDatei()
+        ));
+        Add(new Datei(
+            "SchuelerTelefonnummern",
+            "Beschreibung",
+            schildhinweise,
+            [""],
+            true,
+            d => d.FilternDatDatei()
+        ));
+        Add(new Datei(
+            "Faecher",
+            "Beschreibung",
+            schildhinweise,
+            ["Unterrichtsprache", "Sortierung S1", "Sortierung S2", "Gewichtung"],
+            true,
+            d => d.FilternSchildFaecher()
+        ));
+        Add(new Datei(
+            "SchuelerLernabschnittsdaten",
+            "Beschreibung",
+            schildhinweise,
+            [""],
+            true,
+            d => d.FilternDatDatei()
+        ));
+        Add(new Datei(
+            "SchuelerTeilleistungen",
+            "Beschreibung",
+            schildhinweise,
+            [""],
+            true,
+            d => d.FilternDatDatei()
+        ));
+        Add(new Datei(
+            "SchuelerFehlstunden",
+            "Beschreibung",
+            schildhinweise,
+            [""],
+            true,
+            d => d.FilternDatDatei()
+        ));
+        Add(new Datei(
+            "SchuelerVermerke",
+            "Beschreibung",
+            schildhinweise,
+            [""],
+            true,
+            d => d.FilternDatDatei()
+        ));
+        Add(new Datei(
+            "MarksPerLesson",
+            "Beschreibung",
+            [
+                "Exportieren Sie die Datei aus Webuntis, indem Sie als Admin den Pfad gehen:",
+                $"1. [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Klassenbuch > Berichte[/]",
+                $"2. Evtl. Klasse auswählen. Evtl. den Zeitraum eingrenzen.",
+                $"3. [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Noten > Noten pro Schüler*in > CSV-Symbol[/] klicken.",
                 $"4. Die Datei in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/] speichern."
-            };
 
-            Add(new Datei(
-                "SchuelerBasisdaten",
-                "Beschreibung",
-                schildhinweise,
-                [""],
-                true,
-                d => d.FilternDatDatei()
-            ));
-            Add(new Datei(
-                "OpenPeriod",
-                "Beschreibung",
-                [
-                    "Exportieren Sie die Datei aus Webuntis, indem Sie den Pfad gehen:",
-                    $"[bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Klassenbuch > Offene Stunden > Bericht[/]",
-                    $"Die PDF-Datei in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/] speichern."
-                ],
-                [""],
-                true,
-                d => d.FilterOpenPeriod(),
-                "*.pdf"
-            ));
-            Add(new Datei(
-                "Student_",
-                "Beschreibung",
-                [
-                    "Exportieren Sie die Datei aus Webuntis, indem Sie als Administrator den Pfad gehen:",
-                    $"1. [bold {Global.GetColor(Global.ColorKopfzeileInCSV)}]Stammdaten > Schüler*innen > Berichte > Schüler > CSV-Ausgabe[/]",
-                    $"2. Die Datei in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/] speichern."
-                ],
-                [""],
-                true,
-                d => d.FilternWebuntisStudent(),
-                "*.csv",
-                "\t"
-            ));
-            Add(new Datei(
-                "ApprenticeRepresentative_",
-                "Beschreibung",
-                [
-                    "Exportieren Sie die Datei aus Webuntis, indem Sie als Administrator den Pfad gehen:",
-                    $"1. [bold {Global.GetColor(Global.ColorKopfzeileInCSV)}]Stammdaten > Ausbildungsbeauftragte > Berichte > Ausbildungsbeauftragte > CSV-Ausgabe[/]",
-                    $"2. Die Datei in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/] speichern."
-                ],
-                [""],
-                true,
-                d => d.FilternWebuntisStudent(),
-                "*.csv",
-                "\t"
-            ));
-            Add(new Datei(
-                "LegalGuardian_",
-                "Beschreibung",
-                [
-                    "Exportieren Sie die Datei aus Webuntis, indem Sie als Administrator den Pfad gehen:",
-                    $"1. [bold {Global.GetColor(Global.ColorKopfzeileInCSV)}]Stammdaten > Erziehungsberechtigte > Berichte > Erziehungsberechtigte > CSV-Ausgabe[/]",
-                    $"2. Die Datei in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/] speichern."
-                ],
-                [""],
-                true,
-                d => d.FilternWebuntisStudent(),
-                "*.csv",
-                "\t"
-            ));
-            Add(new Datei(
-                "GPU002",
-                "Beschreibung",
-                [
-                    "Exportieren Sie die Datei aus Untis, indem Sie als Admin den Pfad gehen:",
-                    $"[bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Datei > Import/Export > Export TXT Datei > Unterricht[/]",
-                    $"Trennzeichen: [{Global.GetColor(Global.ColorPfadInDateien)}]|[/]",
-                    $"Textbegrenzung: [{Global.GetColor(Global.ColorPfadInDateien)}]\"[/]",
-                    $"Encoding: [{Global.GetColor(Global.ColorPfadInDateien)}]UTF-8[/]",
-                    $"Die Datei speichern: [{Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}GPU002.TXT[/]"
-                ],
-                [""],
-                false,
-                d => d.FilternKlassenGPU002(),
-                "*.TXT",
-                "|"
-            ));
-            Add(new Datei(
-                "GPU003",
-                "Beschreibung",
-                untishinweise,
-                [""],
-                false,
-                d => d.FilternKlassenGPU003(),
-                "*.TXT",
-                "|"
-            ));
-            Add(new Datei(
-                "GPU004",
-                "Beschreibung: Lehrkraefte",
-                untishinweise,
-                [""],
-                false,
-                d => d.FilternLehrkraefteGPU004(),
-                "*.TXT",
-                "|"
-            ));
-            Add(new Datei(
-                "GPU005",
-                "Beschreibung: Lehrkraefte",
-                untishinweise,
-                [""],
-                false,
-                d => d.FilternLehrkraefteGPU004(),
-                "*.TXT",
-                "|"
-            ));
-            Add(new Datei(
-                "GPU006",
-                "Beschreibung: Fächer",
-                untishinweise,
-                [""],
-                false,
-                d => d.FilternFaecherGPU006(),
-                "*.TXT",
-                "|"
-            ));
-            Add(new Datei(
-                "GPU020",
-                "Beschreibung",
-                untishinweise,
-                [""],
-                false,
-                d => d.FilternGPU020(),
-                "*.TXT",
-                "|",
-                true
-            ));
-            Add(new Datei(
-                "Lehrkraefte.dat",
-                "Beschreibung",
-                schildhinweise,
-                [""],
-                true,
-                d => d.FilterLehrkraefte()
-            ));
-            Add(new Datei(
-                "LehrkraefteSonderzeiten.dat",
-                "Beschreibung",
-                schildhinweise,
-                [""],
-                true,
-                d => d.FilterLehrkraefte(),
-                "*.dat",
-                "|",
-                true
-            ));
-            Add(new Datei(
-                @"Gost.csv",
-                "Beschreibung",
-                [""],
-                [""],
-                false,
-                d => d.FilterGost(),
-                "*.csv",
-                ","
-            ));
-            Add(new Datei(
-                "ExportLessons",
-                "Beschreibung",
-                untishinweise,
-                [""],
-                true,
-                d => d.FilterExportLessons(),
-                "*.csv",
-                "\t"
-            ));
-            Add(new Datei(
-                "Kurse.",
-                "Beschreibung",
-                schildhinweise,
-                [""],
-                true,
-                d => d.FilterKurse(),
-                "*.dat",
-                "|",
-                true
-            ));
-            Add(new Datei(
-                @"DatumsAusAtlantis.csv",
-                "Beschreibung",
-                [],
-                [""],
-                true,
-                d => d.FilterDatumsAusAtlantis(),
-                "*.csv",
-                ","
-            ));
-            Add(new Datei(
-                "AbsencePerStudent",
-                "Beschreibung",
-                [
-                    "Exportieren Sie die Datei aus Webuntis, indem Sie als Admin den Pfad gehen:",
-                    $"1. [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Klassenbuch > Berichte[/]",
-                    $"2. Evtl. Klasse auswählen. Evtl. den Zeitraum eingrenzen. Beides ist nicht zwingend notwendig.",
-                    $"3. [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Fehlzeiten[/], [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Verspätungen[/] und [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Nur zählende Abwesenheiten[/] anhaken.",
-                    $"4. Auf das CSV-Symbol hinter [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Fehlzeiten pro Schüler*in[/] [bold {Global.GetColor(Global.ColorFehler)}]pro Tag[/] klicken.",
-                    $"5. Die Datei in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/] speichern."
-
-                ],
-                [""],
-                true,
-                d => d.FilternAbsencePerLessons(),
-                "*.csv",
-                "\t"
-            ));
-            Add(new Datei(
-                @"Adressen.csv",
-                "Beschreibung",
-                [
-                    "Exportieren Sie die Datei aus Outlook, indem Sie:",
-                "den Kalender in Listenansicht anzeigen",
-                "Mit Strg+A alles markieren",
-                "Mit Strg+C kopieren",
-                "Die Datei " + Path.Combine(configuration["PfadDownloads"],"termine_kollegium.csv") + " überschreiben oder neu anlegen."
-                ],
-                [""],
-                true,
-                d => d.FilternAdressenAtlantis(),
-                "*.csv",
-                ";"
-            ));
-            Add(new Datei(
-                @"termine_kollegium.csv",
-                "Beschreibung",
-                [
-                    "Exportieren Sie die Datei aus Outlook, indem Sie:",
-                "den Kalender in Listenansicht anzeigen",
-                "Mit Strg+A alles markieren",
-                "Mit Strg+C kopieren",
-                $"Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]" + Path.Combine(configuration["PfadDownloads"],"termine_kollegium.csv") + "[/] überschreiben oder neu anlegen."
-                ],
-                [""],
-                true,
-                d => d.FilternTermineKollegium(),
-                "*.csv",
-                "\t"
-            ));
-            Add(new Datei(
-                @"termine_fhr.csv",
-                "Beschreibung",
-                [
-                    "Exportieren Sie die Datei aus Outlook, indem Sie:",
-                "den Kalender in Listenansicht anzeigen",
-                "Mit Strg+A alles markieren",
-                "Mit Strg+C kopieren",
-                $"Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]" + Path.Combine(configuration["PfadDownloads"],"termine_fhr.csv") + "[/] überschreiben oder neu anlegen."
-                ],
-                [""],
-                true,
-                d => d.FilternTermineFhr(),
-                "*.csv",
-                "\t"
-            ));
-            Add(new Datei(
-                @"termine_verwaltung.csv",
-                "Beschreibung",
-                [
-                    "Exportieren Sie die Datei aus Outlook, indem Sie:",
-                "den Kalender in Listenansicht anzeigen",
-                "Mit Strg+A alles markieren",
-                "Mit Strg+C kopieren",
-                $"Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]" + Path.Combine(configuration["PfadDownloads"],"termine_verwaltung.csv") + "[/] überschreiben oder neu anlegen."
-                ],
-                [""],
-                true,
-                d => d.FilternTermineVerwaltung(),
-                "*.csv",
-                "\t"
-            ));
-            Add(new Datei(
-                @"termine_berufliches_gymnasium.csv",
-                "Beschreibung",
-                 [
-                    "Exportieren Sie die Datei aus Outlook, indem Sie:",
-                "den Kalender in Listenansicht anzeigen",
-                "Mit Strg+A alles markieren",
-                "Mit Strg+C kopieren",
-                $"Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]" + Path.Combine(configuration["PfadDownloads"],"termine_berufliches_gymnasium.csv") + "[/] überschreiben oder neu anlegen."
-                ],
-                [""],
-                true,
-                d => d.FilternTermineBeruflichesGymnasium(),
-                "*.csv",
-                "\t"
-            ));
-            Add(new Datei(
-                @"Atlantis-Zeugnisse-Noten.csv",
-                "Beschreibung",
-                [""],
-                [""],
-                false,
-                d => d.FilternAtlantisZeugnisseNoten(),
-                "*.csv",
-                ","
-            ));
-            Add(new Datei(
-                "SchuelerLeistungsdaten",
-                "Beschreibung",
-                schildhinweise,
-                ["Mahnung", "Mahndatum", "Sortierung"],
-                true,
-                d => d.FilternDatDatei()
-            ));
-            Add(new Datei(
-                "SchuelerErzieher",
-                "Beschreibung",
-                schildhinweise,
-                [""],
-                true,
-                d => d.FilternDatDatei()
-            ));
-            Add(new Datei(
-                "SchuelerTelefonnummern",
-                "Beschreibung",
-                schildhinweise,
-                [""],
-                true,
-                d => d.FilternDatDatei()
-            ));
-            Add(new Datei(
-                "SchuelerAdressen",
-                "Beschreibung",
-                schildhinweise,
-                [""],
-                true,
-                d => d.FilternDatDatei()
-            ));
-            Add(new Datei(
-                "Adressen",
-                "Beschreibung",
-                schildhinweise,
-                [""],
-                true,
-                d => d.FilternDatDatei()
-            ));
-            Add(new Datei(
-                "Klassen",
-                "Beschreibung",
-                schildhinweise,
-                [""],
-                true,
-                d => d.FilternSchildKlassen()
-            ));
-            Add(new Datei(
-                "SchuelerZusatzdaten",
-                "Beschreibung",
-                schildhinweise,
-                [""],
-                true,
-                d => d.FilternDatDatei()
-            ));
-            Add(new Datei(
-                "SchuelerTelefonnummern",
-                "Beschreibung",
-                schildhinweise,
-                [""],
-                true,
-                d => d.FilternDatDatei()
-            ));
-            Add(new Datei(
-                "Faecher",
-                "Beschreibung",
-                schildhinweise,
-                ["Unterrichtsprache", "Sortierung S1", "Sortierung S2", "Gewichtung"],
-                true,
-                d => d.FilternSchildFaecher()
-            ));
-            Add(new Datei(
-                "SchuelerLernabschnittsdaten",
-                "Beschreibung",
-                schildhinweise,
-                [""],
-                true,
-                d => d.FilternDatDatei()
-            ));
-            Add(new Datei(
-                "SchuelerTeilleistungen",
-                "Beschreibung",
-                schildhinweise,
-                [""],
-                true,
-                d => d.FilternDatDatei()
-            ));
-            Add(new Datei(
-                "SchuelerFehlstunden",
-                "Beschreibung",
-                schildhinweise,
-                [""],
-                true,
-                d => d.FilternDatDatei()
-            ));
-            Add(new Datei(
-                "SchuelerVermerke",
-                "Beschreibung",
-                schildhinweise,
-                [""],
-                true,
-                d => d.FilternDatDatei()
-            ));
-            Add(new Datei(
-                "MarksPerLesson",
-                "Beschreibung",
-                [
-                    "Exportieren Sie die Datei aus Webuntis, indem Sie als Admin den Pfad gehen:",
-                    $"1. [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Klassenbuch > Berichte[/]",
-                    $"2. Evtl. Klasse auswählen. Evtl. den Zeitraum eingrenzen.",
-                    $"3. [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Noten > Noten pro Schüler*in > CSV-Symbol[/] klicken.",
-                    $"4. Die Datei in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/] speichern."
-
-                ],
-                [""],
-                true,
-                d => d.FilternMarksPerLessons(),
-                "*.csv",
-                "\t"
-            ));
-            Add(new Datei(
-                "StudentgroupStudents",
-                "Beschreibung",
-                [
-                    "Exportieren Sie die Datei aus Webuntis, indem Sie als Administrator den Pfad gehen:",
-                    $"1. [bold {Global.GetColor(Global.ColorKopfzeileInCSV)}]Administration > Export > StudentgroupStudents.csv[/]",
-                    $"2. Die Datei in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/] speichern."
-                ],
-                [],
-                true,
-                d => d.FilternStudentgroupStudents(),
-                "*.csv",
-                "\t"
-            ));            
-        });
+            ],
+            [""],
+            true,
+            d => d.FilternMarksPerLessons(),
+            "*.csv",
+            "\t"
+        ));
+        Add(new Datei(
+            "StudentgroupStudents",
+            "Beschreibung",
+            [
+                "Exportieren Sie die Datei aus Webuntis, indem Sie als Administrator den Pfad gehen:",
+                $"1. [bold {Global.GetColor(Global.ColorKopfzeileInCSV)}]Administration > Export > StudentgroupStudents.csv[/]",
+                $"2. Die Datei in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/] speichern."
+            ],
+            [],
+            true,
+            d => d.FilternStudentgroupStudents(),
+            "*.csv",
+            "\t"
+        ));                    
     }
 
     public List<dynamic>? GetMatchingList(IConfiguration configuration, string pattern, Students students = null, Klassen klassen = null)
@@ -733,13 +728,27 @@ public class Dateien : List<Datei>
     /// <returns></returns>
     public List<string> GetDateienImPfad(IConfiguration configuration)
     {
-        return Directory.GetFiles(configuration["PfadDownloads"], "*", SearchOption.TopDirectoryOnly) // Nur im aktuellen Verzeichnis suchen
-        .Where(f => f.ToLower().EndsWith(".csv", StringComparison.OrdinalIgnoreCase) ||
-                    f.ToLower().EndsWith(".txt", StringComparison.OrdinalIgnoreCase) ||
-                    f.ToLower().EndsWith(".dat", StringComparison.OrdinalIgnoreCase) ||
-                    Path.GetFileNameWithoutExtension(f).ToLower().StartsWith("openperiod", StringComparison.OrdinalIgnoreCase))
-        .OrderBy(f => File.GetLastWriteTime(f)) // Nach Erstellungsdatum sortieren
-        .ToList();
+        string pfad = configuration["PfadDownloads"];
+        
+        // Sicherstellen, dass der Pfad existiert, um Exceptions zu vermeiden
+        if (string.IsNullOrEmpty(pfad) || !Directory.Exists(pfad))
+            return new List<string>();
+
+        // Definition der erlaubten Endungen
+        var erlaubteEndungen = new[] { ".csv", ".txt", ".dat" };
+
+        return Directory.GetFiles(pfad, "*", SearchOption.AllDirectories) // "AllDirectories" sucht in Unterordnern
+            .Where(f => 
+            {
+                string ext = Path.GetExtension(f);
+                string name = Path.GetFileNameWithoutExtension(f);
+
+                // Prüfung auf Endung ODER ob der Name mit "openperiod" beginnt
+                return erlaubteEndungen.Contains(ext, StringComparer.OrdinalIgnoreCase) || 
+                    name.StartsWith("openperiod", StringComparison.OrdinalIgnoreCase);
+            })
+            .OrderBy(f => File.GetLastWriteTime(f)) // Sortierung nach letztem Schreibzugriff
+            .ToList();
     }
 
     /// <summary>
