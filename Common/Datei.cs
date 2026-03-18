@@ -777,7 +777,7 @@ public class Datei : List<dynamic>
     
         if (Count == 0)
         {
-            AnsiConsole.Write(new Panel($"[red]Datei nicht erstellt (0 Zeilen): [/]{AbsoluterPfad}")
+            AnsiConsole.Write(new Panel($"[Spectre.Console.Color.Orange1]Datei nicht erstellt (0 Zeilen): [/]{AbsoluterPfad}")
                 .HeaderAlignment(Justify.Left)
                 .SquareBorder()
                 .Expand()
@@ -1915,7 +1915,8 @@ public class Datei : List<dynamic>
         if (Global.Modus.Vergleichen == modus)
         {
             AnsiConsole.Write(table);
-            Console.WriteLine("Anzahl Zeilen:" + table.Rows.Count);
+            if (table.Rows.Count > 3)
+                Console.WriteLine("Anzahl Zeilen:" + table.Rows.Count);
             return this;
         }            
 

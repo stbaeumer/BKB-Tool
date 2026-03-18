@@ -1339,7 +1339,7 @@ public static class Global
 
     public static void WeiterMitAnykey(IConfiguration configuration, Menüeintrag menüeintrag = null)
     {
-        var panel = new Panel($"Zur Menüauswahl mit [bold {Global.GetColor(Global.ColorActionInMenüs)}]Anykey[/], mit [bold {Global.GetColor(Global.ColorActionInMenüs)}]e[/] zu den Einstellungen, mit [bold {Global.GetColor(Global.ColorActionInMenüs)}]h[/] zur Onlinehilfe.")
+        var panel = new Panel($"Zur Menüauswahl mit [bold {Global.GetColor(Global.ColorActionInMenüs)}]Anykey[/], mit [bold {Global.GetColor(Global.ColorActionInMenüs)}]e[/] zu den Einstellungen, mit [bold {Global.GetColor(Global.ColorActionInMenüs)}]x[/] abbrechen, mit [bold {Global.GetColor(Global.ColorActionInMenüs)}]h[/] zur Onlinehilfe.")
                         .HeaderAlignment(Justify.Left)
                         .SquareBorder()
                         .Expand()
