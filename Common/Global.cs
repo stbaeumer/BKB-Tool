@@ -2386,6 +2386,17 @@ public static class KonfigHelper
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
-        }
+        },
+        ["SVWSAuswahl"] = new KonfigMeta
+        {
+            Key = "SVWS-Auswahl",
+            DefaultValue = "1",
+            Aufforderung = "Ihre Auswahl zur Steuerung des SVWS-Servers",
+            Hinweise = $"Geben Sie eine [bold {Global.GetColor(Global.ColorTextHervorheben)}]Zahl[/] ein",
+            Datentyp = Global.Datentyp.Auswahl,
+            InGrundeinstellungAbfragen = false,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
+        },
     };
 }

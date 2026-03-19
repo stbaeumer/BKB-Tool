@@ -990,13 +990,4 @@ public class Dateien : List<Datei>
                 datei.ZippenMitKennwort(configuration);
         }
     }
-
-    internal void Mailen(IConfiguration configuration)
-    {
-        foreach (var datei in this)
-        {
-            if(datei.AbsoluterPfad.ToLower().Contains("netman"))
-                datei.Mailen(datei.ZipPfad, datei.ZipPfad, configuration, datei.ZipPfad);
-        }
-    }
 }

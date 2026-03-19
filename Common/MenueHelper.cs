@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 using Common;
 using Microsoft.Extensions.Configuration;
@@ -161,7 +162,15 @@ public static class MenueHelper
           [
            datei => datei.Erstellen(),
            datei => datei.ZippenMitKennwort(configuration),
-           datei => datei.Mailen("Webuntis-Import durchgeführt", "SuS, Eltern, Betriebszugehörigkeiten und Fotos nach Webuntis und Geevoo importiert. Importdatei für o365 und Littera bereitgestellt.", configuration, datei.ZipPfad)
+           datei => datei.Mailen(
+            configuration,
+            "Webuntis-Import durchgeführt", 
+            "SuS, Eltern, Betriebszugehörigkeiten und Fotos nach Webuntis und Geevoo importiert. Importdatei für o365 und Littera bereitgestellt.",
+            configuration["NetmanMailReceiver"].Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(m => m.Trim()).ToList(),
+            "".Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(m => m.Trim()).ToList(),
+            configuration["NetmanMailBccReceiver"].Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(m => m.Trim()).ToList(),
+            new List<string>() { datei.ZipPfad } 
+           )
           ],
           [
            $"Es wird jetzt die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd") + "-ImportNachNetman.csv")}[/] erstellt.",
@@ -255,7 +264,15 @@ public static class MenueHelper
         [
          datei => datei.PutPage(),
          datei => datei.OeffneWebseite("https://bkb.wiki/schulpflichtueberwachung"),
-         datei => datei.Mailen(configuration)
+         datei => datei.Mailen(
+          configuration, 
+          "Schulpflichtüberwachung KW " + ISOWeek.GetWeekOfYear(DateTime.Now), 
+          $"Hallo Klassenleitung,\n\nDu wurdest hierher verlinkt, weil bei der automatisierten, wöchentlichen Durchsicht der Fehlzeiten eine mögliche Schulpflichtverletzung in Deiner Klasse aufgepoppt ist. Siehe hier: https://bkb.wiki/schulpflichtueberwachung\n\nVielen Dank!\n\nIhr Webuntis-Team", 
+          lehrers.Where(l => !string.IsNullOrWhiteSpace(l.Mail)).Select(l => l.Mail!).Distinct().ToList(),
+          new List<string>(["sina.milewski@berufskolleg-borken.de,stefan.gantefort@berufskolleg-borken.de,ursula.moritz@berufskolleg-borken.de"]),
+          new List<string>(["stefan.baeumer@berufskolleg-borken.de"]),
+          null
+         )
         ]
        ); 
       },
@@ -282,7 +299,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Nur177659
      ),     
      new Menüeintrag(
-      "Gruppen & Organig.:Mo:Gruppen & Organigramm aus Untisanrechnungen und Unterrichten als SQLite-Dateien für Wiki-Import erstellen",
+      "Gruppen & Organig.:Mo:Gruppen & Organigramm aus Untisanrechnungen und Unterrichten für Wiki-Import erstellen",
       quelldateien.Notwendige(configuration, ["schuelervermerke,dat", "schuelerzusatzdaten,dat", "absenceperstudent,csv", "GPU006,txt", "GPU002,txt", "GPU003,txt", "klassen,dat"]),
       students,
       klassen,
@@ -519,7 +536,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
-      $"Zeugnis#5 Listen:1 Tag vorher:Notenlisten werden in Wiki veröffentlicht. Fehlende Noten werden markiert.",
+      $"Zeugnis#5 Listen:1 Tag vorher:Notenlisten werden in Wiki veröffentlicht. Fehlende Noten werden markiert",
       quelldateien.Notwendige(configuration, ["faecher,dat","schuelerbasisdaten,dat", "schuelerleistungsdaten,dat"]),
       students,
       klassen,
@@ -1172,6 +1189,49 @@ public static class MenueHelper
          datei => datei.OeffneWebseite("https://bkb.wiki/oeffentlich:sprechtag"),
         ],
         "Zum jährlichen Sprechtag laden wir sehr herzlich am Mittwoch nach der allgemeinen Zeugnisausgabe in der Zeit von 13:30 bis 17:30 Uhr ein. Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
+      },
+      Global.Rubrik.Wiki,
+      Global.NurBeiDiesenSchulnummern.Nur177659
+     ),
+     new Menüeintrag(
+      "SVWS-Server: :managen",
+      quelldateien.Notwendige(configuration, []),
+      students,
+      klassen,
+      [
+       $"Die Wiki-Datei [{Global.GetColor(Global.ColorPfadInDateien)}]SVWS-Server[/] über folgende Funktionen steuern.",
+       $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise:[/]",
+       $"[{Global.GetColor(Global.ColorHinweise)}]1:[/]"
+      ],
+      m =>
+      {
+       var auswahl = AnsiConsole.Prompt(
+        new SelectionPrompt<string>()
+         .Title("SVWS-Server steuern:")
+         .PageSize(10)
+         .AddChoices(new[] {
+          "Server starten",
+          "Server stoppen",
+          "Server Backup erstllen",
+          "Status anzeigen"
+         }));
+        configuration = Global.Konfig("Auswahl", Global.Modus.Update, configuration, "", -1, -1, "", null, null, zulässigeAuswahlOptionen);
+
+        switch (configuration["Auswahl"])
+        {         
+         case "Server starten":
+          m.SvwsServerStarten(configuration);
+          break;
+         case "Server stoppen":
+          m.SvwsServerStoppen(configuration);
+          break;
+         case "Server Backup erstellen":
+          m.SvwsServerBackupErstellen(configuration);
+          break;
+         case "Status anzeigen":
+          m.SvwsServerStatusAnzeigen(configuration);
+          break;
+        }
       },
       Global.Rubrik.Wiki,
       Global.NurBeiDiesenSchulnummern.Nur177659
