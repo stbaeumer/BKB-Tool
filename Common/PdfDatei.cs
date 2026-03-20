@@ -86,7 +86,7 @@ public class PdfDatei
             }
 
             // Den Student aus dem Inhalt aller Seiten eines Elements extrahieren
-
+            
             Student student = students.Where(s => inhalt.Contains(s.Vorname + " " + s.Nachname) && inhalt.Contains(s.Geburtsdatum.ToString())).FirstOrDefault();
 
             // Suche nach Datumsangaben im Text (dd.MM.yyyy, d.M.yyyy, dd.MM.yy, d.M.yy, mit . / -)

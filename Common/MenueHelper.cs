@@ -992,7 +992,7 @@ public static class MenueHelper
       [
        $"PDF-Zeugnisse und andere PDF-Dateien in [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(configuration["PfadDownloads"], "PDF-Input")}[/] werden in die Schüler*innen-Ordner der SchILD-Dokumentenverwaltung einsortiert. Wichtige Voraussetzung: Auf der letzten Seite eines jeden Zeugnisses muss die Schulnummer stehen.",
        $"[{Global.GetColor(Global.ColorHinweise)}]Vorbereitung #1[/]: Zu kopierende PDF-Dateien nach [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(configuration["PfadDownloads"], "PDF-Input")}[/] kopieren.",
-       $"[{Global.GetColor(Global.ColorHinweise)}]Vorbereitung #2[/]: Eine UTF8-CSV-Datei mit Spalten: Nachname, Vorname, Geburtsdatum (aus Atlantis) exportieren und in [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(configuration["PfadDownloads"], "PDF-Input")}[/] ablegen.",
+       $"[{Global.GetColor(Global.ColorHinweise)}]Vorbereitung #2[/]: Eine UTF8-CSV-Datei mit Spalten: Nachname|Vorname|Geburtsdatum (aus Atlantis, Delimiter: |) exportieren und in [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(configuration["PfadDownloads"], "PDF-Input")}[/] ablegen.",
        $"[{Global.GetColor(Global.ColorTextHervorheben)}]Durchführung #2[/]: Geben Sie die Schlüsselwörter an, um die interessierenden PDF-Dateien einzugrenzen.",
       ],
       m =>
@@ -1212,10 +1212,10 @@ public static class MenueHelper
          .AddChoices(new[] {
           "Server starten",
           "Server stoppen",
-          "Server Backup erstllen",
+          "Server Backup erstellen",
           "Status anzeigen"
          }));
-        configuration = Global.Konfig("Auswahl", Global.Modus.Update, configuration, "", -1, -1, "", null, null, zulässigeAuswahlOptionen);
+        configuration = Global.Konfig("Auswahl", Global.Modus.Update, configuration, "", -1, -1, "", null, null, "1,2,3,4");
 
         switch (configuration["Auswahl"])
         {         

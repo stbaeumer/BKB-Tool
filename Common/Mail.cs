@@ -113,7 +113,7 @@ private bool IstMailadresseGültig(string email)
  {
   try
   {
-    var panel = new Panel($"[green]An:  {string.Join(", ", to)}[/] \nCC: {string.Join(", ", cc)} \nBCC: {string.Join(", ", bcc)}\n\nBetreff: {subject}\n\n{body}")
+    var panel = new Panel($"[green]An:  {string.Join(", ", to)}[/] \nCC: {string.Join(", ", cc)} \nBCC: {string.Join(", ", bcc)}\n\nBetreff: {subject}\n\n{body}\n\nAnhänge: {string.Join(", ", attachment)}")
     .Header("[bold red]  Mail jetzt wie angezeigt senden? [/]")
     .HeaderAlignment(Justify.Left)
     .SquareBorder()
@@ -187,7 +187,7 @@ private bool IstMailadresseGültig(string email)
      smtpClient.ServerCertificateValidationCallback = (s, c, h, e) => true; // SSL-Zertifikatsvalidierung deaktivieren
      smtpClient.Connect(smtpServer, smtpPort, MailKit.Security.SecureSocketOptions.StartTls);
      smtpClient.Authenticate(senderEmail, senderPassword);
-     //smtpClient.Send(email);
+     smtpClient.Send(email);
      smtpClient.Disconnect(true);
     }
    });

@@ -6086,13 +6086,46 @@ public class Menüeintrag
                                 var columns = line.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
                                 if (columns.Length >= 3)
                                 {
+                                    try
+                                    {
+                                        DateTime.ParseExact(columns[2].Trim().Trim('"'), "dd.MM.yyyy", CultureInfo.InvariantCulture);
+                                    }
+                                    catch (FormatException)
+                                    {
+                                        var panel = new Panel($"Ungültiges Datum in Zeile: {line}")
+                                            .Header("[bold red] Fehler [/]")
+                                            .HeaderAlignment(Justify.Left)
+                                            .SquareBorder()
+                                            .Expand()
+                                            .BorderColor(Spectre.Console.Color.Red);
+                                        AnsiConsole.Write(panel);
+                                        continue; // Diese Zeile überspringen
+                                    }
+
+                                    if(columns[0] == "Alhamed")
+                                    {
+                                        string aaa = "";
+                                    }
+                                        
+
+
                                     var student = new Student
                                     {
-                                        Vorname = columns[0].Trim().Trim('"'), // Entfernt führende/trailing Leerzeichen und Anführungszeichen
-                                        Nachname = columns[1].Trim().Trim('"'),
-                                        Geburtsdatum = DateTime.ParseExact(columns[2].Trim().Trim('"'), "yyyy-MM-dd", CultureInfo.InvariantCulture).ToString("dd.MM.yyyy")
+                                        Nachname = columns[0].Trim().Trim('"'), // Entfernt führende/trailing Leerzeichen und Anführungszeichen
+                                        Vorname = columns[1].Trim().Trim('"'),
+                                        Geburtsdatum = DateTime.ParseExact(columns[2].Trim().Trim('"'), "dd.MM.yyyy", CultureInfo.InvariantCulture).ToString("dd.MM.yyyy")
                                     };
                                     Students.Add(student);
+                                }
+                                else
+                                {
+                                    var panel = new Panel($"Ungültige Zeile in CSV-Datei: {line}")
+                                        .Header("[bold red] Fehler [/]")
+                                        .HeaderAlignment(Justify.Left)
+                                        .SquareBorder()
+                                        .Expand()
+                                        .BorderColor(Spectre.Console.Color.Red);
+                                    AnsiConsole.Write(panel);
                                 }
                             }
                             Global.ZeileSchreiben(csvPath, Students.Count().ToString(), ConsoleColor.Yellow, ConsoleColor.Gray);                            
@@ -6149,7 +6182,7 @@ public class Menüeintrag
         {
             try
             {
-                if (dateiName.Contains("ADLER"))
+                if (dateiName.Contains("Alattar"))
                 {
                     string a = "";
                 }
@@ -6310,6 +6343,26 @@ public class Menüeintrag
    
    foreach (var aktion in zieldatei.Funktionen)
     aktion(zieldatei);}
+ }
+
+ internal void SvwsServerStarten(IConfiguration configuration)
+ {
+  throw new NotImplementedException();
+ }
+
+ internal void SvwsServerStoppen(IConfiguration configuration)
+ {
+  throw new NotImplementedException();
+ }
+
+ internal void SvwsServerBackupErstellen(IConfiguration configuration)
+ {
+  throw new NotImplementedException();
+ }
+
+ internal void SvwsServerStatusAnzeigen(IConfiguration configuration)
+ {
+  throw new NotImplementedException();
  }
 
 
