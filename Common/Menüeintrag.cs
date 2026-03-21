@@ -6194,6 +6194,8 @@ public class Menüeintrag
                 if (string.IsNullOrEmpty(pdfDatei.Art))
                     continue;
                 pdfDatei.AnzahlElementeInDieserDatei = pdfDatei.GetAnzahlElementeProDatei(configuration);
+                if (pdfDatei.AnzahlElementeInDieserDatei == 0)
+                    continue;
                 pdfDatei.PdfDateiVerarbeiten(Students, configuration);
             }
             catch (Exception ex)
