@@ -150,7 +150,8 @@ public class PdfDatei
                     ordnerNeu = "neu";
                 }
 
-                OpenFolder(student.Zielordner, true);
+                if(i == AnzahlElementeInDieserDatei - 1)
+                    OpenFolder(student.Zielordner, true);
 
                 PdfDocument quelldatei = PdfReader.Open(DateiName, PdfDocumentOpenMode.Import);
                 PdfDocument zieldatei = new PdfDocument();
@@ -349,7 +350,7 @@ public class PdfDatei
             }
         }
 
-        // Wenn die Schulnummer nicht gefunden wurde, such auch nochmal nach dem Wort Rechtsmittelbelehrung
+        // Wenn die Schulnummer nicht gefunden wurde, suche auch nochmal nach dem Wort Rechtsmittelbelehrung
         if (anzahlElemete == 0)
         {
             foreach (var pdfSeite in this.Seiten)
@@ -363,7 +364,7 @@ public class PdfDatei
         }
 
         // E muss immer mindestens 1 Element geben
-        return Math.Max(1, anzahlElemete);
+        //return Math.Max(1, anzahlElemete);
         return anzahlElemete;
     }
 }

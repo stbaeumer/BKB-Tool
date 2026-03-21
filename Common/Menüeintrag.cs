@@ -6185,8 +6185,7 @@ public class Menüeintrag
                 if (dateiName.Contains("Alattar"))
                 {
                     string a = "";
-                }
-                    
+                }                    
 
                 var pdfDatei = new PdfDatei(dateiName);
                 pdfDatei.Seiten.Einlesen(dateiName);                
