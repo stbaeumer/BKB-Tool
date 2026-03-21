@@ -150,8 +150,8 @@ public class PdfDatei
                     ordnerNeu = "neu";
                 }
 
-                if(i == AnzahlElementeInDieserDatei - 1)
-                    OpenFolder(student.Zielordner, true);
+                //if(i == AnzahlElementeInDieserDatei - 1)
+                    //OpenFolder(student.Zielordner, true);
 
                 PdfDocument quelldatei = PdfReader.Open(DateiName, PdfDocumentOpenMode.Import);
                 PdfDocument zieldatei = new PdfDocument();
