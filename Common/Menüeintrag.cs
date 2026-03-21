@@ -6178,7 +6178,7 @@ public class Menüeintrag
     {
         List<string> schlüsselwörter = configuration["Schluesselwoerter"].ToString().Trim().Split(",").ToList();
 
-        foreach (string dateiName in Directory.GetFiles(Path.Combine(configuration["PfadDownloads"], "PDF-Input"), "*.*").Where(file => file.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase)))
+        foreach (string dateiName in Directory.GetFiles(Path.Combine(configuration["PfadDownloads"], "PDF-Input"), "*.*").Where(file => file.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase)).OrderBy(file => file))
         {
             try
             {
