@@ -68,12 +68,12 @@ public static class MenueHelper
       students,
       klassen,
       [
-       $"Es wird jetzt die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", "SchuelerZusatzdaten.dat")}[/] um schulinterne Mailadressen ergänzt und in [{Global.GetColor(Global.ColorPfadInDateien)}]{pfadSchilddatenaustausch}[/] für den Re-Import nach SchILD bereitgestellt.",
+       $"Es wird die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", "SchuelerZusatzdaten.dat")}[/] um schulinterne Mailadressen ergänzt und in [{Global.GetColor(Global.ColorPfadInDateien)}]{pfadSchilddatenaustausch}[/] für den Re-Import nach SchILD bereitgestellt.",
        $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise:[/] ",
        $"[{Global.GetColor(Global.ColorHinweise)}]#1:[/] BKB-Tool bildet die schulinternen Mailadressen wie folgt: [{Global.GetColor(Global.ColorTextHervorheben)}]nv061231@meine-schule.de[/], wobei gilt:",
-       $"[{Global.GetColor(Global.ColorTextHervorheben)}] n[/]   : Erster Buchstabe des Nachnamens. Umlaute werden aufgelöst. Bsp.: [{Global.GetColor(Global.ColorTextHervorheben)}]Ü[/] wird zu [{Global.GetColor(Global.ColorTextHervorheben)}]u[/] usw.",
-       $"[{Global.GetColor(Global.ColorTextHervorheben)}] v[/]   : Erster Buchstabe des Vornamens. Umlaute werden aufgelöst.",
-       $"[{Global.GetColor(Global.ColorTextHervorheben)}] 061231[/] : Geburtsdatum in der Notation: JJMMTT.",
+       $"[{Global.GetColor(Global.ColorTextHervorheben)}]   n[/]       : Erster Buchstabe des Nachnamens. Umlaute werden aufgelöst. Bsp.: [{Global.GetColor(Global.ColorTextHervorheben)}]Ü[/] wird zu [{Global.GetColor(Global.ColorTextHervorheben)}]u[/] usw.",
+       $"[{Global.GetColor(Global.ColorTextHervorheben)}]   v[/]       : Erster Buchstabe des Vornamens. Umlaute werden aufgelöst.",
+       $"[{Global.GetColor(Global.ColorTextHervorheben)}]   061231[/]  : Geburtsdatum in der Notation: JJMMTT.",
        $"[{Global.GetColor(Global.ColorHinweise)}]#2:[/] Vorhandene schulinterne SchILD-Mailadressen in [{Global.GetColor(Global.ColorPfadInProgrammen)}]Individualdaten I[/] bleiben unangetastet.",
        $"[{Global.GetColor(Global.ColorHinweise)}]#3:[/] Doppelungen werden angezeigt und müssen nach Vorgabe behandelt werden."
       ],
@@ -172,11 +172,10 @@ public static class MenueHelper
             new List<string>() { datei.ZipPfad } 
            )
           ],
-          [
-           $"Es wird jetzt die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd") + "-ImportNachNetman.csv")}[/] erstellt.",
+          [           
            $"[{Global.GetColor(Global.ColorHinweise)}]#1:[/] Schüler*innen, die bereits abgegangen sind oder einen Abschluss erworben haben, werden erst sechs Wochen später ausgebucht, um den Zugriff auf Teams nicht direkt zu verlieren.",
-           $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #2:[/] Auch Abschluss und Abgang muss beim SchILD-Export angehakt werden.",
-           $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #3:[/] Schüler*innen werden 42 Tage nach dem Abgangszeugnis/Abschlusszeugnis ausgeschult. Wenn kein letztes Zeugnisdatum bei Abgängern/Abgeschlossenen ermittelt werden kann, dann wird sofort ausgeschult."
+           $"[{Global.GetColor(Global.ColorHinweise)}]#2:[/] Auch Abschluss und Abgang muss beim SchILD-Export angehakt werden.",
+           $"[{Global.GetColor(Global.ColorHinweise)}]#3:[/] Schüler*innen werden 42 Tage nach dem Abgangszeugnis/Abschlusszeugnis ausgeschult. Wenn kein letztes Zeugnisdatum bei Abgängern/Abgeschlossenen ermittelt werden kann, dann wird sofort ausgeschult."
           ]
          ),
          new Datei(
@@ -222,7 +221,7 @@ public static class MenueHelper
        m.NeueFotosAusSchildOrdnerErstellenUndAlteFotosVerschieben(configuration);
       },
       Global.Rubrik.WöchtentlicheArbeiten,
-      Global.NurBeiDiesenSchulnummern.Nur177659
+      Global.NurBeiDiesenSchulnummern.Alle
      ),
      new Menüeintrag(
       "Absentismus:Mo:Klassenleitungen über schulpflichtverletzende Schüler*innen informieren",
@@ -280,7 +279,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Nur177659
      ),     
      new Menüeintrag(
-      "Klassenbuchpflege:Mo:Säumige Lehrer*innen erinnern",
+      "Klassenbuchpflege:Mo:Säumige Lehrer*innen auf fehlende Klassenbucheinträge hinweisen",
       quelldateien.Notwendige(configuration, ["lehrkraefte,dat", "openperiod,pdf"]),
       students,
       klassen,
@@ -296,10 +295,10 @@ public static class MenueHelper
        lehrers.OffeneKlassenbuchEinträgeMahnen(m.Quelldateien, configuration);
       },
       Global.Rubrik.Allgemein,
-      Global.NurBeiDiesenSchulnummern.Nur177659
+      Global.NurBeiDiesenSchulnummern.Alle
      ),     
      new Menüeintrag(
-      "Gruppen & Organig.:Mo:Gruppen & Organigramm aus Untisanrechnungen und Unterrichten für Wiki-Import erstellen",
+      "Gruppen & Organigramm:Mo:Gruppen & Organigramm aus Untisanrechnungen und Unterrichten für Wiki-Import erstellen",
       quelldateien.Notwendige(configuration, ["schuelervermerke,dat", "schuelerzusatzdaten,dat", "absenceperstudent,csv", "GPU006,txt", "GPU002,txt", "GPU003,txt", "klassen,dat"]),
       students,
       klassen,
@@ -383,27 +382,49 @@ public static class MenueHelper
      ),
      new Menüeintrag(
       $"Stammdaten:Mo:Stammdaten zwischen SchILD und Untis abgleichen",
-      new Dateien(),
+      quelldateien.Notwendige(configuration, ["faecher,dat", "GPU002,txt", "klassen,dat", "GPU003,txt"]),
       students,
       klassen,
       [
-       $"..."
+       $"Folgende Stammdaten  werden abgeglichen:",       
+       $"[{Global.GetColor(Global.ColorActionInMenüs)}]Faecher:[/] Es wird angenommen, dass Untis die Fächer aktuell hält. Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]Facher.dat[/] wird erstellt. In jedem Fall muss die Datei in SchILD nachbearbeitet werden.",
       ],
-      _ =>
+      m =>
       {
-       
+       m.Faecher(
+        configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Faecher.dat"),
+        [
+         datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
+         datei => datei.Verarbeiten(quelldateien, Global.Modus.Filtern),
+         datei => datei.Erstellen()
+        ],
+        ["InternKrz"],
+        [],
+        "|", '\0', new UTF8Encoding(true), false);
+        m.KlassenErstellen(
+        configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Klassen.dat"),
+        [
+         datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
+         datei => datei.Verarbeiten(quelldateien, Global.Modus.Filtern),
+         //datei => datei.OrdnerOeffnen(),
+         datei => datei.Erstellen()
+        ],
+        ["InternBez"],
+        ["SonstigeBez", "Folgeklasse"],
+        "|", '\0', new UTF8Encoding(true), false);
+        ;
       },
       Global.Rubrik.Allgemein,
       Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
-      $"Zeugnis#1 Unterr.:14 Tage vorher:Unterrichte und Kurse schülergenau von Webuntis nach SchILD übertragen",
+      $"Zeugnis #1 Unterricht:14 Tage vor ZK:Unterrichte und Kurse schülergenau von Webuntis nach SchILD übertragen",
       quelldateien.Notwendige(configuration, ["studentgroupstudents,csv", "klassen,dat", "schuelerlernabschnitt,dat,optional", "schuelerleistungsdaten,dat", "lehrkraefte,dat", "kurse,dat", "schuelerbasisdaten,dat", "faecher,dat", "GPU002,txt"]),
       students,
       klassen,
       [
        $"Die Lernabschnittsdaten müssen zuvor angelegt worden sein.",
-       $"Die Unterrichte ([{Global.GetColor(Global.ColorActionInMenüs)}]GPU002[/]) und Kurse ([{Global.GetColor(Global.ColorActionInMenüs)}]studentgoupstudents[/]) werden aus den (Web-)Untis für jeden Schüler neu angelegt und unter Leistungsdaten eingetragen.",       
+       $"Die Unterrichte ([{Global.GetColor(Global.ColorActionInMenüs)}]GPU002[/]) und Kurse ([{Global.GetColor(Global.ColorActionInMenüs)}]studentgoupstudents[/]) werden aus (Web-)Untis für jeden Schüler neu angelegt und in die SchuelerLeistungsdaten.dat eingetragen.",       
        $"[{Global.GetColor(Global.ColorActionInMenüs)}]Hinweise zum Beruflichen Gymnasium:[/]",
        $"[{Global.GetColor(Global.ColorActionInMenüs)}]#1[/] Die Kurswahlen sollten auf der Wiki-Seite zu Halbjahresbeginn erfolgt sein. Aus den Kurswahlen werden [{Global.GetColor(Global.ColorActionInMenüs)}]LK1, LK2, GKS usw.[/] übernommen.",
        $"[{Global.GetColor(Global.ColorActionInMenüs)}]#2[/] Es empfiehlt sich, dass die SuS die Kurswahlen vor der Zeugniskonferenz nochmal überprüfen."       
@@ -412,9 +433,7 @@ public static class MenueHelper
       {
        m.FilterInteressierendeStudentsUndKlassen(configuration);
        configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration);
-       configuration = Global.Konfig("Schulnummer", Global.Modus.Update, configuration);
-       configuration = Global.Konfig("ZeugnisDatum", Global.Modus.Update, configuration);
-       configuration = Global.Konfig("Kursarten", Global.Modus.Update, configuration);
+       //configuration = Global.Konfig("Kursarten", Global.Modus.Update, configuration);
 
        m.Unterrichte = new Unterrichte(configuration, m, Global.Zweck.Zeugnis, Global.Art.KursUnterrichte);
        m.Unterrichte.AddRange(new Unterrichte(configuration, m, Global.Zweck.Zeugnis, Global.Art.NichtKursUnterrichte));
@@ -440,22 +459,12 @@ public static class MenueHelper
         [],
         "|", '\0', new UTF8Encoding(true), false, null,
         Global.Zweck.Zeugnis);
-       m.Faecher(
-        configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Faecher.dat"),
-        [
-         datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
-         datei => datei.Verarbeiten(quelldateien, Global.Modus.Filtern),
-         datei => datei.Erstellen()
-        ],
-        ["InternKrz"],
-        [],
-        "|", '\0', new UTF8Encoding(true), false);
       },
       Global.Rubrik.Allgemein,
       Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
-      $"Zeugnis#2 Belegung:13 Tage vorher:In den Klassen des Beruflichen Gymnasiums die Klausurbelegung aus Wiki in die SchILD-Leistungsdaten übernehmen",
+      $"Zeugnis #2 Belegung:13 Tage vor ZK:In den Klassen des Beruflichen Gymnasiums die Klausurbelegung aus Wiki in die SchILD-Leistungsdaten übernehmen",
       quelldateien.Notwendige(configuration, ["schuelerleistungsdaten,dat"]),
       students,
       klassen,
@@ -489,7 +498,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
-      $"Zeugnis#3 Fehlz.:3 Tage vorher:Die Fehlzeiten werden in bestehende Lernabschnittsdaten eingefügt",
+      $"Zeugnis #3 Fehlzeiten:3  Tage vor ZK:Die Fehlzeiten werden in bestehende Lernabschnittsdaten eingefügt",
       new Dateien(),
       students,
       klassen,
@@ -507,7 +516,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
-      $"Zeugnis#4 Noten:1 Tag vorher:Noten aus Webuntis (MarksPerLesson) nach SchILD (SchuelerLeistungsdaten) schreiben",
+      $"Zeugnis #4 Noten:1  Tag  vor ZK:Noten aus Webuntis (MarksPerLesson) nach SchILD (SchuelerLeistungsdaten) schreiben",
       quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "schuelerleistungsdaten,dat", "marksperlesson,csv"]),
       students,
       klassen,
@@ -536,7 +545,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
-      $"Zeugnis#5 Listen:1 Tag vorher:Notenlisten werden in Wiki veröffentlicht. Fehlende Noten werden markiert",
+      $"Zeugnis #5 Listen:1  Tag  vor ZK:Notenlisten werden in Wiki veröffentlicht. Fehlende Noten werden markiert",
       quelldateien.Notwendige(configuration, ["faecher,dat","schuelerbasisdaten,dat", "schuelerleistungsdaten,dat"]),
       students,
       klassen,
@@ -994,6 +1003,7 @@ public static class MenueHelper
        $"[{Global.GetColor(Global.ColorHinweise)}]Vorbereitung #1[/]: Zu kopierende PDF-Dateien nach [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(configuration["PfadDownloads"], "PDF-Input")}[/] kopieren.",
        $"[{Global.GetColor(Global.ColorHinweise)}]Vorbereitung #2[/]: Eine UTF8-CSV-Datei mit Spalten: Nachname|Vorname|Geburtsdatum (aus Atlantis, Delimiter: |) exportieren und in [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(configuration["PfadDownloads"], "PDF-Input")}[/] ablegen.",
        $"[{Global.GetColor(Global.ColorTextHervorheben)}]Durchführung #2[/]: Geben Sie die Schlüsselwörter an, um die interessierenden PDF-Dateien einzugrenzen.",
+       $"[{Global.GetColor(Global.ColorTextHervorheben)}]Hinweis 12[/]: BKB-Tool erkennt, wenn mehrere Zeugnisse in einem PDF-Dokument gespeichert sind. Dafür muss auf der letzten Seite die Schulnummer oder das Wort Rechtsmittelbelehrung oder das Wort Rechtsbehelfsbelehrung stehen."
       ],
       m =>
       {

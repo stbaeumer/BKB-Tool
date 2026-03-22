@@ -38,8 +38,7 @@ public class PdfDatei
     public Students PdfDateiVerarbeiten(Students students, IConfiguration configuration)
     {
         Students studentsMitSeiten = new Students();
-        var element = 1;
-
+        
         var laufendeSeitennummer = 1;
 
         var table = new Table();
@@ -88,6 +87,58 @@ public class PdfDatei
             // Den Student aus dem Inhalt aller Seiten eines Elements extrahieren
             
             Student student = students.Where(s => inhalt.Contains(s.Vorname + " " + s.Nachname) && inhalt.Contains(s.Geburtsdatum.ToString())).FirstOrDefault();
+
+            if(student == null)
+            {
+                // Es kann sein, dass das Geburtsdatum d.m.yyyy geschrieben ist
+                student = students.FirstOrDefault(s => 
+                    inhalt.Contains($"{s.Vorname} {s.Nachname}") && 
+                    inhalt.Contains(DateTime.Parse(s.Geburtsdatum).ToString("d.M.yyyy"))
+                );
+            }
+            if(student == null)
+            {
+                // Es kann sein, dass das Geburtsdatum fehlt
+                student = students.FirstOrDefault(s => 
+                    inhalt.Contains($"{s.Vorname} {s.Nachname}")
+                );
+            }
+            if(student == null)
+            {
+                // Es kann sein, dass nur Nachname und Geburtsdatum matchen, wegen z.B. Doppelvornamen oder fehlendem Vornamen
+                student = students.FirstOrDefault(s => 
+                    inhalt.Contains($"{s.Nachname}")
+                    && 
+                    inhalt.Contains(DateTime.Parse(s.Geburtsdatum).ToString("dd.MM.yyyy"))
+                );
+            }
+            if(student == null)
+            {
+                // Es kann sein, dass nur Nachname und Geburtsdatum matchen, wegen z.B. Doppelvornamen oder fehlendem Vornamen
+                student = students.FirstOrDefault(s => 
+                    inhalt.Contains($"{s.Nachname}")
+                    && 
+                    inhalt.Contains(DateTime.Parse(s.Geburtsdatum).ToString("d.M.yyyy"))
+                );
+            }
+            if(student == null)
+            {
+                // Es kann sein, dass nur Vorname und Geburtsdatum matchen, wegen z.B. Doppelvornamen oder fehlendem Vornamen
+                student = students.FirstOrDefault(s => 
+                    inhalt.Contains($"{s.Vorname}")
+                    && 
+                    inhalt.Contains(DateTime.Parse(s.Geburtsdatum).ToString("d.M.yyyy"))
+                );
+            }
+            if(student == null)
+            {
+                // Es kann sein, dass nur Vorname und Geburtsdatum matchen, wegen z.B. Doppelvornamen oder fehlendem Vornamen
+                student = students.FirstOrDefault(s => 
+                    inhalt.Contains($"{s.Vorname}")
+                    && 
+                    inhalt.Contains(DateTime.Parse(s.Geburtsdatum).ToString("dd.MM.yyyy"))
+                );
+            }
 
             // Suche nach Datumsangaben im Text (dd.MM.yyyy, d.M.yyyy, dd.MM.yy, d.M.yy, mit . / -)
             var dateMatches = Regex.Matches(inhalt, @"\b\d{1,2}[.\-/]\d{1,2}[.\-/]\d{2,4}\b")
@@ -150,8 +201,7 @@ public class PdfDatei
                     ordnerNeu = "neu";
                 }
 
-                //if(i == AnzahlElementeInDieserDatei - 1)
-                    //OpenFolder(student.Zielordner, true);
+                
 
                 PdfDocument quelldatei = PdfReader.Open(DateiName, PdfDocumentOpenMode.Import);
                 PdfDocument zieldatei = new PdfDocument();
@@ -165,9 +215,11 @@ public class PdfDatei
 
                 CheckObDateiGeschlossen(DateiName);
 
+
+
                 zieldatei.Save(student.Zielordner + "/" + $"{student.Nachname}_{student.Vorname}_{student.Geburtsdatum}_{Art}_{gefundenesDatum}.pdf");
 
-                UserPrompts.ConfirmOrThrowSeiten($"Wurde {Path.GetFileName($"{student.Nachname}_{student.Vorname}_{student.Geburtsdatum}_{Art}_{gefundenesDatum}.pdf")} korrekt im Zielordner gespeichert?");
+                UserPrompts.ConfirmOrThrowSeiten($"Wurde {Path.GetFileName($"{student.Nachname}_{student.Vorname}_{student.Geburtsdatum}_{Art}_{gefundenesDatum}.pdf")} korrekt im Zielordner gespeichert?", student);
 
                 // Löschen
                 for (int j = student.PdfSeiten.Count; 0 < j; j--)
@@ -356,7 +408,7 @@ public class PdfDatei
             foreach (var pdfSeite in this.Seiten)
             {
                 // Wenn das Sort Schulnummer und diie Schulnummer selbst gefunden wurde, dann zählen.
-                if (pdfSeite.Inhalt.Contains("Rechtsmittelbelehrung"))
+                if (pdfSeite.Inhalt.Contains("Rechtsmittelbelehrung") || pdfSeite.Inhalt.Contains("Rechtsbehelfsbelehrung")|| pdfSeite.Inhalt.Contains("APO-BK"))
                 {
                     anzahlElemete++;
                 }

@@ -4741,7 +4741,7 @@ public class Menüeintrag
     public void RenderAuswahlÜberschrift(IConfiguration configuration)
     {
         var panel3 = new Panel($"[grey85]{string.Join("\n", Beschreibung)}[/]")
-            .Header($"[bold yellow3_1] {Titel} [/]")
+            .Header($"[bold yellow3_1] {Titel.Split(':')[2]} [/]")
             .HeaderAlignment(Justify.Left)
             .SquareBorder()
             .Expand()
@@ -6182,11 +6182,6 @@ public class Menüeintrag
         {
             try
             {
-                if (dateiName.Contains("Alattar"))
-                {
-                    string a = "";
-                }                    
-
                 var pdfDatei = new PdfDatei(dateiName);
                 pdfDatei.Seiten.Einlesen(dateiName);                
                 pdfDatei.Art = pdfDatei.GetArt(schlüsselwörter);

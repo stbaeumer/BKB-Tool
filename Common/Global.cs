@@ -2086,7 +2086,7 @@ public static class KonfigHelper
         ["Schluesselwoerter"] = new KonfigMeta
         {
             Key = "Schluesselwoerter",
-            DefaultValue = "Fachhochschulreife, Hochschulreife, Halbjahreszeugnis, Jahreszeugnis, Abschlusszeugnis, Abgangszeugnis, Zeugnis",
+            DefaultValue = "Schullaufbahn, Fachhochschulreife, Hochschulreife, Halbjahreszeugnis, Bescheinigung, Jahreszeugnis, Abschlusszeugnis, Abgangszeugnis, Zeugnis, Versetzungszeugnis",
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie kommagetrennt interessierende [{Global.GetColor(Global.ColorInfoBox)}]Schluesselwoerter[/] an (z.B. Abgangszeugnis, Abschlusszeugnis, Jahreszeugnis). BKB-Tool durchsucht die PDF-Dateien im Ordner nach den Wörtern. Sobald ein Schlüsselwort matcht, wird die Datei in das Dokumentenverzeichnis kopiert.",
             Datentyp = Global.Datentyp.ListString,

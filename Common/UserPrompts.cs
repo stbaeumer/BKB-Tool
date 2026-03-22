@@ -29,7 +29,7 @@ public static class UserPrompts
     /// ENTER = weiter, x = Exception (Abbruch), w = nicht mehr fragen in dieser Session,
     /// Ziffer 1-9 = 10-90 weitere Durchläufe ohne Nachfrage.
     /// </summary>
-    public static void ConfirmOrThrowSeiten(string question)
+    public static void ConfirmOrThrowSeiten(string question, Student student)
     {
         // Wenn dauerhaft unterdrückt, sofort zurück
         if (_skipConfirmationSeiten) return;
@@ -41,8 +41,10 @@ public static class UserPrompts
             return;
         }
 
+        Global.OpenFolder(student.Zielordner, true);
+
         AnsiConsole.MarkupLine($"[{Global.GetColor(Global.ColorHinweise)}]{question}[/]");
-        AnsiConsole.MarkupLine($"Drücken Sie [green]ENTER[/] (weiter), [red]x[/] (abbrechen), [yellow]w[/] (weiter, nicht mehr fragen in dieser Session) oder eine Ziffer [aqua]1-9[/] (10-90 Durchläufe überspringen).");
+        AnsiConsole.MarkupLine($"Drücken Sie [green]ENTER[/] (weiter), [red]x[/] (abbrechen), [yellow]w[/] (weiter, nicht mehr fragen in dieser Session) oder eine Ziffer [aqua]1-9[/] (50-450 Durchläufe überspringen).");
 
         while (true)
         {
@@ -73,7 +75,7 @@ public static class UserPrompts
             if (c >= '1' && c <= '9')
             {
                 int multiplier = c - '0';
-                _skipConfirmationSeitenCount = multiplier * 10;
+                _skipConfirmationSeitenCount = multiplier * 30;
                 AnsiConsole.MarkupLine($"[yellow]Überspringe die nächsten {_skipConfirmationSeitenCount} Durchläufe ohne Nachfrage.[/]");
                 return;
             }
@@ -81,12 +83,12 @@ public static class UserPrompts
         }
     }
 
-    /// <summary>
-    /// Fragt den Benutzer mit einer individuellen Frage.
-    /// ENTER = weiter, x = Exception (Abbruch), w = nicht mehr fragen in dieser Session,
-    /// Ziffer 1-9 = 10-90 weitere Durchläufe ohne Nachfrage.
-    /// </summary>
-    public static void ConfirmOrThrowDateien(string question)
+ /// <summary>
+ /// Fragt den Benutzer mit einer individuellen Frage.
+ /// ENTER = weiter, x = Exception (Abbruch), w = nicht mehr fragen in dieser Session,
+ /// Ziffer 1-9 = 10-90 weitere Durchläufe ohne Nachfrage.
+ /// </summary>
+ public static void ConfirmOrThrowDateien(string question)
     {
         // Wenn dauerhaft unterdrückt, sofort zurück
         if (_skipConfirmationDateien) return;
@@ -99,7 +101,7 @@ public static class UserPrompts
         }
 
         AnsiConsole.MarkupLine($"[{Global.GetColor(Global.ColorHinweise)}]{question}[/]");
-        AnsiConsole.MarkupLine($"Drücken Sie [green]ENTER[/] (weiter), [red]x[/] (abbrechen), [yellow]w[/] (weiter, nicht mehr fragen in dieser Session) oder eine Ziffer [aqua]1-9[/] (10-90 Durchläufe überspringen).");
+        AnsiConsole.MarkupLine($"Drücken Sie [green]ENTER[/] (weiter), [red]x[/] (abbrechen), [yellow]w[/] (weiter, nicht mehr fragen in dieser Session) oder eine Ziffer [aqua]1-9[/] (50-450 Durchläufe überspringen).");
 
         while (true)
         {
