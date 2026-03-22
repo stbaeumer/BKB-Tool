@@ -210,6 +210,9 @@ public class Students : List<Student>
             @"  * :?: Was, wenn die Zahlen nicht stimmen? :!: Dann gerne melden bei [[chat>stefan.baeumer|Stefan Bäumer]].");
 
         zieldatei.Add(
+            @"  * :?: Was kann ich tun, wenn der Fall bereits der BezReg vorliegt? :!: Bei dauerhaft fehlenden SuS müssen die Klassenleitungen keine weiteren Aufgaben übernehmen, wenn der Fall der Bezirksregierung Münster gemeldet wurde.");
+        
+        zieldatei.Add(
             @"  * :?: Muss ich eine irgendwem eine Rückmeldung zu den Fällen in meiner Klasse geben? :!: Nein. Eine Rückmeldung ist nicht notwendig. Wer Fragen hat, kann sich natürlich immer melden: [[chat>stefan.baeumer|Stefan Bäumer]].");
         zieldatei.Add(@"");
         zieldatei.Add(@"");
