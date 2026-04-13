@@ -113,7 +113,7 @@ private bool IstMailadresseGültig(string email)
  {
   try
   {
-    var panel = new Panel($"[green]An:  {string.Join(", ", to)}[/] \nCC: {string.Join(", ", cc)} \nBCC: {string.Join(", ", bcc)}\n\nBetreff: {subject}\n\n{body}\n\nAnhänge: {string.Join(", ", attachment)}")
+    var panel = new Panel($"[green]An:[/]  {string.Join(", ", to)} \n[green]CC:[/] {string.Join(", ", cc)} \n[green]BCC:[/] {string.Join(", ", bcc)}\n\n[green]Betreff:[/] {subject}\n\n{body}\n\n[green]Anhänge:[/] {string.Join(", ", attachment)}")
     .Header("[bold red]  Mail jetzt wie angezeigt senden? [/]")
     .HeaderAlignment(Justify.Left)
     .SquareBorder()

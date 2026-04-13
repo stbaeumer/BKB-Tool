@@ -71,9 +71,9 @@ public static class MenueHelper
        $"Es wird die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", "SchuelerZusatzdaten.dat")}[/] um schulinterne Mailadressen ergänzt und in [{Global.GetColor(Global.ColorPfadInDateien)}]{pfadSchilddatenaustausch}[/] für den Re-Import nach SchILD bereitgestellt.",
        $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise:[/] ",
        $"[{Global.GetColor(Global.ColorHinweise)}]#1:[/] BKB-Tool bildet die schulinternen Mailadressen wie folgt: [{Global.GetColor(Global.ColorTextHervorheben)}]nv061231@meine-schule.de[/], wobei gilt:",
-       $"[{Global.GetColor(Global.ColorTextHervorheben)}]   n[/]       : Erster Buchstabe des Nachnamens. Umlaute werden aufgelöst. Bsp.: [{Global.GetColor(Global.ColorTextHervorheben)}]Ü[/] wird zu [{Global.GetColor(Global.ColorTextHervorheben)}]u[/] usw.",
-       $"[{Global.GetColor(Global.ColorTextHervorheben)}]   v[/]       : Erster Buchstabe des Vornamens. Umlaute werden aufgelöst.",
-       $"[{Global.GetColor(Global.ColorTextHervorheben)}]   061231[/]  : Geburtsdatum in der Notation: JJMMTT.",
+       $"[{Global.GetColor(Global.ColorTextHervorheben)}]     n[/]       : Erster Buchstabe des Nachnamens. Umlaute werden aufgelöst. Bsp.: [{Global.GetColor(Global.ColorTextHervorheben)}]Ü[/] wird zu [{Global.GetColor(Global.ColorTextHervorheben)}]u[/] usw.",
+       $"[{Global.GetColor(Global.ColorTextHervorheben)}]     v[/]       : Erster Buchstabe des Vornamens. Umlaute werden aufgelöst.",
+       $"[{Global.GetColor(Global.ColorTextHervorheben)}]     061231[/]  : Geburtsdatum in der Notation: JJMMTT.",
        $"[{Global.GetColor(Global.ColorHinweise)}]#2:[/] Vorhandene schulinterne SchILD-Mailadressen in [{Global.GetColor(Global.ColorPfadInProgrammen)}]Individualdaten I[/] bleiben unangetastet.",
        $"[{Global.GetColor(Global.ColorHinweise)}]#3:[/] Doppelungen werden angezeigt und müssen nach Vorgabe behandelt werden."
       ],
@@ -267,10 +267,10 @@ public static class MenueHelper
           configuration, 
           "Schulpflichtüberwachung KW " + ISOWeek.GetWeekOfYear(DateTime.Now), 
           $"Hallo Klassenleitung,\n\nDu wurdest hierher verlinkt, weil bei der automatisierten, wöchentlichen Durchsicht der Fehlzeiten eine mögliche Schulpflichtverletzung in Deiner Klasse aufgepoppt ist. Siehe hier: https://bkb.wiki/schulpflichtueberwachung\n\nVielen Dank!\n\nIhr Webuntis-Team", 
-          lehrers.Where(l => !string.IsNullOrWhiteSpace(l.Mail)).Select(l => l.Mail!).Distinct().ToList(),
-          new List<string>(["sina.milewski@berufskolleg-borken.de,stefan.gantefort@berufskolleg-borken.de,ursula.moritz@berufskolleg-borken.de"]),
-          new List<string>(["stefan.baeumer@berufskolleg-borken.de"]),
-          null
+          new List<string>([configuration["SmtpUser"]]),
+          datei.Lehrers.Where(l => !string.IsNullOrWhiteSpace(l.Mail)).Select(l => l.Mail!).Distinct().ToList(),
+          new List<string>(["stefan.baeumer@berufskolleg-borken.de", "sina.milewski@berufskolleg-borken.de", "stefan.gantefort@berufskolleg-borken.de", "ursula.moritz@berufskolleg-borken.de"]),
+          []
          )
         ]
        ); 

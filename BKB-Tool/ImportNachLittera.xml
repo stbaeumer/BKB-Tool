@@ -5040,7 +5040,7 @@
     </Titel>
     <Nachname>Tubes</Nachname>
     <Vorname>Justus</Vorname>
-    <Strasse>Am Pastors Busch 12</Strasse>
+    <Strasse>Finkenweg 18</Strasse>
     <PLZ>46244</PLZ>
     <Ort>Bottrop</Ort>
     <Geschlecht>M</Geschlecht>
@@ -7766,27 +7766,6 @@
     </Telefon>
     <Mobiltelefon>0159 06783830</Mobiltelefon>
     <email>oj061212@students.berufskolleg-borken.de</email>
-    <ZusatzInfo>
-    </ZusatzInfo>
-    <Bemerkung>
-    </Bemerkung>
-  </Leser>
-  <Leser>
-    <LGruppe>BD25A</LGruppe>
-    <Geburtsdatum>24.10.2005</Geburtsdatum>
-    <Titel>
-    </Titel>
-    <Nachname>Otzen</Nachname>
-    <Vorname>Robin</Vorname>
-    <Strasse>Diekersfeld 4</Strasse>
-    <PLZ>48712</PLZ>
-    <Ort>Gescher</Ort>
-    <Geschlecht>M</Geschlecht>
-    <Anmeldedatum>01.08.2025</Anmeldedatum>
-    <Telefon>
-    </Telefon>
-    <Mobiltelefon>0155 61539718</Mobiltelefon>
-    <email>or051024@students.berufskolleg-borken.de</email>
     <ZusatzInfo>
     </ZusatzInfo>
     <Bemerkung>
@@ -13531,27 +13510,6 @@
   </Leser>
   <Leser>
     <LGruppe>EE24A</LGruppe>
-    <Geburtsdatum>24.04.2007</Geburtsdatum>
-    <Titel>
-    </Titel>
-    <Nachname>Habicht</Nachname>
-    <Vorname>Mike</Vorname>
-    <Strasse>Fliederstraße 19</Strasse>
-    <PLZ>46325</PLZ>
-    <Ort>Borken</Ort>
-    <Geschlecht>M</Geschlecht>
-    <Anmeldedatum>21.08.2024</Anmeldedatum>
-    <Telefon>0176 75821499</Telefon>
-    <Mobiltelefon>
-    </Mobiltelefon>
-    <email>hm157478@students.berufskolleg-borken.de</email>
-    <ZusatzInfo>
-    </ZusatzInfo>
-    <Bemerkung>
-    </Bemerkung>
-  </Leser>
-  <Leser>
-    <LGruppe>EE24A</LGruppe>
     <Geburtsdatum>02.06.2007</Geburtsdatum>
     <Titel>
     </Titel>
@@ -13599,10 +13557,8 @@
     <Nachname>Klekotka</Nachname>
     <Vorname>Daniel</Vorname>
     <Strasse>Rehmannweg 7</Strasse>
-    <PLZ>
-    </PLZ>
-    <Ort>
-    </Ort>
+    <PLZ>46325</PLZ>
+    <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
     <Anmeldedatum>21.08.2024</Anmeldedatum>
     <Telefon>02861 605845</Telefon>
@@ -13683,10 +13639,8 @@
     <Nachname>Lueb</Nachname>
     <Vorname>Jonathan</Vorname>
     <Strasse>Gerhart-Hauptmann-Straße 13</Strasse>
-    <PLZ>
-    </PLZ>
-    <Ort>
-    </Ort>
+    <PLZ>46325</PLZ>
+    <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
     <Anmeldedatum>21.08.2024</Anmeldedatum>
     <Telefon>02861 809613</Telefon>
@@ -13901,6 +13855,27 @@
     <Mobiltelefon>
     </Mobiltelefon>
     <email>db951010@students.berufskolleg-borken.de</email>
+    <ZusatzInfo>
+    </ZusatzInfo>
+    <Bemerkung>
+    </Bemerkung>
+  </Leser>
+  <Leser>
+    <LGruppe>EE25A</LGruppe>
+    <Geburtsdatum>24.04.2007</Geburtsdatum>
+    <Titel>
+    </Titel>
+    <Nachname>Habicht</Nachname>
+    <Vorname>Mike</Vorname>
+    <Strasse>Fliederstraße 19</Strasse>
+    <PLZ>46325</PLZ>
+    <Ort>Borken</Ort>
+    <Geschlecht>M</Geschlecht>
+    <Anmeldedatum>21.08.2024</Anmeldedatum>
+    <Telefon>0176 75821499</Telefon>
+    <Mobiltelefon>
+    </Mobiltelefon>
+    <email>hm157478@students.berufskolleg-borken.de</email>
     <ZusatzInfo>
     </ZusatzInfo>
     <Bemerkung>
@@ -14705,7 +14680,7 @@
     </Titel>
     <Nachname>Beil</Nachname>
     <Vorname>Pia-Sophie</Vorname>
-    <Strasse>Rüster Weg, 104</Strasse>
+    <Strasse>Rüster Weg 104</Strasse>
     <PLZ>46514</PLZ>
     <Ort>Schermbeck</Ort>
     <Geschlecht>W</Geschlecht>
@@ -17880,27 +17855,6 @@
   </Leser>
   <Leser>
     <LGruppe>GW23A</LGruppe>
-    <Geburtsdatum>02.07.2004</Geburtsdatum>
-    <Titel>
-    </Titel>
-    <Nachname>Hrnecek</Nachname>
-    <Vorname>Florian</Vorname>
-    <Strasse>Wagenfeldstraße 37</Strasse>
-    <PLZ>46397</PLZ>
-    <Ort>Bocholt</Ort>
-    <Geschlecht>M</Geschlecht>
-    <Anmeldedatum>01.08.2023</Anmeldedatum>
-    <Telefon>0177 1596349</Telefon>
-    <Mobiltelefon>
-    </Mobiltelefon>
-    <email>hf156797@students.berufskolleg-borken.de</email>
-    <ZusatzInfo>
-    </ZusatzInfo>
-    <Bemerkung>
-    </Bemerkung>
-  </Leser>
-  <Leser>
-    <LGruppe>GW23A</LGruppe>
     <Geburtsdatum>18.03.2007</Geburtsdatum>
     <Titel>
     </Titel>
@@ -19483,7 +19437,7 @@
     </Titel>
     <Nachname>Haupt</Nachname>
     <Vorname>Niklas</Vorname>
-    <Strasse>Birkhuhnweg 5</Strasse>
+    <Strasse>Birkhuhnweg  5</Strasse>
     <PLZ>48734</PLZ>
     <Ort>Reken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -20123,7 +20077,7 @@
     </Titel>
     <Nachname>Altmayer</Nachname>
     <Vorname>Artur</Vorname>
-    <Strasse>Dülmener Weg 30</Strasse>
+    <Strasse>Auf der Flüt 13</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -20789,27 +20743,6 @@
   </Leser>
   <Leser>
     <LGruppe>HBW24B</LGruppe>
-    <Geburtsdatum>08.05.2006</Geburtsdatum>
-    <Titel>
-    </Titel>
-    <Nachname>Korkmaz</Nachname>
-    <Vorname>Daniel</Vorname>
-    <Strasse>Coesfelder Straße 39</Strasse>
-    <PLZ>46342</PLZ>
-    <Ort>Velen</Ort>
-    <Geschlecht>M</Geschlecht>
-    <Anmeldedatum>21.08.2024</Anmeldedatum>
-    <Telefon>02863 9248378</Telefon>
-    <Mobiltelefon>
-    </Mobiltelefon>
-    <email>kd157635@students.berufskolleg-borken.de</email>
-    <ZusatzInfo>
-    </ZusatzInfo>
-    <Bemerkung>
-    </Bemerkung>
-  </Leser>
-  <Leser>
-    <LGruppe>HBW24B</LGruppe>
     <Geburtsdatum>19.11.2004</Geburtsdatum>
     <Titel>
     </Titel>
@@ -20878,7 +20811,7 @@
     </Titel>
     <Nachname>Strotmann</Nachname>
     <Vorname>Paul</Vorname>
-    <Strasse>Bolkenhainer Straße BITTE HAUSNUMMER angeb.</Strasse>
+    <Strasse>Böltingsweg 22</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -21332,7 +21265,7 @@
     </Titel>
     <Nachname>Zywicki</Nachname>
     <Vorname>Nikodem</Vorname>
-    <Strasse>Nelly-Sachs-Weg 5</Strasse>
+    <Strasse>Nelly Sachs Weg 5</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -22401,27 +22334,6 @@
     <Mobiltelefon>
     </Mobiltelefon>
     <email>oj157160@students.berufskolleg-borken.de</email>
-    <ZusatzInfo>
-    </ZusatzInfo>
-    <Bemerkung>
-    </Bemerkung>
-  </Leser>
-  <Leser>
-    <LGruppe>HT23B</LGruppe>
-    <Geburtsdatum>15.08.2006</Geburtsdatum>
-    <Titel>
-    </Titel>
-    <Nachname>Rottstegge</Nachname>
-    <Vorname>Tom</Vorname>
-    <Strasse>Prattenborgweg 13</Strasse>
-    <PLZ>46325</PLZ>
-    <Ort>Borken</Ort>
-    <Geschlecht>M</Geschlecht>
-    <Anmeldedatum>07.08.2023</Anmeldedatum>
-    <Telefon>02861 8085421</Telefon>
-    <Mobiltelefon>
-    </Mobiltelefon>
-    <email>rt156591@students.berufskolleg-borken.de</email>
     <ZusatzInfo>
     </ZusatzInfo>
     <Bemerkung>
@@ -28931,28 +28843,6 @@
   </Leser>
   <Leser>
     <LGruppe>MK25A</LGruppe>
-    <Geburtsdatum>13.08.2006</Geburtsdatum>
-    <Titel>
-    </Titel>
-    <Nachname>Konetzka</Nachname>
-    <Vorname>Noel</Vorname>
-    <Strasse>Bismarckstraße 49, Postfach nichts</Strasse>
-    <PLZ>
-    </PLZ>
-    <Ort>gibt keinen</Ort>
-    <Geschlecht>M</Geschlecht>
-    <Anmeldedatum>01.08.2025</Anmeldedatum>
-    <Telefon>0176 70983996</Telefon>
-    <Mobiltelefon>
-    </Mobiltelefon>
-    <email>kn060813@students.berufskolleg-borken.de</email>
-    <ZusatzInfo>
-    </ZusatzInfo>
-    <Bemerkung>
-    </Bemerkung>
-  </Leser>
-  <Leser>
-    <LGruppe>MK25A</LGruppe>
     <Geburtsdatum>31.10.1990</Geburtsdatum>
     <Titel>
     </Titel>
@@ -29112,6 +29002,28 @@
     <Mobiltelefon>
     </Mobiltelefon>
     <email>kn071206@students.berufskolleg-borken.de</email>
+    <ZusatzInfo>
+    </ZusatzInfo>
+    <Bemerkung>
+    </Bemerkung>
+  </Leser>
+  <Leser>
+    <LGruppe>MK25B</LGruppe>
+    <Geburtsdatum>13.08.2006</Geburtsdatum>
+    <Titel>
+    </Titel>
+    <Nachname>Konetzka</Nachname>
+    <Vorname>Noel</Vorname>
+    <Strasse>Bismarckstraße 49, Postfach nichts</Strasse>
+    <PLZ>
+    </PLZ>
+    <Ort>gibt keinen</Ort>
+    <Geschlecht>M</Geschlecht>
+    <Anmeldedatum>01.08.2025</Anmeldedatum>
+    <Telefon>0176 70983996</Telefon>
+    <Mobiltelefon>
+    </Mobiltelefon>
+    <email>kn060813@students.berufskolleg-borken.de</email>
     <ZusatzInfo>
     </ZusatzInfo>
     <Bemerkung>
@@ -33750,27 +33662,6 @@
   </Leser>
   <Leser>
     <LGruppe>WA25B</LGruppe>
-    <Geburtsdatum>01.11.2003</Geburtsdatum>
-    <Titel>
-    </Titel>
-    <Nachname>Domnowski</Nachname>
-    <Vorname>Julina</Vorname>
-    <Strasse>Up´m Höwel 23</Strasse>
-    <PLZ>46399</PLZ>
-    <Ort>Bocholt</Ort>
-    <Geschlecht>W</Geschlecht>
-    <Anmeldedatum>02.02.2026</Anmeldedatum>
-    <Telefon>
-    </Telefon>
-    <Mobiltelefon>0157 51190551</Mobiltelefon>
-    <email>dj031101@students.berufskolleg-borken.de</email>
-    <ZusatzInfo>
-    </ZusatzInfo>
-    <Bemerkung>
-    </Bemerkung>
-  </Leser>
-  <Leser>
-    <LGruppe>WA25B</LGruppe>
     <Geburtsdatum>07.01.2009</Geburtsdatum>
     <Titel>
     </Titel>
@@ -34189,9 +34080,9 @@
     </Titel>
     <Nachname>Kocanda</Nachname>
     <Vorname>Anna</Vorname>
-    <Strasse>Up de Worte 15 B</Strasse>
-    <PLZ>46359</PLZ>
-    <Ort>Heiden</Ort>
+    <Strasse>Lange Stiege 3</Strasse>
+    <PLZ>46325</PLZ>
+    <Ort>Borken</Ort>
     <Geschlecht>W</Geschlecht>
     <Anmeldedatum>07.08.2023</Anmeldedatum>
     <Telefon>0160 94480390</Telefon>
@@ -35058,9 +34949,9 @@
     </Titel>
     <Nachname>Döhmer</Nachname>
     <Vorname>Saphira</Vorname>
-    <Strasse>Am Binsenrain 10</Strasse>
-    <PLZ>59348</PLZ>
-    <Ort>Lüdinghausen</Ort>
+    <Strasse>Bachstraße 10</Strasse>
+    <PLZ>46325</PLZ>
+    <Ort>Borken</Ort>
     <Geschlecht>W</Geschlecht>
     <Anmeldedatum>28.10.2025</Anmeldedatum>
     <Telefon>0176 32073318</Telefon>
@@ -36884,7 +36775,7 @@
     </Titel>
     <Nachname>Teame</Nachname>
     <Vorname>Eden</Vorname>
-    <Strasse>Bullenkämpe 27</Strasse>
+    <Strasse>Mühlenstraße 2b</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>W</Geschlecht>

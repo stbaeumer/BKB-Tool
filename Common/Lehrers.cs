@@ -271,7 +271,7 @@ WHERE (((SCHOOLYEAR_ID)= " + Global.AktSj[0] + Global.AktSj[1] + ") AND  ((TERM_
 
      // Gib die 10 häufigsten Nennungen aus der Liste "lehrer" aus
      var topLehrer = lehrer
-      .Where(name => this.Any(l => l.Kürzel == name))
+      .Where(name => this.Any(l => !string.IsNullOrEmpty(l.Kürzel) && l.Kürzel == name))
       .GroupBy(x => x)
       .OrderByDescending(g => g.Count())
       .Take(10)
@@ -309,7 +309,7 @@ WHERE (((SCHOOLYEAR_ID)= " + Global.AktSj[0] + Global.AktSj[1] + ") AND  ((TERM_
       {
           var le = (from l in this where l.Kürzel == item.Name select l).FirstOrDefault();
 
-          if(le.Mail == "")
+          if(string.IsNullOrEmpty(le.Mail))
           {
            Global.ZeileSchreiben($"Fehler: {le.Kürzel} hat keine E-Mail-Adresse hinterlegt!", "", ConsoleColor.Red, ConsoleColor.Gray);
            continue;
@@ -325,7 +325,7 @@ WHERE (((SCHOOLYEAR_ID)= " + Global.AktSj[0] + Global.AktSj[1] + ") AND  ((TERM_
            body += "Ihr Webuntis-Team";
 
            var mail = new Mail();           
-           mail.Senden(configuration, $" Offenen Klassenbuch-Einträge ({le.Kürzel})", body, [le.Mail!], [], ["stefan.baeumer@berufskolleg-borken.de"], null);
+           mail.Senden(configuration, $" Offenen Klassenbuch-Einträge ({le.Kürzel})", body, [le.Mail!], [], ["stefan.baeumer@berufskolleg-borken.de"], []);
           }
 
           i++;

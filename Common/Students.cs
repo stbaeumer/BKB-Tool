@@ -178,6 +178,7 @@ public class Students : List<Student>
         Lehrers lehrers,
         Dateien dateien)
     {
+        var x = this.Where(s => s.Klasse == "WE25B").ToList();
 
         var schuelerZusatzdaten = dateien.GetMatchingList(configuration, "schuelerzusatzdaten", null, null);
         if (schuelerZusatzdaten == null || !schuelerZusatzdaten.Any()) throw new Exception("Keine SchuelerZusatzdaten.dat");
@@ -253,15 +254,19 @@ public class Students : List<Student>
                     var klassenlehrer = lehrers.FirstOrDefault(l => l.Kürzel == klassenlehrerKü.ToString());
                     if (klassenlehrer != null)
                     {
-                        Klassenlehrers.Add(klassenlehrer);
+                        Klassenlehrers.Add(klassenlehrer);                        
                     }
                 }
                 
-
                 foreach (var student in this.OrderBy(x => x.Nachname))
                 {
                     if (student.Klasse == kl)
                     {
+                        if(kl == "NBK25A")
+                        {
+                            string aa = "";
+                        }
+
                         var name = student.Vorname!.Substring(0, 2) + "." + student.Nachname!.Substring(0, 2);
 
                         if (student.Nachname.StartsWith("Li") && student.Vorname.StartsWith("De"))
@@ -395,17 +400,26 @@ public class Students : List<Student>
                             //klassenleitungString += Klassenlehrer.Kürzel + ",";
                             klassenleitungString += string.Join(",", Klassenlehrers.Select(klassenlehrer => klassenlehrer.Kürzel));
 
-                            if (!mailliste.Contains(Klassenlehrer.Mail))
+                            foreach (var klassenlehrer in Klassenlehrers)
                             {
-                                mailliste += Klassenlehrer.Mail + ";";
-                                if(Klassenlehrer != null)
-                                    zieldatei.Lehrers.Add(Klassenlehrer);
-                            }
+                                if (!mailliste.Contains(klassenlehrer.Mail))
+                                {
+                                    mailliste += klassenlehrer.Mail + ";";
+                                    if(klassenlehrer != null)
+                                        zieldatei.Lehrers.Add(klassenlehrer);
+                                }
 
-                            if (!teamsChatLink.Contains(Klassenlehrer.Mail))
-                            {
-                                teamsChatLink += string.Join(",", Klassenlehrers.Select(klassenlehrer => klassenlehrer.Mail));
+                                if (!teamsChatLink.Contains(klassenlehrer.Mail))
+                                {
+                                    teamsChatLink += string.Join(",", Klassenlehrers.Select(klassenlehrer => klassenlehrer.Mail));
+                                }    
                             }
+                            zieldatei.Add("|" + student.Klasse.PadRight(10) + "|" + klassenleitungString.TrimEnd(',').PadRight(16) + "  |" + name.PadRight(8) + "|" +
+                                   alter + "|" +
+                                   student.MaßnahmenAlsWikiLinkAufzählung + "  |" + aussage +
+                                   "  |[[:eskalationsstufen_erzieherische_einwirkung_ordnungsmassnahmen|Erz.Einwirkung]] " +
+                                   attestpflichtWikiLink + " " + mahnungWikiLink + " " + bußgeldverfahren + " " +
+                                   teilkonferenz + "|");
                         }                        
                     }
                 }
