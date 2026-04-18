@@ -1565,11 +1565,12 @@ public class Students : List<Student>
         }
 
         // Falls Bilder vorhanden sind, wird als erstes ein Vergleich zwischen pfadFotosAusSchild und seinem neuesten
-        // Klonordner versucht. Der Klon liegt im selben Ordner wie pfadFotosAusSchild. Der Name des Ordners heißt identisch,
+        // Klonordner im Unterordner Fotos_aus_Schild_bisher versucht. Der Klon liegt im selben Ordner wie pfadFotosAusSchild. Der Name des Ordners heißt identisch,
         // hat aber das Erstelldatum als Suffix im Namen.
         var ordnername = new DirectoryInfo(pfadFotosAusSchild).Name;
+        var ordnernameBisher = ordnername + "_bisher";
         var übergeordneterOrdner = Directory.GetParent(pfadFotosAusSchild)?.FullName;
-        var unterordner = Directory.GetDirectories(übergeordneterOrdner ?? "", ordnername + "*")
+        var unterordner = Directory.GetDirectories(Path.Combine(übergeordneterOrdner ?? "", ordnernameBisher), ordnername + "*")
             .Select(d => new DirectoryInfo(d))
             .Where(di => di.FullName != pfadFotosAusSchild)
             .OrderByDescending(di => di.CreationTime)

@@ -314,7 +314,10 @@ public partial class Student
                             {
                                 if (dict["Note"] != null && dict["Note"].ToString() != "")
                                 {
-                                    notenWebuntis.Add(dict["Note"].ToString());
+                                    if (dict["Prüfungsart"] != null && dict["Prüfungsart"].ToString() == "Mahnung gem. §50 (4) SchulG (Blauer Brief)")
+                                    {
+                                        notenWebuntis.Add(dict["Note"].ToString());
+                                    }
                                 }
                             }
                             else

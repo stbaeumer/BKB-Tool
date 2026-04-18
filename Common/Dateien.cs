@@ -138,7 +138,7 @@ public class Dateien : List<Datei>
                 $"Trennzeichen: [{Global.GetColor(Global.ColorPfadInDateien)}]|[/]",
                 $"Textbegrenzung: [{Global.GetColor(Global.ColorPfadInDateien)}]\"[/]",
                 $"Encoding: [{Global.GetColor(Global.ColorPfadInDateien)}]UTF-8[/]",
-                $"Die Datei speichern: [{Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}GPU002.TXT[/]"
+                $"Die Datei speichern: [{Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}/GPU002.TXT[/]"
             ],
             [""],
             false,

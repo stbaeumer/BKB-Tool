@@ -423,11 +423,11 @@ public static class MenueHelper
       students,
       klassen,
       [
-       $"Die Lernabschnittsdaten müssen zuvor angelegt worden sein.",
-       $"Die Unterrichte ([{Global.GetColor(Global.ColorActionInMenüs)}]GPU002[/]) und Kurse ([{Global.GetColor(Global.ColorActionInMenüs)}]studentgoupstudents[/]) werden aus (Web-)Untis für jeden Schüler neu angelegt und in die SchuelerLeistungsdaten.dat eingetragen.",       
-       $"[{Global.GetColor(Global.ColorActionInMenüs)}]Hinweise zum Beruflichen Gymnasium:[/]",
-       $"[{Global.GetColor(Global.ColorActionInMenüs)}]#1[/] Die Kurswahlen sollten auf der Wiki-Seite zu Halbjahresbeginn erfolgt sein. Aus den Kurswahlen werden [{Global.GetColor(Global.ColorActionInMenüs)}]LK1, LK2, GKS usw.[/] übernommen.",
-       $"[{Global.GetColor(Global.ColorActionInMenüs)}]#2[/] Es empfiehlt sich, dass die SuS die Kurswahlen vor der Zeugniskonferenz nochmal überprüfen."       
+       $"Starten Sie diese Funktion nur, wenn die Lernabschnittsdaten zuvor angelegt worden sind.",
+       $"Die Unterrichte ([{Global.GetColor(Global.ColorPfadInDateien)}]GPU002[/]) und Kurse ([{Global.GetColor(Global.ColorPfadInDateien)}]studentgroupstudents[/]) werden aus (Web-)Untis für jeden Schüler neu angelegt und in die [{Global.GetColor(Global.ColorPfadInDateien)}]SchuelerLeistungsdaten.dat[/] eingetragen.",       
+       $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise zum Beruflichen Gymnasium:[/]",
+       $"[{Global.GetColor(Global.ColorHinweise)}]#1[/] Die Kurswahlen sollten auf der Wiki-Seite zu Halbjahresbeginn erfolgt sein. Aus den Kurswahlen werden [{Global.GetColor(Global.ColorActionInMenüs)}]LK1, LK2, GKS usw.[/] übernommen.",
+       $"[{Global.GetColor(Global.ColorHinweise)}]#2[/] Es empfiehlt sich, dass die SuS die Kurswahlen vor der Zeugniskonferenz nochmals überprüfen."       
       ],
       m =>
       {
@@ -442,7 +442,7 @@ public static class MenueHelper
         configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Kurse.dat"),
         [
          datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
-         datei => datei.Verarbeiten(quelldateien, Global.Modus.Filtern),
+         //datei => datei.Verarbeiten(quelldateien, Global.Modus.Filtern),
          datei => datei.Erstellen()
         ],
         ["KursBez", "Jahr", "Abschnitt"],
@@ -452,7 +452,7 @@ public static class MenueHelper
         configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat", ""),
         [
          datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
-         datei => datei.Verarbeiten(quelldateien, Global.Modus.Filtern),
+         //datei => datei.Verarbeiten(quelldateien, Global.Modus.Filtern),
          datei => datei.Erstellen()
         ],
         ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach", "Kurs"],
@@ -732,6 +732,36 @@ public static class MenueHelper
         );       
       },
       Global.Rubrik.Leistungsdaten,
+      Global.NurBeiDiesenSchulnummern.Nur177659
+     ),
+     new Menüeintrag(
+         "Blaue Briefe: April: Mahnungen gem. §50(4) SchulG erstellen",
+         quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "schuelerleistungsdaten,dat", "marksperlesson,csv"]),
+         students,
+         klassen,
+         [
+          $"Es werden jetzt die Leistungsdaten für die Blauen Briefe erstellt.",
+          $"[{Global.GetColor(Global.ColorUnterschrift)}]Voraussetzung #1: [/]Die Unterrichte müssen bereits vorher schülergenau nach SchILD übertragen worden sein, da diese Funktion nur bestehende SchuelerLeistungsdaten um die Note 5 oder 6 ergänzt.",
+          $"[{Global.GetColor(Global.ColorUnterschrift)}]Voraussetzung #2: [/]Die Mahnungen aus dem Halbjahr wurden in SchILD bereits in einem Gruppenprozess geholt.",
+          $"[{Global.GetColor(Global.ColorUnterschrift)}]Voraussetzung #3: [/]LuL haben die Mahnungen in Untis eingetragen. Sie müssen dafür die Prüfungsart Blauer Brief auswählen."
+         ],
+         m =>
+     {
+      m.FilterInteressierendeStudentsUndKlassen(configuration);
+      configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration);      
+      m.NotenInLeistungsdatenErgaenzen(
+       configuration, lehrers, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat", ""),
+       [
+        datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
+        //datei => datei.Verarbeiten(quelldateien, Global.Modus.Filtern),
+        datei => datei.Erstellen()
+       ],
+       ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach"],
+       [],
+       "|", '\0', new UTF8Encoding(true), false, null,
+       Global.Zweck.Mahnung);
+      },
+      Global.Rubrik.Allgemein,
       Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(

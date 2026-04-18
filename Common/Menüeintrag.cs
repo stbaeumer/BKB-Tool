@@ -1056,7 +1056,9 @@ public class Menüeintrag
                         if(string.IsNullOrEmpty(note))
                         {
                             var lol = dictLeist["Fachlehrer"].ToString();
-                            student.Warnung($"{lol} hat keine Note erteilt in {fach}.");
+
+                            if(art != Global.Zweck.Mahnung)
+                                student.Warnung($"{lol} hat keine Note erteilt in {fach}.");
                         }
                         
                         ((IDictionary<string, object>)record)[name] = note;
@@ -5249,8 +5251,10 @@ public class Menüeintrag
         var ordnername = new DirectoryInfo(pfadFotosAusSchild).Name;
         var übergeordneterOrdner = Directory.GetParent(pfadFotosAusSchild)?.FullName;
 
+        var ordnernameBisher = ordnername + "_bisher";
+
         var neuerOrdnername = $"{ordnername}_{DateTime.Now:yyyyMMdd_HHmmss}";
-        var neuerOrdnerPfad = Path.Combine(übergeordneterOrdner ?? "", neuerOrdnername);
+        var neuerOrdnerPfad = Path.Combine(Path.Combine(übergeordneterOrdner ?? "", ordnernameBisher), neuerOrdnername);
         
         var panel = new Panel(
             $"Nach dem erfolgreichen Zippen werden nun die Fotos aus [{Global.GetColor(Global.ColorPfadInDateien)}]{pfadFotosAusSchild}[/] nach [{Global.GetColor(Global.ColorPfadInDateien)}]{neuerOrdnerPfad}[/] verschoben. Das ist notwendig, damit BKB-Tool beim nächsten Mal aus dem Vergleich der neuen und alten Fotos die Zipdatei passend erstellen kann. " +
