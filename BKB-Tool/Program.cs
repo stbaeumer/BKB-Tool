@@ -210,7 +210,21 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                         });
                     }
 
-                    // 4) .desktop-Datei anpassen
+
+                    // 4) chmod +x auf neue Datei
+                    try
+                    {
+                        var chmodProc = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                        {
+                            FileName = "/bin/chmod",
+                            Arguments = $"+x \"{newPath}\"",
+                            UseShellExecute = false
+                        });
+                        chmodProc?.WaitForExit();
+                    }
+                    catch { /* Ignorieren, Fehler wird später sichtbar */ }
+
+                    // 5) .desktop-Datei anpassen (vollständiger Pfad)
                     string desktopFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), ".local/share/applications/BKB-Tool.desktop");
                     if (File.Exists(desktopFile))
                     {
