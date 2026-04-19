@@ -433,6 +433,8 @@ public static class MenueHelper
       {
        m.FilterInteressierendeStudentsUndKlassen(configuration);
        configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration);
+       configuration = Global.Konfig("NichtInteressierendeUnterrichtsgruppen", Global.Modus.Update, configuration,null,-1,-1,null,"keine");
+       configuration = Global.Konfig("NichtInteressierendeFächer", Global.Modus.Update, configuration, null,-1,-1,null,"keine");
        //configuration = Global.Konfig("Kursarten", Global.Modus.Update, configuration);
 
        m.Unterrichte = new Unterrichte(configuration, m, Global.Zweck.Zeugnis, Global.Art.KursUnterrichte);
@@ -733,37 +735,7 @@ public static class MenueHelper
       },
       Global.Rubrik.Leistungsdaten,
       Global.NurBeiDiesenSchulnummern.Nur177659
-     ),
-     new Menüeintrag(
-         "Blaue Briefe: April: Mahnungen gem. §50(4) SchulG erstellen",
-         quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "schuelerleistungsdaten,dat", "marksperlesson,csv"]),
-         students,
-         klassen,
-         [
-          $"Es werden jetzt die Leistungsdaten für die Blauen Briefe erstellt.",
-          $"[{Global.GetColor(Global.ColorUnterschrift)}]Voraussetzung #1: [/]Die Unterrichte müssen bereits vorher schülergenau nach SchILD übertragen worden sein, da diese Funktion nur bestehende SchuelerLeistungsdaten um die Note 5 oder 6 ergänzt.",
-          $"[{Global.GetColor(Global.ColorUnterschrift)}]Voraussetzung #2: [/]Die Mahnungen aus dem Halbjahr wurden in SchILD bereits in einem Gruppenprozess geholt.",
-          $"[{Global.GetColor(Global.ColorUnterschrift)}]Voraussetzung #3: [/]LuL haben die Mahnungen in Untis eingetragen. Sie müssen dafür die Prüfungsart Blauer Brief auswählen."
-         ],
-         m =>
-     {
-      m.FilterInteressierendeStudentsUndKlassen(configuration);
-      configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration);      
-      m.NotenInLeistungsdatenErgaenzen(
-       configuration, lehrers, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat", ""),
-       [
-        datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
-        //datei => datei.Verarbeiten(quelldateien, Global.Modus.Filtern),
-        datei => datei.Erstellen()
-       ],
-       ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach"],
-       [],
-       "|", '\0', new UTF8Encoding(true), false, null,
-       Global.Zweck.Mahnung);
-      },
-      Global.Rubrik.Allgemein,
-      Global.NurBeiDiesenSchulnummern.Nur177659
-     ),
+     ),     
      new Menüeintrag(
       "Schnellmeldung:September:Relationsgruppen im September aufbereiten",
       quelldateien.Notwendige(configuration,[]),
@@ -854,6 +826,36 @@ public static class MenueHelper
       },
       Global.Rubrik.Leistungsdaten,
       Global.NurBeiDiesenSchulnummern.Alle
+     ),
+     new Menüeintrag(
+         "Blaue Briefe: April: Mahnungen gem. §50(4) SchulG erstellen",
+         quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "schuelerleistungsdaten,dat", "marksperlesson,csv"]),
+         students,
+         klassen,
+         [
+          $"Die [{Global.GetColor(Global.ColorPfadInDateien)}]SchuelerLeistungsdaten.dat[/] wird um die Noten 5 oder 6 für die Blauen Briefe ergänzt.",
+          $"[{Global.GetColor(Global.ColorUnterschrift)}]Voraussetzung #1: [/]Die Unterrichte müssen bereits vorher schülergenau nach SchILD übertragen worden sein, da diese Funktion nur bestehende SchuelerLeistungsdaten um die Note 5 oder 6 ergänzt.",
+          $"[{Global.GetColor(Global.ColorUnterschrift)}]Voraussetzung #2: [/]Die Defizite aus dem Halbjahr wurden in SchILD bereits in einem Gruppenprozess geholt.",
+          $"[{Global.GetColor(Global.ColorUnterschrift)}]Voraussetzung #3: [/]LuL haben zuvor die Noten in Untis eingetragen. Sie müssen dafür die Prüfungsart Blauer Brief auswählen."
+         ],
+         m =>
+     {
+      m.FilterInteressierendeStudentsUndKlassen(configuration);
+      configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration);      
+      m.NotenInLeistungsdatenErgaenzen(
+       configuration, lehrers, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat", ""),
+       [
+        datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
+        //datei => datei.Verarbeiten(quelldateien, Global.Modus.Filtern),
+        datei => datei.Erstellen()
+       ],
+       ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach"],
+       [],
+       "|", '\0', new UTF8Encoding(true), false, null,
+       Global.Zweck.Mahnung);
+      },
+      Global.Rubrik.Allgemein,
+      Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
       "Klassen anlegen:vor Sommer:Neue Klassen von Untis nach SchILD übergeben und Eigenschaften anpassen",

@@ -1037,8 +1037,9 @@ public static class Global
             // Wenn der Wert abgefragt wird, dann wird ein Panel mit dem Hinweis angezeigt
             AnsiConsole.Write(panel);
 
+                                    // $"[] {aufforderung}[/]"
             userInput = AnsiConsole.Prompt(
-                new TextPrompt<string>($"[] {aufforderung} {(string.IsNullOrEmpty(zulässigeAuswahlOptionen) ? "" : "(Zulässige Optionen: " + zulässigeAuswahlOptionen + ")")} [/]")
+                new TextPrompt<string>($"[] {aufforderung} {(string.IsNullOrEmpty(zulässigeAuswahlOptionen) ? "" : "(Zulässige Optionen: " + zulässigeAuswahlOptionen + ")")}[/]")
                 .PromptStyle(Global.GetColor(Global.ColorActionInMenüs))
                     .ShowDefaultValue(true)
                     .Validate(n =>
@@ -1069,6 +1070,10 @@ public static class Global
                 if(userInput.ToString() == "alle")
                 {
                     userInput = zulässigeAuswahlOptionen;
+                }
+                if(userInput.ToString() == "keine" || userInput.ToString() == "nichts")
+                {
+                    userInput = "keine";
                 }
         }
         if (datentyp == Datentyp.Abschnitt)
@@ -1816,17 +1821,28 @@ public static class KonfigHelper
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
-        ["InteressierendeUnterrichtsgruppen"] = new KonfigMeta
+        ["NichtInteressierendeUnterrichtsgruppen"] = new KonfigMeta
         {
-            Key = "InteressierendeUnterrichtsgruppen",
-            DefaultValue = Environment.GetEnvironmentVariable("InteressierendeUnterrichtsgruppen") ?? "",
+            Key = "NichtInteressierendeUnterrichtsgruppen",
+            DefaultValue = Environment.GetEnvironmentVariable("NichtInteressierendeUnterrichtsgruppen") ?? "",
             Aufforderung = $"[green]■[/]",
-            Hinweise = $"Geben Sie alle interessierenden [{Global.GetColor(Global.ColorInfoBox)}]Unterrichtsgruppen[/] an. Bei der Statistik sind das alle Unterrichtsgruppen, die am Stichtag anwesend sind. Unterrichte ohne Unterrichtsgrupe werden immer berücksichtigt.\nGroß- und Kleinschreibung beachten!\nWenn Sie alle Unterrichtsgruppen berücksichtigen wollen, schreiben Sie das Wort [{Global.GetColor(Global.ColorActionInMenüs)}]alle[/].",
+            Hinweise = $"Geben Sie kommagetrennt alle nicht interessierenden [{Global.GetColor(Global.ColorInfoBox)}]Untis-Unterrichtsgruppen[/] an. Bei der Statistik interessieren z.B. alle diejenigen Unterrichtsgruppen nicht, die am Stichtag nicht anwesend sind. Unterrichte ohne Unterrichtsgruppe werden immer berücksichtigt. Löschen Sie bereits vorher definierte Gruppen, indem Sie '[{Global.GetColor(Global.ColorHinweise)}]keine[/]' tippen. Groß- und Kleinschreibung beachten!",
             Datentyp = Global.Datentyp.ListString,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
+        ["NichtInteressierendeFächer"] = new KonfigMeta
+        {
+            Key = "NichtInteressierendeFächer",
+            DefaultValue = Environment.GetEnvironmentVariable("NichtInteressierendeFächer") ?? "",
+            Aufforderung = $"[green]■[/]",
+            Hinweise = $"Geben Sie kommagetrennt alle nicht interessierenden [{Global.GetColor(Global.ColorInfoBox)}]Fächer[/] an. Z.B. könnten Sie Englisch Förderunterricht ausschließen (E FU). Geben Sie hier '[{Global.GetColor(Global.ColorHinweise)}]keine[/]' an, wenn Sie nichts ausschießen wollen. Groß- und Kleinschreibung beachten!",
+            Datentyp = Global.Datentyp.ListString,
+            InGrundeinstellungAbfragen = false,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
+        }        ,
         ["Klassen"] = new KonfigMeta
         {
             Key = "Klassen",

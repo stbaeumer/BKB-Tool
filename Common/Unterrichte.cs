@@ -25,9 +25,6 @@ public class Unterrichte : List<Unterricht>
         
         var zulässigeAuswahlOptionen = GetZulässigeUnterrichtsgruppen(configuration, gpu002);
 
-        if (Global.Art.KursUnterrichte == art)
-            configuration = Global.Konfig("InteressierendeUnterrichtsgruppen", Global.Modus.ReadSilent, configuration, null, -1, -1, null, null, null, zulässigeAuswahlOptionen + ",_"); // wird immer abgefragt
-
         AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start($"{art} aus GPU002.TXT einlesen ...", ctx =>
         {
             // Ordne die GPU002 aufsteigend nach Field6. Dadurch wird erreicht, dass die erste Lehrkraft im Alphabet Kursleiter wird.
@@ -38,12 +35,20 @@ public class Unterrichte : List<Unterricht>
                 var Klassen = new Klassen();
                 var dict = (IDictionary<string, object>)record;
                
+                if(dict["Field1"]?.ToString() == "3449" || dict["Field1"]?.ToString() == "3636")
+                {
+                    string aa = "Test"; // Debugging purpose
+                }
+
                 // ohne eingetragenen Lehrer wird die Zeile übersprungen
                 if (!dict.ContainsKey("Field6") || string.IsNullOrEmpty(dict["Field6"]?.ToString()))
                     continue; // Ohne Lehrer wird die Zeile übersprungen.
            
                 if (nichtInteressierdendeUnterrichtsgruppe(configuration, dict))
-                    continue; // Diese Gruppe ist nicht interessant, also überspringen.                
+                    continue; // Diese Gruppe ist nicht interessant, also überspringen.
+
+                if (nichtInteressierdendeFächer(configuration, dict))
+                    continue; // Diese Fächer sind nicht interessant, also überspringen.
 
                 if (zweck == Global.Zweck.Statistik && !dict.ContainsKey("Field12") && außerhalbDesStatistikdatums(configuration, dict))
                     continue; // Statistikdatum liegt außerhalb des Zeitraums.
@@ -164,7 +169,21 @@ public class Unterrichte : List<Unterricht>
         }   
     }
 
-    private DateTime tt_mm_jjjjNachDateTime(string? v)
+ private bool nichtInteressierdendeFächer(IConfiguration configuration, IDictionary<string, object> dict)
+ {
+        // Wenn Field7 leer ist oder configuration["InteressierendeFächer"].Split(',').Contains(Field7) dann wird die Zeile weiterverarbeitet.
+        if (dict.ContainsKey("Field7") && !string.IsNullOrEmpty(dict["Field7"]?.ToString()))
+        {
+            var nichtInteressierendeFächer = configuration["NichtInteressierendeFächer"]?.Split(',').Select(s => s.Trim()).ToList();
+            if (nichtInteressierendeFächer != null && nichtInteressierendeFächer.Contains(dict["Field7"].ToString()))
+            {
+                return true; // Dieses Fach ist nicht interessant, also überspringen.
+            }
+        }
+        return false;
+ }
+
+ private DateTime tt_mm_jjjjNachDateTime(string? v)
     {
         if (string.IsNullOrEmpty(v) || v.Length != 10)
             return DateTime.MinValue; // Ungültiges Datum
@@ -226,8 +245,8 @@ public class Unterrichte : List<Unterricht>
         // Wenn Field12 leer ist oder configuration["InteressierendeUnterrichtsgruppen"].Split(',').Contains(Field12) dann wird die Zeile weiterverarbeitet.
         if (dict.ContainsKey("Field12") && !string.IsNullOrEmpty(dict["Field12"]?.ToString()))
         {
-            var interessierendeGruppen = configuration["InteressierendeUnterrichtsgruppen"]?.Split(',').Select(s => s.Trim()).ToList();
-            if (interessierendeGruppen != null && !interessierendeGruppen.Contains(dict["Field12"].ToString()))
+            var nichtInteressierendeGruppen = configuration["NichtInteressierendeUnterrichtsgruppen"]?.Split(',').Select(s => s.Trim()).ToList();
+            if (nichtInteressierendeGruppen != null && nichtInteressierendeGruppen.Contains(dict["Field12"].ToString()))
             {
                 return true; // Diese Gruppe ist nicht interessant, also überspringen.
             }

@@ -103,7 +103,7 @@ FROM Class LEFT JOIN Teacher ON Class.TEACHER_ID = Teacher.TEACHER_ID WHERE (((C
 
     public Klassen()
     {
-     }
+    }
 
     public Klassen(IConfiguration configuration, Dateien quelldateien, Students students)
     {
