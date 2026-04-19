@@ -1789,7 +1789,7 @@ public static class KonfigHelper
             NurBeiDiesenSchulnummern = Global.Schulnummer177659
         },
         ["ConnectionStringUntis"] = new KonfigMeta
-        {
+        { 
             Key = "ConnectionStringUntis",
             DefaultValue = Environment.GetEnvironmentVariable("ConnectionStringUntis") ?? "",
             Aufforderung = $"[green]■[/]",
