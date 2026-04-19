@@ -169,13 +169,13 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                         return configuration;
                     }
 
-                    // 1) Download-URL für AppImage mit Versionsnummer finden
+                    // 1) Download-URL für Linux-Binary mit Versionsnummer finden
                     string downloadUrl = null;
                     string assetName = null;
                     foreach (var asset in selectedRelease.Value.GetProperty("assets").EnumerateArray())
                     {
                         var name = asset.GetProperty("name").GetString();
-                        if (name != null && name.StartsWith("BKB-Tool-") && name.EndsWith(".AppImage"))
+                        if (name != null && name.StartsWith("BKB-Tool-linux-x64-") )
                         {
                             downloadUrl = asset.GetProperty("browser_download_url").GetString();
                             assetName = name;
@@ -185,26 +185,13 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
 
                     if (string.IsNullOrEmpty(downloadUrl) || string.IsNullOrEmpty(assetName))
                     {
-                        AnsiConsole.MarkupLine("[red]Fehler: BKB-Tool-<Version>.AppImage im Release nicht gefunden.[/]");
+                        AnsiConsole.MarkupLine("[red]Fehler: BKB-Tool-linux-x64-<Version> im Release nicht gefunden.[/]");
                         return configuration;
                     }
-
 
                     // 2) Zielpfade bestimmen
-                    string appImagePath = Environment.GetEnvironmentVariable("APPIMAGE");
-                    if (string.IsNullOrEmpty(appImagePath))
-                    {
-                        var guess = Directory.GetFiles(Directory.GetCurrentDirectory(), "BKB-Tool-*.AppImage").FirstOrDefault() ?? "";
-                        if (!string.IsNullOrEmpty(guess))
-                            appImagePath = guess;
-                    }
-                    if (string.IsNullOrEmpty(appImagePath) || !File.Exists(appImagePath))
-                    {
-                        AnsiConsole.MarkupLine("[red]Fehler: Laufendes AppImage nicht ermittelt. Starten Sie BKB-Tool als AppImage und versuchen Sie es erneut.[/]");
-                        return configuration;
-                    }
-
-                    string appDir = Path.GetDirectoryName(appImagePath) ?? Directory.GetCurrentDirectory();
+                    string runningBinary = Environment.GetCommandLineArgs()[0];
+                    string appDir = Path.GetDirectoryName(runningBinary) ?? Directory.GetCurrentDirectory();
                     string newPath = Path.Combine(appDir, assetName);
 
                     // 3) Neue Version herunterladen (mit Fortschritt)
@@ -245,6 +232,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                     Console.WriteLine("\nDrücken Sie eine beliebige Taste zum Beenden ...");
                     Console.ReadKey(true);
                     Environment.Exit(0);
+                    return configuration; // unreachable
                     return configuration; // unreachable
                 }
                 else if (os == "Windows")

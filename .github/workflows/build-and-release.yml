@@ -143,8 +143,9 @@ jobs:
     - name: Prepare Linux Binary for Release
       shell: pwsh
       run: |
-        # Kopiert die nackte Binärdatei mit einem eindeutigen Namen für das Release
-        Copy-Item "./publish/linux/BKB-Tool" -Destination "./publish/linux/BKB-Tool-linux-x64"
+        $version = "${{ steps.get_version.outputs.version }}"
+        $target = "./publish/linux/BKB-Tool-linux-x64-$version"
+        Copy-Item "./publish/linux/BKB-Tool" -Destination $target
 
     - name: Create AppImage structure
       shell: pwsh
@@ -203,7 +204,7 @@ jobs:
         prerelease: true
         files: |
           ./publish/windows/BKB-Tool.exe
-          ./publish/linux/BKB-Tool-linux-x64
+          ./publish/linux/BKB-Tool-linux-x64-${{ steps.get_version.outputs.version }}
           ./BKB-Tool-${{ steps.get_version.outputs.version }}.AppImage
           ./BKB-Tool.AppImage.zsync
       env:
