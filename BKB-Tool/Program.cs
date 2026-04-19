@@ -188,6 +188,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                         AnsiConsole.MarkupLine("[red]Fehler: BKB-Tool-linux-x64-<Version> im Release nicht gefunden.[/]");
                         return configuration;
                     }
+                    
 
                     // 2) Zielpfade bestimmen
                     string runningBinary = Environment.GetCommandLineArgs()[0];
