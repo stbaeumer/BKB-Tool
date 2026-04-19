@@ -187,7 +187,6 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                         return configuration;
                     }
 
-
                     // 2) Zielpfade bestimmen
                     string appImagePath = Environment.GetEnvironmentVariable("APPIMAGE");
                     if (string.IsNullOrEmpty(appImagePath))
