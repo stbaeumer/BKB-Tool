@@ -169,21 +169,23 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                         return configuration;
                     }
 
-                    // 1) Download-URL für AppImage finden (Name exakt: BKB-Tool.AppImage) 
+                    // 1) Download-URL für AppImage mit Versionsnummer finden
                     string downloadUrl = null;
+                    string assetName = null;
                     foreach (var asset in selectedRelease.Value.GetProperty("assets").EnumerateArray())
                     {
                         var name = asset.GetProperty("name").GetString();
-                        if (string.Equals(name, "BKB-Tool.AppImage", StringComparison.OrdinalIgnoreCase))
+                        if (name != null && name.StartsWith("BKB-Tool-") && name.EndsWith(".AppImage"))
                         {
                             downloadUrl = asset.GetProperty("browser_download_url").GetString();
+                            assetName = name;
                             break;
                         }
                     }
 
-                    if (string.IsNullOrEmpty(downloadUrl))
+                    if (string.IsNullOrEmpty(downloadUrl) || string.IsNullOrEmpty(assetName))
                     {
-                        AnsiConsole.MarkupLine("[red]Fehler: BKB-Tool.AppImage im Release nicht gefunden.[/]");
+                        AnsiConsole.MarkupLine("[red]Fehler: BKB-Tool-<Version>.AppImage im Release nicht gefunden.[/]");
                         return configuration;
                     }
 
@@ -191,11 +193,9 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                     string appImagePath = Environment.GetEnvironmentVariable("APPIMAGE");
                     if (string.IsNullOrEmpty(appImagePath))
                     {
-                        var guess = Path.Combine(Directory.GetCurrentDirectory(), "BKB-Tool.AppImage");
-                        if (File.Exists(guess))
+                        var guess = Directory.GetFiles(Directory.GetCurrentDirectory(), "BKB-Tool-*.AppImage").FirstOrDefault() ?? "";
+                        if (!string.IsNullOrEmpty(guess))
                             appImagePath = guess;
-                        else
-                            appImagePath = Directory.GetFiles(Directory.GetCurrentDirectory(), "BKB-Tool*.AppImage").FirstOrDefault() ?? "";
                     }
                     if (string.IsNullOrEmpty(appImagePath) || !File.Exists(appImagePath))
                     {
@@ -204,9 +204,9 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                     }
 
                     string appDir = Path.GetDirectoryName(appImagePath) ?? Directory.GetCurrentDirectory();
-                    string newPath = Path.Combine(appDir, "BKB-Tool_neu.AppImage");
+                    string newPath = Path.Combine(appDir, assetName);
 
-                    // 3) Neue Version herunterladen (mit Fortschritt) 
+                    // 3) Neue Version herunterladen (mit Fortschritt)
                     using (var wc = new System.Net.WebClient())
                     {
                         wc.Headers.Add("User-Agent", "request");
@@ -221,99 +221,28 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                         });
                     }
 
-                    // Updater-Skript schreiben (sichtbar, bleibt erhalten)
-                    string updaterScript = Path.Combine(appDir, "BKB-Tool-update.sh");
-                    string script = "#!/usr/bin/env bash\n"
-                        + "set -euo pipefail\n"
-                        + "trap 'echo; echo \"Es ist ein Fehler aufgetreten.\";' ERR\n"
-                        + $"APP=\"{appImagePath}\"\n"
-                        + $"NEW=\"{newPath}\"\n"
-                        + "DIR=\"$(dirname \"$APP\")\"\n"
-                        + "LOG=\"$DIR/BKB-Tool-update.log\"\n"
-                        + "echo \"[$(date)] Selfupdate gestartet. APP=$APP NEW=$NEW\" | tee -a \"$LOG\"\n"
-                        + "sleep 1\n"
-                        + "n=0\n"
-                        + "while pgrep -f \"BKB-Tool.*AppImage\" >/dev/null 2>&1; do\n"
-                        + "  echo \"[$(date)] BKB-Tool läuft noch. Bitte schließen!\" | tee -a \"$LOG\"\n"
-                        + "  sleep 1\n"
-                        + "  n=$((n+1))\n"
-                        + "  if [ $n -gt 120 ]; then\n"
-                        + "    echo \"Timeout: BKB-Tool beendet sich nicht.\" | tee -a \"$LOG\"\n"
-                        + "    echo\n"
-                        + "    exit 1\n"
-                        + "  fi\n"
-                        + "done\n"
-                        + "if [ ! -f \"$NEW\" ]; then\n"
-                        + "  echo \"Fehler: Update-Datei fehlt: $NEW\" | tee -a \"$LOG\"\n"
-                        + "  echo\n"
-                        + "  exit 1\n"
-                        + "fi\n"
-                        + "echo \"Lösche alte Version...\" | tee -a \"$LOG\"\n"
-                        + "rm -f \"$APP\"\n"
-                        + "echo \"Benenne neue Version um...\" | tee -a \"$LOG\"\n"
-                        + "mv \"$NEW\" \"$APP\"\n"
-                        + "chmod +x \"$APP\"\n"
-                        + "echo \"Starte neue Version...\" | tee -a \"$LOG\"\n"
-                        + "nohup \"$APP\" >/dev/null 2>&1 &\n"
-                        + "echo\n"
-                        + "echo \"Update abgeschlossen.\"\n"
-                        + "echo \"Log: $LOG\"\n"
-                        + "echo\n";
-
-                    File.WriteAllText(updaterScript, script, new System.Text.UTF8Encoding(false));
-
-                    Process.Start(new ProcessStartInfo
+                    // 4) .desktop-Datei anpassen
+                    string desktopFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), ".local/share/applications/BKB-Tool.desktop");
+                    if (File.Exists(desktopFile))
                     {
-                        FileName = "chmod",
-                        Arguments = $"+x \"{updaterScript}\"",
-                        UseShellExecute = false
-                    })?.WaitForExit();
-
-                    AnsiConsole.MarkupLine($"[gray]Updater-Skript:[/] [bold {Global.GetColor(Global.ColorPfadInDateien)}]{updaterScript}[/]");
-
-                    // 1. Terminal-Erkennung (Diesen Teil musst du ausführen!)
-                    bool hasAlacritty = false;
-                    bool hasGnomeTerminal = false;
-
-                    try
-                    {
-                        using (var p = Process.Start(new ProcessStartInfo("which", "alacritty") { RedirectStandardOutput = true, UseShellExecute = false }))
+                        var lines = File.ReadAllLines(desktopFile).ToList();
+                        for (int i = 0; i < lines.Count; i++)
                         {
-                            p?.WaitForExit();
-                            hasAlacritty = p?.ExitCode == 0;
-                        }
-                        if (!hasAlacritty)
-                        {
-                            using (var p = Process.Start(new ProcessStartInfo("which", "gnome-terminal") { RedirectStandardOutput = true, UseShellExecute = false }))
+                            if (lines[i].StartsWith("Exec="))
                             {
-                                p?.WaitForExit();
-                                hasGnomeTerminal = p?.ExitCode == 0;
+                                lines[i] = $"Exec={newPath}";
                             }
                         }
+                        File.WriteAllLines(desktopFile, lines);
                     }
-                    catch { /* Ignorieren */ }
 
-                    // 2. Terminal-Befehl zusammenbauen
-                    string terminalCmd = "";
-                    string terminalArgs = "";
-
-                    // Skript direkt mit bash im Hintergrund starten und App beenden
-                    try
-                    {
-                        Process.Start(new ProcessStartInfo
-                        {
-                            FileName = "/bin/bash",
-                            Arguments = $"\"{updaterScript}\"",
-                            UseShellExecute = false,
-                            CreateNoWindow = true,
-                            WorkingDirectory = appDir
-                        });
-                    }
-                    catch (Exception ex)
-                    {
-                        AnsiConsole.MarkupLine($"[red]Fehler beim Starten des Update-Skripts:[/] {ex.Message}");
-                        AnsiConsole.MarkupLine($"[gray]Tipp:[/] Versuchen Sie manuell:\n  '/bin/bash {updaterScript}'");
-                    }
+                    // 5) Erfolgsmeldung und Hinweis anzeigen
+                    AnsiConsole.MarkupLine($"[green]Update erfolgreich heruntergeladen:[/] [bold]{assetName}[/]");
+                    AnsiConsole.MarkupLine($"[green]Desktop-Verknüpfung wurde angepasst:[/] [bold]{desktopFile}[/]");
+                    AnsiConsole.MarkupLine("[yellow]Bitte das Programm jetzt beenden und neu starten, um die neue Version zu verwenden.[/]");
+                    AnsiConsole.MarkupLine("[gray]Sie können die alte Version als Backup behalten oder löschen.[/]");
+                    Console.WriteLine("\nDrücken Sie eine beliebige Taste zum Beenden ...");
+                    Console.ReadKey(true);
                     Environment.Exit(0);
                     return configuration; // unreachable
                 }
