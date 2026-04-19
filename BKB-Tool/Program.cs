@@ -210,7 +210,6 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                         });
                     }
 
-
                     // 4) chmod +x auf neue Datei
                     try
                     {
