@@ -262,6 +262,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                         + "echo\n";
 
                     File.WriteAllText(updaterScript, script, new System.Text.UTF8Encoding(false));
+
                     Process.Start(new ProcessStartInfo
                     {
                         FileName = "chmod",
@@ -297,82 +298,23 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                     string terminalCmd = "";
                     string terminalArgs = "";
 
-                    if (hasAlacritty)
-                    {
-                        terminalCmd = "alacritty";
-                        // Alacritty braucht den absoluten Pfad oder bash -c
-                        terminalArgs = $"-e /bin/bash \"{updaterScript}\"";
-                    }
-                    else if (hasGnomeTerminal)
-                    {
-                        terminalCmd = "gnome-terminal";
-                        // WICHTIG: gnome-terminal erwartet oft das -- vor dem Skriptpfad
-                        terminalArgs = $"-- /bin/bash \"{updaterScript}\"";
-                    }
-                    else
-                    {
-                        // Fallback: xterm ist auf fast allen Linux-Systemen als kleinster Nenner installiert
-                        terminalCmd = "/bin/bash";
-                        terminalArgs = $"\"{updaterScript}\"";
-                    }
-
-                    // 3. Starten
+                    // Skript direkt mit bash im Hintergrund starten und App beenden
                     try
                     {
                         Process.Start(new ProcessStartInfo
                         {
-                            FileName = terminalCmd,
-                            Arguments = terminalArgs,
+                            FileName = "/bin/bash",
+                            Arguments = $"\"{updaterScript}\"",
                             UseShellExecute = false,
-                            CreateNoWindow = false // Wir WOLLEN ein Fenster sehen
+                            CreateNoWindow = true,
+                            WorkingDirectory = appDir
                         });
                     }
                     catch (Exception ex)
                     {
-                        AnsiConsole.MarkupLine($"[red]Fehler beim Starten des Skripts:[/] {ex.Message}");
+                        AnsiConsole.MarkupLine($"[red]Fehler beim Starten des Update-Skripts:[/] {ex.Message}");
+                        AnsiConsole.MarkupLine($"[gray]Tipp:[/] Versuchen Sie manuell:\n  '/bin/bash {updaterScript}'");
                     }
-
-                    if (!hasAlacritty && !hasGnomeTerminal)
-                    {
-                        var terminalWarning = new Panel(new Markup(
-                            $"[red]Weder alacritty noch gnome-terminal ist installiert.[/]\n\n" +
-                            $"Das Update-Skript wurde erstellt:\n" +
-                            $"[bold {Global.GetColor(Global.ColorPfadInDateien)}]{updaterScript}[/]\n\n" +
-                            $"Installation:\n" +
-                            $"[{Global.GetColor(Global.ColorPfadInDateien)}]sudo dnf install alacritty[/] (Fedora) oder\n" +
-                            $"[{Global.GetColor(Global.ColorPfadInDateien)}]sudo apt install alacritty[/] (Debian/Ubuntu)\n\n" +
-                            $"Oder führen Sie das Skript manuell aus:\n" +
-                            $"[{Global.GetColor(Global.ColorPfadInDateien)}]bash {updaterScript}[/]"))
-                            .Header("[red]Terminal fehlt[/]")
-                            .BorderColor(Color.Red)
-                            .Expand();
-                        AnsiConsole.Write(terminalWarning);                        
-                        return configuration;
-                    }
-                    try
-                    {
-                        // Terminal unabhängig vom Parent-Prozess starten (detached)
-                        string cmd = hasAlacritty
-                            // Alacritty: Skript als ausführbare Datei starten
-                            ? $"nohup setsid alacritty -t \"BKB-Tool Update\" -e '{updaterScript}' >/dev/null 2>&1 &"
-                            // gnome-terminal: Skript als ausführbare Datei starten
-                            : $"nohup setsid gnome-terminal -- '{updaterScript}' >/dev/null 2>&1 &";
-
-                        Process.Start(new ProcessStartInfo
-                        {
-                            FileName = "bash",
-                            Arguments = $"-c \"{cmd}\"",
-                            UseShellExecute = false,
-                            WorkingDirectory = appDir
-                        });
-                    }
-                    catch (Exception e)
-                    {
-                        AnsiConsole.MarkupLine($"[red]Start des Terminals fehlgeschlagen:[/] {e.Message}");
-                        AnsiConsole.MarkupLine($"[gray]Tipp:[/] Versuchen Sie manuell:\n  '{updaterScript}'");
-                    }
-
-                    // Hauptprozess beenden, damit das Skript ersetzen kann
                     Environment.Exit(0);
                     return configuration; // unreachable
                 }
