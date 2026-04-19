@@ -209,6 +209,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                             mre.WaitOne();
                         });
                     }
+                    
 
                     // 4) chmod +x auf neue Datei
                     try
