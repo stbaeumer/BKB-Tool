@@ -177,9 +177,10 @@ jobs:
         wget -q https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O appimagetool
         chmod +x appimagetool
         ./appimagetool --appimage-extract
+        export VERSION=${{ steps.get_version.outputs.version }}
         ARCH=x86_64 ./squashfs-root/AppRun --no-appstream \
           -u "gh-releases-zsync|${{ github.repository_owner }}|${{ github.event.repository.name }}|${{ steps.get_version.outputs.version }}|BKB-Tool.AppImage.zsync" \
-          AppDir BKB-Tool.AppImage
+          AppDir BKB-Tool-${{ steps.get_version.outputs.version }}.AppImage
     
     - name: Create Release
       uses: softprops/action-gh-release@v1
@@ -203,7 +204,7 @@ jobs:
         files: |
           ./publish/windows/BKB-Tool.exe
           ./publish/linux/BKB-Tool-linux-x64
-          ./BKB-Tool.AppImage
+          ./BKB-Tool-${{ steps.get_version.outputs.version }}.AppImage
           ./BKB-Tool.AppImage.zsync
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
