@@ -1799,6 +1799,17 @@ public static class KonfigHelper
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernPrivilegiert
         },
+        ["PrüfungsartBlauerBrief"] = new KonfigMeta
+        {
+            Key = "PrüfungsartBlauerBrief",
+            DefaultValue = "Mahnung gem. §50 (4) SchulG (Blauer Brief)",
+            Aufforderung = $"[green]■[/]",
+            Hinweise = $"Bitte geben Sie die [{Global.GetColor(Global.ColorInfoBox)}]Prüfungsart[/] aus Webuntis an, anhand derer Noten für Blaue Briefe identifiziert werden können.",
+            Datentyp = Global.Datentyp.String,
+            InGrundeinstellungAbfragen = true,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.SchulnummernPrivilegiert
+        },
         ["FirstRun"] = new KonfigMeta
         {
             Key = "FirstRun",

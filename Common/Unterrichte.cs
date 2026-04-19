@@ -165,7 +165,8 @@ public class Unterrichte : List<Unterricht>
             int wochenstunden = this.Sum(u => u.Wochenstunden);
 
             table.AddRow("", "", $"[{Global.GetColor(Global.ColorZahlen)}]{wochenstunden}[/]", "");
-            AnsiConsole.Write(table);
+            if(configuration["Klassen"]?.Split(',').Select(s => s.Trim()).Contains(klasse) == true)
+                AnsiConsole.Write(table);
         }   
     }
 

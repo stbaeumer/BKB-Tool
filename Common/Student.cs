@@ -281,7 +281,7 @@ public partial class Student
     //    }
     //}
 
-    public string GetNote(string? note, string? noteOderPunkte, string? punkte, string fach, string tendenz)
+    public string GetNote(string? note, string? noteOderPunkte, string? punkte, string fach, string tendenz, IConfiguration configuration)
     {
         if (note == "84" || note == "84.00" || note == "A" || note == "Attest") return "AT";
         if (note == "99") return "NB";
@@ -290,7 +290,7 @@ public partial class Student
         return noteOderPunkte == "N" ? note : "";
     }
 
-    internal string GetNote(string jahrgang, List<dynamic>? marksPerLesson, string fach, Global.Zweck art)
+    internal string GetNote(string jahrgang, List<dynamic>? marksPerLesson, string fach, Global.Zweck art, IConfiguration configuration)
     {
         var linkeSeite = Nachname + ", " + Vorname + " (" + Klasse + "), " + fach;
 
@@ -314,7 +314,7 @@ public partial class Student
                             {
                                 if (dict["Note"] != null && dict["Note"].ToString() != "")
                                 {
-                                    if (dict["Prüfungsart"] != null && dict["Prüfungsart"].ToString() == "Mahnung gem. §50 (4) SchulG (Blauer Brief)")
+                                    if (dict["Prüfungsart"] != null && dict["Prüfungsart"].ToString() == configuration["PrüfungsartBlauerBrief"])
                                     {
                                         notenWebuntis.Add(dict["Note"].ToString());
                                     }

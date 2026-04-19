@@ -415,7 +415,7 @@ public static class MenueHelper
         ;
       },
       Global.Rubrik.Allgemein,
-      Global.NurBeiDiesenSchulnummern.Nur177659
+      Global.NurBeiDiesenSchulnummern.Alle
      ),
      new Menüeintrag(
       $"Zeugnis #1 Unterricht:14 Tage vor ZK:Unterrichte und Kurse schülergenau von Webuntis nach SchILD übertragen",
@@ -463,7 +463,7 @@ public static class MenueHelper
         Global.Zweck.Zeugnis);
       },
       Global.Rubrik.Allgemein,
-      Global.NurBeiDiesenSchulnummern.Nur177659
+      Global.NurBeiDiesenSchulnummern.Alle
      ),
      new Menüeintrag(
       $"Zeugnis #2 Belegung:13 Tage vor ZK:In den Klassen des Beruflichen Gymnasiums die Klausurbelegung aus Wiki in die SchILD-Leistungsdaten übernehmen",
@@ -515,7 +515,7 @@ public static class MenueHelper
        pdfDateien.KennwortSetzen(configuration);
       },
       Global.Rubrik.Allgemein,
-      Global.NurBeiDiesenSchulnummern.Nur177659
+      Global.NurBeiDiesenSchulnummern.Alle
      ),
      new Menüeintrag(
       $"Zeugnis #4 Noten:1  Tag  vor ZK:Noten aus Webuntis (MarksPerLesson) nach SchILD (SchuelerLeistungsdaten) schreiben",
@@ -544,7 +544,7 @@ public static class MenueHelper
             
       },
       Global.Rubrik.Allgemein,
-      Global.NurBeiDiesenSchulnummern.Nur177659
+      Global.NurBeiDiesenSchulnummern.Alle
      ),
      new Menüeintrag(
       $"Zeugnis #5 Listen:1  Tag  vor ZK:Notenlisten werden in Wiki veröffentlicht. Fehlende Noten werden markiert",
@@ -841,7 +841,8 @@ public static class MenueHelper
          m =>
      {
       m.FilterInteressierendeStudentsUndKlassen(configuration);
-      configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration);      
+      configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration);
+      configuration = Global.Konfig("PrüfungsartBlauerBrief", Global.Modus.Update, configuration);
       m.NotenInLeistungsdatenErgaenzen(
        configuration, lehrers, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat", ""),
        [
@@ -855,7 +856,7 @@ public static class MenueHelper
        Global.Zweck.Mahnung);
       },
       Global.Rubrik.Allgemein,
-      Global.NurBeiDiesenSchulnummern.Nur177659
+      Global.NurBeiDiesenSchulnummern.Alle
      ),
      new Menüeintrag(
       "Klassen anlegen:vor Sommer:Neue Klassen von Untis nach SchILD übergeben und Eigenschaften anpassen",
@@ -924,7 +925,7 @@ public static class MenueHelper
         m.ExportAusSchildVerschieben(configuration);
        },
        Global.Rubrik.Allgemein,
-       Global.NurBeiDiesenSchulnummern.Nur177659
+       Global.NurBeiDiesenSchulnummern.Alle
       ),
      new Menüeintrag(
       "Sonderzeiten:Mai/Juni:Lehrkräftesonderzeiten (Anrechnungen) nach SchILD importieren",
@@ -981,7 +982,7 @@ public static class MenueHelper
        pdfDateien.KennwortSetzen(configuration);
       },
       Global.Rubrik.Allgemein,
-      Global.NurBeiDiesenSchulnummern.Nur177659
+      Global.NurBeiDiesenSchulnummern.Alle
      ),     
      new Menüeintrag(
       $"PDF-Seiten mailen::PDF-Seiten an darauf enthaltene E-Mail-Adressen mailen",
@@ -1150,7 +1151,7 @@ public static class MenueHelper
         ",", '\"', new UTF8Encoding(false), true);
      },
      Global.Rubrik.Leistungsdaten,
-     Global.NurBeiDiesenSchulnummern.Alle
+     Global.NurBeiDiesenSchulnummern.Nur000000
     ),
      
     new Menüeintrag("Teams-Chat::Teams-Chat mit Gruppe von Lehrkräften beginnen",
@@ -1206,7 +1207,7 @@ public static class MenueHelper
         "|", '\0', new UTF8Encoding(true), false);
       },
       Global.Rubrik.Allgemein,
-      Global.NurBeiDiesenSchulnummern.Alle
+      Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
       "Sprechtag:Januar:Lehrerübersichtsseite im Wiki veröffentlichen",

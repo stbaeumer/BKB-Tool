@@ -61,7 +61,7 @@ public class Dateien : List<Datei>
         {
             "Exportieren Sie die Datei aus Untis, indem Sie den Pfad gehen:",
             $"1. [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Datei > Import/Export > Export TXT Datei[/]",
-            $"2. Als Delimiter muss '|' ausgewählt werden.",
+            $"2. Als Delimiter muss '|' ausgewählt werden; UTF8; Textbegrenzung: '\"'",
             $"3. Die Datei auswählen.",
             $"4. Die Datei in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/] speichern."
         };

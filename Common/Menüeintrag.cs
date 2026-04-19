@@ -346,7 +346,7 @@ public class Menüeintrag
                     record.Fachlehrer = "";
                     record.Kursart = kursart;
                     record.Kurs = "";
-                    record.Note = student.GetNote(note, noteOderPunkte, punkte, fach, tendenz);
+                    record.Note = student.GetNote(note, noteOderPunkte, punkte, fach, tendenz, configuration);
                     record.Abiturfach = "";
                     record.WochenstdPUNKT = "";
                     record.ExterneSchulnrPUNKT = "";
@@ -964,7 +964,7 @@ public class Menüeintrag
                         abiturfach = leistungsdaten["Abiturfach"].ToString();
                     
                     string jahrgang = student.GetJahrgang(schBasisds);
-                    string note = student.GetNote(jahrgang, marksPerLs, unt.Fach, art);
+                    string note = student.GetNote(jahrgang, marksPerLs, unt.Fach, art, configuration);
 
                     dynamic record = new ExpandoObject();
                     record.Nachname = $"{student.Nachname}#{student.Klasse}";
@@ -1052,7 +1052,7 @@ public class Menüeintrag
                         
                         var fach = dictLeist["Fach"].ToString();
 
-                        string note = student.GetNote(jahrgang, marksPerLs, fach, art);
+                        string note = student.GetNote(jahrgang, marksPerLs, fach, art, configuration);
                         if(string.IsNullOrEmpty(note))
                         {
                             var lol = dictLeist["Fachlehrer"].ToString();
