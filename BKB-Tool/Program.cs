@@ -223,43 +223,42 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
 
                     // Updater-Skript schreiben (sichtbar, bleibt erhalten)
                     string updaterScript = Path.Combine(appDir, "BKB-Tool-update.sh");
-                    string script = "#!/usr/bin/env bash\n" +
-                    "set -euo pipefail\n" +
-                    "trap 'echo; echo \"Es ist ein Fehler aufgetreten.\"; read -n1 -s -r -p \"Taste drücken, um dieses Fenster zu schließen ...\"; echo' ERR\n" +
-                    $"APP=\"{appImagePath}\"\n" +
-                    $"NEW=\"{newPath}\"\n" +
-                    "DIR=\"$(dirname \"$APP\")\"\n" +
-                    "LOG=\"$DIR/BKB-Tool-update.log\"\n" +
-                    "echo \"[$(date)] Selfupdate gestartet. APP=$APP NEW=$NEW\" | tee -a \"$LOG\"\n" +
-                    "sleep 1\n" +
-                    "n=0\n" +
-                    "while pgrep -f \"BKB-Tool.*AppImage\" >/dev/null 2>&1; do\n" +
-                    "  echo \"[$(date)] BKB-Tool läuft noch. Bitte schließen!\" | tee -a \"$LOG\"\n" +
-                    "  sleep 1\n" +
-                    "  n=$((n+1))\n" +
-                    "  if [ $n -gt 120 ]; then\n" +
-                    "    echo \"Timeout: BKB-Tool beendet sich nicht.\" | tee -a \"$LOG\"\n" +
-                    "    echo\n" +
-                    "    read -n1 -s -r -p \"Taste drücken, um dieses Fenster zu schließen ...\"; echo\n" +
-                    "    exit 1\n" +
-                    "  fi\n" +
-                    "done\n" +
-                    "if [ ! -f \"$NEW\" ]; then\n" +
-                    "  echo \"Fehler: Update-Datei fehlt: $NEW\" | tee -a \"$LOG\"\n" +
-                    "  echo\n" +
-                    "  read -n1 -s -r -p \"Taste drücken, um dieses Fenster zu schließen ...\"; echo\n" +
-                    "  exit 1\n" +
-                    "fi\n" +
-                    "echo \"Ersetze alte Version...\" | tee -a \"$LOG\"\n" +
-                    "mv -f \"$NEW\" \"$APP\"\n" +
-                    "chmod +x \"$APP\"\n" +
-                    "echo \"Starte neue Version...\" | tee -a \"$LOG\"\n" +
-                    "nohup \"$APP\" >/dev/null 2>&1 &\n" +
-                    "echo\n" +
-                    "echo \"Update abgeschlossen.\"\n" +
-                    "echo \"Log: $LOG\"\n" +
-                    "echo\n" +
-                    "read -n1 -s -r -p \"Taste drücken, um dieses Fenster zu schließen ...\"; echo\n";
+                    string script = "#!/usr/bin/env bash\n"
+                        + "set -euo pipefail\n"
+                        + "trap 'echo; echo \"Es ist ein Fehler aufgetreten.\";' ERR\n"
+                        + $"APP=\"{appImagePath}\"\n"
+                        + $"NEW=\"{newPath}\"\n"
+                        + "DIR=\"$(dirname \"$APP\")\"\n"
+                        + "LOG=\"$DIR/BKB-Tool-update.log\"\n"
+                        + "echo \"[$(date)] Selfupdate gestartet. APP=$APP NEW=$NEW\" | tee -a \"$LOG\"\n"
+                        + "sleep 1\n"
+                        + "n=0\n"
+                        + "while pgrep -f \"BKB-Tool.*AppImage\" >/dev/null 2>&1; do\n"
+                        + "  echo \"[$(date)] BKB-Tool läuft noch. Bitte schließen!\" | tee -a \"$LOG\"\n"
+                        + "  sleep 1\n"
+                        + "  n=$((n+1))\n"
+                        + "  if [ $n -gt 120 ]; then\n"
+                        + "    echo \"Timeout: BKB-Tool beendet sich nicht.\" | tee -a \"$LOG\"\n"
+                        + "    echo\n"
+                        + "    exit 1\n"
+                        + "  fi\n"
+                        + "done\n"
+                        + "if [ ! -f \"$NEW\" ]; then\n"
+                        + "  echo \"Fehler: Update-Datei fehlt: $NEW\" | tee -a \"$LOG\"\n"
+                        + "  echo\n"
+                        + "  exit 1\n"
+                        + "fi\n"
+                        + "echo \"Lösche alte Version...\" | tee -a \"$LOG\"\n"
+                        + "rm -f \"$APP\"\n"
+                        + "echo \"Benenne neue Version um...\" | tee -a \"$LOG\"\n"
+                        + "mv \"$NEW\" \"$APP\"\n"
+                        + "chmod +x \"$APP\"\n"
+                        + "echo \"Starte neue Version...\" | tee -a \"$LOG\"\n"
+                        + "nohup \"$APP\" >/dev/null 2>&1 &\n"
+                        + "echo\n"
+                        + "echo \"Update abgeschlossen.\"\n"
+                        + "echo \"Log: $LOG\"\n"
+                        + "echo\n";
 
                     File.WriteAllText(updaterScript, script, new System.Text.UTF8Encoding(false));
                     Process.Start(new ProcessStartInfo
