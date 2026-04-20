@@ -1718,7 +1718,7 @@ public static class KonfigHelper
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]Pfad zur Access-Datenbank[/] an. Beispiel:[{Global.GetColor(Global.ColorPfadInProgrammen)}]{@"\\fs01\SchILD-NRW\DB\Test.mdb"}[/]\nGeben Sie stets den kompletten Pfad inklusive Dateinname an.",
             Datentyp = Global.Datentyp.Pfad,
-            InGrundeinstellungAbfragen = true,
+            InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
@@ -1729,7 +1729,7 @@ public static class KonfigHelper
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie das [{Global.GetColor(Global.ColorInfoBox)}]Kennwort[/] der Access-Datenbank an. Es geht nicht um Ihr persönliches Kennwort in SchILD, sondern um das Kennwort der Access-Datenbank selbst.",
             Datentyp = Global.Datentyp.Kennwort,
-            InGrundeinstellungAbfragen = true,
+            InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
@@ -1784,7 +1784,7 @@ public static class KonfigHelper
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]ConnectionString[/] für SchILD an.",
             Datentyp = Global.Datentyp.String,
-            InGrundeinstellungAbfragen = true,
+            InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.Schulnummer177659
         },
@@ -1795,7 +1795,7 @@ public static class KonfigHelper
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Bitte geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]ConnectionString[/] für Untis an.",
             Datentyp = Global.Datentyp.String,
-            InGrundeinstellungAbfragen = true,
+            InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernPrivilegiert
         },
@@ -1806,7 +1806,7 @@ public static class KonfigHelper
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Bitte geben Sie die [{Global.GetColor(Global.ColorInfoBox)}]Prüfungsart[/] aus Webuntis an, anhand derer Noten für Blaue Briefe identifiziert werden können.",
             Datentyp = Global.Datentyp.String,
-            InGrundeinstellungAbfragen = true,
+            InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernPrivilegiert
         },
