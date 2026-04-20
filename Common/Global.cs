@@ -1941,7 +1941,7 @@ public static class KonfigHelper
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie die [{Global.GetColor(Global.ColorInfoBox)}]schulische Mail-Domain[/] für Mailadressen der Schüler*innen an. Bsp.: [{Global.GetColor(Global.ColorHyperlink)}]@students.berufskolleg-borken.de[/]. Ihre Eingabe muss mit [{Global.GetColor(Global.ColorHyperlink)}]@[/] beginnen und mit [{Global.GetColor(Global.ColorHyperlink)}].de[/] etc. enden.",
             Datentyp = Global.Datentyp.Maildomain,
-            InGrundeinstellungAbfragen = true,
+            InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
@@ -2007,7 +2007,7 @@ public static class KonfigHelper
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie optional ein [{Global.GetColor(Global.ColorInfoBox)}]Kennwort[/] an, mit dem Sie die PDF-Dateien verschlüsseln möchten. Wenn Sie kein Kennwort wünschen, dann ein \"-\" eingeben, um einen vorherigen Wert zu löschen.",
             Datentyp = Global.Datentyp.Kennwort,
-            InGrundeinstellungAbfragen = true,
+            InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
@@ -2271,7 +2271,7 @@ public static class KonfigHelper
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie die [{Global.GetColor(Global.ColorInfoBox)}]URL[/] zur dokuwiki xmlrpc.php an.",
             Datentyp = Global.Datentyp.Url,
-            InGrundeinstellungAbfragen = true,
+            InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
@@ -2282,7 +2282,7 @@ public static class KonfigHelper
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]Benutzernamen[/] für den Zugriff auf das Wiki JSON an.",
             Datentyp = Global.Datentyp.String,
-            InGrundeinstellungAbfragen = true,
+            InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
@@ -2293,7 +2293,7 @@ public static class KonfigHelper
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie das [{Global.GetColor(Global.ColorInfoBox)}]Kennwort[/] für den Zugriff auf das Wiki JSON an.",
             Datentyp = Global.Datentyp.Kennwort,
-            InGrundeinstellungAbfragen = true,
+            InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
