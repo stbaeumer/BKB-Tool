@@ -225,8 +225,8 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                     catch { /* Ignorieren, Fehler wird später sichtbar */ }
 
                     // 5) .desktop-Datei anpassen (nur Dateiname, wenn im $PATH)
-                    string desktopFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), ".local/share/applications/BKB-Tool.desktop");
-                    string localBin = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), ".local/bin");
+                    string desktopFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "~/.local/share/applications/BKB-Tool.desktop");
+                    string localBin = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), "~/.local/bin");
                     string execValue = newPath;
                     if (Path.GetDirectoryName(newPath) == localBin)
                         execValue = Path.GetFileName(newPath);
