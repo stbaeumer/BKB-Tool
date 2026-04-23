@@ -427,7 +427,8 @@ public static class MenueHelper
        $"Die Unterrichte ([{Global.GetColor(Global.ColorPfadInDateien)}]GPU002[/]) und Kurse ([{Global.GetColor(Global.ColorPfadInDateien)}]studentgroupstudents[/]) werden aus (Web-)Untis für jeden Schüler neu angelegt und in die [{Global.GetColor(Global.ColorPfadInDateien)}]SchuelerLeistungsdaten.dat[/] eingetragen.",       
        $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise zum Beruflichen Gymnasium:[/]",
        $"[{Global.GetColor(Global.ColorHinweise)}]#1[/] Die Kurswahlen sollten auf der Wiki-Seite zu Halbjahresbeginn erfolgt sein. Aus den Kurswahlen werden [{Global.GetColor(Global.ColorActionInMenüs)}]LK1, LK2, GKS usw.[/] übernommen.",
-       $"[{Global.GetColor(Global.ColorHinweise)}]#2[/] Es empfiehlt sich, dass die SuS die Kurswahlen vor der Zeugniskonferenz nochmals überprüfen."       
+       $"[{Global.GetColor(Global.ColorHinweise)}]#2[/] Es empfiehlt sich, dass die SuS die Kurswahlen vor der Zeugniskonferenz nochmals überprüfen.",
+       $"[{Global.GetColor(Global.ColorHinweise)}]#2[/] Die Zuordnung der Schüler zu den Kursen erfolgt über den ersten Teil der schulinternen Mailaddresse. Falls eine externe ID gesetzt wird, dann wird diese stattdessen verwendet. Letzteres kann beim Wechssel von einem anderen Tool zu Schild helfen, da so die Zuordnung auch ohne eindeutige Mailadresse funktioniert."
       ],
       m =>
       {
