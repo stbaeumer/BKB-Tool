@@ -208,8 +208,7 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
                             wc.DownloadFileAsync(new Uri(downloadUrl), newPath);
                             mre.WaitOne();
                         });
-                    }
-                    
+                    }              
 
                     // 4) chmod +x auf neue Datei
                     try

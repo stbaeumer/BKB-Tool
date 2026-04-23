@@ -991,8 +991,8 @@ public static class MenueHelper
       students,
       klassen,
       [
-       $"Die zuletzt bearbeitete PDF-Datei in [{Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/] wird eingelesen und jede Seite der Datei wird nach E-Mail-Adressen durchsucht. Wenn auf einer Seite eine oder mehrere E-Mail-Adressen gefunden werden, dann wirde die betreffenden Seiten an die enthaltene(n) E-Mail-Adresse(n) gemailt. Das ursprüngliche PDF-Dokument wird also bei Bedarf in mehrere PDF-Dokumente aufgeteilt.",
-       $"Nutzen Sie diese Funktion, um beispielsweise, um eine Datei mit allen Studenplänen an Lehrkräfte zu mailen.",
+       $"Die zuletzt bearbeitete PDF-Datei in [{Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/] wird eingelesen und jede Seite der Datei wird nach E-Mail-Adressen durchsucht. Wenn auf einer Seite eine oder mehrere E-Mail-Adressen gefunden werden, dann wird die betreffenden Seiten an die enthaltene(n) E-Mail-Adresse(n) gemailt. Das ursprüngliche PDF-Dokument wird also bei Bedarf in mehrere PDF-Dokumente aufgeteilt.",
+       $"Nutzen Sie diese Funktion, um beispielsweise Studenpläne an Lehrkräfte zu mailen.",
        $"Hinweise:",
        $"1. Die zuletzt bearbeitete PDF-Datei wird eingelesen.",
        $"2. Jede Seite der Datei wird nach E-Mail-Adressen durchsucht.",
@@ -1001,7 +1001,7 @@ public static class MenueHelper
       ],
       m =>
       {
-       var pdfDatei = Directory.GetFiles(pfadDownloads, "*.pdf").OrderByDescending(File.GetLastWriteTime).FirstOrDefault();
+      var pdfDatei = Directory.GetFiles(pfadDownloads, "*.pdf", SearchOption.AllDirectories).OrderByDescending(File.GetLastWriteTime).FirstOrDefault();
        Global.ZeileSchreiben("Die neueste PDF-Datei wird versendet:", pdfDatei, ConsoleColor.White, ConsoleColor.Black);
        Global.Konfig("SmtpServer", Global.Modus.Update, configuration);
        Global.Konfig("SmtpPort", Global.Modus.Update, configuration);
@@ -1018,8 +1018,8 @@ public static class MenueHelper
         {
          seite?.GetMailReceiver(lehrers);
          seite?.PdfDocumentCreate(pdfDatei);
-         if (!string.IsNullOrEmpty(pdfKennwort) && pdfKennwort != "kein" && pdfKennwort != "-")
-          seite?.PdfDocumentEncrypt(pdfKennwort);
+         if (!string.IsNullOrEmpty(configuration["PdfKennwort"]) && configuration["PdfKennwort"] != "kein" && configuration["PdfKennwort"] != "-")
+          seite?.PdfDocumentEncrypt(configuration["PdfKennwort"]);
          seite?.Mailen(configuration);
         }
        });
