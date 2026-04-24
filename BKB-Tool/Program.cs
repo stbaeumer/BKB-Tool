@@ -8,6 +8,7 @@ using Common;
 using Microsoft.Extensions.Configuration;
 using Spectre.Console;
 using System.Linq;
+using System.Threading;
 
 try { Console.WindowHeight = 35;} catch { }
 
@@ -105,7 +106,7 @@ do
     }    
 } while (true);
 
-// ...existing code...
+
 IConfiguration CheckForUpdate(IConfiguration configuration)
 {
     if (Global.RunningInCodeSpace())
@@ -163,95 +164,78 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
 
                 if (os == "Linux")
                 {
-                    if (selectedRelease is null)
-                    {
-                        AnsiConsole.MarkupLine("[red]Fehler: Release nicht gefunden.[/]");
-                        return configuration;
-                    }
+                    if (selectedRelease is null) return configuration;
 
-                    // 1) Download-URL für Linux-Binary mit Versionsnummer finden
+                    // 1) Download-URL für AppImage finden
                     string downloadUrl = null;
-                    string assetName = null;
                     foreach (var asset in selectedRelease.Value.GetProperty("assets").EnumerateArray())
                     {
                         var name = asset.GetProperty("name").GetString();
-                        if (name != null && name.StartsWith("BKB-Tool-linux-x64-") )
+                        // Sucht nach der .AppImage Datei im Release
+                        if (name != null && name.EndsWith(".AppImage", StringComparison.OrdinalIgnoreCase))
                         {
                             downloadUrl = asset.GetProperty("browser_download_url").GetString();
-                            assetName = name;
                             break;
                         }
                     }
 
-                    if (string.IsNullOrEmpty(downloadUrl) || string.IsNullOrEmpty(assetName))
+                    if (string.IsNullOrEmpty(downloadUrl))
                     {
-                        AnsiConsole.MarkupLine("[red]Fehler: BKB-Tool-linux-x64-<Version> im Release nicht gefunden.[/]");
+                        AnsiConsole.MarkupLine("[red]Fehler: AppImage im Release nicht gefunden.[/]");
                         return configuration;
                     }
-                    
 
-                    // 2) Zielpfade bestimmen
-                    string runningBinary = Environment.GetCommandLineArgs()[0];
-                    string appDir = Path.GetDirectoryName(runningBinary) ?? Directory.GetCurrentDirectory();
-                    string newPath = Path.Combine(appDir, assetName);
+                    // 2) Den ECHTEN Pfad finden
+                    // WICHTIG: Erst schauen, ob wir in einem AppImage laufen, sonst Fallback auf ProcessPath
+                    string runningBinary = Environment.GetEnvironmentVariable("APPIMAGE") 
+                                        ?? Environment.ProcessPath 
+                                        ?? Environment.GetCommandLineArgs()[0];
 
-                    // 3) Neue Version herunterladen (mit Fortschritt)
+                    string appDir = Path.GetDirectoryName(runningBinary);
+                    string tempNewPath = Path.Combine(appDir, "BKB-Tool.update");
+
+                    // 3) Download (wie gehabt)
                     using (var wc = new System.Net.WebClient())
                     {
                         wc.Headers.Add("User-Agent", "request");
                         AnsiConsole.Progress().Start(ctx =>
                         {
-                            var task = ctx.AddTask("Lade Update herunter");
+                            var task = ctx.AddTask("Lade neues AppImage herunter");
                             var mre = new System.Threading.ManualResetEvent(false);
                             wc.DownloadProgressChanged += (_, e) => task.Value = e.ProgressPercentage;
                             wc.DownloadFileCompleted += (_, __) => { task.Value = 100; mre.Set(); };
-                            wc.DownloadFileAsync(new Uri(downloadUrl), newPath);
+                            wc.DownloadFileAsync(new Uri(downloadUrl), tempNewPath);
                             mre.WaitOne();
                         });
-                    }              
+                    }
 
-                    // 4) chmod +x auf neue Datei
+                    // 4) chmod +x
+                    Process.Start("chmod", $"+x \"{tempNewPath}\"")?.WaitForExit();
+
+                    // 5) In-Place Austausch
                     try
                     {
-                        var chmodProc = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                        // Auch ein laufendes AppImage kann im Dateisystem überschrieben/verschoben werden!
+                        File.Move(tempNewPath, runningBinary, overwrite: true);
+
+                        AnsiConsole.MarkupLine("[green]AppImage erfolgreich aktualisiert![/]");
+                        AnsiConsole.MarkupLine("[yellow]Das Programm wird neu gestartet...[/]");
+                        Thread.Sleep(1000);
+
+                        Process.Start(new ProcessStartInfo
                         {
-                            FileName = "/bin/chmod",
-                            Arguments = $"+x \"{newPath}\"",
-                            UseShellExecute = false
+                            FileName = runningBinary,
+                            UseShellExecute = true
                         });
-                        chmodProc?.WaitForExit();
-                    }
-                    catch { /* Ignorieren, Fehler wird später sichtbar */ }
 
-                    // 5) .desktop-Datei anpassen (nur Dateiname, wenn im $PATH)
-                    string desktopFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local/share/applications/BKB-Tool.desktop");
-                    string localBin = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".local/bin");
-                    string execValue = newPath;
-                    if (Path.GetDirectoryName(newPath) == localBin)
-                        execValue = Path.GetFileName(newPath);
-                    if (File.Exists(desktopFile))
+                        Environment.Exit(0);
+                    }
+                    catch (Exception ex)
                     {
-                        var lines = File.ReadAllLines(desktopFile).ToList();
-                        for (int i = 0; i < lines.Count; i++)
-                        {
-                            if (lines[i].StartsWith("Exec="))
-                            {
-                                lines[i] = $"Exec={execValue}";
-                            }
-                        }
-                        File.WriteAllLines(desktopFile, lines);
+                        AnsiConsole.MarkupLine($"[red]Fehler: {ex.Message}[/]");
                     }
 
-                    // 5) Erfolgsmeldung und Hinweis anzeigen
-                    AnsiConsole.MarkupLine($"[green]Update erfolgreich heruntergeladen:[/] [bold]{assetName}[/]");
-                    AnsiConsole.MarkupLine($"[green]Desktop-Verknüpfung wurde angepasst:[/] [bold]{desktopFile}[/]");
-                    AnsiConsole.MarkupLine("[yellow]Bitte das Programm jetzt beenden und neu starten, um die neue Version zu verwenden.[/]");
-                    AnsiConsole.MarkupLine("[gray]Sie können die alte Version als Backup behalten oder löschen.[/]");
-                    Console.WriteLine("\nDrücken Sie eine beliebige Taste zum Beenden ...");
-                    Console.ReadKey(true);
-                    Environment.Exit(0);
-                    return configuration; // unreachable
-                    return configuration; // unreachable
+                    return configuration;
                 }
                 else if (os == "Windows")
                 {
