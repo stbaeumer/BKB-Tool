@@ -15,6 +15,7 @@ try { Console.WindowHeight = 35;} catch { }
 Global.User = Environment.UserName;
 IConfiguration? configuration = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile($"BKB-Tool.json", optional: true, reloadOnChange: true).Build();
 
+
 Global.ColorÜberschrift = Color.Aqua; // Überschrift
 Global.ColorUnterschrift = Color.Aqua; // 2.Überschrift
 Global.ColorBeschreibung = Color.SpringGreen2; // Beschreibung
