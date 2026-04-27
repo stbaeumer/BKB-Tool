@@ -1075,6 +1075,126 @@ public class Menüeintrag
         foreach (var aktion in zieldatei.Funktionen)
             aktion(zieldatei);
     }
+
+    public void FehlzeitenInAbschnittsdatenErgaenzen(
+        IConfiguration configuration,
+        Lehrers lehrers,
+        string zieldateiname,        
+        List<Action<Datei>> funktionen,
+        string[] anhandDieserAttributeWirdVerglichen,
+        string[] dieseAttributeWerdenBeimVergleichIgnoriert,
+        string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null, Global.Zweck art = Global.Zweck.Statistik)
+    {   
+        List<dynamic> lernabschnittsdaten = Quelldateien.GetMatchingList(configuration, "schuelerlernabschnitt", IStudents, Klassen);
+        if (art == null && (lernabschnittsdaten == null || lernabschnittsdaten.Count == 0)) return;
+  
+        var zieldatei = new Datei(zieldateiname, funktionen, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+
+        zieldatei.Lehrers = lehrers;
+
+        var absencePerStud = new List<dynamic>();
+
+        absencePerStud = Quelldateien.GetMatchingList(configuration, "absenceperstudent", IStudents, Klassen);
+        if (absencePerStud == null || !absencePerStud.Any()) return;
+
+        // Wenn der Abschnittswechsel hinter uns liegt und gleichzeitig Fehlzeiten von vorher vorliegen, dann wird gefragt, ob die vorherigen Fehlzeiten berücksichtigt werden sollen. 
+        var abschnittswechsel = DateTime.Parse(configuration["Abschnittswechsel"]);
+        var abschnittswechelInderZukunft = abschnittswechsel > DateTime.Now;
+        if (!abschnittswechelInderZukunft)
+        {
+            var alteFehlzeiten = absencePerStud
+                .Where(rec =>
+                {
+                    if (rec == null) return false;
+                    var dict = (IDictionary<string, object>)rec;
+                    return dict != null && DateTime.Parse(dict["Datum"].ToString()) < abschnittswechsel;
+                }).Count();
+
+            if (alteFehlzeiten > 0)
+                configuration = Global.Konfig("FehlzeitenVorDemAbschnittswechselBeruecksichtigen", Global.Modus.Update, configuration);
+
+            // Wenn die Fehlzeiten vor dem Abschnittswechsel nicht berücksichtigt werden sollen, dann werden sie aus der Liste entfernt.
+            if (!configuration["FehlzeitenVorDemAbschnittswechselBeruecksichtigen"].ToLower().StartsWith("j"))
+            {
+                absencePerStud = absencePerStud
+                    .Where(rec =>
+                    {
+                        if (rec == null) return false;
+                        var dict = (IDictionary<string, object>)rec;
+                        return dict != null && DateTime.Parse(dict["Datum"].ToString()) >= abschnittswechsel;
+                    }).ToList();
+            }
+        }
+
+        // Falls es offene Stunden gibt, kommt ein Hinweis, den man auch bestätigen muss.
+        var ab = absencePerStud
+                .Where(rec =>
+                {
+                    if (rec == null) return false;
+                    var dict = (IDictionary<string, object>)rec;
+                    return dict != null && dict["Status"] != null && dict["Status"].ToString() == "offen";
+                }).Count();
+
+        if (ab > 0)
+        {
+            configuration = Global.Konfig("OffeneFehlstunden", Global.Modus.Update, configuration);
+            if(!configuration["OffeneFehlstunden"].ToLower().StartsWith("j"))
+            {                    
+                zieldatei.Auswählen(configuration, this, lehrers, Global.Modus.NurEineKlasse);
+                throw new Exception("Sie haben wegen offener Fehlstunden in Webuntis abgebrochen.");
+            }
+        }        
+
+        AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start($"{zieldateiname} ...", ctx =>
+        {
+            for (int i = 0; i < lernabschnittsdaten.Count; i++)
+            {
+                var dictLeist = (IDictionary<string, object>)lernabschnittsdaten[i];
+                var student = Students.Where(s => s.Nachname == dictLeist["Nachname"].ToString() && s.Vorname == dictLeist["Vorname"].ToString() && s.Geburtsdatum == dictLeist["Geburtsdatum"].ToString()).FirstOrDefault();    
+
+                // Nur Zeilen des interessierenden Abschnitts berücksichtigen
+                if(dictLeist["Abschnitt"].ToString() != configuration["Abschnitt"]) continue;
+                
+                // Wenn der Schüler nicht aktiv oder extern ist, überspringe diese Zeile
+                if (!(student.Status.ToString() == "2" || student.Status.ToString() == "6")) continue;
+
+                dynamic record = new ExpandoObject();
+
+                foreach (var prop in dictLeist)
+                {
+                    var name = prop.Key;
+                    var value = prop.Value;
+
+                    if (name == "Nachname")
+                    {
+                        var klasse = student.Klasse;
+                        if(string.IsNullOrEmpty(klasse)){student.Warnung("hat keine Klasse in Schild."); continue;}
+                        
+                        ((IDictionary<string, object>)record)[name] = $"{value}#{klasse}";
+                    }
+                    else if (name == "SummeFehlstd")
+                    {
+                        var summe = student.GetFehlstd(absencePerStud, configuration);                        
+                        ((IDictionary<string, object>)record)[name] = summe;
+                    }
+                    else if (name == "SummeFehlstd_unentschuldigt")
+                    {                        
+                        var summe = student.GetUnentFehlstd(absencePerStud, configuration);                        
+                        ((IDictionary<string, object>)record)[name] = summe;
+                    }
+                    else 
+                    {
+                        ((IDictionary<string, object>)record)[name] = value;
+                    }
+                }
+                zieldatei.Add(record);
+            }
+            Global.ZeileSchreiben("SchuelerLernabschnittsdaten.dat", zieldatei.Count().ToString());
+        });
+        foreach (var aktion in zieldatei.Funktionen)
+            aktion(zieldatei);
+    }
+
     public void UnterrichteAnlegen(
         IConfiguration configuration,
         string zieldateiname,

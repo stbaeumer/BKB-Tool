@@ -502,18 +502,32 @@ public static class MenueHelper
      ),
      new Menüeintrag(
       $"Zeugnis #3 Fehlzeiten:3  Tage vor ZK:Die Fehlzeiten werden in bestehende Lernabschnittsdaten eingefügt",
-      new Dateien(),
+      quelldateien.Notwendige(configuration, ["absenceperstudent,csv", "schuelerlernabschnitt,dat", "schuelerbasisdaten,dat"]),
       students,
       klassen,
       [
-       $"Von allen PDF-Dateien in [{Global.GetColor(Global.ColorPfadInDateien)}]" + configuration["PfadDownloads"] + "[/] werden verschlüsselte Kopien erstellt.",
-       $"Es werden nur Dateien berücksichtigt, die nicht bereits die Endung [{Global.GetColor(Global.ColorPfadInDateien)}]-kennwort.pdf[/] haben.",
-       $"Kopien bekommen die Dateiendung [{Global.GetColor(Global.ColorPfadInDateien)}]-kennwort.pdf[/]."
+       $"Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", "SchuelerLernabschnittsdaten.dat")}[/] wird um Fehlstunden ergänzt und in [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLernabschnittsdaten.dat")}[/] gespeichert."
       ],
-      _ =>
+      m =>
       {
-       var pdfDateien = new PdfDateien();
-       pdfDateien.KennwortSetzen(configuration);
+       m.FilterInteressierendeStudentsUndKlassen(configuration);
+       configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration);
+       configuration = Global.Konfig("MaximaleAnzahlFehlstundenProTag", Global.Modus.Read, configuration);
+       configuration = Global.Konfig("FehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt", Global.Modus.Read, configuration);
+       
+       m.FehlzeitenInAbschnittsdatenErgaenzen(
+       configuration,
+       lehrers,
+       Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLernabschnittsdaten.dat"),
+       [
+        datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
+        //datei => datei.Verarbeiten(quelldateien, Global.Modus.Filtern),
+        //datei => datei.OrdnerOeffnen(),
+        datei => datei.Erstellen()
+       ],
+       ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt"],
+       [],
+       "|", '\0', new UTF8Encoding(true), false);
       },
       Global.Rubrik.Allgemein,
       Global.NurBeiDiesenSchulnummern.Alle
@@ -530,7 +544,7 @@ public static class MenueHelper
      m =>
      {
       m.FilterInteressierendeStudentsUndKlassen(configuration);
-      configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration);      
+      configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration);
       m.NotenInLeistungsdatenErgaenzen(
        configuration, lehrers, Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLeistungsdaten.dat", ""),
        [
@@ -541,8 +555,7 @@ public static class MenueHelper
        ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach"],
        [],
        "|", '\0', new UTF8Encoding(true), false, null,
-       Global.Zweck.Zeugnis);
-            
+       Global.Zweck.Zeugnis);            
       },
       Global.Rubrik.Allgemein,
       Global.NurBeiDiesenSchulnummern.Alle
