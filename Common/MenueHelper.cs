@@ -506,15 +506,16 @@ public static class MenueHelper
       students,
       klassen,
       [
-       $"Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", "SchuelerLernabschnittsdaten.dat")}[/] wird um Fehlstunden ergänzt und in [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLernabschnittsdaten.dat")}[/] gespeichert."
+       $"Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", "SchuelerLernabschnittsdaten.dat")}[/] wird um (unentschuldigte) Fehlstunden ergänzt und in [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerLernabschnittsdaten.dat")}[/] für den Re-Import nach SchILD gespeichert."
       ],
       m =>
       {
        m.FilterInteressierendeStudentsUndKlassen(configuration);
        configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration);
-       configuration = Global.Konfig("MaximaleAnzahlFehlstundenProTag", Global.Modus.Read, configuration);
-       configuration = Global.Konfig("FehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt", Global.Modus.Read, configuration);
-       
+       configuration = Global.Konfig("Abschnittswechsel", Global.Modus.Update, configuration);
+       configuration = Global.Konfig("MaximaleAnzahlFehlstundenProTag", Global.Modus.Update, configuration);
+       configuration = Global.Konfig("FehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt", Global.Modus.Update, configuration);
+       configuration = Global.Konfig("Abschnittswechsel", Global.Modus.Update, configuration);
        m.FehlzeitenInAbschnittsdatenErgaenzen(
        configuration,
        lehrers,
