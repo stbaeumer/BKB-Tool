@@ -502,7 +502,7 @@ public static class MenueHelper
      ),
      new Menüeintrag(
       $"Zeugnis #3 Fehlzeiten:3  Tage vor ZK:Die Fehlzeiten werden in bestehende Lernabschnittsdaten eingefügt",
-      quelldateien.Notwendige(configuration, ["absenceperstudent,csv", "schuelerlernabschnitt,dat", "schuelerbasisdaten,dat"]),
+      quelldateien.Notwendige(configuration, ["absenceperstudent,csv", "schuelerlernabschnitt,dat", "schuelerbasisdaten,dat", "gpu002,txt"]),
       students,
       klassen,
       [
@@ -514,8 +514,7 @@ public static class MenueHelper
        configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration);
        configuration = Global.Konfig("Abschnittswechsel", Global.Modus.Update, configuration);
        configuration = Global.Konfig("MaximaleAnzahlFehlstundenProTag", Global.Modus.Update, configuration);
-       configuration = Global.Konfig("FehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt", Global.Modus.Update, configuration);
-       configuration = Global.Konfig("Abschnittswechsel", Global.Modus.Update, configuration);
+       configuration = Global.Konfig("FehlzeitenWaehrendDerLetztenTagBleibenUnberuecksichtigt", Global.Modus.Update, configuration);       
        m.FehlzeitenInAbschnittsdatenErgaenzen(
        configuration,
        lehrers,

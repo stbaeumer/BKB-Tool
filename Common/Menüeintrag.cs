@@ -1140,7 +1140,7 @@ public class Menüeintrag
             configuration = Global.Konfig("OffeneFehlstunden", Global.Modus.Update, configuration);
             if(!configuration["OffeneFehlstunden"].ToLower().StartsWith("j"))
             {                    
-                zieldatei.Auswählen(configuration, this, lehrers, Global.Modus.NurEineKlasse);
+                //zieldatei.Auswählen(configuration, this, lehrers, Global.Modus.NurEineKlasse);
                 throw new Exception("Sie haben wegen offener Fehlstunden in Webuntis abgebrochen.");
             }
         }        
