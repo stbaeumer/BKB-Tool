@@ -588,6 +588,36 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
+      "Zeugnis #6 Teilleistungen::SchuelerTeilleistungen.dat erstellen",
+      quelldateien.Notwendige(configuration, ["schuelerteilleistungen,dat", "schuelerleistungsdaten,dat", "schuelerbasisdaten,dat", "marksperlesson,csv"]),
+      students,
+      klassen,
+      [
+       $"Es wird jetzt die Datei [bold {Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerTeilleistungen.dat")}[/] erstellt.",
+       $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis:[/] Damit der Import nach SchILD reibungslos funktioniert, müssen zuvor die Teilleistungsarten in SchILD ([{Global.GetColor(Global.ColorPfadInProgrammen)}]Schulverwaltung > Teilleistungsarten[/]) gleichlautend mit dem Langnamen in Webuntis ([{Global.GetColor(Global.ColorPfadInProgrammen)}]Stammdaten > Prüfungsarten[/]) angelegt werden.",
+       $"[{Global.GetColor(Global.ColorHinweise)}]Wichtig:[/] Um feststellen zu können wo Teilleistungen fehlen, müssen die Leistungsdaten bereits in SchILD importiert bzw. angelegt worden sein."
+      ],
+      m =>
+      {
+       m.FilterInteressierendeStudentsUndKlassen(configuration);
+       m.Teilleistungen(
+        configuration,
+        Path.Combine(pfadSchilddatenaustausch ?? "", "SchuelerTeilleistungen.dat"),
+        lehrers,
+        [
+         datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
+         datei => datei.Verarbeiten(quelldateien, Global.Modus.Filtern),
+         datei => datei.OeffneWebseite("https://teams.microsoft.com/l/chat/0/0?users=", datei.UrlMitte, datei.UrlRechts),
+         datei => datei.Erstellen()
+        ],
+        ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach", "Datum"],
+        [],
+        "|", '\0', new UTF8Encoding(true), false);
+      },
+      Global.Rubrik.Allgemein,
+      Global.NurBeiDiesenSchulnummern.Nur177659
+     ),
+     new Menüeintrag(
       "Wiki::Diverse SQLite-Dateien (Praktikum etc.) erstellen",
       quelldateien.Notwendige(configuration, ["schuelervermerke,dat", "schuelerzusatzdaten,dat", "absenceperstudent,csv", "GPU006,txt", "GPU002,txt", "GPU003,txt", "klassen,dat"]),
       students,
