@@ -238,7 +238,13 @@ public static class Global
         AnsiConsole.Write(new FigletText("BKB-Tool").Centered().Color(ColorÜberschrift));
 
         var unterschrift = GetColor(ColorUnterschrift);
-        var contentString = ""; //configuration["AppDescription"] ?? "BKB-Tool - Ein Werkzeug an der Schnittstelle zwischen SchILD & WebUntis";
+        var contentString = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", "BKB-Tool", "BKB-Tool.json"); //configuration["AppDescription"] ?? "BKB-Tool - Ein Werkzeug an der Schnittstelle zwischen SchILD & WebUntis";
+        
+        if(configuration["Auswahl"] != "e")
+        {
+            contentString = "";
+        }
+        
         var header = $"[{unterschrift} link=https://github.com/stbaeumer/BKB-Tool] https://github.com/stbaeumer/BKB-Tool[/] | [{unterschrift}]GPLv2[/] | [{unterschrift}]v{AppVersion} [/]";
 
         if (content != null && content.Count > 0)
@@ -315,7 +321,7 @@ public static class Global
                 s = $"[{Global.GetColor(Global.ColorPfadInDateien)}]{s}[/]\n\n[{Global.GetColor(Global.ColorHinweise)}]Importhinweise:  [/]\n" + rechteSeite;
             }
 
-            var panel = new Panel($"[bold {Global.GetColor(ColorInfoBox)}] Bereit: [/]{s}")
+            var panel = new Panel($"[bold {Global.GetColor(ColorInfoBox)}] Bereit für den SchILD-Import: [/]{s}")
                 .HeaderAlignment(Justify.Left)
                 .SquareBorder()
                 .Expand()

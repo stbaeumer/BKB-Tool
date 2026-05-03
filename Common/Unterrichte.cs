@@ -34,11 +34,6 @@ public class Unterrichte : List<Unterricht>
             {
                 var Klassen = new Klassen();
                 var dict = (IDictionary<string, object>)record;
-               
-                if(dict["Field1"]?.ToString() == "3449" || dict["Field1"]?.ToString() == "3636")
-                {
-                    string aa = "Test"; // Debugging purpose
-                }
 
                 // ohne eingetragenen Lehrer wird die Zeile übersprungen
                 if (!dict.ContainsKey("Field6") || string.IsNullOrEmpty(dict["Field6"]?.ToString()))

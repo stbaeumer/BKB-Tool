@@ -51,7 +51,8 @@ public class Unterricht
         LehrkraefteWochenstunden = new List<int>();
         Schülergruppe = schuelergruppe;
         UnterrichtsIds = new List<int> { int.Parse(unterrichtsId) };
-        Students = m.IStudents.Filter(configuration, zweck, klasse, schuelergruppe, studentgroupStudents);        
+        Students = m.IStudents.Filter(configuration, zweck, klasse, schuelergruppe, studentgroupStudents);    
+        Jahrgaenge = new List<string>() { Students.DistinctBy(s => s.Jahrgang).FirstOrDefault()?.Jahrgang ?? "" };    
     }
 
     private string GetKursart(IConfiguration configuration, List<dynamic> kurseDat, string fach, string? kursleiter, string? unterrichtsId)

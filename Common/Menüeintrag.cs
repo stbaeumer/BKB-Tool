@@ -1546,7 +1546,7 @@ public class Menüeintrag
 
                 record.Jahr = Global.AktSj[0];
                 record.Abschnitt = configuration["Abschnitt"].ToString();
-                record.Jahrgang = ""; //kann leer bleiben
+                record.Jahrgang = string.Join(",", kurs.Jahrgaenge); //kann in S3 nicht mehr leer bleiben
                 record.Fach = kurs.Fach;
                 record.Kursart = kurs.Kursart;
                 record.WochenstdPUNKT = kurs.Wochenstunden;

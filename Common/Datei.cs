@@ -1751,7 +1751,7 @@ public class Datei : List<dynamic>
         }
 
         var table = TableErstellen(
-                $"Veränderungen von alt ([{Global.GetColor(Global.ColorPfadInDateien)}]{vorhandeneDatei}[/]) nach neu:",
+                $"Veränderungen von alt ([{Global.GetColor(Global.ColorPfadInDateien)}]{vorhandeneDatei}[/]) nach neu ([{Global.GetColor(Global.ColorPfadInDateien)}]{AbsoluterPfad}[/]):",
                 AnhandDieserSchlüsselAttributeWirdVerglichen);
 
         AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start($" {modusString} ...", ctx =>

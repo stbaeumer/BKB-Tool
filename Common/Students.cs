@@ -1263,7 +1263,7 @@ public class Students : List<Student>
                     statusstring += " in Neuaufnahme, ";
                     break;
                 case "2":
-                    statusstring += " aktive, ";
+                    statusstring += " aktiv, ";
                     break;
                 case "6":
                     statusstring += " extern, ";

@@ -419,12 +419,12 @@ public static class MenueHelper
      ),
      new Menüeintrag(
       $"Zeugnis #1 Unterricht:14 Tage vor ZK:Unterrichte und Kurse schülergenau von Webuntis nach SchILD übertragen",
-      quelldateien.Notwendige(configuration, ["studentgroupstudents,csv", "klassen,dat", "schuelerlernabschnitt,dat,optional", "schuelerleistungsdaten,dat", "lehrkraefte,dat", "kurse,dat", "schuelerbasisdaten,dat", "faecher,dat", "GPU002,txt"]),
+      quelldateien.Notwendige(configuration, ["studentgroupstudents,csv", "klassen,dat", "schuelerlernabschnitt,dat,optional", "schuelerleistungsdaten,dat", "lehrkraefte,dat", "kurse,dat", "schuelerbasisdaten,dat", "faecher,dat", "GPU002,TXT"]),
       students,
       klassen,
       [
        $"Starten Sie diese Funktion nur, wenn die Lernabschnittsdaten zuvor angelegt worden sind.",
-       $"Die Unterrichte ([{Global.GetColor(Global.ColorPfadInDateien)}]GPU002[/]) und Kurse ([{Global.GetColor(Global.ColorPfadInDateien)}]studentgroupstudents[/]) werden aus (Web-)Untis für jeden Schüler neu angelegt und in die [{Global.GetColor(Global.ColorPfadInDateien)}]SchuelerLeistungsdaten.dat[/] eingetragen.",       
+       $"Die Unterrichte ([{Global.GetColor(Global.ColorPfadInDateien)}]GPU002.TXT[/]) und Kurse ([{Global.GetColor(Global.ColorPfadInDateien)}]StudentgroupStudents_xx_xx.csv[/]) werden aus (Web-)Untis für jeden Schüler neu angelegt und in die [{Global.GetColor(Global.ColorPfadInDateien)}]SchuelerLeistungsdaten.dat[/] eingetragen.",       
        $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise zum Beruflichen Gymnasium:[/]",
        $"[{Global.GetColor(Global.ColorHinweise)}]#1[/] Die Kurswahlen sollten auf der Wiki-Seite zu Halbjahresbeginn erfolgt sein. Aus den Kurswahlen werden [{Global.GetColor(Global.ColorActionInMenüs)}]LK1, LK2, GKS usw.[/] übernommen.",
        $"[{Global.GetColor(Global.ColorHinweise)}]#2[/] Es empfiehlt sich, dass die SuS die Kurswahlen vor der Zeugniskonferenz nochmals überprüfen.",
@@ -585,7 +585,7 @@ public static class MenueHelper
         );       
       },
       Global.Rubrik.Allgemein,
-      Global.NurBeiDiesenSchulnummern.Nur177659
+      Global.NurBeiDiesenSchulnummern.Alle
      ),
      new Menüeintrag(
       "Zeugnis #6 Teilleistungen::SchuelerTeilleistungen.dat erstellen",
