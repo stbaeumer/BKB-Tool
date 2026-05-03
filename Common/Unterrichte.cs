@@ -270,14 +270,14 @@ public class Unterrichte : List<Unterricht>
 
     private bool zeileIstKursOderGehörtZuKurs(List<dynamic> gpu002, IDictionary<string, object> dict)
     {
-        if (dict["Field1"]?.ToString() == "1397" || dict["Field1"]?.ToString() == "1410")
+        if (dict["Field1"]?.ToString() == "3000" || dict["Field1"]?.ToString() == "2263")
         {
             string aa = "Test"; // Debugging purpose
         }
 
-        // Ein Kurs ist definiert, wenn Field42 nicht leer ist.
+        // Ein Kurs ist definiert, wenn Field42 (Schülergruppe) nicht leer ist.
         if (dict.ContainsKey("Field42") && !string.IsNullOrEmpty(dict["Field42"]?.ToString()))
-        {
+        {   
             return true; // Es ist ein Kurs, wenn Field42 nicht leer ist.
         }
 
