@@ -538,7 +538,7 @@ public static class MenueHelper
       students,
       klassen,
       [
-      $"Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "Leistungsdaten.dat")}[/] wird um die Noten aus MarksPerLesson.csv ergänzt und dann unter [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(configuration["Ausgabeverzeichnis"] ?? "", "Leistungsdaten.dat")}[/] bereitgestellt.",
+      $"Die Datei schuelerleistungsdaten wird um die Noten aus marksperlesson ergänzt und dann unter [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(configuration["Ausgabeverzeichnis"] ?? "", "Leistungsdaten.dat")}[/] bereitgestellt.",
       $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise:[/]",      
      ],
      m =>
