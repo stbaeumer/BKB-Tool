@@ -67,7 +67,7 @@ public class Unterrichte : List<Unterricht>
                 if (wochentundenLehrkraft == 0) continue; // Unterricht mit 0 Wochenstunden werden nicht berücksichtigt.
 
                 // Wenn es um Kurse geht und die Zeile ein Kurs ist oder zu einem Kurs gehört
-                if (art == Global.Art.KursUnterrichte && zeileIstKursOderGehörtZuKurs(gpu002, dict))
+                if (art == Global.Art.KursUnterrichte && zeileIstKursOderGehörtZuKurs(gpu002, dict, m.IStudents))
                 {
                     // Suche nach einem bestehenden Kurs mit identischer UntisID
                     var kurs = this.FirstOrDefault(k => k.UnterrichtsIds.Contains(Convert.ToInt32(unterrichtsId)));
@@ -268,7 +268,7 @@ public class Unterrichte : List<Unterricht>
         return false; // Statistikdatum liegt innerhalb des Zeitraums.
     }
 
-    private bool zeileIstKursOderGehörtZuKurs(List<dynamic> gpu002, IDictionary<string, object> dict)
+    private bool zeileIstKursOderGehörtZuKurs(List<dynamic> gpu002, IDictionary<string, object> dict, Students students = null)
     {
         if (dict["Field1"]?.ToString() == "3000" || dict["Field1"]?.ToString() == "2263")
         {
@@ -278,6 +278,18 @@ public class Unterrichte : List<Unterricht>
         // Ein Kurs ist definiert, wenn Field42 (Schülergruppe) nicht leer ist.
         if (dict.ContainsKey("Field42") && !string.IsNullOrEmpty(dict["Field42"]?.ToString()))
         {   
+            // ... es sei denn, dass alle SuS einer Klasse in dem Unterricht sind, dann ist es kein Kurs, auch wenn Field42 nicht leer ist. Das wird hier überprüft, indem geschaut wird, ob die Schülergruppe (Field42) alle Schüler einer Klasse enthält.
+            if (students != null && dict.ContainsKey("Field5") && !string.IsNullOrEmpty(dict["Field5"]?.ToString()))
+            {
+                var klasse = dict["Field5"].ToString();
+                var schuelerInKlasse = students.Where(s => s.Klasse == klasse).ToList();
+                var schuelerInSchuelergruppe = dict["Field42"].ToString().Split(',').Select(s => s.Trim()).ToList();
+                
+                //if (schuelerInSchuelergruppe.All(s => schuelerInKlasse.Contains(s)))
+                //{
+                    return false; // Es ist kein Kurs, wenn alle Schüler einer Klasse in der Schülergruppe sind.
+                //}
+            }
             return true; // Es ist ein Kurs, wenn Field42 nicht leer ist.
         }
 
