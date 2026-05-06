@@ -68,7 +68,7 @@ public static class MenueHelper
       students,
       klassen,
       [
-       $"Es wird die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads ?? "", "SchuelerZusatzdaten.dat")}[/] um schulinterne Mailadressen ergänzt und in [{Global.GetColor(Global.ColorPfadInDateien)}]{pfadSchilddatenaustausch}[/] für den Re-Import nach SchILD bereitgestellt.",
+       $"Es wird die Datei schuelerzusatzdaten um schulinterne Mailadressen ergänzt und in [{Global.GetColor(Global.ColorPfadInDateien)}]{pfadSchilddatenaustausch}[/] für den Re-Import nach SchILD bereitgestellt.",
        $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise:[/] ",
        $"[{Global.GetColor(Global.ColorHinweise)}]#1:[/] BKB-Tool bildet die schulinternen Mailadressen wie folgt: [{Global.GetColor(Global.ColorTextHervorheben)}]nv061231@meine-schule.de[/], wobei gilt:",
        $"[{Global.GetColor(Global.ColorTextHervorheben)}]     n[/]       : Erster Buchstabe des Nachnamens. Umlaute werden aufgelöst. Bsp.: [{Global.GetColor(Global.ColorTextHervorheben)}]Ü[/] wird zu [{Global.GetColor(Global.ColorTextHervorheben)}]u[/] usw.",
@@ -538,7 +538,7 @@ public static class MenueHelper
       students,
       klassen,
       [
-      $"Es wird die [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "Leistungsdaten.dat")}[/] um die Noten aus MarksPerLesson.csv ergänzt:",
+      $"Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadSchilddatenaustausch ?? "", "Leistungsdaten.dat")}[/] wird um die Noten aus MarksPerLesson.csv ergänzt und dann unter [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(configuration["Ausgabeverzeichnis"] ?? "", "Leistungsdaten.dat")}[/] bereitgestellt.",
       $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise:[/]",      
      ],
      m =>

@@ -80,6 +80,19 @@ public class Menüeintrag
                 Students = students;
                 Klassen = klassen;
                 DateienFehlenOderSindLeer = false;
+
+                // Die Beschreibung wird um die konkreten Werte aus den Quelldateien ergänzt.
+
+                for (int i = 0; i < beschreibung.Count; i++)
+                {                    
+                    if(beschreibung[i].Contains("schuelerzusatzdaten"))
+                    {
+                        var quelldatei = (Quelldateien.FirstOrDefault(q => q.Name.ToLower().Contains("schuelerzusatzdaten"))).AbsoluterPfad;
+                        beschreibung[i] = beschreibung[i].Replace("schuelerzusatzdaten", $"[{Global.GetColor(Global.ColorPfadInDateien)}]{quelldatei}[/]");
+                    }
+                }
+                
+
                 Beschreibung = beschreibung;
                 Funktion = funktion;
                 Gruppen = new Gruppen();
