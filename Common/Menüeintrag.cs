@@ -85,47 +85,47 @@ public class Menüeintrag
 
                 for (int i = 0; i < beschreibung.Count; i++)
                 {                    
-                    if(beschreibung[i].Contains("schuelerzusatzdaten"))
+                    if(beschreibung[i].Contains(" schuelerzusatzdaten "))
                     {
                         var quelldatei = (Quelldateien.FirstOrDefault(q => q.Name.ToLower().Contains("schuelerzusatzdaten"))).AbsoluterPfad;
                         beschreibung[i] = beschreibung[i].Replace("schuelerzusatzdaten", $"[{Global.GetColor(Global.ColorPfadInDateien)}]{quelldatei}[/]");
                     }
-                    if(beschreibung[i].Contains("schuelerbasisdaten"))
+                    if(beschreibung[i].Contains(" schuelerbasisdaten "))
                     {
                         var quelldatei = (Quelldateien.FirstOrDefault(q => q.Name.ToLower().Contains("schuelerbasisdaten"))).AbsoluterPfad;
                         beschreibung[i] = beschreibung[i].Replace("schuelerbasisdaten", $"[{Global.GetColor(Global.ColorPfadInDateien)}]{quelldatei}[/]");
                     }
-                    if(beschreibung[i].Contains("marksperlesson"))
+                    if(beschreibung[i].Contains(" marksperlesson "))
                     {
                         var quelldatei = (Quelldateien.FirstOrDefault(q => q.Name.ToLower().Contains("marksperlesson"))).AbsoluterPfad;
                         beschreibung[i] = beschreibung[i].Replace("marksperlesson", $"[{Global.GetColor(Global.ColorPfadInDateien)}]{quelldatei}[/]");
                     }
-                    if(beschreibung[i].Contains("schuelerlernabschnittsdaten"))
+                    if(beschreibung[i].Contains(" schuelerlernabschnittsdaten "))
                     {
                         var quelldatei = (Quelldateien.FirstOrDefault(q => q.Name.ToLower().Contains("schuelerlernabschnittsdaten"))).AbsoluterPfad;
                         beschreibung[i] = beschreibung[i].Replace("schuelerlernabschnittsdaten", $"[{Global.GetColor(Global.ColorPfadInDateien)}]{quelldatei}[/]");
                     }
-                    if(beschreibung[i].Contains("schueleradressen"))
+                    if(beschreibung[i].Contains(" schueleradressen "))
                     {
                         var quelldatei = (Quelldateien.FirstOrDefault(q => q.Name.ToLower().Contains("schueleradressen"))).AbsoluterPfad;
                         beschreibung[i] = beschreibung[i].Replace("schueleradressen", $"[{Global.GetColor(Global.ColorPfadInDateien)}]{quelldatei}[/]");
                     }
-                    if(beschreibung[i].Contains("adressen"))
+                    if(beschreibung[i].Contains(" adressen "))
                     {
                         var quelldatei = (Quelldateien.FirstOrDefault(q => q.Name.ToLower().Contains("adressen"))).AbsoluterPfad;
                         beschreibung[i] = beschreibung[i].Replace("adressen", $"[{Global.GetColor(Global.ColorPfadInDateien)}]{quelldatei}[/]");
                     }                    
-                    if(beschreibung[i].Contains("schuelertelefonnummern"))
+                    if(beschreibung[i].Contains(" schuelertelefonnummern "))
                     {
                         var quelldatei = (Quelldateien.FirstOrDefault(q => q.Name.ToLower().Contains("schuelertelefonnummern"))).AbsoluterPfad;
                         beschreibung[i] = beschreibung[i].Replace("schuelertelefonnummern", $"[{Global.GetColor(Global.ColorPfadInDateien)}]{quelldatei}[/]");
                     }
-                    if(beschreibung[i].Contains("studentgroupstudents"))
+                    if(beschreibung[i].Contains(" studentgroupstudents "))
                     {
                         var quelldatei = (Quelldateien.FirstOrDefault(q => q.Name.ToLower().Contains("studentgroupstudents"))).AbsoluterPfad;
                         beschreibung[i] = beschreibung[i].Replace("studentgroupstudents", $"[{Global.GetColor(Global.ColorPfadInDateien)}]{quelldatei}[/]");
                     }
-                    if(beschreibung[i].Contains("gpu002"))
+                    if(beschreibung[i].Contains(" gpu002 "))
                     {
                         var quelldatei = (Quelldateien.FirstOrDefault(q => q.Name.ToLower().Contains("gpu002"))).AbsoluterPfad;
                         beschreibung[i] = beschreibung[i].Replace("gpu002", $"[{Global.GetColor(Global.ColorPfadInDateien)}]{quelldatei}[/]");
@@ -135,34 +135,50 @@ public class Menüeintrag
                         var quelldatei = (Quelldateien.FirstOrDefault(q => q.Name.ToLower().Contains("legalguardian_"))).AbsoluterPfad;
                         beschreibung[i] = beschreibung[i].Replace("legalguardian_", $"[{Global.GetColor(Global.ColorPfadInDateien)}]{quelldatei}[/]");
                     }
-                    if(beschreibung[i].Contains("apprenticerepresentative_"))
+                    if(beschreibung[i].Contains(" apprenticerepresentative "))
                     {
                         var quelldatei = (Quelldateien.FirstOrDefault(q => q.Name.ToLower().Contains("apprenticerepresentative_"))).AbsoluterPfad;
                         beschreibung[i] = beschreibung[i].Replace("apprenticerepresentative_", $"[{Global.GetColor(Global.ColorPfadInDateien)}]{quelldatei}[/]");               
                     }                    
-                    if(beschreibung[i].Contains("student_"))
+                    if(beschreibung[i].Contains(" student "))
                     {
                         var quelldatei = (Quelldateien.FirstOrDefault(q => q.Name.ToLower().Contains("student_"))).AbsoluterPfad;
                         beschreibung[i] = beschreibung[i].Replace("student_", $"[{Global.GetColor(Global.ColorPfadInDateien)}]{quelldatei}[/]");
                     }
-                    if(beschreibung[i].Contains("schuelererzieher"))
+                    if(beschreibung[i].Contains(" schuelererzieher "))
                     {
                         var quelldatei = (Quelldateien.FirstOrDefault(q => q.Name.ToLower().Contains("schuelererzieher"))).AbsoluterPfad;
                         beschreibung[i] = beschreibung[i].Replace("schuelererzieher", $"[{Global.GetColor(Global.ColorPfadInDateien)}]{quelldatei}[/]");
                     }
-                    if(beschreibung[i].Contains("lehrkraefte"))
+                    if(beschreibung[i].Contains(" lehrkraefte "))
                     {
                         var quelldatei = (Quelldateien.FirstOrDefault(q => q.Name.ToLower().Contains("lehrkraefte"))).AbsoluterPfad;
                         beschreibung[i] = beschreibung[i].Replace("lehrkraefte", $"[{Global.GetColor(Global.ColorPfadInDateien)}]{quelldatei}[/]");
                     }
-                    if(beschreibung[i].Contains("klassen"))
+                    if(beschreibung[i].Contains(" klassen "))
                     {
                         var quelldatei = (Quelldateien.FirstOrDefault(q => q.Name.ToLower().Contains("klassen"))).AbsoluterPfad;
                         beschreibung[i] = beschreibung[i].Replace("klassen", $"[{Global.GetColor(Global.ColorPfadInDateien)}]{quelldatei}[/]");
                     }
+                    if(beschreibung[i].Contains("1: "))
+                    {                        
+                        beschreibung[i] = beschreibung[i].Replace("1: ", $"[{Global.GetColor(Global.ColorHinweise)}]#1:[/] ");
+                    }
+                    if(beschreibung[i].Contains("2: "))
+                    {                        
+                        beschreibung[i] = beschreibung[i].Replace("2: ", $"[{Global.GetColor(Global.ColorHinweise)}]#2:[/] ");
+                    }
+                    if(beschreibung[i].Contains("3: "))
+                    {                        
+                        beschreibung[i] = beschreibung[i].Replace("3: ", $"[{Global.GetColor(Global.ColorHinweise)}]#3:[/] ");
+                    }
+                    if(beschreibung[i].Contains("4: "))
+                    {                        
+                        beschreibung[i] = beschreibung[i].Replace("4: ", $"[{Global.GetColor(Global.ColorHinweise)}]#4:[/] ");
+                    }
+
                 }
                 
-
                 Beschreibung = beschreibung;
                 Funktion = funktion;
                 Gruppen = new Gruppen();

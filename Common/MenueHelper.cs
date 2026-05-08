@@ -68,14 +68,14 @@ public static class MenueHelper
       students,
       klassen,
       [
-       $"Es wird die Datei schuelerzusatzdaten um schulinterne Mailadressen ergänzt und in [{Global.GetColor(Global.ColorPfadInDateien)}]{pfadSchilddatenaustausch}[/] für den Re-Import nach SchILD bereitgestellt.",
-       $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise:[/] ",
-       $"[{Global.GetColor(Global.ColorHinweise)}]#1:[/] BKB-Tool bildet die schulinternen Mailadressen wie folgt: [{Global.GetColor(Global.ColorTextHervorheben)}]nv061231@meine-schule.de[/], wobei gilt:",
+       $"Die Datei schuelerzusatzdaten wird um schulinterne Mailadressen ergänzt und in [{Global.GetColor(Global.ColorPfadInDateien)}]{pfadSchilddatenaustausch}[/] für den Re-Import nach SchILD bereitgestellt.",
+       $"Hinweise:",
+       $"1: BKB-Tool bildet die schulinternen Mailadressen wie folgt: [{Global.GetColor(Global.ColorTextHervorheben)}]nv061231@meine-schule.de[/], wobei gilt:",
        $"[{Global.GetColor(Global.ColorTextHervorheben)}]     n[/]       : Erster Buchstabe des Nachnamens. Umlaute werden aufgelöst. Bsp.: [{Global.GetColor(Global.ColorTextHervorheben)}]Ü[/] wird zu [{Global.GetColor(Global.ColorTextHervorheben)}]u[/] usw.",
        $"[{Global.GetColor(Global.ColorTextHervorheben)}]     v[/]       : Erster Buchstabe des Vornamens. Umlaute werden aufgelöst.",
        $"[{Global.GetColor(Global.ColorTextHervorheben)}]     061231[/]  : Geburtsdatum in der Notation: JJMMTT.",
-       $"[{Global.GetColor(Global.ColorHinweise)}]#2:[/] Vorhandene schulinterne SchILD-Mailadressen in [{Global.GetColor(Global.ColorPfadInProgrammen)}]Individualdaten I[/] bleiben unangetastet.",
-       $"[{Global.GetColor(Global.ColorHinweise)}]#3:[/] Doppelungen werden angezeigt und müssen nach Vorgabe behandelt werden."
+       $"2: Vorhandene schulinterne SchILD-Mailadressen in [{Global.GetColor(Global.ColorPfadInProgrammen)}]Individualdaten I[/] bleiben unangetastet.",
+       $"3: Doppelungen werden angezeigt und müssen nach Vorgabe behandelt werden."
       ],
       m =>
       {
@@ -277,7 +277,7 @@ public static class MenueHelper
       },
       Global.Rubrik.Allgemein,
       Global.NurBeiDiesenSchulnummern.Nur177659
-     ),     
+     ),
      new Menüeintrag(
       "Klassenbuchpflege:Mo:Säumige Lehrer*innen auf fehlende Klassenbucheinträge hinweisen",
       quelldateien.Notwendige(configuration, ["lehrkraefte,dat", "openperiod,pdf"]),
@@ -296,7 +296,7 @@ public static class MenueHelper
       },
       Global.Rubrik.Allgemein,
       Global.NurBeiDiesenSchulnummern.Alle
-     ),     
+     ),
      new Menüeintrag(
       "Gruppen & Organigramm:Mo:Gruppen & Organigramm aus Untisanrechnungen und Unterrichten für Wiki-Import erstellen",
       quelldateien.Notwendige(configuration, ["schuelervermerke,dat", "schuelerzusatzdaten,dat", "absenceperstudent,csv", "GPU006,txt", "GPU002,txt", "GPU003,txt", "klassen,dat"]),
@@ -424,7 +424,7 @@ public static class MenueHelper
       klassen,
       [
        $"Starten Sie diese Funktion nur, wenn die Lernabschnittsdaten zuvor angelegt worden sind.",
-       $"Die Unterrichte ([{Global.GetColor(Global.ColorPfadInDateien)}]GPU002.TXT[/]) und Kurse ([{Global.GetColor(Global.ColorPfadInDateien)}]StudentgroupStudents_xx_xx.csv[/]) werden aus (Web-)Untis für jeden Schüler neu angelegt und in die [{Global.GetColor(Global.ColorPfadInDateien)}]SchuelerLeistungsdaten.dat[/] eingetragen.",       
+       $"Die Unterrichte (gpu002) und Kurse (studentgroupstudents) werden aus (Web-)Untis für jeden Schüler neu angelegt und in die schuelerleistungsdaten eingetragen.",       
        $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise zum Beruflichen Gymnasium:[/]",
        $"[{Global.GetColor(Global.ColorHinweise)}]#1[/] Die Kurswahlen sollten auf der Wiki-Seite zu Halbjahresbeginn erfolgt sein. Aus den Kurswahlen werden [{Global.GetColor(Global.ColorActionInMenüs)}]LK1, LK2, GKS usw.[/] übernommen.",
        $"[{Global.GetColor(Global.ColorHinweise)}]#2[/] Es empfiehlt sich, dass die SuS die Kurswahlen vor der Zeugniskonferenz nochmals überprüfen.",
