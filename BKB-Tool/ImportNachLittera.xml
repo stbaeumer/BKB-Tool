@@ -1860,27 +1860,6 @@
     </Bemerkung>
   </Leser>
   <Leser>
-    <LGruppe>AGG25A</LGruppe>
-    <Geburtsdatum>22.06.2001</Geburtsdatum>
-    <Titel>
-    </Titel>
-    <Nachname>Zander</Nachname>
-    <Vorname>Andre</Vorname>
-    <Strasse>Ellerbruchstraße 107 a</Strasse>
-    <PLZ>46284</PLZ>
-    <Ort>Dorsten</Ort>
-    <Geschlecht>M</Geschlecht>
-    <Anmeldedatum>01.08.2025</Anmeldedatum>
-    <Telefon>0176 41645760</Telefon>
-    <Mobiltelefon>
-    </Mobiltelefon>
-    <email>za010622@students.berufskolleg-borken.de</email>
-    <ZusatzInfo>
-    </ZusatzInfo>
-    <Bemerkung>
-    </Bemerkung>
-  </Leser>
-  <Leser>
     <LGruppe>AGG25B</LGruppe>
     <Geburtsdatum>24.04.2009</Geburtsdatum>
     <Titel>
@@ -15315,26 +15294,6 @@
   </Leser>
   <Leser>
     <LGruppe>GG23A</LGruppe>
-    <Geburtsdatum>05.09.2007</Geburtsdatum>
-    <Titel>
-    </Titel>
-    <Nachname>Wischnewski</Nachname>
-    <Vorname>Mia</Vorname>
-    <Strasse>Am Bülten 40</Strasse>
-    <PLZ>46342</PLZ>
-    <Ort>Velen</Ort>
-    <Geschlecht>W</Geschlecht>
-    <Anmeldedatum>07.08.2023</Anmeldedatum>
-    <Telefon>02863 382695</Telefon>
-    <Mobiltelefon>02863 382695</Mobiltelefon>
-    <email>wm156648@students.berufskolleg-borken.de</email>
-    <ZusatzInfo>
-    </ZusatzInfo>
-    <Bemerkung>
-    </Bemerkung>
-  </Leser>
-  <Leser>
-    <LGruppe>GG23A</LGruppe>
     <Geburtsdatum>23.09.2006</Geburtsdatum>
     <Titel>
     </Titel>
@@ -15369,26 +15328,6 @@
     <Mobiltelefon>
     </Mobiltelefon>
     <email>zm156649@students.berufskolleg-borken.de</email>
-    <ZusatzInfo>
-    </ZusatzInfo>
-    <Bemerkung>
-    </Bemerkung>
-  </Leser>
-  <Leser>
-    <LGruppe>GG24A</LGruppe>
-    <Geburtsdatum>30.04.2006</Geburtsdatum>
-    <Titel>
-    </Titel>
-    <Nachname>Aldur</Nachname>
-    <Vorname>Berinda</Vorname>
-    <Strasse>Gutenbergstraße 2</Strasse>
-    <PLZ>46325</PLZ>
-    <Ort>Borken</Ort>
-    <Geschlecht>W</Geschlecht>
-    <Anmeldedatum>21.08.2024</Anmeldedatum>
-    <Telefon>0152 05684333</Telefon>
-    <Mobiltelefon>0152 05684333</Mobiltelefon>
-    <email>ab158188@students.berufskolleg-borken.de</email>
     <ZusatzInfo>
     </ZusatzInfo>
     <Bemerkung>
@@ -19294,26 +19233,6 @@
   </Leser>
   <Leser>
     <LGruppe>HBT25A</LGruppe>
-    <Geburtsdatum>25.05.2009</Geburtsdatum>
-    <Titel>
-    </Titel>
-    <Nachname>Lewandowski</Nachname>
-    <Vorname>Mio</Vorname>
-    <Strasse>Vardingholter Straße 19</Strasse>
-    <PLZ>46414</PLZ>
-    <Ort>Rhede</Ort>
-    <Geschlecht>M</Geschlecht>
-    <Anmeldedatum>01.08.2025</Anmeldedatum>
-    <Telefon>0155 65203045</Telefon>
-    <Mobiltelefon>0176 64658650</Mobiltelefon>
-    <email>lm090525@students.berufskolleg-borken.de</email>
-    <ZusatzInfo>
-    </ZusatzInfo>
-    <Bemerkung>
-    </Bemerkung>
-  </Leser>
-  <Leser>
-    <LGruppe>HBT25A</LGruppe>
     <Geburtsdatum>11.04.2008</Geburtsdatum>
     <Titel>
     </Titel>
@@ -22682,10 +22601,8 @@
     <Nachname>Issinger</Nachname>
     <Vorname>Leon</Vorname>
     <Strasse>Wakelkamp 59</Strasse>
-    <PLZ>
-    </PLZ>
-    <Ort>
-    </Ort>
+    <PLZ>46325</PLZ>
+    <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
     <Anmeldedatum>21.08.2024</Anmeldedatum>
     <Telefon>0179 3278644</Telefon>
@@ -22737,28 +22654,6 @@
     <Mobiltelefon>
     </Mobiltelefon>
     <email>ks090611@students.berufskolleg-borken.de</email>
-    <ZusatzInfo>
-    </ZusatzInfo>
-    <Bemerkung>
-    </Bemerkung>
-  </Leser>
-  <Leser>
-    <LGruppe>HT25A</LGruppe>
-    <Geburtsdatum>16.01.2008</Geburtsdatum>
-    <Titel>
-    </Titel>
-    <Nachname>Müller</Nachname>
-    <Vorname>Maximilian</Vorname>
-    <Strasse>Alter Kreuzweg 4</Strasse>
-    <PLZ>46325</PLZ>
-    <Ort>Borken</Ort>
-    <Geschlecht>M</Geschlecht>
-    <Anmeldedatum>01.08.2025</Anmeldedatum>
-    <Telefon>
-    </Telefon>
-    <Mobiltelefon>
-    </Mobiltelefon>
-    <email>mm080116@students.berufskolleg-borken.de</email>
     <ZusatzInfo>
     </ZusatzInfo>
     <Bemerkung>
@@ -25262,48 +25157,6 @@
   </Leser>
   <Leser>
     <LGruppe>MF23A</LGruppe>
-    <Geburtsdatum>30.10.1997</Geburtsdatum>
-    <Titel>
-    </Titel>
-    <Nachname>Becker</Nachname>
-    <Vorname>Ottilia</Vorname>
-    <Strasse>Windthorststraße 37</Strasse>
-    <PLZ>46325</PLZ>
-    <Ort>Borken</Ort>
-    <Geschlecht>W</Geschlecht>
-    <Anmeldedatum>07.08.2023</Anmeldedatum>
-    <Telefon>0178 5550785</Telefon>
-    <Mobiltelefon>
-    </Mobiltelefon>
-    <email>bo148494@students.berufskolleg-borken.de</email>
-    <ZusatzInfo>
-    </ZusatzInfo>
-    <Bemerkung>
-    </Bemerkung>
-  </Leser>
-  <Leser>
-    <LGruppe>MF23A</LGruppe>
-    <Geburtsdatum>03.12.2001</Geburtsdatum>
-    <Titel>
-    </Titel>
-    <Nachname>Convent</Nachname>
-    <Vorname>Florian</Vorname>
-    <Strasse>Lisztweg 10</Strasse>
-    <PLZ>46414</PLZ>
-    <Ort>Rhede</Ort>
-    <Geschlecht>M</Geschlecht>
-    <Anmeldedatum>07.08.2023</Anmeldedatum>
-    <Telefon>0159 06656233</Telefon>
-    <Mobiltelefon>
-    </Mobiltelefon>
-    <email>cf157034@students.berufskolleg-borken.de</email>
-    <ZusatzInfo>
-    </ZusatzInfo>
-    <Bemerkung>
-    </Bemerkung>
-  </Leser>
-  <Leser>
-    <LGruppe>MF23A</LGruppe>
     <Geburtsdatum>23.10.2006</Geburtsdatum>
     <Titel>
     </Titel>
@@ -25318,28 +25171,6 @@
     <Mobiltelefon>
     </Mobiltelefon>
     <email>dv157975@students.berufskolleg-borken.de</email>
-    <ZusatzInfo>
-    </ZusatzInfo>
-    <Bemerkung>
-    </Bemerkung>
-  </Leser>
-  <Leser>
-    <LGruppe>MF23A</LGruppe>
-    <Geburtsdatum>23.07.2005</Geburtsdatum>
-    <Titel>
-    </Titel>
-    <Nachname>Dücker</Nachname>
-    <Vorname>Sebastian</Vorname>
-    <Strasse>Don-Boso-Straße 4</Strasse>
-    <PLZ>48703</PLZ>
-    <Ort>Stadtlohn</Ort>
-    <Geschlecht>M</Geschlecht>
-    <Anmeldedatum>21.08.2024</Anmeldedatum>
-    <Telefon>
-    </Telefon>
-    <Mobiltelefon>
-    </Mobiltelefon>
-    <email>ds157976@students.berufskolleg-borken.de</email>
     <ZusatzInfo>
     </ZusatzInfo>
     <Bemerkung>
@@ -25514,26 +25345,6 @@
   </Leser>
   <Leser>
     <LGruppe>MF23A</LGruppe>
-    <Geburtsdatum>23.03.2006</Geburtsdatum>
-    <Titel>
-    </Titel>
-    <Nachname>Rottbeck</Nachname>
-    <Vorname>Louis</Vorname>
-    <Strasse>Katthagen 8</Strasse>
-    <PLZ>46325</PLZ>
-    <Ort>Borken</Ort>
-    <Geschlecht>M</Geschlecht>
-    <Anmeldedatum>07.08.2023</Anmeldedatum>
-    <Telefon>02862 415517</Telefon>
-    <Mobiltelefon>0178 1529413</Mobiltelefon>
-    <email>rl156216@students.berufskolleg-borken.de</email>
-    <ZusatzInfo>
-    </ZusatzInfo>
-    <Bemerkung>
-    </Bemerkung>
-  </Leser>
-  <Leser>
-    <LGruppe>MF23A</LGruppe>
     <Geburtsdatum>20.01.2006</Geburtsdatum>
     <Titel>
     </Titel>
@@ -25632,26 +25443,6 @@
     <Mobiltelefon>
     </Mobiltelefon>
     <email>va157984@students.berufskolleg-borken.de</email>
-    <ZusatzInfo>
-    </ZusatzInfo>
-    <Bemerkung>
-    </Bemerkung>
-  </Leser>
-  <Leser>
-    <LGruppe>MF23A</LGruppe>
-    <Geburtsdatum>28.01.2003</Geburtsdatum>
-    <Titel>
-    </Titel>
-    <Nachname>Wiese</Nachname>
-    <Vorname>Finn Nikita</Vorname>
-    <Strasse>Am Buttendick 25</Strasse>
-    <PLZ>46485</PLZ>
-    <Ort>Wesel</Ort>
-    <Geschlecht>M</Geschlecht>
-    <Anmeldedatum>05.09.2023</Anmeldedatum>
-    <Telefon>0157 55901681</Telefon>
-    <Mobiltelefon>0157 55901681</Mobiltelefon>
-    <email>wf157231@students.berufskolleg-borken.de</email>
     <ZusatzInfo>
     </ZusatzInfo>
     <Bemerkung>
@@ -31584,6 +31375,27 @@
     <Mobiltelefon>
     </Mobiltelefon>
     <email>nd158323@students.berufskolleg-borken.de</email>
+    <ZusatzInfo>
+    </ZusatzInfo>
+    <Bemerkung>
+    </Bemerkung>
+  </Leser>
+  <Leser>
+    <LGruppe>NF25A</LGruppe>
+    <Geburtsdatum>10.01.2001</Geburtsdatum>
+    <Titel>
+    </Titel>
+    <Nachname>Tukan</Nachname>
+    <Vorname>Inocentius Benedictus</Vorname>
+    <Strasse>Weseler Landstraße 8</Strasse>
+    <PLZ>46325</PLZ>
+    <Ort>Borken</Ort>
+    <Geschlecht>M</Geschlecht>
+    <Anmeldedatum>20.04.2026</Anmeldedatum>
+    <Telefon>
+    </Telefon>
+    <Mobiltelefon>0178 9023286</Mobiltelefon>
+    <email>ti010110@students.berufskolleg-borken.de</email>
     <ZusatzInfo>
     </ZusatzInfo>
     <Bemerkung>
