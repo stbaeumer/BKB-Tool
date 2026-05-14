@@ -48,6 +48,14 @@ Passwörter/
 # JSON – but keep project-specific JSON!
 ############
 *.json
+
+############
+# Import / Export Files
+############
+ImportNachLittera*
+*.dat
+ImportNachNetman*
+ImportNachWebuntis*
 !appsettings*.json   # Keep .NET config files
 
 ############
