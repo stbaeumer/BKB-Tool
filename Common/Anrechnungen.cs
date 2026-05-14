@@ -18,7 +18,7 @@ public partial class Anrechnungen : List<Anrechnung>
 
     public Anrechnungen(Lehrers lehrers, IConfiguration configuration)
     {
-        configuration = Global.Konfig("ConnectionStringUntis", Global.Modus.ReadSilent, configuration);
+        configuration = Global.Konfig("ConnectionStringUntis", Global.Modus.Update, configuration);
 
         using var odbcConnection = new SqlConnection(configuration["ConnectionStringUntis"]);
         var beschreibungs = new Beschreibungs();

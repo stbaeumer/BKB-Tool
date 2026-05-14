@@ -1801,7 +1801,7 @@ public static class KonfigHelper
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Bitte geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]ConnectionString[/] für Untis an.",
             Datentyp = Global.Datentyp.String,
-            InGrundeinstellungAbfragen = false,
+            InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernPrivilegiert
         },

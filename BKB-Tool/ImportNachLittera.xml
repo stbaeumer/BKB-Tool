@@ -88,7 +88,7 @@
     </Titel>
     <Nachname>Gamisch</Nachname>
     <Vorname>Sina</Vorname>
-    <Strasse>Ulmenweg 5a</Strasse>
+    <Strasse>Ulmenweg 5</Strasse>
     <PLZ>46397</PLZ>
     <Ort>Bocholt</Ort>
     <Geschlecht>W</Geschlecht>
@@ -214,7 +214,7 @@
     </Titel>
     <Nachname>Lendring</Nachname>
     <Vorname>Linus</Vorname>
-    <Strasse>Am Schäfingskamp 9a</Strasse>
+    <Strasse>Am Schäfingskamp 9</Strasse>
     <PLZ>48683</PLZ>
     <Ort>Ahaus</Ort>
     <Geschlecht>M</Geschlecht>
@@ -298,7 +298,7 @@
     </Titel>
     <Nachname>Schulten</Nachname>
     <Vorname>Lena</Vorname>
-    <Strasse>Hoher Weg 29a</Strasse>
+    <Strasse>Hoher Weg 29</Strasse>
     <PLZ>48599</PLZ>
     <Ort>Gronau</Ort>
     <Geschlecht>W</Geschlecht>
@@ -359,7 +359,7 @@
     </Titel>
     <Nachname>Tenhumberg</Nachname>
     <Vorname>Sven</Vorname>
-    <Strasse>Schwalbenweg 16a</Strasse>
+    <Strasse>Schwalbenweg 16</Strasse>
     <PLZ>48683</PLZ>
     <Ort>Ahaus</Ort>
     <Geschlecht>M</Geschlecht>
@@ -401,7 +401,7 @@
     </Titel>
     <Nachname>Walfort</Nachname>
     <Vorname>Hannes</Vorname>
-    <Strasse>Schaddenhook 29a</Strasse>
+    <Strasse>Schaddenhook 29</Strasse>
     <PLZ>48683</PLZ>
     <Ort>Ahaus</Ort>
     <Geschlecht>M</Geschlecht>
@@ -545,7 +545,7 @@
     </Titel>
     <Nachname>Haukap</Nachname>
     <Vorname>Fynn</Vorname>
-    <Strasse>Letter-Bruch 2a</Strasse>
+    <Strasse>Letter-Bruch 2</Strasse>
     <PLZ>48653</PLZ>
     <Ort>Coesfeld</Ort>
     <Geschlecht>M</Geschlecht>
@@ -607,7 +607,7 @@
     </Titel>
     <Nachname>Jolink</Nachname>
     <Vorname>Max</Vorname>
-    <Strasse>Klever Str. 12 b</Strasse>
+    <Strasse>Klever Str. 12</Strasse>
     <PLZ>46419</PLZ>
     <Ort>Isselburg</Ort>
     <Geschlecht>M</Geschlecht>
@@ -749,7 +749,7 @@
     </Titel>
     <Nachname>Brand</Nachname>
     <Vorname>Luana</Vorname>
-    <Strasse>Brimmingskamp  1</Strasse>
+    <Strasse>Brimmingskamp 1</Strasse>
     <PLZ>48734</PLZ>
     <Ort>Reken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -790,7 +790,7 @@
     </Titel>
     <Nachname>Elting</Nachname>
     <Vorname>Henrike</Vorname>
-    <Strasse>Ernst- Pauls-Weg 16</Strasse>
+    <Strasse>Ernst-Pauls-Weg 16</Strasse>
     <PLZ>46397</PLZ>
     <Ort>Bocholt</Ort>
     <Geschlecht>W</Geschlecht>
@@ -978,7 +978,7 @@
     </Titel>
     <Nachname>Rensing</Nachname>
     <Vorname>Raik</Vorname>
-    <Strasse>Marienstraße  11</Strasse>
+    <Strasse>Marienstraße 11</Strasse>
     <PLZ>48734</PLZ>
     <Ort>Reken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -1019,7 +1019,7 @@
     </Titel>
     <Nachname>Späker</Nachname>
     <Vorname>Luca</Vorname>
-    <Strasse>Ramsdorfer Str. 19a</Strasse>
+    <Strasse>Ramsdorfer Str. 19</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -1538,7 +1538,7 @@
     </Titel>
     <Nachname>Bösing</Nachname>
     <Vorname>Luis</Vorname>
-    <Strasse>Müggenbergstraße 27A</Strasse>
+    <Strasse>Müggenbergstraße 27</Strasse>
     <PLZ>48683</PLZ>
     <Ort>Ahaus</Ort>
     <Geschlecht>M</Geschlecht>
@@ -1618,7 +1618,7 @@
     </Titel>
     <Nachname>Eisenberg</Nachname>
     <Vorname>Tobias</Vorname>
-    <Strasse>Pröbstinger Allee 23a</Strasse>
+    <Strasse>Pröbstinger Allee 23</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -1721,7 +1721,7 @@
     </Titel>
     <Nachname>Kemper</Nachname>
     <Vorname>Jan</Vorname>
-    <Strasse>Graf-Landsberg-Straße 10a</Strasse>
+    <Strasse>Graf-Landsberg-Straße 10</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -1935,7 +1935,7 @@
     </Titel>
     <Nachname>Feldhaus</Nachname>
     <Vorname>Joost</Vorname>
-    <Strasse>Am Elschatt 24 B</Strasse>
+    <Strasse>Am Elschatt 24</Strasse>
     <PLZ>46359</PLZ>
     <Ort>Heiden</Ort>
     <Geschlecht>M</Geschlecht>
@@ -2018,7 +2018,7 @@
     </Titel>
     <Nachname>Huesmann</Nachname>
     <Vorname>Max</Vorname>
-    <Strasse>Gerhart-Hauptmann-Straße 25a</Strasse>
+    <Strasse>Gerhart-Hauptmann-Straße 25</Strasse>
     <PLZ>48653</PLZ>
     <Ort>Coesfeld</Ort>
     <Geschlecht>M</Geschlecht>
@@ -2286,7 +2286,7 @@
     </Titel>
     <Nachname>Winkelmann</Nachname>
     <Vorname>Laurenz</Vorname>
-    <Strasse>Heltweg 14a</Strasse>
+    <Strasse>Heltweg 14</Strasse>
     <PLZ>48734</PLZ>
     <Ort>Reken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -2307,7 +2307,7 @@
     </Titel>
     <Nachname>Wolters</Nachname>
     <Vorname>Hermann</Vorname>
-    <Strasse>Wendfeld 4a</Strasse>
+    <Strasse>Wendfeld 4</Strasse>
     <PLZ>48703</PLZ>
     <Ort>Stadtlohn</Ort>
     <Geschlecht>M</Geschlecht>
@@ -2349,7 +2349,7 @@
     </Titel>
     <Nachname>Borelbach</Nachname>
     <Vorname>Sina Marie</Vorname>
-    <Strasse>Schleiermacherstraße 3a</Strasse>
+    <Strasse>Schleiermacherstraße 3</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -2573,7 +2573,7 @@
     </Titel>
     <Nachname>Bengfort</Nachname>
     <Vorname>Jonte</Vorname>
-    <Strasse>Wennewick 39A</Strasse>
+    <Strasse>Wennewick 39</Strasse>
     <PLZ>48691</PLZ>
     <Ort>Vreden</Ort>
     <Geschlecht>M</Geschlecht>
@@ -2657,7 +2657,7 @@
     </Titel>
     <Nachname>Gebing</Nachname>
     <Vorname>Jan Wilm</Vorname>
-    <Strasse>Crosewick 50a</Strasse>
+    <Strasse>Crosewick 50</Strasse>
     <PLZ>48691</PLZ>
     <Ort>Vreden</Ort>
     <Geschlecht>M</Geschlecht>
@@ -2740,7 +2740,7 @@
     </Titel>
     <Nachname>Krämer</Nachname>
     <Vorname>Nicolas</Vorname>
-    <Strasse>Am Kiwitt 2a</Strasse>
+    <Strasse>Am Kiwitt 2</Strasse>
     <PLZ>46419</PLZ>
     <Ort>Isselburg</Ort>
     <Geschlecht>M</Geschlecht>
@@ -2946,7 +2946,7 @@
     </Titel>
     <Nachname>Steverding</Nachname>
     <Vorname>Sebastian</Vorname>
-    <Strasse>Schlichtenkamp 31a</Strasse>
+    <Strasse>Schlichtenkamp 31</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -3048,7 +3048,7 @@
     </Titel>
     <Nachname>Frerick</Nachname>
     <Vorname>Linus</Vorname>
-    <Strasse>Bauerschaft 154a</Strasse>
+    <Strasse>Bauerschaft 154</Strasse>
     <PLZ>48249</PLZ>
     <Ort>Dülmen</Ort>
     <Geschlecht>M</Geschlecht>
@@ -3527,7 +3527,7 @@
     <Vorname>Manuel</Vorname>
     <Strasse>Glückaufstraße 21</Strasse>
     <PLZ>49176</PLZ>
-    <Ort>Hilter am Teutoburger Wald-Ebbendorf</Ort>
+    <Ort>Hilter am Teutoburger Wald-Ebbendorf  </Ort>
     <Geschlecht>M</Geschlecht>
     <Anmeldedatum>01.08.2025</Anmeldedatum>
     <Telefon>05409 989191</Telefon>
@@ -3751,7 +3751,7 @@
     </Titel>
     <Nachname>Klüppel</Nachname>
     <Vorname>Anna</Vorname>
-    <Strasse>Eschweg 61a</Strasse>
+    <Strasse>Eschweg 61</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -3816,7 +3816,8 @@
     <Strasse>Bornhagener Straße 11</Strasse>
     <PLZ>
     </PLZ>
-    <Ort>Witzenhausen</Ort>
+    <Ort>
+    </Ort>
     <Geschlecht>W</Geschlecht>
     <Anmeldedatum>01.08.2025</Anmeldedatum>
     <Telefon>0176 63663311</Telefon>
@@ -4105,7 +4106,7 @@
     </Titel>
     <Nachname>Hemmelberg</Nachname>
     <Vorname>Nele</Vorname>
-    <Strasse>Loikumer Weg 79a</Strasse>
+    <Strasse>Loikumer Weg 79</Strasse>
     <PLZ>46395</PLZ>
     <Ort>Bocholt</Ort>
     <Geschlecht>W</Geschlecht>
@@ -4146,7 +4147,7 @@
     </Titel>
     <Nachname>Hülsken</Nachname>
     <Vorname>Jana</Vorname>
-    <Strasse>Tüskerbrook 7C</Strasse>
+    <Strasse>Tüskerbrook 7</Strasse>
     <PLZ>46286</PLZ>
     <Ort>Dorsten</Ort>
     <Geschlecht>W</Geschlecht>
@@ -4312,7 +4313,7 @@
     </Titel>
     <Nachname>Schwarz</Nachname>
     <Vorname>Mika</Vorname>
-    <Strasse>Ant Kruse Bömken 15b</Strasse>
+    <Strasse>Ant Kruse Bömken 15</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -4375,7 +4376,7 @@
     </Titel>
     <Nachname>Wewering</Nachname>
     <Vorname>Finnja</Vorname>
-    <Strasse>An der Koplak 10a</Strasse>
+    <Strasse>An der Koplak 10</Strasse>
     <PLZ>46499</PLZ>
     <Ort>Hamminkeln</Ort>
     <Geschlecht>W</Geschlecht>
@@ -4416,7 +4417,7 @@
     </Titel>
     <Nachname>Altena</Nachname>
     <Vorname>Jan</Vorname>
-    <Strasse>Görings Esch 20a</Strasse>
+    <Strasse>Görings Esch 20</Strasse>
     <PLZ>
     </PLZ>
     <Ort>
@@ -4602,7 +4603,7 @@
     </Titel>
     <Nachname>Graf Droste zu Vischering von Nesselrode Reichenst</Nachname>
     <Vorname>Konrad</Vorname>
-    <Strasse>Baumberger Weg</Strasse>
+    <Strasse>Baumberger Weg </Strasse>
     <PLZ>40593</PLZ>
     <Ort>Düsseldorf</Ort>
     <Geschlecht>M</Geschlecht>
@@ -4623,7 +4624,7 @@
     </Titel>
     <Nachname>Harde</Nachname>
     <Vorname>Kord</Vorname>
-    <Strasse>Geeste 50A</Strasse>
+    <Strasse>Geeste 50</Strasse>
     <PLZ>46342</PLZ>
     <Ort>Velen</Ort>
     <Geschlecht>M</Geschlecht>
@@ -4643,7 +4644,7 @@
     </Titel>
     <Nachname>Horstmann</Nachname>
     <Vorname>Lukas</Vorname>
-    <Strasse>Hollich 157a</Strasse>
+    <Strasse>Hollich 157</Strasse>
     <PLZ>48565</PLZ>
     <Ort>Steinfurt</Ort>
     <Geschlecht>M</Geschlecht>
@@ -4957,7 +4958,7 @@
     </Titel>
     <Nachname>Schwenk</Nachname>
     <Vorname>Erik</Vorname>
-    <Strasse>Haaneweg 152b</Strasse>
+    <Strasse>Haaneweg 152</Strasse>
     <PLZ>46286</PLZ>
     <Ort>Dorsten</Ort>
     <Geschlecht>M</Geschlecht>
@@ -5019,7 +5020,7 @@
     </Titel>
     <Nachname>Wenning</Nachname>
     <Vorname>Gero</Vorname>
-    <Strasse>Bahnhofstraße 17a</Strasse>
+    <Strasse>Bahnhofstraße 17</Strasse>
     <PLZ>48691</PLZ>
     <Ort>Vreden</Ort>
     <Geschlecht>M</Geschlecht>
@@ -5145,7 +5146,7 @@
     </Titel>
     <Nachname>Hying</Nachname>
     <Vorname>Kristin</Vorname>
-    <Strasse>Grüner Weg 12a</Strasse>
+    <Strasse>Grüner Weg 12</Strasse>
     <PLZ>46354</PLZ>
     <Ort>Südlohn</Ort>
     <Geschlecht>W</Geschlecht>
@@ -5480,7 +5481,7 @@
     </Titel>
     <Nachname>Beckmann</Nachname>
     <Vorname>Charlotte</Vorname>
-    <Strasse>Eschweg 2A</Strasse>
+    <Strasse>Eschweg 2</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -5864,6 +5865,28 @@
   </Leser>
   <Leser>
     <LGruppe>AVE25A</LGruppe>
+    <Geburtsdatum>16.01.2008</Geburtsdatum>
+    <Titel>
+    </Titel>
+    <Nachname>Müller</Nachname>
+    <Vorname>Maximilian</Vorname>
+    <Strasse>Alter Kreuzweg 4</Strasse>
+    <PLZ>46325</PLZ>
+    <Ort>Borken</Ort>
+    <Geschlecht>M</Geschlecht>
+    <Anmeldedatum>01.11.2025</Anmeldedatum>
+    <Telefon>
+    </Telefon>
+    <Mobiltelefon>
+    </Mobiltelefon>
+    <email>mm080116@students.berufskolleg-borken.de</email>
+    <ZusatzInfo>
+    </ZusatzInfo>
+    <Bemerkung>
+    </Bemerkung>
+  </Leser>
+  <Leser>
+    <LGruppe>AVE25A</LGruppe>
     <Geburtsdatum>15.10.2008</Geburtsdatum>
     <Titel>
     </Titel>
@@ -5912,7 +5935,7 @@
     </Titel>
     <Nachname>Charif</Nachname>
     <Vorname>Hamied</Vorname>
-    <Strasse>Vredener Straße 155b</Strasse>
+    <Strasse>Vredener Straße 155</Strasse>
     <PLZ>48703</PLZ>
     <Ort>Stadtlohn</Ort>
     <Geschlecht>M</Geschlecht>
@@ -6032,7 +6055,7 @@
     </Titel>
     <Nachname>Senger</Nachname>
     <Vorname>Nico</Vorname>
-    <Strasse>Im Mensing 11a</Strasse>
+    <Strasse>Im Mensing 11</Strasse>
     <PLZ>46348</PLZ>
     <Ort>Raesfeld</Ort>
     <Geschlecht>M</Geschlecht>
@@ -6041,27 +6064,6 @@
     <Mobiltelefon>
     </Mobiltelefon>
     <email>sn080206@students.berufskolleg-borken.de</email>
-    <ZusatzInfo>
-    </ZusatzInfo>
-    <Bemerkung>
-    </Bemerkung>
-  </Leser>
-  <Leser>
-    <LGruppe>AVT25A</LGruppe>
-    <Geburtsdatum>24.05.2009</Geburtsdatum>
-    <Titel>
-    </Titel>
-    <Nachname>Steffens</Nachname>
-    <Vorname>Kilian</Vorname>
-    <Strasse>Schorlemerstr. 3</Strasse>
-    <PLZ>46348</PLZ>
-    <Ort>Raesfeld</Ort>
-    <Geschlecht>M</Geschlecht>
-    <Anmeldedatum>20.01.2026</Anmeldedatum>
-    <Telefon>0177 5651874</Telefon>
-    <Mobiltelefon>
-    </Mobiltelefon>
-    <email>sk090524@students.berufskolleg-borken.de</email>
     <ZusatzInfo>
     </ZusatzInfo>
     <Bemerkung>
@@ -6095,7 +6097,7 @@
     </Titel>
     <Nachname>Arping</Nachname>
     <Vorname>Julia</Vorname>
-    <Strasse>In den Gärten 21a</Strasse>
+    <Strasse>In den Gärten 21</Strasse>
     <PLZ>46395</PLZ>
     <Ort>Bocholt</Ort>
     <Geschlecht>W</Geschlecht>
@@ -6178,7 +6180,7 @@
     </Titel>
     <Nachname>Fering</Nachname>
     <Vorname>Mareen</Vorname>
-    <Strasse>Urnenfeld 7a</Strasse>
+    <Strasse>Urnenfeld 7</Strasse>
     <PLZ>46414</PLZ>
     <Ort>Rhede</Ort>
     <Geschlecht>W</Geschlecht>
@@ -6238,7 +6240,7 @@
     </Titel>
     <Nachname>Grunden</Nachname>
     <Vorname>Hanna</Vorname>
-    <Strasse>Bocholter Straße 207a</Strasse>
+    <Strasse>Bocholter Straße 207</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -6340,7 +6342,7 @@
     </Titel>
     <Nachname>Meier</Nachname>
     <Vorname>Clemens</Vorname>
-    <Strasse>Suendarp 13a</Strasse>
+    <Strasse>Suendarp 13</Strasse>
     <PLZ>46348</PLZ>
     <Ort>Raesfeld</Ort>
     <Geschlecht>M</Geschlecht>
@@ -6465,7 +6467,7 @@
     </Titel>
     <Nachname>Blits</Nachname>
     <Vorname>Jannick</Vorname>
-    <Strasse>Möllenstegge 22a</Strasse>
+    <Strasse>Möllenstegge 22</Strasse>
     <PLZ>46395</PLZ>
     <Ort>Bocholt</Ort>
     <Geschlecht>M</Geschlecht>
@@ -6882,7 +6884,7 @@
     </Titel>
     <Nachname>Terhart</Nachname>
     <Vorname>Alina</Vorname>
-    <Strasse>Binnenkamp 8A</Strasse>
+    <Strasse>Binnenkamp 8</Strasse>
     <PLZ>46414</PLZ>
     <Ort>Rhede</Ort>
     <Geschlecht>W</Geschlecht>
@@ -6945,7 +6947,7 @@
     </Titel>
     <Nachname>Timmer</Nachname>
     <Vorname>Bea</Vorname>
-    <Strasse>Meppener Str. 100 A</Strasse>
+    <Strasse>Meppener Str. 100</Strasse>
     <PLZ>49808</PLZ>
     <Ort>Lingen</Ort>
     <Geschlecht>W</Geschlecht>
@@ -6966,7 +6968,7 @@
     </Titel>
     <Nachname>Wendholt</Nachname>
     <Vorname>Finn Mika</Vorname>
-    <Strasse>Am Friedhof 8a</Strasse>
+    <Strasse>Am Friedhof 8</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -7049,7 +7051,7 @@
     </Titel>
     <Nachname>Beckmann</Nachname>
     <Vorname>Till</Vorname>
-    <Strasse>Birkenweg, 13a</Strasse>
+    <Strasse>Birkenweg, 13</Strasse>
     <PLZ>46414</PLZ>
     <Ort>Rhede</Ort>
     <Geschlecht>M</Geschlecht>
@@ -7112,7 +7114,7 @@
     </Titel>
     <Nachname>Derksen</Nachname>
     <Vorname>Yannick</Vorname>
-    <Strasse>Schaumburgstraße 3a</Strasse>
+    <Strasse>Schaumburgstraße 3</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -7196,7 +7198,7 @@
     </Titel>
     <Nachname>Grunden</Nachname>
     <Vorname>Maike</Vorname>
-    <Strasse>Bocholter Str. 207 A</Strasse>
+    <Strasse>Bocholter Str. 207</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -7216,7 +7218,7 @@
     </Titel>
     <Nachname>Immand</Nachname>
     <Vorname>Jule</Vorname>
-    <Strasse>Schwester-Bertranda-Straße 26b</Strasse>
+    <Strasse>Schwester-Bertranda-Straße 26</Strasse>
     <PLZ>46446</PLZ>
     <Ort>Emmerich</Ort>
     <Geschlecht>W</Geschlecht>
@@ -7340,7 +7342,7 @@
     </Titel>
     <Nachname>Pflewko</Nachname>
     <Vorname>Karolina</Vorname>
-    <Strasse>Biemenhorster Weg 153b</Strasse>
+    <Strasse>Biemenhorster Weg 153</Strasse>
     <PLZ>46395</PLZ>
     <Ort>Bocholt</Ort>
     <Geschlecht>W</Geschlecht>
@@ -7506,7 +7508,7 @@
     </Titel>
     <Nachname>Bendfeld</Nachname>
     <Vorname>Kilian</Vorname>
-    <Strasse>Raiffeisenstraße 5a</Strasse>
+    <Strasse>Raiffeisenstraße 5</Strasse>
     <PLZ>48619</PLZ>
     <Ort>Heek</Ort>
     <Geschlecht>M</Geschlecht>
@@ -7756,7 +7758,7 @@
     </Titel>
     <Nachname>Nowatzke</Nachname>
     <Vorname>Elias Miklos</Vorname>
-    <Strasse>Lennestraße 16 B</Strasse>
+    <Strasse>Lennestraße 16</Strasse>
     <PLZ>46395</PLZ>
     <Ort>Bocholt</Ort>
     <Geschlecht>M</Geschlecht>
@@ -7943,7 +7945,7 @@
     </Titel>
     <Nachname>Golla</Nachname>
     <Vorname>Bastian</Vorname>
-    <Strasse>Westfalenstraße 26b</Strasse>
+    <Strasse>Westfalenstraße 26</Strasse>
     <PLZ>48599</PLZ>
     <Ort>Gronau</Ort>
     <Geschlecht>M</Geschlecht>
@@ -8025,7 +8027,7 @@
     </Titel>
     <Nachname>Ryfka</Nachname>
     <Vorname>Jakub</Vorname>
-    <Strasse>Hagenstiege 8 a</Strasse>
+    <Strasse>Hagenstiege 8</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -8313,7 +8315,7 @@
     </Titel>
     <Nachname>Book</Nachname>
     <Vorname>Felix</Vorname>
-    <Strasse>Marbecker Straße 2b</Strasse>
+    <Strasse>Marbecker Straße 2</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -8375,7 +8377,7 @@
     </Titel>
     <Nachname>Hanke</Nachname>
     <Vorname>Leon Maik</Vorname>
-    <Strasse>Klostergasse 4d</Strasse>
+    <Strasse>Klostergasse 4</Strasse>
     <PLZ>46342</PLZ>
     <Ort>Velen</Ort>
     <Geschlecht>M</Geschlecht>
@@ -8455,7 +8457,7 @@
     </Titel>
     <Nachname>Mohamed</Nachname>
     <Vorname>Subayr</Vorname>
-    <Strasse>Theresienstraße 1a</Strasse>
+    <Strasse>Theresienstraße 1</Strasse>
     <PLZ>46414</PLZ>
     <Ort>Rhede</Ort>
     <Geschlecht>M</Geschlecht>
@@ -8495,7 +8497,7 @@
     </Titel>
     <Nachname>Rarek</Nachname>
     <Vorname>Justin</Vorname>
-    <Strasse>Matthias-Grünewald-Weg 28 a</Strasse>
+    <Strasse>Matthias-Grünewald-Weg 28</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -8537,7 +8539,7 @@
     </Titel>
     <Nachname>Wiersma</Nachname>
     <Vorname>Jona Jiraju</Vorname>
-    <Strasse>Am Kaninchenberg 5a</Strasse>
+    <Strasse>Am Kaninchenberg 5</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -8620,7 +8622,7 @@
     </Titel>
     <Nachname>Duarte Barros</Nachname>
     <Vorname>Julian</Vorname>
-    <Strasse>Jeanette-Wolff-Str. 3 a</Strasse>
+    <Strasse>Jeanette-Wolff-Str. 3</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -8930,7 +8932,7 @@
     </Titel>
     <Nachname>Weidemann</Nachname>
     <Vorname>Joel</Vorname>
-    <Strasse>Bellenstegge 7a</Strasse>
+    <Strasse>Bellenstegge 7</Strasse>
     <PLZ>46342</PLZ>
     <Ort>Velen</Ort>
     <Geschlecht>M</Geschlecht>
@@ -9236,7 +9238,7 @@
     </Titel>
     <Nachname>Benning</Nachname>
     <Vorname>Hami</Vorname>
-    <Strasse>Liebauweg 13a</Strasse>
+    <Strasse>Liebauweg 13</Strasse>
     <PLZ>46395</PLZ>
     <Ort>Bocholt</Ort>
     <Geschlecht>M</Geschlecht>
@@ -9277,7 +9279,7 @@
     </Titel>
     <Nachname>Düme</Nachname>
     <Vorname>Sibel</Vorname>
-    <Strasse>Am Elschatt 29c</Strasse>
+    <Strasse>Am Elschatt 29</Strasse>
     <PLZ>46359</PLZ>
     <Ort>Heiden</Ort>
     <Geschlecht>W</Geschlecht>
@@ -9361,7 +9363,7 @@
     </Titel>
     <Nachname>Peifer</Nachname>
     <Vorname>Til</Vorname>
-    <Strasse>Eschke 34b</Strasse>
+    <Strasse>Eschke 34</Strasse>
     <PLZ>46354</PLZ>
     <Ort>Südlohn</Ort>
     <Geschlecht>M</Geschlecht>
@@ -9466,7 +9468,7 @@
     </Titel>
     <Nachname>Gieswinkel</Nachname>
     <Vorname>Anika</Vorname>
-    <Strasse>Heidener Straße 117a</Strasse>
+    <Strasse>Heidener Straße 117</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -9590,7 +9592,7 @@
     </Titel>
     <Nachname>Murina</Nachname>
     <Vorname>Eleonora</Vorname>
-    <Strasse>Eschlohnerstraße 17a</Strasse>
+    <Strasse>Eschlohnerstraße 17</Strasse>
     <PLZ>46354</PLZ>
     <Ort>Südlohn</Ort>
     <Geschlecht>W</Geschlecht>
@@ -10080,6 +10082,27 @@
     </Bemerkung>
   </Leser>
   <Leser>
+    <LGruppe>BS25B</LGruppe>
+    <Geburtsdatum>24.05.2009</Geburtsdatum>
+    <Titel>
+    </Titel>
+    <Nachname>Steffens</Nachname>
+    <Vorname>Kilian</Vorname>
+    <Strasse>Schorlemerstr. 3</Strasse>
+    <PLZ>46348</PLZ>
+    <Ort>Raesfeld</Ort>
+    <Geschlecht>M</Geschlecht>
+    <Anmeldedatum>20.01.2026</Anmeldedatum>
+    <Telefon>0177 5651874</Telefon>
+    <Mobiltelefon>
+    </Mobiltelefon>
+    <email>sk090524@students.berufskolleg-borken.de</email>
+    <ZusatzInfo>
+    </ZusatzInfo>
+    <Bemerkung>
+    </Bemerkung>
+  </Leser>
+  <Leser>
     <LGruppe>BW25A</LGruppe>
     <Geburtsdatum>01.05.2007</Geburtsdatum>
     <Titel>
@@ -10271,7 +10294,7 @@
     </Titel>
     <Nachname>Iraschko</Nachname>
     <Vorname>Laura</Vorname>
-    <Strasse>Nordring 56 a</Strasse>
+    <Strasse>Nordring 56</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -10312,7 +10335,7 @@
     </Titel>
     <Nachname>Markovic</Nachname>
     <Vorname>Ferrejano</Vorname>
-    <Strasse>Heidener Straße 97a</Strasse>
+    <Strasse>Heidener Straße 97</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -10619,7 +10642,7 @@
     </Titel>
     <Nachname>Böcker</Nachname>
     <Vorname>Henrich</Vorname>
-    <Strasse>Ortwicker Straße 1a</Strasse>
+    <Strasse>Ortwicker Straße 1</Strasse>
     <PLZ>48683</PLZ>
     <Ort>Ahaus</Ort>
     <Geschlecht>M</Geschlecht>
@@ -10765,7 +10788,7 @@
     </Titel>
     <Nachname>Kustos</Nachname>
     <Vorname>Constantin</Vorname>
-    <Strasse>Friedmate 45a</Strasse>
+    <Strasse>Friedmate 45</Strasse>
     <PLZ>48683</PLZ>
     <Ort>Ahaus</Ort>
     <Geschlecht>M</Geschlecht>
@@ -10909,7 +10932,7 @@
     </Titel>
     <Nachname>Tenbrink</Nachname>
     <Vorname>Colin</Vorname>
-    <Strasse>Krögerskamp 46a</Strasse>
+    <Strasse>Krögerskamp 46</Strasse>
     <PLZ>48703</PLZ>
     <Ort>Stadtlohn</Ort>
     <Geschlecht>M</Geschlecht>
@@ -11264,7 +11287,7 @@
     </Titel>
     <Nachname>Nickel</Nachname>
     <Vorname>Benedikt</Vorname>
-    <Strasse>Bachaue 13a</Strasse>
+    <Strasse>Bachaue 13</Strasse>
     <PLZ>46499</PLZ>
     <Ort>Hamminkeln</Ort>
     <Geschlecht>M</Geschlecht>
@@ -11306,7 +11329,7 @@
     </Titel>
     <Nachname>Nienhaus</Nachname>
     <Vorname>Lars</Vorname>
-    <Strasse>Möllenstegge 29 a</Strasse>
+    <Strasse>Möllenstegge 29</Strasse>
     <PLZ>46395</PLZ>
     <Ort>Bocholt</Ort>
     <Geschlecht>M</Geschlecht>
@@ -11348,9 +11371,9 @@
     </Titel>
     <Nachname>Schenk</Nachname>
     <Vorname>Anna</Vorname>
-    <Strasse>Moorweg 12</Strasse>
-    <PLZ>46419</PLZ>
-    <Ort>Isselburg</Ort>
+    <Strasse>Winterswijker Str. 26</Strasse>
+    <PLZ>46399</PLZ>
+    <Ort>Bocholt</Ort>
     <Geschlecht>W</Geschlecht>
     <Anmeldedatum>21.08.2024</Anmeldedatum>
     <Telefon>0157 53652248</Telefon>
@@ -11513,7 +11536,7 @@
     </Titel>
     <Nachname>Buning</Nachname>
     <Vorname>Johann</Vorname>
-    <Strasse>Fuistingstr. 25, Postfach k.buning@gmx.de</Strasse>
+    <Strasse>Fuistingstr. 25</Strasse>
     <PLZ>
     </PLZ>
     <Ort>
@@ -11536,7 +11559,7 @@
     </Titel>
     <Nachname>Dogan</Nachname>
     <Vorname>Samuel</Vorname>
-    <Strasse>Geschwister-Scholl-Straße 40a</Strasse>
+    <Strasse>Geschwister-Scholl-Straße 40</Strasse>
     <PLZ>48599</PLZ>
     <Ort>Gronau</Ort>
     <Geschlecht>M</Geschlecht>
@@ -11761,7 +11784,7 @@
     </Titel>
     <Nachname>Schmiing</Nachname>
     <Vorname>Luis</Vorname>
-    <Strasse>Ahle 132a</Strasse>
+    <Strasse>Ahle 132</Strasse>
     <PLZ>48619</PLZ>
     <Ort>Heek</Ort>
     <Geschlecht>M</Geschlecht>
@@ -11968,7 +11991,7 @@
     </Titel>
     <Nachname>Bröker</Nachname>
     <Vorname>Torben</Vorname>
-    <Strasse>Dülmener Weg 19 a</Strasse>
+    <Strasse>Dülmener Weg 19</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -11989,7 +12012,7 @@
     </Titel>
     <Nachname>Brömmel</Nachname>
     <Vorname>Ben</Vorname>
-    <Strasse>Brinkstrasse 30a</Strasse>
+    <Strasse>Brinkstrasse 30</Strasse>
     <PLZ>46348</PLZ>
     <Ort>Raesfeld</Ort>
     <Geschlecht>M</Geschlecht>
@@ -12093,7 +12116,7 @@
     </Titel>
     <Nachname>Knipping</Nachname>
     <Vorname>Bernd</Vorname>
-    <Strasse>Renzelhook 6a</Strasse>
+    <Strasse>Renzelhook 6</Strasse>
     <PLZ>46414</PLZ>
     <Ort>Rhede</Ort>
     <Geschlecht>M</Geschlecht>
@@ -12135,7 +12158,7 @@
     </Titel>
     <Nachname>Morgalla</Nachname>
     <Vorname>Nina</Vorname>
-    <Strasse>Knüverdarp 34 a</Strasse>
+    <Strasse>Knüverdarp 34</Strasse>
     <PLZ>46342</PLZ>
     <Ort>Velen</Ort>
     <Geschlecht>W</Geschlecht>
@@ -12261,7 +12284,7 @@
     </Titel>
     <Nachname>Stanik</Nachname>
     <Vorname>Maximilian</Vorname>
-    <Strasse>Im Park 10 c</Strasse>
+    <Strasse>Im Park 10</Strasse>
     <PLZ>46395</PLZ>
     <Ort>Bocholt</Ort>
     <Geschlecht>M</Geschlecht>
@@ -12324,7 +12347,7 @@
     </Titel>
     <Nachname>Wienen</Nachname>
     <Vorname>Luis</Vorname>
-    <Strasse>Röwekamp 12a</Strasse>
+    <Strasse>Röwekamp 12</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -12387,7 +12410,7 @@
     </Titel>
     <Nachname>Bellmann</Nachname>
     <Vorname>Finn Paul</Vorname>
-    <Strasse>Michaelstraße  41</Strasse>
+    <Strasse>Michaelstraße 41</Strasse>
     <PLZ>48734</PLZ>
     <Ort>Reken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -12633,7 +12656,7 @@
     </Titel>
     <Nachname>Popov</Nachname>
     <Vorname>Andrii</Vorname>
-    <Strasse>Rathausplatz 29a</Strasse>
+    <Strasse>Rathausplatz 29</Strasse>
     <PLZ>46359</PLZ>
     <Ort>Heiden</Ort>
     <Geschlecht>M</Geschlecht>
@@ -12696,7 +12719,7 @@
     </Titel>
     <Nachname>Wolsing</Nachname>
     <Vorname>Leon</Vorname>
-    <Strasse>Klosterbusch 35 b</Strasse>
+    <Strasse>Klosterbusch 35</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -12716,7 +12739,7 @@
     </Titel>
     <Nachname>Bernhardt</Nachname>
     <Vorname>Dave</Vorname>
-    <Strasse>Bahnhofstr. 3a</Strasse>
+    <Strasse>Bahnhofstr. 3</Strasse>
     <PLZ>48734</PLZ>
     <Ort>Reken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -12859,7 +12882,7 @@
     </Titel>
     <Nachname>Fidan</Nachname>
     <Vorname>Ibrahim</Vorname>
-    <Strasse>Dorstener Straße 1a</Strasse>
+    <Strasse>Dorstener Straße 1</Strasse>
     <PLZ>48734</PLZ>
     <Ort>Reken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -12921,7 +12944,7 @@
     </Titel>
     <Nachname>Herget</Nachname>
     <Vorname>Max</Vorname>
-    <Strasse>Zeppelinstr. 1F</Strasse>
+    <Strasse>Zeppelinstr. 1</Strasse>
     <PLZ>46284</PLZ>
     <Ort>Dorsten</Ort>
     <Geschlecht>M</Geschlecht>
@@ -13023,7 +13046,7 @@
     </Titel>
     <Nachname>Lansmann</Nachname>
     <Vorname>Phil</Vorname>
-    <Strasse>Hohe Ost Straße 22a</Strasse>
+    <Strasse>Hohe Ost Straße 22</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -13107,7 +13130,7 @@
     </Titel>
     <Nachname>Rose</Nachname>
     <Vorname>Jan Luca</Vorname>
-    <Strasse>Helle 8e</Strasse>
+    <Strasse>Helle 8</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -13127,7 +13150,7 @@
     </Titel>
     <Nachname>Ruby</Nachname>
     <Vorname>Wayne</Vorname>
-    <Strasse>In der Meehe 1a</Strasse>
+    <Strasse>In der Meehe 1</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -13210,7 +13233,7 @@
     </Titel>
     <Nachname>Walter</Nachname>
     <Vorname>John Marius</Vorname>
-    <Strasse>Isingort 3a</Strasse>
+    <Strasse>Isingort 3</Strasse>
     <PLZ>48739</PLZ>
     <Ort>Legden</Ort>
     <Geschlecht>M</Geschlecht>
@@ -13356,7 +13379,7 @@
     </Titel>
     <Nachname>Korte</Nachname>
     <Vorname>Matthis</Vorname>
-    <Strasse>Dalbroms Krüüs 8 a</Strasse>
+    <Strasse>Dalbroms Krüüs 8</Strasse>
     <PLZ>46359</PLZ>
     <Ort>Heiden</Ort>
     <Geschlecht>M</Geschlecht>
@@ -13377,7 +13400,7 @@
     </Titel>
     <Nachname>Lohbreier</Nachname>
     <Vorname>Johannes</Vorname>
-    <Strasse>Rosenstr. 3a</Strasse>
+    <Strasse>Rosenstr. 3</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -13481,7 +13504,7 @@
     </Titel>
     <Nachname>Saydo</Nachname>
     <Vorname>Ardwan</Vorname>
-    <Strasse>Nordring 36a</Strasse>
+    <Strasse>Nordring 36</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -13607,7 +13630,7 @@
     </Titel>
     <Nachname>Westhoff</Nachname>
     <Vorname>Erik</Vorname>
-    <Strasse>Im Brok 41A</Strasse>
+    <Strasse>Im Brok 41</Strasse>
     <PLZ>46286</PLZ>
     <Ort>Dorsten</Ort>
     <Geschlecht>M</Geschlecht>
@@ -13998,6 +14021,49 @@
   </Leser>
   <Leser>
     <LGruppe>FFM25B</LGruppe>
+    <Geburtsdatum>09.12.2008</Geburtsdatum>
+    <Titel>
+    </Titel>
+    <Nachname>Matviiuk</Nachname>
+    <Vorname>Davyd</Vorname>
+    <Strasse>Karl-Leisner-Straße 15</Strasse>
+    <PLZ>46325</PLZ>
+    <Ort>Borken</Ort>
+    <Geschlecht>M</Geschlecht>
+    <Anmeldedatum>04.05.2026</Anmeldedatum>
+    <Telefon>
+    </Telefon>
+    <Mobiltelefon>
+    </Mobiltelefon>
+    <email>md081209@students.berufskolleg-borken.de</email>
+    <ZusatzInfo>
+    </ZusatzInfo>
+    <Bemerkung>
+    </Bemerkung>
+  </Leser>
+  <Leser>
+    <LGruppe>FFM25B</LGruppe>
+    <Geburtsdatum>04.02.2010</Geburtsdatum>
+    <Titel>
+    </Titel>
+    <Nachname>Ngabo</Nachname>
+    <Vorname>Jodan Angelo</Vorname>
+    <Strasse>Wilbecke 28</Strasse>
+    <PLZ>46325</PLZ>
+    <Ort>Borken</Ort>
+    <Geschlecht>M</Geschlecht>
+    <Anmeldedatum>04.05.2026</Anmeldedatum>
+    <Telefon>015210341319</Telefon>
+    <Mobiltelefon>
+    </Mobiltelefon>
+    <email>nj100204@students.berufskolleg-borken.de</email>
+    <ZusatzInfo>
+    </ZusatzInfo>
+    <Bemerkung>
+    </Bemerkung>
+  </Leser>
+  <Leser>
+    <LGruppe>FFM25B</LGruppe>
     <Geburtsdatum>24.03.2009</Geburtsdatum>
     <Titel>
     </Titel>
@@ -14107,7 +14173,7 @@
     </Titel>
     <Nachname>Bettermann</Nachname>
     <Vorname>Fiona-Maria</Vorname>
-    <Strasse>Eichendorffweg  12</Strasse>
+    <Strasse>Eichendorffweg 12</Strasse>
     <PLZ>48734</PLZ>
     <Ort>Reken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -14128,7 +14194,7 @@
     </Titel>
     <Nachname>El Harrouck</Nachname>
     <Vorname>Malaak</Vorname>
-    <Strasse>Lohweg 2a</Strasse>
+    <Strasse>Lohweg 2</Strasse>
     <PLZ>48683</PLZ>
     <Ort>Ahaus</Ort>
     <Geschlecht>W</Geschlecht>
@@ -14170,7 +14236,7 @@
     </Titel>
     <Nachname>Evers</Nachname>
     <Vorname>Maya</Vorname>
-    <Strasse>Fedor-Sommer-Straße 15 a</Strasse>
+    <Strasse>Fedor-Sommer-Straße 15</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -14212,7 +14278,7 @@
     </Titel>
     <Nachname>Fungk</Nachname>
     <Vorname>Angelina</Vorname>
-    <Strasse>Josef-Haydn-Str.24</Strasse>
+    <Strasse>Josef-Haydn-Str. 24</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -14233,7 +14299,7 @@
     </Titel>
     <Nachname>Grimmert</Nachname>
     <Vorname>Mika</Vorname>
-    <Strasse>Brockmühlenweg  11</Strasse>
+    <Strasse>Brockmühlenweg 11</Strasse>
     <PLZ>48734</PLZ>
     <Ort>Reken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -14275,7 +14341,7 @@
     </Titel>
     <Nachname>Hollenborg</Nachname>
     <Vorname>Lotta</Vorname>
-    <Strasse>Knüverdarp 14 a</Strasse>
+    <Strasse>Knüverdarp 14</Strasse>
     <PLZ>46342</PLZ>
     <Ort>Velen</Ort>
     <Geschlecht>W</Geschlecht>
@@ -14338,7 +14404,7 @@
     </Titel>
     <Nachname>Kruse</Nachname>
     <Vorname>Bruno</Vorname>
-    <Strasse>Papenkamp14</Strasse>
+    <Strasse>Papenkamp 14</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -14380,7 +14446,7 @@
     </Titel>
     <Nachname>Mark</Nachname>
     <Vorname>Chiara Lea</Vorname>
-    <Strasse>Dorstener Straße 16c</Strasse>
+    <Strasse>Dorstener Straße 16</Strasse>
     <PLZ>46348</PLZ>
     <Ort>Raesfeld</Ort>
     <Geschlecht>W</Geschlecht>
@@ -14401,7 +14467,7 @@
     </Titel>
     <Nachname>Mitulla</Nachname>
     <Vorname>Annika</Vorname>
-    <Strasse>Weseler Landstr. 133D</Strasse>
+    <Strasse>Weseler Landstr. 133</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -14568,7 +14634,7 @@
     </Titel>
     <Nachname>van Rensen</Nachname>
     <Vorname>Rachel</Vorname>
-    <Strasse>Eichendorffstraße 3a</Strasse>
+    <Strasse>Eichendorffstraße 3</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -14610,7 +14676,7 @@
     </Titel>
     <Nachname>Borke</Nachname>
     <Vorname>Gabriel</Vorname>
-    <Strasse>Ritterstr. 7a</Strasse>
+    <Strasse>Ritterstr. 7</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -14672,7 +14738,7 @@
     </Titel>
     <Nachname>Jalal</Nachname>
     <Vorname>Aelin</Vorname>
-    <Strasse>Nina-Winkel-Str. 57 a</Strasse>
+    <Strasse>Nina-Winkel-Str. 57</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -14735,7 +14801,7 @@
     </Titel>
     <Nachname>Kremer</Nachname>
     <Vorname>Ida</Vorname>
-    <Strasse>Letterhaussstr. 22c</Strasse>
+    <Strasse>Letterhaussstr. 22</Strasse>
     <PLZ>46342</PLZ>
     <Ort>Velen</Ort>
     <Geschlecht>W</Geschlecht>
@@ -14860,7 +14926,7 @@
     </Titel>
     <Nachname>Ostgathe</Nachname>
     <Vorname>Pauline</Vorname>
-    <Strasse>Buchenstr. 41a</Strasse>
+    <Strasse>Buchenstr. 41</Strasse>
     <PLZ>46359</PLZ>
     <Ort>Heiden</Ort>
     <Geschlecht>W</Geschlecht>
@@ -14881,7 +14947,7 @@
     </Titel>
     <Nachname>Schwarz</Nachname>
     <Vorname>Finja</Vorname>
-    <Strasse>Ant Kruse Bömken 15b</Strasse>
+    <Strasse>Ant Kruse Bömken 15</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -14901,7 +14967,7 @@
     </Titel>
     <Nachname>Wöhrmann</Nachname>
     <Vorname>Mary</Vorname>
-    <Strasse>Dorstener Straße 30c</Strasse>
+    <Strasse>Dorstener Straße 30</Strasse>
     <PLZ>46348</PLZ>
     <Ort>Raesfeld</Ort>
     <Geschlecht>W</Geschlecht>
@@ -15006,7 +15072,7 @@
     </Titel>
     <Nachname>Evers</Nachname>
     <Vorname>Noelle</Vorname>
-    <Strasse>Nausdorfer Weg 2a</Strasse>
+    <Strasse>Nausdorfer Weg 2</Strasse>
     <PLZ>48734</PLZ>
     <Ort>Reken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -15173,7 +15239,7 @@
     </Titel>
     <Nachname>Poersch</Nachname>
     <Vorname>Amelie</Vorname>
-    <Strasse>Immanuel-Kant-Straße 5b</Strasse>
+    <Strasse>Immanuel-Kant-Straße 5</Strasse>
     <PLZ>46359</PLZ>
     <Ort>Heiden</Ort>
     <Geschlecht>W</Geschlecht>
@@ -15319,7 +15385,7 @@
     </Titel>
     <Nachname>Zawadzki</Nachname>
     <Vorname>Maja</Vorname>
-    <Strasse>Letterhausstr. 22a</Strasse>
+    <Strasse>Letterhausstr. 22</Strasse>
     <PLZ>46342</PLZ>
     <Ort>Velen</Ort>
     <Geschlecht>W</Geschlecht>
@@ -15361,7 +15427,7 @@
     </Titel>
     <Nachname>Bischop</Nachname>
     <Vorname>Ella</Vorname>
-    <Strasse>Amselweg 14b</Strasse>
+    <Strasse>Amselweg 14</Strasse>
     <PLZ>46359</PLZ>
     <Ort>Heiden</Ort>
     <Geschlecht>W</Geschlecht>
@@ -15403,7 +15469,7 @@
     </Titel>
     <Nachname>Dawara</Nachname>
     <Vorname>Lara</Vorname>
-    <Strasse>An der Seilerei 32A</Strasse>
+    <Strasse>An der Seilerei 32</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -15506,7 +15572,7 @@
     </Titel>
     <Nachname>Rademacher</Nachname>
     <Vorname>Eva</Vorname>
-    <Strasse>Florianweg 2b</Strasse>
+    <Strasse>Florianweg 2</Strasse>
     <PLZ>46359</PLZ>
     <Ort>Heiden</Ort>
     <Geschlecht>W</Geschlecht>
@@ -15590,7 +15656,7 @@
     </Titel>
     <Nachname>Wachtmeister</Nachname>
     <Vorname>Charlotte Maria</Vorname>
-    <Strasse>Pohlhoff 40a</Strasse>
+    <Strasse>Pohlhoff 40</Strasse>
     <PLZ>46348</PLZ>
     <Ort>Raesfeld</Ort>
     <Geschlecht>W</Geschlecht>
@@ -15794,7 +15860,7 @@
     </Titel>
     <Nachname>Hassan Harb</Nachname>
     <Vorname>Iman Rim</Vorname>
-    <Strasse>Dorstener Str.  1</Strasse>
+    <Strasse>Dorstener Str. 1</Strasse>
     <PLZ>48734</PLZ>
     <Ort>Reken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -15857,7 +15923,7 @@
     </Titel>
     <Nachname>Schierenberg-Niehues</Nachname>
     <Vorname>Hannah Elena</Vorname>
-    <Strasse>Gerh.-Hauptmann-Str. 21a</Strasse>
+    <Strasse>Gerh.-Hauptmann-Str. 21</Strasse>
     <PLZ>46359</PLZ>
     <Ort>Heiden</Ort>
     <Geschlecht>W</Geschlecht>
@@ -15939,7 +16005,7 @@
     </Titel>
     <Nachname>Bietenbeck</Nachname>
     <Vorname>Johanna</Vorname>
-    <Strasse>Novalisstr. 5a</Strasse>
+    <Strasse>Novalisstr. 5</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -16393,7 +16459,7 @@
     </Titel>
     <Nachname>Borelbach</Nachname>
     <Vorname>Robin Noah</Vorname>
-    <Strasse>Schleiermacherstr. 3a</Strasse>
+    <Strasse>Schleiermacherstr. 3</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -16456,7 +16522,7 @@
     </Titel>
     <Nachname>Lohmann</Nachname>
     <Vorname>Linus Nicolaus</Vorname>
-    <Strasse>Ritterstraße 2c</Strasse>
+    <Strasse>Ritterstraße 2</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -16477,7 +16543,7 @@
     </Titel>
     <Nachname>Schäfer</Nachname>
     <Vorname>Keanu</Vorname>
-    <Strasse>Bonhoefferring 22a</Strasse>
+    <Strasse>Bonhoefferring 22</Strasse>
     <PLZ>48734</PLZ>
     <Ort>Reken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -16561,7 +16627,7 @@
     </Titel>
     <Nachname>Vollmer</Nachname>
     <Vorname>Henry William Douglas</Vorname>
-    <Strasse>Gildenstr. 71a</Strasse>
+    <Strasse>Gildenstr. 71</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -16728,7 +16794,7 @@
     </Titel>
     <Nachname>Warmers</Nachname>
     <Vorname>Mika Jan</Vorname>
-    <Strasse>Südstraße 65a</Strasse>
+    <Strasse>Südstraße 65</Strasse>
     <PLZ>46414</PLZ>
     <Ort>Rhede</Ort>
     <Geschlecht>M</Geschlecht>
@@ -16833,7 +16899,7 @@
     </Titel>
     <Nachname>Beckmann</Nachname>
     <Vorname>Ole</Vorname>
-    <Strasse>Birkenweg 13a</Strasse>
+    <Strasse>Birkenweg 13</Strasse>
     <PLZ>46414</PLZ>
     <Ort>Rhede</Ort>
     <Geschlecht>M</Geschlecht>
@@ -16854,7 +16920,7 @@
     </Titel>
     <Nachname>Büscher</Nachname>
     <Vorname>Tim</Vorname>
-    <Strasse>Lönsstr. 1a</Strasse>
+    <Strasse>Lönsstr. 1</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -17082,7 +17148,7 @@
     </Titel>
     <Nachname>Beckmann</Nachname>
     <Vorname>Melina</Vorname>
-    <Strasse>Eschweg 2A</Strasse>
+    <Strasse>Eschweg 2</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -17247,7 +17313,7 @@
     </Titel>
     <Nachname>Niazi</Nachname>
     <Vorname>Loureen Sophia</Vorname>
-    <Strasse>Lembecker Str. 157 a</Strasse>
+    <Strasse>Lembecker Str. 157</Strasse>
     <PLZ>46286</PLZ>
     <Ort>Dorsten</Ort>
     <Geschlecht>W</Geschlecht>
@@ -17268,7 +17334,7 @@
     </Titel>
     <Nachname>Pondes</Nachname>
     <Vorname>David</Vorname>
-    <Strasse>Raabestraße 22A</Strasse>
+    <Strasse>Raabestraße 22</Strasse>
     <PLZ>46354</PLZ>
     <Ort>Südlohn</Ort>
     <Geschlecht>M</Geschlecht>
@@ -17393,7 +17459,7 @@
     </Titel>
     <Nachname>Bondar</Nachname>
     <Vorname>Marieluise</Vorname>
-    <Strasse>Robert-Koch-Str. 12 a</Strasse>
+    <Strasse>Robert-Koch-Str. 12</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -17787,7 +17853,7 @@
     </Titel>
     <Nachname>Vierlinger</Nachname>
     <Vorname>Benedikt</Vorname>
-    <Strasse>Wittenfeld 4a</Strasse>
+    <Strasse>Wittenfeld 4</Strasse>
     <PLZ>48653</PLZ>
     <Ort>Coesfeld</Ort>
     <Geschlecht>M</Geschlecht>
@@ -17850,7 +17916,7 @@
     </Titel>
     <Nachname>Bußkamp</Nachname>
     <Vorname>Maya</Vorname>
-    <Strasse>Bösweg 29a</Strasse>
+    <Strasse>Bösweg 29</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -17973,7 +18039,7 @@
     </Titel>
     <Nachname>Kieper</Nachname>
     <Vorname>Milla</Vorname>
-    <Strasse>Pfarrer - Trockel - Pättcken 22</Strasse>
+    <Strasse>Pfarrer-Trockel-Pättcken 22</Strasse>
     <PLZ>46348</PLZ>
     <Ort>Raesfeld</Ort>
     <Geschlecht>W</Geschlecht>
@@ -18036,7 +18102,7 @@
     </Titel>
     <Nachname>Minckwitz</Nachname>
     <Vorname>Louis Julien</Vorname>
-    <Strasse>Karl-Legien- Weg 1</Strasse>
+    <Strasse>Karl-Legien-Weg 1</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -18118,7 +18184,7 @@
     </Titel>
     <Nachname>Picklum</Nachname>
     <Vorname>Neele</Vorname>
-    <Strasse>Bischof-Ketteler-Str. 7a</Strasse>
+    <Strasse>Bischof-Ketteler-Str. 7</Strasse>
     <PLZ>46359</PLZ>
     <Ort>Heiden</Ort>
     <Geschlecht>W</Geschlecht>
@@ -18180,7 +18246,7 @@
     </Titel>
     <Nachname>Schepers</Nachname>
     <Vorname>Laura</Vorname>
-    <Strasse>Ritterstraße 10A</Strasse>
+    <Strasse>Ritterstraße 10</Strasse>
     <PLZ>46348</PLZ>
     <Ort>Raesfeld</Ort>
     <Geschlecht>W</Geschlecht>
@@ -18282,7 +18348,7 @@
     </Titel>
     <Nachname>Böhmert</Nachname>
     <Vorname>Franziska Ida</Vorname>
-    <Strasse>Auf Der Brey 50a</Strasse>
+    <Strasse>Auf Der Brey 50</Strasse>
     <PLZ>46286</PLZ>
     <Ort>Dorsten</Ort>
     <Geschlecht>W</Geschlecht>
@@ -18511,7 +18577,7 @@
     </Titel>
     <Nachname>Schlegel</Nachname>
     <Vorname>Aaron</Vorname>
-    <Strasse>Siegenweg 52 a</Strasse>
+    <Strasse>Siegenweg 52</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -18782,7 +18848,7 @@
     </Titel>
     <Nachname>Haupt</Nachname>
     <Vorname>Niklas</Vorname>
-    <Strasse>Birkhuhnweg  5</Strasse>
+    <Strasse>Birkhuhnweg 5</Strasse>
     <PLZ>48734</PLZ>
     <Ort>Reken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -18803,7 +18869,7 @@
     </Titel>
     <Nachname>Hoppe</Nachname>
     <Vorname>Tristan Tim</Vorname>
-    <Strasse>Dorkamp 11a</Strasse>
+    <Strasse>Dorkamp 11</Strasse>
     <PLZ>48734</PLZ>
     <Ort>Reken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -19012,7 +19078,7 @@
     </Titel>
     <Nachname>Brömmel</Nachname>
     <Vorname>Max</Vorname>
-    <Strasse>Brinkstr. 30 a</Strasse>
+    <Strasse>Brinkstr. 30</Strasse>
     <PLZ>46348</PLZ>
     <Ort>Raesfeld</Ort>
     <Geschlecht>M</Geschlecht>
@@ -19115,7 +19181,7 @@
     </Titel>
     <Nachname>Germ</Nachname>
     <Vorname>Tabea</Vorname>
-    <Strasse>Velener Straße 28a</Strasse>
+    <Strasse>Velener Straße 28</Strasse>
     <PLZ>46342</PLZ>
     <Ort>Velen</Ort>
     <Geschlecht>W</Geschlecht>
@@ -19238,7 +19304,7 @@
     </Titel>
     <Nachname>Matsutaka</Nachname>
     <Vorname>Karin</Vorname>
-    <Strasse>Von-Ketteler-Str. 22a</Strasse>
+    <Strasse>Von-Ketteler-Str. 22</Strasse>
     <PLZ>48734</PLZ>
     <Ort>Reken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -19259,7 +19325,7 @@
     </Titel>
     <Nachname>Nikella</Nachname>
     <Vorname>Tim</Vorname>
-    <Strasse>Lembecker Str. 166 b</Strasse>
+    <Strasse>Lembecker Str. 166</Strasse>
     <PLZ>46286</PLZ>
     <Ort>Dorsten</Ort>
     <Geschlecht>M</Geschlecht>
@@ -19279,7 +19345,7 @@
     </Titel>
     <Nachname>Olthoff</Nachname>
     <Vorname>Julius</Vorname>
-    <Strasse>Kotten Büsken 44a</Strasse>
+    <Strasse>Kotten Büsken 44</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -19444,7 +19510,7 @@
     </Titel>
     <Nachname>Baumbach</Nachname>
     <Vorname>Kristina</Vorname>
-    <Strasse>Taubengasse2</Strasse>
+    <Strasse>Taubengasse 2</Strasse>
     <PLZ>48712</PLZ>
     <Ort>Gescher</Ort>
     <Geschlecht>W</Geschlecht>
@@ -19633,7 +19699,7 @@
     </Titel>
     <Nachname>Kolbe</Nachname>
     <Vorname>Yasmin Georgia</Vorname>
-    <Strasse>Asternweg 27a</Strasse>
+    <Strasse>Asternweg 27</Strasse>
     <PLZ>48683</PLZ>
     <Ort>Ahaus</Ort>
     <Geschlecht>W</Geschlecht>
@@ -19696,7 +19762,7 @@
     </Titel>
     <Nachname>Noor Ul Aman</Nachname>
     <Vorname>Noor Ul Aman</Vorname>
-    <Strasse>Kreuzweg 2a</Strasse>
+    <Strasse>Kreuzweg 2</Strasse>
     <PLZ>46359</PLZ>
     <Ort>Heiden</Ort>
     <Geschlecht>W</Geschlecht>
@@ -19758,7 +19824,7 @@
     </Titel>
     <Nachname>Schwartke</Nachname>
     <Vorname>Hannah</Vorname>
-    <Strasse>Kurt-Tietze-Straße 8c</Strasse>
+    <Strasse>Kurt-Tietze-Straße 8</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -19779,7 +19845,7 @@
     </Titel>
     <Nachname>Sperlbaum</Nachname>
     <Vorname>Noah</Vorname>
-    <Strasse>Im Lücking 10b</Strasse>
+    <Strasse>Im Lücking 10</Strasse>
     <PLZ>46359</PLZ>
     <Ort>Heiden</Ort>
     <Geschlecht>M</Geschlecht>
@@ -19989,7 +20055,7 @@
     </Titel>
     <Nachname>Jalal</Nachname>
     <Vorname>Lisee</Vorname>
-    <Strasse>Nina-Winkel-Str. 57a</Strasse>
+    <Strasse>Nina-Winkel-Str. 57</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -20157,7 +20223,7 @@
     </Titel>
     <Nachname>Trzcinski</Nachname>
     <Vorname>Mia</Vorname>
-    <Strasse>Eichendorffweg  43</Strasse>
+    <Strasse>Eichendorffweg 43</Strasse>
     <PLZ>48734</PLZ>
     <Ort>Reken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -20282,7 +20348,7 @@
     </Titel>
     <Nachname>Ehnes</Nachname>
     <Vorname>Cecile</Vorname>
-    <Strasse>Josefstr. 17a</Strasse>
+    <Strasse>Josefstr. 17</Strasse>
     <PLZ>46359</PLZ>
     <Ort>Heiden</Ort>
     <Geschlecht>W</Geschlecht>
@@ -20404,7 +20470,7 @@
     </Titel>
     <Nachname>Jackowski</Nachname>
     <Vorname>Fiona</Vorname>
-    <Strasse>Ramsdorfer Str. 70c</Strasse>
+    <Strasse>Ramsdorfer Str. 70</Strasse>
     <PLZ>46359</PLZ>
     <Ort>Heiden</Ort>
     <Geschlecht>W</Geschlecht>
@@ -20467,7 +20533,7 @@
     </Titel>
     <Nachname>Radosavljevic</Nachname>
     <Vorname>Andrija</Vorname>
-    <Strasse>An Der Nathe 18b</Strasse>
+    <Strasse>An Der Nathe 18</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -20714,7 +20780,7 @@
     </Titel>
     <Nachname>Haberscheidt</Nachname>
     <Vorname>Luca-Pascal</Vorname>
-    <Strasse>Dorstenerstraße 44A</Strasse>
+    <Strasse>Dorstenerstraße 44</Strasse>
     <PLZ>46348</PLZ>
     <Ort>Raesfeld</Ort>
     <Geschlecht>M</Geschlecht>
@@ -20860,7 +20926,7 @@
     </Titel>
     <Nachname>Langenbrink</Nachname>
     <Vorname>Juan</Vorname>
-    <Strasse>Hohes Land 28 B</Strasse>
+    <Strasse>Hohes Land 28</Strasse>
     <PLZ>46414</PLZ>
     <Ort>Rhede</Ort>
     <Geschlecht>M</Geschlecht>
@@ -20964,7 +21030,7 @@
     </Titel>
     <Nachname>Rachid</Nachname>
     <Vorname>Amina</Vorname>
-    <Strasse>Hauptstr.  33</Strasse>
+    <Strasse>Hauptstr. 33</Strasse>
     <PLZ>48734</PLZ>
     <Ort>Reken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -21130,7 +21196,7 @@
     </Titel>
     <Nachname>Dürr</Nachname>
     <Vorname>Elias</Vorname>
-    <Strasse>Vennstraße 4b</Strasse>
+    <Strasse>Vennstraße 4</Strasse>
     <PLZ>46354</PLZ>
     <Ort>Südlohn</Ort>
     <Geschlecht>M</Geschlecht>
@@ -21151,7 +21217,7 @@
     </Titel>
     <Nachname>El-Mahmoud</Nachname>
     <Vorname>Judi</Vorname>
-    <Strasse>Händelstraße 24a</Strasse>
+    <Strasse>Händelstraße 24</Strasse>
     <PLZ>48734</PLZ>
     <Ort>Reken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -21171,8 +21237,7 @@
     </Titel>
     <Nachname>Klimkiewicz</Nachname>
     <Vorname>Zofia</Vorname>
-    <Strasse>
-    </Strasse>
+    <Strasse> </Strasse>
     <PLZ>
     </PLZ>
     <Ort>
@@ -21860,7 +21925,7 @@
     </Titel>
     <Nachname>Chorowsky</Nachname>
     <Vorname>Georg</Vorname>
-    <Strasse>Dorstener Str. 16b</Strasse>
+    <Strasse>Dorstener Str. 16</Strasse>
     <PLZ>46348</PLZ>
     <Ort>Raesfeld</Ort>
     <Geschlecht>M</Geschlecht>
@@ -22039,26 +22104,6 @@
   </Leser>
   <Leser>
     <LGruppe>HT24A</LGruppe>
-    <Geburtsdatum>26.04.2006</Geburtsdatum>
-    <Titel>
-    </Titel>
-    <Nachname>Röttgers</Nachname>
-    <Vorname>Luca</Vorname>
-    <Strasse>Händelstraße 1</Strasse>
-    <PLZ>48734</PLZ>
-    <Ort>Reken</Ort>
-    <Geschlecht>M</Geschlecht>
-    <Anmeldedatum>21.08.2024</Anmeldedatum>
-    <Telefon>02864 6784</Telefon>
-    <Mobiltelefon>0178 2133728</Mobiltelefon>
-    <email>rl155441@students.berufskolleg-borken.de</email>
-    <ZusatzInfo>
-    </ZusatzInfo>
-    <Bemerkung>
-    </Bemerkung>
-  </Leser>
-  <Leser>
-    <LGruppe>HT24A</LGruppe>
     <Geburtsdatum>15.08.2006</Geburtsdatum>
     <Titel>
     </Titel>
@@ -22085,7 +22130,7 @@
     </Titel>
     <Nachname>Steinberg</Nachname>
     <Vorname>Maja</Vorname>
-    <Strasse>Fookeskamp 6 b</Strasse>
+    <Strasse>Fookeskamp 6</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -22105,7 +22150,7 @@
     </Titel>
     <Nachname>Wilting</Nachname>
     <Vorname>Milena</Vorname>
-    <Strasse>Spolerstraße 12a</Strasse>
+    <Strasse>Spolerstraße 12</Strasse>
     <PLZ>46414</PLZ>
     <Ort>Rhede</Ort>
     <Geschlecht>W</Geschlecht>
@@ -22188,7 +22233,7 @@
     </Titel>
     <Nachname>Feuchthofen</Nachname>
     <Vorname>Celine</Vorname>
-    <Strasse>Letterhausstraße 22c</Strasse>
+    <Strasse>Letterhausstraße 22</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -22250,7 +22295,7 @@
     </Titel>
     <Nachname>Heimann</Nachname>
     <Vorname>Raphael</Vorname>
-    <Strasse>Steinstraße  32</Strasse>
+    <Strasse>Steinstraße 32</Strasse>
     <PLZ>48734</PLZ>
     <Ort>Reken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -22434,7 +22479,7 @@
     </Titel>
     <Nachname>Osterholt</Nachname>
     <Vorname>Ben</Vorname>
-    <Strasse>Rekener Straße 8a</Strasse>
+    <Strasse>Rekener Straße 8</Strasse>
     <PLZ>46286</PLZ>
     <Ort>Dorsten</Ort>
     <Geschlecht>M</Geschlecht>
@@ -22517,7 +22562,7 @@
     </Titel>
     <Nachname>Flanz</Nachname>
     <Vorname>Maximilian</Vorname>
-    <Strasse>Kalmanweg 5A</Strasse>
+    <Strasse>Kalmanweg 5</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -22538,7 +22583,7 @@
     </Titel>
     <Nachname>Hartmann</Nachname>
     <Vorname>Marlon</Vorname>
-    <Strasse>Am Elschatt 57a</Strasse>
+    <Strasse>Am Elschatt 57</Strasse>
     <PLZ>46359</PLZ>
     <Ort>Heiden</Ort>
     <Geschlecht>M</Geschlecht>
@@ -22831,7 +22876,7 @@
     </Titel>
     <Nachname>Zalikha</Nachname>
     <Vorname>Bader</Vorname>
-    <Strasse>Alter Kirchplatz 10a</Strasse>
+    <Strasse>Alter Kirchplatz 10</Strasse>
     <PLZ>46359</PLZ>
     <Ort>Heiden</Ort>
     <Geschlecht>M</Geschlecht>
@@ -22873,7 +22918,7 @@
     </Titel>
     <Nachname>Brockmeier</Nachname>
     <Vorname>Arne</Vorname>
-    <Strasse>Stegge 13a</Strasse>
+    <Strasse>Stegge 13</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -22996,7 +23041,7 @@
     </Titel>
     <Nachname>Hoffjann</Nachname>
     <Vorname>Johann</Vorname>
-    <Strasse>Nordstraße 8a</Strasse>
+    <Strasse>Nordstraße 8</Strasse>
     <PLZ>46348</PLZ>
     <Ort>Raesfeld</Ort>
     <Geschlecht>M</Geschlecht>
@@ -23037,7 +23082,7 @@
     </Titel>
     <Nachname>Kutzner</Nachname>
     <Vorname>Jens</Vorname>
-    <Strasse>Garbenweg 19 a</Strasse>
+    <Strasse>Garbenweg 19</Strasse>
     <PLZ>46348</PLZ>
     <Ort>Raesfeld</Ort>
     <Geschlecht>M</Geschlecht>
@@ -23140,7 +23185,7 @@
     </Titel>
     <Nachname>Wietholt</Nachname>
     <Vorname>Finn</Vorname>
-    <Strasse>Speckinger Weg 136B</Strasse>
+    <Strasse>Speckinger Weg 136</Strasse>
     <PLZ>46286</PLZ>
     <Ort>Dorsten</Ort>
     <Geschlecht>M</Geschlecht>
@@ -23394,7 +23439,7 @@
     </Titel>
     <Nachname>Mohamed</Nachname>
     <Vorname>Mulki JIbril</Vorname>
-    <Strasse>Neue Mitte 10A</Strasse>
+    <Strasse>Neue Mitte 10</Strasse>
     <PLZ>48734</PLZ>
     <Ort>Reken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -23668,7 +23713,7 @@
     </Titel>
     <Nachname>Niknam</Nachname>
     <Vorname>Ahmad</Vorname>
-    <Strasse>Burloer Straße 53A</Strasse>
+    <Strasse>Burloer Straße 53</Strasse>
     <PLZ>46414</PLZ>
     <Ort>Rhede</Ort>
     <Geschlecht>M</Geschlecht>
@@ -23731,7 +23776,7 @@
     </Titel>
     <Nachname>Voropai</Nachname>
     <Vorname>Herman</Vorname>
-    <Strasse>Melchenberg 4a</Strasse>
+    <Strasse>Melchenberg 4</Strasse>
     <PLZ>48734</PLZ>
     <Ort>Reken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -23897,7 +23942,7 @@
     </Titel>
     <Nachname>Bischop</Nachname>
     <Vorname>Phil</Vorname>
-    <Strasse>Amselstraße 14b</Strasse>
+    <Strasse>Amselstraße 14</Strasse>
     <PLZ>46359</PLZ>
     <Ort>Heiden</Ort>
     <Geschlecht>M</Geschlecht>
@@ -23918,7 +23963,7 @@
     </Titel>
     <Nachname>Brun</Nachname>
     <Vorname>Alex</Vorname>
-    <Strasse>Alter Sportplatz 18b</Strasse>
+    <Strasse>Alter Sportplatz 18</Strasse>
     <PLZ>46359</PLZ>
     <Ort>Heiden</Ort>
     <Geschlecht>M</Geschlecht>
@@ -24290,7 +24335,7 @@
     </Titel>
     <Nachname>Steiger</Nachname>
     <Vorname>Yannik</Vorname>
-    <Strasse>Dülmener Weg 60 a</Strasse>
+    <Strasse>Dülmener Weg 60</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -24498,7 +24543,7 @@
     </Titel>
     <Nachname>Hellenkamp</Nachname>
     <Vorname>Marvin</Vorname>
-    <Strasse>Holzplatz  16</Strasse>
+    <Strasse>Holzplatz 16</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -24539,7 +24584,7 @@
     </Titel>
     <Nachname>Laacks</Nachname>
     <Vorname>Arne</Vorname>
-    <Strasse>Deutener Weg  60</Strasse>
+    <Strasse>Deutener Weg 60</Strasse>
     <PLZ>46286</PLZ>
     <Ort>Dorsten</Ort>
     <Geschlecht>M</Geschlecht>
@@ -24560,7 +24605,7 @@
     </Titel>
     <Nachname>Ladenberger</Nachname>
     <Vorname>Fynn</Vorname>
-    <Strasse>Nünningsweg 13a</Strasse>
+    <Strasse>Nünningsweg 13</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -25059,7 +25104,7 @@
     </Titel>
     <Nachname>Stenkamp</Nachname>
     <Vorname>Hannes</Vorname>
-    <Strasse>Feldstiege 13 a</Strasse>
+    <Strasse>Feldstiege 13</Strasse>
     <PLZ>46348</PLZ>
     <Ort>Raesfeld</Ort>
     <Geschlecht>M</Geschlecht>
@@ -25309,7 +25354,7 @@
     </Titel>
     <Nachname>Kötting</Nachname>
     <Vorname>Jan</Vorname>
-    <Strasse>Bahnhofstr. 49a</Strasse>
+    <Strasse>Bahnhofstr. 49</Strasse>
     <PLZ>46286</PLZ>
     <Ort>Dorsten</Ort>
     <Geschlecht>M</Geschlecht>
@@ -25329,7 +25374,7 @@
     </Titel>
     <Nachname>Künzel</Nachname>
     <Vorname>Elias René</Vorname>
-    <Strasse>Leuskesweg 121a</Strasse>
+    <Strasse>Leuskesweg 121</Strasse>
     <PLZ>48619</PLZ>
     <Ort>Heek</Ort>
     <Geschlecht>M</Geschlecht>
@@ -25371,7 +25416,7 @@
     </Titel>
     <Nachname>Vennekötter</Nachname>
     <Vorname>Finn</Vorname>
-    <Strasse>Brink 41a</Strasse>
+    <Strasse>Brink 41</Strasse>
     <PLZ>48683</PLZ>
     <Ort>Ahaus</Ort>
     <Geschlecht>M</Geschlecht>
@@ -25434,7 +25479,7 @@
     </Titel>
     <Nachname>Vogt</Nachname>
     <Vorname>Arijen Ruben</Vorname>
-    <Strasse>Fröbelring 27a</Strasse>
+    <Strasse>Fröbelring 27</Strasse>
     <PLZ>48703</PLZ>
     <Ort>Stadtlohn</Ort>
     <Geschlecht>M</Geschlecht>
@@ -25476,7 +25521,7 @@
     </Titel>
     <Nachname>Brüninghoff</Nachname>
     <Vorname>Fynn José</Vorname>
-    <Strasse>Bernhard-Letterhaus-Straße  7b</Strasse>
+    <Strasse>Bernhard-Letterhaus-Straße 7</Strasse>
     <PLZ>46359</PLZ>
     <Ort>Heiden</Ort>
     <Geschlecht>M</Geschlecht>
@@ -25560,7 +25605,7 @@
     </Titel>
     <Nachname>Droste</Nachname>
     <Vorname>Lukas</Vorname>
-    <Strasse>Forstweg 12 a</Strasse>
+    <Strasse>Forstweg 12</Strasse>
     <PLZ>46286</PLZ>
     <Ort>Dorsten</Ort>
     <Geschlecht>M</Geschlecht>
@@ -25581,7 +25626,7 @@
     </Titel>
     <Nachname>Eggink</Nachname>
     <Vorname>Lukas</Vorname>
-    <Strasse>Look 19a</Strasse>
+    <Strasse>Look 19</Strasse>
     <PLZ>46354</PLZ>
     <Ort>Südlohn</Ort>
     <Geschlecht>M</Geschlecht>
@@ -25602,7 +25647,7 @@
     </Titel>
     <Nachname>Gerling</Nachname>
     <Vorname>Sebastian</Vorname>
-    <Strasse>Engelkamp 4a</Strasse>
+    <Strasse>Engelkamp 4</Strasse>
     <PLZ>48683</PLZ>
     <Ort>Ahaus</Ort>
     <Geschlecht>M</Geschlecht>
@@ -25706,7 +25751,7 @@
     </Titel>
     <Nachname>Leers</Nachname>
     <Vorname>Tom Volker</Vorname>
-    <Strasse>Kreidestraße 7b</Strasse>
+    <Strasse>Kreidestraße 7</Strasse>
     <PLZ>48683</PLZ>
     <Ort>Ahaus</Ort>
     <Geschlecht>M</Geschlecht>
@@ -25975,7 +26020,7 @@
     </Titel>
     <Nachname>van der Heusen</Nachname>
     <Vorname>Jan</Vorname>
-    <Strasse>Im Schlatt 15b</Strasse>
+    <Strasse>Im Schlatt 15</Strasse>
     <PLZ>48683</PLZ>
     <Ort>Ahaus</Ort>
     <Geschlecht>M</Geschlecht>
@@ -26059,7 +26104,7 @@
     </Titel>
     <Nachname>Epping</Nachname>
     <Vorname>Tim</Vorname>
-    <Strasse>Schillerstr.  21a</Strasse>
+    <Strasse>Schillerstr. 21</Strasse>
     <PLZ>48734</PLZ>
     <Ort>Reken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -26141,7 +26186,7 @@
     </Titel>
     <Nachname>Hissawi</Nachname>
     <Vorname>Ali</Vorname>
-    <Strasse>Im Großen Esch 16a</Strasse>
+    <Strasse>Im Großen Esch 16</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -26267,7 +26312,7 @@
     </Titel>
     <Nachname>Sachse</Nachname>
     <Vorname>Leon Florian</Vorname>
-    <Strasse>Im Lücking 10A</Strasse>
+    <Strasse>Im Lücking 10</Strasse>
     <PLZ>46359</PLZ>
     <Ort>Heiden</Ort>
     <Geschlecht>M</Geschlecht>
@@ -26434,7 +26479,7 @@
     </Titel>
     <Nachname>Dettloff</Nachname>
     <Vorname>Lars</Vorname>
-    <Strasse>Eschstraße 49c</Strasse>
+    <Strasse>Eschstraße 49</Strasse>
     <PLZ>48703</PLZ>
     <Ort>Stadtlohn</Ort>
     <Geschlecht>M</Geschlecht>
@@ -26537,7 +26582,7 @@
     </Titel>
     <Nachname>Kasparek</Nachname>
     <Vorname>Nikolas</Vorname>
-    <Strasse>Hasenwinkel 3C</Strasse>
+    <Strasse>Hasenwinkel 3</Strasse>
     <PLZ>46414</PLZ>
     <Ort>Rhede</Ort>
     <Geschlecht>M</Geschlecht>
@@ -26683,7 +26728,7 @@
     </Titel>
     <Nachname>Reimann</Nachname>
     <Vorname>Thomas</Vorname>
-    <Strasse>Boklerhook 8a</Strasse>
+    <Strasse>Boklerhook 8</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -27096,7 +27141,7 @@
     </Titel>
     <Nachname>El Mahmoud</Nachname>
     <Vorname>Mohamed</Vorname>
-    <Strasse>Händelstraße  24a</Strasse>
+    <Strasse>Händelstraße 24</Strasse>
     <PLZ>48734</PLZ>
     <Ort>Reken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -27157,7 +27202,7 @@
     </Titel>
     <Nachname>Jacobs</Nachname>
     <Vorname>Felix</Vorname>
-    <Strasse>Am Krusenhof 11a</Strasse>
+    <Strasse>Am Krusenhof 11</Strasse>
     <PLZ>46286</PLZ>
     <Ort>Dorsten</Ort>
     <Geschlecht>M</Geschlecht>
@@ -27466,7 +27511,7 @@
     </Titel>
     <Nachname>Schulte</Nachname>
     <Vorname>Leon Ben</Vorname>
-    <Strasse>Königsweg 23 B</Strasse>
+    <Strasse>Königsweg 23</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -27590,7 +27635,7 @@
     </Titel>
     <Nachname>Winzen</Nachname>
     <Vorname>Lennard</Vorname>
-    <Strasse>Holtendorf  2</Strasse>
+    <Strasse>Holtendorf 2</Strasse>
     <PLZ>48734</PLZ>
     <Ort>Reken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -27734,7 +27779,7 @@
     </Titel>
     <Nachname>Alahmad</Nachname>
     <Vorname>Mohammad</Vorname>
-    <Strasse>Franzstraße 1b</Strasse>
+    <Strasse>Franzstraße 1</Strasse>
     <PLZ>46395</PLZ>
     <Ort>Bocholt</Ort>
     <Geschlecht>M</Geschlecht>
@@ -27797,7 +27842,7 @@
     </Titel>
     <Nachname>Balster</Nachname>
     <Vorname>Thomas</Vorname>
-    <Strasse>Falkenstr. 23b</Strasse>
+    <Strasse>Falkenstr. 23</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -27818,7 +27863,7 @@
     </Titel>
     <Nachname>Belz</Nachname>
     <Vorname>Justin Leon</Vorname>
-    <Strasse>Mühlenweg 4 E</Strasse>
+    <Strasse>Mühlenweg 4</Strasse>
     <PLZ>48734</PLZ>
     <Ort>Reken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -27880,7 +27925,7 @@
     </Titel>
     <Nachname>Dimitrievski</Nachname>
     <Vorname>Savo</Vorname>
-    <Strasse>Hoxfelder Weg 49a</Strasse>
+    <Strasse>Hoxfelder Weg 49</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -27942,7 +27987,7 @@
     </Titel>
     <Nachname>Friedrich</Nachname>
     <Vorname>Finn</Vorname>
-    <Strasse>Lena-Nüssing-Straße 5c</Strasse>
+    <Strasse>Lena-Nüssing-Straße 5</Strasse>
     <PLZ>46348</PLZ>
     <Ort>Raesfeld</Ort>
     <Geschlecht>M</Geschlecht>
@@ -28025,7 +28070,7 @@
     </Titel>
     <Nachname>Scheele</Nachname>
     <Vorname>Alexander Fritz</Vorname>
-    <Strasse>Johanniterstraße 6</Strasse>
+    <Strasse>Hawerkämpe 41</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -28088,7 +28133,7 @@
     </Titel>
     <Nachname>Berz</Nachname>
     <Vorname>Anna-Lena</Vorname>
-    <Strasse>Am Beisen 18b</Strasse>
+    <Strasse>Am Beisen 18</Strasse>
     <PLZ>45768</PLZ>
     <Ort>Marl</Ort>
     <Geschlecht>W</Geschlecht>
@@ -28191,10 +28236,11 @@
     </Titel>
     <Nachname>Konetzka</Nachname>
     <Vorname>Noel</Vorname>
-    <Strasse>Bismarckstraße 49, Postfach nichts</Strasse>
+    <Strasse>Bismarckstraße 49</Strasse>
     <PLZ>
     </PLZ>
-    <Ort>gibt keinen</Ort>
+    <Ort>
+    </Ort>
     <Geschlecht>M</Geschlecht>
     <Anmeldedatum>01.08.2025</Anmeldedatum>
     <Telefon>0176 70983996</Telefon>
@@ -28213,7 +28259,7 @@
     </Titel>
     <Nachname>Krebs</Nachname>
     <Vorname>Jan</Vorname>
-    <Strasse>Südlohner Diek 14A</Strasse>
+    <Strasse>Südlohner Diek 14</Strasse>
     <PLZ>46342</PLZ>
     <Ort>Velen</Ort>
     <Geschlecht>M</Geschlecht>
@@ -28423,7 +28469,7 @@
     </Titel>
     <Nachname>van Loosen</Nachname>
     <Vorname>Jonas</Vorname>
-    <Strasse>Rhader Weg 2a</Strasse>
+    <Strasse>Rhader Weg 2</Strasse>
     <PLZ>46359</PLZ>
     <Ort>Heiden</Ort>
     <Geschlecht>M</Geschlecht>
@@ -28465,7 +28511,7 @@
     </Titel>
     <Nachname>van Rensen</Nachname>
     <Vorname>Marlon</Vorname>
-    <Strasse>Eichendorffstr. 3 a</Strasse>
+    <Strasse>Eichendorffstr. 3</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -28505,7 +28551,7 @@
     </Titel>
     <Nachname>Wöllstein</Nachname>
     <Vorname>Maximilian</Vorname>
-    <Strasse>Industriestr. 12a</Strasse>
+    <Strasse>Industriestr. 12</Strasse>
     <PLZ>46342</PLZ>
     <Ort>Velen</Ort>
     <Geschlecht>M</Geschlecht>
@@ -28546,7 +28592,7 @@
     </Titel>
     <Nachname>Anders</Nachname>
     <Vorname>Justin</Vorname>
-    <Strasse>Siepe 3a</Strasse>
+    <Strasse>Siepe 3</Strasse>
     <PLZ>48734</PLZ>
     <Ort>Reken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -28773,7 +28819,7 @@
     </Titel>
     <Nachname>Korte</Nachname>
     <Vorname>David</Vorname>
-    <Strasse>Klein Rekener Weg 4a</Strasse>
+    <Strasse>Klein Rekener Weg 4</Strasse>
     <PLZ>48734</PLZ>
     <Ort>Reken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -28814,7 +28860,7 @@
     </Titel>
     <Nachname>Küppers</Nachname>
     <Vorname>Simon</Vorname>
-    <Strasse>Am Elschatt 11a</Strasse>
+    <Strasse>Am Elschatt 11</Strasse>
     <PLZ>46359</PLZ>
     <Ort>Heiden</Ort>
     <Geschlecht>M</Geschlecht>
@@ -29081,7 +29127,7 @@
     </Titel>
     <Nachname>Zens</Nachname>
     <Vorname>Jaimee Tyler</Vorname>
-    <Strasse>Im Aap 68a</Strasse>
+    <Strasse>Im Aap 68</Strasse>
     <PLZ>46514</PLZ>
     <Ort>Schermbeck</Ort>
     <Geschlecht>M</Geschlecht>
@@ -29123,7 +29169,7 @@
     </Titel>
     <Nachname>Bonhoff</Nachname>
     <Vorname>Fynn</Vorname>
-    <Strasse>Hohenfriedeberger Str.</Strasse>
+    <Strasse>Hohenfriedeberger Str. </Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -29164,7 +29210,7 @@
     </Titel>
     <Nachname>Buclaw</Nachname>
     <Vorname>Sebastian</Vorname>
-    <Strasse>Brunnenweg 27X</Strasse>
+    <Strasse>Brunnenweg 27</Strasse>
     <PLZ>48734</PLZ>
     <Ort>Reken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -29226,7 +29272,7 @@
     </Titel>
     <Nachname>Kolz</Nachname>
     <Vorname>Laura</Vorname>
-    <Strasse>Weberstraße 1a</Strasse>
+    <Strasse>Weberstraße 1</Strasse>
     <PLZ>46414</PLZ>
     <Ort>Rhede</Ort>
     <Geschlecht>W</Geschlecht>
@@ -29350,7 +29396,7 @@
     </Titel>
     <Nachname>Rottbeck</Nachname>
     <Vorname>Linus</Vorname>
-    <Strasse>Am Holzplatz 7a</Strasse>
+    <Strasse>Am Holzplatz 7</Strasse>
     <PLZ>46348</PLZ>
     <Ort>Raesfeld</Ort>
     <Geschlecht>M</Geschlecht>
@@ -29433,7 +29479,7 @@
     </Titel>
     <Nachname>Schröer</Nachname>
     <Vorname>Luca Elias</Vorname>
-    <Strasse>Münsterstraße 57d</Strasse>
+    <Strasse>Münsterstraße 57</Strasse>
     <PLZ>46414</PLZ>
     <Ort>Rhede</Ort>
     <Geschlecht>M</Geschlecht>
@@ -29516,7 +29562,7 @@
     </Titel>
     <Nachname>Wachnik</Nachname>
     <Vorname>Jonas</Vorname>
-    <Strasse>Hohe Oststraße 14a</Strasse>
+    <Strasse>Hohe Oststraße 14</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -29683,7 +29729,7 @@
     </Titel>
     <Nachname>Dahlhaus</Nachname>
     <Vorname>Mirko</Vorname>
-    <Strasse>Butenwall 54a</Strasse>
+    <Strasse>Butenwall 54</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -29767,7 +29813,7 @@
     </Titel>
     <Nachname>Höing</Nachname>
     <Vorname>Carlo</Vorname>
-    <Strasse>Weseker Landweg 15a</Strasse>
+    <Strasse>Weseker Landweg 15</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -29933,7 +29979,7 @@
     </Titel>
     <Nachname>Sall</Nachname>
     <Vorname>Boubacar</Vorname>
-    <Strasse>Königsberger Straße 4a</Strasse>
+    <Strasse>Königsberger Straße 4</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -29975,7 +30021,7 @@
     </Titel>
     <Nachname>Schönet</Nachname>
     <Vorname>Leonard</Vorname>
-    <Strasse>Kurfürstenstraße 157a</Strasse>
+    <Strasse>Kurfürstenstraße 157</Strasse>
     <PLZ>46399</PLZ>
     <Ort>Bocholt</Ort>
     <Geschlecht>M</Geschlecht>
@@ -29996,7 +30042,7 @@
     </Titel>
     <Nachname>Stripp</Nachname>
     <Vorname>Leander</Vorname>
-    <Strasse>Große Allee 3a</Strasse>
+    <Strasse>Große Allee 3</Strasse>
     <PLZ>46397</PLZ>
     <Ort>Bocholt</Ort>
     <Geschlecht>M</Geschlecht>
@@ -30017,7 +30063,7 @@
     </Titel>
     <Nachname>Tautz</Nachname>
     <Vorname>Collin</Vorname>
-    <Strasse>Rosenstr. 15a</Strasse>
+    <Strasse>Rosenstr. 15</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -30059,7 +30105,7 @@
     </Titel>
     <Nachname>Wolters</Nachname>
     <Vorname>Jathen</Vorname>
-    <Strasse>unbekannt</Strasse>
+    <Strasse>unbekannt </Strasse>
     <PLZ>46399</PLZ>
     <Ort>Bocholt</Ort>
     <Geschlecht>M</Geschlecht>
@@ -30576,7 +30622,7 @@
     </Titel>
     <Nachname>Boudour</Nachname>
     <Vorname>Mohamed</Vorname>
-    <Strasse>An der Bleiche 6c</Strasse>
+    <Strasse>An der Bleiche 6</Strasse>
     <PLZ>46395</PLZ>
     <Ort>Bocholt</Ort>
     <Geschlecht>M</Geschlecht>
@@ -30803,7 +30849,7 @@
     </Titel>
     <Nachname>Kysorets</Nachname>
     <Vorname>Sofiia</Vorname>
-    <Strasse>Coesfelder Str.6</Strasse>
+    <Strasse>Coesfelder Str. 6</Strasse>
     <PLZ>46342</PLZ>
     <Ort>Velen</Ort>
     <Geschlecht>W</Geschlecht>
@@ -30824,7 +30870,7 @@
     </Titel>
     <Nachname>Nyweide</Nachname>
     <Vorname>Laura</Vorname>
-    <Strasse>Krechtingerstraße 71a</Strasse>
+    <Strasse>Krechtingerstraße 71</Strasse>
     <PLZ>46397</PLZ>
     <Ort>Bocholt</Ort>
     <Geschlecht>W</Geschlecht>
@@ -31094,7 +31140,7 @@
     </Titel>
     <Nachname>Hartmann</Nachname>
     <Vorname>Konrad</Vorname>
-    <Strasse>Högerstr. 22a</Strasse>
+    <Strasse>Högerstr. 22</Strasse>
     <PLZ>48683</PLZ>
     <Ort>Ahaus</Ort>
     <Geschlecht>M</Geschlecht>
@@ -31177,7 +31223,7 @@
     </Titel>
     <Nachname>Rix</Nachname>
     <Vorname>Phil</Vorname>
-    <Strasse>De-Bilt-Allee 29a</Strasse>
+    <Strasse>De-Bilt-Allee 29</Strasse>
     <PLZ>48653</PLZ>
     <Ort>Coesfeld</Ort>
     <Geschlecht>M</Geschlecht>
@@ -31218,7 +31264,7 @@
     </Titel>
     <Nachname>Klein</Nachname>
     <Vorname>Mia</Vorname>
-    <Strasse>Dorfstraße 20b</Strasse>
+    <Strasse>Dorfstraße 20</Strasse>
     <PLZ>48734</PLZ>
     <Ort>Reken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -31323,7 +31369,7 @@
     </Titel>
     <Nachname>Derking</Nachname>
     <Vorname>Kevin</Vorname>
-    <Strasse>Wennewick 7a</Strasse>
+    <Strasse>Wennewick 7</Strasse>
     <PLZ>48691</PLZ>
     <Ort>Vreden</Ort>
     <Geschlecht>M</Geschlecht>
@@ -31449,7 +31495,7 @@
     </Titel>
     <Nachname>Büscher</Nachname>
     <Vorname>Bill</Vorname>
-    <Strasse>Schultestraße 33a</Strasse>
+    <Strasse>Schultestraße 33</Strasse>
     <PLZ>48683</PLZ>
     <Ort>Ahaus</Ort>
     <Geschlecht>M</Geschlecht>
@@ -31592,7 +31638,7 @@
     </Titel>
     <Nachname>Barembruch</Nachname>
     <Vorname>Tamina Sophie</Vorname>
-    <Strasse>Prattenborgweg 1a</Strasse>
+    <Strasse>Prattenborgweg 1</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -31670,6 +31716,26 @@
   </Leser>
   <Leser>
     <LGruppe>WA23B</LGruppe>
+    <Geburtsdatum>30.06.2006</Geburtsdatum>
+    <Titel>
+    </Titel>
+    <Nachname>Grotzki</Nachname>
+    <Vorname>Simeon</Vorname>
+    <Strasse>Nachtigallenweg 23</Strasse>
+    <PLZ>46459</PLZ>
+    <Ort>Rees</Ort>
+    <Geschlecht>M</Geschlecht>
+    <Anmeldedatum>01.12.2023</Anmeldedatum>
+    <Telefon>0160 94956033</Telefon>
+    <Mobiltelefon>0160 94956033</Mobiltelefon>
+    <email>gs157280@students.berufskolleg-borken.de</email>
+    <ZusatzInfo>
+    </ZusatzInfo>
+    <Bemerkung>
+    </Bemerkung>
+  </Leser>
+  <Leser>
+    <LGruppe>WA23B</LGruppe>
     <Geburtsdatum>17.04.2004</Geburtsdatum>
     <Titel>
     </Titel>
@@ -31717,7 +31783,7 @@
     </Titel>
     <Nachname>Khaled Khalil</Nachname>
     <Vorname>Nadine</Vorname>
-    <Strasse>Klosterstraße 64a</Strasse>
+    <Strasse>Klosterstraße 64</Strasse>
     <PLZ>48703</PLZ>
     <Ort>Stadtlohn</Ort>
     <Geschlecht>W</Geschlecht>
@@ -31883,7 +31949,7 @@
     </Titel>
     <Nachname>Bönke</Nachname>
     <Vorname>Mats</Vorname>
-    <Strasse>Melatenweg 82a</Strasse>
+    <Strasse>Melatenweg 82</Strasse>
     <PLZ>46459</PLZ>
     <Ort>Rees</Ort>
     <Geschlecht>M</Geschlecht>
@@ -32003,26 +32069,6 @@
   </Leser>
   <Leser>
     <LGruppe>WA24A</LGruppe>
-    <Geburtsdatum>30.06.2006</Geburtsdatum>
-    <Titel>
-    </Titel>
-    <Nachname>Grotzki</Nachname>
-    <Vorname>Simeon</Vorname>
-    <Strasse>Nachtigallenweg 23</Strasse>
-    <PLZ>46459</PLZ>
-    <Ort>Rees</Ort>
-    <Geschlecht>M</Geschlecht>
-    <Anmeldedatum>01.12.2023</Anmeldedatum>
-    <Telefon>0160 94956033</Telefon>
-    <Mobiltelefon>0160 94956033</Mobiltelefon>
-    <email>gs157280@students.berufskolleg-borken.de</email>
-    <ZusatzInfo>
-    </ZusatzInfo>
-    <Bemerkung>
-    </Bemerkung>
-  </Leser>
-  <Leser>
-    <LGruppe>WA24A</LGruppe>
     <Geburtsdatum>15.05.2008</Geburtsdatum>
     <Titel>
     </Titel>
@@ -32049,7 +32095,7 @@
     </Titel>
     <Nachname>Ibraimi</Nachname>
     <Vorname>Shakira</Vorname>
-    <Strasse>Advenastraße 29A</Strasse>
+    <Strasse>Advenastraße 29</Strasse>
     <PLZ>48619</PLZ>
     <Ort>Heek</Ort>
     <Geschlecht>W</Geschlecht>
@@ -32342,7 +32388,7 @@
     </Titel>
     <Nachname>Saglik</Nachname>
     <Vorname>Diyar Denis</Vorname>
-    <Strasse>Weidenweg 40a</Strasse>
+    <Strasse>Weidenweg 40</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -32383,7 +32429,7 @@
     </Titel>
     <Nachname>Seeger</Nachname>
     <Vorname>Maximilian</Vorname>
-    <Strasse>Adolf-Kolping-Straße 15b</Strasse>
+    <Strasse>Adolf-Kolping-Straße 15</Strasse>
     <PLZ>46359</PLZ>
     <Ort>Heiden</Ort>
     <Geschlecht>M</Geschlecht>
@@ -32508,7 +32554,7 @@
     </Titel>
     <Nachname>Boger</Nachname>
     <Vorname>Julia Maria</Vorname>
-    <Strasse>Mergelstraße 35A</Strasse>
+    <Strasse>Mergelstraße 35</Strasse>
     <PLZ>48683</PLZ>
     <Ort>Ahaus</Ort>
     <Geschlecht>W</Geschlecht>
@@ -32529,7 +32575,7 @@
     </Titel>
     <Nachname>Charif</Nachname>
     <Vorname>Rascha</Vorname>
-    <Strasse>Vredener Str. 155b</Strasse>
+    <Strasse>Vredener Str. 155</Strasse>
     <PLZ>48703</PLZ>
     <Ort>Stadtlohn</Ort>
     <Geschlecht>W</Geschlecht>
@@ -32571,7 +32617,7 @@
     </Titel>
     <Nachname>Haar</Nachname>
     <Vorname>Julia</Vorname>
-    <Strasse>Bunings Weide 35a</Strasse>
+    <Strasse>Bunings Weide 35</Strasse>
     <PLZ>48703</PLZ>
     <Ort>Stadtlohn</Ort>
     <Geschlecht>W</Geschlecht>
@@ -32781,7 +32827,7 @@
     </Titel>
     <Nachname>Sivanantharajah</Nachname>
     <Vorname>Shangavi</Vorname>
-    <Strasse>Schulstraße 13a</Strasse>
+    <Strasse>Schulstraße 13</Strasse>
     <PLZ>46342</PLZ>
     <Ort>Velen</Ort>
     <Geschlecht>W</Geschlecht>
@@ -32968,7 +33014,7 @@
     </Titel>
     <Nachname>Malik</Nachname>
     <Vorname>Ahmad</Vorname>
-    <Strasse>Büngerner Weg 27a</Strasse>
+    <Strasse>Büngerner Weg 27</Strasse>
     <PLZ>46414</PLZ>
     <Ort>Rhede</Ort>
     <Geschlecht>M</Geschlecht>
@@ -33381,7 +33427,7 @@
     </Titel>
     <Nachname>Schmelting</Nachname>
     <Vorname>Marius</Vorname>
-    <Strasse>Velener Straße  3</Strasse>
+    <Strasse>Velener Straße 3</Strasse>
     <PLZ>48734</PLZ>
     <Ort>Reken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -33484,7 +33530,7 @@
     </Titel>
     <Nachname>Wiegand</Nachname>
     <Vorname>Lisa Maria</Vorname>
-    <Strasse>Rathausplatz 15b</Strasse>
+    <Strasse>Rathausplatz 15</Strasse>
     <PLZ>46359</PLZ>
     <Ort>Heiden</Ort>
     <Geschlecht>W</Geschlecht>
@@ -33627,7 +33673,7 @@
     </Titel>
     <Nachname>Faltmann</Nachname>
     <Vorname>Viola</Vorname>
-    <Strasse>Vennediek 15a</Strasse>
+    <Strasse>Vennediek 15</Strasse>
     <PLZ>48734</PLZ>
     <Ort>Reken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -33710,7 +33756,7 @@
     </Titel>
     <Nachname>Hoeper</Nachname>
     <Vorname>Jana</Vorname>
-    <Strasse>An der Eggelbrücke 1a</Strasse>
+    <Strasse>An der Eggelbrücke 1</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -33794,7 +33840,7 @@
     </Titel>
     <Nachname>Kozaris</Nachname>
     <Vorname>Jolina</Vorname>
-    <Strasse>Karl-leisner-Str.7</Strasse>
+    <Strasse>Karl-leisner-Str. 7</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -33815,7 +33861,7 @@
     </Titel>
     <Nachname>Kropp</Nachname>
     <Vorname>Alina</Vorname>
-    <Strasse>Bischof-Kettler-Straße  7b</Strasse>
+    <Strasse>Bischof-Kettler-Straße 7</Strasse>
     <PLZ>46359</PLZ>
     <Ort>Heiden</Ort>
     <Geschlecht>W</Geschlecht>
@@ -33940,7 +33986,7 @@
     </Titel>
     <Nachname>Stovermann</Nachname>
     <Vorname>Luis</Vorname>
-    <Strasse>Ostendorfer Straße 16 a</Strasse>
+    <Strasse>Ostendorfer Straße 16</Strasse>
     <PLZ>46342</PLZ>
     <Ort>Velen</Ort>
     <Geschlecht>M</Geschlecht>
@@ -34084,7 +34130,7 @@
     </Titel>
     <Nachname>Bitikji</Nachname>
     <Vorname>Hasan</Vorname>
-    <Strasse>Lange Stiege 55a</Strasse>
+    <Strasse>Lange Stiege 55</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -34209,7 +34255,7 @@
     </Titel>
     <Nachname>Hinske</Nachname>
     <Vorname>Anna</Vorname>
-    <Strasse>von-Mulert-Str. 10a</Strasse>
+    <Strasse>von-Mulert-Str. 10</Strasse>
     <PLZ>46354</PLZ>
     <Ort>Südlohn</Ort>
     <Geschlecht>W</Geschlecht>
@@ -34356,7 +34402,7 @@
     </Titel>
     <Nachname>Muchortow</Nachname>
     <Vorname>Sarah</Vorname>
-    <Strasse>Pappelallee 58f</Strasse>
+    <Strasse>Pappelallee 58</Strasse>
     <PLZ>48712</PLZ>
     <Ort>Gescher</Ort>
     <Geschlecht>W</Geschlecht>
@@ -34480,7 +34526,7 @@
     </Titel>
     <Nachname>Schöttler</Nachname>
     <Vorname>Jill</Vorname>
-    <Strasse>Strote 19A</Strasse>
+    <Strasse>Strote 19</Strasse>
     <PLZ>48734</PLZ>
     <Ort>Reken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -34501,7 +34547,7 @@
     </Titel>
     <Nachname>Canpolat</Nachname>
     <Vorname>Cem</Vorname>
-    <Strasse>Bolkenhainer Straße 35 a</Strasse>
+    <Strasse>Bolkenhainer Straße 35</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -34542,7 +34588,7 @@
     </Titel>
     <Nachname>Echelmeyer</Nachname>
     <Vorname>Lotta</Vorname>
-    <Strasse>Lohner Straße 7a</Strasse>
+    <Strasse>Lohner Straße 7</Strasse>
     <PLZ>46354</PLZ>
     <Ort>Südlohn</Ort>
     <Geschlecht>W</Geschlecht>
@@ -34563,7 +34609,7 @@
     </Titel>
     <Nachname>Frankmölle</Nachname>
     <Vorname>Enja</Vorname>
-    <Strasse>Velener Straße 15A</Strasse>
+    <Strasse>Velener Straße 15</Strasse>
     <PLZ>48734</PLZ>
     <Ort>Reken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -34584,7 +34630,7 @@
     </Titel>
     <Nachname>Fuchs</Nachname>
     <Vorname>Jaqueline Sophia</Vorname>
-    <Strasse>Südlohner Straße 6c</Strasse>
+    <Strasse>Südlohner Straße 6</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -34604,7 +34650,7 @@
     </Titel>
     <Nachname>Haggert</Nachname>
     <Vorname>Noel</Vorname>
-    <Strasse>An der Nathe 7a</Strasse>
+    <Strasse>An der Nathe 7</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -34666,7 +34712,7 @@
     </Titel>
     <Nachname>Kirchheim</Nachname>
     <Vorname>Melissa</Vorname>
-    <Strasse>Münsterstraße 32d</Strasse>
+    <Strasse>Münsterstraße 32</Strasse>
     <PLZ>46414</PLZ>
     <Ort>Rhede</Ort>
     <Geschlecht>W</Geschlecht>
@@ -34729,7 +34775,7 @@
     </Titel>
     <Nachname>Medic</Nachname>
     <Vorname>Santino</Vorname>
-    <Strasse>Ludgerisstraße 7c</Strasse>
+    <Strasse>Ludgerisstraße 7</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -34770,7 +34816,7 @@
     </Titel>
     <Nachname>Schneider</Nachname>
     <Vorname>Evelyn</Vorname>
-    <Strasse>Grenzmark 18a</Strasse>
+    <Strasse>Grenzmark 18</Strasse>
     <PLZ>48734</PLZ>
     <Ort>Reken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -34833,7 +34879,7 @@
     </Titel>
     <Nachname>Wittgens</Nachname>
     <Vorname>Alina Celine</Vorname>
-    <Strasse>Up de Roddick 24b</Strasse>
+    <Strasse>Up de Roddick 24</Strasse>
     <PLZ>46354</PLZ>
     <Ort>Südlohn</Ort>
     <Geschlecht>W</Geschlecht>
@@ -34853,7 +34899,7 @@
     </Titel>
     <Nachname>Brennecke</Nachname>
     <Vorname>Fynn</Vorname>
-    <Strasse>Nünningsweg 59a</Strasse>
+    <Strasse>Nünningsweg 59</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -34977,7 +35023,7 @@
     </Titel>
     <Nachname>Hübner</Nachname>
     <Vorname>Michelle</Vorname>
-    <Strasse>Robert-Koch-Straße 28g</Strasse>
+    <Strasse>Robert-Koch-Straße 28</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -35165,7 +35211,7 @@
     </Titel>
     <Nachname>Nawrotzki</Nachname>
     <Vorname>Julia Beate</Vorname>
-    <Strasse>Jeannette-Wolff str.3</Strasse>
+    <Strasse>Jeannette-Wolff str. 3</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -35415,7 +35461,7 @@
     </Titel>
     <Nachname>Astasov</Nachname>
     <Vorname>Tim</Vorname>
-    <Strasse>von-Bora-Str. 11 a</Strasse>
+    <Strasse>von-Bora-Str. 11</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -35538,7 +35584,7 @@
     </Titel>
     <Nachname>Koch</Nachname>
     <Vorname>Philipp Bruce</Vorname>
-    <Strasse>Fritz-Reuter-Str. 23b</Strasse>
+    <Strasse>Fritz-Reuter-Str. 23</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -35578,7 +35624,7 @@
     </Titel>
     <Nachname>Pawig</Nachname>
     <Vorname>Johannes Helmut</Vorname>
-    <Strasse>Immanuel-Kant-Straße 4b</Strasse>
+    <Strasse>Immanuel-Kant-Straße 4</Strasse>
     <PLZ>46359</PLZ>
     <Ort>Heiden</Ort>
     <Geschlecht>M</Geschlecht>
@@ -35619,7 +35665,7 @@
     </Titel>
     <Nachname>Saglik</Nachname>
     <Vorname>Baran</Vorname>
-    <Strasse>Weidenweg 40a</Strasse>
+    <Strasse>Weidenweg 40</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -35702,7 +35748,7 @@
     </Titel>
     <Nachname>Berisa</Nachname>
     <Vorname>Medin</Vorname>
-    <Strasse>Beckingsweg 48, Postfach Hab keins</Strasse>
+    <Strasse>Beckingsweg 48</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -35973,7 +36019,7 @@
     </Titel>
     <Nachname>Teame</Nachname>
     <Vorname>Eden</Vorname>
-    <Strasse>Mühlenstraße 2b</Strasse>
+    <Strasse>Mühlenstraße 2</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -35994,7 +36040,7 @@
     </Titel>
     <Nachname>Wolber</Nachname>
     <Vorname>Fiona</Vorname>
-    <Strasse>Beckingsweg 35a</Strasse>
+    <Strasse>Beckingsweg 35</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -36220,7 +36266,7 @@
     </Titel>
     <Nachname>Steinbach</Nachname>
     <Vorname>Nico</Vorname>
-    <Strasse>Nikolaus-Groß-Str.31</Strasse>
+    <Strasse>Nikolaus-Groß-Str. 31</Strasse>
     <PLZ>46499</PLZ>
     <Ort>Hamminkeln</Ort>
     <Geschlecht>M</Geschlecht>
@@ -36509,7 +36555,7 @@
     </Titel>
     <Nachname>Seyer</Nachname>
     <Vorname>Leon</Vorname>
-    <Strasse>Fliederweg 10 c</Strasse>
+    <Strasse>Fliederweg 10</Strasse>
     <PLZ>46286</PLZ>
     <Ort>Dorsten</Ort>
     <Geschlecht>M</Geschlecht>
@@ -36551,7 +36597,7 @@
     </Titel>
     <Nachname>Sperlbaum</Nachname>
     <Vorname>Lara</Vorname>
-    <Strasse>Im Lücking 10b</Strasse>
+    <Strasse>Im Lücking 10</Strasse>
     <PLZ>46359</PLZ>
     <Ort>Heiden</Ort>
     <Geschlecht>W</Geschlecht>
@@ -36675,7 +36721,7 @@
     </Titel>
     <Nachname>Darwin</Nachname>
     <Vorname>Kevin</Vorname>
-    <Strasse>Burloer Straße 116 b</Strasse>
+    <Strasse>Burloer Straße 116</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -36717,7 +36763,7 @@
     </Titel>
     <Nachname>Khoruzhenko</Nachname>
     <Vorname>Daria</Vorname>
-    <Strasse>Freiherr-vom-Stein-Straße 7a</Strasse>
+    <Strasse>Freiherr-vom-Stein-Straße 7</Strasse>
     <PLZ>48734</PLZ>
     <Ort>Reken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -37071,7 +37117,7 @@
     </Titel>
     <Nachname>Sobczak</Nachname>
     <Vorname>Nino Alessandro</Vorname>
-    <Strasse>Wagnerstraße 31b</Strasse>
+    <Strasse>Wagnerstraße 31</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -37215,7 +37261,7 @@
     </Titel>
     <Nachname>Knüwer</Nachname>
     <Vorname>Florian</Vorname>
-    <Strasse>Thüringer Weg  12 b</Strasse>
+    <Strasse>Thüringer Weg 12</Strasse>
     <PLZ>46359</PLZ>
     <Ort>Heiden</Ort>
     <Geschlecht>M</Geschlecht>
@@ -37795,7 +37841,7 @@
     </Titel>
     <Nachname>Südholt</Nachname>
     <Vorname>Jannis</Vorname>
-    <Strasse>Lucas-Cranach-Straße 11a</Strasse>
+    <Strasse>Lucas-Cranach-Straße 11</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -37899,7 +37945,7 @@
     </Titel>
     <Nachname>Grütering</Nachname>
     <Vorname>Noah</Vorname>
-    <Strasse>Sonnenbrink 8a</Strasse>
+    <Strasse>Sonnenbrink 8</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -37919,7 +37965,7 @@
     </Titel>
     <Nachname>Klemm</Nachname>
     <Vorname>Marvin</Vorname>
-    <Strasse>Mühlenweg 48a</Strasse>
+    <Strasse>Mühlenweg 48</Strasse>
     <PLZ>46342</PLZ>
     <Ort>Velen</Ort>
     <Geschlecht>M</Geschlecht>
@@ -37981,7 +38027,7 @@
     </Titel>
     <Nachname>Thiele</Nachname>
     <Vorname>Mia</Vorname>
-    <Strasse>Goethestraße 7a</Strasse>
+    <Strasse>Goethestraße 7</Strasse>
     <PLZ>48734</PLZ>
     <Ort>Reken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -38211,7 +38257,7 @@
     </Titel>
     <Nachname>Kösters</Nachname>
     <Vorname>Hanna</Vorname>
-    <Strasse>Weskerhok 1a</Strasse>
+    <Strasse>Weskerhok 1</Strasse>
     <PLZ>48734</PLZ>
     <Ort>Reken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -38294,7 +38340,7 @@
     </Titel>
     <Nachname>Niermann</Nachname>
     <Vorname>Lina-Julie</Vorname>
-    <Strasse>Schultenallee 2a</Strasse>
+    <Strasse>Schultenallee 2</Strasse>
     <PLZ>46354</PLZ>
     <Ort>Südlohn</Ort>
     <Geschlecht>W</Geschlecht>
@@ -38419,7 +38465,7 @@
     </Titel>
     <Nachname>Völker</Nachname>
     <Vorname>Jannis</Vorname>
-    <Strasse>Rekener Straße 73A</Strasse>
+    <Strasse>Rekener Straße 73</Strasse>
     <PLZ>46342</PLZ>
     <Ort>Velen</Ort>
     <Geschlecht>M</Geschlecht>
@@ -38566,7 +38612,7 @@
     </Titel>
     <Nachname>Steverding</Nachname>
     <Vorname>Carolin</Vorname>
-    <Strasse>Schlichtenkamp 31a</Strasse>
+    <Strasse>Schlichtenkamp 31</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -38711,7 +38757,7 @@
     </Titel>
     <Nachname>Pieczynski</Nachname>
     <Vorname>Mariella</Vorname>
-    <Strasse>Talaue 1b</Strasse>
+    <Strasse>Talaue 1</Strasse>
     <PLZ>46286</PLZ>
     <Ort>Dorsten</Ort>
     <Geschlecht>W</Geschlecht>
@@ -38753,7 +38799,7 @@
     </Titel>
     <Nachname>Sieverding</Nachname>
     <Vorname>Lea</Vorname>
-    <Strasse>Rosenstraße 19a</Strasse>
+    <Strasse>Rosenstraße 19</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>W</Geschlecht>
@@ -39045,7 +39091,7 @@
     </Titel>
     <Nachname>Nienhaus</Nachname>
     <Vorname>Inga</Vorname>
-    <Strasse>Möllenstegge 29 a</Strasse>
+    <Strasse>Möllenstegge 29</Strasse>
     <PLZ>46395</PLZ>
     <Ort>Bocholt</Ort>
     <Geschlecht>W</Geschlecht>
@@ -39149,7 +39195,7 @@
     </Titel>
     <Nachname>Benning</Nachname>
     <Vorname>Joel</Vorname>
-    <Strasse>Fedor-Sommer-Str.5 A</Strasse>
+    <Strasse>Fedor-Sommer-Str. 5</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>M</Geschlecht>
@@ -39336,7 +39382,7 @@
     </Titel>
     <Nachname>Kappenhagen</Nachname>
     <Vorname>Mia</Vorname>
-    <Strasse>Spolerstraße 60b</Strasse>
+    <Strasse>Spolerstraße 60</Strasse>
     <PLZ>46414</PLZ>
     <Ort>Rhede</Ort>
     <Geschlecht>W</Geschlecht>
@@ -39525,7 +39571,7 @@
     </Titel>
     <Nachname>Patz</Nachname>
     <Vorname>Vanessa</Vorname>
-    <Strasse>von-Bora-Str. 9a</Strasse>
+    <Strasse>von-Bora-Str. 9</Strasse>
     <PLZ>46325</PLZ>
     <Ort>Borken</Ort>
     <Geschlecht>W</Geschlecht>
