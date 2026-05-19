@@ -180,8 +180,8 @@ public class Students : List<Student>
     {
         var x = this.Where(s => s.Klasse == "WE25B").ToList();
 
-        var schuelerZusatzdaten = dateien.GetMatchingList(configuration, "schuelerzusatzdaten", null, null);
-        if (schuelerZusatzdaten == null || !schuelerZusatzdaten.Any()) throw new Exception("Keine SchuelerZusatzdaten.dat");
+        //var schuelerZusatzdaten = dateien.GetMatchingList(configuration, "schuelerzusatzdaten", null, null);
+        //if (schuelerZusatzdaten == null || !schuelerZusatzdaten.Any()) throw new Exception("Keine SchuelerZusatzdaten.dat");
 
         var gpu003 = dateien.GetMatchingList(configuration, "gpu003", null, null);
         if (gpu003 == null || gpu003.Count == 0) return;
@@ -1707,7 +1707,7 @@ public class Students : List<Student>
 
         AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("SuS mit Maßnahmen ermitteln ...", ctx =>
         {
-            var schuelerZusatzdaten = Quelldateien.GetMatchingList(configuration, "schuelerzusatzdaten", this, null);
+            //var schuelerZusatzdaten = Quelldateien.GetMatchingList(configuration, "schuelerzusatzdaten", this, null);
 
             foreach (Student student in this)
             {

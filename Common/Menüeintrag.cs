@@ -65,7 +65,7 @@ public class Menüeintrag
     public Dateien Zieldateien { get; set; }
     public Relationsgruppen Relationsgruppen { get; internal set; }
 
-    public Menüeintrag(string titel, Dateien quelldateien, Students students, Klassen klassen, List<string> beschreibung, Action<Menüeintrag> funktion, Global.Rubrik rubrik = Global.Rubrik.Allgemein, Global.NurBeiDiesenSchulnummern nurbeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Alle)
+    public Menüeintrag(IConfiguration configuration, string titel, Dateien quelldateien, Students students, Klassen klassen, List<string> beschreibung, Action<Menüeintrag> funktion, Global.Rubrik rubrik = Global.Rubrik.Allgemein, Global.NurBeiDiesenSchulnummern nurbeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Alle)
     {
         try
         {
@@ -89,6 +89,15 @@ public class Menüeintrag
                     {
                         var quelldatei = (Quelldateien.FirstOrDefault(q => q.Name.ToLower().Contains("schuelerzusatzdaten"))).AbsoluterPfad;
                         beschreibung[i] = beschreibung[i].Replace("schuelerzusatzdaten", $"[{Global.GetColor(Global.ColorPfadInDateien)}]{quelldatei}[/]");
+                    }
+                    if(beschreibung[i].Contains(" dokumentenverwaltung "))
+                    {                        
+                        beschreibung[i] = beschreibung[i].Replace("dokumentenverwaltung", $"[{Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDokumentenverwaltung"]}[/]");
+                    }
+                    if(beschreibung[i].Contains(" absenceperstudent "))
+                    {
+                        var quelldatei = (Quelldateien.FirstOrDefault(q => q.Name.ToLower().Contains("absenceperstudent"))).AbsoluterPfad;
+                        beschreibung[i] = beschreibung[i].Replace("absenceperstudent", $"[{Global.GetColor(Global.ColorPfadInDateien)}]{quelldatei}[/]");
                     }
                     if(beschreibung[i].Contains(" schuelerbasisdaten "))
                     {
@@ -129,6 +138,11 @@ public class Menüeintrag
                     {
                         var quelldatei = (Quelldateien.FirstOrDefault(q => q.Name.ToLower().Contains("gpu002"))).AbsoluterPfad;
                         beschreibung[i] = beschreibung[i].Replace("gpu002", $"[{Global.GetColor(Global.ColorPfadInDateien)}]{quelldatei}[/]");
+                    }
+                    if(beschreibung[i].Contains(" gpu003 "))
+                    {
+                        var quelldatei = (Quelldateien.FirstOrDefault(q => q.Name.ToLower().Contains("gpu003"))).AbsoluterPfad;
+                        beschreibung[i] = beschreibung[i].Replace("gpu003", $"[{Global.GetColor(Global.ColorPfadInDateien)}]{quelldatei}[/]");
                     }
                     if(beschreibung[i].Contains("legalguardian_"))
                     {

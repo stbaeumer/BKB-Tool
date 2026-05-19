@@ -2080,7 +2080,7 @@ public static class KonfigHelper
             Hinweise = $"Geben Sie das [{Global.GetColor(Global.ColorInfoBox)}]Verzeichnis[/] an, das in SchILD unter [{Global.GetColor(Global.ColorPfadInProgrammen)}]Extras > Programmeinstellungen > Globale Einstellungen > Dokumentenverwaltung[/] als [{Global.GetColor(Global.ColorPfadInProgrammen)}]Dokumentenverzeichnis[/] eingetragen ist.",
             Datentyp = Global.Datentyp.Pfad,
             InGrundeinstellungAbfragen = true,
-            InitialAbfragen = false,
+            InitialAbfragen = true,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
         ["PfadFotosImSchILD-Ordner"] = new KonfigMeta
@@ -2090,7 +2090,7 @@ public static class KonfigHelper
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Wo werden die aufbereiteten Schüler*innenfotos in Klassenordnern gespeichert? Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]Pfad[/] an! Beispiel: [aqua]\\\\fs01\\SchILD-NRW\\Fotos[/]. Beachten Sie, dass alle Fotos im Zielordner den Benutzernamen (der Teil vor dem @ der Mail-Adresse) als Namen haben müssen.",
             Datentyp = Global.Datentyp.Pfad,
-            InGrundeinstellungAbfragen = false,
+            InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },

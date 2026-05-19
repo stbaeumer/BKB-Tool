@@ -63,6 +63,7 @@ public static class MenueHelper
     students,
     [
      new Menüeintrag(
+        configuration,
       "Mailadressen:Mo, Mi, Fr:Fehlende schulinterne Mailadressen in den Individualdaten I ergänzen",
       quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat","schuelerzusatzdaten,dat", "schueleradressen,dat", "adressen,dat", "schuelertelefonnummern,dat"]),
       students,
@@ -97,6 +98,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Alle
      ),     
      new Menüeintrag(
+      configuration,
       "Webuntis & Co.:Mo, Mi, Fr:Importdateien für Webuntis, Littera, Netman erstellen",
       quelldateien.Notwendige(configuration, ["legalguardian_,csv,optional","apprenticerepresentative_,csv,optional","student_,csv","schuelerlernabschnittsdaten,dat", "schuelerzusatzdaten,dat", "schuelererzieher,dat", "schuelerAdressen,dat", "lehrkraefte,dat", "klassen,dat", "schuelerTelefonnummern,dat"]),
       students,
@@ -197,6 +199,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Alle
      ),
      new Menüeintrag(
+      configuration,
       "Fotos aus SchILD:Mo, Mi, Fr:Schüler*innenfotos aus SchILD für Webuntis, Geevoo und Netman bereitstellen",
       quelldateien.Notwendige(configuration, ["schuelerZusatzdaten,dat"]),
       students,
@@ -224,16 +227,17 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Alle
      ),
      new Menüeintrag(
+      configuration,
       "Absentismus:Mo:Klassenleitungen über schulpflichtverletzende Schüler*innen informieren",
-      quelldateien.Notwendige(configuration, ["schuelervermerke,dat", "schuelerzusatzdaten,dat", "absenceperstudent,csv", "GPU003,txt"]),
+      quelldateien.Notwendige(configuration, ["GPU003,txt", "absenceperstudent,csv"]),
       students,
       klassen,
       [       
-       $"Schulpfichtüberwachung:",
-       $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise:[/]",
-       $"[{Global.GetColor(Global.ColorHinweise)}]#1[/] Alle SuS mit mehr als 8 unentsch. Fehlstunden werden angezeigt.",
-       $"[{Global.GetColor(Global.ColorHinweise)}]#2[/] Maßnahmen werden aus den Dateinamen in der Dokumentenverwaltung ausgelesen. Das Create-Datum wird zum Datum der Maßnahme.",
-       $"[{Global.GetColor(Global.ColorHinweise)}]#3[/] Klassenleitungen werden per Mail in cc informiert."
+       $"Die (un-)entschuldigten Fehlstunden werden aus absenceperstudent ausgelesen. Die bisherigen Maßnahmen werden aus den Schülerordnern unterhalb von dokumentenverwaltung ausgelesen. Die Klassenlehrereigenschaftenw werden aus gpu003 entnommen. Es werden nur Schüler*innen mit mehr als 8 unentschuldigten Fehlstunden angezeigt.",
+       $"Hinweise:",
+       $"1: Alle SuS mit mehr als 8 unentsch. Fehlstunden werden angezeigt.",
+       $"2: Maßnahmen werden aus den Dateinamen in der Dokumentenverwaltung ausgelesen. Das Create-Datum wird zum Datum der Maßnahme.",
+       $"3: Klassenleitungen werden per Mail in cc informiert."
       ],
       m =>
       {
@@ -279,6 +283,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
+      configuration,
       "Klassenbuchpflege:Mo:Säumige Lehrer*innen auf fehlende Klassenbucheinträge hinweisen",
       quelldateien.Notwendige(configuration, ["lehrkraefte,dat", "openperiod,pdf"]),
       students,
@@ -298,6 +303,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Alle
      ),
      new Menüeintrag(
+      configuration,
       "Gruppen & Organigramm:Mo:Gruppen & Organigramm aus Untisanrechnungen und Unterrichten für Wiki-Import erstellen",
       quelldateien.Notwendige(configuration, ["schuelervermerke,dat", "schuelerzusatzdaten,dat", "absenceperstudent,csv", "GPU006,txt", "GPU002,txt", "GPU003,txt", "klassen,dat"]),
       students,
@@ -342,6 +348,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
+        configuration,
       "Outlook:Mo:CSV-Terminexporte für Wiki aufbereiten",
       quelldateien.Notwendige(configuration,["termine_fhr,csv,optional", "termine_verwaltung,csv,optional", "termine_berufliches_gymnasium,csv,optional", "termine_kollegium,csv,optional"]),
       students,
@@ -381,6 +388,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
+        configuration,
       $"Stammdaten:Mo:Stammdaten zwischen SchILD und Untis abgleichen",
       quelldateien.Notwendige(configuration, ["faecher,dat", "GPU002,txt", "klassen,dat", "GPU003,txt"]),
       students,
@@ -418,6 +426,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Alle
      ),
      new Menüeintrag(
+      configuration,
       $"Zeugnis #1 Unterricht:14 Tage vor ZK:Unterrichte und Kurse schülergenau von Webuntis nach SchILD übertragen",
       quelldateien.Notwendige(configuration, ["studentgroupstudents,csv", "klassen,dat", "schuelerlernabschnitt,dat,optional", "schuelerleistungsdaten,dat", "lehrkraefte,dat", "kurse,dat", "schuelerbasisdaten,dat", "faecher,dat", "GPU002,TXT"]),
       students,
@@ -467,6 +476,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Alle
      ),
      new Menüeintrag(
+        configuration,
       $"Zeugnis #2 Belegung:13 Tage vor ZK:In den Klassen des Beruflichen Gymnasiums die Klausurbelegung aus Wiki in die SchILD-Leistungsdaten übernehmen",
       quelldateien.Notwendige(configuration, ["schuelerleistungsdaten,dat"]),
       students,
@@ -501,6 +511,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
+        configuration,
       $"Zeugnis #3 Fehlzeiten:3  Tage vor ZK:Die Fehlzeiten werden in bestehende Lernabschnittsdaten eingefügt",
       quelldateien.Notwendige(configuration, ["absenceperstudent,csv", "schuelerlernabschnitt,dat", "schuelerbasisdaten,dat", "gpu002,txt"]),
       students,
@@ -533,6 +544,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Alle
      ),
      new Menüeintrag(
+        configuration,
       $"Zeugnis #4 Noten:1  Tag  vor ZK:Noten aus Webuntis (MarksPerLesson) nach SchILD (SchuelerLeistungsdaten) schreiben",
       quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "schuelerleistungsdaten,dat", "marksperlesson,csv"]),
       students,
@@ -561,6 +573,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Alle
      ),
      new Menüeintrag(
+        configuration,
       $"Zeugnis #5 Listen:1  Tag  vor ZK:Notenlisten werden in Wiki veröffentlicht. Fehlende Noten werden markiert",
       quelldateien.Notwendige(configuration, ["faecher,dat","schuelerbasisdaten,dat", "schuelerleistungsdaten,dat"]),
       students,
@@ -588,6 +601,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Alle
      ),
      new Menüeintrag(
+      configuration,
       "Zeugnis #6 Teilleistungen::SchuelerTeilleistungen.dat erstellen",
       quelldateien.Notwendige(configuration, ["schuelerteilleistungen,dat", "schuelerleistungsdaten,dat", "schuelerbasisdaten,dat", "marksperlesson,csv"]),
       students,
@@ -618,6 +632,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
+      configuration,
       "Wiki::Diverse SQLite-Dateien (Praktikum etc.) erstellen",
       quelldateien.Notwendige(configuration, ["schuelervermerke,dat", "schuelerzusatzdaten,dat", "absenceperstudent,csv", "GPU006,txt", "GPU002,txt", "GPU003,txt", "klassen,dat"]),
       students,
@@ -695,6 +710,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
+        configuration,
       "Fotos (a):1. Schultag:Schüler*innen klassenweise fotografieren, kopieren, umbenennen, ablegen",
       quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "schuelerzusatzdaten,dat"]),
       students,
@@ -722,6 +738,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
+        configuration,
       "Fotos (b):1. Schultag:Schüler*innenfotos nach SchILD2 hochladen",
       quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "schuelerzusatzdaten,dat"]),
       students,
@@ -744,6 +761,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
+        configuration,
       "Klausurbelegung:1. Schultag:Wiki-Seite (mit Zuordnung der SuS zu allen Fächern) erstellen / auslesen",
       quelldateien.Notwendige(configuration, ["faecher,dat","gpu002,txt","kurse.,dat","studentgroupstudents,csv", "schuelerleistungsdaten,dat"]),
       students,
@@ -781,6 +799,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Nur177659
      ),     
      new Menüeintrag(
+        configuration,
       "Schnellmeldung:September:Relationsgruppen im September aufbereiten",
       quelldateien.Notwendige(configuration,[]),
       students,
@@ -799,6 +818,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
+        configuration,
       "Statistik:September:Unterrichtsverteilung und Anrechnungen nach SchILD importieren",
       quelldateien.Notwendige(configuration, ["studentgroupstudents,csv", "klassen,dat", "schuelerlernabschnitt,dat,optional", "schuelerleistungsdaten,dat", "schuelerbasis,dat", "lehrkraefte,dat", "kurse,dat", "lehrkraeftesonderzeiten,dat", "schuelerbasisdaten,dat", "GPU002,txt", "GPU020,txt", "GPU004,txt", "faecher,dat"]),
       students,
@@ -872,6 +892,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Alle
      ),
      new Menüeintrag(
+        configuration,
          "Blaue Briefe: April: Mahnungen gem. §50(4) SchulG erstellen",
          quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "schuelerleistungsdaten,dat", "marksperlesson,csv"]),
          students,
@@ -903,6 +924,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Alle
      ),
      new Menüeintrag(
+        configuration,
       "Klassen anlegen:vor Sommer:Neue Klassen von Untis nach SchILD übergeben und Eigenschaften anpassen",
       quelldateien.Notwendige(configuration, ["klassen,dat", "GPU003,txt", "GPU002,txt"]),
       students,
@@ -932,6 +954,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
+        configuration,
       $"Altersermäßigung:vor Sommer:Altersermäßigung berechnen für {int.Parse(Global.AktSj[0])}/{int.Parse(Global.AktSj[0]) + 1} und {int.Parse(Global.AktSj[0]) + 1}/{int.Parse(Global.AktSj[0]) + 2}",
       quelldateien.Notwendige(configuration, ["lehrkraefte,dat", "lehrkraeftesonderzeiten,dat,optional", "GPU020,txt,optional", "GPU004,txt,optional"]),
       students,
@@ -972,6 +995,7 @@ public static class MenueHelper
        Global.NurBeiDiesenSchulnummern.Alle
       ),
      new Menüeintrag(
+        configuration,
       "Sonderzeiten:Mai/Juni:Lehrkräftesonderzeiten (Anrechnungen) nach SchILD importieren",
       quelldateien.Notwendige(configuration, ["studentgroupstudents,csv", "klassen,dat", "schuelerlernabschnitt,dat,optional", "schuelerleistungsdaten,dat", "schuelerbasis,dat", "lehrkraefte,dat", "kurse,dat", "lehrkraeftesonderzeiten,dat", "schuelerbasisdaten,dat", "GPU002,txt", "GPU020,txt", "GPU004,txt", "faecher,dat"]),
       students,
@@ -1011,6 +1035,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Alle
      ),
      new Menüeintrag(
+        configuration,
       $"PDF verschlüsseln:: Von PDF-Dateien in {configuration["PfadDownloads"]} verschlüsselte Kopien erstellen",
       new Dateien(),
       students,
@@ -1029,6 +1054,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Alle
      ),     
      new Menüeintrag(
+        configuration,
       $"PDF-Seiten mailen::PDF-Seiten an darauf enthaltene E-Mail-Adressen mailen",
       quelldateien.Notwendige(configuration, ["lehrkraefte,dat"]),
       students,
@@ -1071,6 +1097,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Alle
      ),
      new Menüeintrag(
+          configuration,
       "PDF-Zeugnisse::Auslesen und in die SchILD-Dokumentenverwaltung einsortieren",
       quelldateien.Notwendige(configuration, []),
       students,
@@ -1095,6 +1122,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Alle
      ),
      new Menüeintrag(
+          configuration,
       "Zeugnis-Chat::Säumige Lehrer*innen im Teams-Chat an die Noten-Eintragung erinnern",
       quelldateien.Notwendige(configuration, ["schuelerleistungsdaten,dat"]),
       students,
@@ -1115,6 +1143,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
+          configuration,
      "Zeugnisse::Leistungsdaten (Unterrichte, Zeugnisnoten, Fehlzeiten, ...) nach SchILD importieren",
      quelldateien.Notwendige(configuration, ["absenceperstudent,csv", "studentgroupstudents,csv", "klassen,dat", "schuelerlernabschnitt,dat,optional", "schuelerleistungsdaten,dat", "lehrkraefte,dat", "kurse,dat", "schuelerbasisdaten,dat", "GPU002,txt", "GPU004,txt", "faecher,dat", "marksperlesson,csv,optional"]),
      students,
@@ -1198,7 +1227,9 @@ public static class MenueHelper
      Global.NurBeiDiesenSchulnummern.Nur000000
     ),
      
-    new Menüeintrag("Teams-Chat::Teams-Chat mit Gruppe von Lehrkräften beginnen",
+    new Menüeintrag(
+      configuration,
+      "Teams-Chat::Teams-Chat mit Gruppe von Lehrkräften beginnen",
      quelldateien.Notwendige(configuration, ["gpu002,txt","gpu003,txt"]),
      students,
      klassen,
@@ -1224,6 +1255,7 @@ public static class MenueHelper
      Global.NurBeiDiesenSchulnummern.Nur177659
     ),
     new Menüeintrag(
+        configuration,
       "Teilleistungen::SchuelerTeilleistungen.dat erstellen",
       quelldateien.Notwendige(configuration, ["schuelerteilleistungen,dat", "schuelerleistungsdaten,dat", "schuelerbasisdaten,dat", "marksperlesson,csv"]),
       students,
@@ -1254,6 +1286,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
+        configuration,
       "Sprechtag:Januar:Lehrerübersichtsseite im Wiki veröffentlichen",
       quelldateien.Notwendige(configuration, ["exportlessons,csv", "gpu004,txt", "gpu005,txt", "lehrkraefte,dat"]),
       students,
@@ -1281,6 +1314,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
+        configuration,
       "SVWS-Server: :managen",
       quelldateien.Notwendige(configuration, []),
       students,
@@ -1326,6 +1360,7 @@ public static class MenueHelper
        
     /*,
         new Menüeintrag(
+          configuration,
          "Zeugnisse #1: Lernabschnittsdaten: Fehlzeiten von Webuntis nach SchILD importieren",
          anrechnungen,
          quelldateien.Notwendige(configuration, ["schuelerbasisdaten,dat", "absenceperstudent,csv", "schuelerlernabschnitt,dat"]),
@@ -1378,6 +1413,7 @@ public static class MenueHelper
         ),
 
         new Menüeintrag(
+          configuration,
          "Mahnungen: Gem. §50(4) SchulG erstellen",
          anrechnungen,
          quelldateien.Notwendige(configuration, ["marksperlesson,csv", "schuelerleistungsdaten,dat", "exportlessons,csv", "studentgroupstudents,csv", "schuelerleistungsdaten,dat", "schuelerbasisdaten,dat"]),
