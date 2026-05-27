@@ -2491,7 +2491,7 @@ public class Menüeintrag
                 {
                     foreach (var studen in uniqueStudents)
                     {
-                        if(studen.Nachname == "Sadiku" && studen.Vorname == "Almir")
+                        if(studen.Nachname == "Drüing" && studen.Vorname == "Julian")
                         {
                             string aaaa = "";
                         }
@@ -2501,6 +2501,11 @@ public class Menüeintrag
                         var student = Students.OrderBy(x => int.TryParse(x.Status, out var status) ? status : 0).FirstOrDefault(x => x.Nachname == studen.Nachname && x.Vorname == studen.Vorname && x.Geburtsdatum == studen.Geburtsdatum && x.Klasse == studen.Klasse);
 
                         if (student == null) continue;
+
+                        if (student.Nachname == "Drüing" && student.Vorname == "Julian")
+                        {
+                            string aa = "";
+                        }
 
                         // Wenn der Schüler in Webuntis nicht existiert, ...
                         if (!webuntisStudents.Any(rec =>
@@ -2599,7 +2604,7 @@ public class Menüeintrag
 
                         if (Path.GetFileName(zieldateiname).ToLower().Contains("stammdaten-schueler"))
                         {
-                            if (student.Nachname == "Sadiku" && student.Vorname == "Almir")
+                            if (student.Nachname == "Drüing" && student.Vorname == "Julian")
                             {
                                 string aa = "";
                             }
@@ -2698,7 +2703,7 @@ public class Menüeintrag
                                     record.EMINUSMail = sz["schulische E-Mail"].ToString();
                                     record.Familienname = student.Nachname;
 
-                                    if (student.Nachname == "Sadiku")
+                                    if (student.Nachname == "Drüing" && student.Vorname == "Julian")
                                     {
                                         string aa = "";
                                     }
@@ -2763,6 +2768,11 @@ public class Menüeintrag
                             {
                                 record.Schlüssel = sz["schulische E-Mail"].ToString().Split('@')[0];
                             }
+
+                            if (student.Nachname == "Drüing" && student.Vorname == "Julian")
+                                    {
+                                        string aa = "";
+                                    }
 
                             record.EMINUSMail = sz["schulische E-Mail"].ToString();
                             record.Familienname = student.Nachname;

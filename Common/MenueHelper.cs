@@ -107,8 +107,8 @@ public static class MenueHelper
        $"Es werden jetzt verschiedene Dateien in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{pfadDownloads}[/] erstellt: " +
        $"[bold {Global.GetColor(Global.ColorPfadInDateien)}]Webuntis-Stammdaten-Schueler.csv[/], [bold {Global.GetColor(Global.ColorPfadInDateien)}]Webuntis-Stammdaten-Betriebe.csv[/], [bold {Global.GetColor(Global.ColorPfadInDateien)}]Webuntis-Stammdaten-Erzieher.csv[/], [bold {Global.GetColor(Global.ColorPfadInDateien)}]-ImportNachLittera.xml[/], [bold {Global.GetColor(Global.ColorPfadInDateien)}]-ImportNachNetman.csv[/]",
        $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis:[/]",
+       $"[{Global.GetColor(Global.ColorHinweise)}]#2:[/] Damit korrekt ausgeschult wird, muss auch Abgang und Abschluss beim SchILD-Export angehakt werden. SuS werden 6 Wochen nach Abgang oder Abschluss aus Webuntis/Teams entfernt.",       
        $"[{Global.GetColor(Global.ColorHinweise)}]#1:[/] Das Zeugnisdatum des letzten Zeugnisses in einer Klasse wird zum Webuntis-Austrittsdatum bei Schüler*innen, deren Status weder aktiv noch extern ist.",
-       $"[{Global.GetColor(Global.ColorHinweise)}]#2:[/] Damit korrekt ausgeschult wird, muss auch Abgang und Abschluss beim SchILD-Export angehakt werden.",
        $"[{Global.GetColor(Global.ColorHinweise)}]#3:[/] Für den Betriebeimport sollte im Webuntis-Importprofil die SchildAdressId auf Schlüssel (externe) matchen.",
        $"[{Global.GetColor(Global.ColorHinweise)}]#4:[/] Wenn ein Schüler mehrfach (als Duplikat) aktiv in SchILD ist, wird diejenige Klasse mit dem jüngsten Bildungsgangbeginn zur Klasse des Schülers in Webuntis."
       ],
@@ -348,7 +348,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
-        configuration,
+      configuration,
       "Outlook:Mo:CSV-Terminexporte für Wiki aufbereiten",
       quelldateien.Notwendige(configuration,["termine_fhr,csv,optional", "termine_verwaltung,csv,optional", "termine_berufliches_gymnasium,csv,optional", "termine_kollegium,csv,optional"]),
       students,
@@ -388,7 +388,7 @@ public static class MenueHelper
       Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
-        configuration,
+      configuration,
       $"Stammdaten:Mo:Stammdaten zwischen SchILD und Untis abgleichen",
       quelldateien.Notwendige(configuration, ["faecher,dat", "GPU002,txt", "klassen,dat", "GPU003,txt"]),
       students,
