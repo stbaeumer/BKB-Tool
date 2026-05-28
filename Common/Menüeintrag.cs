@@ -4783,7 +4783,7 @@ public class Menüeintrag
                     if (interessierendeGründe.Contains("200") && grund == "200")
                     {
                         // Spalte 4      
-                        lehrer.ProzentStelleInSchild = lehrer.GetProzentStelle(configuration);
+                        lehrer.ProzentStelleInUntis = lehrer.GetProzentStelle(configuration);
                         // Spalte 5
                         lehrer.AlterAmErstenSchultagDesJahres = lehrer.GetAlterAmErstenSchultagDesSchuljahres(akt);
                         // Spalte 6
@@ -4809,7 +4809,7 @@ public class Menüeintrag
                                 lehrer.Kürzel,
                                 lehrer.Geburtsdatum.ToString("dd.MM.yy"),
                                 deputatLautSchildUndUntis,
-                                lehrer.ProzentStelleInSchild == 0 ? "-" : lehrer.ProzentStelleInSchild.ToString("0.##", CultureInfo.InvariantCulture),
+                                lehrer.ProzentStelleInUntis == 0 ? "-" : lehrer.ProzentStelleInUntis.ToString("0.##", CultureInfo.InvariantCulture),
                                 lehrer.AlterAmErstenSchultagDesJahres == 0 ? "-" : lehrer.AlterAmErstenSchultagDesJahres.ToString(),
                                 lehrer.AlterAmErstenSchultagDesKommendenJahres == 0 ? "-" : lehrer.AlterAmErstenSchultagDesKommendenJahres.ToString(),
                                 istSchildUndUntis,

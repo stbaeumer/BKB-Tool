@@ -33,7 +33,7 @@ public class Lehrer
     public string? Raum { get; internal set; }
     public DateTime Geburtsdatum { get; internal set; }
     public double AusgeschütteteAltersermäßigung { get; internal set; }
-    public int ProzentStelleInSchild { get; internal set; }
+    public int ProzentStelleInUntis { get; internal set; }
     public int AlterAmErstenSchultagDesJahres { get; internal set; }
     public string? Flags { get; internal set; }
     public string Beschreibung { get; internal set; }
@@ -65,7 +65,7 @@ public class Lehrer
     {
         var volleStelle = float.TryParse(configuration["VolleStelle"]?.Replace(',', '.'), NumberStyles.Any, CultureInfo.InvariantCulture, out float volleStelleValue) ? volleStelleValue : 25.5f;
         
-        return Convert.ToInt32(Math.Floor(100 / volleStelle * this.DeputatLautSchild));
+        return Convert.ToInt32(Math.Floor(100 / volleStelle * this.DeputatLautUntis));
     }
 
     public DateTime GetGeburtsdatum(string geburtsdatum)
@@ -88,7 +88,7 @@ public class Lehrer
         {
             case >= 60:
                 {
-                    switch (ProzentStelleInSchild)
+                    switch (ProzentStelleInUntis)
                     {
                         case >= 96 when (ausgeschütteteAltersermäßigung != 3 || ausgeschütteteAltersermäßigung < 0):
                             {
@@ -108,7 +108,7 @@ public class Lehrer
                 }
             case >= 55 and < 60:
                 {
-                    switch (ProzentStelleInSchild)
+                    switch (ProzentStelleInUntis)
                     {
                         case 100 when (ausgeschütteteAltersermäßigung != 1 || ausgeschütteteAltersermäßigung < 0):
                             {
@@ -131,7 +131,7 @@ public class Lehrer
         {
             case >= 60:
             {
-                switch (ProzentStelleInSchild)
+                switch (ProzentStelleInUntis)
                 {
                     case >= 96:
                     {
@@ -151,7 +151,7 @@ public class Lehrer
             }
             case >= 55 and < 60:
             {
-                switch (ProzentStelleInSchild)
+                switch (ProzentStelleInUntis)
                 {
                     case 100:
                     {                        
