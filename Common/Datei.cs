@@ -1588,24 +1588,31 @@ public class Datei : List<dynamic>
     {
         var mitgliederMail = "";
 
-        if (!string.IsNullOrEmpty(urlMitte))
+        try
         {
-            mitgliederMail = this
-            .Where(rec =>
+            if (!string.IsNullOrEmpty(urlMitte))
             {
-                if (rec == null) return false;
-                var dict = (IDictionary<string, object>)rec;
-                return dict != null && dict["MitgliederMail"] != null && !string.IsNullOrWhiteSpace(dict["MitgliederMail"].ToString());
-            })
-            .Select(rec => ((IDictionary<string, object>)rec)["MitgliederMail"].ToString())
-            .LastOrDefault();
+                mitgliederMail = this
+                .Where(rec =>
+                {
+                    if (rec == null) return false;
+                    var dict = (IDictionary<string, object>)rec;
+                    return dict != null && dict["MitgliederMail"] != null && !string.IsNullOrWhiteSpace(dict["MitgliederMail"].ToString());
+                })
+                .Select(rec => ((IDictionary<string, object>)rec)["MitgliederMail"].ToString())
+                .LastOrDefault();
 
-            // Wenn MitgliederMail vorhanden ist, verwende es in der URL
-            if (!string.IsNullOrEmpty(mitgliederMail))
-            {
-                urlMitte = mitgliederMail;
+                // Wenn MitgliederMail vorhanden ist, verwende es in der URL
+                if (!string.IsNullOrEmpty(mitgliederMail))
+                {
+                    urlMitte = mitgliederMail;
+                }
             }
-        }
+         }   
+         catch (Exception ex)
+                 {}          
+        
+        
         
 
         // Wenn der URL insgesamt länger als 300 Zeichen ist, wird der urlMitte solange gekürzt, bis die URL passt.
