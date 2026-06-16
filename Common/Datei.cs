@@ -1416,7 +1416,7 @@ public class Datei : List<dynamic>
             var netmanZipPfad = Path.Combine(Path.GetDirectoryName(AbsoluterPfad),
                 Path.GetFileNameWithoutExtension(AbsoluterPfad) + "_Netman-Kurzname.zip");
 
-            AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start($"Fotos zippen (Netman-Kurzname) ...", ctx =>
+            /*AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start($"Fotos zippen (Netman-Kurzname) ...", ctx =>
             {
                 using (FileStream zipStream = File.Create(geevooZipPfad))
                 using (ZipOutputStream zip = new ZipOutputStream(zipStream))
@@ -1474,7 +1474,7 @@ public class Datei : List<dynamic>
                     zip.IsStreamOwner = true;
                 }
             });
-            Global.ZeileSchreiben("Fotos gezippt (Geevoo-Mail)", geevooZipPfad, ConsoleColor.Green, ConsoleColor.White);
+            Global.ZeileSchreiben("Fotos gezippt (Geevoo-Mail)", geevooZipPfad, ConsoleColor.Green, ConsoleColor.White);*/
         }
         catch (Exception ex)
         {

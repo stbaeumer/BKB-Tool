@@ -621,7 +621,7 @@ public static class MenueHelper
         [
          datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
          datei => datei.Verarbeiten(quelldateien, Global.Modus.Filtern),
-         datei => datei.OeffneWebseite("https://teams.microsoft.com/l/chat/0/0?users=", datei.UrlMitte, datei.UrlRechts),
+         //datei => datei.OeffneWebseite("https://teams.microsoft.com/l/chat/0/0?users=", datei.UrlMitte, datei.UrlRechts),
          datei => datei.Erstellen()
         ],
         ["Nachname", "Vorname", "Geburtsdatum", "Jahr", "Abschnitt", "Fach", "Datum"],
