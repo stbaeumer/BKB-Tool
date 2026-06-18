@@ -91,7 +91,7 @@ public static class MenueHelper
         datei => datei.Erstellen()
        ],
        ["Nachname", "Vorname", "Geburtsdatum"],
-       ["BeginnBildungsgang", "Telefon-Nr.","Fax/Mobilnr","bisherige ID"],
+       ["BeginnBildungsgang", "Telefon-Nr.","Fax/Mobilnr","bisherige ID", "Entlassjahrgang", "Haltestelle", "Entlassdatum"],
        "|", '\'', new UTF8Encoding(false), false);
       },
       Global.Rubrik.WöchtentlicheArbeiten,

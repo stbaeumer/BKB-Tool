@@ -4,7 +4,7 @@
 @using Microsoft.JSInterop
 @inject IJSRuntime JS
 
-<h3>Mailadressen erg‰nzen (SchuelerZusatzdaten)</h3>
+<h3>Mailadressen erg√§nzen (SchuelerZusatzdaten)</h3>
 
 <InputFile OnChange="OnInputFileChange" accept=".dat,.csv" />
 <div style="margin-top:10px;">
@@ -30,7 +30,7 @@
     private async Task OnInputFileChange(InputFileChangeEventArgs e)
     {
         uploadedFile = e.File;
-        Message = $"Datei ausgew‰hlt: {uploadedFile.Name} ({uploadedFile.Size} bytes)";
+        Message = $"Datei ausgew√§hlt: {uploadedFile.Name} ({uploadedFile.Size} bytes)";
     }
 
     public async Task Process()
@@ -39,7 +39,7 @@
         {
             if (uploadedFile == null)
             {
-                Message = "Keine Datei ausgew‰hlt.";
+                Message = "Keine Datei ausgew√§hlt.";
                 return;
             }
 
