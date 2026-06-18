@@ -186,7 +186,7 @@ private bool IstMailadresseGültig(string email)
     {
      smtpClient.ServerCertificateValidationCallback = (s, c, h, e) => true; // SSL-Zertifikatsvalidierung deaktivieren
      smtpClient.Connect(smtpServer, smtpPort, MailKit.Security.SecureSocketOptions.StartTls);
-     smtpClient.Authenticate(senderEmail, senderPassword);
+     //smtpClient.Authenticate(senderEmail, senderPassword);
      smtpClient.Send(email);
      smtpClient.Disconnect(true);
     }

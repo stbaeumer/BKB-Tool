@@ -1485,7 +1485,7 @@ public class Datei : List<dynamic>
     public void ZippenMitKennwort(IConfiguration configuration)
     {
         ZipPfad = Path.Combine(AbsoluterPfad + ".zip");
-
+        
         try
         {
             AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start($"Zippen ...", ctx =>

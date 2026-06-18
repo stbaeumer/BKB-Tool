@@ -158,20 +158,20 @@ public static class MenueHelper
            $"[{Global.GetColor(Global.ColorHinweise)}]#3:[/] Profil: Schuelerimport, dann Vorschau",
            $"Mehr zum Profil Schuelerimport: [{Global.GetColor(Global.ColorHyperlink)}][link=https://github.com/stbaeumer/BKB-Tool/wiki]https://github.com/stbaeumer/BKB-Tool/wiki[/][/]"
           ]
-         ),
+         ),         
          new Datei(
           "ImportNachNetman.csv", new string[] { }, new string[] { }, ",", '\'', new UTF8Encoding(false), false,
           [
            datei => datei.Erstellen(),
-           datei => datei.ZippenMitKennwort(configuration),
+           //datei => datei.ZippenMitKennwort(configuration),
            datei => datei.Mailen(
             configuration,
-            "Webuntis-Import durchgeführt", 
-            "SuS, Eltern, Betriebszugehörigkeiten und Fotos nach Webuntis und Geevoo importiert. Importdatei für o365 und Littera bereitgestellt.",
+            "Webuntis-Netman-Geevoo", 
+            "SuS, Eltern, Betriebszugehörigkeiten und Fotos nach Webuntis und Geevoo importiert. Importdatei für o365.",
             configuration["NetmanMailReceiver"].Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(m => m.Trim()).ToList(),
             "".Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(m => m.Trim()).ToList(),
             configuration["NetmanMailBccReceiver"].Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(m => m.Trim()).ToList(),
-            new List<string>() { datei.ZipPfad } 
+            new List<string>() { datei.AbsoluterPfad } 
            )
           ],
           [           
@@ -184,14 +184,23 @@ public static class MenueHelper
           "ImportNachLittera.xml", new string[] { }, new string[] { }, ",", '\'', new UTF8Encoding(false), false,
           [
            datei => datei.Erstellen(),
-           datei => datei.Verschieben(configuration["PfadLitteraImport"])
+           //datei => datei.Verschieben(configuration["PfadLitteraImport"])
+           datei => datei.Mailen(
+            configuration,
+            "Webuntis-Netman-Geevoo", 
+            "Importdatei für Littera",
+            configuration["NetmanMailReceiver"].Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(m => m.Trim()).ToList(),
+            "".Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(m => m.Trim()).ToList(),
+            configuration["NetmanMailBccReceiver"].Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(m => m.Trim()).ToList(),
+            new List<string>() { datei.AbsoluterPfad } 
+           )
           ],
           [
            $"Es wird jetzt die Datei [bold {Global.GetColor(Global.ColorPfadInDateien)}]" + Path.Combine(configuration["PfadDownloads"] ?? "", DateTime.Now.ToString("yyyyMMdd-") + @"-ImportNachLittera.csv") + "[/] erstellt.",
            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #1:[/] Auch Abschluss und Abgang muss beim SchILD-Export angehakt werden.",
            $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis #2:[/] Schüler*innen werden 42 Tage nach dem Abgangszeugnis/Abschlusszeugnis ausgeschult. Wenn kein letztes Zeugnisdatum bei Abgängern/Abgeschlossenen ermittelt werden kann, dann wird sofort ausgeschult."
           ]
-         )
+         ),
         ]
        );
       },

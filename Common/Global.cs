@@ -842,8 +842,8 @@ public static class Global
                             return ValidationResult.Error("[]  Eingabe muss @ enthalten und einen Punkt enthalten.[/]");
                         if (!string.IsNullOrEmpty(n) && !n.Contains(".") && !string.IsNullOrWhiteSpace(n))
                             return ValidationResult.Error("[]  Eingabe muss @ enthalten und einen Punkt enthalten.[/]");
-                        if (!string.IsNullOrWhiteSpace(n) && !(n.Contains(".de") || n.Contains(".org")))
-                            return ValidationResult.Error("[]  Zulässige TLDs: .de und .org.[/]");
+                        if (!string.IsNullOrWhiteSpace(n) && !(n.Contains(".de") || n.Contains(".org") || n.Contains(".wiki")))
+                            return ValidationResult.Error("[]  Zulässige TLDs: .de, .org und .wiki.[/]");
                         return ValidationResult.Success();
                     })
                 .DefaultValue<string>(defaultValue)
@@ -1947,7 +1947,7 @@ public static class KonfigHelper
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie die [{Global.GetColor(Global.ColorInfoBox)}]schulische Mail-Domain[/] für Mailadressen der Schüler*innen an. Bsp.: [{Global.GetColor(Global.ColorHyperlink)}]@students.berufskolleg-borken.de[/]. Ihre Eingabe muss mit [{Global.GetColor(Global.ColorHyperlink)}]@[/] beginnen und mit [{Global.GetColor(Global.ColorHyperlink)}].de[/] etc. enden.",
             Datentyp = Global.Datentyp.Maildomain,
-            InGrundeinstellungAbfragen = false,
+            InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
@@ -1958,7 +1958,7 @@ public static class KonfigHelper
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie die [{Global.GetColor(Global.ColorInfoBox)}]Empfänger-E-Mail-Adresse[/] der Netman-Datei an.",
             Datentyp = Global.Datentyp.Mail,
-            InGrundeinstellungAbfragen = false,
+            InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
@@ -1969,7 +1969,7 @@ public static class KonfigHelper
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie die [{Global.GetColor(Global.ColorInfoBox)}]BCC-Empfänger-E-Mail-Adresse[/] der Netman-Datei an.",
             Datentyp = Global.Datentyp.Mail,
-            InGrundeinstellungAbfragen = false,
+            InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
@@ -2101,7 +2101,7 @@ public static class KonfigHelper
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]Littera-Ziel-Pfad[/] an, wohin die neue Datei nach dem Erstellen verschoben werden soll.",
             Datentyp = Global.Datentyp.Pfad,
-            InGrundeinstellungAbfragen = false,
+            InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
@@ -2178,7 +2178,7 @@ public static class KonfigHelper
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie das [{Global.GetColor(Global.ColorInfoBox)}]SMTP-Kennwort[/] an.",
             Datentyp = Global.Datentyp.Kennwort,
-            InGrundeinstellungAbfragen = false,
+            InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
@@ -2189,7 +2189,7 @@ public static class KonfigHelper
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]SMTP-Port[/] an.",
             Datentyp = Global.Datentyp.String,
-            InGrundeinstellungAbfragen = false,
+            InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
@@ -2200,7 +2200,7 @@ public static class KonfigHelper
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]SMTP-Server[/] an.",
             Datentyp = Global.Datentyp.String,
-            InGrundeinstellungAbfragen = false,
+            InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
@@ -2211,7 +2211,7 @@ public static class KonfigHelper
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]SMTP-Benutzer[/] (Absender-E-Mail-Adresse) an.",
             Datentyp = Global.Datentyp.String,
-            InGrundeinstellungAbfragen = false,
+            InGrundeinstellungAbfragen = true,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
