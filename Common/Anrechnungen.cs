@@ -120,8 +120,8 @@ WITH RankedCountValues AS (
                 cv.COUNT_VALUE_ID ASC
         ) AS rn
     FROM 
-        [master].[dbo].[Teacher] AS t
-        LEFT JOIN [master].[dbo].[CountValue] AS cv 
+        [dbo].[Teacher] AS t
+        LEFT JOIN [dbo].[CountValue] AS cv 
             ON cv.TEACHER_ID = t.TEACHER_ID
             AND cv.SCHOOLYEAR_ID = t.SCHOOLYEAR_ID
             AND cv.VERSION_ID = t.VERSION_ID
@@ -129,11 +129,11 @@ WITH RankedCountValues AS (
             AND cv.VERSION_ID = 1
             AND cv.Deleted = 0
             AND NOT (cv.Text IS NULL AND cv.DESCRIPTION_ID IS NULL)
-        LEFT JOIN [master].[dbo].[CV_Reason] AS cvr 
+        LEFT JOIN [dbo].[CV_Reason] AS cvr 
             ON cv.CV_REASON_ID = cvr.CV_REASON_ID
             AND cv.SCHOOLYEAR_ID = cvr.SCHOOLYEAR_ID
             AND cv.VERSION_ID = cvr.VERSION_ID
-        LEFT JOIN [master].[dbo].[Description] AS d 
+        LEFT JOIN [dbo].[Description] AS d 
             ON cv.DESCRIPTION_ID = d.DESCRIPTION_ID
             AND cv.SCHOOLYEAR_ID = d.SCHOOLYEAR_ID
             AND cv.VERSION_ID = d.VERSION_ID
