@@ -5964,7 +5964,7 @@ public class Menüeintrag
 
   foreach (var klasse in verschiedeneKlassenDerStudents)
   {
-   zieldatei.Name = $"oeffentlich:Klausurbelegung:{klasse}-{configuration["InteressierendesSchuljahr"]}-{configuration["Abschnitt"]}";
+   zieldatei.Name = $"oeffentlich:klausurbelegung-kurswahlen:{klasse}-{configuration["InteressierendesSchuljahr"]}-{configuration["Abschnitt"]}";
    zieldatei.Add($"====== Klausurbelegung {klasse} Schuljahr: {configuration["InteressierendesSchuljahr"]} Abschnitt: {configuration["Abschnitt"]} ======");
    zieldatei.Add("");
 
@@ -6135,7 +6135,7 @@ public class Menüeintrag
   foreach (var klasse in verschiedeneKlassenDerStudents)
   {
    // Wiki-Seite lesen
-   string seitenName = $"oeffentlich:Klausurbelegung:{klasse}-{configuration["InteressierendesSchuljahr"]}-{configuration["Abschnitt"]}"; // Pfad im Wiki
+   string seitenName = $"oeffentlich:klausurbelegung-kurswahlen:{klasse}-{configuration["InteressierendesSchuljahr"]}-{configuration["Abschnitt"]}"; // Pfad im Wiki
    var seitenInhalt = dokuwikiZugriff.Proxy.GetPage(seitenName);
 
    // Tabelle parsen

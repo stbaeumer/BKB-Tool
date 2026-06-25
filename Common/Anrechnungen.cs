@@ -27,12 +27,12 @@ public partial class Anrechnungen : List<Anrechnung>
         try
         {
             var queryString = $"""
-                               SELECT 
-                               CV_REASON_ID, 
-                               Name, 
-                               Longname
-                               FROM CV_Reason
-                               WHERE (SCHOOLYEAR_ID={Global.AktSj[0]}{Global.AktSj[1]});
+                               SELECT
+                                   cr.CV_REASON_ID,
+                                   cr.Name,
+                                   cr.Longname
+                               FROM dbo.CV_Reason cr
+                               WHERE (cr.SCHOOLYEAR_ID={Global.AktSj[0]}{Global.AktSj[1]});
                                """;
 
             var odbcCommand = new SqlCommand(queryString, odbcConnection);

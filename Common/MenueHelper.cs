@@ -776,7 +776,7 @@ public static class MenueHelper
       students,
       klassen,
       [
-       $"Es wird für jede Klasse eine Wiki-Seite erstellt unterhalb von https://bkb.wiki/oeffentlich:klausurbelegung:start. Die Seite enthält eine Tabelle mit allen Schüler*innen der Klasse und allen Fächern, die die Schüler*innen belegen. Klassenleitungen können dort einfach alle Belegungen eintragen. Am besten wird die Tabelle von Klassenleitungen vor den Sommerferien erstellt.",
+       $"Es wird für jede Klasse eine Wiki-Seite erstellt unterhalb von https://bkb.wiki/oeffentlich:klausurbelegung-kursplanung:start. Die Seite enthält eine Tabelle mit allen Schüler*innen der Klasse und allen Fächern, die die Schüler*innen belegen. Klassenleitungen können dort einfach alle Belegungen eintragen. Am besten wird die Tabelle von Klassenleitungen vor den Sommerferien erstellt.",
        $"[{Global.GetColor(Global.ColorHinweise)}]Verarbeitungsoptionen:[/]",
        $"[{Global.GetColor(Global.ColorHinweise)}]#1[/] Wiki-Tabelle aus der GPU002 erstellen und als Seite anlegen:",
        $"   Diese Option ist direkt vor den Sommerferien sinnvoll, damit Kurswahlen durchgeführt werden können.",
@@ -797,7 +797,7 @@ public static class MenueHelper
        if(configuration["Klausurbelegung"] == "1" || configuration["Klausurbelegung"] == "3")
         m.KlausurbelegungWikiSeiteErstellen(
          configuration,
-         $"oeffentlich:klausurbelegung:{configuration["InteressierendesSchuljahr"]}:",
+         $"oeffentlich:klausurbelegung-kurswahlen:{configuration["InteressierendesSchuljahr"]}:",
          [
           datei => datei.PutPage(),
           datei => datei.OeffneWebseite($"https://bkb.wiki/{datei.Name}"),
