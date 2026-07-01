@@ -2480,10 +2480,8 @@ public class Menüeintrag
                 }
 
                 // Ab hier die Neuanlagen
-
                 
                 var aaaaa = uniqueStudents.Where(s => s.Nachname == "Sadiku" && s.Vorname == "Almir" && s.Status == "2").ToList();
-
 
                 AnsiConsole.Status()
                 .Spinner(Spinner.Known.Dots)
@@ -2703,7 +2701,7 @@ public class Menüeintrag
                                     record.EMINUSMail = sz["schulische E-Mail"].ToString();
                                     record.Familienname = student.Nachname;
 
-                                    if (student.Nachname == "Drüing" && student.Vorname == "Julian")
+                                    if (student.Nachname == "Abdo" && student.Vorname == "Sidar")
                                     {
                                         string aa = "";
                                     }

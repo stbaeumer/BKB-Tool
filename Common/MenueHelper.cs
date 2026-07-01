@@ -273,7 +273,7 @@ public static class MenueHelper
         30, // Nach so vielen Tagen verjähren unentschuldigte Fehlstunden für Unbescholtene.
         90, // Nach so vielen Tagen verjähren unentschuldigte Fehlstunden für SuS mit Maßnahme
         lehrers,
-        [
+        [         
          datei => datei.PutPage(),
          datei => datei.OeffneWebseite("https://bkb.wiki/schulpflichtueberwachung"),
          datei => datei.Mailen(
@@ -334,11 +334,13 @@ public static class MenueHelper
        m.GetGruppen(
         configuration,
         [
-         zieldatei => zieldatei.Erstellen(),
+         datei => quelldateien.Add(new Datei(configuration).GetSchemaDynamisch("gruppen", ["Page", "MitgliederKuerzel", "Mitglieder", "MitgliederMail"], ["Page"], [])),
+         datei => datei.AnhandDieserSchlüsselAttributeWirdVerglichen = ["Page"],
+         zieldatei => zieldatei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
          datei => datei.OeffneWebseite("https://bkb.wiki/oeffentlich:organigramm?do=admin&page=struct_schemas&table=gruppen"),
         ],
         anrechnungen,
-        Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-gruppen.csv"),
+        "gruppen.struct",
         lehrers,
         ",", '\"', new UTF8Encoding(false), true);
        m.GetUntisAnrechnungen(

@@ -29,7 +29,6 @@ public struct StructField
     public string label;
     public string type;
     public string multi;
-    
 }
 
 public interface IDokuWikiApi : IXmlRpcProxy
@@ -48,6 +47,10 @@ public interface IDokuWikiApi : IXmlRpcProxy
 
     [XmlRpcMethod("wiki.putPage")]
     bool PutPage(string page, string content, XmlRpcStruct options);    
+
+    // NEU: Holt die Tabellendaten (Aggregationen) des Struct-Plugins
+    [XmlRpcMethod("plugin.struct.getAggregationData")]
+    object[] GetAggregationData(string[] schemas, string[] columns, object[] filters, string sortBy);
 }
 
 public class DokuwikiZugriff
@@ -78,8 +81,8 @@ public class DokuwikiZugriff
 
     public string GetPage(string page)
     {
-        var pageContent = Proxy.GetPage("start");
-        //Console.WriteLine($"Seiteninhalt: {pageContent}");
+        // Korrigiert: Nutzt jetzt den Parameter 'page' statt fest "start"
+        var pageContent = Proxy.GetPage(page); 
         return pageContent;
     }
     

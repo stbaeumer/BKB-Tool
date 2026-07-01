@@ -55,6 +55,9 @@ public class Datei : List<dynamic>
     public List<string> KlassenNamen { get; set; } = null!;
     public Students IStudents { get; set; } = null!;
 
+    // In dieser Property wird das Endergebnis als lesbarer Text gespeichert    
+    public List<Dictionary<string, string>> SchemaData { get; set; } = new List<Dictionary<string, string>>();
+
     /// <summary>
     /// Am Ende werden neu erstellte Dateien mit vorhandenen verglichen. Diese Eigenschaften werden für den Dateivergleich ignoriert.
     /// </summary>
@@ -105,6 +108,11 @@ public class Datei : List<dynamic>
         Importhinweise = importhinweise;
     }
     
+public Datei(IConfiguration configuration)
+    {
+        Konfiguration = configuration;
+    }
+
     public Datei(
         string name,        
         List<Action<Datei>> funktionen,
@@ -2073,7 +2081,113 @@ public class Datei : List<dynamic>
         DokuwikiZugriff.Proxy.PutPage(Name, string.Join("\n", this), new XmlRpcStruct());
     }
 
-    internal void ChatErzeugen(Menüeintrag m)
+    /// <summary>
+    /// GetSchemaDynamisch("gruppen", ["Page", "MitgliederKuerzel", "Mitglieder", "MitgliederMail"])
+    /// </summary>
+    /// <param name="schemaName"></param>
+    /// <param name="benutzerSpalten"></param>
+    internal Datei GetSchemaDynamisch(string schemaName, string[] benutzerSpalten, string[] AnhandDieserSchlüsselAttributeWirdVerglichen, string[] DieseAttributeWerdenBeimVergleichIgnoriert)
+    {        
+        this.AnhandDieserSchlüsselAttributeWirdVerglichen = AnhandDieserSchlüsselAttributeWirdVerglichen;
+        this.DieseAttributeWerdenBeimVergleichIgnoriert = DieseAttributeWerdenBeimVergleichIgnoriert;
+
+        var configuration = Global.Konfig("WikiKleineAenderung", Global.Modus.Update, Konfiguration);
+        var wikiZugriff = new DokuwikiZugriff(configuration);
+        AbsoluterPfad = schemaName;
+
+        // 1. Präfixe für die API automatisch hinzufügen (z.B. "gruppen.MitgliederKuerzel")
+        string[] schemas = { schemaName };
+        string[] apiColumns = benutzerSpalten
+            .Select(s => s.Equals("Page", StringComparison.OrdinalIgnoreCase) ? $"{schemaName}.Page" : $"{schemaName}.{s}")
+            .ToArray();
+
+        object[] filters = { };
+        string sortBy = "";
+
+        // 2. API Abfrage
+        object[] ergebnis = wikiZugriff.Proxy.GetAggregationData(schemas, apiColumns, filters, sortBy);
+
+        // 3. Ergebnis-Property und Records leeren und neu befüllen
+        SchemaData.Clear();
+        Clear();
+
+        foreach (object zeileObj in ergebnis)
+        {
+            XmlRpcStruct zeile = (XmlRpcStruct)zeileObj;
+            var datenZeile = new Dictionary<string, string>();
+
+            foreach (var spalte in benutzerSpalten)
+            {
+                string apiKey = spalte.Equals("Page", StringComparison.OrdinalIgnoreCase) ? $"{schemaName}.Page" : $"{schemaName}.{spalte}";
+                datenZeile[spalte] = ConvertStructValueToString(zeile, apiKey);
+            }
+            SchemaData.Add(datenZeile);
+
+            dynamic record = new ExpandoObject();
+            var recordDict = (IDictionary<string, object>)record;
+            foreach (var spalte in benutzerSpalten)
+                recordDict[spalte] = datenZeile[spalte];
+            Add(record);
+        }
+
+        // 4. Spectre.Console Tabelle initialisieren
+        var table = new Table();
+        table.Title($"Vorhandene Werte aus dem Schema [bold {Global.GetColor(Global.ColorHinweise)}] {schemaName}[/]");
+        table.Border(TableBorder.Rounded);
+        table.Centered();
+        table.Expand();
+
+        // Spalten hinzufügen (Lfd. Nr als erste Spalte)
+        table.AddColumn(new TableColumn("[yellow]ldf. Nr[/]").Centered());
+        
+        // Die dynamischen Spalten hinzufügen
+        foreach (var spalte in benutzerSpalten)
+        {
+            table.AddColumn(new TableColumn($"[cyan]{spalte}[/]"));
+        }
+
+        // 5. Zeilen zur Tabelle hinzufügen (maximal 3)
+        int anzeigeLimit = Math.Min(3, SchemaData.Count);
+        for (int i = 0; i < anzeigeLimit; i++)
+        {
+            var zeile = SchemaData[i];
+            var zeilenInhalt = new List<string> { (i + 1).ToString() }; // Laufende Nummer
+            
+            foreach (var spalte in benutzerSpalten)
+            {
+                zeilenInhalt.Add(zeile[spalte]);
+            }
+
+            table.AddRow(zeilenInhalt.ToArray());
+        }
+
+        // 6. Gesamtsumme als Fußzeile (Footer) einfügen
+        // Wir fügen leere Fußzeilen für die restlichen Spalten hinzu, damit das Layout stimmt
+        var footerZeile = new List<string> { $"[bold green]Gesamt: {SchemaData.Count}[/]" };
+        for (int i = 0; i < benutzerSpalten.Length; i++)
+        {
+            footerZeile.Add(string.Empty);
+        }
+        table.AddEmptyRow(); // Eine Leerzeile als optischer Trenner vor dem Footer
+        table.AddRow(footerZeile.ToArray());
+
+        // 7. Tabelle ausgeben
+        AnsiConsole.Write(table);
+
+        return this;
+    }
+
+    private string ConvertStructValueToString(XmlRpcStruct zeile, string key)
+    {
+        if (!zeile.ContainsKey(key) || zeile[key] == null) return "";
+
+        if (zeile[key] is string[] array) return string.Join(", ", array);
+        if (zeile[key] is object[] objArray) return string.Join(", ", objArray);
+
+        return zeile[key].ToString();
+    }
+
+ internal void ChatErzeugen(Menüeintrag m)
     {
         var table = new Table();
         table.AddColumn("Nr.");

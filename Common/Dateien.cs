@@ -603,7 +603,6 @@ public class Dateien : List<Datei>
                         
                     }
 
-
                     if (datei.Erstelldatum.Date.AddDays(maxDateiAlter) < DateTime.Now.Date)
                     {
                         var veraltet = $"darf aber nicht älter als [bold {Global.GetColor(Global.ColorHinweise)}]{configuration["MaxDateiAlter"]}[/] Tage sein.";
