@@ -63,11 +63,17 @@ public class Unterrichte : List<Unterricht>
                 var lehrer = dict["Field6"]?.ToString();
                 int wochentundenLehrkraft = int.TryParse(dict["Field2"]?.ToString(), out int ws) ? ws : 0;
                 int wochenstundenKurs = 0;
+                int schuelerInKurs = studentgroupStudents
+                    .Select(record => (IDictionary<string, object>)record)
+                    .Where(dict => dict.ContainsKey("studentgroup.name") && 
+                    !string.IsNullOrEmpty(dict["studentgroup.name"]?.ToString()))
+                    .Where(dict => dict["studentgroup.name"].ToString() == schuelergruppe)  
+                    .Count();
 
                 if (wochentundenLehrkraft == 0) continue; // Unterricht mit 0 Wochenstunden werden nicht berücksichtigt.
 
                 // Wenn es um Kurse geht und die Zeile ein Kurs ist oder zu einem Kurs gehört
-                if (art == Global.Art.KursUnterrichte && zeileIstKursOderGehörtZuKurs(gpu002, dict, m.IStudents))
+                if (art == Global.Art.KursUnterrichte && zeileIstKursOderGehörtZuKurs(gpu002, dict, m.IStudents, schuelerInKurs))
                 {
                     // Suche nach einem bestehenden Kurs mit identischer UntisID
                     var kurs = this.FirstOrDefault(k => k.UnterrichtsIds.Contains(Convert.ToInt32(unterrichtsId)));
@@ -94,7 +100,7 @@ public class Unterrichte : List<Unterricht>
                             var kursBez = kurs.Updaten(zweck, m, configuration, fach, lehrer, unterrichtsId, schuelergruppe, klasse, wochentundenLehrkraft, studentgroupStudents);
                         }
                 }
-                else if (art == Global.Art.NichtKursUnterrichte && !zeileIstKursOderGehörtZuKurs(gpu002, dict))
+                else if (art == Global.Art.NichtKursUnterrichte && !zeileIstKursOderGehörtZuKurs(gpu002, dict, m.IStudents, schuelerInKurs))
                 {
                     var nichtKursUnterricht = this.FirstOrDefault(u =>
                         Bereinigen(u.Fach) == Bereinigen(fach) &&
@@ -268,9 +274,9 @@ public class Unterrichte : List<Unterricht>
         return false; // Statistikdatum liegt innerhalb des Zeitraums.
     }
 
-    private bool zeileIstKursOderGehörtZuKurs(List<dynamic> gpu002, IDictionary<string, object> dict, Students students = null)
+    private bool zeileIstKursOderGehörtZuKurs(List<dynamic> gpu002, IDictionary<string, object> dict, Students students = null, int schuelerInKurs = 0)
     {
-        if (dict["Field1"]?.ToString() == "3000" || dict["Field1"]?.ToString() == "2263")
+        if (dict["Field1"]?.ToString() == "2676" || dict["Field1"]?.ToString() == "2263")
         {
             string aa = "Test"; // Debugging purpose
         }
@@ -283,12 +289,11 @@ public class Unterrichte : List<Unterricht>
             {
                 var klasse = dict["Field5"].ToString();
                 var schuelerInKlasse = students.Where(s => s.Klasse == klasse).ToList();
-                var schuelerInSchuelergruppe = dict["Field42"].ToString().Split(',').Select(s => s.Trim()).ToList();
                 
-                //if (schuelerInSchuelergruppe.All(s => schuelerInKlasse.Contains(s)))
-                //{
+                if (schuelerInKurs > 0 && schuelerInKurs == schuelerInKlasse.Count)
+                {
                     return false; // Es ist kein Kurs, wenn alle Schüler einer Klasse in der Schülergruppe sind.
-                //}
+                }
             }
             return true; // Es ist ein Kurs, wenn Field42 nicht leer ist.
         }
