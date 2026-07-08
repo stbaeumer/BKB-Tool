@@ -314,7 +314,7 @@ public static class MenueHelper
      new Menüeintrag(
       configuration,
       "Gruppen & Organigramm:Mo:Gruppen & Organigramm aus Untisanrechnungen und Unterrichten für Wiki-Import erstellen",
-      quelldateien.Notwendige(configuration, ["schuelervermerke,dat", "schuelerzusatzdaten,dat", "absenceperstudent,csv", "GPU006,txt", "GPU002,txt", "GPU003,txt", "klassen,dat"]),
+      quelldateien.Notwendige(configuration, ["gruppen,struct", "schuelervermerke,dat", "schuelerzusatzdaten,dat", "absenceperstudent,csv", "GPU006,txt", "GPU002,txt", "GPU003,txt", "klassen,dat"]),
       students,
       klassen,
       [
@@ -334,9 +334,11 @@ public static class MenueHelper
        m.GetGruppen(
         configuration,
         [
-         datei => quelldateien.Add(new Datei(configuration).GetSchemaDynamisch("gruppen", ["Page", "MitgliederKuerzel", "Mitglieder", "MitgliederMail"], ["Page"], [])),
          datei => datei.AnhandDieserSchlüsselAttributeWirdVerglichen = ["Page"],
-         zieldatei => zieldatei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
+         datei => datei.DieseAttributeWerdenBeimVergleichIgnoriert = new string[]{},
+         datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.Vergleichen),
+         datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.SchemaUpdaten),
+         datei => datei.Erstellen("/home/stefan/Downloads/" + DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachWiki-Gruppen.struct"),
          datei => datei.OeffneWebseite("https://bkb.wiki/oeffentlich:organigramm?do=admin&page=struct_schemas&table=gruppen"),
         ],
         anrechnungen,

@@ -109,6 +109,12 @@ do
 
 IConfiguration CheckForUpdate(IConfiguration configuration)
 {
+    // Im Debug-Betrieb kein Auto-Update: verhindert Neustart/Exit waehrend F5.
+    if (IsDebugBuild() || Debugger.IsAttached)
+    {
+        return configuration;
+    }
+
     if (Global.RunningInCodeSpace())
     {
         AnsiConsole.MarkupLine("[bold yellow]Running in Codespace, skipping update check.[/]");
@@ -345,4 +351,13 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
     }
 
     return configuration;
+}
+
+bool IsDebugBuild()
+{
+#if DEBUG
+    return true;
+#else
+    return false;
+#endif
 }

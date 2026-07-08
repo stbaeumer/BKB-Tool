@@ -502,10 +502,19 @@ public class Dateien : List<Datei>
         ));                    
     }
 
-    public List<dynamic>? GetMatchingList(IConfiguration configuration, string pattern, Students students = null, Klassen klassen = null)
+    public List<dynamic>? GetMatchingList(IConfiguration configuration, string pattern, Students students = null, Klassen klassen = null, string[] spalten = null)
     {
         Datei datei = this.FirstOrDefault(datei => !string.IsNullOrEmpty(datei.Dateiname) && datei.Dateiname.ToLower().StartsWith(pattern, StringComparison.CurrentCultureIgnoreCase));
-
+        
+        // Spezielle Behandlung für "struct" Dateiendung: Struct-Dateien müssen erst gefüllt werden.
+        // Die bereits angelegte Datei wird gefüllt
+        if(spalten != null && spalten.Length > 0)
+        {                       
+            datei.GetSchema(pattern, spalten, configuration);
+            datei.SchreibeZeilen();
+            return null;
+        }        
+                                       
         // Mögliche Meldungen werden ausgegeben, wenn die Datei nicht gefunden wurde oder veraltet ist.
 
         if (string.IsNullOrEmpty(datei.AbsoluterPfad) && datei.Endung.ToLower().Contains("dat"))
@@ -551,43 +560,76 @@ public class Dateien : List<Datei>
             var dateiendung = dateinameNotwendig.Split(',')[1].Trim().ToLower();
             var dateiname = dateinameNotwendig.Split(',')[0];
 
-            var datei = this.First(datei => !string.IsNullOrEmpty(datei.Dateiname)
+            var datei = new Datei();
+            
+            if(dateiendung == "struct")
+            {
+                datei.Erstellen(Path.Combine(pfadDownloads, dateiname + "." + dateiendung));
+                datei.AbsoluterPfad = Path.Combine(pfadDownloads, dateiname + "." + dateiendung);
+                datei.Dateiname = dateiname;                
+            }
+            else
+            {
+                datei = this.First(datei => !string.IsNullOrEmpty(datei.Dateiname)
                     && !datei.Dateiname.ToLower().Contains("-kennwort")
                     && datei.Dateiname.ToLower().StartsWith(dateiname.ToLower(), StringComparison.CurrentCultureIgnoreCase)
-                    && datei.Endung.ToLower().Contains("*." + dateiendung.ToLower(), StringComparison.CurrentCultureIgnoreCase));
+                    && datei.Endung.ToLower().Contains("*." + dateiendung.ToLower(), StringComparison.CurrentCultureIgnoreCase));                
 
-            datei.IstOptional = dateinameNotwendig.Split(',').Length > 2 && dateinameNotwendig.Split(',')[2].ToLower().Contains("opt") ? true : false;
-            datei.Nur177659 = dateinameNotwendig.Split(',').Length > 2 && dateinameNotwendig.ToLower().Contains("177659") ? true : false;
+                datei.IstOptional = dateinameNotwendig.Split(',').Length > 2 && dateinameNotwendig.Split(',')[2].ToLower().Contains("opt") ? true : false;
+                datei.Nur177659 = dateinameNotwendig.Split(',').Length > 2 && dateinameNotwendig.ToLower().Contains("177659") ? true : false;
 
-            var absoluterPfad = this.First(datei => !string.IsNullOrEmpty(datei.Dateiname)
-            && !datei.Dateiname.ToLower().Contains("-kennwort")
-            && datei.Dateiname.ToLower().StartsWith(dateiname.ToLower(), StringComparison.CurrentCultureIgnoreCase)
-            && datei.Endung.ToLower().Contains("*." + dateiendung.ToLower(), StringComparison.CurrentCultureIgnoreCase)
-            ).AbsoluterPfad;
+                var absoluterPfad = this.First(datei => !string.IsNullOrEmpty(datei.Dateiname)
+                && !datei.Dateiname.ToLower().Contains("-kennwort")
+                && datei.Dateiname.ToLower().StartsWith(dateiname.ToLower(), StringComparison.CurrentCultureIgnoreCase)
+                && datei.Endung.ToLower().Contains("*." + dateiendung.ToLower(), StringComparison.CurrentCultureIgnoreCase)
+                ).AbsoluterPfad;
 
-            if (absoluterPfad.ToLower().Contains("-kennwort"))
-            {
-                absoluterPfad = "";
-            }
-
-            if (absoluterPfad.Length > 0)
-            {
-                if (datei.Count == 0)
+                if (absoluterPfad.ToLower().Contains("-kennwort"))
                 {
-                    if (datei.AbsoluterPfad.EndsWith(".pdf"))
+                    absoluterPfad = "";
+                }
+
+                if (absoluterPfad.Length > 0)
+                {
+                    if (datei.Count == 0)
                     {
-                        if (datei.Erstelldatum.Date.AddDays(maxDateiAlter) < DateTime.Now)
+                        if (datei.AbsoluterPfad.EndsWith(".pdf"))
                         {
-                            datei.Fehlermeldung = $"Die Datei [bold aqua]{absoluterPfad}[/] existiert, ist aber veraltet.";
-                            if (meldungAnzeigen && !datei.IstOptional)
-                                datei.FehlermeldungRendern(configuration);
+                            if (datei.Erstelldatum.Date.AddDays(maxDateiAlter) < DateTime.Now)
+                            {
+                                datei.Fehlermeldung = $"Die Datei [bold aqua]{absoluterPfad}[/] existiert, ist aber veraltet.";
+                                if (meldungAnzeigen && !datei.IstOptional)
+                                    datei.FehlermeldungRendern(configuration);
+                            }
+                        }
+                        else
+                        {
+                            if (!datei.DarfLeerSein)
+                            {
+                                //datei.Fehlermeldung = $"Die Datei [bold aqua]{absoluterPfad}[/] existiert, ist aber leer. Ist die Datei evtl. vorher in Excel o.ä. geöffnet worden? Oder stimmt der Delimiter nicht? Der korrekte Delimiter ist: '[bold aqua]{datei.Delimiter}[/]'";
+                                if (meldungAnzeigen && !datei.IstOptional)
+                                    datei.FehlermeldungRendern(configuration);
+                            }
                         }
                     }
                     else
                     {
-                        if (!datei.DarfLeerSein)
+                        if (((IDictionary<string, object>)datei[0]).Count == 1)
                         {
-                            //datei.Fehlermeldung = $"Die Datei [bold aqua]{absoluterPfad}[/] existiert, ist aber leer. Ist die Datei evtl. vorher in Excel o.ä. geöffnet worden? Oder stimmt der Delimiter nicht? Der korrekte Delimiter ist: '[bold aqua]{datei.Delimiter}[/]'";
+                            datei.Fehlermeldung = $"Die Datei [bold {Global.GetColor(Global.ColorPfadInDateien)}]{absoluterPfad}[/] hat nur eine einzige Spalte. Das korrekte Trennzeichen ist: [{Global.GetColor(Global.ColorZahlen)}]'{datei.Delimiter}'[/].";
+                            if (meldungAnzeigen && !datei.IstOptional)
+                                datei.FehlermeldungRendern(configuration);
+                            
+                        }
+
+                        if (datei.Erstelldatum.Date.AddDays(maxDateiAlter) < DateTime.Now.Date)
+                        {
+                            var veraltet = $"darf aber nicht älter als [bold {Global.GetColor(Global.ColorHinweise)}]{configuration["MaxDateiAlter"]}[/] Tage sein.";
+                            if (configuration["MaxDateiAlter"] == "1")
+                                veraltet = "darf aber nicht älter als von gestern sein.";
+                            if (configuration["MaxDateiAlter"] == "0")
+                                veraltet = "muss aber von heute sein.";
+                            datei.Fehlermeldung = $"Die Datei [bold {Global.GetColor(Global.ColorPfadInDateien)}]{datei.AbsoluterPfad}[/] ist veraltet. Sie wurde am [bold {Global.GetColor(Global.ColorHinweise)}]{datei.Erstelldatum:dd.MM.yyyy}[/] erstellt, {veraltet}";
                             if (meldungAnzeigen && !datei.IstOptional)
                                 datei.FehlermeldungRendern(configuration);
                         }
@@ -595,43 +637,21 @@ public class Dateien : List<Datei>
                 }
                 else
                 {
-                    if (((IDictionary<string, object>)datei[0]).Count == 1)
+                    var opt = "";
+
+                    if (datei.IstOptional)
                     {
-                        datei.Fehlermeldung = $"Die Datei [bold {Global.GetColor(Global.ColorPfadInDateien)}]{absoluterPfad}[/] hat nur eine einzige Spalte. Das korrekte Trennzeichen ist: [{Global.GetColor(Global.ColorZahlen)}]'{datei.Delimiter}'[/].";
-                        if (meldungAnzeigen && !datei.IstOptional)
-                            datei.FehlermeldungRendern(configuration);
-                        
+                        opt = ", ist aber optional";
+                    }
+                    else
+                    {
+                        opt = " und ist nicht optional";
                     }
 
-                    if (datei.Erstelldatum.Date.AddDays(maxDateiAlter) < DateTime.Now.Date)
-                    {
-                        var veraltet = $"darf aber nicht älter als [bold {Global.GetColor(Global.ColorHinweise)}]{configuration["MaxDateiAlter"]}[/] Tage sein.";
-                        if (configuration["MaxDateiAlter"] == "1")
-                            veraltet = "darf aber nicht älter als von gestern sein.";
-                        if (configuration["MaxDateiAlter"] == "0")
-                            veraltet = "muss aber von heute sein.";
-                        datei.Fehlermeldung = $"Die Datei [bold {Global.GetColor(Global.ColorPfadInDateien)}]{datei.AbsoluterPfad}[/] ist veraltet. Sie wurde am [bold {Global.GetColor(Global.ColorHinweise)}]{datei.Erstelldatum:dd.MM.yyyy}[/] erstellt, {veraltet}";
-                        if (meldungAnzeigen && !datei.IstOptional)
-                            datei.FehlermeldungRendern(configuration);
-                    }
+                    datei.Fehlermeldung = $"Die Datei [bold {Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads, dateiname)}[/] existiert nicht{opt}.";
+                    if (meldungAnzeigen && !datei.IstOptional)
+                        datei.FehlermeldungRendern(configuration);
                 }
-            }
-            else
-            {
-                var opt = "";
-
-                if (datei.IstOptional)
-                {
-                    opt = ", ist aber optional";
-                }
-                else
-                {
-                    opt = " und ist nicht optional";
-                }
-
-                datei.Fehlermeldung = $"Die Datei [bold {Global.GetColor(Global.ColorPfadInDateien)}]{Path.Combine(pfadDownloads, dateiname)}[/] existiert nicht{opt}.";
-                if (meldungAnzeigen && !datei.IstOptional)
-                    datei.FehlermeldungRendern(configuration);
             }
             notwendige.Add(datei);            
         }

@@ -557,8 +557,10 @@ public Datei(IConfiguration configuration)
         return liste;
     }
 
-    public void Erstellen()
+    public void Erstellen(string absoluterPfad = null)
     {
+        AbsoluterPfad = absoluterPfad ?? AbsoluterPfad;
+
         if (AbsoluterPfad == null)
         {
             // Wenn der Pfad leer ist oder die Liste leer ist, wird die Datei nicht erstellt.
@@ -570,9 +572,10 @@ public Datei(IConfiguration configuration)
             
             AnsiConsole.Write(panel);
             return;
-        }else if (Count == 0)
+        }else if (Count == 0 && !AbsoluterPfad.ToLower().EndsWith(".struct"))
         {
             // Wenn der Pfad leer ist oder die Liste leer ist, wird die Datei nicht erstellt.
+            // Struct-Dateien sind solange leer, bis sie konkret ausgewertet werden sollen.
             var panel = new Panel($"[red]Datei nicht erstellt (0 Zeilen): [/]{AbsoluterPfad}")
                 .HeaderAlignment(Justify.Left)
                 .SquareBorder()
@@ -628,7 +631,7 @@ public Datei(IConfiguration configuration)
                 Global.ZeileSchreiben(AbsoluterPfad, "", ConsoleColor.White, ConsoleColor.Blue);
             }
         }
-                else if (AbsoluterPfad.ToLower().EndsWith(".html"))
+        else if (AbsoluterPfad.ToLower().EndsWith(".html"))
         {
             try
             {
@@ -697,7 +700,7 @@ public Datei(IConfiguration configuration)
             {
                 Global.ZeileSchreiben(AbsoluterPfad, "", ConsoleColor.White, ConsoleColor.Blue);
             }
-        }
+        }        
         else
         {
             try
@@ -765,8 +768,13 @@ public Datei(IConfiguration configuration)
             }
             finally
             {
-                var rechteSeite = Importhinweise != null && Importhinweise.Any() ? string.Join("\n", Importhinweise) : "";
-                Global.ZeileSchreiben(AbsoluterPfad, rechteSeite, ConsoleColor.White, ConsoleColor.Blue);
+                if (AbsoluterPfad != null)
+                {
+                    // struct-Dateien werden neu leer angelegt. Sie wird gefüllt, wenn die Datei konkret ausgewertet wird. Deshalb wird hier kein Hinweistext geschrieben.
+                    using var writer = new StreamWriter(AbsoluterPfad, false, Encoding.UTF8);                    
+                    //var rechteSeite = Importhinweise != null && Importhinweise.Any() ? string.Join("\n", Importhinweise) : "";
+                    //Global.ZeileSchreiben(AbsoluterPfad, rechteSeite, ConsoleColor.White, ConsoleColor.Blue);
+                }
             }
         }
     }
@@ -1745,7 +1753,10 @@ public Datei(IConfiguration configuration)
         var modusString = "Vergleichen";
 
         if (modus == Global.Modus.Filtern)
-            modusString = "Filtern";        
+            modusString = "Filtern";
+
+        if (modus == Global.Modus.SchemaUpdaten)
+            modusString = "SchemaUpdaten";
 
         var neueDatei = new Datei(AbsoluterPfad);
         bool skipProcessing = false;
@@ -1855,9 +1866,22 @@ public Datei(IConfiguration configuration)
                     neueDatei.Add(neueRec);
                     if (rows > maxRows) break; // Wenn die maximale Anzahl an Zeilen erreicht ist, breche die Schleife ab.                                        
                     if (!string.IsNullOrEmpty(anhandDieserSchlüsselAttributeWirdVerglichenString))
+                    {
                         table.AddRow(new Text(
                             $"{anhandDieserSchlüsselAttributeWirdVerglichenString}"
                             ), new Text($"  neue Zeile  "), new Text(""), new Text("")); rows++;
+
+
+                        if(modus == Global.Modus.SchemaUpdaten)
+                        {
+                            // Zeile in Datenbank anlegen
+
+                            
+
+
+
+                        }
+                    }                        
                     continue;
                 } // und die Schleife übersprungen
 
@@ -1881,12 +1905,22 @@ public Datei(IConfiguration configuration)
                     if (rows == maxRows)
                         table.AddRow(new Text("..."), new Text("..."), new Text("..."), new Text("..."));
                     if (rows < maxRows)
+                    {
                         table.AddRow(
                             RenderZeile(
                                 neueDict,
                                 vorhandeneRec,
                                 nichtIdentischeSonstigeAttribute[i],
                                 zeileMitIdentischenSchlüsselattributen));
+
+
+                        // Zeile in Datenbank updaten
+                        if(modus == Global.Modus.SchemaUpdaten)
+                        {
+                            // Zeile in Datenbank updaten
+                        }
+                    }
+                        
                     rows++;
                 }
                 neueDatei.Add(neueRec);
@@ -2177,6 +2211,49 @@ public Datei(IConfiguration configuration)
         return this;
     }
 
+    internal void GetSchema(string schemaName, string[] benutzerSpalten, IConfiguration configuration)
+    {        
+        var wikiZugriff = new DokuwikiZugriff(configuration);
+        AbsoluterPfad = Path.Combine(configuration["PfadDownloads"], schemaName + ".struct");
+
+        // 1. Präfixe für die API automatisch hinzufügen (z.B. "gruppen.MitgliederKuerzel")
+        string[] schemas = { schemaName };
+        string[] apiColumns = benutzerSpalten
+            .Select(s => s.Equals("Page", StringComparison.OrdinalIgnoreCase) ? $"{schemaName}.Page" : $"{schemaName}.{s}")
+            .ToArray();
+
+        object[] filters = { };
+        string sortBy = "";
+
+        // 2. API Abfrage
+        object[] ergebnis = wikiZugriff.Proxy.GetAggregationData(schemas, apiColumns, filters, sortBy);
+
+        // 3. Ergebnis-Property und Records leeren und neu befüllen
+        SchemaData.Clear();
+        Clear();
+
+        foreach (object zeileObj in ergebnis)
+        {
+            XmlRpcStruct zeile = (XmlRpcStruct)zeileObj;
+            var datenZeile = new Dictionary<string, string>();
+
+            foreach (var spalte in benutzerSpalten)
+            {
+                string apiKey = spalte.Equals("Page", StringComparison.OrdinalIgnoreCase) ? $"{schemaName}.Page" : $"{schemaName}.{spalte}";
+                datenZeile[spalte] = ConvertStructValueToString(zeile, apiKey);
+            }
+            SchemaData.Add(datenZeile);
+
+            dynamic record = new ExpandoObject();
+            var recordDict = (IDictionary<string, object>)record;
+            foreach (var spalte in benutzerSpalten)
+            {                    
+                recordDict[spalte] = datenZeile[spalte];
+            }                
+            Add(record);
+        }
+    }
+
     private string ConvertStructValueToString(XmlRpcStruct zeile, string key)
     {
         if (!zeile.ContainsKey(key) || zeile[key] == null) return "";
@@ -2355,5 +2432,63 @@ public Datei(IConfiguration configuration)
         this.UrlMitte = mitgliederMail;
         this.UrlRechts = "&message=" + Uri.EscapeDataString(message);            
         return this;
+    }
+
+ internal void SchreibeZeilen()
+    {
+        try
+            {
+                var sb = new StringBuilder();
+                        
+                var firstRecord = this.FirstOrDefault() as IDictionary<string, object>;
+                if (firstRecord != null)
+                {
+                    string kopfzeile = "";
+                    
+                    foreach (var header in firstRecord.Keys)
+                    {
+                        var adjustedHeader = header
+                            .Replace("DOPPELPUNKT", ":")
+                            .Replace("PUNKT", ".")
+                            .Replace("MINUS", "-")
+                            .Replace("ZWEI", "2")
+                            .Replace("EINS", "1")
+                            .Replace("UNTERSTRICH", "_")
+                            .Replace("SLASH", "/")
+                            .Replace("LEERZEICHEN", " ")
+                            .Replace("KLAMMERAUF", "(")
+                            .Replace("KLAMMERZU", ")");
+        
+                        kopfzeile += adjustedHeader + ";";
+                    }
+
+                    sb.AppendLine(kopfzeile.TrimEnd(';'));
+                    
+                    foreach (var record in this)
+                    {
+                        var datenzeile = "";
+                        var recordDict = record as IDictionary<string, object>;
+                        if (recordDict == null) continue;        
+                    
+                        foreach (var header in firstRecord.Keys)
+                        {
+                            recordDict.TryGetValue(header, out var value);
+                            datenzeile += value?.ToString() + ";";
+                        }
+                        sb.AppendLine(datenzeile.TrimEnd(';'));
+                    }
+                }        
+                
+                File.Delete(AbsoluterPfad);
+                File.WriteAllText(AbsoluterPfad, sb.ToString(), this.Encoding ?? Encoding.UTF8);
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Fehler beim Schreiben der Struct-Datei: {ex.Message}");
+            }
+            finally
+            {
+                //Global.ZeileSchreiben(AbsoluterPfad, "xxx", ConsoleColor.White, ConsoleColor.Blue);
+            }
     }
 }
