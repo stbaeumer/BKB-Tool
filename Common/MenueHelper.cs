@@ -314,11 +314,11 @@ public static class MenueHelper
      new Menüeintrag(
       configuration,
       "Gruppen & Organigramm:Mo:Gruppen & Organigramm aus Untisanrechnungen und Unterrichten für Wiki-Import erstellen",
-      quelldateien.Notwendige(configuration, ["gruppen,struct", "schuelervermerke,dat", "schuelerzusatzdaten,dat", "absenceperstudent,csv", "GPU006,txt", "GPU002,txt", "GPU003,txt", "klassen,dat"]),
+      quelldateien.Notwendige(configuration, ["gruppen,struct", "schuelervermerke,dat", "schuelerzusatzdaten,dat", "GPU006,txt", "GPU002,txt", "GPU003,txt", "klassen,dat"]),
       students,
       klassen,
       [
-       $"Das Organigramm wird aus Untisanrechnungen gebildet. Beispiele: {{...}} = KATEGORIE; [[...]] = HINWEIS, Text ohne Klammern wird zur ROLLE; A14, A15, A16 ohne Klammern > AMT; Untis-Beschreibung > AUFGABE. Im Organigramm wird nach Kategorie, Aufgabe oder Beschreibung gruppiert.",
+       $"Das Organigramm wird aus Untisanrechnungen gebildet. Für Spalte Text gilt: {{...}} = KATEGORIE; [[...]] = HINWEIS, Text ohne Klammern wird zur ROLLE; A14, A15, A16 ohne Klammern > AMT; Spalte Beschreibung: wird zur AUFGABE. Im Organigramm wird nach Kategorie, Aufgabe oder Beschreibung gruppiert.",
        $"Untisanrechnungen: 1.Struct Schema Editor > Untisanrechnungen > Löschen/Leeren > 'untisanrechnungen' eingeben, dann Leeren",
        $"Untisanrechnungen: 2.Struct Schema Editor > Untisanrechnungen > Importieren/Exportieren > Importieren von Rohdaten > Global > Durchsuchen",
        $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise zum Text in Anrechnungen:[/]",
@@ -334,7 +334,7 @@ public static class MenueHelper
        m.GetGruppen(
         configuration,
         [
-         datei => datei.AnhandDieserSchlüsselAttributeWirdVerglichen = ["Page"],
+         datei => datei.AnhandDieserSchlüsselAttributeWirdVerglichen = ["Link"],
          datei => datei.DieseAttributeWerdenBeimVergleichIgnoriert = new string[]{},
          datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.Vergleichen),
          datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.SchemaUpdaten),
@@ -651,7 +651,7 @@ public static class MenueHelper
       students,
       klassen,
       [
-       $"Das Organigramm wird aus Untisanrechnungen gebildet. Beispiele: {{...}} = KATEGORIE; [[...]] = HINWEIS, Text ohne Klammern wird zur ROLLE; A14, A15, A16 ohne Klammern > AMT; Untis-Beschreibung > AUFGABE. Im Organigramm wird nach Kategorie, Aufgabe oder Beschreibung gruppiert.",
+       $"Das Organigramm wird aus Untisanrechnungen gebildet. Für die Spalte Text gilt: {{...}} = KATEGORIE; [[...]] = HINWEIS, Text ohne Klammern wird zur ROLLE; A14, A15, A16 ohne Klammern > AMT; Spalte Beschreibung: wird zur AUFGABE. Im Organigramm wird nach Kategorie, Aufgabe oder Beschreibung gruppiert.",
        $"Untisanrechnungen: 1.Struct Schema Editor > Untisanrechnungen > Löschen/Leeren > 'untisanrechnungen' eingeben, dann Leeren",
        $"Untisanrechnungen: 2.Struct Schema Editor > Untisanrechnungen > Importieren/Exportieren > Importieren von Rohdaten > Global > Durchsuchen",
        $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise zum Text in Anrechnungen:[/]",

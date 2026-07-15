@@ -1758,7 +1758,7 @@ public Datei(IConfiguration configuration)
         if (modus == Global.Modus.SchemaUpdaten)
             modusString = "SchemaUpdaten";
 
-        var neueDatei = new Datei(AbsoluterPfad);
+        var neueDatei = new Datei(Path.Combine(Konfiguration["PfadDownloads"], "neu-" + Path.GetFileName(AbsoluterPfad)));
         bool skipProcessing = false;
 
         var vorhandeneDatei = GetVorhandeneDatei(quelldateien);
@@ -2218,15 +2218,12 @@ public Datei(IConfiguration configuration)
 
         // 1. Präfixe für die API automatisch hinzufügen (z.B. "gruppen.MitgliederKuerzel")
         string[] schemas = { schemaName };
-        string[] apiColumns = benutzerSpalten
-            .Select(s => s.Equals("Page", StringComparison.OrdinalIgnoreCase) ? $"{schemaName}.Page" : $"{schemaName}.{s}")
-            .ToArray();
 
         object[] filters = { };
         string sortBy = "";
 
         // 2. API Abfrage
-        object[] ergebnis = wikiZugriff.Proxy.GetAggregationData(schemas, apiColumns, filters, sortBy);
+        object[] ergebnis = wikiZugriff.Proxy.GetAggregationData(schemas, benutzerSpalten, filters, sortBy);
 
         // 3. Ergebnis-Property und Records leeren und neu befüllen
         SchemaData.Clear();
@@ -2239,8 +2236,8 @@ public Datei(IConfiguration configuration)
 
             foreach (var spalte in benutzerSpalten)
             {
-                string apiKey = spalte.Equals("Page", StringComparison.OrdinalIgnoreCase) ? $"{schemaName}.Page" : $"{schemaName}.{spalte}";
-                datenZeile[spalte] = ConvertStructValueToString(zeile, apiKey);
+                //string apiKey = spalte.Equals("Page", StringComparison.OrdinalIgnoreCase) ? $"{schemaName}.Page" : $"{schemaName}.{spalte}";
+                datenZeile[spalte] = ConvertStructValueToString(zeile, spalte);
             }
             SchemaData.Add(datenZeile);
 

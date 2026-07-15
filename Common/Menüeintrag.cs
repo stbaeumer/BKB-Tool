@@ -4208,7 +4208,7 @@ public class Menüeintrag
         if (gpu003 == null || gpu003.Count == 0) return;
 
         // Die Struct-Tabelle wird ausgelesen und in die Datei geschrieben.
-        Quelldateien.GetMatchingList(configuration, "gruppen", IStudents, Klassen, ["Page", "MitgliederKuerzel", "Mitglieder", "MitgliederMail"]);
+        Quelldateien.GetMatchingList(configuration, "gruppen", IStudents, Klassen, ["gruppen.Page", "gruppen.MitgliederKuerzel", "gruppen.Mitglieder", "gruppen.MitgliederMail", "gruppen.Link"]);
         
         Gruppen = new Gruppen();
         Gruppen.AddRange(new Gruppen().GetBildungsgaenge(gpu002, anrechnungen, lehrers));
