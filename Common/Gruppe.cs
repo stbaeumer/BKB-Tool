@@ -43,6 +43,7 @@ public class Gruppe
 
         dynamic record = new ExpandoObject();
         record.Page = wikiLink;
+        record.Link = wikiLink;
 
         var lehrerKürzel = new List<string>();
         var lehrerMail = new List<string>();
@@ -104,6 +105,7 @@ public class Gruppe
         var gruppe = new Gruppe(wikiLink);
         dynamic record = new ExpandoObject();
         record.Page = wikiLink;
+        record.Link = wikiLink;
 
         var lehrerKürzel = new List<string>();
         var lehrerMail = new List<string>();
@@ -161,6 +163,7 @@ public class Gruppe
         var gruppe = new Gruppe(wikiLink);
         dynamic record = new ExpandoObject();
         record.Page = wikiLink;
+        record.Link = wikiLink;
 
         var lehrerKürzel = new List<string>();
         var lehrerMail = new List<string>();
@@ -217,6 +220,7 @@ public class Gruppe
         var gruppe = new Gruppe(wikiLink);
         dynamic record = new ExpandoObject();
         record.Page = wikiLink;
+        record.Link = wikiLink;
 
         var lehrerKürzel = new List<string>();
         var lehrerMail = new List<string>();
@@ -269,6 +273,7 @@ public class Gruppe
         var gruppe = new Gruppe(wikiLink);
         dynamic record = new ExpandoObject();
         record.Page = wikiLink;
+        record.Link = wikiLink;
 
         var lehrerKürzel = new List<string>();
         var lehrerMail = new List<string>();
@@ -314,6 +319,7 @@ public class Gruppe
         var gruppe = new Gruppe(wikiLink);
         dynamic record = new ExpandoObject();
         record.Page = wikiLink;
+        record.Link = wikiLink;
 
         var lehrerKürzel = new List<string>();
         var lehrerMail = new List<string>();
@@ -367,7 +373,8 @@ public class Gruppe
         var gruppe = new Gruppe(wikiLink);
         dynamic record = new ExpandoObject();
         record.Page = wikiLink;
-
+        record.Link = wikiLink;
+        
         var lehrerKürzel = new List<string>();
         var lehrerMail = new List<string>();
         var lehrerName = new List<string>();
@@ -414,7 +421,8 @@ public class Gruppe
         var gruppe = new Gruppe(wikiLink);
         dynamic record = new ExpandoObject();
         record.Page = wikiLink;
-
+        record.Link = wikiLink;
+    
         var lehrerKürzel = new List<string>();
         var lehrerMail = new List<string>();
         var lehrerName = new List<string>();

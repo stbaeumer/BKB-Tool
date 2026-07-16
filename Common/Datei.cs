@@ -1758,7 +1758,7 @@ public Datei(IConfiguration configuration)
         if (modus == Global.Modus.SchemaUpdaten)
             modusString = "SchemaUpdaten";
 
-        var neueDatei = new Datei(Path.Combine(Konfiguration["PfadDownloads"], "neu-" + Path.GetFileName(AbsoluterPfad)));
+        var neueDatei = new Datei(AbsoluterPfad);
         bool skipProcessing = false;
 
         var vorhandeneDatei = GetVorhandeneDatei(quelldateien);
@@ -1830,11 +1830,6 @@ public Datei(IConfiguration configuration)
                 }
                 var neueDict = (IDictionary<string, object>)neueRec;
 
-                if (neueDict.ContainsKey("Fach") && neueDict["Fach"].ToString().StartsWith("DPF"))
-                {
-                    var x = 1;
-                }
-
                 var anhandDieserSchlüsselAttributeWirdVerglichenString = "";
 
                 foreach (var key in AnhandDieserSchlüsselAttributeWirdVerglichen)
@@ -1844,14 +1839,6 @@ public Datei(IConfiguration configuration)
                         if (anhandDieserSchlüsselAttributeWirdVerglichenString.Length > 0)
                             anhandDieserSchlüsselAttributeWirdVerglichenString += ", ";
                         anhandDieserSchlüsselAttributeWirdVerglichenString += value.ToString();
-                    }
-                }
-
-                if (neueDict.ContainsKey("Fach") && neueDict["Fach"].ToString() == "GG G1")
-                {
-                    //if (neueDict.ContainsKey("KursBez") && !neueDict["KursBez"].ToString().StartsWith("ES"))
-                    {
-                        var x = 1;
                     }
                 }
 
@@ -2431,7 +2418,7 @@ public Datei(IConfiguration configuration)
         return this;
     }
 
- internal void SchreibeZeilen()
+ internal void SchreibeZeilen(string trennzeichen)
     {
         try
             {
@@ -2456,10 +2443,10 @@ public Datei(IConfiguration configuration)
                             .Replace("KLAMMERAUF", "(")
                             .Replace("KLAMMERZU", ")");
         
-                        kopfzeile += adjustedHeader + ";";
+                        kopfzeile += adjustedHeader + trennzeichen;
                     }
 
-                    sb.AppendLine(kopfzeile.TrimEnd(';'));
+                    sb.AppendLine(kopfzeile.TrimEnd(trennzeichen.ToCharArray()));
                     
                     foreach (var record in this)
                     {
@@ -2470,9 +2457,9 @@ public Datei(IConfiguration configuration)
                         foreach (var header in firstRecord.Keys)
                         {
                             recordDict.TryGetValue(header, out var value);
-                            datenzeile += value?.ToString() + ";";
+                            datenzeile += value?.ToString() + trennzeichen;
                         }
-                        sb.AppendLine(datenzeile.TrimEnd(';'));
+                        sb.AppendLine(datenzeile.TrimEnd(trennzeichen.ToCharArray()));
                     }
                 }        
                 

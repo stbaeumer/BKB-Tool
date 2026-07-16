@@ -45,6 +45,7 @@ public class Gruppen : List<Gruppe>
 
             var members = GetMembers(gpu002, lehrers, new List<int>() { 1, 2, 3, 4 }, kurzname);
             record.Page = wikiLink;
+            record.Link = wikiLink;
             var enumerable = members.ToList();
             record.Mitglieder = string.Join(',',
                 enumerable.Select(x => (x.Titel != " " ? x.Titel : "") + x.Vorname + " " + x.Nachname));

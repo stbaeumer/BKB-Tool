@@ -334,8 +334,8 @@ public static class MenueHelper
        m.GetGruppen(
         configuration,
         [
-         datei => datei.AnhandDieserSchlüsselAttributeWirdVerglichen = ["Link"],
-         datei => datei.DieseAttributeWerdenBeimVergleichIgnoriert = new string[]{},
+         datei => datei.AnhandDieserSchlüsselAttributeWirdVerglichen = ["gruppen.Link"],
+         datei => datei.DieseAttributeWerdenBeimVergleichIgnoriert = new string[]{"gruppen.Page"},
          datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.Vergleichen),
          datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.SchemaUpdaten),
          datei => datei.Erstellen("/home/stefan/Downloads/" + DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachWiki-Gruppen.struct"),

@@ -511,7 +511,7 @@ public class Dateien : List<Datei>
         if(spalten != null && spalten.Length > 0)
         {                       
             datei.GetSchema(pattern, spalten, configuration);
-            datei.SchreibeZeilen();
+            datei.SchreibeZeilen("|");
             return null;
         }        
                                        
