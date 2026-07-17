@@ -62,8 +62,8 @@ public class Datei : List<dynamic>
     /// Am Ende werden neu erstellte Dateien mit vorhandenen verglichen. Diese Eigenschaften werden für den Dateivergleich ignoriert.
     /// </summary>
     private string[] ZuIgnorierendeEigenschaften { get; set; } = null!;
-
-    public string? AbsoluterPfad { get; set; } = "";
+ public DokuwikiZugriff WikiZugriff { get; set; }
+ public string? AbsoluterPfad { get; set; } = "";
     public List<Action<Datei>> Funktionen { get; set; }
     public IConfiguration Konfiguration { get; private set; }
     public string Dateiname { get; set; } = null!;
@@ -1824,10 +1824,6 @@ public Datei(IConfiguration configuration)
             {
                 ss++;
 
-                if(ss == 194)
-                {
-                    var x = 1;
-                }
                 var neueDict = (IDictionary<string, object>)neueRec;
 
                 var anhandDieserSchlüsselAttributeWirdVerglichenString = "";
@@ -1881,7 +1877,7 @@ public Datei(IConfiguration configuration)
                 // Fall2b: Wenn eine vorhandene Zeile auf die Vergleichsattribute matcht und die sonstigen Attribute nicht identisch sind, ...
                 if (nichtIdentischeSonstigeAttribute.Count <= 0) continue;
 
-                // Für die ersten 2 abweichenden Attribute dieser Zeile wird eine Zeile in der Tabelle erstellt.
+                // Für die ersten abweichenden Attribute dieser Zeile wird eine Zeile in der Tabelle erstellt.
                 for (int i = 0; i < nichtIdentischeSonstigeAttribute.Count; i++)
                 {
                     if (rows > maxRows)
@@ -1904,7 +1900,23 @@ public Datei(IConfiguration configuration)
                         // Zeile in Datenbank updaten
                         if(modus == Global.Modus.SchemaUpdaten)
                         {
-                            // Zeile in Datenbank updaten
+                            // Update die Zeile in Dokuwiki-Datenbank mit den Werten aus neueDict und den Schlüsselattributen aus zeileMitIdentischenSchlüsselattributen
+                            // Hier müsste der Code stehen, um die Datenbank zu aktualisieren.
+
+                            var tabelle = AbsoluterPfad.Split(Path.DirectorySeparatorChar).Last().Split('.').First(); // Tabelle aus Dateiname ableiten
+
+                            // 1. Zielseite und Schema festlegen
+                            string zielSeite = "kollegium:gruppen"; // Die DokuWiki Page-ID (z. B. "wiki:mitglieder")
+                            string schemaName = "gruppen";  // Name deines Schemas (z. B. "gruppen")
+
+                            var neueWerte = new Dictionary<string, object>
+                            {
+                                { "MitgliederKuerzel", "WIK,DIE,OST,EIT,HE" },
+                                { "Mitglieder", "Kerstin Winking,Uta Dierk,Marc Osterbrink,Vera Eiting,Eva Caroline Hansen" },
+                                { "MitgliederMail", "kerstin.winking@berufskolleg-borken.de;uta.dierk@berufskolleg-borken.de;marc.osterbrink@berufskolleg-borken.de;vera.eiting@berufskolleg-borken.de;eva.hansen@berufskolleg-borken.de" }
+                            };
+
+                            UpdateSchemaData(zielSeite, schemaName, neueWerte);
                         }
                     }
                         
@@ -2198,9 +2210,8 @@ public Datei(IConfiguration configuration)
         return this;
     }
 
-    internal void GetSchema(string schemaName, string[] benutzerSpalten, IConfiguration configuration)
-    {        
-        var wikiZugriff = new DokuwikiZugriff(configuration);
+    internal void GetSchema(string schemaName, string[] benutzerSpalten, IConfiguration configuration, DokuwikiZugriff wikiZugriff)
+    {   
         AbsoluterPfad = Path.Combine(configuration["PfadDownloads"], schemaName + ".struct");
 
         // 1. Präfixe für die API automatisch hinzufügen (z.B. "gruppen.MitgliederKuerzel")
@@ -2223,8 +2234,10 @@ public Datei(IConfiguration configuration)
 
             foreach (var spalte in benutzerSpalten)
             {
+                // Der Schemaname wird aus dem String entfernt, falls er vorhanden ist, um die Spaltennamen zu vereinfachen.
+                string neueSpalte = spalte.Replace(schemaName + ".", ""); // Entferne das Präfix, falls vorhanden
                 //string apiKey = spalte.Equals("Page", StringComparison.OrdinalIgnoreCase) ? $"{schemaName}.Page" : $"{schemaName}.{spalte}";
-                datenZeile[spalte] = ConvertStructValueToString(zeile, spalte);
+                datenZeile[neueSpalte] = ConvertStructValueToString(zeile, spalte);
             }
             SchemaData.Add(datenZeile);
 
@@ -2232,9 +2245,35 @@ public Datei(IConfiguration configuration)
             var recordDict = (IDictionary<string, object>)record;
             foreach (var spalte in benutzerSpalten)
             {                    
-                recordDict[spalte] = datenZeile[spalte];
+                // Der Schemaname wird aus dem String entfernt, falls er vorhanden ist, um die Spaltennamen zu vereinfachen.
+                string neueSpalte = spalte.Replace(schemaName + ".", "");
+                recordDict[neueSpalte] = datenZeile[neueSpalte];
             }                
             Add(record);
+        }
+    }
+
+    internal void UpdateSchemaData(string page, string schemaName, Dictionary<string, object> felder)
+    {
+        // 1. Die inneren Felder in ein XmlRpcStruct umwandeln
+        var innerStruct = new XmlRpcStruct();
+        foreach (var kvp in felder)
+        {
+            innerStruct[kvp.Key] = kvp.Value;
+        }
+
+        // 2. Den äußeren Payload (schema_name -> felder) als XmlRpcStruct aufbauen
+        var structPayload = new XmlRpcStruct
+        {
+            { schemaName, innerStruct }
+        };
+
+        // 3. API-Call abfeuern
+        bool erfolg = WikiZugriff.Proxy.SaveStructData(page, structPayload, "Daten via C#-Anwendung aktualisiert");
+
+        if (!erfolg)
+        {
+            throw new Exception($"Update für die Seite '{page}' ist fehlgeschlagen.");
         }
     }
 

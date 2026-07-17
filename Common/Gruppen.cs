@@ -49,7 +49,7 @@ public class Gruppen : List<Gruppe>
             var enumerable = members.ToList();
             record.Mitglieder = string.Join(',',
                 enumerable.Select(x => (x.Titel != " " ? x.Titel : "") + x.Vorname + " " + x.Nachname));
-            record.MitgliederMail = string.Join(',', enumerable.Select(x => x.Mail));
+            record.MitgliederMail = string.Join(';', enumerable.Select(x => x.Mail));
             record.MitgliederKuerzel = string.Join(',', enumerable.Select(x => x.Kürzel));
             var gruppe = new Gruppe(kurzname);
             records.Add(record);

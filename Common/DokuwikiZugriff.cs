@@ -50,7 +50,11 @@ public interface IDokuWikiApi : IXmlRpcProxy
 
     // NEU: Holt die Tabellendaten (Aggregationen) des Struct-Plugins
     [XmlRpcMethod("plugin.struct.getAggregationData")]
+    
     object[] GetAggregationData(string[] schemas, string[] columns, object[] filters, string sortBy);
+
+    [XmlRpcMethod("plugin.struct.saveData")]
+    bool SaveStructData(string page, object data, string summary = "Updated via API");
 }
 
 public class DokuwikiZugriff

@@ -502,7 +502,7 @@ public class Dateien : List<Datei>
         ));                    
     }
 
-    public List<dynamic>? GetMatchingList(IConfiguration configuration, string pattern, Students students = null, Klassen klassen = null, string[] spalten = null)
+    public List<dynamic>? GetMatchingList(IConfiguration configuration, string pattern, Students students = null, Klassen klassen = null, string[] spalten = null, DokuwikiZugriff dokuwikiZugriff = null)
     {
         Datei datei = this.FirstOrDefault(datei => !string.IsNullOrEmpty(datei.Dateiname) && datei.Dateiname.ToLower().StartsWith(pattern, StringComparison.CurrentCultureIgnoreCase));
         
@@ -510,7 +510,7 @@ public class Dateien : List<Datei>
         // Die bereits angelegte Datei wird gefüllt
         if(spalten != null && spalten.Length > 0)
         {                       
-            datei.GetSchema(pattern, spalten, configuration);
+            datei.GetSchema(pattern, spalten, configuration, dokuwikiZugriff );
             datei.SchreibeZeilen("|");
             return null;
         }        
