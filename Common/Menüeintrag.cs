@@ -5002,7 +5002,7 @@ public class Menüeintrag
         zieldatei.WikiZugriff = this.WikiZugriff;
 
         // Ist-Stand der Kollegium-Tabelle in Datei schreiben
-        Quelldateien.GetMatchingList(configuration, "kollegium", IStudents, Klassen, ["kollegium.Page", "kollegium.Kürzel", "kollegium.Namen", "kollegium.Mail", "kollegium.Link"], this.WikiZugriff);
+        Quelldateien.GetMatchingList(configuration, "kollegium", IStudents, Klassen, ["kollegium.Page", "kollegium.Kürzel", "kollegium.Namen", "kollegium.Mail", "kollegium.Link", "kollegium.Art"], this.WikiZugriff);
 
         // Zum Kollegium müssen folgende Items abgeglichen werden:
         // 1. Lehrkräfte, die in der Datei "lehrkraefte.dat" enthalten sind, aber nicht in der Liste der IST-Lehrkräfte (lehrersSoll) enthalten sind, werden entfernt.
@@ -5019,8 +5019,9 @@ public class Menüeintrag
             record.Kürzel = l.Kürzel;
             record.Namen = string.IsNullOrEmpty(l.Titel) ? $"{l.Vorname} {l.Nachname}" : $"{l.Titel} {l.Vorname} {l.Nachname}";
             record.Mail = l.Mail;
+            record.Art = !String.IsNullOrEmpty(l.PflichtstundenSoll) ? "Lehrkraft" : ""; // Nur LuL haben Pflichtstunden.
             record.Link = "kollegium:" + l.Kürzel.ToLower();     
-            if(l.Kürzel == "AEH" || l.Kürzel == "BM" || l.Kürzel == "PLA")// || l.Kürzel == "BM3" || l.Kürzel == "BM4")                
+            if(l.Kürzel == "AEH" || l.Kürzel == "BM" || l.Kürzel == "KU" || l.Kürzel == "PLA" || l.Kürzel == "KS" || l.Kürzel == "BEH")                
                 zieldatei.Add(record);    
         }
 

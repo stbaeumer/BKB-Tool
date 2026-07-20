@@ -57,6 +57,7 @@ public class Lehrers : List<Lehrer>
             l.Geschlecht = dict["Geschlecht"].ToString().ToLower();
             l.Rechtsverhältnis = dict["Rechtsverhältnis"].ToString();
             l.Beschäftigungsart = dict["Beschäftigungsart"].ToString();
+            l.PflichtstundenSoll = dict["Pflichtstunden-Soll"].ToString();
             l.StatistikRelevant = dict["statistik-relevant"].ToString();
             l.Geburtsdatum = DateTime.TryParseExact(dict["Geburtsdatum"].ToString(), "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var dt) ? dt : new DateTime(1, 1, 1);
 

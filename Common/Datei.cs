@@ -1765,7 +1765,23 @@ public Datei(IConfiguration configuration)
             modusString = "Filtern";
 
         if (modus == Global.Modus.SchemaUpdaten)
-            modusString = "SchemaUpdaten";
+        {            
+            var panel = new Panel("")
+                .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] Weiter oder Abbrechen [/]")
+                .HeaderAlignment(Justify.Left)
+                .SquareBorder()
+                .Expand()
+                .BorderColor(Global.ColorHinweise);
+            
+            AnsiConsole.Write(panel);
+            AnsiConsole.MarkupLine($"[bold {Global.GetColor(Global.ColorHinweise)}] Bitte mit [green]Enter[/] bestätigen oder mit [red]ESC[/] abbrechen.[/]");
+            
+            var keyInfo = Console.ReadKey(intercept: true);
+            if (keyInfo.Key != ConsoleKey.Enter)
+            {
+                return new Datei(); // Abbruch, wenn nicht Enter gedrückt wurde
+            }
+        }         
 
         var neueDatei = new Datei(AbsoluterPfad);
         bool skipProcessing = false;
@@ -1868,6 +1884,8 @@ public Datei(IConfiguration configuration)
                         {
                             // Zeile in Datenbank anlegen
                             InsertSchemaData(neueDict);
+                            string page = neueDict["Page"]?.ToString().ToLower().Trim();
+                            Console.WriteLine($"{Global.GetColor(Global.ColorHinweise)}INSERT: {page} ... durchgeführt.");
                         }
                     }                        
                     continue;
@@ -1925,6 +1943,7 @@ public Datei(IConfiguration configuration)
 
                             // Aufruf der Update-Methode mit der VOLLSTÄNDIGEN Zeile
                             UpdateSchemaData(zielSeite, schemaName, alleWerteFuerDieseZeile, WikiZugriff);
+                            Console.WriteLine($"{Global.GetColor(Global.ColorHinweise)}UPDATE: {zielSeite} ... durchgeführt.");
                         }
                     }
                         

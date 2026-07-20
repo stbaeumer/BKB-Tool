@@ -48,6 +48,7 @@ public class Lehrer
     public string? StatistikRelevant { get; internal set; }
     public string? Anrede { get; internal set; }
  public List<string> NichtEingetrageneNotenKlassen { get; internal set; }
+ public string? PflichtstundenSoll { get; set; }
 
  internal int GetAlterAmErstenSchultagDesSchuljahres(int jahr)
     {

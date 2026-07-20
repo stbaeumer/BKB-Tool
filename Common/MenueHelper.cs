@@ -417,7 +417,7 @@ public static class MenueHelper
        m.Kollegium(
         configuration, Path.Combine(pfadDownloads ?? "", "kollegium.struct"), lehrers,
         [
-         datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.Vergleichen),
+         datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.Vergleichen),         
          datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.SchemaUpdaten),
          //datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.Filtern),
          //datei => datei.Erstellen()
