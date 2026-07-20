@@ -1903,21 +1903,28 @@ public Datei(IConfiguration configuration)
 
 
                         // Zeile in Datenbank updaten
-                        if(modus == Global.Modus.SchemaUpdaten)
+                        if (modus == Global.Modus.SchemaUpdaten)
                         {
-                            string zielSeite = anhandDieserSchlüsselAttributeWirdVerglichenString.ToLower(); 
+                            string zielSeite = anhandDieserSchlüsselAttributeWirdVerglichenString.ToLower().Trim(); 
                             string schemaName = Path.GetFileNameWithoutExtension(AbsoluterPfad);  
 
-                            var spaltenName = nichtIdentischeSonstigeAttribute[i]; 
-                            var spaltenWert = GetNeuerWert(neueDict, nichtIdentischeSonstigeAttribute[i], false); 
+                            // Wir erstellen ein Dictionary für ALLE Spalten dieser Zeile
+                            var alleWerteFuerDieseZeile = new Dictionary<string, object>();
 
-                            var neueWerte = new Dictionary<string, object>
+                            // Alle Keys aus dem neuen Datensatz kopieren
+                            foreach (var key in neueDict.Keys)
                             {
-                                { spaltenName, spaltenWert } // Standard-Typ reicht für XmlRpcStruct
-                            };
+                                // Interne Steuerungs- und Hilfsspalten nicht in das DokuWiki-Schema schreiben
+                                if (key.Equals("Page", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    continue;
+                                }
 
-                            // Aufruf mit Übergabe deiner funktionierenden Wiki-Instanz
-                            UpdateSchemaData(zielSeite, schemaName, neueWerte, WikiZugriff);
+                                alleWerteFuerDieseZeile[key] = neueDict[key];
+                            }
+
+                            // Aufruf der Update-Methode mit der VOLLSTÄNDIGEN Zeile
+                            UpdateSchemaData(zielSeite, schemaName, alleWerteFuerDieseZeile, WikiZugriff);
                         }
                     }
                         
@@ -1950,7 +1957,7 @@ public Datei(IConfiguration configuration)
         string zielSeite = neueDict["Page"]?.ToString().ToLower().Trim(); 
         
         // Teilt am Doppelpunkt und nimmt das letzte Element
-        string schemaName = zielSeite.Split(':').Last().ToLower().Trim();         
+        string schemaName = zielSeite.Split(':').First().ToLower().Trim();         
         
         try
         {
@@ -1959,17 +1966,17 @@ public Datei(IConfiguration configuration)
             string templateInhalt = "";
             try 
             {
-                templateInhalt = WikiZugriff.Proxy.GetPage("kollegium:template");
+                templateInhalt = WikiZugriff.Proxy.GetPage(schemaName + ":template");
             }
             catch (Exception)
             {
                 // Fallback, falls das Template nicht gelesen werden kann
-                templateInhalt = $"====== {zielSeite.Replace("kollegium:", "").ToUpper()} ======\n";
+                templateInhalt = $"====== {zielSeite.Replace(schemaName + ":", "").ToUpper()} ======\n";
             }
 
             // 2. Platzhalter im Template ersetzen (falls vorhanden, z.B. @PAGE@ oder @USER@)
             // DokuWiki ersetzt diese normalerweise automatisch, per API müssen wir das selbst tun:
-            templateInhalt = templateInhalt.Replace("@PAGE@", zielSeite.Replace("kollegium:", "").ToUpper());
+            templateInhalt = templateInhalt.Replace("@PAGE@", zielSeite.Replace(schemaName + ":", "").ToUpper());
             templateInhalt = templateInhalt.Replace("@ID@", zielSeite);
 
             // 3. Seite mit dem Template-Inhalt anlegen

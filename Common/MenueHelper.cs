@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text;
 using Common;
+using DocumentFormat.OpenXml.Drawing.Diagrams;
 using Microsoft.Extensions.Configuration;
 using Spectre.Console;
 #pragma warning disable CS8603 // Mögliche Null-Verweis-Rückgabe
@@ -418,13 +419,13 @@ public static class MenueHelper
         [
          datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.Vergleichen),
          datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.SchemaUpdaten),
-         datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.Filtern),
-         datei => datei.Erstellen()
+         //datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.Filtern),
+         //datei => datei.Erstellen()
         ],
         ["Link"],
         ["Page"],
-        "|", '\0', new UTF8Encoding(true), false);
-       m.Faecher(
+        "|", '\0', new UTF8Encoding(true), false); 
+       /*m.Faecher(
         configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Faecher.dat"),
         [
          datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
@@ -444,8 +445,7 @@ public static class MenueHelper
         ],
         ["InternBez"],
         ["SonstigeBez", "Folgeklasse"],
-        "|", '\0', new UTF8Encoding(true), false);
-        ;
+        "|", '\0', new UTF8Encoding(true), false);*/
       },
       Global.Rubrik.Allgemein,
       Global.NurBeiDiesenSchulnummern.Alle

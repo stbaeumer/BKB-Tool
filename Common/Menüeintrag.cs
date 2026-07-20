@@ -5020,7 +5020,7 @@ public class Menüeintrag
             record.Namen = string.IsNullOrEmpty(l.Titel) ? $"{l.Vorname} {l.Nachname}" : $"{l.Titel} {l.Vorname} {l.Nachname}";
             record.Mail = l.Mail;
             record.Link = "kollegium:" + l.Kürzel.ToLower();     
-            if(l.Kürzel == "AEH" || l.Kürzel == "BM") //|| l.Kürzel == "BM" || l.Kürzel == "BM3" || l.Kürzel == "BM4")                
+            if(l.Kürzel == "AEH" || l.Kürzel == "BM" || l.Kürzel == "PLA")// || l.Kürzel == "BM3" || l.Kürzel == "BM4")                
                 zieldatei.Add(record);    
         }
 
