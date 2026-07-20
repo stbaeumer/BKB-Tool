@@ -3,9 +3,9 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <RollForward>Major</RollForward>
-    <Version>1.0.106</Version>
-    <AssemblyVersion>1.0.106</AssemblyVersion>
-    <FileVersion>1.0.106</FileVersion>
+    <Version>1.0.107</Version>
+    <AssemblyVersion>1.0.107</AssemblyVersion>
+    <FileVersion>1.0.107</FileVersion>
     <Authors>Stefan Bäumer</Authors>
     <Company>Berufskolleg Borken</Company>
     <Product>BKB-Tool</Product>
