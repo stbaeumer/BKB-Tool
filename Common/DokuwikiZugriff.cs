@@ -55,10 +55,25 @@ public interface IDokuWikiApi : IXmlRpcProxy
 
     [XmlRpcMethod("plugin.struct.saveData")]
     bool SaveStructData(string page, object data, string summary = "Updated via API");
+    
+    [XmlRpcMethod("plugin.struct.addGlobalRow")]
+    object AddGlobalRow(XmlRpcStruct data, string summary = "");
+
+    // NEU: Ermöglicht das Abfragen aller registrierten API-Endpunkte des Servers
+    [XmlRpcMethod("system.listMethods")]
+    string[] ListMethods();
+
+    // Testweise das Interface anpassen, falls die API ein Array/Objekt-Wrapper benötigt:
+[XmlRpcMethod("plugin.struct.saveData")]
+bool SaveStructData(string pageId, string schemaName, object data);
+
 }
 
 public class DokuwikiZugriff
 {
+    public IDokuWikiApi Proxy { get; set; }
+    public XmlRpcStruct Options { get; set; } // Hier ist es definiert!
+
     public DokuwikiZugriff(IConfiguration configuration)
     {
         Global.Konfig("WikiUrl", Global.Modus.Update, configuration);
@@ -72,27 +87,5 @@ public class DokuwikiZugriff
         // Manuelle HTTP-Header setzen
         var credentials = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{configuration["WikiJsonUser"]}:{configuration["WikiJsonUserKennwort"]}"));
         ((XmlRpcClientProtocol)Proxy).Headers.Add("Authorization", "Basic " + credentials);
-    }
-
-    public IDokuWikiApi Proxy { get; set; }
-    public XmlRpcStruct Options { get; set; }
-
-    public void GetVersion()
-    {
-        var version = Proxy.GetVersion();
-        Console.WriteLine($"DokuWiki Version: {version}");
-    }
-
-    public string GetPage(string page)
-    {
-        // Korrigiert: Nutzt jetzt den Parameter 'page' statt fest "start"
-        var pageContent = Proxy.GetPage(page); 
-        return pageContent;
-    }
-    
-    public void PutPage(string page, string content)
-    {
-        Proxy.PutPage(page, content, new XmlRpcStruct());
-        Console.WriteLine("Seite aktualisiert!");
     }
 }

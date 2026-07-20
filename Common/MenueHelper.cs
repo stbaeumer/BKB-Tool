@@ -402,16 +402,28 @@ public static class MenueHelper
      ),
      new Menüeintrag(
       configuration,
-      $"Stammdaten:Mo:Stammdaten zwischen SchILD und Untis abgleichen",
-      quelldateien.Notwendige(configuration, ["faecher,dat", "GPU002,txt", "klassen,dat", "GPU003,txt"]),
+      $"Stammdaten:Mo:Kollegium & Untisanrechnungen abgleichen",
+      quelldateien.Notwendige(configuration, ["kollegium,struct", "lehrkraefte,dat", "faecher,dat", "GPU002,txt", "klassen,dat", "GPU003,txt"]),
       students,
       klassen,
       [
-       $"Folgende Stammdaten  werden abgeglichen:",       
+       $"Folgende Stammdaten  werden abgeglichen:",
        $"[{Global.GetColor(Global.ColorActionInMenüs)}]Faecher:[/] Es wird angenommen, dass Untis die Fächer aktuell hält. Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]Facher.dat[/] wird erstellt. In jedem Fall muss die Datei in SchILD nachbearbeitet werden.",
       ],
       m =>
       {
+       m.DokuwikiZugriffSetzen(configuration);
+       m.Kollegium(
+        configuration, Path.Combine(pfadDownloads ?? "", "kollegium.struct"), lehrers,
+        [
+         datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.Vergleichen),
+         datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.SchemaUpdaten),
+         datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.Filtern),
+         datei => datei.Erstellen()
+        ],
+        ["Link"],
+        ["Page"],
+        "|", '\0', new UTF8Encoding(true), false);
        m.Faecher(
         configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Faecher.dat"),
         [
@@ -1037,7 +1049,7 @@ public static class MenueHelper
         configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Lehrkraefte.dat"),
         [
          datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
-         datei => datei.Verarbeiten(quelldateien, Global.Modus.Filtern),
+         //datei => datei.Verarbeiten(quelldateien, Global.Modus.Filtern),
          datei => datei.Erstellen()
         ],
         ["InternKrz"],
@@ -1085,10 +1097,10 @@ public static class MenueHelper
       {
       var pdfDatei = Directory.GetFiles(pfadDownloads, "*.pdf", SearchOption.AllDirectories).OrderByDescending(File.GetLastWriteTime).FirstOrDefault();
        Global.ZeileSchreiben("Die neueste PDF-Datei wird versendet:", pdfDatei, ConsoleColor.White, ConsoleColor.Black);
-       Global.Konfig("SmtpServer", Global.Modus.Update, configuration);
-       Global.Konfig("SmtpPort", Global.Modus.Update, configuration);
-       Global.Konfig("SmtpUser", Global.Modus.Update, configuration);
-       Global.Konfig("SmtpKennwort", Global.Modus.Update, configuration);
+       Global.Konfig("SmtpServer365", Global.Modus.Update, configuration);
+       Global.Konfig("SmtpPort365", Global.Modus.Update, configuration);
+       Global.Konfig("SmtpUser365", Global.Modus.Update, configuration);
+       Global.Konfig("SmtpKennwort365", Global.Modus.Update, configuration);
        Global.Konfig("PdfKennwort", Global.Modus.Update, configuration);
        Global.Konfig("Betreff", Global.Modus.Update, configuration);
        Global.Konfig("Body", Global.Modus.Update, configuration);

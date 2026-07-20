@@ -2216,6 +2216,50 @@ public static class KonfigHelper
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
+        ["SmtpKennwortPostfix"] = new KonfigMeta
+        {
+            Key = "SmtpKennwort365",
+            DefaultValue = Environment.GetEnvironmentVariable("SmtpKennwort365") ?? "",
+            Aufforderung = $"[green]■[/]",
+            Hinweise = $"Geben Sie das [{Global.GetColor(Global.ColorInfoBox)}]SMTP-Kennwort-365[/] an.",
+            Datentyp = Global.Datentyp.Kennwort,
+            InGrundeinstellungAbfragen = true,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
+        },
+        ["SmtpPort365"] = new KonfigMeta
+        {
+            Key = "SmtpPort365",
+            DefaultValue = "587",
+            Aufforderung = $"[green]■[/]",
+            Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]SMTP-Port-365[/] an.",
+            Datentyp = Global.Datentyp.String,
+            InGrundeinstellungAbfragen = true,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
+        },
+        ["SmtpServer365"] = new KonfigMeta
+        {
+            Key = "SmtpServer365",
+            DefaultValue = "smtp.office365.com",
+            Aufforderung = $"[green]■[/]",
+            Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]SMTP-Server-365[/] an.",
+            Datentyp = Global.Datentyp.String,
+            InGrundeinstellungAbfragen = true,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
+        },
+        ["SmtpUser365"] = new KonfigMeta
+        {
+            Key = "SmtpUser365",
+            DefaultValue = Environment.GetEnvironmentVariable("SmtpUser365") ?? "",
+            Aufforderung = $"[green]■[/]",
+            Hinweise = $"Geben Sie den [{Global.GetColor(Global.ColorInfoBox)}]SMTP-Benutzer-365[/] an.",
+            Datentyp = Global.Datentyp.String,
+            InGrundeinstellungAbfragen = true,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
+        },
         ["SprechtagsDatum"] = new KonfigMeta
         {
             Key = "SprechtagsDatum",

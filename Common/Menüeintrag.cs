@@ -64,8 +64,9 @@ public class Menüeintrag
     public Unterrichte Unterrichte { get; set; }
     public Dateien Zieldateien { get; set; }
     public Relationsgruppen Relationsgruppen { get; internal set; }
+ public DokuwikiZugriff WikiZugriff { get; set; }
 
-    public Menüeintrag(IConfiguration configuration, string titel, Dateien quelldateien, Students students, Klassen klassen, List<string> beschreibung, Action<Menüeintrag> funktion, Global.Rubrik rubrik = Global.Rubrik.Allgemein, Global.NurBeiDiesenSchulnummern nurbeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Alle)
+ public Menüeintrag(IConfiguration configuration, string titel, Dateien quelldateien, Students students, Klassen klassen, List<string> beschreibung, Action<Menüeintrag> funktion, Global.Rubrik rubrik = Global.Rubrik.Allgemein, Global.NurBeiDiesenSchulnummern nurbeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Alle)
     {
         try
         {
@@ -4987,6 +4988,52 @@ public class Menüeintrag
         zieldatei.Add(record);
     }
 
+    public void Kollegium(
+        IConfiguration configuration,        
+        string zieldateiname,
+        Lehrers lehrersSoll,
+        List<Action<Datei>> funktionen,
+        string[] anhandDieserAttributeWirdVerglichen, 
+        string[] dieseAttributeWerdenBeimVergleichIgnoriert, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
+    {
+        // zieldatei, die die Lehrkräfte enthält. Diese Datei wird in Wiki importiert.
+        var zieldatei = new Datei(zieldateiname, funktionen, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
+                
+        zieldatei.WikiZugriff = this.WikiZugriff;
+
+        // Ist-Stand der Kollegium-Tabelle in Datei schreiben
+        Quelldateien.GetMatchingList(configuration, "kollegium", IStudents, Klassen, ["kollegium.Page", "kollegium.Kürzel", "kollegium.Namen", "kollegium.Mail", "kollegium.Link"], this.WikiZugriff);
+
+        // Zum Kollegium müssen folgende Items abgeglichen werden:
+        // 1. Lehrkräfte, die in der Datei "lehrkraefte.dat" enthalten sind, aber nicht in der Liste der IST-Lehrkräfte (lehrersSoll) enthalten sind, werden entfernt.
+        // 2. Anrechnungen aus Untis
+        // 3. Gruppen, die sich aus Unterricht usw. ergeben 
+
+        // Zu 1. Lehrkräfte
+        var lehrerliste = new List<dynamic>();
+
+        foreach (var l in lehrersSoll)        
+        {
+            dynamic record = new ExpandoObject();
+            record.Page = "kollegium:" + l.Kürzel;
+            record.Kürzel = l.Kürzel;
+            record.Namen = string.IsNullOrEmpty(l.Titel) ? $"{l.Vorname} {l.Nachname}" : $"{l.Titel} {l.Vorname} {l.Nachname}";
+            record.Mail = l.Mail;
+            record.Link = "kollegium:" + l.Kürzel.ToLower();     
+            if(l.Kürzel == "AEH" || l.Kürzel == "BM") //|| l.Kürzel == "BM" || l.Kürzel == "BM3" || l.Kürzel == "BM4")                
+                zieldatei.Add(record);    
+        }
+
+        // Zu 2. Anrechnungen aus Untis
+
+
+        // Zu 3. Gruppen, die sich aus Unterricht usw. ergeben
+
+            
+        foreach (var aktion in zieldatei.Funktionen)
+            aktion(zieldatei);
+    }
+
     public void RenderAuswahlÜberschrift(IConfiguration configuration)
     {
         var panel3 = new Panel($"[grey85]{string.Join("\n", Beschreibung)}[/]")
@@ -6610,6 +6657,11 @@ public class Menüeintrag
  internal void SvwsServerStatusAnzeigen(IConfiguration configuration)
  {
   throw new NotImplementedException();
+ }
+
+ internal void DokuwikiZugriffSetzen(IConfiguration configuration)
+ {
+     WikiZugriff = new DokuwikiZugriff(configuration);
  }
 
 

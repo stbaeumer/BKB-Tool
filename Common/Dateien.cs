@@ -548,6 +548,13 @@ public class Dateien : List<Datei>
         return datei.ToList();
     }
 
+    /// <summary>
+    /// Aus allen möglchen Quelldateien (quelldateien) werden die notwendigen Quelldateien (m.Quelldateien) herausgefiltert.
+    /// </summary>
+    /// <param name="configuration"></param>
+    /// <param name="dateinamenNotwendigeDateien"></param>
+    /// <param name="meldungAnzeigen"></param>
+    /// <returns></returns>
     public Dateien Notwendige(IConfiguration configuration, List<string> dateinamenNotwendigeDateien, bool meldungAnzeigen = false)
     {
         var pfadDownloads = configuration["PfadDownloads"];
@@ -564,6 +571,7 @@ public class Dateien : List<Datei>
             
             if(dateiendung == "struct")
             {
+                // Wenn die Datei noch nicht existiert, wird sie erstellt, aber nicht gefüllt. Sie wird später gefüllt, wenn die Spalten bekannt sind.
                 datei.Erstellen(Path.Combine(pfadDownloads, dateiname + "." + dateiendung));
                 datei.AbsoluterPfad = Path.Combine(pfadDownloads, dateiname + "." + dateiendung);
                 datei.Dateiname = dateiname;                

@@ -1057,15 +1057,24 @@ public Datei(IConfiguration configuration)
     }
 
 
-    private string GetNeuerWert(IDictionary<string, object> neueDict, string nichtIdentischesSonstigesAttribut)
+    private string GetNeuerWert(IDictionary<string, object> neueDict, string nichtIdentischesSonstigesAttribut, bool abschneiden = true)
     {
         var x = "";
 
-        x = neueDict.TryGetValue(nichtIdentischesSonstigesAttribut, out var neuerWert)
+        if (abschneiden)
+        {
+            x = neueDict.TryGetValue(nichtIdentischesSonstigesAttribut, out var neuerWert)
             ? (neuerWert?.ToString()?.Length > 20
                 ? neuerWert.ToString().Substring(0, 17) + "..."
                 : neuerWert?.ToString() ?? string.Empty)
-            : string.Empty;
+            : string.Empty;    
+        }
+        else
+        {
+            x = neueDict.TryGetValue(nichtIdentischesSonstigesAttribut, out var neuerWert)
+            ? (neuerWert?.ToString() ?? string.Empty)
+            : string.Empty;    
+        }
 
         if (x.Length > 0)
             return x;
@@ -1766,7 +1775,7 @@ public Datei(IConfiguration configuration)
         // Wenn keine vorhandene Datei mit demselben Namen existiert, wird die Datei unverändert zurückgegeben.
         if (string.IsNullOrEmpty(vorhandeneDatei))
         {
-            var panel = new Panel($"Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{Path.GetFileName(AbsoluterPfad)}[/] wurde nicht gefunden. Ein Vergleich von neu & alt ist nicht möglich.")
+            var panel = new Panel($"Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]{AbsoluterPfad}[/] wurde nicht gefunden. Ein Vergleich von neu & alt ist nicht möglich.")
                 .Header("[bold aqua] Neue Datei [/]")
                 .HeaderAlignment(Justify.Left)
                 .SquareBorder()
@@ -1858,11 +1867,7 @@ public Datei(IConfiguration configuration)
                         if(modus == Global.Modus.SchemaUpdaten)
                         {
                             // Zeile in Datenbank anlegen
-
-                            
-
-
-
+                            InsertSchemaData(neueDict);
                         }
                     }                        
                     continue;
@@ -1900,23 +1905,19 @@ public Datei(IConfiguration configuration)
                         // Zeile in Datenbank updaten
                         if(modus == Global.Modus.SchemaUpdaten)
                         {
-                            // Update die Zeile in Dokuwiki-Datenbank mit den Werten aus neueDict und den Schlüsselattributen aus zeileMitIdentischenSchlüsselattributen
-                            // Hier müsste der Code stehen, um die Datenbank zu aktualisieren.
+                            string zielSeite = anhandDieserSchlüsselAttributeWirdVerglichenString.ToLower(); 
+                            string schemaName = Path.GetFileNameWithoutExtension(AbsoluterPfad);  
 
-                            var tabelle = AbsoluterPfad.Split(Path.DirectorySeparatorChar).Last().Split('.').First(); // Tabelle aus Dateiname ableiten
-
-                            // 1. Zielseite und Schema festlegen
-                            string zielSeite = "kollegium:gruppen"; // Die DokuWiki Page-ID (z. B. "wiki:mitglieder")
-                            string schemaName = "gruppen";  // Name deines Schemas (z. B. "gruppen")
+                            var spaltenName = nichtIdentischeSonstigeAttribute[i]; 
+                            var spaltenWert = GetNeuerWert(neueDict, nichtIdentischeSonstigeAttribute[i], false); 
 
                             var neueWerte = new Dictionary<string, object>
                             {
-                                { "MitgliederKuerzel", "WIK,DIE,OST,EIT,HE" },
-                                { "Mitglieder", "Kerstin Winking,Uta Dierk,Marc Osterbrink,Vera Eiting,Eva Caroline Hansen" },
-                                { "MitgliederMail", "kerstin.winking@berufskolleg-borken.de;uta.dierk@berufskolleg-borken.de;marc.osterbrink@berufskolleg-borken.de;vera.eiting@berufskolleg-borken.de;eva.hansen@berufskolleg-borken.de" }
+                                { spaltenName, spaltenWert } // Standard-Typ reicht für XmlRpcStruct
                             };
 
-                            UpdateSchemaData(zielSeite, schemaName, neueWerte);
+                            // Aufruf mit Übergabe deiner funktionierenden Wiki-Instanz
+                            UpdateSchemaData(zielSeite, schemaName, neueWerte, WikiZugriff);
                         }
                     }
                         
@@ -1944,7 +1945,62 @@ public Datei(IConfiguration configuration)
         return this;
     }
 
-    private string GetVorhandeneDatei(Dateien quelldateien)
+    internal void InsertSchemaData(IDictionary<string, object> neueDict)
+    {
+        string zielSeite = neueDict["Page"]?.ToString().ToLower().Trim(); 
+        
+        // Teilt am Doppelpunkt und nimmt das letzte Element
+        string schemaName = zielSeite.Split(':').Last().ToLower().Trim();         
+        
+        try
+        {
+            // 1. Inhalt der template.txt über die API abrufen
+            // DokuWiki-Pfad syntax nutzt Doppelpunkte statt Slashes
+            string templateInhalt = "";
+            try 
+            {
+                templateInhalt = WikiZugriff.Proxy.GetPage("kollegium:template");
+            }
+            catch (Exception)
+            {
+                // Fallback, falls das Template nicht gelesen werden kann
+                templateInhalt = $"====== {zielSeite.Replace("kollegium:", "").ToUpper()} ======\n";
+            }
+
+            // 2. Platzhalter im Template ersetzen (falls vorhanden, z.B. @PAGE@ oder @USER@)
+            // DokuWiki ersetzt diese normalerweise automatisch, per API müssen wir das selbst tun:
+            templateInhalt = templateInhalt.Replace("@PAGE@", zielSeite.Replace("kollegium:", "").ToUpper());
+            templateInhalt = templateInhalt.Replace("@ID@", zielSeite);
+
+            // 3. Seite mit dem Template-Inhalt anlegen
+            WikiZugriff.Proxy.PutPage(zielSeite, templateInhalt, new XmlRpcStruct());
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Hinweis beim Erstellen der Template-Seite: {ex.Message}");
+        }
+        // ---------------------------------------------------------------------
+
+        var innerStruct = new XmlRpcStruct();
+        foreach (var kvp in neueDict)
+        {
+            innerStruct[kvp.Key] = kvp.Value?.ToString() ?? "";
+        }
+
+        var structPayload = new XmlRpcStruct
+        {
+            { schemaName, innerStruct }
+        };
+
+        bool erfolg = WikiZugriff.Proxy.SaveStructData(zielSeite, structPayload, "Lehrer via API hinzugefügt");
+
+        if (!erfolg)
+        {
+            throw new Exception($"Das Einfügen in das Schema '{schemaName}' ist fehlgeschlagen.");
+        }
+    }
+
+ private string GetVorhandeneDatei(Dateien quelldateien)
     {
         var vorhandeneRec = new List<dynamic>();
 
@@ -1956,6 +2012,7 @@ public Datei(IConfiguration configuration)
                 return vorhandeneDatei.AbsoluterPfad;
                 break; // Schleife abbrechen, wenn die Datei gefunden wurde
             }
+            Console.WriteLine($"Vergleiche {vorhandeneDatei.AbsoluterPfad} {vorhandeneDatei.Count} mit {Path.GetFileName(AbsoluterPfad.ToLower())}");
         }
         // Neue .csv-Dateien beginnen mit demselben Namen wie die Zieldatei, bis zum Unterstrich
         foreach (var vorhandeneDatei in quelldateien)
@@ -2211,72 +2268,129 @@ public Datei(IConfiguration configuration)
     }
 
     internal void GetSchema(string schemaName, string[] benutzerSpalten, IConfiguration configuration, DokuwikiZugriff wikiZugriff)
-    {   
-        AbsoluterPfad = Path.Combine(configuration["PfadDownloads"], schemaName + ".struct");
+{   
+    AbsoluterPfad = Path.Combine(configuration["PfadDownloads"], schemaName + ".struct");
 
-        // 1. Präfixe für die API automatisch hinzufügen (z.B. "gruppen.MitgliederKuerzel")
-        string[] schemas = { schemaName };
+    string[] schemas = { schemaName };
+    object[] filters = { };
+    string sortBy = "";
 
-        object[] filters = { };
-        string sortBy = "";
+    // 1. API Abfrage an DokuWiki
+    object[] ergebnis = wikiZugriff.Proxy.GetAggregationData(schemas, benutzerSpalten, filters, sortBy);
 
-        // 2. API Abfrage
-        object[] ergebnis = wikiZugriff.Proxy.GetAggregationData(schemas, benutzerSpalten, filters, sortBy);
+    SchemaData.Clear();
+    Clear();
 
-        // 3. Ergebnis-Property und Records leeren und neu befüllen
-        SchemaData.Clear();
-        Clear();
-
-        foreach (object zeileObj in ergebnis)
-        {
-            XmlRpcStruct zeile = (XmlRpcStruct)zeileObj;
-            var datenZeile = new Dictionary<string, string>();
-
-            foreach (var spalte in benutzerSpalten)
-            {
-                // Der Schemaname wird aus dem String entfernt, falls er vorhanden ist, um die Spaltennamen zu vereinfachen.
-                string neueSpalte = spalte.Replace(schemaName + ".", ""); // Entferne das Präfix, falls vorhanden
-                //string apiKey = spalte.Equals("Page", StringComparison.OrdinalIgnoreCase) ? $"{schemaName}.Page" : $"{schemaName}.{spalte}";
-                datenZeile[neueSpalte] = ConvertStructValueToString(zeile, spalte);
-            }
-            SchemaData.Add(datenZeile);
-
-            dynamic record = new ExpandoObject();
-            var recordDict = (IDictionary<string, object>)record;
-            foreach (var spalte in benutzerSpalten)
-            {                    
-                // Der Schemaname wird aus dem String entfernt, falls er vorhanden ist, um die Spaltennamen zu vereinfachen.
-                string neueSpalte = spalte.Replace(schemaName + ".", "");
-                recordDict[neueSpalte] = datenZeile[neueSpalte];
-            }                
-            Add(record);
-        }
-    }
-
-    internal void UpdateSchemaData(string page, string schemaName, Dictionary<string, object> felder)
+    foreach (object zeileObj in ergebnis)
     {
-        // 1. Die inneren Felder in ein XmlRpcStruct umwandeln
-        var innerStruct = new XmlRpcStruct();
-        foreach (var kvp in felder)
+        XmlRpcStruct zeile = (XmlRpcStruct)zeileObj;
+        var datenZeile = new Dictionary<string, string>();
+
+        // 2. Alle benutzerdefinierten Spalten regulär auslesen
+        foreach (var spalte in benutzerSpalten)
         {
-            innerStruct[kvp.Key] = kvp.Value;
+            string neueSpalte = spalte.Replace(schemaName + ".", "");
+            
+            // "Page" überspringen wir in der Hauptschleife, da wir es gleich logisch befüllen
+            if (neueSpalte.Equals("Page", StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            datenZeile[neueSpalte] = ConvertStructValueToString(zeile, spalte);
         }
 
-        // 2. Den äußeren Payload (schema_name -> felder) als XmlRpcStruct aufbauen
-        var structPayload = new XmlRpcStruct
+        // 3. Fallback/Zuweisung: Wert von 'Link' in 'Page' übertragen
+        // Falls 'Link' existiert, nutzen wir diesen Wert kleingeschrieben als Page-ID
+        if (datenZeile.ContainsKey("Link"))
         {
-            { schemaName, innerStruct }
-        };
-
-        // 3. API-Call abfeuern
-        bool erfolg = WikiZugriff.Proxy.SaveStructData(page, structPayload, "Daten via C#-Anwendung aktualisiert");
-
-        if (!erfolg)
+            datenZeile["Page"] = datenZeile["Link"]?.ToLower().Trim() ?? "";
+        }
+        else
         {
-            throw new Exception($"Update für die Seite '{page}' ist fehlgeschlagen.");
+            datenZeile["Page"] = "";
+        }
+
+        // Dictionary zur Liste hinzufügen
+        SchemaData.Add(datenZeile);
+
+        // 4. Dynamisches ExpandoObject für die interne Weiterverarbeitung befüllen
+        dynamic record = new ExpandoObject();
+        var recordDict = (IDictionary<string, object>)record;
+        
+        // Page-Wert explizit setzen
+        recordDict["Page"] = datenZeile["Page"];
+
+        foreach (var spalte in benutzerSpalten)
+        {                    
+            string neueSpalte = spalte.Replace(schemaName + ".", "");
+            if (neueSpalte.Equals("Page", StringComparison.OrdinalIgnoreCase)) 
+                continue;
+            
+            recordDict[neueSpalte] = datenZeile[neueSpalte];
+        }                
+        Add(record);
+    }
+}
+
+    // Das Interface bleibt bestehen, muss aber der API des Struct-Plugins entsprechen
+[XmlRpcUrl("https://deine-dokuwiki-url.de/lib/exe/xmlrpc.php")]
+public interface IDokuWikiRpc : IXmlRpcProxy
+{
+    // Geändert von bool auf object
+    [XmlRpcMethod("plugin.struct.saveData")]
+    object SaveStructData(string pageId, string schemaName, XmlRpcStruct data);
+}
+
+
+    internal void UpdateSchemaData(string zielSeite, string schemaName, Dictionary<string, object> neueWerte, DokuwikiZugriff wikiZugriff)
+    {
+        try
+        {
+            // 1. Die eigentlichen Spaltenwerte sammeln
+            XmlRpcStruct innerStruct = new XmlRpcStruct();
+            foreach (var eintrag in neueWerte)
+            {
+                string wertString = eintrag.Value?.ToString() ?? "";
+                string bereinigterSpaltenName = eintrag.Key.Replace(schemaName + ".", "");
+
+                innerStruct.Add(bereinigterSpaltenName, wertString);
+            }
+
+            // 2. FIX: Die Payload exakt so verschachteln wie beim funktionierenden Insert
+            XmlRpcStruct structPayload = new XmlRpcStruct
+            {
+                { schemaName, innerStruct }
+            };
+
+            // 3. API-Aufruf ausführen
+            // Parameter 1: Die Zielseite (z.B. "kollegium:aeh")
+            // Parameter 2: Die verschachtelte Payload
+            // Parameter 3: Die Änderungszusammenfassung (Summary)
+            bool erfolg = wikiZugriff.Proxy.SaveStructData(zielSeite, structPayload, "Automatische Aktualisierung via API");
+            
+            System.Diagnostics.Debug.WriteLine($"[Struct-Update] Erfolg für {zielSeite}: {erfolg}");
+        }
+        catch (XmlRpcFaultException fex)
+        {
+            System.Diagnostics.Debug.WriteLine("=== XML-RPC FEHLER (VOM SERVER) ===");
+            System.Diagnostics.Debug.WriteLine($"Code: {fex.FaultCode} | Meldung: {fex.FaultString}");
+            throw;
+        }
+        catch (XmlRpcIllFormedXmlException xmlEx)
+        {
+            System.Diagnostics.Debug.WriteLine("=== UNGÜLTIGE ANTWORT VOM SERVER ===");
+            System.Diagnostics.Debug.WriteLine($"Meldung: {xmlEx.Message}");
+            if (xmlEx.InnerException != null)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ursache: {xmlEx.InnerException.Message}");
+            }
+            throw;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Allgemeiner Fehler: {ex.Message}");
+            throw;
         }
     }
-
     private string ConvertStructValueToString(XmlRpcStruct zeile, string key)
     {
         if (!zeile.ContainsKey(key) || zeile[key] == null) return "";
