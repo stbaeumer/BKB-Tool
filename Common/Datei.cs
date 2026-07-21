@@ -1064,8 +1064,8 @@ public Datei(IConfiguration configuration)
         if (abschneiden)
         {
             x = neueDict.TryGetValue(nichtIdentischesSonstigesAttribut, out var neuerWert)
-            ? (neuerWert?.ToString()?.Length > 20
-                ? neuerWert.ToString().Substring(0, 17) + "..."
+            ? (neuerWert?.ToString()?.Length > 55
+                ? neuerWert.ToString().Substring(0, 52) + "..."
                 : neuerWert?.ToString() ?? string.Empty)
             : string.Empty;    
         }
@@ -1084,8 +1084,8 @@ public Datei(IConfiguration configuration)
         nichtIdentischesSonstigesAttribut = nichtIdentischesSonstigesAttribut.Replace(".", "PUNKT").Replace(" ", "LEERZEICHEN").Replace("-", "MINUS").Replace("_", "UNTERSTRICH").Replace("/", "SLASH");
 
         return neueDict.TryGetValue(nichtIdentischesSonstigesAttribut, out var neuerWert1)
-            ? (neuerWert1?.ToString()?.Length > 20
-                ? neuerWert1.ToString().Substring(0, 17) + "..."
+            ? (neuerWert1?.ToString()?.Length > 55
+                ? neuerWert1.ToString().Substring(0, 52) + "..."
                 : neuerWert1?.ToString() ?? string.Empty)
             : string.Empty;
             
@@ -1877,7 +1877,7 @@ public Datei(IConfiguration configuration)
                     {
                         table.AddRow(new Text(
                             $"{anhandDieserSchlüsselAttributeWirdVerglichenString}"
-                            ), new Text($"  neue Zeile  "), new Text(""), new Text("")); rows++;
+                            ), new Text($"neue Zeile"), new Text(""), new Text("")); rows++;
 
 
                         if(modus == Global.Modus.SchemaUpdaten)
@@ -1885,7 +1885,7 @@ public Datei(IConfiguration configuration)
                             // Zeile in Datenbank anlegen
                             InsertSchemaData(neueDict);
                             string page = neueDict["Page"]?.ToString().ToLower().Trim();
-                            Console.WriteLine($"{Global.GetColor(Global.ColorHinweise)}INSERT: {page} ... durchgeführt.");
+                            Console.WriteLine($"INSERT: {page} ... durchgeführt.");
                         }
                     }                        
                     continue;
@@ -1943,13 +1943,44 @@ public Datei(IConfiguration configuration)
 
                             // Aufruf der Update-Methode mit der VOLLSTÄNDIGEN Zeile
                             UpdateSchemaData(zielSeite, schemaName, alleWerteFuerDieseZeile, WikiZugriff);
-                            Console.WriteLine($"{Global.GetColor(Global.ColorHinweise)}UPDATE: {zielSeite} ... durchgeführt.");
+                            Console.WriteLine($"UPDATE: {zielSeite} ... durchgeführt.");
                         }
                     }
                         
                     rows++;
                 }
                 neueDatei.Add(neueRec);
+            }
+
+            // Es werden alle bisherigen durchlaufen. Wenn in neueDict keine Zeilen mehr vorhanden sind, 
+            // die in der vorhandenen Datei nicht existieren, wird eine Meldung ausgegeben.
+            foreach (var vRec in vorhandeneRec)
+            {
+                var vorhandeneDict = (IDictionary<string, object>)vRec;
+                var löschen = true;
+                
+                foreach (var neueRec in this)
+                {
+                    var neueDict2 = (IDictionary<string, object>)neueRec;
+
+                    var neu = neueDict2[AnhandDieserSchlüsselAttributeWirdVerglichen.FirstOrDefault()].ToString();
+                    var vorh = vorhandeneDict[AnhandDieserSchlüsselAttributeWirdVerglichen.FirstOrDefault()].ToString();
+
+                    if(neu == vorh)
+                    {
+                        löschen = false;
+                        break; // Wenn eine Übereinstimmung gefunden wurde, breche die innere Schleife ab
+                    }
+                }
+                if (löschen)
+                {
+                    table.AddRow(
+                            RenderZeile(
+                                vorhandeneDict,
+                                neueDatei,
+                                "Seite löschen!",
+                                null));
+                }
             }
 
             if (table.Rows.Count == 0)

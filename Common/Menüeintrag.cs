@@ -4995,7 +4995,7 @@ public class Menüeintrag
         List<Action<Datei>> funktionen,
         string[] anhandDieserAttributeWirdVerglichen, 
         string[] dieseAttributeWerdenBeimVergleichIgnoriert, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
-    {
+        {
         // zieldatei, die die Lehrkräfte enthält. Diese Datei wird in Wiki importiert.
         var zieldatei = new Datei(zieldateiname, funktionen, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
                 
@@ -5021,11 +5021,12 @@ public class Menüeintrag
             record.Mail = l.Mail;
             record.Art = !String.IsNullOrEmpty(l.PflichtstundenSoll) ? "Lehrkraft" : ""; // Nur LuL haben Pflichtstunden.
             record.Link = "kollegium:" + l.Kürzel.ToLower();     
-            if(l.Kürzel == "AEH" || l.Kürzel == "BM" || l.Kürzel == "KU" || l.Kürzel == "PLA" || l.Kürzel == "KS" || l.Kürzel == "BEH")                
+            if(l.Kürzel == "STK" || l.Kürzel == "AEH" || l.Kürzel == "BM" || l.Kürzel == "ART" || l.Kürzel == "BAU" || l.Kürzel == "KU" || l.Kürzel == "PLA" || l.Kürzel == "KS" || l.Kürzel == "BEH")                
                 zieldatei.Add(record);    
         }
 
         // Zu 2. Anrechnungen aus Untis
+
 
 
         // Zu 3. Gruppen, die sich aus Unterricht usw. ergeben

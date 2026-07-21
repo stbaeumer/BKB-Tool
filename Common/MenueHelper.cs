@@ -419,8 +419,7 @@ public static class MenueHelper
         [
          datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.Vergleichen),         
          datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.SchemaUpdaten),
-         //datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.Filtern),
-         //datei => datei.Erstellen()
+         datei => datei.OeffneWebseite("https://bkb.wiki/kollegium:start")
         ],
         ["Link"],
         ["Page"],
