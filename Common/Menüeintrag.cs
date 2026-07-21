@@ -4192,27 +4192,22 @@ public class Menüeintrag
         return sMitAbwesenheiten;
     }
 
-    public void GetGruppen(
+    public List<dynamic> GetGruppen(
         IConfiguration configuration,
-        List<Action<Datei>> funktionen,
-        Anrechnungen anrechnungen,
-        string zieldateiname,
         Lehrers lehrers,
-        string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
+        Anrechnungen anrechnungen
+    )
     {
-        var zieldatei = new Datei(zieldateiname, configuration, funktionen, delimiter, quote, encoding, shouldAllQuote, lehrers, importhinweise);
-
+        var rückgabe = new List<dynamic>();
+                
         var gpu002 = Quelldateien.GetMatchingList(configuration, "gpu002", IStudents, Klassen);
-        if (gpu002 == null || gpu002.Count == 0) return;
+        if (gpu002 == null || gpu002.Count == 0) return rückgabe;
 
         var gpu003 = Quelldateien.GetMatchingList(configuration, "gpu003", IStudents, Klassen);
-        if (gpu003 == null || gpu003.Count == 0) return;
-
-        var wikiZugriff = new DokuwikiZugriff(configuration);
-        zieldatei.WikiZugriff = wikiZugriff;
+        if (gpu003 == null || gpu003.Count == 0) return rückgabe;
 
         // Die Struct-Tabelle wird ausgelesen und in die Datei geschrieben.
-        Quelldateien.GetMatchingList(configuration, "gruppen", IStudents, Klassen, ["gruppen.Page", "gruppen.MitgliederKuerzel", "gruppen.Mitglieder", "gruppen.MitgliederMail", "gruppen.Link"], wikiZugriff);
+        //Quelldateien.GetMatchingList(configuration, "gruppen", IStudents, Klassen, ["gruppen.Page", "gruppen.MitgliederKuerzel", "gruppen.Mitglieder", "gruppen.MitgliederMail", "gruppen.Link"], WikiZugriff);
         
         Gruppen = new Gruppen();
         Gruppen.AddRange(new Gruppen().GetBildungsgaenge(gpu002, anrechnungen, lehrers));
@@ -4269,11 +4264,13 @@ public class Menüeintrag
             "kollegium:lehrerrat"));
 
         foreach (var gruppe in Gruppen)
-            zieldatei.Add(gruppe.Record);
+            rückgabe.Add(gruppe.Record);
         
-        foreach (var aktion in zieldatei.Funktionen)
-            aktion(zieldatei);
+        // Debug! .FirstOrDefault() wieder entfernen!
+        return rückgabe.TakeLast(1).ToList();
     }
+
+    
 
  public void Kalender2Wiki(
   IConfiguration configuration,
@@ -5004,12 +5001,14 @@ public class Menüeintrag
         // Ist-Stand der Kollegium-Tabelle in Datei schreiben
         Quelldateien.GetMatchingList(configuration, "kollegium", IStudents, Klassen, ["kollegium.Page", "kollegium.Kürzel", "kollegium.Namen", "kollegium.Mail", "kollegium.Link", "kollegium.Art"], this.WikiZugriff);
 
-        // Zum Kollegium müssen folgende Items abgeglichen werden:
-        // 1. Lehrkräfte, die in der Datei "lehrkraefte.dat" enthalten sind, aber nicht in der Liste der IST-Lehrkräfte (lehrersSoll) enthalten sind, werden entfernt.
-        // 2. Anrechnungen aus Untis
-        // 3. Gruppen, die sich aus Unterricht usw. ergeben 
+        // Im Kollegium müssen folgende Items abgeglichen werden:
+        // 1. Lehrkräfte, die in der Datei "lehrkraefte.dat" enthalten sind, aber nicht in der Liste der IST-Lehrkräfte (lehrersSoll) enthalten sind, werden entfernt.        
+        // 2. Gruppen, die sich aus Unterricht usw. ergeben 
+        // 3. Anrechnungen aus Untis
 
+        //
         // Zu 1. Lehrkräfte
+        //
         var lehrerliste = new List<dynamic>();
 
         foreach (var l in lehrersSoll)        
@@ -5021,22 +5020,71 @@ public class Menüeintrag
             record.Mail = l.Mail;
             record.Art = !String.IsNullOrEmpty(l.PflichtstundenSoll) ? "Lehrkraft" : ""; // Nur LuL haben Pflichtstunden.
             record.Link = "kollegium:" + l.Kürzel.ToLower();     
-            if(l.Kürzel == "STK" || l.Kürzel == "AEH" || l.Kürzel == "BM" || l.Kürzel == "ART" || l.Kürzel == "BAU" || l.Kürzel == "KU" || l.Kürzel == "PLA" || l.Kürzel == "KS" || l.Kürzel == "BEH")                
+            if(l.Kürzel == "GV" ||l.Kürzel == "HR" ||l.Kürzel == "STK" || l.Kürzel == "AEH" || l.Kürzel == "BM" || l.Kürzel == "ART" || l.Kürzel == "BAU" || l.Kürzel == "KU" || l.Kürzel == "PLA" || l.Kürzel == "KS" || l.Kürzel == "BEH")                
                 zieldatei.Add(record);    
         }
 
-        // Zu 2. Anrechnungen aus Untis
+        //
+        // Zu 2. Gruppen, die sich aus Unterricht usw. ergeben
+        //
 
+        var anrechnungen = new Anrechnungen(lehrersSoll, configuration);
 
+        zieldatei.AddRange(GetGruppen(configuration, lehrersSoll, anrechnungen));
 
-        // Zu 3. Gruppen, die sich aus Unterricht usw. ergeben
+        //
+        // Zu 3. Anrechnungen aus Untis
+        //
+
+        zieldatei.AddRange(GetAnrechnungen(configuration, lehrersSoll, anrechnungen));
+
+        
 
             
         foreach (var aktion in zieldatei.Funktionen)
             aktion(zieldatei);
     }
 
-    public void RenderAuswahlÜberschrift(IConfiguration configuration)
+ private IEnumerable<dynamic> GetAnrechnungen(IConfiguration configuration, Lehrers lehrersSoll, Anrechnungen anrechnungen)
+ {  
+    List<Anrechnungen> uniqueAnrechnungen = new List<Anrechnungen>();
+
+    var alleVerschiedenenAnrechnungen = anrechnungen
+        .Where(a => !string.IsNullOrEmpty(a.Beschr))
+        .Where(a => new List<int> { 500, 530 }.Contains(a.Grund))
+        .GroupBy(a => new { a.Beschr })
+        .Select(g => g.First())
+        .ToList();
+
+    var anrechnungenList = new List<dynamic>();
+
+    foreach (var a in alleVerschiedenenAnrechnungen)
+    {
+        // Suche alle Lehrer, die diese Anrechnung haben
+        var matchingLehrer = anrechnungen.Where(l => l.Beschr == a.Beschr).Select(l => l.LehrerKuerzel).ToList();
+           
+        var lul = lehrersSoll.Where(l => matchingLehrer.Contains(l.Kürzel)).ToList();
+
+        var kürzel = string.Join(", ", lul.Select(l => l.Kürzel));
+        var mail = string.Join("; ", lul.Select(l => l.Mail));
+        var namen = string.Join(", ", lul.Select(l => string.IsNullOrEmpty(l.Titel) ? $"{l.Vorname} {l.Nachname}" : $"{l.Titel} {l.Vorname} {l.Nachname}"));
+        var seite =  a.Beschr.Split(':').Where(s => !s.Equals("start", StringComparison.OrdinalIgnoreCase)).LastOrDefault();   
+        var art = "Anrechnung";
+        
+        dynamic record = new ExpandoObject();
+            record.Page = "kollegium:" + seite;
+            record.Kürzel = kürzel;
+            record.Mail = mail;
+            record.Namen = namen;
+            record.Art = art;
+            record.Link = a.Beschr.ToLower();
+           
+            anrechnungenList.Add(record);            
+    }
+    return anrechnungenList.Take(1);
+ }
+
+ public void RenderAuswahlÜberschrift(IConfiguration configuration)
     {
         var panel3 = new Panel($"[grey85]{string.Join("\n", Beschreibung)}[/]")
             .Header($"[bold yellow3_1] {Titel.Split(':')[2]} [/]")

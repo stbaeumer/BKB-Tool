@@ -332,7 +332,7 @@ public static class MenueHelper
       {
        var anrechnungen = new Anrechnungen(lehrers, configuration);
        
-       m.GetGruppen(
+       /*m.GetGruppen(
         configuration,
         [
          datei => datei.AnhandDieserSchlüsselAttributeWirdVerglichen = ["Link"],
@@ -345,7 +345,7 @@ public static class MenueHelper
         anrechnungen,
         "gruppen.struct",
         lehrers,
-        ",", '\"', new UTF8Encoding(false), true);
+        ",", '\"', new UTF8Encoding(false), true);*/
        m.GetUntisAnrechnungen(
         anrechnungen,
         Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-untisanrechnungen.csv"),
@@ -404,12 +404,20 @@ public static class MenueHelper
      new Menüeintrag(
       configuration,
       $"Stammdaten:Mo:Kollegium & Untisanrechnungen abgleichen",
-      quelldateien.Notwendige(configuration, ["kollegium,struct", "lehrkraefte,dat", "faecher,dat", "GPU002,txt", "klassen,dat", "GPU003,txt"]),
+      quelldateien.Notwendige(configuration, ["kollegium,struct", "lehrkraefte,dat", "faecher,dat", "GPU002,txt", "klassen,dat", "GPU003,txt", "gruppen,struct", "schuelervermerke,dat", "schuelerzusatzdaten,dat", "GPU006,txt"]),      
       students,
       klassen,
       [
-       $"Folgende Stammdaten  werden abgeglichen:",
-       $"[{Global.GetColor(Global.ColorActionInMenüs)}]Faecher:[/] Es wird angenommen, dass Untis die Fächer aktuell hält. Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]Facher.dat[/] wird erstellt. In jedem Fall muss die Datei in SchILD nachbearbeitet werden.",
+       $"Die Wiki-Seite/Tabelle [{Global.GetColor(Global.ColorHinweise)}]Kollegium[/] wird abgeglichen.",
+       $"1. Die Lehrkräfte werden aus [{Global.GetColor(Global.ColorPfadInDateien)}]Lehrkraefte.dat[/] nach Wiki importiert. Neue und geänderte werden direkt nach Wiki geschrieben. Hinweise auf manuell vorzunehmende Lösungen werden angezeigt.",
+       $"Das Organigramm wird aus Untisanrechnungen gebildet. Für Spalte Text gilt: {{...}} = KATEGORIE; [[...]] = HINWEIS, Text ohne Klammern wird zur ROLLE; A14, A15, A16 ohne Klammern > AMT; Spalte Beschreibung: wird zur AUFGABE. Im Organigramm wird nach Kategorie, Aufgabe oder Beschreibung gruppiert.",
+       $"Untisanrechnungen: 1.Struct Schema Editor > Untisanrechnungen > Löschen/Leeren > 'untisanrechnungen' eingeben, dann Leeren",
+       $"Untisanrechnungen: 2.Struct Schema Editor > Untisanrechnungen > Importieren/Exportieren > Importieren von Rohdaten > Global > Durchsuchen",
+       $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise zum Text in Anrechnungen:[/]",
+       $"[{Global.GetColor(Global.ColorHinweise)}]#1[/] Das Beförderungsamt wird ausgelesen. Bsp.: A14",
+       $"[{Global.GetColor(Global.ColorHinweise)}]#2[/] Hinweise werden aus eckigen Klammern ausgelesen. Bsp.: Fortbildung 2024",
+       $"[{Global.GetColor(Global.ColorHinweise)}]#3[/] Kategorien werden aus geschweiften Klammern ausgelesen. Bsp.: Technik, Beratung",
+       $"[{Global.GetColor(Global.ColorHinweise)}]#4[/] Bildungsgänge werden daran identifiziert, dass im Text [aqua]Bildungsgangleitung[/] steht und die Beschreibung mit [aqua]bildunggaenge:[/] beginnt, ",       
       ],
       m =>
       {
@@ -675,7 +683,7 @@ public static class MenueHelper
       {
        var anrechnungen = new Anrechnungen(lehrers, configuration);
        
-       m.GetGruppen(
+       /*m.GetGruppen(
         configuration,
         [
          zieldatei => zieldatei.Erstellen(),
@@ -684,7 +692,7 @@ public static class MenueHelper
         anrechnungen,
         Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-gruppen.csv"),
         lehrers,
-        ",", '\"', new UTF8Encoding(false), true);
+        ",", '\"', new UTF8Encoding(false), true);*/
        m.GetUntisAnrechnungen(
         anrechnungen,
         Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-untisanrechnungen.csv"),
@@ -1264,7 +1272,7 @@ public static class MenueHelper
      m =>
      {
       var anrechnungen = new Anrechnungen(lehrers, configuration);
-      m.GetGruppen(
+      /*m.GetGruppen(
        configuration,
        [
         datei => datei.Auswählen(configuration, m, lehrers, Global.Modus.AlleGruppen),
@@ -1273,7 +1281,7 @@ public static class MenueHelper
        anrechnungen,
        Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-gruppen.csv"),
        lehrers,
-       ",", '\"', new UTF8Encoding(false), true);
+       ",", '\"', new UTF8Encoding(false), true);*/
      },
      Global.Rubrik.Allgemein,
      Global.NurBeiDiesenSchulnummern.Nur177659

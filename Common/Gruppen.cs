@@ -47,11 +47,10 @@ public class Gruppen : List<Gruppe>
             record.Page = wikiLink;
             record.Link = wikiLink;
             var enumerable = members.ToList();
-            record.Mitglieder = string.Join(',',
-                enumerable.Select(x => (x.Titel != " " ? x.Titel : "") + x.Vorname + " " + x.Nachname));
-            record.MitgliederMail = string.Join(';', enumerable.Select(x => x.Mail));
-            record.MitgliederKuerzel = string.Join(',', enumerable.Select(x => x.Kürzel));
-            var gruppe = new Gruppe(kurzname);
+            record.Namen = string.Join(", ", enumerable.Select(x => (string.IsNullOrWhiteSpace(x.Titel) ? "" : x.Titel.Trim() + " ") + x.Vorname + " " + x.Nachname));
+            record.Mail = string.Join("; ", enumerable.Select(x => x.Mail));
+            record.Kürzel = string.Join(", ", enumerable.Select(x => x.Kürzel));var gruppe = new Gruppe(kurzname);
+            record.Art = "Bildungsgang";
             records.Add(record);
             gruppe.Record = record;
             gruppen.Add(gruppe);
@@ -126,10 +125,11 @@ public class Gruppen : List<Gruppe>
             }
 
             dynamic record = new ExpandoObject();
-            record.Page = "bildungsgaenge:" + schulform + ":start";
-            record.Mitglieder = string.Join(',', lehrerName);
-            record.MitgliederMail = string.Join(',', lehrerMail);
-            record.MitgliederKuerzel = string.Join(',', lehrerKürzel);
+            record.Page = "bildungsgaenge:" + schulform + ":start";            
+            record.Namen = string.Join(", ", lehrerName);
+            record.Mail = string.Join(", ", lehrerMail);
+            record.Kürzel = string.Join(", ", lehrerKürzel);
+            record.Art = "Schulform";
             Gruppe gruppe = new Gruppe(schulform);
             gruppe.Record = record;
             gruppen.Add(gruppe);
@@ -306,9 +306,9 @@ public class Gruppen : List<Gruppe>
             }
         }
 
-        record.Mitglieder = string.Join(',', lehrerName);
-        record.MitgliederMail = string.Join(',', lehrerMail);
-        record.MitgliederKuerzel = string.Join(',', lehrerKürzel);
+        record.Namen = string.Join(',', lehrerName);
+        record.Mail = string.Join(',', lehrerMail);
+        record.Kürzel = string.Join(',', lehrerKürzel);
         records.Add(record);
         return records;
     }

@@ -1851,6 +1851,9 @@ public Datei(IConfiguration configuration)
 
                 var neueDict = (IDictionary<string, object>)neueRec;
 
+                var schemaName = Path.GetFileNameWithoutExtension(AbsoluterPfad);
+                string zielSeite = schemaName + ":" + neueDict["Page"]?.ToString().ToLower().Trim().Split(':').Where(s => !s.Equals("start", StringComparison.OrdinalIgnoreCase)).LastOrDefault();
+
                 var anhandDieserSchlüsselAttributeWirdVerglichenString = "";
 
                 foreach (var key in AnhandDieserSchlüsselAttributeWirdVerglichen)
@@ -1881,11 +1884,9 @@ public Datei(IConfiguration configuration)
 
 
                         if(modus == Global.Modus.SchemaUpdaten)
-                        {
-                            // Zeile in Datenbank anlegen
-                            InsertSchemaData(neueDict);
-                            string page = neueDict["Page"]?.ToString().ToLower().Trim();
-                            Console.WriteLine($"INSERT: {page} ... durchgeführt.");
+                        {                            
+                            InsertSchemaData(neueDict, schemaName, zielSeite);                            
+                            Console.WriteLine($"INSERT: {schemaName} ... durchgeführt.");
                         }
                     }                        
                     continue;
@@ -1923,9 +1924,6 @@ public Datei(IConfiguration configuration)
                         // Zeile in Datenbank updaten
                         if (modus == Global.Modus.SchemaUpdaten)
                         {
-                            string zielSeite = anhandDieserSchlüsselAttributeWirdVerglichenString.ToLower().Trim(); 
-                            string schemaName = Path.GetFileNameWithoutExtension(AbsoluterPfad);  
-
                             // Wir erstellen ein Dictionary für ALLE Spalten dieser Zeile
                             var alleWerteFuerDieseZeile = new Dictionary<string, object>();
 
@@ -1980,6 +1978,7 @@ public Datei(IConfiguration configuration)
                                 neueDatei,
                                 "Seite löschen!",
                                 null));
+                    //this.OeffneWebseite("https://bkb.wiki/doku.php?id=", zielSeite);
                 }
             }
 
@@ -2002,13 +2001,8 @@ public Datei(IConfiguration configuration)
         return this;
     }
 
-    internal void InsertSchemaData(IDictionary<string, object> neueDict)
-    {
-        string zielSeite = neueDict["Page"]?.ToString().ToLower().Trim(); 
-        
-        // Teilt am Doppelpunkt und nimmt das letzte Element
-        string schemaName = zielSeite.Split(':').First().ToLower().Trim();         
-        
+    internal void InsertSchemaData(IDictionary<string, object> neueDict, string schemaName, string zielSeite = "")
+    {   
         try
         {
             // 1. Inhalt der template.txt über die API abrufen
@@ -2026,8 +2020,18 @@ public Datei(IConfiguration configuration)
 
             // 2. Platzhalter im Template ersetzen (falls vorhanden, z.B. @PAGE@ oder @USER@)
             // DokuWiki ersetzt diese normalerweise automatisch, per API müssen wir das selbst tun:
-            templateInhalt = templateInhalt.Replace("@PAGE@", zielSeite.Replace(schemaName + ":", "").ToUpper());
-            templateInhalt = templateInhalt.Replace("@ID@", zielSeite);
+
+            if(neueDict["Art"] == "Lehrkraft")
+            {
+                templateInhalt = templateInhalt.Replace("@PAGE@", neueDict["Namen"].ToString());
+                templateInhalt = templateInhalt.Replace("@ID@", zielSeite);
+            }
+            else
+            {
+                templateInhalt = templateInhalt.Replace("@PAGE@", zielSeite.Replace(schemaName + ":", ""));
+                templateInhalt = templateInhalt.Replace("@ID@", zielSeite);
+            }
+            
 
             // 3. Seite mit dem Template-Inhalt anlegen
             WikiZugriff.Proxy.PutPage(zielSeite, templateInhalt, new XmlRpcStruct());

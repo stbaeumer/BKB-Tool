@@ -86,9 +86,10 @@ public class Gruppe
                 lehrerName.Add((leh.Titel == "" ? "" : leh.Titel + " ") + leh.Vorname + " " + leh.Nachname);
         }
 
-        record.Mitglieder = string.Join(',', lehrerName);
-        record.MitgliederMail = string.Join(',', lehrerMail);
-        record.MitgliederKuerzel = string.Join(',', lehrerKürzel);
+        record.Namen = string.Join(", ", lehrerName);
+        record.Mail = string.Join(", ", lehrerMail);
+        record.Kürzel = string.Join(", ", lehrerKürzel);
+        record.Art = "Gruppe";
         gruppe.Record = record;
 
         //Global.ZeileSchreiben("Gruppe: " + wikiLink, lehrerName.Count().ToString(), ConsoleColor.Black, ConsoleColor.White);
@@ -147,9 +148,10 @@ public class Gruppe
             }
         }
 
-        record.Mitglieder = string.Join(',', lehrerName.OrderBy(name => name));
-        record.MitgliederMail = string.Join(',', lehrerMail.OrderBy(name => name));
-        record.MitgliederKuerzel = string.Join(',', lehrerKürzel.OrderBy(name => name));
+        record.Namen = string.Join(", ", lehrerName.OrderBy(name => name));
+        record.Mail = string.Join(", ", lehrerMail.OrderBy(name => name));
+        record.Kürzel = string.Join(", ", lehrerKürzel.OrderBy(name => name));
+        record.Art = "Fachschaft";
         gruppe.Record = record;
 
         //Global.ZeileSchreiben("Gruppe: " + wikiLink, lehrerName.Count().ToString(), ConsoleColor.Black, ConsoleColor.White);
@@ -206,9 +208,10 @@ public class Gruppe
             throw new Exception("Fehler beim Verarbeiten der Kollegium-Gruppe");
         }
 
-        record.Mitglieder = string.Join(',', lehrerName.OrderBy(name => name));
-        record.MitgliederMail = string.Join(',', lehrerMail.OrderBy(name => name));
-        record.MitgliederKuerzel = string.Join(',', lehrerKürzel.OrderBy(name => name));
+        record.Namen = string.Join(", ", lehrerName.OrderBy(name => name));
+        record.Mail = string.Join(", ", lehrerMail.OrderBy(name => name));
+        record.Kürzel = string.Join(", ", lehrerKürzel.OrderBy(name => name));
+        record.Art = "Kollegium";
         gruppe.Record = record;
         return gruppe;
     }
@@ -260,9 +263,10 @@ public class Gruppe
             }
         }
 
-        record.Mitglieder = string.Join(',', lehrerName.OrderBy(name => name));
-        record.MitgliederMail = string.Join(',', lehrerMail.OrderBy(name => name));
-        record.MitgliederKuerzel = string.Join(',', lehrerKürzel.OrderBy(name => name));
+        record.Namen = string.Join(", ", lehrerName.OrderBy(name => name));
+        record.Mail = string.Join(", ", lehrerMail.OrderBy(name => name));
+        record.Kürzel = string.Join(", ", lehrerKürzel.OrderBy(name => name));
+        record.Art = "Lehrerinnen";
         gruppe.Record = record;
         return gruppe;
     }
@@ -305,9 +309,10 @@ public class Gruppe
             }
         }
 
-        record.Mitglieder = string.Join(',', lehrerName.OrderBy(name => name));
-        record.MitgliederMail = string.Join(',', lehrerMail.OrderBy(name => name));
-        record.MitgliederKuerzel = string.Join(',', lehrerKürzel.OrderBy(name => name));
+        record.Namen = string.Join(',', lehrerName.OrderBy(name => name));
+        record.Mail = string.Join(',', lehrerMail.OrderBy(name => name));
+        record.Kürzel = string.Join(',', lehrerKürzel.OrderBy(name => name));
+        record.Art = "Referendare";
         gruppe.Record = record;
         return gruppe;
     }
@@ -358,9 +363,10 @@ public class Gruppe
             }
         }
 
-        record.Mitglieder = string.Join(',', lehrerName.OrderBy(name => name));
-        record.MitgliederMail = string.Join(',', lehrerMail.OrderBy(name => name));
-        record.MitgliederKuerzel = string.Join(',', lehrerKürzel.OrderBy(name => name));
+        record.Namen = string.Join(", ", lehrerName.OrderBy(name => name));
+        record.Mail = string.Join(", ", lehrerMail.OrderBy(name => name));
+        record.Kürzel = string.Join(", ", lehrerKürzel.OrderBy(name => name));
+        record.Art = "Klassenleitungen";
         gruppe.Record = record;
         return gruppe;
     }
@@ -407,9 +413,10 @@ public class Gruppe
             }
         }
 
-        record.Mitglieder = string.Join(',', lehrerName.OrderBy(name => name));
-        record.MitgliederMail = string.Join(',', lehrerMail.OrderBy(name => name));
-        record.MitgliederKuerzel = string.Join(',', lehrerKürzel.OrderBy(name => name));
+        record.Namen = string.Join(", ", lehrerName.OrderBy(name => name));
+        record.Mail = string.Join(", ", lehrerMail.OrderBy(name => name));
+        record.Kürzel = string.Join(", ", lehrerKürzel.OrderBy(name => name));
+        record.Art = "Bildungsgangleitungen";
         gruppe.Record = record;
         return gruppe;
     }
@@ -454,9 +461,10 @@ public class Gruppe
             }
         }
 
-        record.Mitglieder = string.Join(',', lehrerName.OrderBy(name => name));
-        record.MitgliederMail = string.Join(',', lehrerMail.OrderBy(name => name));
-        record.MitgliederKuerzel = string.Join(',', lehrerKürzel.OrderBy(name => name));
+        record.Namen = string.Join(", ", lehrerName.OrderBy(name => name));
+        record.Mail = string.Join(", ", lehrerMail.OrderBy(name => name));
+        record.Kürzel = string.Join(", ", lehrerKürzel.OrderBy(name => name));
+        record.Art = "Gruppe";
         gruppe.Record = record;
         return gruppe;
     }
