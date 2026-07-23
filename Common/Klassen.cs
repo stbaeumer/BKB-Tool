@@ -172,7 +172,7 @@ FROM Class LEFT JOIN Teacher ON Class.TEACHER_ID = Teacher.TEACHER_ID WHERE (((C
 
         File.AppendAllText(Path.GetTempPath() + dateiname + ".txt", "---- struct global ----" + Environment.NewLine,
             Encoding.UTF8);
-        File.AppendAllText(Path.GetTempPath() + dateiname + ".txt", "schema: termine_kollegium" + Environment.NewLine,
+        File.AppendAllText(Path.GetTempPath() + dateiname + ".txt", "schema: termine" + Environment.NewLine,
             Encoding.UTF8);
         File.AppendAllText(Path.GetTempPath() + dateiname + ".txt", "cols:Datum" + Environment.NewLine, Encoding.UTF8);
         File.AppendAllText(Path.GetTempPath() + dateiname + ".txt", "head:Datum/Uhrzeit" + Environment.NewLine,

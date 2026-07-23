@@ -283,7 +283,7 @@ public class Dateien : List<Datei>
             "den Kalender in Listenansicht anzeigen",
             "Mit Strg+A alles markieren",
             "Mit Strg+C kopieren",
-            "Die Datei " + Path.Combine(configuration["PfadDownloads"],"termine_kollegium.csv") + " überschreiben oder neu anlegen."
+            "Die Datei " + Path.Combine(configuration["PfadDownloads"],"termine.csv") + " überschreiben oder neu anlegen."
             ],
             [""],
             true,
@@ -292,14 +292,14 @@ public class Dateien : List<Datei>
             ";"
         ));
         Add(new Datei(
-            @"termine_kollegium.csv",
+            @"termine.csv",
             "Beschreibung",
             [
                 "Exportieren Sie die Datei aus Outlook, indem Sie:",
-            "den Kalender in Listenansicht anzeigen",
-            "Mit Strg+A alles markieren",
-            "Mit Strg+C kopieren",
-            $"Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]" + Path.Combine(configuration["PfadDownloads"],"termine_kollegium.csv") + "[/] überschreiben oder neu anlegen."
+                "den Kalender in Listenansicht anzeigen",
+                "Mit Strg+A alles markieren",
+                "Mit Strg+C kopieren",
+                $"Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]" + Path.Combine(configuration["PfadDownloads"],"termine.csv") + "[/] überschreiben oder neu anlegen."
             ],
             [""],
             true,
@@ -324,18 +324,18 @@ public class Dateien : List<Datei>
             "\t"
         ));
         Add(new Datei(
-            @"termine_verwaltung.csv",
+            @"termine.csv",
             "Beschreibung",
             [
-                "Exportieren Sie die Datei aus Outlook, indem Sie:",
+            "Exportieren Sie die Datei aus Outlook, indem Sie:",
             "den Kalender in Listenansicht anzeigen",
             "Mit Strg+A alles markieren",
             "Mit Strg+C kopieren",
-            $"Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]" + Path.Combine(configuration["PfadDownloads"],"termine_verwaltung.csv") + "[/] überschreiben oder neu anlegen."
+            $"Die Datei [{Global.GetColor(Global.ColorPfadInDateien)}]" + Path.Combine(configuration["PfadDownloads"],"termine.csv") + "[/] überschreiben oder neu anlegen."
             ],
             [""],
             true,
-            d => d.FilternTermineVerwaltung(),
+            d => d.FilternTermine(),
             "*.csv",
             "\t"
         ));
@@ -505,16 +505,27 @@ public class Dateien : List<Datei>
     public List<dynamic>? GetMatchingList(IConfiguration configuration, string pattern, Students students = null, Klassen klassen = null, string[] spalten = null, DokuwikiZugriff dokuwikiZugriff = null)
     {
         Datei datei = this.FirstOrDefault(datei => !string.IsNullOrEmpty(datei.Dateiname) && datei.Dateiname.ToLower().StartsWith(pattern, StringComparison.CurrentCultureIgnoreCase));
-        
+
+        if(pattern.ToLower() == "termine")
+            datei = this.FirstOrDefault(datei => !string.IsNullOrEmpty(datei.Dateiname) && datei.AbsoluterPfad.EndsWith("termine.csv".ToLower()));   
+
+
         // Spezielle Behandlung für "struct" Dateiendung: Struct-Dateien müssen erst gefüllt werden.
         // Die bereits angelegte Datei wird gefüllt
         if(spalten != null && spalten.Length > 0)
-        {                       
-            datei.GetSchema(pattern, spalten, configuration, dokuwikiZugriff );
+        {
+            datei = this.FirstOrDefault(datei => !string.IsNullOrEmpty(datei.Dateiname) && datei.Dateiname.ToLower() == pattern.ToLower());
+
+            if(datei.Dateiname == "termine")
+             datei = this.FirstOrDefault(datei => !string.IsNullOrEmpty(datei.Dateiname) && datei.AbsoluterPfad.EndsWith("termine.struct".ToLower()));
+            
+             datei.GetSchema(pattern, spalten, configuration, dokuwikiZugriff);            
+            
+            var ss = datei.AbsoluterPfad;
             datei.SchreibeZeilen("|");
             return null;
         }        
-                                       
+
         // Mögliche Meldungen werden ausgegeben, wenn die Datei nicht gefunden wurde oder veraltet ist.
 
         if (string.IsNullOrEmpty(datei.AbsoluterPfad) && datei.Endung.ToLower().Contains("dat"))
@@ -693,6 +704,11 @@ public class Dateien : List<Datei>
             {
                 foreach (var datei in this)
                 {
+                    if(datei.Dateiname.Contains("termine.csv"))
+                    {
+                        string a = "";
+                    }
+
                     if (dateienImPfad.Any(d => Path.GetFileName(d).ToLower().StartsWith(datei.Dateiname.ToLower())))
                     {
                         var passendeDatei = dateienImPfad

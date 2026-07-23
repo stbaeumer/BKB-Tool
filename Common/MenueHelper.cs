@@ -345,30 +345,19 @@ public static class MenueHelper
         anrechnungen,
         "gruppen.struct",
         lehrers,
-        ",", '\"', new UTF8Encoding(false), true);*/
-       m.GetUntisAnrechnungen(
-        anrechnungen,
-        Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-untisanrechnungen.csv"),
-        [
-         zieldatei => zieldatei.Erstellen(),
-         datei => datei.OeffneWebseite("https://bkb.wiki/oeffentlich:organigramm?do=admin&page=struct_schemas&table=untisanrechnungen"),
-        ],
-        [500, 510, 530, 590, 900],
-        [500, 510, 530, 590],
-        ["PLA", "BM"],
-        ",", '\"', new UTF8Encoding(false), true);
+        ",", '\"', new UTF8Encoding(false), true);*/       
       },
       Global.Rubrik.Wiki,
       Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
       configuration,
-      "Outlook:Mo:CSV-Terminexporte für Wiki aufbereiten",
-      quelldateien.Notwendige(configuration,["termine_fhr,csv,optional", "termine_verwaltung,csv,optional", "termine_berufliches_gymnasium,csv,optional", "termine_kollegium,csv,optional"]),
+      "Termine:Mo:Outlook-CSV-Terminexporte für Wiki aufbereiten",
+      quelldateien.Notwendige(configuration,["termine,struct", "termine,csv"]),      
       students,
       klassen,
       [
-       $"Termine aus Outlook (Kollegium, FHR, Berufliches Gymnasium, Verwaltung) werden nach {Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachWiki-Kalendername.csv")} exportiert.",
+       $"Die Termine aus Outlook (Kollegium, FHR, Berufliches Gymnasium, Verwaltung) werden nach Wiki importiert.",
        $"[{Global.GetColor(Global.ColorActionInMenüs)}]Vorgehen:[/]",
        $"[{Global.GetColor(Global.ColorActionInMenüs)}]#1[/] Die Kalender in Listenansicht anzeigen. Notwendige Spalten: [{Global.GetColor(Global.ColorActionInMenüs)}]Beginn, Ende, Betreff, Kategorien, Ressourcen, Ort, Nachricht[/]",
        $"[{Global.GetColor(Global.ColorActionInMenüs)}]#2[/] Kalender aufsteigend nach Beginn sortieren.",
@@ -385,18 +374,19 @@ public static class MenueHelper
       ],
       m =>
       {
-       m.OeffneExistierendeDateienOderNeueInEditor(configuration, ["termine_fhr.csv", "termine_berufliches_gymnasium.csv", "termine_kollegium.csv", "termine_verwaltung.csv"]);
-       foreach (var kalender in new List<string>(){"termine_berufliches_gymnasium", "termine_kollegium", "termine_fhr", "termine_verwaltung" })
-       {
+       m.OeffneExistierendeDateienOderNeueInEditor(configuration, ["termine.csv"]);
+       m.DokuwikiZugriffSetzen(configuration);
         m.Kalender2Wiki(configuration,
         [
-         datei => datei.OrdnerOeffnen(),
-         datei => datei.Erstellen(),
-         datei => datei.OeffneWebseite($"https://bkb.wiki/start?do=admin&page=struct_schemas&table=" + kalender),
-         datei => datei.OeffneWebseite($"https://bkb.wiki/start?do=admin&page=struct_schemas&table=" + kalender)
+          datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.Vergleichen),
+          datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.SchemaUpdaten),
+          datei => datei.OeffneWebseite($"https://bkb.wiki/start?do=admin&page=struct_schemas&table=" + datei.Kalender),
+          datei => datei.OeffneWebseite($"https://bkb.wiki/start?do=admin&page=struct_schemas&table=" + datei.Kalender)
         ],
-        kalender, Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-ImportNachWiki-" + kalender), ",", '\"', new UTF8Encoding(false), true);
-       }
+        ["BetreffBeginn"],
+        [],
+        Path.Combine(pfadDownloads ?? "", "termine.struct"), 
+        ",", '\"', new UTF8Encoding(false), true);
       },
       Global.Rubrik.Wiki,
       Global.NurBeiDiesenSchulnummern.Nur177659
@@ -422,6 +412,7 @@ public static class MenueHelper
       m =>
       {
        m.DokuwikiZugriffSetzen(configuration);
+       m.GetAnrechnungen(lehrers, configuration);
        m.Kollegium(
         configuration, Path.Combine(pfadDownloads ?? "", "kollegium.struct"), lehrers,
         [
@@ -432,6 +423,18 @@ public static class MenueHelper
         ["Link"],
         ["Page"],
         "|", '\0', new UTF8Encoding(true), false); 
+        m.GetUntisAnrechnungen(
+        Path.Combine(pfadDownloads ?? "untisanrechnungen.struct"),
+        [
+         datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.Vergleichen),         
+         datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.SchemaUpdaten),
+         datei => datei.OeffneWebseite("https://bkb.wiki/oeffentlich:organigramm?do=admin&page=struct_schemas&table=untisanrechnungen"),
+        ],
+        [500, 510, 530, 590, 900],
+        [500, 510, 530, 590],
+        ["PLA", "BM"],
+        ",", '\"', new UTF8Encoding(false), true);
+        
        /*m.Faecher(
         configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Faecher.dat"),
         [
@@ -692,7 +695,7 @@ public static class MenueHelper
         anrechnungen,
         Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-gruppen.csv"),
         lehrers,
-        ",", '\"', new UTF8Encoding(false), true);*/
+        ",", '\"', new UTF8Encoding(false), true);
        m.GetUntisAnrechnungen(
         anrechnungen,
         Path.Combine(pfadDownloads ?? "", DateTime.Now.ToString("yyyyMMdd-HHmm") + "-untisanrechnungen.csv"),
@@ -703,7 +706,7 @@ public static class MenueHelper
         [500, 510, 530, 590, 900],
         [500, 510, 530, 590],
         ["PLA", "BM"],
-        ",", '\"', new UTF8Encoding(false), true);
+        ",", '\"', new UTF8Encoding(false), true);*/
        m.GetLehrer(
         anrechnungen,
         [

@@ -48,6 +48,7 @@ public class Datei : List<dynamic>
     public string UnterordnerUndDateiname { get; set; } = null!;
     private Datei Vergleichsdatei { get; } = null!;
     public string[] Hinweise { get; } = null!;
+    public string[] Kalender { get; set; } = null!;
     public DateTime Erstelldatum { get; set; }
     public bool Vorhanden { get; set; }
     public string Beschreibung { get; } = null!;
@@ -363,6 +364,22 @@ public Datei(IConfiguration configuration)
     }
 
     public List<dynamic> FilternTermineKollegium()
+    {
+        var liste = new List<dynamic>();
+
+        foreach (var rec in this)
+        {
+            var dict = (IDictionary<string, object>)rec;
+            if (true)
+            {
+                liste.Add(rec);
+            }
+        }
+
+        return liste;
+    }
+
+    public List<dynamic> FilternTermine()
     {
         var liste = new List<dynamic>();
 
@@ -1811,7 +1828,7 @@ public Datei(IConfiguration configuration)
             var tableRows = new List<Text>();
             
             var vorhandeneRec = GetVorhandeneRec(quelldateien);
-            if (vorhandeneRec == null || vorhandeneRec.Count == 0)
+            if (vorhandeneRec == null)
             {
                 skipProcessing = true;
                 return;
@@ -2026,6 +2043,11 @@ public Datei(IConfiguration configuration)
                 templateInhalt = templateInhalt.Replace("@PAGE@", neueDict["Namen"].ToString());
                 templateInhalt = templateInhalt.Replace("@ID@", zielSeite);
             }
+            if (neueDict["Art"] == "Termine")
+            {
+                templateInhalt = templateInhalt.Replace("@PAGE@", neueDict["Betreff"].ToString());
+                templateInhalt = templateInhalt.Replace("@ID@", zielSeite);
+            }
             else
             {
                 templateInhalt = templateInhalt.Replace("@PAGE@", zielSeite.Replace(schemaName + ":", ""));
@@ -2039,6 +2061,7 @@ public Datei(IConfiguration configuration)
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Hinweis beim Erstellen der Template-Seite: {ex.Message}");
+            throw new Exception($"Fehler beim Erstellen der Template-Seite '{zielSeite}': {ex.Message}");
         }
         // ---------------------------------------------------------------------
 
@@ -2632,13 +2655,20 @@ public interface IDokuWikiRpc : IXmlRpcProxy
         return this;
     }
 
- internal void SchreibeZeilen(string trennzeichen)
+    internal void SchreibeZeilen(string trennzeichen, Datei quelle = null)
     {
+        // Bei termin-DAteien wird eine Quelle übergeben.
+        // Wenn die Zeilen aus dtruct kommen, ist this die quelle.
+        if (quelle == null || quelle.Count == 0)
+        {
+            quelle = this;
+        }
+
         try
             {
                 var sb = new StringBuilder();
                         
-                var firstRecord = this.FirstOrDefault() as IDictionary<string, object>;
+                var firstRecord = quelle.FirstOrDefault() as IDictionary<string, object>;
                 if (firstRecord != null)
                 {
                     string kopfzeile = "";
@@ -2662,7 +2692,7 @@ public interface IDokuWikiRpc : IXmlRpcProxy
 
                     sb.AppendLine(kopfzeile.TrimEnd(trennzeichen.ToCharArray()));
                     
-                    foreach (var record in this)
+                    foreach (var record in quelle)
                     {
                         var datenzeile = "";
                         var recordDict = record as IDictionary<string, object>;
@@ -2689,4 +2719,160 @@ public interface IDokuWikiRpc : IXmlRpcProxy
                 //Global.ZeileSchreiben(AbsoluterPfad, "xxx", ConsoleColor.White, ConsoleColor.Blue);
             }
     }
+
+ internal void Outlook2StructDatei(string dateiname)
+ {
+
+
+/*
+  else if (pattern == "termine")
+        {
+            datei = this.FirstOrDefault(datei => !string.IsNullOrEmpty(datei.Dateiname) && datei.AbsoluterPfad.EndsWith("termine.struct", StringComparison.CurrentCultureIgnoreCase));
+            // Bei Terminen wird termine.struct aus allen verfügbaren "...-termine.csv"-Dateien gefüllt.
+            foreach (var termineDatei in this)
+            {
+                if (termineDatei.AbsoluterPfad.Contains("termine") && termineDatei.AbsoluterPfad.ToLower().EndsWith(".csv"))
+                {                    
+                    datei.SchreibeZeilen("|",termineDatei);
+                }
+            }
+        }*/
+ }
+
+ internal IEnumerable<dynamic> Outlook2Struct()
+ {
+  var records = new List<dynamic>();
+
+    var sortedRecords = this?
+     .Where(rec =>
+     {
+      var beginnString = (string)((IDictionary<string, object>)rec)["Beginn"];
+      var kategorienString = (string)((IDictionary<string, object>)rec)["Kategorien"] ?? "";
+
+      return beginnString.Split(" ").Length > 0
+      && !string.IsNullOrEmpty(kategorienString)
+      && DateTime.ParseExact(beginnString.Split(" ")[1], "dd.MM.yyyy", new CultureInfo("de-DE")) >=
+          new DateTime(Convert.ToInt32(Global.AktSj[0]), 07, 31); // keine alten SJ
+     })
+     .OrderBy(rec =>
+     {
+      var beginnString = (string)((IDictionary<string, object>)rec)["Beginn"];
+      return DateTime.ParseExact(beginnString.Substring(3, beginnString.Length - 3), "dd.MM.yyyy HH:mm",
+       new CultureInfo("de-DE"));
+     })
+     .ToList();
+
+    if (sortedRecords != null)
+    {
+     foreach (var rec in sortedRecords)
+     {
+      var dict = (IDictionary<string, object>)rec;
+      var beginnString = (string)((IDictionary<string, object>)rec)["Beginn"];
+      var endeString = (string)((IDictionary<string, object>)rec)["Ende"];
+      var beginnDatum = DateTime.ParseExact(beginnString.Substring(3, beginnString.Length - 3),
+       "dd.MM.yyyy HH:mm", new CultureInfo("de-DE"));
+      var endeDatum = DateTime.ParseExact(endeString.Substring(3, endeString.Length - 3), "dd.MM.yyyy HH:mm",
+       new CultureInfo("de-DE"));
+      var dat = beginnDatum.ToString("ddd dd.MM.yyyy", new CultureInfo("de-DE"));
+      var zeit = "";
+
+      // Wenn zwischen beginn und ende exakt 24 Stunden oder ein Vielfaches von 24 liegen, dann ist das Ereignis ganztägig
+      bool ganztaegig = (endeDatum - beginnDatum).TotalHours % 24 == 0;
+
+      // Bei mehrtägiges, ganztägigen Ereignissen muss das Endedatum um einen Tag nach vorne geschoben werden
+
+      if ((endeDatum - beginnDatum).TotalHours >= 24 && endeDatum.Hour == 0 && endeDatum.Minute == 0 &&
+       endeDatum.Second == 0)
+      {
+       endeDatum = endeDatum.AddDays(-1);
+      }
+
+      if (beginnDatum.Hour != 0)
+      {
+       zeit = ", " + beginnDatum.ToShortTimeString();
+
+       if (endeDatum.Hour != 0)
+       {
+        zeit += " - " + endeDatum.ToShortTimeString();
+       }
+
+       zeit += " Uhr";
+      }
+
+      if (ganztaegig && beginnDatum.Date != endeDatum.Date)
+      {
+       dat += " - " + endeDatum.ToString("ddd dd.MM.yyyy", new CultureInfo("de-DE"));
+      }
+
+      var sj = "vergangene";
+
+      if (new DateTime(Convert.ToInt32(Global.AktSj[0]), 8, 1) < beginnDatum &&
+       beginnDatum < new DateTime(Convert.ToInt32(Global.AktSj[1]), 7, 31))
+      {
+       sj = "aktuelles";
+      }
+      if (beginnDatum > new DateTime(Convert.ToInt32(Global.AktSj[1]), 7, 31))
+      {
+       sj = "kommendes";
+      }
+
+      if (dict["Betreff"].ToString().Contains("QA"))
+      {
+       string aa = "";
+      }
+      // Wenn in der Nachricht ein Hyperlink enthalten ist, der nach bkb.wiki zeigt, dann wird der Hyperlink aus dem Inhalt der Seite isoliert und einer Variablen namen link zugewiesen.
+      var link = dict["Nachricht"].ToString()!.Split(' ').FirstOrDefault(x => x.Contains("bkb.wiki"));
+
+      // Vom link wird nur der Teil hinter dem letzten Slash behalten
+      if (link != null && link.Contains("/"))
+      {
+       link = link.Substring(link.LastIndexOf('/') + 1);
+      }
+      else
+      {
+       link = null;
+      }
+
+      dynamic record = new ExpandoObject();
+      record.Betreff = dict["Betreff"].ToString()!.Trim();
+      record.Seite = string.IsNullOrEmpty(link) ? dict["Kategorien"].ToString().Split(';')[0] : link;
+      record.Hinweise = "";
+      record.Datum = dat + zeit;
+      record.Kategorien = GetKategorien(link, dict["Kategorien"].ToString());
+      record.Verantwortlich = "";
+      record.Ort = dict["Ort"].ToString()!.Trim();
+      record.Ressourcen = dict["Ressourcen"].ToString()!.Trim();
+      record.BetreffBeginn = record.Betreff + record.Datum;
+      record.SJ = sj;
+
+      if (AbsoluterPfad != null && !AbsoluterPfad.Contains("kollegium"))
+      {
+      }
+      else
+      {
+       record.Links = "";
+      }
+
+      records.Add(record);
+     }
+    }
+    return records;
+ }
+
+ private string GetKategorien(string? link, string? toString)
+ {
+  if (string.IsNullOrEmpty(toString))
+  {
+   return string.Empty;
+  }
+
+  var kategorien = toString.ToLower().Split(';').Aggregate("", (current, str) => current + (str.Trim() + ","));
+
+  if (!string.IsNullOrEmpty(link) && !kategorien.Contains(link.ToLower()))
+  {
+   kategorien = link + "," + kategorien;
+  }
+
+  return kategorien.TrimEnd(',');
+ }
 }
