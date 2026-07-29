@@ -10,6 +10,7 @@ using Path = System.IO.Path;
 using dotenv.net;
 using static KonfigHelper;
 using PdfSharp.Pdf;
+using System.Text.RegularExpressions;
 
 #pragma warning disable CS0252 // Unbeabsichtigter Verweisvergleich. Wandeln Sie die linke Seite in den Typ "string" um, um einen Wertvergleich durchzuführen.
 #pragma warning disable CA2200
@@ -1637,6 +1638,52 @@ public static class Global
             }
         }
     }
+
+
+    internal static string CleanUrlString(string betreffBeginn)
+    {
+        if (string.IsNullOrEmpty(betreffBeginn))
+            return string.Empty;
+
+        // 1. Hochgestellte und tiefgestellte Zahlen umwandeln
+        string asciiString = ReplaceSubAndSuperscripts(betreffBeginn);
+
+        // 2. Umlaute / Eszett ersetzen
+        asciiString = asciiString
+            .Replace("ß", "ss")
+            .Replace("ä", "ae")
+            .Replace("ö", "oe")
+            .Replace("ü", "ue")
+            .Replace("Ä", "Ae")
+            .Replace("Ö", "Oe")
+            .Replace("Ü", "Ue");
+
+        // 3. Normalisierung für Diakritika (FormD)
+        string normalizedString = asciiString.Normalize(NormalizationForm.FormD);
+
+        // 4. Alle Nicht-URL-Zeichen löschen
+        string cleanedString = Regex.Replace(normalizedString, @"[^a-zA-Z0-9\-._~]", "");
+
+        // 5. Auf maximal 25 Zeichen kürzen
+        return cleanedString.Length > 25 
+            ? cleanedString.Substring(0, 25) 
+            : cleanedString;
+    }
+
+    private static string ReplaceSubAndSuperscripts(string input)
+    {
+        // Ersetzt hoch- und tiefgestellte Zahlen durch ihre Standard-ASCII-Pendants
+        return input
+            .Replace('⁰', '0').Replace('¹', '1').Replace('²', '2').Replace('³', '3').Replace('⁴', '4')
+            .Replace('⁵', '5').Replace('⁶', '6').Replace('⁷', '7').Replace('⁸', '8').Replace('⁹', '9')
+            .Replace('₀', '0').Replace('₁', '1').Replace('₂', '2').Replace('₃', '3').Replace('₄', '4')
+            .Replace('₅', '5').Replace('₆', '6').Replace('₇', '7').Replace('₈', '8').Replace('₉', '9');
+    }
+
+
+
+
+
 }    
 
 
@@ -1834,6 +1881,17 @@ public static class KonfigHelper
             DefaultValue = "Nein",
             Aufforderung = $"[green]■[/]",
             Hinweise = $"Sollen die [{Global.GetColor(Global.ColorInfoBox)}]Fehlzeiten[/] vor dem Abschnittswechsel auf dem Zeugnis hinzugefügt werden?",
+            Datentyp = Global.Datentyp.JaNein,
+            InGrundeinstellungAbfragen = false,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
+        },
+        ["StructDelete"] = new KonfigMeta
+        {
+            Key = "StructDelete",
+            DefaultValue = "Nein",
+            Aufforderung = $"[green]■[/]",
+            Hinweise = $"Soll die Seite jetzt gelöscht werden?",
             Datentyp = Global.Datentyp.JaNein,
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,

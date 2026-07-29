@@ -1081,8 +1081,8 @@ public Datei(IConfiguration configuration)
         if (abschneiden)
         {
             x = neueDict.TryGetValue(nichtIdentischesSonstigesAttribut, out var neuerWert)
-            ? (neuerWert?.ToString()?.Length > 55
-                ? neuerWert.ToString().Substring(0, 52) + "..."
+            ? (neuerWert?.ToString()?.Length > 85
+                ? neuerWert.ToString().Substring(0, 82) + "..."
                 : neuerWert?.ToString() ?? string.Empty)
             : string.Empty;    
         }
@@ -1101,8 +1101,8 @@ public Datei(IConfiguration configuration)
         nichtIdentischesSonstigesAttribut = nichtIdentischesSonstigesAttribut.Replace(".", "PUNKT").Replace(" ", "LEERZEICHEN").Replace("-", "MINUS").Replace("_", "UNTERSTRICH").Replace("/", "SLASH");
 
         return neueDict.TryGetValue(nichtIdentischesSonstigesAttribut, out var neuerWert1)
-            ? (neuerWert1?.ToString()?.Length > 55
-                ? neuerWert1.ToString().Substring(0, 52) + "..."
+            ? (neuerWert1?.ToString()?.Length > 85
+                ? neuerWert1.ToString().Substring(0, 82) + "..."
                 : neuerWert1?.ToString() ?? string.Empty)
             : string.Empty;
             
@@ -1791,7 +1791,7 @@ public Datei(IConfiguration configuration)
                 .BorderColor(Global.ColorHinweise);
             
             AnsiConsole.Write(panel);
-            AnsiConsole.MarkupLine($"[bold {Global.GetColor(Global.ColorHinweise)}] Bitte mit [green]Enter[/] bestätigen oder mit [red]ESC[/] abbrechen.[/]");
+            AnsiConsole.MarkupLine($"[bold {Global.GetColor(Global.ColorHinweise)}] Mit [green]Enter[/] bestätigen oder mit [red]ESC[/] abbrechen.[/]");
             
             var keyInfo = Console.ReadKey(intercept: true);
             if (keyInfo.Key != ConsoleKey.Enter)
@@ -1899,11 +1899,10 @@ public Datei(IConfiguration configuration)
                             $"{anhandDieserSchlüsselAttributeWirdVerglichenString}"
                             ), new Text($"neue Zeile"), new Text(""), new Text("")); rows++;
 
-
                         if(modus == Global.Modus.SchemaUpdaten)
                         {                            
                             InsertSchemaData(neueDict, schemaName, zielSeite);                            
-                            Console.WriteLine($"INSERT: {schemaName} ... durchgeführt.");
+                            Console.WriteLine($"INSERT: {neueDict["BetreffBeginn"]} -> {schemaName} ... durchgeführt.");
                         }
                     }                        
                     continue;
@@ -1995,7 +1994,19 @@ public Datei(IConfiguration configuration)
                                 neueDatei,
                                 "Seite löschen!",
                                 null));
-                    //this.OeffneWebseite("https://bkb.wiki/doku.php?id=", zielSeite);
+                    if(modus == Global.Modus.Vergleichen)
+                    {
+                      this.OeffneWebseite("https://bkb.wiki/doku.php?id=", vorhandeneDict["Page"]?.ToString());
+                    }
+                    if(modus == Global.Modus.SchemaUpdaten)
+                    {
+                        var configuration = Global.Konfig("StructDelete", Global.Modus.Update, Konfiguration);
+
+                        var schemaName = Path.GetFileNameWithoutExtension(AbsoluterPfad);
+                        
+                        if (!configuration["StructDelete"].ToLower().StartsWith("j"))
+                            DeleteSchemaData(schemaName, vorhandeneDict["Page"]?.ToString(), WikiZugriff);
+                    }                    
                 }
             }
 
@@ -2393,6 +2404,12 @@ public Datei(IConfiguration configuration)
             datenZeile["Page"] = "";
         }
 
+        if (datenZeile.ContainsKey("Kategorien"))
+        {
+            datenZeile["Kategorien"] = datenZeile["Kategorien"]?.ToString().ToLower().Trim().Replace(" ", "") ?? "";
+        }
+
+
         // Dictionary zur Liste hinzufügen
         SchemaData.Add(datenZeile);
 
@@ -2475,6 +2492,39 @@ public interface IDokuWikiRpc : IXmlRpcProxy
             throw;
         }
     }
+
+    internal void DeleteSchemaData(string zielSeite, string schemaName, DokuwikiZugriff wikiZugriff)
+    {
+        try
+        {
+            Console.WriteLine($"Lösche Seite {zielSeite} aus Schema {schemaName} ...");
+            Console.ReadKey(intercept: true); // Warten auf Benutzereingabe, um versehentliches Löschen zu verhindern
+            var erfolg = wikiZugriff.Proxy.PutPage(zielSeite, "", new XmlRpcStruct { { "sum", "Seite gelöscht via API" } });            
+            System.Diagnostics.Debug.WriteLine($"[Struct-Delete] Erfolg für {zielSeite}: {erfolg}");    
+        }
+        catch (XmlRpcFaultException fex)
+        {
+            System.Diagnostics.Debug.WriteLine("=== XML-RPC FEHLER (VOM SERVER) ===");
+            System.Diagnostics.Debug.WriteLine($"Code: {fex.FaultCode} | Meldung: {fex.FaultString}");
+            throw;
+        }
+        catch (XmlRpcIllFormedXmlException xmlEx)
+        {
+            System.Diagnostics.Debug.WriteLine("=== UNGÜLTIGE ANTWORT VOM SERVER ===");
+            System.Diagnostics.Debug.WriteLine($"Meldung: {xmlEx.Message}");
+            if (xmlEx.InnerException != null)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ursache: {xmlEx.InnerException.Message}");
+            }
+            throw;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Allgemeiner Fehler: {ex.Message}");
+            throw;
+        }
+    }
+
     private string ConvertStructValueToString(XmlRpcStruct zeile, string key)
     {
         if (!zeile.ContainsKey(key) || zeile[key] == null) return "";

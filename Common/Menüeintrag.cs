@@ -4288,7 +4288,7 @@ return dict["teacher"].ToString();
   zieldatei.WikiZugriff = this.WikiZugriff;
 
   // Die TerimineISt werden gefüllt  
-  Quelldateien.GetMatchingList(configuration, "termine", IStudents, Klassen, ["termine.Betreff", "termine.Seite", "termine.Hinweise", "termine.Datum", "termine.Kategorien", "termine.Verantwortlich", "termine.Ort", "termine.Ressourcen", "termine.SJ", "termine.Links", "termine.BetreffBeginn"], this.WikiZugriff);
+  Quelldateien.GetMatchingList(configuration, "termine", IStudents, Klassen, ["termine.Page","termine.Link","termine.Betreff", "termine.Seite", "termine.Hinweise", "termine.Datum", "termine.Kategorien", "termine.Verantwortlich", "termine.Ort", "termine.Ressourcen", "termine.SJ", "termine.Links", "termine.BetreffBeginn", "termine.DatumInt"], this.WikiZugriff);
     
   // Für jeden gleichnamigen Kalender, der in Downloads liegt und nicht älter ist als configuratuin["MaxAlter"]
   
@@ -4329,6 +4329,7 @@ return dict["teacher"].ToString();
       var endeDatum = DateTime.ParseExact(endeString.Substring(3, endeString.Length - 3), "dd.MM.yyyy HH:mm",
        new CultureInfo("de-DE"));
       var dat = beginnDatum.ToString("ddd dd.MM.yyyy", new CultureInfo("de-DE"));
+      var datInt = beginnDatum.ToString("yyyyMMddHHmm", new CultureInfo("de-DE"));
       var zeit = "";
 
       // Wenn zwischen beginn und ende exakt 24 Stunden oder ein Vielfaches von 24 liegen, dann ist das Ereignis ganztägig
@@ -4387,20 +4388,26 @@ return dict["teacher"].ToString();
       {
        link = null;
       }
+      
+      // Wandel alles nach ASCII um, damit keine Umlaute in der Page vorkommen.
+      var betreffBeginn = Global.CleanUrlString(dict["Betreff"].ToString()!.Trim());
+      betreffBeginn = betreffBeginn.ToLower() + "-" + datInt;
 
       dynamic record = new ExpandoObject();
       record.Betreff = dict["Betreff"].ToString()!.Trim();
-      record.Seite = string.IsNullOrEmpty(link) ? dict["Kategorien"].ToString().Split(';')[0] : link;
+      record.Seite = string.IsNullOrEmpty(link) ? dict["Kategorien"].ToString().Split(';')[0] : link; // Die tatsächliche Seite irgendwo im Wiki.
       record.Hinweise = "";
       record.Datum = dat + zeit;
       record.Kategorien = GetKategorien(link, dict["Kategorien"].ToString());
       record.Verantwortlich = "";
       record.Ort = dict["Ort"].ToString()!.Trim();
       record.Ressourcen = dict["Ressourcen"].ToString()!.Trim();
-      record.BetreffBeginn = record.Betreff + " " + record.Datum;
-      record.Page = "termine:" + record.Betreff + "_" + beginnDatum.ToString("yyyyMMdd");
+      record.BetreffBeginn = betreffBeginn;
+      record.Page = "termine:" + betreffBeginn; // Die Page ist identisch mit  Link. Die Page wird aber von der Abfrage nicht erfasst.
       record.SJ = sj;
       record.Art = "Termine";
+      record.Link = record.Page; // Link auf die verborgene Seite
+      record.DatumInt = datInt; // Datum in numerischer Form, damit die Termine sortiert werden können.
 
       if (zieldatei.AbsoluterPfad != null && !zieldatei.AbsoluterPfad.Contains("kollegium"))
       {
@@ -4415,7 +4422,7 @@ return dict["teacher"].ToString();
     }
 
     // Zeige den Link in spectre console   
-    AnsiConsole.MarkupLine($"[link=https://bkb.wiki/start?do=admin&page=struct_schemas&table=termine#plugin__struct_delete][{Global.GetColor(Global.ColorHyperlink)}]https://bkb.wiki/start?do=admin&page=struct_schemas&table=termine[/][/]");
+    //AnsiConsole.MarkupLine($"[link=https://bkb.wiki/start?do=admin&page=struct_schemas&table=termine#plugin__struct_delete][{Global.GetColor(Global.ColorHyperlink)}]https://bkb.wiki/start?do=admin&page=struct_schemas&table=termine[/][/");
 
     foreach (var aktion in zieldatei.Funktionen) aktion(zieldatei);
    }
@@ -5061,9 +5068,10 @@ return dict["teacher"].ToString();
    dynamic record = new ExpandoObject();
    record.Page = "kollegium:" + l.Kürzel;
    record.Kürzel = l.Kürzel;
-   record.Namen = string.IsNullOrEmpty(l.Titel) ? $"{l.Vorname} {l.Nachname}" : $"{l.Titel} {l.Vorname} {l.Nachname}";
+   record.Namen = "kollegium:" + l.Kürzel;
+   //record.Namen = string.IsNullOrEmpty(l.Titel) ? $"{l.Vorname} {l.Nachname}" : $"{l.Titel} {l.Vorname} {l.Nachname}";
    record.Mail = l.Mail;
-   record.Art = !String.IsNullOrEmpty(l.PflichtstundenSoll) ? "Lehrkraft" : ""; // Nur LuL haben Pflichtstunden.
+   record.Art = !String.IsNullOrEmpty(l.PflichtstundenSoll) ? "kollegium:Lehrkraefte" : ""; // Nur LuL haben Pflichtstunden.
    record.Link = "kollegium:" + l.Kürzel.ToLower();
    if (l.Kürzel == "GV" || l.Kürzel == "HR" || l.Kürzel == "STK" || l.Kürzel == "AEH" || l.Kürzel == "BM" || l.Kürzel == "ART" || l.Kürzel == "BAU" || l.Kürzel == "KU" || l.Kürzel == "PLA" || l.Kürzel == "KS" || l.Kürzel == "BEH")
     zieldatei.Add(record);

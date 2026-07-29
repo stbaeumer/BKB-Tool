@@ -359,7 +359,7 @@ public static class MenueHelper
       [
        $"Die Termine aus Outlook (Kollegium, FHR, Berufliches Gymnasium, Verwaltung) werden nach Wiki importiert.",
        $"[{Global.GetColor(Global.ColorActionInMenüs)}]Vorgehen:[/]",
-       $"[{Global.GetColor(Global.ColorActionInMenüs)}]#1[/] Die Kalender in Listenansicht anzeigen. Notwendige Spalten: [{Global.GetColor(Global.ColorActionInMenüs)}]Beginn, Ende, Betreff, Kategorien, Ressourcen, Ort, Nachricht[/]",
+       $"[{Global.GetColor(Global.ColorActionInMenüs)}]#1[/] In Outlook-Classic Die Kalender in Listenansicht anzeigen. Notwendige Spalten: [{Global.GetColor(Global.ColorActionInMenüs)}]Beginn, Ende, Betreff, Kategorien, Ressourcen, Ort, Nachricht[/]",
        $"[{Global.GetColor(Global.ColorActionInMenüs)}]#2[/] Kalender aufsteigend nach Beginn sortieren.",
        $"[{Global.GetColor(Global.ColorActionInMenüs)}]#3[/] Mit Copy&Paste (Strg+A, Strg+C) die Termine aus Outlook in die CSV-Dateien im Download-Ordner kopieren. Codierung UTF8",
        $"[{Global.GetColor(Global.ColorActionInMenüs)}]#4[/] Die Kalender im Wiki zuerst leeren ([{Global.GetColor(Global.ColorPfadInProgrammen)}]Admin > Struct Schema Editor > Leeren[/]). Anschließend die neuen CSV als Global importieren.",
@@ -380,11 +380,10 @@ public static class MenueHelper
         [
           datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.Vergleichen),
           datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.SchemaUpdaten),
-          datei => datei.OeffneWebseite($"https://bkb.wiki/start?do=admin&page=struct_schemas&table=" + datei.Kalender),
-          datei => datei.OeffneWebseite($"https://bkb.wiki/start?do=admin&page=struct_schemas&table=" + datei.Kalender)
+          //datei => datei.OeffneWebseite($"https://bkb.wiki/start?do=admin&page=struct_schemas&table=" + datei.Kalender)
         ],
         ["BetreffBeginn"],
-        [],
+        ["Seite"],
         Path.Combine(pfadDownloads ?? "", "termine.struct"), 
         ",", '\"', new UTF8Encoding(false), true);
       },
