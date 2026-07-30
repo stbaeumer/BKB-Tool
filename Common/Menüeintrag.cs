@@ -3700,7 +3700,22 @@ return dict["teacher"].ToString();
   zieldatei.Add("====== Sprechtag ======");
   zieldatei.Add("");
 
-  zieldatei.Add(hinweis);
+  
+zieldatei.Add("---- struct table ----");
+zieldatei.Add("schema: termine");
+zieldatei.Add("cols:Datum,Betreff,Ort");
+zieldatei.Add("filterand: Seite=$ID$");
+zieldatei.Add("filterand: SJ=aktuelles");
+zieldatei.Add("sort:      DatumInt");
+zieldatei.Add("dynfilters: 0");
+zieldatei.Add("csv: 0");
+zieldatei.Add("----");
+
+zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
+
+
+
+
 
   var i = 1;
   zieldatei.Add("");
@@ -4337,8 +4352,7 @@ return dict["teacher"].ToString();
 
       // Bei mehrtägiges, ganztägigen Ereignissen muss das Endedatum um einen Tag nach vorne geschoben werden
 
-      if ((endeDatum - beginnDatum).TotalHours >= 24 && endeDatum.Hour == 0 && endeDatum.Minute == 0 &&
-       endeDatum.Second == 0)
+      if ((endeDatum - beginnDatum).TotalHours >= 24 && endeDatum.Hour == 0 && endeDatum.Minute == 0 && endeDatum.Second == 0)
       {
        endeDatum = endeDatum.AddDays(-1);
       }
@@ -4360,17 +4374,28 @@ return dict["teacher"].ToString();
        dat += " - " + endeDatum.ToString("ddd dd.MM.yyyy", new CultureInfo("de-DE"));
       }
 
-      var sj = "vergangene";
+    int startJahr = Convert.ToInt32(Global.AktSj[0]);
+    int endJahr = Convert.ToInt32(Global.AktSj[1]);
 
-      if (new DateTime(Convert.ToInt32(Global.AktSj[0]), 8, 1) < beginnDatum &&
-       beginnDatum < new DateTime(Convert.ToInt32(Global.AktSj[1]), 7, 31))
-      {
-       sj = "aktuelles";
-      }
-      if (beginnDatum > new DateTime(Convert.ToInt32(Global.AktSj[1]), 7, 31))
-      {
-       sj = "kommendes";
-      }
+    // Stichtag-Grenzen sauber definieren
+    DateTime aktSjStart = new DateTime(startJahr, 8, 1);
+    DateTime aktSjEnde = new DateTime(endJahr, 7, 31);
+    DateTime kommendesSjEnde = new DateTime(endJahr + 1, 7, 31);
+
+    string sj = "vergangene";
+
+    if (beginnDatum >= aktSjStart && beginnDatum <= aktSjEnde)
+    {
+        sj = "aktuelles";
+    }
+    else if (beginnDatum > aktSjEnde && beginnDatum <= kommendesSjEnde)
+    {
+        sj = "kommendes";
+    }
+    else if (beginnDatum > kommendesSjEnde)
+    {
+        sj = "spaeteres";
+    }
 
       if (dict["Betreff"].ToString().Contains("QA"))
       {

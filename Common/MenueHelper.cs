@@ -376,16 +376,16 @@ public static class MenueHelper
       {
        m.OeffneExistierendeDateienOderNeueInEditor(configuration, ["termine.csv"]);
        m.DokuwikiZugriffSetzen(configuration);
-        m.Kalender2Wiki(configuration,
-        [
-          datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.Vergleichen),
-          datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.SchemaUpdaten),
-          //datei => datei.OeffneWebseite($"https://bkb.wiki/start?do=admin&page=struct_schemas&table=" + datei.Kalender)
-        ],
-        ["BetreffBeginn"],
-        ["Seite"],
-        Path.Combine(pfadDownloads ?? "", "termine.struct"), 
-        ",", '\"', new UTF8Encoding(false), true);
+       m.Kalender2Wiki(configuration,
+       [
+         datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.Vergleichen),
+         datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.SchemaUpdaten),
+         //datei => datei.OeffneWebseite($"https://bkb.wiki/start?do=admin&page=struct_schemas&table=" + datei.Kalender)
+       ],
+       ["BetreffBeginn"],
+       ["Seite"],
+       Path.Combine(pfadDownloads ?? "", "termine.struct"), 
+       ",", '\"', new UTF8Encoding(false), true);
       },
       Global.Rubrik.Wiki,
       Global.NurBeiDiesenSchulnummern.Nur177659

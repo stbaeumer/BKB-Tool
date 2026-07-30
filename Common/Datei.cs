@@ -1822,6 +1822,8 @@ public Datei(IConfiguration configuration)
                 $"Veränderungen von alt ([{Global.GetColor(Global.ColorPfadInDateien)}]{vorhandeneDatei}[/]) nach neu ([{Global.GetColor(Global.ColorPfadInDateien)}]{AbsoluterPfad}[/]):",
                 AnhandDieserSchlüsselAttributeWirdVerglichen);
 
+        var zulöschendeSeiten = new List<string>(); 
+
         AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start($" {modusString} ...", ctx =>
         {
             var dateiendung = Path.GetExtension(AbsoluterPfad);
@@ -1987,25 +1989,20 @@ public Datei(IConfiguration configuration)
                     }
                 }
                 if (löschen)
-                {
-                    table.AddRow(
+                {                    
+                    if(modus == Global.Modus.Vergleichen)
+                    {
+                        table.AddRow(
                             RenderZeile(
                                 vorhandeneDict,
                                 neueDatei,
                                 "Seite löschen!",
                                 null));
-                    if(modus == Global.Modus.Vergleichen)
-                    {
-                      this.OeffneWebseite("https://bkb.wiki/doku.php?id=", vorhandeneDict["Page"]?.ToString());
+                      //this.OeffneWebseite("https://bkb.wiki/doku.php?id=", vorhandeneDict["Page"]?.ToString());
                     }
                     if(modus == Global.Modus.SchemaUpdaten)
                     {
-                        var configuration = Global.Konfig("StructDelete", Global.Modus.Update, Konfiguration);
-
-                        var schemaName = Path.GetFileNameWithoutExtension(AbsoluterPfad);
-                        
-                        if (!configuration["StructDelete"].ToLower().StartsWith("j"))
-                            DeleteSchemaData(schemaName, vorhandeneDict["Page"]?.ToString(), WikiZugriff);
+                        zulöschendeSeiten.Add(vorhandeneDict["Page"]?.ToString());
                     }                    
                 }
             }
@@ -2014,6 +2011,27 @@ public Datei(IConfiguration configuration)
                 table.AddRow(new Text("keine Änderungen, nichts anzuzeigen"), new Text("..."), new Text("..."), new Text("..."));
         });
 
+        if(modus == Global.Modus.SchemaUpdaten)
+        {
+            if(zulöschendeSeiten.Count > 0)
+            {
+                Console.WriteLine($"Es werden {zulöschendeSeiten.Count} Seiten gelöscht. Bitte bestätigen Sie mit 'j' oder 'J', um fortzufahren.");
+                var keyInfo = Console.ReadKey(intercept: true);
+                if (keyInfo.KeyChar.ToString().ToLower().StartsWith("j"))
+                {
+                    foreach(var seite in zulöschendeSeiten)
+                    {
+                        DeleteSchemaData(Path.GetFileNameWithoutExtension(AbsoluterPfad), seite, WikiZugriff);
+                        Console.WriteLine($"DELETE: {seite.PadRight(50)}... durchgeführt.");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Löschvorgang abgebrochen.");
+                }
+            }    
+        }
+        
         // Im Vergleichsmodus wird die originale Datei nicht verändert.
         if (Global.Modus.Vergleichen == modus)
         {
@@ -2493,13 +2511,11 @@ public interface IDokuWikiRpc : IXmlRpcProxy
         }
     }
 
-    internal void DeleteSchemaData(string zielSeite, string schemaName, DokuwikiZugriff wikiZugriff)
+    internal void DeleteSchemaData(string schemaName, string zielSeite, DokuwikiZugriff wikiZugriff)
     {
         try
         {
-            Console.WriteLine($"Lösche Seite {zielSeite} aus Schema {schemaName} ...");
-            Console.ReadKey(intercept: true); // Warten auf Benutzereingabe, um versehentliches Löschen zu verhindern
-            var erfolg = wikiZugriff.Proxy.PutPage(zielSeite, "", new XmlRpcStruct { { "sum", "Seite gelöscht via API" } });            
+            var erfolg = wikiZugriff.Proxy.PutPage(zielSeite, String.Empty, new XmlRpcStruct { { "sum", "Seite gelöscht via API" } });            
             System.Diagnostics.Debug.WriteLine($"[Struct-Delete] Erfolg für {zielSeite}: {erfolg}");    
         }
         catch (XmlRpcFaultException fex)
