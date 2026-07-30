@@ -5091,14 +5091,14 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
   foreach (var l in lehrersSoll)
   {
    dynamic record = new ExpandoObject();
-   record.Page = "kollegium:" + l.Kürzel;
+   record.Page = "kollegium:" + l.Kürzel.ToLower();
    record.Kürzel = l.Kürzel;
-   record.Namen = "kollegium:" + l.Kürzel;
-   //record.Namen = string.IsNullOrEmpty(l.Titel) ? $"{l.Vorname} {l.Nachname}" : $"{l.Titel} {l.Vorname} {l.Nachname}";
+   record.Namen = "kollegium:" + l.Kürzel.ToLower(); 
+   record.TitelVornameNachname = (String.IsNullOrEmpty(l.Titel) ? $"{l.Vorname} {l.Nachname}" : $"{l.Titel} {l.Vorname} {l.Nachname}");
    record.Mail = l.Mail;
    record.Art = !String.IsNullOrEmpty(l.PflichtstundenSoll) ? "kollegium:Lehrkraefte" : ""; // Nur LuL haben Pflichtstunden.
    record.Link = "kollegium:" + l.Kürzel.ToLower();
-   if (l.Kürzel == "GV" || l.Kürzel == "HR" || l.Kürzel == "STK" || l.Kürzel == "AEH" || l.Kürzel == "BM" || l.Kürzel == "ART" || l.Kürzel == "BAU" || l.Kürzel == "KU" || l.Kürzel == "PLA" || l.Kürzel == "KS" || l.Kürzel == "BEH")
+   if (l.Kürzel == "GV" || l.Kürzel == "HR")// || l.Kürzel == "STK" || l.Kürzel == "AEH" || l.Kürzel == "BM" || l.Kürzel == "ART" || l.Kürzel == "BAU" || l.Kürzel == "KU" || l.Kürzel == "PLA" || l.Kürzel == "KS" || l.Kürzel == "BEH")
     zieldatei.Add(record);
   }
 

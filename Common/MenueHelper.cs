@@ -420,7 +420,7 @@ public static class MenueHelper
          datei => datei.OeffneWebseite("https://bkb.wiki/kollegium:start")
         ],
         ["Link"],
-        ["Page"],
+        ["Page,Namen,Art"],
         "|", '\0', new UTF8Encoding(true), false); 
         m.GetUntisAnrechnungen(
         Path.Combine(pfadDownloads ?? "untisanrechnungen.struct"),

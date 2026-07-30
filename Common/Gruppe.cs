@@ -453,18 +453,19 @@ public class Gruppe
                 lehrerMail.Add(leh.Mail);
             }
 
-            if (!lehrerName.Any(x =>
-                    x.Contains((leh.Titel == "" ? "" : leh.Titel + " ") + leh.Vorname + " " +
-                               leh.Nachname)))
+            //if (!lehrerName.Any(x => x.Contains((leh.Titel == "" ? "" : leh.Titel + " ") + leh.Vorname + " " + leh.Nachname)))
+            if (!lehrerName.Any(x => x.Contains(":kollegium:" + leh.Kürzel.ToLower())))
             {
-                lehrerName.Add((leh.Titel == "" ? "" : leh.Titel + " ") + leh.Vorname + " " + leh.Nachname);
+                record.TitelVornameNachname = (String.IsNullOrEmpty(leh.Titel) ? $"{leh.Vorname} {leh.Nachname}" : $"{leh.Titel} {leh.Vorname} {leh.Nachname}");                
+                //lehrerName.Add((leh.Titel == "" ? "" : leh.Titel + " ") + leh.Vorname + " " + leh.Nachname);
+                lehrerName.Add(":kollegium:" + leh.Kürzel.ToLower());
             }
         }
 
         record.Namen = string.Join(", ", lehrerName.OrderBy(name => name));
         record.Mail = string.Join(", ", lehrerMail.OrderBy(name => name));
         record.Kürzel = string.Join(", ", lehrerKürzel.OrderBy(name => name));
-        record.Art = "Gruppe";
+        record.Art = "kollegium:gruppen";
         gruppe.Record = record;
         return gruppe;
     }

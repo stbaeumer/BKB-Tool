@@ -1904,7 +1904,7 @@ public Datei(IConfiguration configuration)
                         if(modus == Global.Modus.SchemaUpdaten)
                         {                            
                             InsertSchemaData(neueDict, schemaName, zielSeite);                            
-                            Console.WriteLine($"INSERT: {neueDict["BetreffBeginn"]} -> {schemaName} ... durchgeführt.");
+                            Console.WriteLine($"INSERT: {anhandDieserSchlüsselAttributeWirdVerglichenString} -> {schemaName} ... durchgeführt.");
                         }
                     }                        
                     continue;
@@ -2067,12 +2067,13 @@ public Datei(IConfiguration configuration)
             // 2. Platzhalter im Template ersetzen (falls vorhanden, z.B. @PAGE@ oder @USER@)
             // DokuWiki ersetzt diese normalerweise automatisch, per API müssen wir das selbst tun:
 
-            if(neueDict["Art"] == "Lehrkraft")
-            {
+            if(neueDict["Art"].ToString().ToLower() == "kollegium:lehrkraefte")
+            {   
+                templateInhalt = templateInhalt.Replace("@NAME@", neueDict["TitelVornameNachname"].ToString());             
                 templateInhalt = templateInhalt.Replace("@PAGE@", neueDict["Namen"].ToString());
                 templateInhalt = templateInhalt.Replace("@ID@", zielSeite);
             }
-            if (neueDict["Art"] == "Termine")
+            if (neueDict["Art"].ToString().ToLower() == "termine")
             {
                 templateInhalt = templateInhalt.Replace("@PAGE@", neueDict["Betreff"].ToString());
                 templateInhalt = templateInhalt.Replace("@ID@", zielSeite);
@@ -2080,6 +2081,7 @@ public Datei(IConfiguration configuration)
             else
             {
                 templateInhalt = templateInhalt.Replace("@PAGE@", zielSeite.Replace(schemaName + ":", ""));
+                templateInhalt = templateInhalt.Replace("@NAME@", zielSeite.Replace(schemaName + ":", ""));
                 templateInhalt = templateInhalt.Replace("@ID@", zielSeite);
             }
             
