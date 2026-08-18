@@ -1194,6 +1194,11 @@ public Datei(IConfiguration configuration)
                     vorhDictWert = vorhDict[key].ToString().Split('#')[0];
                 }
 
+                if(vorhDictWert == "termine:bekanntgabederanrechnungen-202703030000")
+                {
+                    string a = "";
+                }
+
                 if (neueDictWert != vorhDictWert)
                 {
                     match = false;
@@ -1871,7 +1876,7 @@ public Datei(IConfiguration configuration)
                 var neueDict = (IDictionary<string, object>)neueRec;
 
                 var schemaName = Path.GetFileNameWithoutExtension(AbsoluterPfad);
-                string zielSeite = schemaName + ":" + neueDict["Page"]?.ToString().ToLower().Trim().Split(':').Where(s => !s.Equals("start", StringComparison.OrdinalIgnoreCase)).LastOrDefault();
+                string zielSeite = neueDict["Page"]?.ToString().ToLower();//.Trim().Split(':').Where(s => !s.Equals("start", StringComparison.OrdinalIgnoreCase)).LastOrDefault();
 
                 var anhandDieserSchlüsselAttributeWirdVerglichenString = "";
 
@@ -1903,6 +1908,10 @@ public Datei(IConfiguration configuration)
 
                         if(modus == Global.Modus.SchemaUpdaten)
                         {                            
+                            if(zielSeite.ToLower().Contains("sprechtag"))
+                            {
+                                string aa = "";
+                            }
                             InsertSchemaData(neueDict, schemaName, zielSeite);                            
                             Console.WriteLine($"INSERT: {anhandDieserSchlüsselAttributeWirdVerglichenString} -> {schemaName} ... durchgeführt.");
                         }

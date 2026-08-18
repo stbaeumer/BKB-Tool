@@ -4418,6 +4418,11 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
       var betreffBeginn = Global.CleanUrlString(dict["Betreff"].ToString()!.Trim());
       betreffBeginn = betreffBeginn.ToLower() + "-" + datInt;
 
+        if(dict["Betreff"].ToString().Contains("Sprechtag"))
+        {
+            string a = "";
+        }
+
       dynamic record = new ExpandoObject();
       record.Betreff = dict["Betreff"].ToString()!.Trim();
       record.Seite = string.IsNullOrEmpty(link) ? dict["Kategorien"].ToString().Split(';')[0] : link; // Die tatsächliche Seite irgendwo im Wiki.
@@ -4427,8 +4432,19 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
       record.Verantwortlich = "";
       record.Ort = dict["Ort"].ToString()!.Trim();
       record.Ressourcen = dict["Ressourcen"].ToString()!.Trim();
-      record.BetreffBeginn = betreffBeginn;
-      record.Page = "termine:" + betreffBeginn; // Die Page ist identisch mit  Link. Die Page wird aber von der Abfrage nicht erfasst.
+      record.BetreffBeginn = "termine:" + betreffBeginn;
+      record.Page = record.BetreffBeginn; // Die Page ist identisch mit  Link. Die Page wird aber von der Abfrage nicht erfasst.
+      
+      // Wenn im link "termine:" steht, dann wird der Betreffbeginn duurch den link ersetzt.
+        if(!string.IsNullOrEmpty(link) && link.Contains("termine:"))
+        {
+            if (!dict["Kategorien"].ToString().Split(';', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Contains(link))
+            {
+                record.BetreffBeginn = link;
+                record.Page = link;
+            }                           
+        }
+      
       record.SJ = sj;
       record.Art = "Termine";
       record.Link = record.Page; // Link auf die verborgene Seite
@@ -4441,6 +4457,9 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
       {
        record.Links = "";
       }
+
+
+
 
       zieldatei.Add(record);
      }
@@ -5076,7 +5095,7 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
   zieldatei.WikiZugriff = this.WikiZugriff;
 
   // Ist-Stand der Kollegium-Tabelle in Datei schreiben
-  Quelldateien.GetMatchingList(configuration, "kollegium", IStudents, Klassen, ["kollegium.Page", "kollegium.Kürzel", "kollegium.Namen", "kollegium.Mail", "kollegium.Link", "kollegium.Art"], this.WikiZugriff);
+  Quelldateien.GetMatchingList(configuration, "kollegium", IStudents, Klassen, ["kollegium.Page", "kollegium.Kürzel", "kollegium.Namen", "kollegium.Mail", "kollegium.Teams", "kollegium.Link", "kollegium.Art", "kollegium.TitelVornameNachname"], this.WikiZugriff);
 
   // Im Kollegium müssen folgende Items abgeglichen werden:
   // 1. Lehrkräfte, die in der Datei "lehrkraefte.dat" enthalten sind, aber nicht in der Liste der IST-Lehrkräfte (lehrersSoll) enthalten sind, werden entfernt.        
@@ -5096,6 +5115,7 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
    record.Namen = "kollegium:" + l.Kürzel.ToLower(); 
    record.TitelVornameNachname = (String.IsNullOrEmpty(l.Titel) ? $"{l.Vorname} {l.Nachname}" : $"{l.Titel} {l.Vorname} {l.Nachname}");
    record.Mail = l.Mail;
+   record.Teams = l.Mail;
    record.Art = !String.IsNullOrEmpty(l.PflichtstundenSoll) ? "kollegium:Lehrkraefte" : ""; // Nur LuL haben Pflichtstunden.
    record.Link = "kollegium:" + l.Kürzel.ToLower();
    if (l.Kürzel == "GV" || l.Kürzel == "HR")// || l.Kürzel == "STK" || l.Kürzel == "AEH" || l.Kürzel == "BM" || l.Kürzel == "ART" || l.Kürzel == "BAU" || l.Kürzel == "KU" || l.Kürzel == "PLA" || l.Kürzel == "KS" || l.Kürzel == "BEH")

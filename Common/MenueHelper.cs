@@ -357,7 +357,7 @@ public static class MenueHelper
       students,
       klassen,
       [
-       $"Die Termine aus Outlook (Kollegium, FHR, Berufliches Gymnasium, Verwaltung) werden nach Wiki importiert.",
+       $"Die Termine aus Outlook (Kollegium, FHR, Berufliches Gymnasium) werden nach Wiki importiert.",
        $"[{Global.GetColor(Global.ColorActionInMenüs)}]Vorgehen:[/]",
        $"[{Global.GetColor(Global.ColorActionInMenüs)}]#1[/] In Outlook-Classic Die Kalender in Listenansicht anzeigen. Notwendige Spalten: [{Global.GetColor(Global.ColorActionInMenüs)}]Beginn, Ende, Betreff, Kategorien, Ressourcen, Ort, Nachricht[/]",
        $"[{Global.GetColor(Global.ColorActionInMenüs)}]#2[/] Kalender aufsteigend nach Beginn sortieren.",
@@ -366,7 +366,7 @@ public static class MenueHelper
        $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise:[/]",
        $"[{Global.GetColor(Global.ColorHinweise)}]#1[/] Falls der Inhalt im Body (Spalte Nachricht) mehrzeilig ist, wird nur die erste Zeile berücksichtigt.",
        $"[{Global.GetColor(Global.ColorHinweise)}]#2[/] Es werden nur Termine berücksichtigt, die mindestens eine Kategorie haben. Kategorien werden zu Links in Wiki.",
-       $"[{Global.GetColor(Global.ColorHinweise)}]#3[/] Termine aus vergangenen Schuljahren werden nicht mit übertragen.",
+       $"[{Global.GetColor(Global.ColorHinweise)}]#3[/] Termine aus vergangenen Schuljahren werden nicht mit übertragen. Andere Termine bekommen SJ=aktuelles/kommendes/spaeteres",
        $"[{Global.GetColor(Global.ColorHinweise)}]#4[/] Falls in der Nachricht ein Link zu bkb.wiki enthalten ist, dann wird der Link zum Seitenlink. Ansonsten wird die erste Kategorie zum Seitenlink.",
        $"[{Global.GetColor(Global.ColorHinweise)}]#5[/] Falls in der Nachricht ein Link zu bkb.wiki enthalten ist, wird der Link zur ersten Kategorie.",
        $"[{Global.GetColor(Global.ColorHinweise)}]#6[/] Die Anzahl der Kategorien ist in Outlook begrenzt. Mehr als 6 Kategorien sind evtl. problematisch.",
