@@ -359,18 +359,18 @@ public static class MenueHelper
       [
        $"Die Termine aus Outlook (Kollegium, FHR, Berufliches Gymnasium) werden nach Wiki importiert.",
        $"[{Global.GetColor(Global.ColorActionInMenüs)}]Vorgehen:[/]",
-       $"[{Global.GetColor(Global.ColorActionInMenüs)}]#1[/] In Outlook-Classic Die Kalender in Listenansicht anzeigen. Notwendige Spalten: [{Global.GetColor(Global.ColorActionInMenüs)}]Beginn, Ende, Betreff, Kategorien, Ressourcen, Ort, Nachricht[/]",
+       $"[{Global.GetColor(Global.ColorActionInMenüs)}]#1[/] In Outlook-Classic die gewünschten Kalender nacheinander in Listenansicht anzeigen. Notwendige Spalten: [{Global.GetColor(Global.ColorActionInMenüs)}]Beginn, Ende, Betreff, Kategorien, Ressourcen, Ort, Nachricht[/]",
        $"[{Global.GetColor(Global.ColorActionInMenüs)}]#2[/] Kalender aufsteigend nach Beginn sortieren.",
-       $"[{Global.GetColor(Global.ColorActionInMenüs)}]#3[/] Mit Copy&Paste (Strg+A, Strg+C) die Termine aus Outlook in die CSV-Dateien im Download-Ordner kopieren. Codierung UTF8",
-       $"[{Global.GetColor(Global.ColorActionInMenüs)}]#4[/] Die Kalender im Wiki zuerst leeren ([{Global.GetColor(Global.ColorPfadInProgrammen)}]Admin > Struct Schema Editor > Leeren[/]). Anschließend die neuen CSV als Global importieren.",
+       $"[{Global.GetColor(Global.ColorActionInMenüs)}]#3[/] Mit Copy&Paste (Strg+A, Strg+C) die Termine aus Outlook in die Datei termine.csv im Download-Ordner kopieren. Codierung UTF8",       
        $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise:[/]",
        $"[{Global.GetColor(Global.ColorHinweise)}]#1[/] Falls der Inhalt im Body (Spalte Nachricht) mehrzeilig ist, wird nur die erste Zeile berücksichtigt.",
        $"[{Global.GetColor(Global.ColorHinweise)}]#2[/] Es werden nur Termine berücksichtigt, die mindestens eine Kategorie haben. Kategorien werden zu Links in Wiki.",
        $"[{Global.GetColor(Global.ColorHinweise)}]#3[/] Termine aus vergangenen Schuljahren werden nicht mit übertragen. Andere Termine bekommen SJ=aktuelles/kommendes/spaeteres",
        $"[{Global.GetColor(Global.ColorHinweise)}]#4[/] Falls in der Nachricht ein Link zu bkb.wiki enthalten ist, dann wird der Link zum Seitenlink. Ansonsten wird die erste Kategorie zum Seitenlink.",
        $"[{Global.GetColor(Global.ColorHinweise)}]#5[/] Falls in der Nachricht ein Link zu bkb.wiki enthalten ist, wird der Link zur ersten Kategorie.",
-       $"[{Global.GetColor(Global.ColorHinweise)}]#6[/] Die Anzahl der Kategorien ist in Outlook begrenzt. Mehr als 6 Kategorien sind evtl. problematisch.",
-       $"[{Global.GetColor(Global.ColorHinweise)}]#7[/] Mehrtägige Termine: Nur bei ganztägigen Terminen wird der erste und letzte Tag richtig angezeigt. Wenn Uhrzeiten angegeben werden, wird nur der erste Tag angezeigt."
+       $"[{Global.GetColor(Global.ColorHinweise)}]#6[/] Zu jedem Termin wird eine Seite angelegt. Die Seiten werden nach dem Schema [{Global.GetColor(Global.ColorTextHervorheben)}]BetreffBeginn[/] benannt. Es sei denn, dass in der Nachricht ein Link zu bkb.wiki/termine enthalten ist. Dann wird der Link aus der Nachricht zum Seitennamen.",       
+       $"[{Global.GetColor(Global.ColorHinweise)}]#7[/] Die Anzahl der Kategorien ist in Outlook begrenzt. Mehr als 6 Kategorien sind evtl. problematisch.",
+       $"[{Global.GetColor(Global.ColorHinweise)}]#8[/] Mehrtägige Termine: Nur bei ganztägigen Terminen wird der erste und letzte Tag richtig angezeigt. Wenn Uhrzeiten angegeben werden, wird nur der erste Tag angezeigt."
       ],
       m =>
       {
@@ -380,7 +380,7 @@ public static class MenueHelper
        [
          datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.Vergleichen),
          datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.SchemaUpdaten),
-         //datei => datei.OeffneWebseite($"https://bkb.wiki/start?do=admin&page=struct_schemas&table=" + datei.Kalender)
+         datei => datei.OeffneWebseite($"https://bkb.wiki/termine:oeffentlich:bewegliche_ferientage?do=admin&page=config")
        ],
        ["BetreffBeginn"],
        ["Seite"],
@@ -420,7 +420,7 @@ public static class MenueHelper
          datei => datei.OeffneWebseite("https://bkb.wiki/kollegium:start")
         ],
         ["Link"],
-        ["Page,Namen,Art"],
+        ["Page", "Namen", "Art"],
         "|", '\0', new UTF8Encoding(true), false); 
         m.GetUntisAnrechnungen(
         Path.Combine(pfadDownloads ?? "untisanrechnungen.struct"),

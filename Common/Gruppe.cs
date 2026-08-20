@@ -87,7 +87,7 @@ public class Gruppe
         }
 
         record.Namen = string.Join(", ", lehrerName);
-        record.Mail = string.Join(", ", lehrerMail);
+        record.Mail = string.Join("; ", lehrerMail);
         record.Kürzel = string.Join(", ", lehrerKürzel);
         record.Art = "Gruppe";
         gruppe.Record = record;
@@ -149,7 +149,7 @@ public class Gruppe
         }
 
         record.Namen = string.Join(", ", lehrerName.OrderBy(name => name));
-        record.Mail = string.Join(", ", lehrerMail.OrderBy(name => name));
+        record.Mail = string.Join("; ", lehrerMail.OrderBy(name => name));
         record.Kürzel = string.Join(", ", lehrerKürzel.OrderBy(name => name));
         record.Art = "Fachschaft";
         gruppe.Record = record;
@@ -209,7 +209,7 @@ public class Gruppe
         }
 
         record.Namen = string.Join(", ", lehrerName.OrderBy(name => name));
-        record.Mail = string.Join(", ", lehrerMail.OrderBy(name => name));
+        record.Mail = string.Join("; ", lehrerMail.OrderBy(name => name));
         record.Kürzel = string.Join(", ", lehrerKürzel.OrderBy(name => name));
         record.Art = "Kollegium";
         gruppe.Record = record;
@@ -264,7 +264,7 @@ public class Gruppe
         }
 
         record.Namen = string.Join(", ", lehrerName.OrderBy(name => name));
-        record.Mail = string.Join(", ", lehrerMail.OrderBy(name => name));
+        record.Mail = string.Join("; ", lehrerMail.OrderBy(name => name));
         record.Kürzel = string.Join(", ", lehrerKürzel.OrderBy(name => name));
         record.Art = "Lehrerinnen";
         gruppe.Record = record;
@@ -364,7 +364,7 @@ public class Gruppe
         }
 
         record.Namen = string.Join(", ", lehrerName.OrderBy(name => name));
-        record.Mail = string.Join(", ", lehrerMail.OrderBy(name => name));
+        record.Mail = string.Join("; ", lehrerMail.OrderBy(name => name));
         record.Kürzel = string.Join(", ", lehrerKürzel.OrderBy(name => name));
         record.Art = "Klassenleitungen";
         gruppe.Record = record;
@@ -414,7 +414,7 @@ public class Gruppe
         }
 
         record.Namen = string.Join(", ", lehrerName.OrderBy(name => name));
-        record.Mail = string.Join(", ", lehrerMail.OrderBy(name => name));
+        record.Mail = string.Join("; ", lehrerMail.OrderBy(name => name));
         record.Kürzel = string.Join(", ", lehrerKürzel.OrderBy(name => name));
         record.Art = "Bildungsgangleitungen";
         gruppe.Record = record;
@@ -463,7 +463,7 @@ public class Gruppe
         }
 
         record.Namen = string.Join(", ", lehrerName.OrderBy(name => name));
-        record.Mail = string.Join(", ", lehrerMail.OrderBy(name => name));
+        record.Mail = string.Join("; ", lehrerMail.OrderBy(name => name));
         record.Kürzel = string.Join(", ", lehrerKürzel.OrderBy(name => name));
         record.Art = "kollegium:gruppen";
         gruppe.Record = record;

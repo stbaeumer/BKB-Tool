@@ -1152,9 +1152,9 @@ public Datei(IConfiguration configuration)
             // Wenn die neueDict keine Sonderzeichen enthält, dann wird auch bei vorhandeneDict die Sonderzeichen ersetzt.
             if (!sonderzeichen)
                 k = key.Replace(".", "PUNKT").Replace(" ", "LEERZEICHEN").Replace("-", "MINUS").Replace("_", "UNTERSTRICH").Replace("/", "SCHRÄGSTRICH");
-
+            
             // Die Felder, die mit Field beginnen, sind nicht relevant
-            if (DieseAttributeWerdenBeimVergleichIgnoriert.Contains(key)) continue;
+            if (DieseAttributeWerdenBeimVergleichIgnoriert.Contains(key.ToString())) continue;
             if (AnhandDieserSchlüsselAttributeWirdVerglichen.Contains(key)) continue; // Die Vergleichsattribute werden nicht berücksichtigt
 
             // Es wird geprüft, ob das Dictionary neueDict einen Eintrag mit dem Schlüssel key enthält.
@@ -1890,7 +1890,7 @@ public Datei(IConfiguration configuration)
                     }
                 }
 
-                var dieseAttributeWerdenBeimVergleichIgnoriert = DieseAttributeWerdenBeimVergleichIgnoriert;
+                //var dieseAttributeWerdenBeimVergleichIgnoriert = DieseAttributeWerdenBeimVergleichIgnoriert;
 
                 // ... wird geprüft, ob es eine vorhandene Zeile gibt, die auf die Schlüsselattribute matcht.
                 var zeileMitIdentischenSchlüsselattributen = GetZeileMitIdentischenSchlüsselattributen(vorhandeneRec, neueDict, AnhandDieserSchlüsselAttributeWirdVerglichen);

@@ -5118,7 +5118,7 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
    record.Teams = l.Mail;
    record.Art = !String.IsNullOrEmpty(l.PflichtstundenSoll) ? "kollegium:Lehrkraefte" : ""; // Nur LuL haben Pflichtstunden.
    record.Link = "kollegium:" + l.Kürzel.ToLower();
-   if (l.Kürzel == "GV" || l.Kürzel == "HR")// || l.Kürzel == "STK" || l.Kürzel == "AEH" || l.Kürzel == "BM" || l.Kürzel == "ART" || l.Kürzel == "BAU" || l.Kürzel == "KU" || l.Kürzel == "PLA" || l.Kürzel == "KS" || l.Kürzel == "BEH")
+   if (l.Kürzel == "GV" || l.Kürzel == "HR" || l.Kürzel == "STK" || l.Kürzel == "AEH" || l.Kürzel == "BM" || l.Kürzel == "ART" )//|| l.Kürzel == "BAU" || l.Kürzel == "KU" || l.Kürzel == "PLA" || l.Kürzel == "KS" || l.Kürzel == "BEH")
     zieldatei.Add(record);
   }
 
@@ -5126,7 +5126,9 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
   // Zu 2. Gruppen, die sich aus Unterricht usw. ergeben
   //
 
-  Anrechnungen = new Anrechnungen(lehrersSoll, configuration);
+  //Anrechnungen = new Anrechnungen(lehrersSoll, configuration);
+
+  var anrechnungen = this.Anrechnungen;
 
   zieldatei.AddRange(GetGruppen(configuration, lehrersSoll, this.Anrechnungen));
 
@@ -5134,7 +5136,7 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
   // Zu 3. Anrechnungen aus Untis, die zu Gruppen werden
   //
 
-  zieldatei.AddRange(GetAnrechnungen(configuration, lehrersSoll, this.Anrechnungen));
+  //zieldatei.AddRange(GetAnrechnungen(configuration, lehrersSoll, this.Anrechnungen));
 
 
   foreach (var aktion in zieldatei.Funktionen)

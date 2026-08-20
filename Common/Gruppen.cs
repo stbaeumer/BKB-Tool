@@ -127,7 +127,7 @@ public class Gruppen : List<Gruppe>
             dynamic record = new ExpandoObject();
             record.Page = "bildungsgaenge:" + schulform + ":start";            
             record.Namen = string.Join(", ", lehrerName);
-            record.Mail = string.Join(", ", lehrerMail);
+            record.Mail = string.Join("; ", lehrerMail);
             record.Kürzel = string.Join(", ", lehrerKürzel);
             record.Art = "Schulform";
             Gruppe gruppe = new Gruppe(schulform);
