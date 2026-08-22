@@ -393,7 +393,7 @@ public static class MenueHelper
      new Menüeintrag(
       configuration,
       $"Stammdaten:Mo:Kollegium & Untisanrechnungen abgleichen",
-      quelldateien.Notwendige(configuration, ["kollegium,struct", "lehrkraefte,dat", "faecher,dat", "GPU002,txt", "klassen,dat", "GPU003,txt", "gruppen,struct", "schuelervermerke,dat", "schuelerzusatzdaten,dat", "GPU006,txt"]),      
+      quelldateien.Notwendige(configuration, ["istSollMittel,csv", "kollegium,struct", "lehrkraefte,dat", "faecher,dat", "GPU004,txt", "GPU002,txt", "klassen,dat", "GPU003,txt", "gruppen,struct", "schuelervermerke,dat", "schuelerzusatzdaten,dat", "GPU006,txt"]),      
       students,
       klassen,
       [

@@ -306,6 +306,22 @@ public Datei(IConfiguration configuration)
         return liste;
     }
 
+    public List<dynamic> FilterIstSollMittel()
+    {
+         var liste = new List<dynamic>();
+
+        foreach (var rec in this)
+        {
+            var dict = (IDictionary<string, object>)rec;
+            if (true)
+            {
+                liste.Add(rec);
+            }
+        }
+
+        return liste;
+    }
+
     public List<dynamic> FilterGost()
     {
         throw new NotImplementedException();

@@ -66,6 +66,13 @@ public class Dateien : List<Datei>
             $"4. Die Datei in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/] speichern."
         };
 
+        var istSollMittelHinweise = new string[]
+        {
+            "Machen Sie einen Exceldruck von Stammdaten. 3 Spalten: 'Name,Nachname,istSollMittel':",
+            $"1. Wenn Excel nicht installiert ist, dann in die Zwischenablage kopieren.",
+            $"2. Zwischenablage speichern: [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}istSollMittel.csv[/]"            
+        };
+
         Add(new Datei(
             "SchuelerBasisdaten",
             "Beschreibung",
@@ -233,6 +240,16 @@ public class Dateien : List<Datei>
             [""],
             true,
             d => d.FilterExportLessons(),
+            "*.csv",
+            "\t"
+        ));
+        Add(new Datei(
+            "istSollMittel",
+            "Beschreibung",
+            istSollMittelHinweise,
+            [""],
+            true,
+            d => d.FilterIstSollMittel(),
             "*.csv",
             "\t"
         ));
@@ -578,6 +595,11 @@ public class Dateien : List<Datei>
             var dateiendung = dateinameNotwendig.Split(',')[1].Trim().ToLower();
             var dateiname = dateinameNotwendig.Split(',')[0];
 
+            if(dateiname.Contains("istSollMittel"))
+            {
+                string aakkka = "";
+            }
+                
             var datei = new Datei();
             
             if(dateiendung == "struct")
@@ -704,7 +726,7 @@ public class Dateien : List<Datei>
             {
                 foreach (var datei in this)
                 {
-                    if(datei.Dateiname.Contains("termine.csv"))
+                    if(datei.Dateiname.Contains("istSoll"))
                     {
                         string a = "";
                     }

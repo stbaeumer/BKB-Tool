@@ -49,6 +49,12 @@ public class Lehrer
     public string? Anrede { get; internal set; }
  public List<string> NichtEingetrageneNotenKlassen { get; internal set; }
  public string? PflichtstundenSoll { get; set; }
+ public string? Schulleitung { get; internal set; }
+ public string? Mobilnummer { get; internal set; }
+ public string? Festnetznummer { get; internal set; }
+ public string? Telefonnummer { get; internal set; }
+ public string? StrasseHausnummer { get; internal set; }
+ public string? PlzOrt { get; internal set; }
 
  internal int GetAlterAmErstenSchultagDesSchuljahres(int jahr)
     {

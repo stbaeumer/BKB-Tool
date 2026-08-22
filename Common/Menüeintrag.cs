@@ -5097,6 +5097,13 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
   // Ist-Stand der Kollegium-Tabelle in Datei schreiben
   Quelldateien.GetMatchingList(configuration, "kollegium", IStudents, Klassen, ["kollegium.Page", "kollegium.Kürzel", "kollegium.Namen", "kollegium.Mail", "kollegium.Teams", "kollegium.Link", "kollegium.Art", "kollegium.TitelVornameNachname"], this.WikiZugriff);
 
+  var gpu004 = Quelldateien.GetMatchingList(configuration, "gpu004", IStudents, Klassen);
+  if (gpu004 == null || !gpu004.Any()) return;
+
+  // Die Datei "istSollMittel.dat" enthält die Spalte "Ist-Soll Mittel"
+  var istSollMittel = Quelldateien.GetMatchingList(configuration, "istSollMittel", IStudents, Klassen);
+  if (istSollMittel == null || !istSollMittel.Any()) return;
+
   // Im Kollegium müssen folgende Items abgeglichen werden:
   // 1. Lehrkräfte, die in der Datei "lehrkraefte.dat" enthalten sind, aber nicht in der Liste der IST-Lehrkräfte (lehrersSoll) enthalten sind, werden entfernt.        
   // 2. Gruppen, die sich aus Unterricht usw. ergeben 
@@ -5105,10 +5112,27 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
   //
   // Zu 1. Lehrkräfte
   //
+
   var lehrerliste = new List<dynamic>();
 
   foreach (var l in lehrersSoll)
   {
+    var lehIstSollMittel = istSollMittel.Where(rec =>
+   {
+    if (rec == null) return false;
+    var dic = (IDictionary<string, object>)rec;
+    return dic != null && dic["Name"] != null && dic["Name"].ToString().ToLower() == l.Kürzel.ToLower();
+   }).LastOrDefault() as IDictionary<string, object>;
+
+    var lehGpu004 = gpu004.Where(rec =>
+   {
+    if (rec == null) return false;
+    var dic = (IDictionary<string, object>)rec;
+    return dic != null && dic["Field1"] != null && dic["Field1"].ToString() == l.Kürzel;
+   }).LastOrDefault() as IDictionary<string, object>;
+
+   var amt = Anrechnungen.Where(a => a.LehrerKuerzel == l.Kürzel && !string.IsNullOrEmpty(a.Amt)).Select(a => a.Amt).FirstOrDefault();
+
    dynamic record = new ExpandoObject();
    record.Page = "kollegium:" + l.Kürzel.ToLower();
    record.Kürzel = l.Kürzel;
@@ -5118,6 +5142,38 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
    record.Teams = l.Mail;
    record.Art = !String.IsNullOrEmpty(l.PflichtstundenSoll) ? "kollegium:Lehrkraefte" : ""; // Nur LuL haben Pflichtstunden.
    record.Link = "kollegium:" + l.Kürzel.ToLower();
+   record.Amt = "kollegium:" + amt.ToLower();
+
+   if (lehGpu004 != null)
+   {
+    record.SprechtagRaum = lehGpu004["Field5"].ToString();
+    record.SprechtagBemerkung = lehGpu004["Field43"].ToString();
+    record.DeputatLautUntis = lehGpu004["Field6"].ToString();
+   }
+
+   if (lehIstSollMittel != null)
+   {
+    record.IstSollMittel = lehIstSollMittel["Ist-Soll Mittel"].ToString().Replace("'-", "-").Trim();
+   }
+
+   // Nur bei SL und bei Nicht-LuL werden die Telefonnummern angezeigt. Bei LuL werden die Telefonnummern nicht angezeigt.
+   if(l.Schulleitung == "J")
+    {
+     record.Mobilnummer = l.Mobilnummer;
+     record.Festnetznummer = l.Festnetznummer;
+     record.Telefonnummer = l.Telefonnummer;
+     record.StrasseHausnummer = l.StrasseHausnummer;
+     record.PlzOrt = l.PlzOrt;
+    }
+    else
+    {
+     record.Mobilnummer = "";
+     record.Festnetznummer = "";
+     record.Telefonnummer = "";
+     record.StrasseHausnummer = "";
+     record.PlzOrt = "";
+    }   
+
    if (l.Kürzel == "GV" || l.Kürzel == "HR" || l.Kürzel == "STK" || l.Kürzel == "AEH" || l.Kürzel == "BM" || l.Kürzel == "ART" )//|| l.Kürzel == "BAU" || l.Kürzel == "KU" || l.Kürzel == "PLA" || l.Kürzel == "KS" || l.Kürzel == "BEH")
     zieldatei.Add(record);
   }
@@ -6799,7 +6855,7 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
  }
 
  internal void DokuwikiZugriffSetzen(IConfiguration configuration)
- {
+ {  
   WikiZugriff = new DokuwikiZugriff(configuration);
  }
 

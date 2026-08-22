@@ -60,6 +60,17 @@ public class Lehrers : List<Lehrer>
             l.PflichtstundenSoll = dict["Pflichtstunden-Soll"].ToString();
             l.StatistikRelevant = dict["statistik-relevant"].ToString();
             l.Geburtsdatum = DateTime.TryParseExact(dict["Geburtsdatum"].ToString(), "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var dt) ? dt : new DateTime(1, 1, 1);
+            l.Schulleitung = dict["Schulleitung"].ToString();
+            l.Mobilnummer = dict["Tel. mobil"].ToString();
+            l.Festnetznummer = dict["Tel. Festnetz"].ToString();
+
+            if (l.Kürzel == "PLA")
+             l.Telefonnummer = "1014\\02861 90990-40";
+            if (l.Kürzel == "BM")
+             l.Telefonnummer = "1012\\02861 90990-41";
+                                    
+            l.StrasseHausnummer = dict["Straße"].ToString();
+            l.PlzOrt = dict["PLZ"].ToString() + " " + dict["Ort"].ToString();
 
             if(l.StatistikRelevant.ToLower().StartsWith("j"))
                 this.Add(l);
