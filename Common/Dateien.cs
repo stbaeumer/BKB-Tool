@@ -68,9 +68,9 @@ public class Dateien : List<Datei>
 
         var istSollMittelHinweise = new string[]
         {
-            "Machen Sie einen Exceldruck von Stammdaten. 3 Spalten: 'Name,Nachname,istSollMittel':",
+            "Machen Sie einen Exceldruck von Lehrerstammdaten. 3 Spalten: 'Name,Nachname,istSollMittel':",
             $"1. Wenn Excel nicht installiert ist, dann in die Zwischenablage kopieren.",
-            $"2. Zwischenablage speichern: [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}istSollMittel.csv[/]"            
+            $"2. Zwischenablage speichern: [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}/istSollMittel.csv[/]"            
         };
 
         Add(new Datei(

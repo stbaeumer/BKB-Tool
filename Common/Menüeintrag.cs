@@ -4266,19 +4266,19 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
       new List<string>() { "BI", "Bi", "Bi FU", "Bi1", "Bi G1", "Bi G2", "BI G1", "BI L1" }));
 
   Gruppen.Add(new Gruppe().GetKollegium(gpu002, lehrers,
-      ":kollegium:start"));
+      ":personen:start"));
   Gruppen.Add(new Gruppe().GetLehrerinnen(anrechnungen, lehrers,
-      "kollegium:lehrerinnen"));
+      "personen:lehrerinnen"));
   Gruppen.Add(new Gruppe().GetRefs(lehrers,
-      "kollegium:referendar_innen"));
+      "personen:referendar_innen"));
   Gruppen.Add(new Gruppe().GetKlassenleitungen(gpu003, lehrers,
-      "kollegium:klassenleitungen"));
+      "personen:klassenleitungen"));
   Gruppen.Add(new Gruppe().GetBildungsgangleitungen(anrechnungen, lehrers,
-      "kollegium:bildungsgangleitungen"));
+      "personen:bildungsgangleitungen"));
   Gruppen.Add(new Gruppe().GetByWikilink(anrechnungen, lehrers,
-      "kollegium:schulleitung:erweiterte:start"));
+      "personen:schulleitung:erweiterte:start"));
   Gruppen.Add(new Gruppe().GetByWikilink(anrechnungen, lehrers,
-      "kollegium:lehrerrat"));
+      "personen:lehrerrat"));
 
   foreach (var gruppe in Gruppen)
    rückgabe.Add(gruppe.Record);
@@ -4450,7 +4450,7 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
       record.Link = record.Page; // Link auf die verborgene Seite
       record.DatumInt = datInt; // Datum in numerischer Form, damit die Termine sortiert werden können.
 
-      if (zieldatei.AbsoluterPfad != null && !zieldatei.AbsoluterPfad.Contains("kollegium"))
+      if (zieldatei.AbsoluterPfad != null && !zieldatei.AbsoluterPfad.Contains("personen"))
       {
       }
       else
@@ -5081,7 +5081,7 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
   this.Anrechnungen = new Anrechnungen(lehrers, configuration);
  }
 
- public void Kollegium(
+ public void Personen(
      IConfiguration configuration,
      string zieldateiname,
      Lehrers lehrersSoll,
@@ -5094,15 +5094,38 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
 
   zieldatei.WikiZugriff = this.WikiZugriff;
 
-  // Ist-Stand der Kollegium-Tabelle in Datei schreiben
-  Quelldateien.GetMatchingList(configuration, "kollegium", IStudents, Klassen, ["kollegium.Page", "kollegium.Kürzel", "kollegium.Namen", "kollegium.Mail", "kollegium.Teams", "kollegium.Link", "kollegium.Art", "kollegium.TitelVornameNachname"], this.WikiZugriff);
+  // Ist-Stand der Personen-Tabelle in Datei schreiben
+  Quelldateien.GetMatchingList(configuration, "personen", IStudents, Klassen, 
+  [
+    "personen.Page", 
+    "personen.Namen",
+    "personen.Kürzel",
+    "personen.Mail", 
+    "personen.Teams", 
+    "personen.Link", 
+    "personen.Art", 
+    "personen.TitelVornameNachname",
+    "personen.Amt", 
+    "personen.Mobilnummer",
+    "personen.Festnetznummer",
+    "personen.Telefonnummer", 
+    "personen.StrasseHausnummer",
+    "personen.PlzOrt",
+    "personen.SprechtagRaum",
+    "personen.SprechtagBemerkung",
+    "personen.DeputatLautUntis",
+    "personen.IstSollMittel",
+    "personen.SchulmitwirkungRangfolge",
+    "personen.SchulmitwirkungHinweis",
+    "personen.SchulmitwirkungRolle"
+    ], this.WikiZugriff);
 
   var gpu004 = Quelldateien.GetMatchingList(configuration, "gpu004", IStudents, Klassen);
   if (gpu004 == null || !gpu004.Any()) return;
 
-  // Die Datei "istSollMittel.dat" enthält die Spalte "Ist-Soll Mittel"
+  // Die Datei "istSollMittel.csv" enthält die Spalte "Ist-Soll Mittel"
   var istSollMittel = Quelldateien.GetMatchingList(configuration, "istSollMittel", IStudents, Klassen);
-  if (istSollMittel == null || !istSollMittel.Any()) return;
+  
 
   // Im Kollegium müssen folgende Items abgeglichen werden:
   // 1. Lehrkräfte, die in der Datei "lehrkraefte.dat" enthalten sind, aber nicht in der Liste der IST-Lehrkräfte (lehrersSoll) enthalten sind, werden entfernt.        
@@ -5134,21 +5157,21 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
    var amt = Anrechnungen.Where(a => a.LehrerKuerzel == l.Kürzel && !string.IsNullOrEmpty(a.Amt)).Select(a => a.Amt).FirstOrDefault();
 
    dynamic record = new ExpandoObject();
-   record.Page = "kollegium:" + l.Kürzel.ToLower();
+   record.Page = "personen:" + l.Kürzel.ToLower();
    record.Kürzel = l.Kürzel;
-   record.Namen = "kollegium:" + l.Kürzel.ToLower(); 
+   record.Namen = "personen:" + l.Kürzel.ToLower(); 
    record.TitelVornameNachname = (String.IsNullOrEmpty(l.Titel) ? $"{l.Vorname} {l.Nachname}" : $"{l.Titel} {l.Vorname} {l.Nachname}");
    record.Mail = l.Mail;
    record.Teams = l.Mail;
-   record.Art = !String.IsNullOrEmpty(l.PflichtstundenSoll) ? "kollegium:Lehrkraefte" : ""; // Nur LuL haben Pflichtstunden.
-   record.Link = "kollegium:" + l.Kürzel.ToLower();
-   record.Amt = "kollegium:" + amt.ToLower();
+   record.Art = !String.IsNullOrEmpty(l.PflichtstundenSoll) ? "personen:Lehrkraefte" : ""; // Nur LuL haben Pflichtstunden.
+   record.Link = "personen:" + l.Kürzel.ToLower();
+   record.Amt = (string.IsNullOrEmpty(amt) ? "" : "personen:" + amt.ToLower());
 
    if (lehGpu004 != null)
    {
     record.SprechtagRaum = lehGpu004["Field5"].ToString();
     record.SprechtagBemerkung = lehGpu004["Field43"].ToString();
-    record.DeputatLautUntis = lehGpu004["Field6"].ToString();
+    record.DeputatLautUntis = lehGpu004["Field15"].ToString();
    }
 
    if (lehIstSollMittel != null)
@@ -5174,7 +5197,7 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
      record.PlzOrt = "";
     }   
 
-   if (l.Kürzel == "GV" || l.Kürzel == "HR" || l.Kürzel == "STK" || l.Kürzel == "AEH" || l.Kürzel == "BM" || l.Kürzel == "ART" )//|| l.Kürzel == "BAU" || l.Kürzel == "KU" || l.Kürzel == "PLA" || l.Kürzel == "KS" || l.Kürzel == "BEH")
+   if (l.Kürzel == "AEH" || l.Kürzel == "HR" || l.Kürzel == "STK" || l.Kürzel == "GV" || l.Kürzel == "BM" || l.Kürzel == "ART" || l.Kürzel == "BAU" || l.Kürzel == "KU" || l.Kürzel == "PLA" || l.Kürzel == "KS" || l.Kürzel == "BEH")
     zieldatei.Add(record);
   }
 
@@ -5226,7 +5249,7 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
    var art = "Anrechnung";
 
    dynamic record = new ExpandoObject();
-   record.Page = "kollegium:" + seite;
+   record.Page = "personen:" + seite;
    record.Kürzel = kürzel;
    record.Mail = mail;
    record.Namen = namen;

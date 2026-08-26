@@ -392,12 +392,12 @@ public static class MenueHelper
      ),
      new Menüeintrag(
       configuration,
-      $"Stammdaten:Mo:Kollegium & Untisanrechnungen abgleichen",
-      quelldateien.Notwendige(configuration, ["istSollMittel,csv", "kollegium,struct", "lehrkraefte,dat", "faecher,dat", "GPU004,txt", "GPU002,txt", "klassen,dat", "GPU003,txt", "gruppen,struct", "schuelervermerke,dat", "schuelerzusatzdaten,dat", "GPU006,txt"]),      
+      $"Stammdaten:Mo:Personen & Untisanrechnungen abgleichen",
+      quelldateien.Notwendige(configuration, ["istSollMittel,csv,optional", "personen,struct", "lehrkraefte,dat", "faecher,dat", "GPU004,txt", "GPU002,txt", "klassen,dat", "GPU003,txt", "gruppen,struct", "schuelervermerke,dat", "schuelerzusatzdaten,dat", "GPU006,txt"]),      
       students,
       klassen,
       [
-       $"Die Wiki-Seite/Tabelle [{Global.GetColor(Global.ColorHinweise)}]Kollegium[/] wird abgeglichen.",
+       $"Die Wiki-Seite/Tabelle [{Global.GetColor(Global.ColorHinweise)}]Personen[/] wird abgeglichen.",
        $"1. Die Lehrkräfte werden aus [{Global.GetColor(Global.ColorPfadInDateien)}]Lehrkraefte.dat[/] nach Wiki importiert. Neue und geänderte werden direkt nach Wiki geschrieben. Hinweise auf manuell vorzunehmende Lösungen werden angezeigt.",
        $"Das Organigramm wird aus Untisanrechnungen gebildet. Für Spalte Text gilt: {{...}} = KATEGORIE; [[...]] = HINWEIS, Text ohne Klammern wird zur ROLLE; A14, A15, A16 ohne Klammern > AMT; Spalte Beschreibung: wird zur AUFGABE. Im Organigramm wird nach Kategorie, Aufgabe oder Beschreibung gruppiert.",
        $"Untisanrechnungen: 1.Struct Schema Editor > Untisanrechnungen > Löschen/Leeren > 'untisanrechnungen' eingeben, dann Leeren",
@@ -412,12 +412,12 @@ public static class MenueHelper
       {
        m.DokuwikiZugriffSetzen(configuration);
        m.GetAnrechnungen(lehrers, configuration);
-       m.Kollegium(
-        configuration, Path.Combine(pfadDownloads ?? "", "kollegium.struct"), lehrers,
+       m.Personen(
+        configuration, Path.Combine(pfadDownloads ?? "", "personen.struct"), lehrers,
         [
          datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.Vergleichen),         
          datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.SchemaUpdaten),
-         datei => datei.OeffneWebseite("https://bkb.wiki/kollegium:start")
+         datei => datei.OeffneWebseite("https://bkb.wiki/personen:start")
         ],
         ["Link"],
         ["Page", "Namen", "Art"],

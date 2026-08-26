@@ -2092,7 +2092,7 @@ public Datei(IConfiguration configuration)
             // 2. Platzhalter im Template ersetzen (falls vorhanden, z.B. @PAGE@ oder @USER@)
             // DokuWiki ersetzt diese normalerweise automatisch, per API müssen wir das selbst tun:
 
-            if(neueDict["Art"].ToString().ToLower() == "kollegium:lehrkraefte")
+            if(neueDict["Art"].ToString().ToLower() == "personen:lehrkraefte")
             {   
                 templateInhalt = templateInhalt.Replace("@NAME@", neueDict["TitelVornameNachname"].ToString());             
                 templateInhalt = templateInhalt.Replace("@PAGE@", neueDict["Namen"].ToString());
@@ -2508,7 +2508,7 @@ public interface IDokuWikiRpc : IXmlRpcProxy
             };
 
             // 3. API-Aufruf ausführen
-            // Parameter 1: Die Zielseite (z.B. "kollegium:aeh")
+            // Parameter 1: Die Zielseite (z.B. "personen:aeh")
             // Parameter 2: Die verschachtelte Payload
             // Parameter 3: Die Änderungszusammenfassung (Summary)
             bool erfolg = wikiZugriff.Proxy.SaveStructData(zielSeite, structPayload, "Automatische Aktualisierung via API");
@@ -2689,7 +2689,7 @@ public interface IDokuWikiRpc : IXmlRpcProxy
             }
 
             this.UrlMitte = this[0].MitgliederMail;
-            this.UrlRechts = "&message=" + Uri.EscapeDataString("Hallo ") + this[0].Page.Replace("kollegium:", "").Replace(":start", "").Replace(":fachschaften", "Fachschaft");
+            this.UrlRechts = "&message=" + Uri.EscapeDataString("Hallo ") + this[0].Page.Replace("personen:", "").Replace(":start", "").Replace(":fachschaften", "Fachschaft");
         }
         else if (nummer == Count)
         {
@@ -2938,7 +2938,7 @@ public interface IDokuWikiRpc : IXmlRpcProxy
       record.BetreffBeginn = record.Betreff + record.Datum;
       record.SJ = sj;
 
-      if (AbsoluterPfad != null && !AbsoluterPfad.Contains("kollegium"))
+      if (AbsoluterPfad != null && !AbsoluterPfad.Contains("personen"))
       {
       }
       else
