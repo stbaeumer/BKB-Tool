@@ -2046,8 +2046,9 @@ public Datei(IConfiguration configuration)
                 {
                     foreach(var seite in zulöschendeSeiten)
                     {
-                        DeleteSchemaData(Path.GetFileNameWithoutExtension(AbsoluterPfad), seite, WikiZugriff);
-                        Console.WriteLine($"DELETE: {seite.PadRight(50)}... durchgeführt.");
+                        // DeleteSchemaData(Path.GetFileNameWithoutExtension(AbsoluterPfad), seite, WikiZugriff);
+                        // Console.WriteLine($"DELETE: {seite.PadRight(50)}... durchgeführt.");
+                        Console.WriteLine($"DELETE: {seite.PadRight(50)}... simuliert.");
                     }
                 }
                 else

@@ -186,7 +186,7 @@ ORDER BY TeacherName;
                 anrechnung.Mail = Global.SafeGetString(sqlDataReader, 8);
                 anrechnung.Titel = Global.SafeGetString(sqlDataReader, 13);
 
-                if (anrechnung.LehrerKuerzel == "KAS" || id == 308)
+                if (anrechnung.LehrerKuerzel == "HR")
                 {
                     var debug = 1;
                 }
@@ -194,6 +194,11 @@ ORDER BY TeacherName;
                 anrechnung.Lehrer = (from l in lehrers where l.Kürzel == teacherName select l).FirstOrDefault();
 
                 anrechnung.Beschr = Global.SafeGetString(sqlDataReader, 12);
+
+                if(anrechnung.Beschr.ToLower().StartsWith("kollegium:"))
+                 anrechnung.Beschr.Replace("kollegium:", "personen:");
+                
+
                 anrechnung.Text = Global.SafeGetString(sqlDataReader, 2) == null
                     ? ""
                     : Global.SafeGetString(sqlDataReader, 2); // Vorsitz etc.

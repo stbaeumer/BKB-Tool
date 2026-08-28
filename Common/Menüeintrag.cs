@@ -4226,7 +4226,7 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
   // Die Struct-Tabelle wird ausgelesen und in die Datei geschrieben.
   //Quelldateien.GetMatchingList(configuration, "gruppen", IStudents, Klassen, ["gruppen.Page", "gruppen.MitgliederKuerzel", "gruppen.Mitglieder", "gruppen.MitgliederMail", "gruppen.Link"], WikiZugriff);
 
-  Gruppen = new Gruppen();
+  Gruppen = new Gruppen();/*
   Gruppen.AddRange(new Gruppen().GetBildungsgaenge(gpu002, anrechnungen, lehrers));
   Gruppen.AddRange(new Gruppen().GetSchulformen(gpu002, anrechnungen, lehrers));
   Gruppen.Add(new Gruppe().Get(gpu002, lehrers,
@@ -4260,7 +4260,7 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
           new List<string>() { "WL", "WBL" }));
   Gruppen.Add(new Gruppe().GetFachschaft(gpu002, lehrers,
       ":fachschaften:sport",
-      new List<string>() { "SP", "SP G1", "SP G2" }));
+      new List<string>() { "SP", "SP G1", "SP G2" }));*/
   Gruppen.Add(new Gruppe().GetFachschaft(gpu002, lehrers,
       ":fachschaften:biologie",
       new List<string>() { "BI", "Bi", "Bi FU", "Bi1", "Bi G1", "Bi G2", "BI G1", "BI L1" }));
@@ -4274,7 +4274,7 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
   Gruppen.Add(new Gruppe().GetKlassenleitungen(gpu003, lehrers,
       "personen:klassenleitungen"));
   Gruppen.Add(new Gruppe().GetBildungsgangleitungen(anrechnungen, lehrers,
-      "personen:bildungsgangleitungen"));
+      "personen:bildungsgangleitungen"));      
   Gruppen.Add(new Gruppe().GetByWikilink(anrechnungen, lehrers,
       "personen:schulleitung:erweiterte:start"));
   Gruppen.Add(new Gruppe().GetByWikilink(anrechnungen, lehrers,
@@ -4282,9 +4282,8 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
 
   foreach (var gruppe in Gruppen)
    rückgabe.Add(gruppe.Record);
-
-  // Debug! .FirstOrDefault() wieder entfernen!
-  return rückgabe.TakeLast(1).ToList();
+  
+  return rückgabe;
  }
 
 
@@ -5171,7 +5170,7 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
    {
     record.SprechtagRaum = lehGpu004["Field5"].ToString();
     record.SprechtagBemerkung = lehGpu004["Field43"].ToString();
-    record.DeputatLautUntis = lehGpu004["Field15"].ToString();
+    record.DeputatLautUntis = ""; // lehGpu004["Field15"].ToString();
    }
 
    if (lehIstSollMittel != null)
@@ -5197,7 +5196,7 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
      record.PlzOrt = "";
     }   
 
-   if (l.Kürzel == "AEH" || l.Kürzel == "HR" || l.Kürzel == "STK" || l.Kürzel == "GV" || l.Kürzel == "BM" || l.Kürzel == "ART" || l.Kürzel == "BAU" || l.Kürzel == "KU" || l.Kürzel == "PLA" || l.Kürzel == "KS" || l.Kürzel == "BEH")
+   if (l.Kürzel == "GU" ||l.Kürzel == "HAR" || l.Kürzel == "HR" || l.Kürzel == "WZ" || l.Kürzel == "MOR" || l.Kürzel == "GV" || l.Kürzel == "GL" || l.Kürzel == "STR" || l.Kürzel == "BAU" || l.Kürzel == "KU" || l.Kürzel == "PLA" || l.Kürzel == "KS" || l.Kürzel == "BEH"|| l.Kürzel == "BM")
     zieldatei.Add(record);
   }
 
@@ -6159,6 +6158,7 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
 
     dynamic record = new ExpandoObject();
     record.Name = anrechnung.Name;
+    record.Page = ":personen:" + anrechnung.LehrerKuerzel;
     record.Kuerzel = anrechnung.LehrerKuerzel;
     record.Mail = anrechnung.Mail;
     record.Wert = wert;
