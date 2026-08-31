@@ -47,13 +47,26 @@ public class Gruppen : List<Gruppe>
             record.Page = wikiLink;
             record.Link = wikiLink;
             var enumerable = members.ToList();
-            record.Namen = string.Join(", ", enumerable.Select(x => (string.IsNullOrWhiteSpace(x.Titel) ? "" : x.Titel.Trim() + " ") + x.Vorname + " " + x.Nachname));
+            record.Namen = string.Join(", ", enumerable.Select(x => "schulgemeinschaft:" + x.Kürzel));
             record.Mail = string.Join("; ", enumerable.Select(x => x.Mail));
             record.Kürzel = string.Join(", ", enumerable.Select(x => x.Kürzel));var gruppe = new Gruppe(kurzname);
-            record.Art = "Bildungsgang";
+            record.Art = "bildungsgaenge:start";
+            
+            var vorsitzLeitung = "";
+            foreach (var x in (from a in anrechnungs
+                where a.Text.Contains("Bildungsgangleitung")
+                where a.Beschr == wikiLink
+                select a.LehrerKuerzel.ToLower()))
+            {
+                vorsitzLeitung += "schulgemeinschaft:" + x + ",";
+            }
+                
+            record.VorsitzLeitung = vorsitzLeitung.TrimEnd(',');
+
             records.Add(record);
             gruppe.Record = record;
-            gruppen.Add(gruppe);
+            if(wikiLink.Contains("ave"))
+             gruppen.Add(gruppe);
         }
 
         var panel = new Panel("Die Bildungsgangleitungen werden aus den Untis-Anrechnungen ermittelt. Zwei Dinge sind wichtig:\n1. Das Wort 'Bildungsgangleitung' muss im [bold aqua]Text[/] in Untis enthalten sein\n2. einen Link 'bildungsgaenge: ...' in der [bold aqua]Beschr[/].")

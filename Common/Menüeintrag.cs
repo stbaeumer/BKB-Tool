@@ -4226,8 +4226,8 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
   // Die Struct-Tabelle wird ausgelesen und in die Datei geschrieben.
   //Quelldateien.GetMatchingList(configuration, "gruppen", IStudents, Klassen, ["gruppen.Page", "gruppen.MitgliederKuerzel", "gruppen.Mitglieder", "gruppen.MitgliederMail", "gruppen.Link"], WikiZugriff);
 
-  Gruppen = new Gruppen();/*
-  Gruppen.AddRange(new Gruppen().GetBildungsgaenge(gpu002, anrechnungen, lehrers));
+  Gruppen = new Gruppen();
+  Gruppen.AddRange(new Gruppen().GetBildungsgaenge(gpu002, anrechnungen, lehrers));/*
   Gruppen.AddRange(new Gruppen().GetSchulformen(gpu002, anrechnungen, lehrers));
   Gruppen.Add(new Gruppe().Get(gpu002, lehrers,
           "versetzung:blaue_briefe",
@@ -4236,49 +4236,49 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
   Gruppen.Add(new Gruppe().Get(gpu002, lehrers,
           "termine:fhr:start",
           new List<string>() { "BS", "HBG", "HBT", "HBW", "FS", "FM" },
-          new List<int>() { 2 }));
+          new List<int>() { 2 }));*/
   Gruppen.Add(new Gruppe().GetFachschaft(gpu002, lehrers,
-      ":fachschaften:deutsch_kommunikation",
+      "schulgemeinschaft:fachschaften:deutsch_kommunikation",
       new List<string>() { "D", "D FU", "D1", "D2", "D G1", "D G2", "D L1", "D L2", "D L", "DL", "DL1", "DL2" }));
   Gruppen.Add(new Gruppe().GetFachschaft(gpu002, lehrers,
-      ":fachschaften:englisch",
+      "schulgemeinschaft:fachschaften:englisch",
       new List<string>() { "E", "E FU", "E1", "E2", "E G1", "E G2", "E L1", "E L2", "E L", "EL", "EL1", "EL2" }));
   Gruppen.Add(new Gruppe().GetFachschaft(gpu002, lehrers,
-      ":fachschaften:englisch",
+      "schulgemeinschaft:fachschaften:englisch",
       new List<string>() { "E", "E FU", "E1", "E2", "E G1", "E G2", "E L1", "E L2", "E L", "EL", "EL1", "EL2" }));
   Gruppen.Add(new Gruppe().GetFachschaft(gpu002, lehrers,
-      ":fachschaften:religionslehre",
+      "schulgemeinschaft:fachschaften:religionslehre",
       new List<string>() { "KR", "KR FU", "KR1", "KR2", "KR G1", "KR G2", "ER", "ER G1" }));
   Gruppen.Add(new Gruppe().GetFachschaft(gpu002, lehrers,
-      ":fachschaften:mathematik_physik",
+      "schulgemeinschaft:fachschaften:mathematik_physik",
       new List<string>() { "M", "M FU", "M1", "M2", "M G1", "M G2", "M L1", "M L2", "M L", "ML", "ML1", "ML2" }));
   Gruppen.Add(new Gruppe().GetFachschaft(gpu002, lehrers,
-      ":fachschaften:politik_gesellschaftslehre",
+      "schulgemeinschaft:fachschaften:politik_gesellschaftslehre",
       new List<string>() { "PK", "PK FU", "PK1", "PK2", "GG G1", "GG G2" }));
   Gruppen.Add(new Gruppe().GetFachschaft(gpu002, lehrers,
-          ":fachschaften:wirtschaftslehre_in_nicht_kaufm_klassen",
+          "schulgemeinschaft:fachschaften:wirtschaftslehre_in_nicht_kaufm_klassen",
           new List<string>() { "WL", "WBL" }));
   Gruppen.Add(new Gruppe().GetFachschaft(gpu002, lehrers,
-      ":fachschaften:sport",
-      new List<string>() { "SP", "SP G1", "SP G2" }));*/
+      "schulgemeinschaft:fachschaften:sport",
+      new List<string>() { "SP", "SP G1", "SP G2" }));
   Gruppen.Add(new Gruppe().GetFachschaft(gpu002, lehrers,
-      ":fachschaften:biologie",
+      "schulgemeinschaft:fachschaften:biologie",
       new List<string>() { "BI", "Bi", "Bi FU", "Bi1", "Bi G1", "Bi G2", "BI G1", "BI L1" }));
-
-  Gruppen.Add(new Gruppe().GetKollegium(gpu002, lehrers,
-      ":personen:start"));
-  Gruppen.Add(new Gruppe().GetLehrerinnen(anrechnungen, lehrers,
-      "personen:lehrerinnen"));
-  Gruppen.Add(new Gruppe().GetRefs(lehrers,
-      "personen:referendar_innen"));
-  Gruppen.Add(new Gruppe().GetKlassenleitungen(gpu003, lehrers,
-      "personen:klassenleitungen"));
+  
   Gruppen.Add(new Gruppe().GetBildungsgangleitungen(anrechnungen, lehrers,
-      "personen:bildungsgangleitungen"));      
+      "schulgemeinschaft:bildungsgangleitungen"));      
   Gruppen.Add(new Gruppe().GetByWikilink(anrechnungen, lehrers,
-      "personen:schulleitung:erweiterte:start"));
+      "schulgemeinschaft:schulleitung:erweiterte:start"));
+  Gruppen.Add(new Gruppe().GetRefs(lehrers,
+      "schulgemeinschaft:referendar_innen"));
+  Gruppen.Add(new Gruppe().GetKlassenleitungen(gpu003, lehrers,
+      "schulgemeinschaft:klassenleitungen"));
+  Gruppen.Add(new Gruppe().GetLehrerinnen(anrechnungen, lehrers,
+      "schulgemeinschaft:lehrerinnen"));
+  Gruppen.Add(new Gruppe().GetKollegium(gpu002, lehrers,
+      "schulgemeinschaft:kollegium"));
   Gruppen.Add(new Gruppe().GetByWikilink(anrechnungen, lehrers,
-      "personen:lehrerrat"));
+      "schulgemeinschaft:lehrerrat"));
 
   foreach (var gruppe in Gruppen)
    rückgabe.Add(gruppe.Record);
@@ -4449,7 +4449,7 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
       record.Link = record.Page; // Link auf die verborgene Seite
       record.DatumInt = datInt; // Datum in numerischer Form, damit die Termine sortiert werden können.
 
-      if (zieldatei.AbsoluterPfad != null && !zieldatei.AbsoluterPfad.Contains("personen"))
+      if (zieldatei.AbsoluterPfad != null && !zieldatei.AbsoluterPfad.Contains("schulgemeinschaft"))
       {
       }
       else
@@ -5080,7 +5080,7 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
   this.Anrechnungen = new Anrechnungen(lehrers, configuration);
  }
 
- public void Personen(
+ public void Schulgemeinschaft(
      IConfiguration configuration,
      string zieldateiname,
      Lehrers lehrersSoll,
@@ -5093,30 +5093,31 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
 
   zieldatei.WikiZugriff = this.WikiZugriff;
 
-  // Ist-Stand der Personen-Tabelle in Datei schreiben
-  Quelldateien.GetMatchingList(configuration, "personen", IStudents, Klassen, 
+  // Ist-Stand der Schulgemeinschaft-Tabelle in Datei schreiben
+  Quelldateien.GetMatchingList(configuration, "schulgemeinschaft", IStudents, Klassen, 
   [
-    "personen.Page", 
-    "personen.Namen",
-    "personen.Kürzel",
-    "personen.Mail", 
-    "personen.Teams", 
-    "personen.Link", 
-    "personen.Art", 
-    "personen.TitelVornameNachname",
-    "personen.Amt", 
-    "personen.Mobilnummer",
-    "personen.Festnetznummer",
-    "personen.Telefonnummer", 
-    "personen.StrasseHausnummer",
-    "personen.PlzOrt",
-    "personen.SprechtagRaum",
-    "personen.SprechtagBemerkung",
-    "personen.DeputatLautUntis",
-    "personen.IstSollMittel",
-    "personen.SchulmitwirkungRangfolge",
-    "personen.SchulmitwirkungHinweis",
-    "personen.SchulmitwirkungRolle"
+    "schulgemeinschaft.Page", 
+    "schulgemeinschaft.Namen",
+    "schulgemeinschaft.Kürzel",
+    "schulgemeinschaft.Mail", 
+    "schulgemeinschaft.Teams", 
+    "schulgemeinschaft.Link", 
+    "schulgemeinschaft.Art", 
+    "schulgemeinschaft.TitelVornameNachname",
+    "schulgemeinschaft.Amt", 
+    "schulgemeinschaft.Mobilnummer",
+    "schulgemeinschaft.Festnetznummer",
+    "schulgemeinschaft.Telefonnummer", 
+    "schulgemeinschaft.StrasseHausnummer",
+    "schulgemeinschaft.PlzOrt",
+    "schulgemeinschaft.SprechtagRaum",
+    "schulgemeinschaft.SprechtagBemerkung",
+    "schulgemeinschaft.DeputatLautUntis",
+    "schulgemeinschaft.IstSollMittel",
+    "schulgemeinschaft.SchulmitwirkungRangfolge",
+    "schulgemeinschaft.SchulmitwirkungHinweis",
+    "schulgemeinschaft.SchulmitwirkungRolle",
+    "schulgemeinschaft.VorsitzLeitung"
     ], this.WikiZugriff);
 
   var gpu004 = Quelldateien.GetMatchingList(configuration, "gpu004", IStudents, Klassen);
@@ -5156,15 +5157,15 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
    var amt = Anrechnungen.Where(a => a.LehrerKuerzel == l.Kürzel && !string.IsNullOrEmpty(a.Amt)).Select(a => a.Amt).FirstOrDefault();
 
    dynamic record = new ExpandoObject();
-   record.Page = "personen:" + l.Kürzel.ToLower();
+   record.Page = "schulgemeinschaft:" + l.Kürzel.ToLower();
    record.Kürzel = l.Kürzel;
-   record.Namen = "personen:" + l.Kürzel.ToLower(); 
+   record.Namen = "schulgemeinschaft:" + l.Kürzel.ToLower(); 
    record.TitelVornameNachname = (String.IsNullOrEmpty(l.Titel) ? $"{l.Vorname} {l.Nachname}" : $"{l.Titel} {l.Vorname} {l.Nachname}");
    record.Mail = l.Mail;
    record.Teams = l.Mail;
-   record.Art = !String.IsNullOrEmpty(l.PflichtstundenSoll) ? "personen:Lehrkraefte" : ""; // Nur LuL haben Pflichtstunden.
-   record.Link = "personen:" + l.Kürzel.ToLower();
-   record.Amt = (string.IsNullOrEmpty(amt) ? "" : "personen:" + amt.ToLower());
+   record.Art = !String.IsNullOrEmpty(l.PflichtstundenSoll) ? "schulgemeinschaft:Lehrkraefte" : ""; // Nur LuL haben Pflichtstunden.
+   record.Link = "schulgemeinschaft:" + l.Kürzel.ToLower();
+   record.Amt = (string.IsNullOrEmpty(amt) ? "" : "schulgemeinschaft:" + amt.ToLower());
 
    if (lehGpu004 != null)
    {
@@ -5196,7 +5197,9 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
      record.PlzOrt = "";
     }   
 
-   if (l.Kürzel == "GU" ||l.Kürzel == "HAR" || l.Kürzel == "HR" || l.Kürzel == "WZ" || l.Kürzel == "MOR" || l.Kürzel == "GV" || l.Kürzel == "GL" || l.Kürzel == "STR" || l.Kürzel == "BAU" || l.Kürzel == "KU" || l.Kürzel == "PLA" || l.Kürzel == "KS" || l.Kürzel == "BEH"|| l.Kürzel == "BM")
+
+
+   //if (l.Kürzel == "GU" ||l.Kürzel == "HAR" || l.Kürzel == "HR" || l.Kürzel == "WZ" || l.Kürzel == "MOR" || l.Kürzel == "GV" || l.Kürzel == "GL" || l.Kürzel == "STR" || l.Kürzel == "BAU" || l.Kürzel == "KU" || l.Kürzel == "PLA" || l.Kürzel == "KS" || l.Kürzel == "BEH"|| l.Kürzel == "BM")
     zieldatei.Add(record);
   }
 
@@ -5248,7 +5251,7 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
    var art = "Anrechnung";
 
    dynamic record = new ExpandoObject();
-   record.Page = "personen:" + seite;
+   record.Page = "schulgemeinschaft:" + seite;
    record.Kürzel = kürzel;
    record.Mail = mail;
    record.Namen = namen;
@@ -5423,6 +5426,7 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
           }
 
           student.MailSchulisch = schulischeEmail;
+          //Console.WriteLine(student.MailSchulisch);
 
           ((IDictionary<string, object>)record)[name] = schulischeEmail;
 
@@ -5564,7 +5568,7 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
 
    if (alleIdentisch)
     return false; // Kein Duplikat, sondern dieselbe Person
-   return true; // Unterschiedliche Personen mit gleicher Mail
+   return true; // Unterschiedliche schulgemeinschaft mit gleicher Mail
   }
   return false;
  }
@@ -6158,7 +6162,7 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
 
     dynamic record = new ExpandoObject();
     record.Name = anrechnung.Name;
-    record.Page = ":personen:" + anrechnung.LehrerKuerzel;
+    record.Page = ":schulgemeinschaft:" + anrechnung.LehrerKuerzel;
     record.Kuerzel = anrechnung.LehrerKuerzel;
     record.Mail = anrechnung.Mail;
     record.Wert = wert;

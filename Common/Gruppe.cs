@@ -81,16 +81,16 @@ public class Gruppe
             if (!lehrerMail.Any(x => x.Contains(leh.Mail)))
                 lehrerMail.Add(leh.Mail);
 
-            if (!lehrerName.Any(x => x.Contains(":personen:" + leh.Kürzel.ToLower()))) // Prüfen, ob der Name bereits in der Liste ist
+            if (!lehrerName.Any(x => x.Contains(":schulgemeinschaft:" + leh.Kürzel.ToLower()))) // Prüfen, ob der Name bereits in der Liste ist
             {
-                lehrerName.Add((":personen:" + leh.Kürzel.ToLower()));
+                lehrerName.Add((":schulgemeinschaft:" + leh.Kürzel.ToLower()));
             }
         }
 
         record.Namen = string.Join(", ", lehrerName);
         record.Mail = string.Join("; ", lehrerMail);
         record.Kürzel = string.Join(", ", lehrerKürzel);
-        record.Art = ":personen:gruppen";
+        record.Art = ":schulgemeinschaft:gruppen";
         gruppe.Record = record;
 
         //Global.ZeileSchreiben("Gruppe: " + wikiLink, lehrerName.Count().ToString(), ConsoleColor.Black, ConsoleColor.White);
@@ -141,16 +141,16 @@ public class Gruppe
                 lehrerMail.Add(leh.Mail);
             }
 
-            if (!lehrerName.Any(x => x.Contains(":personen:" + leh.Kürzel.ToLower()))) // Prüfen, ob der Name bereits in der Liste ist
+            if (!lehrerName.Any(x => x.Contains(":schulgemeinschaft:" + leh.Kürzel.ToLower()))) // Prüfen, ob der Name bereits in der Liste ist
             {
-                lehrerName.Add((":personen:" + leh.Kürzel.ToLower()));
+                lehrerName.Add((":schulgemeinschaft:" + leh.Kürzel.ToLower()));
             }
         }
 
         record.Namen = string.Join(", ", lehrerName.OrderBy(name => name));
         record.Mail = string.Join("; ", lehrerMail.OrderBy(name => name));
         record.Kürzel = string.Join(", ", lehrerKürzel.OrderBy(name => name));
-        record.Art = ":personen:gruppen";
+        record.Art = ":schulgemeinschaft:gruppen";
         gruppe.Record = record;
 
         //Global.ZeileSchreiben("Gruppe: " + wikiLink, lehrerName.Count().ToString(), ConsoleColor.Black, ConsoleColor.White);
@@ -196,9 +196,9 @@ public class Gruppe
                     lehrerMail.Add(leh.Mail);
                 }
 
-                if (!lehrerName.Any(x => x.Contains(":personen:" + leh.Kürzel.ToLower()))) // Prüfen, ob der Name bereits in der Liste ist
+                if (!lehrerName.Any(x => x.Contains(":schulgemeinschaft:" + leh.Kürzel.ToLower()))) // Prüfen, ob der Name bereits in der Liste ist
                 {
-                    lehrerName.Add((":personen:" + leh.Kürzel.ToLower()));
+                    lehrerName.Add((":schulgemeinschaft:" + leh.Kürzel.ToLower()));
                 }
             }
         }
@@ -210,7 +210,7 @@ public class Gruppe
         record.Namen = string.Join(", ", lehrerName.OrderBy(name => name));
         record.Mail = string.Join("; ", lehrerMail.OrderBy(name => name));
         record.Kürzel = string.Join(", ", lehrerKürzel.OrderBy(name => name));
-        record.Art = ":personen:gruppen";
+        record.Art = ":schulgemeinschaft:gruppen";
         gruppe.Record = record;
         return gruppe;
     }
@@ -253,9 +253,9 @@ public class Gruppe
                     lehrerMail.Add(leh.Mail);
                 }
 
-                if (!lehrerName.Any(x => x.Contains(":personen:" + leh.Kürzel.ToLower()))) // Prüfen, ob der Name bereits in der Liste ist
+                if (!lehrerName.Any(x => x.Contains(":schulgemeinschaft:" + leh.Kürzel.ToLower()))) // Prüfen, ob der Name bereits in der Liste ist
                 {
-                    lehrerName.Add((":personen:" + leh.Kürzel.ToLower()));
+                    lehrerName.Add((":schulgemeinschaft:" + leh.Kürzel.ToLower()));
                 }
             }
         }
@@ -263,7 +263,7 @@ public class Gruppe
         record.Namen = string.Join(", ", lehrerName.OrderBy(name => name));
         record.Mail = string.Join("; ", lehrerMail.OrderBy(name => name));
         record.Kürzel = string.Join(", ", lehrerKürzel.OrderBy(name => name));
-        record.Art = "personen:gruppen";
+        record.Art = "schulgemeinschaft:gruppen";
         gruppe.Record = record;
         return gruppe;
     }
@@ -300,16 +300,16 @@ public class Gruppe
                 lehrerMail.Add(leh.Mail);
             }
 
-            if (!lehrerName.Any(x => x.Contains(":personen:" + leh.Kürzel.ToLower()))) // Prüfen, ob der Name bereits in der Liste ist
+            if (!lehrerName.Any(x => x.Contains(":schulgemeinschaft:" + leh.Kürzel.ToLower()))) // Prüfen, ob der Name bereits in der Liste ist
             {
-                lehrerName.Add((":personen:" + leh.Kürzel.ToLower()));
+                lehrerName.Add((":schulgemeinschaft:" + leh.Kürzel.ToLower()));
             }
         }
 
         record.Namen = string.Join(',', lehrerName.OrderBy(name => name));
         record.Mail = string.Join(',', lehrerMail.OrderBy(name => name));
         record.Kürzel = string.Join(',', lehrerKürzel.OrderBy(name => name));
-        record.Art = "personen:gruppen";
+        record.Art = "schulgemeinschaft:gruppen";
         gruppe.Record = record;
         return gruppe;
     }
@@ -352,16 +352,16 @@ public class Gruppe
                 lehrerMail.Add(leh.Mail);
             }
 
-            if (!lehrerName.Any(x => x.Contains(":personen:" + leh.Kürzel.ToLower()))) // Prüfen, ob der Name bereits in der Liste ist
+            if (!lehrerName.Any(x => x.Contains(":schulgemeinschaft:" + leh.Kürzel.ToLower()))) // Prüfen, ob der Name bereits in der Liste ist
             {
-                lehrerName.Add((":personen:" + leh.Kürzel.ToLower()));
+                lehrerName.Add((":schulgemeinschaft:" + leh.Kürzel.ToLower()));
             }
         }
 
         record.Namen = string.Join(", ", lehrerName.OrderBy(name => name));
         record.Mail = string.Join("; ", lehrerMail.OrderBy(name => name));
         record.Kürzel = string.Join(", ", lehrerKürzel.OrderBy(name => name));
-        record.Art = ":personen:gruppen";
+        record.Art = ":schulgemeinschaft:gruppen";
         gruppe.Record = record;
         return gruppe;
     }
@@ -400,16 +400,16 @@ public class Gruppe
                 lehrerMail.Add(leh.Mail);
             }
 
-            if (!lehrerName.Any(x => x.Contains(":personen:" + leh.Kürzel.ToLower()))) // Prüfen, ob der Name bereits in der Liste ist
+            if (!lehrerName.Any(x => x.Contains(":schulgemeinschaft:" + leh.Kürzel.ToLower()))) // Prüfen, ob der Name bereits in der Liste ist
             {
-                lehrerName.Add((":personen:" + leh.Kürzel.ToLower()));
+                lehrerName.Add((":schulgemeinschaft:" + leh.Kürzel.ToLower()));
             }
         }
 
         record.Namen = string.Join(", ", lehrerName.OrderBy(name => name));
         record.Mail = string.Join("; ", lehrerMail.OrderBy(name => name));
         record.Kürzel = string.Join(", ", lehrerKürzel.OrderBy(name => name));
-        record.Art = ":personen:gruppen";
+        record.Art = ":schulgemeinschaft:gruppen";
         gruppe.Record = record;
         return gruppe;
     }
@@ -432,7 +432,7 @@ public class Gruppe
 
         if (members == null || !members.Any())
         {
-            members = anrechnungen.Where(rec => { return rec.Beschr.Contains(wikiLink.Replace("personen:", "kollegium:")); })
+            members = anrechnungen.Where(rec => { return rec.Beschr.Contains(wikiLink.Replace("schulgemeinschaft:", "kollegium:")); })
             .Select(rec => { return rec.Lehrer.Kürzel; }).Distinct().OrderBy(x => x);
         }
 
@@ -453,18 +453,18 @@ public class Gruppe
             }
 
             //if (!lehrerName.Any(x => x.Contains((leh.Titel == "" ? "" : leh.Titel + " ") + leh.Vorname + " " + leh.Nachname)))
-            if (!lehrerName.Any(x => x.Contains(":personen:" + leh.Kürzel.ToLower())))
+            if (!lehrerName.Any(x => x.Contains(":schulgemeinschaft:" + leh.Kürzel.ToLower())))
             {
                 record.TitelVornameNachname = (String.IsNullOrEmpty(leh.Titel) ? $"{leh.Vorname} {leh.Nachname}" : $"{leh.Titel} {leh.Vorname} {leh.Nachname}");                
                 //lehrerName.Add((leh.Titel == "" ? "" : leh.Titel + " ") + leh.Vorname + " " + leh.Nachname);
-                lehrerName.Add(":personen:" + leh.Kürzel.ToLower());
+                lehrerName.Add(":schulgemeinschaft:" + leh.Kürzel.ToLower());
             }
         }
 
         record.Namen = string.Join(", ", lehrerName.OrderBy(name => name));
         record.Mail = string.Join("; ", lehrerMail.OrderBy(name => name));
         record.Kürzel = string.Join(", ", lehrerKürzel.OrderBy(name => name));
-        record.Art = "personen:gruppen";
+        record.Art = "schulgemeinschaft:gruppen";
         gruppe.Record = record;
         return gruppe;
     }

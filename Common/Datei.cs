@@ -801,7 +801,7 @@ public Datei(IConfiguration configuration)
             }
             finally
             {
-                if (AbsoluterPfad != null)
+                if (AbsoluterPfad != null && AbsoluterPfad.ToLower().Contains("struct"))
                 {
                     // struct-Dateien werden neu leer angelegt. Sie wird gefüllt, wenn die Datei konkret ausgewertet wird. Deshalb wird hier kein Hinweistext geschrieben.
                     using var writer = new StreamWriter(AbsoluterPfad, false, Encoding.UTF8);                    
@@ -1891,9 +1891,6 @@ public Datei(IConfiguration configuration)
 
                 var neueDict = (IDictionary<string, object>)neueRec;
 
-                var schemaName = Path.GetFileNameWithoutExtension(AbsoluterPfad);
-                string zielSeite = neueDict["Page"]?.ToString().ToLower();//.Trim().Split(':').Where(s => !s.Equals("start", StringComparison.OrdinalIgnoreCase)).LastOrDefault();
-
                 var anhandDieserSchlüsselAttributeWirdVerglichenString = "";
 
                 foreach (var key in AnhandDieserSchlüsselAttributeWirdVerglichen)
@@ -1924,10 +1921,12 @@ public Datei(IConfiguration configuration)
 
                         if(modus == Global.Modus.SchemaUpdaten)
                         {                            
+                            string zielSeite = neueDict["Page"]?.ToString().ToLower();//.Trim().Split(':').Where(s => !s.Equals("start", StringComparison.OrdinalIgnoreCase)).LastOrDefault();    
                             if(zielSeite.ToLower().Contains("sprechtag"))
                             {
                                 string aa = "";
                             }
+                            var schemaName = Path.GetFileNameWithoutExtension(AbsoluterPfad);
                             InsertSchemaData(neueDict, schemaName, zielSeite);                            
                             Console.WriteLine($"INSERT: {anhandDieserSchlüsselAttributeWirdVerglichenString} -> {schemaName} ... durchgeführt.");
                         }
@@ -1983,6 +1982,8 @@ public Datei(IConfiguration configuration)
                             }
 
                             // Aufruf der Update-Methode mit der VOLLSTÄNDIGEN Zeile
+                            string zielSeite = neueDict["Page"]?.ToString().ToLower();//.Trim().Split(':').Where(s => !s.Equals("start", StringComparison.OrdinalIgnoreCase)).LastOrDefault();    
+                            var schemaName = Path.GetFileNameWithoutExtension(AbsoluterPfad);
                             UpdateSchemaData(zielSeite, schemaName, alleWerteFuerDieseZeile, WikiZugriff);
                             Console.WriteLine($"UPDATE: {zielSeite} ... durchgeführt.");
                         }
@@ -2015,7 +2016,7 @@ public Datei(IConfiguration configuration)
                 }
                 if (löschen)
                 {                    
-                    if(modus == Global.Modus.Vergleichen)
+                    if(modus == Global.Modus.Vergleichen && AbsoluterPfad.Contains("struct"))
                     {
                         table.AddRow(
                             RenderZeile(
@@ -2093,7 +2094,7 @@ public Datei(IConfiguration configuration)
             // 2. Platzhalter im Template ersetzen (falls vorhanden, z.B. @PAGE@ oder @USER@)
             // DokuWiki ersetzt diese normalerweise automatisch, per API müssen wir das selbst tun:
 
-            if(neueDict["Art"].ToString().ToLower() == "personen:lehrkraefte")
+            if(neueDict["Art"].ToString().ToLower() == "schulgemeinschaft:lehrkraefte")
             {   
                 templateInhalt = templateInhalt.Replace("@NAME@", neueDict["TitelVornameNachname"].ToString());             
                 templateInhalt = templateInhalt.Replace("@PAGE@", neueDict["Namen"].ToString());
@@ -2153,7 +2154,7 @@ public Datei(IConfiguration configuration)
                 return vorhandeneDatei.AbsoluterPfad;
                 break; // Schleife abbrechen, wenn die Datei gefunden wurde
             }
-            Console.WriteLine($"Vergleiche {vorhandeneDatei.AbsoluterPfad} {vorhandeneDatei.Count} mit {Path.GetFileName(AbsoluterPfad.ToLower())}");
+            //Console.WriteLine($"Vergleiche {vorhandeneDatei.AbsoluterPfad} {vorhandeneDatei.Count} mit {Path.GetFileName(AbsoluterPfad.ToLower())}");
         }
         // Neue .csv-Dateien beginnen mit demselben Namen wie die Zieldatei, bis zum Unterstrich
         foreach (var vorhandeneDatei in quelldateien)
@@ -2509,7 +2510,7 @@ public interface IDokuWikiRpc : IXmlRpcProxy
             };
 
             // 3. API-Aufruf ausführen
-            // Parameter 1: Die Zielseite (z.B. "personen:aeh")
+            // Parameter 1: Die Zielseite (z.B. "schulgemeinschaft:aeh")
             // Parameter 2: Die verschachtelte Payload
             // Parameter 3: Die Änderungszusammenfassung (Summary)
             bool erfolg = wikiZugriff.Proxy.SaveStructData(zielSeite, structPayload, "Automatische Aktualisierung via API");
@@ -2690,7 +2691,7 @@ public interface IDokuWikiRpc : IXmlRpcProxy
             }
 
             this.UrlMitte = this[0].MitgliederMail;
-            this.UrlRechts = "&message=" + Uri.EscapeDataString("Hallo ") + this[0].Page.Replace("personen:", "").Replace(":start", "").Replace(":fachschaften", "Fachschaft");
+            this.UrlRechts = "&message=" + Uri.EscapeDataString("Hallo ") + this[0].Page.Replace("schulgemeinschaft:", "").Replace(":start", "").Replace(":fachschaften", "Fachschaft");
         }
         else if (nummer == Count)
         {
@@ -2939,7 +2940,7 @@ public interface IDokuWikiRpc : IXmlRpcProxy
       record.BetreffBeginn = record.Betreff + record.Datum;
       record.SJ = sj;
 
-      if (AbsoluterPfad != null && !AbsoluterPfad.Contains("personen"))
+      if (AbsoluterPfad != null && !AbsoluterPfad.Contains("schulgemeinschaft"))
       {
       }
       else
