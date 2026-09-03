@@ -2202,7 +2202,7 @@ public class Menüeintrag
 
  }
 
- public void WebuntisOderNetmanOderLitteraCsv(IConfiguration configuration, List<Datei> zieldateien)
+ public void WebuntisOderNetmanOderGeevooOderLitteraCsv(IConfiguration configuration, List<Datei> zieldateien)
  {
   try
   {
@@ -2870,6 +2870,26 @@ public class Menüeintrag
        record.Bemerkung = "";
        record.Geschlecht = student.Geschlecht.ToString().ToUpper();
        student.GetLetztesZeugnisdatumInDerKlasse(schuelerLernabschnittsdaten);
+
+       // Aktive SuS oder Schüler mit Abschluss/Abgang, deren letztes Zeugnis noch keine 42 Tage zurückliegt.
+       if (new List<string>() { "2", "6" }.Contains(student.Status) || (new List<string>() { "8", "9" }.Contains(student.Status) && student.ZeugnisdatumLetztesZeugnisInDieserKlasse.AddDays(42) >= DateTime.Now))
+       {
+        zieldatei.Add(record);
+       }
+      }
+      else if (Path.GetFileNameWithoutExtension(zieldateiname).ToLower().Contains("geevoo"))
+      {
+        // Geevoo
+        record.EMINUSMail = sz["schulische E-Mail"].ToString();
+        record.Vorname = student.Vorname;
+        record.Nachname = student.Nachname;
+        record.Geburtsdatum = student.Geburtsdatum;
+        record.PLZ = alter >= 18 ? student.Postleitzahl.ToString() : se?["PLZ"].ToString();
+        record.Ort = alter >= 18 ? student.Ort.ToString() : se?["Ort"].ToString();
+        record.Strasse = alter >= 18 ? student.Straße.ToString() : se?["Straße"].ToString();
+        record.Klasse = student.Klasse;
+        record.SchildMINUSID = sz["schulische E-Mail"].ToString().Split('@')[0];
+        student.GetLetztesZeugnisdatumInDerKlasse(schuelerLernabschnittsdaten);
 
        // Aktive SuS oder Schüler mit Abschluss/Abgang, deren letztes Zeugnis noch keine 42 Tage zurückliegt.
        if (new List<string>() { "2", "6" }.Contains(student.Status) || (new List<string>() { "8", "9" }.Contains(student.Status) && student.ZeugnisdatumLetztesZeugnisInDieserKlasse.AddDays(42) >= DateTime.Now))
@@ -5097,10 +5117,11 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
   Quelldateien.GetMatchingList(configuration, "schulgemeinschaft", IStudents, Klassen, 
   [
     "schulgemeinschaft.Page", 
+    "schulgemeinschaft.BGkuerzel", 
     "schulgemeinschaft.Namen",
     "schulgemeinschaft.Kürzel",
-    "schulgemeinschaft.Mail", 
-    "schulgemeinschaft.Teams", 
+    "schulgemeinschaft.Mail",
+    "schulgemeinschaft.Teams",
     "schulgemeinschaft.Link", 
     "schulgemeinschaft.Art", 
     "schulgemeinschaft.TitelVornameNachname",
@@ -5117,7 +5138,27 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
     "schulgemeinschaft.SchulmitwirkungRangfolge",
     "schulgemeinschaft.SchulmitwirkungHinweis",
     "schulgemeinschaft.SchulmitwirkungRolle",
-    "schulgemeinschaft.VorsitzLeitung"
+    "schulgemeinschaft.VorsitzLeitung",
+    "schulgemeinschaft.Anlage",
+    "schulgemeinschaft.Schulform",
+    "schulgemeinschaft.Bereich",
+    "schulgemeinschaft.TZ/VZ",
+    "schulgemeinschaft.Link zur Homepage",
+    "schulgemeinschaft.BO-Curriculum",
+    "schulgemeinschaft.Praktikum",
+    "schulgemeinschaft.Heterogenität",
+    "schulgemeinschaft.Klausurplanung",
+    "schulgemeinschaft.Versetzung",
+    "schulgemeinschaft.Abschluss",
+    "schulgemeinschaft.DJP1",
+    "schulgemeinschaft.DJP2",
+    "schulgemeinschaft.DJP3",
+    "schulgemeinschaft.DJP4",
+    "schulgemeinschaft.boyd",
+    "schulgemeinschaft.perspektive-boyd",
+    "schulgemeinschaft.Aufnahmevoraussetzungen",
+    "schulgemeinschaft.Bildungsziele"
+    
     ], this.WikiZugriff);
 
   var gpu004 = Quelldateien.GetMatchingList(configuration, "gpu004", IStudents, Klassen);
@@ -5163,7 +5204,7 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
    record.TitelVornameNachname = (String.IsNullOrEmpty(l.Titel) ? $"{l.Vorname} {l.Nachname}" : $"{l.Titel} {l.Vorname} {l.Nachname}");
    record.Mail = l.Mail;
    record.Teams = l.Mail;
-   record.Art = !String.IsNullOrEmpty(l.PflichtstundenSoll) ? "schulgemeinschaft:Lehrkraefte" : ""; // Nur LuL haben Pflichtstunden.
+   record.Art = !String.IsNullOrEmpty(l.PflichtstundenSoll) ? "schulgemeinschaft:kollegium" : ""; // Nur LuL haben Pflichtstunden.
    record.Link = "schulgemeinschaft:" + l.Kürzel.ToLower();
    record.Amt = (string.IsNullOrEmpty(amt) ? "" : "schulgemeinschaft:" + amt.ToLower());
 

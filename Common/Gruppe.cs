@@ -379,10 +379,9 @@ public class Gruppe
         var lehrerKürzel = new List<string>();
         var lehrerMail = new List<string>();
         var lehrerName = new List<string>();
-
+        
         var members = anrechnungen.Where(rec => { return rec.Text.Contains("Bildungsgangleitung"); })
-            .Select(rec => { return rec.Lehrer.Kürzel; }).Distinct().OrderBy(x => x);
-
+            .Select(rec => { return rec.LehrerKuerzel; }).Distinct().OrderBy(x => x);
 
         foreach (var member in members)
         {

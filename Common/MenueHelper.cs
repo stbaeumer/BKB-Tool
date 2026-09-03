@@ -116,7 +116,7 @@ public static class MenueHelper
       m =>
       {
        if(m.NichtAlleSusHabenEineEindeutigeMailAdresse(configuration, m.Students)) return;
-       m.WebuntisOderNetmanOderLitteraCsv(configuration,
+       m.WebuntisOderNetmanOderGeevooOderLitteraCsv(configuration,
        [
         new Datei(
         "ImportNachWebuntis-Stammdaten-Schueler.csv", new string[] { "EMINUSMail" }, new string[] { }, ";", '\'', new UTF8Encoding(false), false,
@@ -126,6 +126,18 @@ public static class MenueHelper
          datei => datei.OeffneWebseite("https://bk-borken.webuntis.com/users"),
          datei => datei.OeffneWebseite("https://management.geevoo.de/import/"),
          datei => datei.OeffneWebseite("https://bk-borken.webuntis.com/students")
+       ],
+       [
+        $"[{Global.GetColor(Global.ColorHinweise)}]#1:[/] In Webuntis als Webuntis-Admin:  [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Stammdaten > Schüler*innen > Import[/]",
+        $"[{Global.GetColor(Global.ColorHinweise)}]#2:[/] Datei auswählen, UTF8",
+        $"[{Global.GetColor(Global.ColorHinweise)}]#3:[/] Profil: Schuelerimport, dann Vorschau",
+        $"Mehr zum Profil Schuelerimport: [{Global.GetColor(Global.ColorHyperlink)}][link=https://github.com/stbaeumer/BKB-Tool/wiki]https://github.com/stbaeumer/BKB-Tool/wiki[/][/]"
+       ]
+      ),
+      new Datei(
+        "ImportNachGeevoo-sus.csv", new string[] { "EMINUSMail" }, new string[] { }, ";", '\'', new UTF8Encoding(false), false,
+        [
+         datei => datei.Erstellen(),         
        ],
        [
         $"[{Global.GetColor(Global.ColorHinweise)}]#1:[/] In Webuntis als Webuntis-Admin:  [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Stammdaten > Schüler*innen > Import[/]",
@@ -392,7 +404,7 @@ public static class MenueHelper
      ),
      new Menüeintrag(
       configuration,
-      $"Stammdaten:Mo:schulgemeinschaft & Untisanrechnungen abgleichen",
+      $"Stammdaten:Mo:Schulgemeinschaft & Untisanrechnungen abgleichen",
       quelldateien.Notwendige(configuration, ["istSollMittel,csv,optional", "schulgemeinschaft,struct", "lehrkraefte,dat", "faecher,dat", "GPU004,txt", "GPU002,txt", "klassen,dat", "GPU003,txt", "gruppen,struct", "schuelervermerke,dat", "schuelerzusatzdaten,dat", "GPU006,txt"]),      
       students,
       klassen,
@@ -420,7 +432,7 @@ public static class MenueHelper
          datei => datei.OeffneWebseite("https://bkb.wiki/schulgemeinschaft:start")
         ],
         ["Link"],
-        ["Page", "Namen", "Art"],
+        ["Page", "Namen", "Art", "Amt", "BGKuerzel", "Anlage", "TZ/VZ", "DJP1", "DJP2", "DJP3", "DJP4", "boyd", "perspektive-boyd", "Aufnahmevoraussetzungen", "Bildungsziele", "Abschluss", "Versetzung", "Klausurplanung", "Heterogenität", "Praktikum", "BO-Curriculum", "Link zur Homepage"],
         "|", '\0', new UTF8Encoding(true), false); 
         m.GetUntisAnrechnungen(
         Path.Combine(pfadDownloads ?? "untisanrechnungen.struct"),

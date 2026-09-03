@@ -2047,9 +2047,36 @@ public Datei(IConfiguration configuration)
                 {
                     foreach(var seite in zulöschendeSeiten)
                     {
-                        // DeleteSchemaData(Path.GetFileNameWithoutExtension(AbsoluterPfad), seite, WikiZugriff);
-                        // Console.WriteLine($"DELETE: {seite.PadRight(50)}... durchgeführt.");
-                        Console.WriteLine($"DELETE: {seite.PadRight(50)}... simuliert.");
+                        Console.WriteLine($"\nAktion für Seite '{seite}' wählen:");
+Console.WriteLine("[1 / Enter] Löschen | [2] Im Browser öffnen | [Jeder andere Key] Überspringen");
+
+ConsoleKeyInfo keyInfo1 = Console.ReadKey(true); // true = Eingabe nicht in der Konsole anzeigen
+
+// Enter liefert '\r' (Carriage Return)
+if (keyInfo1.KeyChar == '1' || keyInfo1.Key == ConsoleKey.Enter)
+{
+    // Option 1 (Default): Seite löschen
+    DeleteSchemaData(Path.GetFileNameWithoutExtension(AbsoluterPfad), seite, WikiZugriff);
+    Console.WriteLine($"DELETE: {seite.PadRight(50)}... durchgeführt.");
+}
+else if (keyInfo1.KeyChar == '2')
+{
+    // Option 2: Seite im Browser öffnen
+    string url = "https://bkb.wiki" + seite; // Pfad/URL entsprechend anpassen
+    
+    Process.Start(new ProcessStartInfo
+    {
+        FileName = url,
+        UseShellExecute = true
+    });
+    
+    Console.WriteLine($"GEÖFFNET: {seite.PadRight(50)}... im Browser geöffnet.");
+}
+else
+{
+    // Alle anderen Tasten: Überspringen
+    Console.WriteLine($"ÜBERSPRUNGEN: {seite.PadRight(50)}... keine Aktion ausgeführt.");
+}
                     }
                 }
                 else
@@ -2094,7 +2121,7 @@ public Datei(IConfiguration configuration)
             // 2. Platzhalter im Template ersetzen (falls vorhanden, z.B. @PAGE@ oder @USER@)
             // DokuWiki ersetzt diese normalerweise automatisch, per API müssen wir das selbst tun:
 
-            if(neueDict["Art"].ToString().ToLower() == "schulgemeinschaft:lehrkraefte")
+            if(neueDict["Art"].ToString().ToLower() == "schulgemeinschaft:kollegium")
             {   
                 templateInhalt = templateInhalt.Replace("@NAME@", neueDict["TitelVornameNachname"].ToString());             
                 templateInhalt = templateInhalt.Replace("@PAGE@", neueDict["Namen"].ToString());
