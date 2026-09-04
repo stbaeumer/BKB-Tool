@@ -1978,7 +1978,20 @@ public Datei(IConfiguration configuration)
                                     continue;
                                 }
 
-                                alleWerteFuerDieseZeile[key] = neueDict[key];
+                                // Schlüssel übersetzen (z.B. "ASLASHB" -> "A/B")
+string uebersetzterKey = key.Replace("DOPPELPUNKT", ":")
+                           .Replace("PUNKT", ".")
+                           .Replace("MINUS", "-")
+                           .Replace("ZWEI", "2")
+                           .Replace("EINS", "1")
+                           .Replace("UNTERSTRICH", "_")
+                           .Replace("SLASH", "/")
+                           .Replace("LEERZEICHEN", " ")
+                           .Replace("KLAMMERAUF", "(")
+                           .Replace("KLAMMERZU", ")");
+
+// Wert zuweisen (mit Null-Prüfung)
+alleWerteFuerDieseZeile[uebersetzterKey] = neueDict[key]?.ToString();
                             }
 
                             // Aufruf der Update-Methode mit der VOLLSTÄNDIGEN Zeile
@@ -2502,7 +2515,7 @@ else
             
             recordDict[neueSpalte] = datenZeile[neueSpalte];
         }                
-        Add(record);
+        this.Add(record);
     }
 }
 
@@ -2526,8 +2539,9 @@ public interface IDokuWikiRpc : IXmlRpcProxy
             {
                 string wertString = eintrag.Value?.ToString() ?? "";
                 string bereinigterSpaltenName = eintrag.Key.Replace(schemaName + ".", "");
-
-                innerStruct.Add(bereinigterSpaltenName, wertString);
+                
+                innerStruct.Add(bereinigterSpaltenName, wertString);    
+                                
             }
 
             // 2. FIX: Die Payload exakt so verschachteln wie beim funktionierenden Insert

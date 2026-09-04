@@ -4243,11 +4243,14 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
   var gpu003 = Quelldateien.GetMatchingList(configuration, "gpu003", IStudents, Klassen);
   if (gpu003 == null || gpu003.Count == 0) return rückgabe;
 
+  var schulgemeinschaft = Quelldateien.GetMatchingList(configuration, "schulgemeinschaft", IStudents, Klassen);
+  if (schulgemeinschaft == null || schulgemeinschaft.Count == 0) return rückgabe;
+
   // Die Struct-Tabelle wird ausgelesen und in die Datei geschrieben.
   //Quelldateien.GetMatchingList(configuration, "gruppen", IStudents, Klassen, ["gruppen.Page", "gruppen.MitgliederKuerzel", "gruppen.Mitglieder", "gruppen.MitgliederMail", "gruppen.Link"], WikiZugriff);
 
   Gruppen = new Gruppen();
-  Gruppen.AddRange(new Gruppen().GetBildungsgaenge(gpu002, anrechnungen, lehrers));/*
+  Gruppen.AddRange(new Gruppen().GetBildungsgaenge(gpu002, schulgemeinschaft, anrechnungen, lehrers));/*
   Gruppen.AddRange(new Gruppen().GetSchulformen(gpu002, anrechnungen, lehrers));
   Gruppen.Add(new Gruppe().Get(gpu002, lehrers,
           "versetzung:blaue_briefe",

@@ -25,7 +25,7 @@ public class Gruppen : List<Gruppe>
     {
     }
 
-    public Gruppen GetBildungsgaenge(List<dynamic> gpu002, Anrechnungen anrechnungs,
+    public Gruppen GetBildungsgaenge(List<dynamic> gpu002, List<dynamic> schulgemeinschaft, Anrechnungen anrechnungs,
         Lehrers lehrers)
     {        
         var gruppen = new Gruppen();
@@ -63,10 +63,91 @@ public class Gruppen : List<Gruppe>
                 
             record.VorsitzLeitung = vorsitzLeitung.TrimEnd(',');
 
+
+            // Ermittle vorhandene Werte
+
+            /*var bg = schulgemeinschaft
+                .Where(rec =>
+                {
+                    if (rec == null) return false;
+                    var dict = (IDictionary<string, object>)rec;
+                    return dict != null && dict["Link"] != null && dict["Link"].ToString() == wikiLink;
+                })
+                .LastOrDefault();*/
+
+
+            try
+            {
+                var bg = schulgemeinschaft
+    .OfType<IDictionary<string, object>>() // Filtert automatisch null und nicht-Dictionary-Einträge
+    .LastOrDefault(dict => dict.TryGetValue("Link", out var link) && link?.ToString() == wikiLink);
+
+
+            var bereiche = "";
+
+            
+                    if(bg["Bereich"].ToString().ToLower().Contains("gesundheit"))
+                    {
+                       bereiche += bereiche + "bereiche:gesundheit_erziehung_und_soziales,"; 
+            
+                    }
+                    if(bg["Bereich"].ToString().ToLower().Contains("metall"))
+                    {
+                       bereiche += bereiche + "bereiche:metall-_und_elektrotechnik_ing,"; 
+            
+                    }
+                    if(bg["Bereich"].ToString().ToLower().Contains("wirtschaft"))
+                    {
+                       bereiche += bereiche + "bereiche:wirtschaft_und_verwaltung,"; 
+            
+                    }
+                    if(bg["Bereich"].ToString().ToLower().Contains("holz"))
+                    {
+                       bereiche += bereiche + "bereiche:bau-_und_holztechnik,"; 
+            
+                    }
+                    if(bg["Bereich"].ToString().ToLower().Contains("agrar"))
+                    {
+                       bereiche += bereiche + "bereiche:agrarwirtschaft,"; 
+            
+                    }
+            
+
+            record.Bereich = bereiche.TrimEnd(',');
+            record.Schulform = "bildungsgaenge:" + schulform + ":start";
+            record.TZSLASHVZ = bg["TZ/VZ"];
+            record.LinkLEERZEICHENzurLEERZEICHENHomepage = bg["Link zur Homepage"];
+            record.BOMINUSCurriculum = bg["BO-Curriculum"];
+            record.Anlage = "anlagen:a2.1";//bg["Anlage"];
+            record.BGkuerzel = bg["BGkuerzel"];
+            record.Praktikum = bg["Praktikum"];
+            record.Heterogenität = bg["Heterogenität"];
+            record.Klausurplanung = bg["Klausurplanung"];
+            record.Versetzung = bg["Versetzung"];
+            record.Abschluss = bg["Abschluss"];
+
+            if(!string.IsNullOrEmpty(bg["DJP1"].ToString()))
+             record.DJP1 = "djp:" + kurzname + ":jg1:start" ;
+            if(!string.IsNullOrEmpty(bg["DJP2"].ToString()))
+             record.DJP2 = "djp:" + kurzname + ":jg2:start" ;
+            if(!string.IsNullOrEmpty(bg["DJP3"].ToString()))
+             record.DJP3 = "djp:" + kurzname + ":jg3:start" ;
+            if(!string.IsNullOrEmpty(bg["DJP4"].ToString()))
+             record.DJP4 = "djp:" + kurzname + ":jg4:start" ;             
+            record.boyd = bg["boyd"];
+            record.perspektiveMINUSboyd = bg["perspektive-boyd"];
+            record.Aufnahmevoraussetzungen = bg["Aufnahmevoraussetzungen"];
+            record.Bildungsziele = bg["Bildungsziele"];    
+            }
+            catch
+            {
+             Console.WriteLine("Gibt's den Bildungsgang " + wikiLink + " noch?");
+            }
+
+            
             records.Add(record);
-            gruppe.Record = record;
-            if(wikiLink.Contains("ave"))
-             gruppen.Add(gruppe);
+            gruppe.Record = record;            
+            gruppen.Add(gruppe);
         }
 
         var panel = new Panel("Die Bildungsgangleitungen werden aus den Untis-Anrechnungen ermittelt. Zwei Dinge sind wichtig:\n1. Das Wort 'Bildungsgangleitung' muss im [bold aqua]Text[/] in Untis enthalten sein\n2. einen Link 'bildungsgaenge: ...' in der [bold aqua]Beschr[/].")
