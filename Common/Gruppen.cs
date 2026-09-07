@@ -78,12 +78,11 @@ public class Gruppen : List<Gruppe>
 
             try
             {
-                var bg = schulgemeinschaft
-    .OfType<IDictionary<string, object>>() // Filtert automatisch null und nicht-Dictionary-Einträge
-    .LastOrDefault(dict => dict.TryGetValue("Link", out var link) && link?.ToString() == wikiLink);
+                var bg = schulgemeinschaft.OfType<IDictionary<string, object>>() // Filtert automatisch null und nicht-Dictionary-Einträge
+                    .LastOrDefault(dict => dict.TryGetValue("Link", out var link) && link?.ToString() == wikiLink);
 
 
-            var bereiche = "";
+                     var bereiche = "";
 
             
                     if(bg["Bereich"].ToString().ToLower().Contains("gesundheit"))
@@ -117,14 +116,34 @@ public class Gruppen : List<Gruppe>
             record.Schulform = "bildungsgaenge:" + schulform + ":start";
             record.TZSLASHVZ = bg["TZ/VZ"];
             record.LinkLEERZEICHENzurLEERZEICHENHomepage = bg["Link zur Homepage"];
-            record.BOMINUSCurriculum = bg["BO-Curriculum"];
+            
+            if(!string.IsNullOrEmpty(bg["BO-Curriculum"].ToString()))
+             record.BOMINUSCurriculum = "konzepte:curriculum-berufliche-orientierung:" + kurzname;
+
+
+
             record.Anlage = "anlagen:a2.1";//bg["Anlage"];
             record.BGkuerzel = bg["BGkuerzel"];
-            record.Praktikum = bg["Praktikum"];
-            record.Heterogenität = bg["Heterogenität"];
-            record.Klausurplanung = bg["Klausurplanung"];
-            record.Versetzung = bg["Versetzung"];
-            record.Abschluss = bg["Abschluss"];
+            if(!string.IsNullOrEmpty(bg["Praktikum"].ToString()))
+             record.Praktikum = "praktikum:start";
+            if(!string.IsNullOrEmpty(bg["Heterogenität"].ToString()))
+             record.Heterogenität = "heterogenitaet";
+            if(!string.IsNullOrEmpty(bg["Klausurplanung"].ToString()))
+             record.Klausurplanung = "oeffentlich:klausurbelegung-kurswahlen:start";
+            record.Versetzung = "";
+            
+            if(!string.IsNullOrEmpty(bg["Abschluss"].ToString()) && (bg["Abschluss"].ToString().ToLower().Contains("abi") || bg["Abschluss"].ToString().ToLower().Contains("allge")))
+             record.Abschluss = "schulabschluesse:allgemeine_hochschulreife";
+            if(!string.IsNullOrEmpty(bg["Abschluss"].ToString()) && bg["Abschluss"].ToString().Contains("..."))
+             record.Abschluss = "schulabschluesse:berufsschulabschluss";
+            if(!string.IsNullOrEmpty(bg["Abschluss"].ToString()) && bg["Abschluss"].ToString().Contains("..."))
+             record.Abschluss = "schulabschluesse:erster_schulabschluss";
+            if(!string.IsNullOrEmpty(bg["Abschluss"].ToString()) && bg["Abschluss"].ToString().Contains("..."))
+             record.Abschluss = "schulabschluesse:erweiterter_erster_schulabschluss";
+            if(!string.IsNullOrEmpty(bg["Abschluss"].ToString()) && bg["Abschluss"].ToString().Contains("..."))
+             record.Abschluss = "schulabschluesse:fachhochschulreife";
+            if(!string.IsNullOrEmpty(bg["Abschluss"].ToString()) && bg["Abschluss"].ToString().Contains("..."))
+             record.Abschluss = "schulabschluesse:mittlerer_schulabschluss";
 
             if(!string.IsNullOrEmpty(bg["DJP1"].ToString()))
              record.DJP1 = "djp:" + kurzname + ":jg1:start" ;
