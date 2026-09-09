@@ -1992,11 +1992,15 @@ alleWerteFuerDieseZeile[uebersetzterKey] = neueDict[key]?.ToString();
                     var vorh = vorhandeneDict[AnhandDieserSchlüsselAttributeWirdVerglichen.FirstOrDefault()].ToString();
 
 
-                    // Wer keine interne Mailadresse hat, wird nicht automatisch gelöscht. Das muss
-                    if(!neueDict2["Mail"].ToString().ToLower().Contains("@berufskolleg-borken.de"))
+                    if (neueDict2.ContainsKey("Mail") && neueDict2["Mail"] != null)
                     {
-                        löschen = false;
-                        break;
+                        string mail = neueDict2["Mail"].ToString();
+                        
+                        if (!string.IsNullOrEmpty(mail) && !mail.ToLower().Contains("@berufskolleg-borken.de"))
+                        {
+                            löschen = false;
+                            break;
+                        }
                     }
 
                     if(neu == vorh)

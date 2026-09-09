@@ -2839,7 +2839,7 @@ public class Menüeintrag
 
        record.Kurzname = sz["schulische E-Mail"].ToString().Replace("@students.berufskolleg-borken.de", "");
        record.Vorname = student.Vorname;
-       record.Nachname = student.Nachname;
+       record.Nachname = student.Nachname.Split('#')[0];
        record.Mail = sz["schulische E-Mail"].ToString();
        record.Passwort = student.Nachname.Substring(0, 1).ToUpper() + student.Geburtsdatum;
        record.Klasse = student.Klasse;
@@ -2864,7 +2864,7 @@ public class Menüeintrag
        record.LGruppe = student.Klasse;
        record.Geburtsdatum = student.Geburtsdatum;
        record.Titel = "";
-       record.Nachname = student.Nachname;
+       record.Nachname = student.Nachname.Split('#')[0];
        record.Vorname = student.Vorname;
        record.Strasse = alter >= 18 ? student.Straße.ToString() : se?["Straße"].ToString();
        record.PLZ = alter >= 18 ? student.Postleitzahl.ToString() : se?["PLZ"].ToString();
