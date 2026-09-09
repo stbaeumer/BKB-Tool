@@ -182,14 +182,21 @@ private bool IstMailadresseGültig(string email)
     // Setze den E-Mail-Body auf multipart (Text + Anhang)
     email.Body = multipart;
 
-    using (var smtpClient = new MailKit.Net.Smtp.SmtpClient())
-    {
-     smtpClient.ServerCertificateValidationCallback = (s, c, h, e) => true; // SSL-Zertifikatsvalidierung deaktivieren
-     smtpClient.Connect(smtpServer, smtpPort, MailKit.Security.SecureSocketOptions.StartTls);
-     //smtpClient.Authenticate(senderEmail, senderPassword);
-     smtpClient.Send(email);
-     smtpClient.Disconnect(true);
-    }
+       try
+       {
+            using (var smtpClient = new MailKit.Net.Smtp.SmtpClient())
+            {
+                smtpClient.ServerCertificateValidationCallback = (s, c, h, e) => true; // SSL-Zertifikatsvalidierung deaktivieren
+                smtpClient.Connect(smtpServer, smtpPort, MailKit.Security.SecureSocketOptions.StartTls);
+                //smtpClient.Authenticate(senderEmail, senderPassword);
+                smtpClient.Send(email);
+                smtpClient.Disconnect(true);
+            }
+       }
+       catch
+       {
+            Console.WriteLine("Mailversand gescheitert.");   
+       }    
    });
   }
   catch(Exception ex)

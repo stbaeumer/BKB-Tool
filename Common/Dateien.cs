@@ -595,7 +595,7 @@ public class Dateien : List<Datei>
             var dateiendung = dateinameNotwendig.Split(',')[1].Trim().ToLower();
             var dateiname = dateinameNotwendig.Split(',')[0];
 
-            if(dateiname.Contains("istSollMittel"))
+            if(dateiname.Contains("usatz"))
             {
                 string aakkka = "";
             }

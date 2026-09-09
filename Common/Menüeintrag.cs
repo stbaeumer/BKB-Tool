@@ -2256,36 +2256,42 @@ public class Menüeintrag
    // Diese Logik an den beiden Stellen im File anwenden, an denen `uniqueStudents` gebildet wird.
 
    var uniqueStudents = Students
-       .GroupBy(s => new { s.Vorname, s.Nachname, s.Geburtsdatum })
-       .Select(g =>
-       {
+    .GroupBy(s => new { 
+        s.Vorname, 
+        NachnameClean = s.Nachname != null ? s.Nachname.Split('#')[0].Trim() : string.Empty, 
+        s.Geburtsdatum 
+    })
+    .Select(g =>
+    {
         var list = g.ToList();
         if (list.Count == 1) return list[0];
 
         DateTime ParseDateOrMin(string? dt)
         {
-         if (string.IsNullOrWhiteSpace(dt)) return DateTime.MinValue;
-         var formats = new[] { "dd.MM.yyyy", "d.M.yyyy", "yyyy-MM-dd", "yyyyMMdd" };
-         if (DateTime.TryParseExact(dt, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed)) return parsed;
-         if (DateTime.TryParse(dt, new CultureInfo("de-DE"), DateTimeStyles.None, out parsed)) return parsed;
-         if (DateTime.TryParse(dt, out parsed)) return parsed;
-         return DateTime.MinValue;
+            if (string.IsNullOrWhiteSpace(dt)) return DateTime.MinValue;
+            var formats = new[] { "dd.MM.yyyy", "d.M.yyyy", "yyyy-MM-dd", "yyyyMMdd" };
+            if (DateTime.TryParseExact(dt, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed)) return parsed;
+            if (DateTime.TryParse(dt, new CultureInfo("de-DE"), DateTimeStyles.None, out parsed)) return parsed;
+            if (DateTime.TryParse(dt, out parsed)) return parsed;
+            return DateTime.MinValue;
         }
 
         // Kandidaten mit Status aktiv (2) oder Gast/extern (6)
         var activeOrGuest = list.Where(s => s.Status == "2" || s.Status == "6").ToList();
         if (activeOrGuest.Count > 1)
         {
-         // Wähle den Eintrag mit dem spätesten BeginnDesBildungsganges
-         return activeOrGuest.OrderByDescending(s => ParseDateOrMin(s.BeginnDesBildungsganges)).First();
+            // Wähle den Eintrag mit dem spätesten BeginnDesBildungsganges
+            return activeOrGuest.OrderByDescending(s => ParseDateOrMin(s.BeginnDesBildungsganges)).First();
         }
 
         // Fallback: wie bisher – wähle den Eintrag mit dem numerisch kleinsten Status
         return list.OrderBy(s => int.TryParse(s.Status, out var st) ? st : int.MaxValue).First();
-       })
-       .OrderBy(s => s.Klasse)
-       .ThenBy(s => s.Nachname)
-       .ThenBy(s => s.Vorname);
+    })
+    .OrderBy(s => s.Klasse)
+    .ThenBy(s => s.Nachname)
+    .ThenBy(s => s.Vorname);
+    
+
 
    AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Webuntis-Schüler*innen vorbereiten ...", ctx =>
    {
@@ -2298,18 +2304,18 @@ public class Menüeintrag
      var schildStudent = uniqueStudents
                   .OrderBy(x => int.TryParse(x.Status, out var status) ? status : 0)
                   .FirstOrDefault(x =>
-                      x.Nachname == webuntisStudent["longName"].ToString() &&
+                      x.Nachname.Split('#')[0] == webuntisStudent["longName"].ToString() &&
                       x.Vorname == webuntisStudent["foreName"].ToString() &&
                       x.Geburtsdatum == webuntisStudent["birthDate"].ToString());
 
-     if (schildStudent == null)
+     if (schildStudent == null || schildStudent.Status == "8"|| schildStudent.Status == "9")
      {
       // Wenn der Schüler in Schüler nicht existiert, wird er in die Liste der gelöschten Schüler aufgenommen.
       gelöschteSchüler.Add((IDictionary<string, object>)rec);
       continue;
      }
 
-     if (schildStudent.Nachname == "Schmitz" && schildStudent.Vorname == "Leon Noel")
+     if (schildStudent.Nachname.Split('#')[0] == "Geessink" && schildStudent.Vorname == "Erik")
      {
       var debug = 1;
      }
@@ -2491,7 +2497,7 @@ public class Menüeintrag
     {
      foreach (var studen in uniqueStudents)
      {
-      if (studen.Nachname == "Drüing" && studen.Vorname == "Julian")
+      if (studen.Nachname == "Kormann" && studen.Vorname == "Felix")
       {
        string aaaa = "";
       }
@@ -2502,7 +2508,7 @@ public class Menüeintrag
 
       if (student == null) continue;
 
-      if (student.Nachname == "Drüing" && student.Vorname == "Julian")
+      if (student.Nachname == "Kormann" && student.Vorname == "Felix")
       {
        string aa = "";
       }
@@ -2511,7 +2517,7 @@ public class Menüeintrag
       if (!webuntisStudents.Any(rec =>
                       {
                  var dict = (IDictionary<string, object>)rec;
-                 return dict["longName"].ToString() == student.Nachname && dict["foreName"].ToString() == student.Vorname && dict["birthDate"].ToString() == student.Geburtsdatum;
+                 return student.Nachname.StartsWith(dict["longName"].ToString()) && dict["foreName"].ToString() == student.Vorname && dict["birthDate"].ToString() == student.Geburtsdatum;
                 }))
       {
        // ... und der Schüler in Schild aktiv der Gast ist, wird er angelegt
@@ -2558,7 +2564,9 @@ public class Menüeintrag
                  return dict["Nachname"].ToString() == student.Nachname &&
                                  dict["Vorname"].ToString() == student.Vorname &&
                                  dict["Geburtsdatum"].ToString() == student.Geburtsdatum &&
-                                 dict["Adressart"].ToString() == "Betrieb";
+                                 dict["Adressart"].ToString() == "Betrieb" &&
+                                 DateTime.TryParseExact(dict["Vertragsbeginn"]?.ToString(), "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var beginn) && beginn < DateTime.Now &&
+                    DateTime.TryParseExact(dict["Vertragsende"]?.ToString(), "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out var ende) && ende > DateTime.Now;
                 }).LastOrDefault() as IDictionary<string, object>;
 
       var klasse = klassen
@@ -2621,7 +2629,7 @@ public class Menüeintrag
        }
 
        record.EMINUSMail = sz["schulische E-Mail"].ToString();
-       record.Familienname = student.Nachname;
+       record.Familienname = student.Nachname.Split('#')[0];
        record.Vorname = student.Vorname;
        record.Klasse = student.Klasse;
        record.Kurzname = sz["schulische E-Mail"].ToString().Split('@')[0];
@@ -2701,7 +2709,7 @@ public class Menüeintrag
          }
 
          record.EMINUSMail = sz["schulische E-Mail"].ToString();
-         record.Familienname = student.Nachname;
+         record.Familienname = student.Nachname.Split('#')[0];
 
          if (student.Nachname == "Abdo" && student.Vorname == "Sidar")
          {
@@ -2769,13 +2777,13 @@ public class Menüeintrag
         record.Schlüssel = sz["schulische E-Mail"].ToString().Split('@')[0];
        }
 
-       if (student.Nachname == "Drüing" && student.Vorname == "Julian")
+       if (student.Nachname.StartsWith("Zielonka") && student.Vorname == "Michal")
        {
         string aa = "";
        }
 
        record.EMINUSMail = sz["schulische E-Mail"].ToString();
-       record.Familienname = student.Nachname;
+       record.Familienname = student.Nachname.Split('#')[0];
        record.Vorname = student.Vorname;
        record.Klasse = student.Klasse;
        record.Kurzname = sz["schulische E-Mail"].ToString().Split('@')[0];
@@ -2918,6 +2926,15 @@ public class Menüeintrag
    Console.ReadKey();
   }
  }
+
+ private DateTime ParseDateOrMin(string dateStr)
+{
+    if (DateTime.TryParse(dateStr, out var parsedDate))
+    {
+        return parsedDate;
+    }
+    return DateTime.MinValue; // Fallback für ungültige oder leere Strings
+}
 
  private string VolljährigJaNein(string? geburtsdatum)
  {
@@ -4456,17 +4473,17 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
       record.Ressourcen = dict["Ressourcen"].ToString()!.Trim();
       record.BetreffBeginn = "termine:" + betreffBeginn;
       record.Page = record.BetreffBeginn; // Die Page ist identisch mit  Link. Die Page wird aber von der Abfrage nicht erfasst.
-      
-      // Wenn im link "termine:" steht, dann wird der Betreffbeginn duurch den link ersetzt.
-        if(!string.IsNullOrEmpty(link) && link.Contains("termine:"))
+
+      // Wenn im link "termine:" steht, dann wird der Betreffbeginn durch den link ersetzt.
+      if(!string.IsNullOrEmpty(link) && link.Contains("termine:oeffentlich:start"))
+      {
+        if (!string.IsNullOrEmpty(dict["Kategorien"].ToString()) && !dict["Kategorien"].ToString().Split(';', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Contains(link))
         {
-            if (!dict["Kategorien"].ToString().Split(';', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries).Contains(link))
-            {
-                record.BetreffBeginn = link;
-                record.Page = link;
-            }                           
-        }
-      
+            record.BetreffBeginn = link;
+            record.Page = link;
+        }                           
+      }
+
       record.SJ = sj;
       record.Art = "Termine";
       record.Link = record.Page; // Link auf die verborgene Seite
@@ -5392,13 +5409,7 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
      var name = prop.Key;
      var value = prop.Value;
 
-     if (name == "Nachname")
-     {
-      var klasse = dictSb["Klasse"].ToString();
-
-      ((IDictionary<string, object>)record)[name] = $"{value}#{klasse}";
-     }
-     else if (name == "schulische E-Mail")
+     if (name == "schulische E-Mail")
      {
       // Schüler mit vorhandener Mail überspringen
       if (!string.IsNullOrEmpty(value.ToString()))
@@ -5605,9 +5616,9 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
    bool alleIdentisch = doppelte.All(rec =>
    {
     var dict = (IDictionary<string, object>)rec;
-    return dict["Nachname"].ToString() == nachname &&
-                 dict["Vorname"].ToString() == vorname &&
-                 dict["Geburtsdatum"].ToString() == geburtsdatum;
+    return dict["Nachname"].ToString().Split('#')[0] == nachname.ToString().Split('#')[0] &&
+       dict["Vorname"].ToString() == vorname &&
+       dict["Geburtsdatum"].ToString() == geburtsdatum;
    });
 
    if (alleIdentisch)
@@ -5622,14 +5633,30 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
   var problem = false;
   var schuelerZusatzdaten = Quelldateien.GetMatchingList(configuration, "schuelerzusatzdaten", students, Klassen);
   if (schuelerZusatzdaten == null || schuelerZusatzdaten.Count == 0) return false;
+  
+  var sz = new List<dynamic>();
 
-  var sz = schuelerZusatzdaten
-          .Where(rec =>
-          {
-           if (rec == null) return false;
-           var dict = (IDictionary<string, object>)rec;
-           return dict != null && string.IsNullOrEmpty(dict["schulische E-Mail"].ToString());
-          }).ToList();
+  for (int i = 0; i < schuelerZusatzdaten.Count; i++)
+  {
+    var dictSz = (IDictionary<string, object>)schuelerZusatzdaten[i];
+    var s = students
+                 .Where(x=>x.Nachname == dictSz["Nachname"].ToString())
+                 .Where(x=>x.Vorname == dictSz["Vorname"].ToString())
+                 .Where(x=>x.Geburtsdatum == dictSz["Geburtsdatum"].ToString())
+                 .FirstOrDefault();
+
+    // Wenn der Schüler nicht aktiv oder extern ist, überspringe diese Zeile
+    if (!(s.Status == "2" || s.Status == "6")) continue;
+
+    // Wenn der Schüler eine Mail hat, überspringe die Zeile
+    if (!string.IsNullOrEmpty(dictSz["schulische E-Mail"].ToString())) continue;
+    
+    sz.Add(dictSz);
+
+   }
+
+  // Prüfe, ob der Schüler aktiv ist
+
 
   if (sz.Count > 0)
   {
@@ -5665,7 +5692,7 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
           g.Count() > 1 &&
           g.Select(sz => (
               Vorname: ((IDictionary<string, object>)sz)["Vorname"]?.ToString(),
-              Nachname: ((IDictionary<string, object>)sz)["Nachname"]?.ToString()
+              Nachname: ((IDictionary<string, object>)sz)["Nachname"]?.ToString().Split('#')[0]
           ))
           .Distinct(new TupleStringComparer()).Count() > 1
       )

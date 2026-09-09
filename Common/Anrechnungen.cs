@@ -198,7 +198,6 @@ ORDER BY TeacherName;
                 if(anrechnung.Beschr.ToLower().StartsWith("kollegium:"))
                  anrechnung.Beschr.Replace("kollegium:", "schulgemeinschaft:");
                 
-
                 anrechnung.Text = Global.SafeGetString(sqlDataReader, 2) == null
                     ? ""
                     : Global.SafeGetString(sqlDataReader, 2); // Vorsitz etc.

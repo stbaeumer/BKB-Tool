@@ -918,7 +918,7 @@ public Datei(IConfiguration configuration)
                 return;
             }
 
-            // Wenn in der vorhandenen eine Spalte namens Nachname existiert und die Dateiendung .dat ist,
+            /* Wenn in der vorhandenen eine Spalte namens Nachname existiert und die Dateiendung .dat ist,
             // dann muss in jeder Zeile der Nachname um #Klasse ergänzt werden.
             if (AnhandDieserSchlüsselAttributeWirdVerglichen.Contains("Nachname") && dateiendung == ".dat")
             {
@@ -936,7 +936,7 @@ public Datei(IConfiguration configuration)
                         vorhandeneDict["Nachname"] = nachname;
                     }
                 }
-            }
+            }*/
 
             // Die Tabelle soll begrenzt werden. Falls mehr als maxRows Zeilen gefunden werden, wird eine weitere Zeile mit "..." eingefügt.
 
@@ -1198,24 +1198,7 @@ public Datei(IConfiguration configuration)
             bool match = true;
             foreach (var key in anhandDieserAttributeWirdVerglichen)
             {
-                var neueDictWert = "";
-                if ((neueDict.ContainsKey(key)) && (neueDict[key] != null))
-                {
-                    neueDictWert = neueDict[key].ToString().Split('#')[0];
-                }
-
-                var vorhDictWert = "";
-                if (vorhDict.ContainsKey(key) && vorhDict[key] != null)
-                {
-                    vorhDictWert = vorhDict[key].ToString().Split('#')[0];
-                }
-
-                if(vorhDictWert == "termine:bekanntgabederanrechnungen-202703030000")
-                {
-                    string a = "";
-                }
-
-                if (neueDictWert != vorhDictWert)
+                if (neueDict[key].ToString() != vorhDict[key].ToString())
                 {
                     match = false;
                     break;
@@ -1279,6 +1262,13 @@ public Datei(IConfiguration configuration)
                 // Iteriere über die Key-Value-Paare des dynamischen Records
                 foreach (var item in (IDictionary<string, object>)record)
                 {
+                    // Wenn in den Basisdaten oder zusatzdaten der Key Nachname ist, dann muss eine Raute enthalten sein
+                    if((AbsoluterPfad.Contains("usatzdaten") || AbsoluterPfad.Contains("asisdaten")) && item.Key == "Nachname" && !item.Value.ToString().Contains("#"))
+                    {
+                        throw new Exception("Bitte beim Export aus SchILD 'Klasse als zuätzliches Identifikationsmerkmal hinzufügen'. Zudem nur den aktuellen Abschnitt exportieren.");
+                    }
+
+
                     // Prüfe, ob der Wert nicht leer ist
                     if (item.Value != null && !string.IsNullOrWhiteSpace(item.Value.ToString()))
                     {
@@ -1855,27 +1845,7 @@ public Datei(IConfiguration configuration)
             {
                 skipProcessing = true;
                 return;
-            }
-
-            // Wenn in der vorhandenen eine Spalte namens Nachname existiert und die Dateiendung .dat ist,
-            // dann muss in jeder Zeile der Nachname um #Klasse ergänzt werden.
-            if (AnhandDieserSchlüsselAttributeWirdVerglichen.Contains("Nachname") && dateiendung == ".dat")
-            {
-                // In jeder Zeile den Nachnamen um #Klasse ergänzen
-                foreach (var vRec in vorhandeneRec)
-                {
-                    var vorhandeneDict = (IDictionary<string, object>)vRec;
-                    if (vorhandeneDict.ContainsKey("Nachname"))
-                    {
-                        var nachname = vorhandeneDict["Nachname"].ToString();
-                        if (vorhandeneDict.ContainsKey("Klasse"))
-                        {
-                            nachname += "#" + vorhandeneDict["Klasse"];
-                        }
-                        vorhandeneDict["Nachname"] = nachname;
-                    }
-                }
-            }
+            }            
 
             // Die Tabelle soll begrenzt werden. Falls mehr als maxRows Zeilen gefunden werden, wird eine weitere Zeile mit "..." eingefügt.
 
@@ -2020,6 +1990,14 @@ alleWerteFuerDieseZeile[uebersetzterKey] = neueDict[key]?.ToString();
 
                     var neu = neueDict2[AnhandDieserSchlüsselAttributeWirdVerglichen.FirstOrDefault()].ToString();
                     var vorh = vorhandeneDict[AnhandDieserSchlüsselAttributeWirdVerglichen.FirstOrDefault()].ToString();
+
+
+                    // Wer keine interne Mailadresse hat, wird nicht automatisch gelöscht. Das muss
+                    if(!neueDict2["Mail"].ToString().ToLower().Contains("@berufskolleg-borken.de"))
+                    {
+                        löschen = false;
+                        break;
+                    }
 
                     if(neu == vorh)
                     {
@@ -2449,7 +2427,7 @@ else
         return this;
     }
 
-    internal void GetSchema(string schemaName, string[] benutzerSpalten, IConfiguration configuration, DokuwikiZugriff wikiZugriff)
+internal void GetSchema(string schemaName, string[] benutzerSpalten, IConfiguration configuration, DokuwikiZugriff wikiZugriff)
 {   
     AbsoluterPfad = Path.Combine(configuration["PfadDownloads"], schemaName + ".struct");
 

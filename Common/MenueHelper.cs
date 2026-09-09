@@ -122,6 +122,7 @@ public static class MenueHelper
         "ImportNachWebuntis-Stammdaten-Schueler.csv", new string[] { "EMINUSMail" }, new string[] { }, ";", '\'', new UTF8Encoding(false), false,
         [
          datei => datei.OrdnerOeffnen(),
+         datei => datei.OrdnerOeffnen(),
          datei => datei.Erstellen(),
          datei => datei.OeffneWebseite("https://bk-borken.webuntis.com/users"),
          datei => datei.OeffneWebseite("https://management.geevoo.de/import/"),
