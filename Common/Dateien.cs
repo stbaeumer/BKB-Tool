@@ -95,6 +95,32 @@ public class Dateien : List<Datei>
             "*.pdf"
         ));
         Add(new Datei(
+            "praktikanten",
+            "Beschreibung",
+            [
+                "Exportieren Sie die Datei aus WIKIIII",
+                $"[bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Klassenbuch > Offene Stunden > Bericht[/]",
+                $"Die PDF-Datei in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/] speichern."
+            ],
+            [""],
+            true,
+            d => d.FilterPraktikanten(),
+            "*.csv"
+        ));
+        Add(new Datei(
+            "praktika",
+            "Beschreibung",
+            [
+                "Exportieren Sie die Datei aus WIKKKKd gehen:",
+                $"[bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Klassenbuch > Offene Stunden > Bericht[/]",
+                $"Die PDF-Datei in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/] speichern."
+            ],
+            [""],
+            true,
+            d => d.FilterPraktika(),
+            "*.csv"
+        ));
+        Add(new Datei(
             "Student_",
             "Beschreibung",
             [

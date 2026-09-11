@@ -2202,6 +2202,28 @@ public class Menüeintrag
 
  }
 
+    public void PraktikantenCsv(IConfiguration configuration, List<Datei> zieldateien)
+    {
+        var praktikanten = Quelldateien.GetMatchingList(configuration, "praktikanten", Students, Klassen);
+        if (praktikanten == null || praktikanten.Count == 0) throw new Exception("Keine schuelerZusatzdaten.dat");
+        var praktika = Quelldateien.GetMatchingList(configuration, "praktika", Students, Klassen);
+        if (praktika == null || praktika.Count == 0) throw new Exception("Keine schuelerlernabschnittsdaten.dat");
+
+
+        var alleVerschiedenenKlassen = praktika
+            .Select(rec => ((IDictionary<string, object>)rec)["Klasse"]?.ToString())
+            .Where(k => !string.IsNullOrEmpty(k))
+            .Distinct()
+            .ToList();
+        
+        var alleStudentsMitPraktika = Students.Where(x => alleVerschiedenenKlassen.Contains(x.Klasse)).ToList();
+
+        
+
+
+
+    }
+
  public void WebuntisOderNetmanOderGeevooOderLitteraCsv(IConfiguration configuration, List<Datei> zieldateien)
  {
   try

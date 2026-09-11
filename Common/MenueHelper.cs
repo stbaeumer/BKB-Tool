@@ -327,6 +327,47 @@ public static class MenueHelper
      ),
      new Menüeintrag(
       configuration,
+      "Praktikum::Praktikanten anlegen und damit vorhandene Eintragungen übernehmen",
+      quelldateien.Notwendige(configuration, ["praktikanten,csv", "praktika,csv"]),
+      students,
+      klassen,
+      [
+       "..."
+      ],
+      m =>
+      {
+       m.PraktikantenCsv(configuration,
+       [
+        new Datei(
+         "praktikanten-neu.csv", 
+         new string[] { "EMINUSMail" }, 
+         new string[] { }, 
+         ";", 
+         '\'', 
+         new UTF8Encoding(false), 
+         false,
+         [
+          datei => datei.OrdnerOeffnen(),
+          datei => datei.OrdnerOeffnen(),
+          datei => datei.Erstellen(),
+          datei => datei.OeffneWebseite("https://bk-borken.webuntis.com/users"),
+          datei => datei.OeffneWebseite("https://management.geevoo.de/import/"),
+          datei => datei.OeffneWebseite("https://bk-borken.webuntis.com/students")
+         ],
+         [
+          $"[{Global.GetColor(Global.ColorHinweise)}]#1:[/] In Webuntis als Webuntis-Admin:  [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Stammdaten > Schüler*innen > Import[/]",
+          $"[{Global.GetColor(Global.ColorHinweise)}]#2:[/] Datei auswählen, UTF8",
+          $"[{Global.GetColor(Global.ColorHinweise)}]#3:[/] Profil: Schuelerimport, dann Vorschau",
+          $"Mehr zum Profil Schuelerimport: [{Global.GetColor(Global.ColorHyperlink)}][link=https://github.com/stbaeumer/BKB-Tool/wiki]https://github.com/stbaeumer/BKB-Tool/wiki[/][/]"
+         ]
+        )
+       ]); // Hier wurde ] statt } benötigt
+      },
+      Global.Rubrik.Allgemein,
+      Global.NurBeiDiesenSchulnummern.Alle
+     ),
+     new Menüeintrag(
+      configuration,
       "Gruppen & Organigramm:Mo:Gruppen & Organigramm aus Untisanrechnungen und Unterrichten für Wiki-Import erstellen",
       quelldateien.Notwendige(configuration, ["gruppen,struct", "schuelervermerke,dat", "schuelerzusatzdaten,dat", "GPU006,txt", "GPU002,txt", "GPU003,txt", "klassen,dat"]),
       students,

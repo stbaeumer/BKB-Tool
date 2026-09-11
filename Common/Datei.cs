@@ -1608,6 +1608,16 @@ public Datei(IConfiguration configuration)
         return this;
     }
 
+    internal List<dynamic> FilterPraktika()
+    {
+        return this;
+    }
+
+    internal List<dynamic> FilterPraktikanten()
+    {
+        return this;
+    }
+
     internal void Verschieben(string zielVerzeichnis)
     {
         if (string.IsNullOrEmpty(AbsoluterPfad) || !File.Exists(AbsoluterPfad))
