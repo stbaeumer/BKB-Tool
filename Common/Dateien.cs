@@ -105,10 +105,11 @@ public class Dateien : List<Datei>
             [""],
             true,
             d => d.FilterPraktikanten(),
-            "*.csv"
+            "*.csv",
+            ","
         ));
         Add(new Datei(
-            "praktika",
+            "praktikas",
             "Beschreibung",
             [
                 "Exportieren Sie die Datei aus WIKKKKd gehen:",
@@ -118,7 +119,8 @@ public class Dateien : List<Datei>
             [""],
             true,
             d => d.FilterPraktika(),
-            "*.csv"
+            "*.csv",
+            ","
         ));
         Add(new Datei(
             "Student_",
@@ -621,7 +623,7 @@ public class Dateien : List<Datei>
             var dateiendung = dateinameNotwendig.Split(',')[1].Trim().ToLower();
             var dateiname = dateinameNotwendig.Split(',')[0];
 
-            if(dateiname.Contains("usatz"))
+            if(dateiname.Contains("praktikanten"))
             {
                 string aakkka = "";
             }
@@ -752,7 +754,7 @@ public class Dateien : List<Datei>
             {
                 foreach (var datei in this)
                 {
-                    if(datei.Dateiname.Contains("istSoll"))
+                    if(datei.Dateiname.Contains("praktikan"))
                     {
                         string a = "";
                     }

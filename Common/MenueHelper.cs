@@ -327,32 +327,32 @@ public static class MenueHelper
      ),
      new Menüeintrag(
       configuration,
-      "Praktikum::Praktikanten anlegen und damit vorhandene Eintragungen übernehmen",
-      quelldateien.Notwendige(configuration, ["praktikanten,csv", "praktika,csv"]),
+      "Praktikum::Praktikanten hinzufügen, nachdem die Praktika in Wiki angelegt wurden.",
+      quelldateien.Notwendige(configuration, ["praktikanten,csv", "praktikas,csv"]),
       students,
       klassen,
       [
-       "..."
+       "Die Struct-CSV-Dateien praktikanten.csv und praktikas.csv müssen global exportiert werden.",
+       "Anschließend wird die praktikanten.csv neu erstellt.",
+       "Vorhandene Zuordnungen von Betrieben und Betreungen bleiben unangetastet."
       ],
       m =>
       {
        m.PraktikantenCsv(configuration,
        [
         new Datei(
-         "praktikanten-neu.csv", 
-         new string[] { "EMINUSMail" }, 
+         DateTime.Now.ToString("yyyyMMdd-HHmm") + "-praktikanten.csv", 
+         new string[] { "Praktikum", "Name" },
          new string[] { }, 
-         ";", 
-         '\'', 
+         ",", 
+         '\"', 
          new UTF8Encoding(false), 
-         false,
+         true,
          [
           datei => datei.OrdnerOeffnen(),
-          datei => datei.OrdnerOeffnen(),
+          datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
           datei => datei.Erstellen(),
-          datei => datei.OeffneWebseite("https://bk-borken.webuntis.com/users"),
-          datei => datei.OeffneWebseite("https://management.geevoo.de/import/"),
-          datei => datei.OeffneWebseite("https://bk-borken.webuntis.com/students")
+          datei => datei.OeffneWebseite("https://bkb.wiki/praktikum:start?do=admin&page=struct_schemas&table=praktikanten")
          ],
          [
           $"[{Global.GetColor(Global.ColorHinweise)}]#1:[/] In Webuntis als Webuntis-Admin:  [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Stammdaten > Schüler*innen > Import[/]",

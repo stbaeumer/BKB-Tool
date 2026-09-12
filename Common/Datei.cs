@@ -1277,7 +1277,7 @@ public Datei(IConfiguration configuration)
                 }
 
                 // Wenn nur eine einzige Zelle Inhalt hat, deutet das auf mehrzeilige Records hin. Weitere Zeilen werden ignoriert.
-                if (anzahlNichtLeererRecords > 2)
+                if (anzahlNichtLeererRecords > 1)
                 {
                     this.Add(record);
                 }

@@ -2204,24 +2204,53 @@ public class Menüeintrag
 
     public void PraktikantenCsv(IConfiguration configuration, List<Datei> zieldateien)
     {
-        var praktikanten = Quelldateien.GetMatchingList(configuration, "praktikanten", Students, Klassen);
-        if (praktikanten == null || praktikanten.Count == 0) throw new Exception("Keine schuelerZusatzdaten.dat");
-        var praktika = Quelldateien.GetMatchingList(configuration, "praktika", Students, Klassen);
-        if (praktika == null || praktika.Count == 0) throw new Exception("Keine schuelerlernabschnittsdaten.dat");
+        var praktikanten = Quelldateien.GetMatchingList(configuration, "praktikanten", IStudents, Klassen);
+        if (praktikanten == null /*|| praktikanten.Count == 0*/) throw new Exception("Keine praktikanten.csv");
+        var praktika = Quelldateien.GetMatchingList(configuration, "praktikas", IStudents, Klassen);
+        if (praktika == null || praktika.Count == 0) throw new Exception("praktikas.csv");
 
+        foreach (var zieldatei in zieldateien)
+        {
+            var zieldateiname = Path.Combine(configuration["pfadDownloads"], zieldatei.AbsoluterPfad);
+            zieldatei.AbsoluterPfad = zieldateiname;
 
-        var alleVerschiedenenKlassen = praktika
+            var alleVerschiedenenKlassen = praktika
             .Select(rec => ((IDictionary<string, object>)rec)["Klasse"]?.ToString())
             .Where(k => !string.IsNullOrEmpty(k))
             .Distinct()
             .ToList();
         
-        var alleStudentsMitPraktika = Students.Where(x => alleVerschiedenenKlassen.Contains(x.Klasse)).ToList();
+            var alleStudentsMitPraktika = Students.Where(x => alleVerschiedenenKlassen.Contains(x.Klasse)).ToList();
 
-        
+            foreach (var p in praktika.Select(rec => ((IDictionary<string, object>)rec)).ToList())
+            {
+                var praktikum = "praktikum:" + p["Klasse"].ToString().ToLower() + "_" + p["ErsterTag"].ToString().ToLower();
+                 
+                var alleStudentsDerKlasse = Students.Where(x => x.Klasse == p["Klasse"].ToString()).ToList();
+                
+                foreach (var s in alleStudentsDerKlasse)
+                {                    
+                    // Prüfe in der vorhandenen Praktikantendatei, ob bereits ein Datensatz zu diesem Schüler in diesem Praktikum existiert.
+                    var v = praktikanten
+                        .Select(rec => (IDictionary<string, object>)rec)
+                        .FirstOrDefault(pr => 
+                            pr["Name"].ToString().Contains(s.Nachname.Split('#')[0].ToString()) && 
+                            pr["Name"].ToString().Contains(s.Vorname.ToString()) && 
+                            pr["Praktikum"].ToString() == praktikum // &&
+                            //(!string.IsNullOrEmpty(pr["Betrieb"].ToString()) ||! string.IsNullOrEmpty(pr["Betrieb"].ToString()))
+                        );
 
-
-
+                    dynamic record = new ExpandoObject();
+                    record.Praktikum = "praktikum:" + p["Klasse"].ToString().ToLower() + "_" + p["ErsterTag"].ToString().ToLower();
+                    record.Name = s.Nachname.Split('#')[0] + ", " + s.Vorname;
+                    record.Betrieb = v != null ? v["Betrieb"] : "";
+                    record.Betreuung = v != null ? v["Betreuung"] : "";
+                    zieldatei.Add(record);
+                }
+            }
+            foreach (var aktion in zieldatei.Funktionen)
+                aktion(zieldatei);            
+        }
     }
 
  public void WebuntisOderNetmanOderGeevooOderLitteraCsv(IConfiguration configuration, List<Datei> zieldateien)
