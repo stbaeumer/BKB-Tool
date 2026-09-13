@@ -66,6 +66,7 @@ public class Menüeintrag
  public Relationsgruppen Relationsgruppen { get; internal set; }
  public DokuwikiZugriff WikiZugriff { get; set; }
  public Anrechnungen Anrechnungen { get; private set; }
+ public Action<IConfiguration, string, List<Action<Datei>>, string[], string[], string, char, Encoding, bool, List<string>> Lehrers { get; private set; }
 
  public Menüeintrag(IConfiguration configuration, string titel, Dateien quelldateien, Students students, Klassen klassen, List<string> beschreibung, Action<Menüeintrag> funktion, Global.Rubrik rubrik = Global.Rubrik.Allgemein, Global.NurBeiDiesenSchulnummern nurbeiDiesenSchulnummern = Global.NurBeiDiesenSchulnummern.Alle)
  {
@@ -5184,7 +5185,8 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
  {
   // zieldatei, die die Lehrkräfte enthält. Diese Datei wird in Wiki importiert.
   var zieldatei = new Datei(zieldateiname, funktionen, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
-
+  
+  zieldatei.Lehrers = lehrersSoll;
   zieldatei.WikiZugriff = this.WikiZugriff;
 
   // Ist-Stand der Schulgemeinschaft-Tabelle in Datei schreiben

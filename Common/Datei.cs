@@ -1172,6 +1172,11 @@ public Datei(IConfiguration configuration)
         List<string> nichtIdentischeSonstige = new List<string>();
         foreach (var key in vorhDict.Keys)
         {
+            if(key.ToLower().Contains("orsitz") && neueDict["Page"].ToString().Contains("ave"))
+            {
+                string aaa= "";
+            }
+
             var k = key;
             // Wenn die neueDict keine Sonderzeichen enthält, dann wird auch bei vorhandeneDict die Sonderzeichen ersetzt.
             if (!sonderzeichen)
@@ -1189,6 +1194,25 @@ public Datei(IConfiguration configuration)
             if (vorhDict[key].Equals(value?.ToString())) continue;
             // Z.B. bei Fehlstunden bleibt die neue Zelle leer. In der alten steht 0
             if (vorhDict[key].ToString() == "0" && neueDict[k].ToString() == "") continue;
+
+            // Aus dem Wiki wird u.U. ein Name ausgelesen. vorhDict[key] ist dann z.B. "Peter Müller"
+            // Der value ist dann schulgemeinschaft:mul  
+            // Der Vergleich muss dann über den Umweg eines Wenn value ein Wikilink ist (erkennbar an dem Doppelpunkt) 
+            // Wenn es sich um einen wikilink handelt und der letzte Teil des Links ein LuL-Kürzel ist            
+            if(value.ToString().Contains(":") && Lehrers.Any(x=>x.Kürzel.ToLower() == value.ToString().Split(':').Last().ToLower()))
+            {
+                var lehrer = Lehrers.Where(x=>x.Kürzel.ToLower() == value.ToString().Split(':').Last().ToLower()).FirstOrDefault();
+                if(value.ToString().ToLower() == "schulgemeinschaft:" + lehrer.Kürzel.ToLower())
+                {
+                    if (vorhDict[key].ToString().Contains(lehrer.Vorname + " " + lehrer.Nachname))
+                    {
+                        // Wenn beides matcht, dann weichen die Werte nicht ab.
+                        continue;
+                    }   
+                }
+            }
+
+
             nichtIdentischeSonstige.Add(key);
         }
 
@@ -1915,7 +1939,7 @@ public Datei(IConfiguration configuration)
                                 string aa = "";
                             }
                             var schemaName = Path.GetFileNameWithoutExtension(AbsoluterPfad);
-                            if(zielSeite.Contains("klassen"))
+                            if(zielSeite.Contains("bildungsgaenge") || zielSeite.Contains("kollegium"))
                             {
                             InsertSchemaData(neueDict, schemaName, zielSeite);                                
                             }
@@ -1990,7 +2014,7 @@ alleWerteFuerDieseZeile[uebersetzterKey] = neueDict[key]?.ToString();
                             string zielSeite = neueDict["Page"]?.ToString().ToLower();//.Trim().Split(':').Where(s => !s.Equals("start", StringComparison.OrdinalIgnoreCase)).LastOrDefault();    
                             var schemaName = Path.GetFileNameWithoutExtension(AbsoluterPfad);
                             
-                            if(zielSeite.Contains("klassen:"))
+                            if(zielSeite.Contains("bildungsgaenge:") || zielSeite.Contains("kollegium:"))
                             {
                             UpdateSchemaData(zielSeite, schemaName, alleWerteFuerDieseZeile, WikiZugriff);    
                             }
@@ -2154,6 +2178,8 @@ else
                 templateInhalt = templateInhalt.Replace("@PAGE@", neueDict["Klasse"].ToString());
                 templateInhalt = templateInhalt.Replace("@NAME@", neueDict["Klasse"].ToString());
                 templateInhalt = templateInhalt.Replace("@ID@", zielSeite);
+                templateInhalt = templateInhalt.Replace("#!schulgemeinschaft", "#!klassen");
+
             }
             if (neueDict["Art"].ToString().ToLower() == "termine")
             {
