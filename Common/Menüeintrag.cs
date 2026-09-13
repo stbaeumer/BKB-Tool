@@ -192,7 +192,6 @@ public class Menüeintrag
      {
       beschreibung[i] = beschreibung[i].Replace("4: ", $"[{Global.GetColor(Global.ColorHinweise)}]#4:[/] ");
      }
-
     }
 
     Beschreibung = beschreibung;
@@ -4300,7 +4299,8 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
  public List<dynamic> GetGruppen(
      IConfiguration configuration,
      Lehrers lehrers,
-     Anrechnungen anrechnungen
+     Anrechnungen anrechnungen,
+     Students students
  )
  {
   var rückgabe = new List<dynamic>();
@@ -4370,6 +4370,9 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
       "schulgemeinschaft:kollegium"));
   Gruppen.Add(new Gruppe().GetByWikilink(anrechnungen, lehrers,
       "schulgemeinschaft:lehrerrat"));
+  Gruppen.AddRange(new Gruppe().GetKlassen(gpu002, gpu003, lehrers, students, anrechnungen,
+      "klassen"));
+
 
   foreach (var gruppe in Gruppen)
    rückgabe.Add(gruppe.Record);
@@ -5189,6 +5192,7 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
   [
     "schulgemeinschaft.Page", 
     "schulgemeinschaft.BGkuerzel", 
+    "schulgemeinschaft.BGSeite", 
     "schulgemeinschaft.Namen",
     "schulgemeinschaft.Kürzel",
     "schulgemeinschaft.Mail",
@@ -5220,6 +5224,8 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
     "schulgemeinschaft.Heterogenität",
     "schulgemeinschaft.Klausurplanung",
     "schulgemeinschaft.Versetzung",
+    "schulgemeinschaft.Klasse",
+    "schulgemeinschaft.Klassen",
     "schulgemeinschaft.Abschluss",
     "schulgemeinschaft.DJP1",
     "schulgemeinschaft.DJP2",
@@ -5228,7 +5234,8 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
     "schulgemeinschaft.boyd",
     "schulgemeinschaft.perspektive-boyd",
     "schulgemeinschaft.Aufnahmevoraussetzungen",
-    "schulgemeinschaft.Bildungsziele"
+    "schulgemeinschaft.Bildungsziele",
+    "schulgemeinschaft.KlasseSus",
     
     ], this.WikiZugriff);
 
@@ -5323,7 +5330,7 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
 
   var anrechnungen = this.Anrechnungen;
 
-  zieldatei.AddRange(GetGruppen(configuration, lehrersSoll, this.Anrechnungen));
+  zieldatei.AddRange(GetGruppen(configuration, lehrersSoll, this.Anrechnungen, this.Students));
 
   //
   // Zu 3. Anrechnungen aus Untis, die zu Gruppen werden
@@ -5504,7 +5511,7 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
          {
           var n = student.Bereinigen(student.Nachname.ToLower()).Substring(0, 1);
           var v = student.Bereinigen(student.Vorname.ToLower()).Substring(0, 1);
-          var geburtsjahr = gebDatum.Year.ToString().Substring(2, 2);
+          var geburtsjahr = gebDatum.Year.ToString().Substring(3, 1);
           var geburtsmonat = gebDatum.Month.ToString("D2");
           var geburtstag = gebDatum.Day.ToString("D2");
 

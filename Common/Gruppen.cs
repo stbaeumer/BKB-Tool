@@ -30,6 +30,15 @@ public class Gruppen : List<Gruppe>
     {        
         var gruppen = new Gruppen();
 
+        var alleVerschiedenenKlassen = gpu002
+            .Cast<IDictionary<string, object>>()
+            .Select(rec => rec.ContainsKey("Field5") ? rec["Field5"]?.ToString() : null)
+            .Where(klasse => !string.IsNullOrEmpty(klasse) && klasse != "?")
+            .Distinct()
+            .OrderBy(klasse => klasse)
+            .ToList();
+
+
         var records = new List<dynamic>();
         var bildungsgaengeWikiLinks = (from a in anrechnungs
             where a.Text.Contains("Bildungsgangleitung")
@@ -62,6 +71,19 @@ public class Gruppen : List<Gruppe>
             }
                 
             record.VorsitzLeitung = vorsitzLeitung.TrimEnd(',');
+
+            var klassen = "";
+
+            foreach(var k in alleVerschiedenenKlassen)
+            {
+                var kl = k.Split('2')[0].ToLower();
+                if(kl == kurzname.ToLower())
+                {
+                    klassen += ":klassen:" + k + ",";
+                }
+            }
+
+            record.Klassen = klassen.TrimEnd(',');
 
 
             // Ermittle vorhandene Werte

@@ -467,4 +467,152 @@ public class Gruppe
         gruppe.Record = record;
         return gruppe;
     }
-}
+
+ 
+  public Gruppen GetKlassen(List<dynamic> gpu002, List<dynamic> gpu003,
+        Lehrers lehrers,
+        Students students,
+        Anrechnungen anrechnungen,
+        string wikiLink)
+    {
+        var gruppen = new Gruppen();
+
+        var alleVerschiedenenKlassen = gpu002
+    .Cast<IDictionary<string, object>>()
+    .Select(rec => rec.ContainsKey("Field5") ? rec["Field5"]?.ToString() : null)
+    .Where(klasse => !string.IsNullOrEmpty(klasse) && klasse != "?")
+    .Distinct()
+    .OrderBy(klasse => klasse)
+    .ToList();
+
+        foreach(var k in alleVerschiedenenKlassen)
+        {
+            var lehrerInDerKlasse = gpu002
+                .Cast<IDictionary<string, object>>()
+                .Where(rec => rec.ContainsKey("Field5") && rec["Field5"]?.ToString() == k)
+                .Select(rec => rec.ContainsKey("Field6") ? rec["Field6"]?.ToString() : null)
+                .Where(lehrer => !string.IsNullOrEmpty(lehrer) && lehrer != "?")
+                .Distinct()
+                .OrderBy(lehrer => lehrer)
+                .ToList();
+
+
+            var gruppe = new Gruppe(wikiLink);
+            dynamic record = new ExpandoObject();
+            record.Page = wikiLink + ":" + k;
+            record.Link = wikiLink + ":" + k;
+
+            var lehrerKürzel = new List<string>();
+            var lehrerMail = new List<string>();
+            var lehrerName = new List<string>();
+
+            foreach (var member in lehrerInDerKlasse)
+            {
+                var leh = lehrers.FirstOrDefault(l => l.Kürzel == member);
+
+                if (leh == null) continue; // Wenn kein Lehrer gefunden, nächsten Eintrag ansehen
+
+                if (!lehrerKürzel.Any(x => x == leh.Kürzel)) // Exakte Übereinstimmung prüfen
+                {
+                    lehrerKürzel.Add(leh.Kürzel);
+                }
+
+                if (!lehrerMail.Any(x => x.Contains(leh.Mail)))
+                {
+                    lehrerMail.Add(leh.Mail);
+                }
+
+                if (!lehrerName.Any(x => x.Contains(":schulgemeinschaft:" + leh.Kürzel.ToLower()))) // Prüfen, ob der Name bereits in der Liste ist
+                {
+                    lehrerName.Add((":schulgemeinschaft:" + leh.Kürzel.ToLower()));
+                }
+            }
+
+            record.Klasse = k;
+            record.Namen = string.Join(", ", lehrerName.OrderBy(name => name));
+            record.Mail = string.Join("; ", lehrerMail.OrderBy(name => name));
+            record.Kürzel = string.Join(", ", lehrerKürzel.OrderBy(name => name));
+            record.Art = ":klassen:start";
+
+            var schuelerDerKlasse = "";
+
+            var sus = students            
+            .Where(s => !string.IsNullOrEmpty(s.Klasse)) // Optional: Leere/Null-Werte herausfiltern
+            .Where(s => s.Klasse == k)
+            .Distinct()
+            .OrderBy(s => s.Nachname)
+            .ToList();
+
+            foreach(var s in sus)
+            {
+                schuelerDerKlasse += s.Vorname + " " + s.Nachname.Split('#')[0] + ", ";
+            }
+
+            record.KlasseSus = schuelerDerKlasse.TrimEnd(',').TrimEnd(' ').TrimEnd(',').TrimEnd(' ');
+
+            var klassenLeitung = gpu003
+    .Cast<IDictionary<string, object>>()
+    .Where(rec => rec.ContainsKey("Field1") && rec["Field1"]?.ToString() == k)
+    .Select(rec => rec.ContainsKey("Field30") ? rec["Field30"]?.ToString() : null)
+    .Where(field30 => !string.IsNullOrEmpty(field30))
+    .Select(field30 => field30.Split(',')[0].Trim().ToLower()) // Ersten Lehrer ermitteln & für Wiki-Namespace säubern
+    .FirstOrDefault();
+
+record.VorsitzLeitung = !string.IsNullOrEmpty(klassenLeitung) 
+    ? "schulgemeinschaft:" + klassenLeitung 
+    : string.Empty;
+
+            
+            string klassenName = k.Trim().ToLower(); // z.B. "bs26a", "hbg24b", "bt23a"
+            var match = System.Text.RegularExpressions.Regex.Match(klassenName, @"^([a-z]+)(\d{2})([a-z0-9]*)$");
+
+            if (match.Success)
+            {
+                string bildungsgang = match.Groups[1].Value; // z. B. "bs", "hbg"
+                int einschulungsJahr = int.Parse(match.Groups[2].Value); // z. B. 26, 25, 24, 23
+
+                // Bestimmung des aktuellen Schuljahr-Startjahres (ab August beginnt das neue Schuljahr)
+                DateTime heute = DateTime.Now;
+                int aktuellesSchuljahrStart = (heute.Month >= 8) ? (heute.Year % 100) : ((heute.Year - 1) % 100);
+
+                // Jahrgang berechnen (1 bis 4)
+                int jahrgangsStufe = (aktuellesSchuljahrStart - einschulungsJahr) + 1;
+
+                if (jahrgangsStufe >= 1 && jahrgangsStufe <= 4)
+                {
+                    string targetNamespace = $"djp:{bildungsgang}:jg{jahrgangsStufe}:start";
+
+                    switch (jahrgangsStufe)
+                    {
+                        case 1: record.DJP1 = targetNamespace; break;
+                        case 2: record.DJP2 = targetNamespace; break;
+                        case 3: record.DJP3 = targetNamespace; break;
+                        case 4: record.DJP4 = targetNamespace; break;
+                    }
+     
+                    string targetEnd = $"{bildungsgang}:start";   // z. B. "bs:start"
+
+                    // 2. Anrechnung suchen
+                    var passendeAnrechnung = anrechnungen
+                        .Where(x => !string.IsNullOrEmpty(x.Beschr))
+                        .FirstOrDefault(x => x.Beschr.StartsWith("bildungsgaenge:", StringComparison.OrdinalIgnoreCase) 
+                                        && x.Beschr.EndsWith(targetEnd, StringComparison.OrdinalIgnoreCase));
+
+                    if (passendeAnrechnung != null)
+                    {
+                        record.BGSeite = passendeAnrechnung.Beschr;
+                    }
+                }
+            }
+
+
+
+
+
+            gruppe.Record = record;
+            gruppen.Add(gruppe);
+        }
+        
+        return gruppen;
+    }
+ }

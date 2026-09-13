@@ -244,6 +244,8 @@ public partial class Student
         text = Regex.Replace(text, "[Ñ]", "N");
         text = Regex.Replace(text, "[š]", "s");
         text = Regex.Replace(text, "[Š]", "S");
+        text = Regex.Replace(text, "[Ş]", "S");
+        text = Regex.Replace(text, "[Ș]", "S");
 
         return text;
     }
@@ -572,6 +574,8 @@ public partial class Student
         text = Regex.Replace(text, "[Ñ]", "N");
         text = Regex.Replace(text, "[š]", "s");
         text = Regex.Replace(text, "[Š]", "S");
+        text = Regex.Replace(text, "[Ş]", "S");
+        text = Regex.Replace(text, "[Ș]", "S");
 
         return text;
     }

@@ -1587,18 +1587,18 @@ public class Students : List<Student>
             {
                 foreach (var student in this)
                 {
-                    var schuelerfotoNeu = Directory.GetFiles(pfadFotosAusSchild, $"{student.Nachname}_{student.Vorname}_{student.Geburtsdatum}*.jpg").FirstOrDefault();
+                    var schuelerfotoNeu = Directory.GetFiles(pfadFotosAusSchild, $"{student.Nachname.Split('#')[0]}_{student.Vorname}_{student.Geburtsdatum}*.jpg").FirstOrDefault();
                     if (schuelerfotoNeu == null) continue;
                     alleMöglichenFotos++;
 
-                    var schuelerfotoAlt = unterordner != null ? Directory.GetFiles(unterordner, $"{student.Nachname}_{student.Vorname}_{student.Geburtsdatum}*.jpg").FirstOrDefault() : null;
+                    var schuelerfotoAlt = unterordner != null ? Directory.GetFiles(unterordner, $"{student.Nachname.Split('#')[0]}_{student.Vorname}_{student.Geburtsdatum}*.jpg").FirstOrDefault() : null;
 
                     // Wenn das Foto im Unterordner nicht vorhanden ist, dann wird das Foto für den Export nach Webuntis vorgesehen
                     if (schuelerfotoAlt == null)
                     {
                         student.ZielFotoPfad = schuelerfotoNeu;
                         if (maxAnzahlZeilen > 0)
-                            table.AddRow(student.Nachname + "," + student.Vorname + ", " + student.Klasse + "(" + student.Geburtsdatum.ToString() + ")", string.IsNullOrEmpty(schuelerfotoAlt) ? "-" : Path.GetFileName(schuelerfotoAlt), Path.GetFileName(schuelerfotoNeu));
+                            table.AddRow(student.Nachname + "," + student.Vorname + ", " + "(" + student.Geburtsdatum.ToString() + ")", string.IsNullOrEmpty(schuelerfotoAlt) ? "-" : Path.GetFileName(schuelerfotoAlt), Path.GetFileName(schuelerfotoNeu));
                         maxAnzahlZeilen--;
                     }
                     else
@@ -1611,7 +1611,7 @@ public class Students : List<Student>
                         {
                             student.ZielFotoPfad = schuelerfotoNeu;
                             if (maxAnzahlZeilen > 0)
-                                table.AddRow(student.Nachname + "," + student.Vorname + ", " + student.Klasse + "(" + student.Geburtsdatum.ToString() + ")", string.IsNullOrEmpty(schuelerfotoAlt) ? "-" : Path.GetFileName(schuelerfotoAlt), Path.GetFileName(schuelerfotoNeu));
+                                table.AddRow(student.Nachname + "," + student.Vorname + ", " + "(" + student.Geburtsdatum.ToString() + ")", string.IsNullOrEmpty(schuelerfotoAlt) ? "-" : Path.GetFileName(schuelerfotoAlt), Path.GetFileName(schuelerfotoNeu));
                             maxAnzahlZeilen--;
                         }
                     }
@@ -1650,7 +1650,7 @@ public class Students : List<Student>
         {
             foreach (var student in this)
             {
-                var fotoDiesesSchuelersInOrdner = Directory.GetFiles(pfadFotosAusSchild, $"{student.Nachname}_{student.Vorname}_{student.Geburtsdatum}*.jpg").FirstOrDefault();
+                var fotoDiesesSchuelersInOrdner = Directory.GetFiles(pfadFotosAusSchild, $"{student.Nachname.Split('#')[0]}_{student.Vorname}_{student.Geburtsdatum}*.jpg").FirstOrDefault();
                 if (fotoDiesesSchuelersInOrdner == null)
                     continue;
 

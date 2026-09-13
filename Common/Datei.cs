@@ -1063,6 +1063,14 @@ public Datei(IConfiguration configuration)
                 vorhandeneRec = vorhandeneDatei;
                 break; // Schleife abbrechen, wenn die Datei gefunden wurde
             }
+            // Manchmal wird beim Download (1) usw. an den Dateinamen gehangen
+            if (
+                Path.GetFileName(AbsoluterPfad).Contains("_") &&
+                Path.GetFileName(vorhandeneDatei.AbsoluterPfad).Split('(')[0] == Path.GetFileName(AbsoluterPfad).Split('_')[0])
+            {
+                vorhandeneRec = vorhandeneDatei;
+                break; // Schleife abbrechen, wenn die Datei gefunden wurde
+            }
         }
         return vorhandeneRec ?? new List<dynamic>(); // Rückgabe der gefundenen Datei oder leere Liste, wenn keine Datei gefunden wurde
     }
@@ -1593,10 +1601,10 @@ public Datei(IConfiguration configuration)
   if (this.Count == 0)
    return;
   
-  configuration = Global.Konfig("SmtpUser", Global.Modus.Update, configuration);
-  configuration = Global.Konfig("SmtpKennwort", Global.Modus.Update, configuration);
-  configuration = Global.Konfig("SmtpPort", Global.Modus.Update, configuration);
-  configuration = Global.Konfig("SmtpServer", Global.Modus.Update, configuration);
+  configuration = Global.Konfig("SmtpUser365", Global.Modus.Update, configuration);
+  configuration = Global.Konfig("SmtpKennwort365", Global.Modus.Update, configuration);
+  configuration = Global.Konfig("SmtpPort365", Global.Modus.Update, configuration);
+  configuration = Global.Konfig("SmtpServer365", Global.Modus.Update, configuration);
   var mail = new Mail();
   mail.Senden(configuration, subject, body, to, cc, bcc, attachments);
  }
@@ -1907,7 +1915,11 @@ public Datei(IConfiguration configuration)
                                 string aa = "";
                             }
                             var schemaName = Path.GetFileNameWithoutExtension(AbsoluterPfad);
-                            InsertSchemaData(neueDict, schemaName, zielSeite);                            
+                            if(zielSeite.Contains("klassen"))
+                            {
+                            InsertSchemaData(neueDict, schemaName, zielSeite);                                
+                            }
+                            
                             Console.WriteLine($"INSERT: {anhandDieserSchlüsselAttributeWirdVerglichenString} -> {schemaName} ... durchgeführt.");
                         }
                     }                        
@@ -1977,7 +1989,12 @@ alleWerteFuerDieseZeile[uebersetzterKey] = neueDict[key]?.ToString();
                             // Aufruf der Update-Methode mit der VOLLSTÄNDIGEN Zeile
                             string zielSeite = neueDict["Page"]?.ToString().ToLower();//.Trim().Split(':').Where(s => !s.Equals("start", StringComparison.OrdinalIgnoreCase)).LastOrDefault();    
                             var schemaName = Path.GetFileNameWithoutExtension(AbsoluterPfad);
-                            UpdateSchemaData(zielSeite, schemaName, alleWerteFuerDieseZeile, WikiZugriff);
+                            
+                            if(zielSeite.Contains("klassen:"))
+                            {
+                            UpdateSchemaData(zielSeite, schemaName, alleWerteFuerDieseZeile, WikiZugriff);    
+                            }
+                            
                             Console.WriteLine($"UPDATE: {zielSeite} ... durchgeführt.");
                         }
                     }
@@ -2132,6 +2149,12 @@ else
                 templateInhalt = templateInhalt.Replace("@PAGE@", neueDict["Namen"].ToString());
                 templateInhalt = templateInhalt.Replace("@ID@", zielSeite);
             }
+            if (neueDict["Art"].ToString().ToLower().Contains("klassen"))
+            {
+                templateInhalt = templateInhalt.Replace("@PAGE@", neueDict["Klasse"].ToString());
+                templateInhalt = templateInhalt.Replace("@NAME@", neueDict["Klasse"].ToString());
+                templateInhalt = templateInhalt.Replace("@ID@", zielSeite);
+            }
             if (neueDict["Art"].ToString().ToLower() == "termine")
             {
                 templateInhalt = templateInhalt.Replace("@PAGE@", neueDict["Betreff"].ToString());
@@ -2191,7 +2214,17 @@ else
         // Neue .csv-Dateien beginnen mit demselben Namen wie die Zieldatei, bis zum Unterstrich
         foreach (var vorhandeneDatei in quelldateien)
         {
+            if(vorhandeneDatei.AbsoluterPfad.Contains("praktikanten"))
+            {
+                string a = "";
+            }
             if (Path.GetFileNameWithoutExtension(vorhandeneDatei.AbsoluterPfad.ToLower()).Split('_')[0] == Path.GetFileNameWithoutExtension(AbsoluterPfad.ToLower()).Split('_')[0])
+            {
+                return vorhandeneDatei.AbsoluterPfad;
+                break; // Schleife abbrechen, wenn die Datei gefunden wurde
+            }
+            // Mnachmal bekommen vorhandene hinten eine (1) angehangen.
+            if (Path.GetFileNameWithoutExtension(vorhandeneDatei.AbsoluterPfad.ToLower()).Split('(')[0] == Path.GetFileNameWithoutExtension(AbsoluterPfad.ToLower()).Split('_')[0])
             {
                 return vorhandeneDatei.AbsoluterPfad;
                 break; // Schleife abbrechen, wenn die Datei gefunden wurde

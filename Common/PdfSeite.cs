@@ -284,7 +284,7 @@ public partial class PdfSeite
 
                         // Erstellen und Senden der E-Mail
                         var mail = new Mail();
-                        mail.Senden(configuration, subject, configuration["SmtpUser"], body, memoryStream, this.DateiName, receiverEmail);
+                        mail.Senden(configuration, subject, configuration["SmtpUser365"], body, memoryStream, this.DateiName, receiverEmail);
                     }
                 }
                 catch (Exception ex)

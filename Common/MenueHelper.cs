@@ -72,10 +72,10 @@ public static class MenueHelper
       [
        $"Die Datei schuelerzusatzdaten wird um schulinterne Mailadressen ergänzt und in [{Global.GetColor(Global.ColorPfadInDateien)}]{pfadSchilddatenaustausch}[/] für den Re-Import nach SchILD bereitgestellt.",
        $"Hinweise:",
-       $"1: BKB-Tool bildet die schulinternen Mailadressen wie folgt: [{Global.GetColor(Global.ColorTextHervorheben)}]nv061231@meine-schule.de[/], wobei gilt:",
+       $"1: BKB-Tool bildet die schulinternen Mailadressen wie folgt: [{Global.GetColor(Global.ColorTextHervorheben)}]nv61231@meine-schule.de[/], wobei gilt:",
        $"[{Global.GetColor(Global.ColorTextHervorheben)}]     n[/]       : Erster Buchstabe des Nachnamens. Umlaute werden aufgelöst. Bsp.: [{Global.GetColor(Global.ColorTextHervorheben)}]Ü[/] wird zu [{Global.GetColor(Global.ColorTextHervorheben)}]u[/] usw.",
        $"[{Global.GetColor(Global.ColorTextHervorheben)}]     v[/]       : Erster Buchstabe des Vornamens. Umlaute werden aufgelöst.",
-       $"[{Global.GetColor(Global.ColorTextHervorheben)}]     061231[/]  : Geburtsdatum in der Notation: JJMMTT.",
+       $"[{Global.GetColor(Global.ColorTextHervorheben)}]     61231[/]   : Geburtsdatum in der Notation: JMMTT.",
        $"2: Vorhandene schulinterne SchILD-Mailadressen in [{Global.GetColor(Global.ColorPfadInProgrammen)}]Individualdaten I[/] bleiben unangetastet.",
        $"3: Doppelungen werden angezeigt und müssen nach Vorgabe behandelt werden."
       ],
@@ -177,7 +177,7 @@ public static class MenueHelper
           "ImportNachNetman.csv", new string[] { }, new string[] { }, ",", '\'', new UTF8Encoding(false), false,
           [
            datei => datei.Erstellen(),
-           //datei => datei.ZippenMitKennwort(configuration),
+           datei => datei.ZippenMitKennwort(configuration),
            datei => datei.Mailen(
             configuration,
             "Webuntis-Netman-Geevoo", 
@@ -341,7 +341,7 @@ public static class MenueHelper
        m.PraktikantenCsv(configuration,
        [
         new Datei(
-         DateTime.Now.ToString("yyyyMMdd-HHmm") + "-praktikanten.csv", 
+         "praktikanten_ImportNachWiki" + DateTime.Now.ToString("yyyyMMdd-HHmm") +".csv", 
          new string[] { "Praktikum", "Name" },
          new string[] { }, 
          ",", 
@@ -361,10 +361,10 @@ public static class MenueHelper
           $"Mehr zum Profil Schuelerimport: [{Global.GetColor(Global.ColorHyperlink)}][link=https://github.com/stbaeumer/BKB-Tool/wiki]https://github.com/stbaeumer/BKB-Tool/wiki[/][/]"
          ]
         )
-       ]); // Hier wurde ] statt } benötigt
+       ]);
       },
       Global.Rubrik.Allgemein,
-      Global.NurBeiDiesenSchulnummern.Alle
+      Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
       configuration,
@@ -1148,7 +1148,7 @@ public static class MenueHelper
       students,
       klassen,
       [
-       $"Die zuletzt bearbeitete PDF-Datei in [{Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/] wird eingelesen und jede Seite der Datei wird nach E-Mail-Adressen durchsucht. Wenn auf einer Seite eine oder mehrere E-Mail-Adressen gefunden werden, dann wird die betreffenden Seiten an die enthaltene(n) E-Mail-Adresse(n) gemailt. Das ursprüngliche PDF-Dokument wird also bei Bedarf in mehrere PDF-Dokumente aufgeteilt.",
+       $"Die zuletzt bearbeitete PDF-Datei in [{Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}[/] wird eingelesen und jede Seite der Datei wird nach Lehrer-E-Mail-Adressen durchsucht. Wenn auf einer Seite eine oder mehrere Lehrer-E-Mail-Adressen gefunden werden, dann wird die betreffenden Seiten an die enthaltene(n) Lehrkräfte-E-Mail-Adresse(n) gemailt. Das ursprüngliche PDF-Dokument wird also bei Bedarf in mehrere PDF-Dokumente aufgeteilt.",
        $"Nutzen Sie diese Funktion, um beispielsweise Studenpläne an Lehrkräfte zu mailen.",
        $"Hinweise:",
        $"1. Die zuletzt bearbeitete PDF-Datei wird eingelesen.",

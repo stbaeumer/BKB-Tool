@@ -132,20 +132,20 @@ private bool IstMailadresseGültig(string email)
 
    AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Mails senden ...", ctx =>
    {
-    string smtpServer = configuration["SmtpServer"];
-    int smtpPort = Convert.ToInt32(configuration["SmtpPort"]);
-    string senderEmail = configuration["SmtpUser"];
+    string smtpServer = configuration["SmtpServer365"];
+    int smtpPort = Convert.ToInt32(configuration["SmtpPort365"]);
+    string senderEmail = configuration["SmtpUser365"];
 
-    if (configuration["SmtpKennwort"] == null || configuration["SmtpKennwort"].Length <= 3)
+    if (configuration["SmtpKennwort365"] == null || configuration["SmtpKennwort365"].Length <= 3)
     {
-     Console.WriteLine("Bitte geben Sie das Passwort von " + configuration["SmtpUser"] + " für den E-Mail-Versand ein:");
-     configuration["SmtpKennwort"] = Console.ReadLine();
+     Console.WriteLine("Bitte geben Sie das Passwort von " + configuration["SmtpUser365"] + " für den E-Mail-Versand ein:");
+     configuration["SmtpKennwort365"] = Console.ReadLine();
     }
 
-    string senderPassword = configuration["SmtpKennwort"];
+    string senderPassword = configuration["SmtpKennwort365"];
 
     var email = new MimeMessage();
-    email.From.Add(new MailboxAddress(configuration["SmtpUser"], senderEmail));
+    email.From.Add(new MailboxAddress(configuration["SmtpUser365"], senderEmail));
 
     email.Subject = subject;
 
@@ -188,7 +188,7 @@ private bool IstMailadresseGültig(string email)
             {
                 smtpClient.ServerCertificateValidationCallback = (s, c, h, e) => true; // SSL-Zertifikatsvalidierung deaktivieren
                 smtpClient.Connect(smtpServer, smtpPort, MailKit.Security.SecureSocketOptions.StartTls);
-                //smtpClient.Authenticate(senderEmail, senderPassword);
+                smtpClient.Authenticate(senderEmail, senderPassword);
                 smtpClient.Send(email);
                 smtpClient.Disconnect(true);
             }
@@ -284,15 +284,15 @@ private bool IstMailadresseGültig(string email)
                 mailMessage.Bcc.Add(configuration["BCCAdresse"]);
             }
             
-            if(configuration["SmtpKennwort"]  == null || configuration["SmtpKennwort"].Length <= 3)
+            if(configuration["SmtpKennwort365"]  == null || configuration["SmtpKennwort365"].Length <= 3)
             {
-                Console.WriteLine($"Bitte geben Sie das Passwort von {configuration["SmtpUser"]} für den E-Mail-Versand ein:");
+                Console.WriteLine($"Bitte geben Sie das Passwort von {configuration["SmtpUser365"]} für den E-Mail-Versand ein:");
                 Global.SmtpKennwort = Console.ReadLine();
             }
 
-            using (var smtpClient = new System.Net.Mail.SmtpClient(configuration["SmtpServer"], Convert.ToInt32(configuration["SmtpPort"])))
+            using (var smtpClient = new System.Net.Mail.SmtpClient(configuration["SmtpServer365"], Convert.ToInt32(configuration["SmtpPort365"])))
             {
-                smtpClient.Credentials = new NetworkCredential(sender, configuration["SmtpKennwort"]);
+                smtpClient.Credentials = new NetworkCredential(sender, configuration["SmtpKennwort365"]);
                 smtpClient.EnableSsl = true;
                 smtpClient.Send(mailMessage);
                 smtpClient.Dispose();

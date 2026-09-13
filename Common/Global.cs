@@ -2278,7 +2278,7 @@ public static class KonfigHelper
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
         },
-        ["SmtpKennwortPostfix"] = new KonfigMeta
+        ["SmtpKennwort365"] = new KonfigMeta
         {
             Key = "SmtpKennwort365",
             DefaultValue = Environment.GetEnvironmentVariable("SmtpKennwort365") ?? "",
