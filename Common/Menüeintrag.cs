@@ -1365,7 +1365,7 @@ public class Menüeintrag
      string note = "";
 
      dynamic record = new ExpandoObject();
-     record.Nachname = $"{student.Nachname}#{student.Klasse}";
+     record.Nachname = student.Nachname;
      record.Vorname = student.Vorname;
      record.Geburtsdatum = student.Geburtsdatum;
      record.Jahr = Global.AktSj[0];
@@ -2668,7 +2668,7 @@ public class Menüeintrag
         string aa = "";
        }
 
-       if (configuration["Schulnummer"] == "177659")
+       if (configuration["Schulnummer"] == "177659" || configuration["Schulnummer"] == "111111")
        {
         record.Schlüssel = !string.IsNullOrEmpty(sz["Externe ID-Nr"].ToString()) && sz["Externe ID-Nr"].ToString().Length == 6 && sz["Externe ID-Nr"].ToString().StartsWith("15")
                     ? sz["Externe ID-Nr"].ToString()
@@ -2748,7 +2748,7 @@ public class Menüeintrag
         {
          record = new ExpandoObject();
 
-         if (configuration["Schulnummer"] == "177659")
+         if (configuration["Schulnummer"] == "177659" || configuration["Schulnummer"] == "111111")
          {
           record.Schlüssel = !string.IsNullOrEmpty(sz["Externe ID-Nr"].ToString()) && sz["Externe ID-Nr"].ToString().Length == 6 && sz["Externe ID-Nr"].ToString().StartsWith("15")
                       ? sz["Externe ID-Nr"].ToString()
@@ -2817,7 +2817,7 @@ public class Menüeintrag
       }
       else if (Path.GetFileName(zieldateiname).ToLower().Contains("ausbildungs"))
       {
-       if (configuration["Schulnummer"] == "177659")
+       if (configuration["Schulnummer"] == "177659" || configuration["Schulnummer"] == "111111")
        {
         record.Schlüssel = !string.IsNullOrEmpty(sz["Externe ID-Nr"].ToString()) && sz["Externe ID-Nr"].ToString().Length == 6 && sz["Externe ID-Nr"].ToString().StartsWith("15")
                     ? sz["Externe ID-Nr"].ToString()
@@ -2877,7 +2877,7 @@ public class Menüeintrag
        // Netman
        // ed123456	Dagobert	Eggemann	ed123456@students.berufskolleg-borken.de	E01.07.1992	BZ22A	Stappert, Markus
 
-       if (configuration["Schulnummer"] == "177659")
+       if (configuration["Schulnummer"] == "177659" || configuration["Schulnummer"] == "111111")
        {
         record.Schlüssel = !string.IsNullOrEmpty(sz["Externe ID-Nr"].ToString()) && sz["Externe ID-Nr"].ToString().Length == 6 && sz["Externe ID-Nr"].ToString().StartsWith("15")
                     ? sz["Externe ID-Nr"].ToString()
@@ -3315,7 +3315,7 @@ public class Menüeintrag
 
       if (Path.GetFileName(zieldatei.AbsoluterPfad).ToLower().Contains("schueler"))
       {
-       if (configuration["Schulnummer"] == "177659")
+       if (configuration["Schulnummer"] == "177659" || configuration["Schulnummer"] == "111111")
        {
         record.Schlüssel = !string.IsNullOrEmpty(sz["Externe ID-Nr"].ToString()) && sz["Externe ID-Nr"].ToString().Length == 6 && sz["Externe ID-Nr"].ToString().StartsWith("15")
                     ? sz["Externe ID-Nr"].ToString()
@@ -3367,7 +3367,7 @@ public class Menüeintrag
       }
       else if (Path.GetFileName(zieldatei.AbsoluterPfad).ToLower().Contains("erzieher"))
       {
-       if (configuration["Schulnummer"] == "177659")
+       if (configuration["Schulnummer"] == "177659" || configuration["Schulnummer"] == "111111")
        {
         record.Schlüssel = !string.IsNullOrEmpty(sz["Externe ID-Nr"].ToString()) && sz["Externe ID-Nr"].ToString().Length == 6 && sz["Externe ID-Nr"].ToString().StartsWith("15")
                     ? sz["Externe ID-Nr"].ToString()
@@ -3410,7 +3410,7 @@ public class Menüeintrag
       }
       else if (Path.GetFileName(zieldatei.AbsoluterPfad).ToLower().Contains("betrieb"))
       {
-       if (configuration["Schulnummer"] == "177659")
+       if (configuration["Schulnummer"] == "177659" || configuration["Schulnummer"] == "111111")
        {
         record.Schlüssel = !string.IsNullOrEmpty(sz["Externe ID-Nr"].ToString()) && sz["Externe ID-Nr"].ToString().Length == 6 && sz["Externe ID-Nr"].ToString().StartsWith("15")
                     ? sz["Externe ID-Nr"].ToString()
@@ -3465,7 +3465,7 @@ public class Menüeintrag
        // Netman
        // ed123456	Dagobert	Eggemann	ed123456@students.berufskolleg-borken.de	E01.07.1992	BZ22A	Stappert, Markus
 
-       if (configuration["Schulnummer"] == "177659")
+       if (configuration["Schulnummer"] == "177659" || configuration["Schulnummer"] == "111111")
        {
         record.Schlüssel = !string.IsNullOrEmpty(sz["Externe ID-Nr"].ToString()) && sz["Externe ID-Nr"].ToString().Length == 6 && sz["Externe ID-Nr"].ToString().StartsWith("15")
                     ? sz["Externe ID-Nr"].ToString()

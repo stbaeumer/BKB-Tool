@@ -18,6 +18,7 @@ public class Unterricht
     public int Wochenstunden { get; internal set; }
     public List<string> Jahrgaenge { get; internal set; }
     public Students Students { get; set; }    
+    public Unterricht(){}
     public Unterricht(Global.Zweck zweck, Menüeintrag m, IConfiguration configuration, string? unterrichtsId, string fach, string? schuelergruppe, string? klasse, string? lehrer, int wochentundenLehrkraft, List<dynamic> studentgroupStudents)
     {
         Fach = Bereinigen(fach);
@@ -55,7 +56,7 @@ public class Unterricht
         Jahrgaenge = new List<string>() { Students.DistinctBy(s => s.Jahrgang).FirstOrDefault()?.Jahrgang ?? "" };    
     }
 
-    private string GetKursart(IConfiguration configuration, List<dynamic> kurseDat, string fach, string? kursleiter, string? unterrichtsId)
+    public string GetKursart(IConfiguration configuration, List<dynamic> kurseDat, string fach, string? kursleiter, string? unterrichtsId)
     {
         List<string> kursarten = new List<string>() { "GK", "LK", "AB", "ZK", "VTF", "PJK" };
         List<string> unserekursarten = configuration["Kursarten"]?.Split(',').Select(s => s).ToList();
@@ -135,12 +136,16 @@ public class Unterricht
             return KursBez;
         }
 
+        bool unterrichtsIdHinzugefügt = false;
+
         // Wenn UnterrichtsId nicht in der Liste der UnterrichtsIds des Kurses enthalten ist, wird sie hinzugefügt
         if (!UnterrichtsIds.Contains(int.Parse(unterrichtsId)))
         {
             UnterrichtsIds.Add(int.Parse(unterrichtsId));
             // Eine weitere UterrichtsId verändert die Kursbezeichnung                            
             KursBez = $"{Kursleiter}-{string.Join('-', UnterrichtsIds)}";
+
+            unterrichtsIdHinzugefügt = true;
             
             // Die Kursbezeichnung muss auf max. 20 Zeichen begrenzt werden. Mehr kann SchILD nicht.
             if (KursBez.Length > 20)
@@ -171,7 +176,11 @@ public class Unterricht
                 int index = Lehrkraefte.IndexOf(lehrer);
                 if (index >= 0)
                 {
-                    LehrkraefteWochenstunden[index] += wochentundenLehrkraft;
+                    // keine Erhöhung, wenn die Kursbezeichnung bereits den Kurs enhält
+                    if(unterrichtsIdHinzugefügt)
+                    {
+                        LehrkraefteWochenstunden[index] += wochentundenLehrkraft;    
+                    }
                 }
             }
         }

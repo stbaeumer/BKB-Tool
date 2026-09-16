@@ -536,7 +536,7 @@ public static class MenueHelper
        //configuration = Global.Konfig("Kursarten", Global.Modus.Update, configuration);
 
        m.Unterrichte = new Unterrichte(configuration, m, Global.Zweck.Zeugnis, Global.Art.KursUnterrichte);
-       m.Unterrichte.AddRange(new Unterrichte(configuration, m, Global.Zweck.Zeugnis, Global.Art.NichtKursUnterrichte));
+       //m.Unterrichte.AddRange(new Unterrichte(configuration, m, Global.Zweck.Zeugnis, Global.Art.NichtKursUnterrichte));
        
        m.Kurse(
         configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Kurse.dat"),
