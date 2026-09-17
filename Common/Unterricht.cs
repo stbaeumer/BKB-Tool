@@ -13,7 +13,7 @@ public class Unterricht
     public List<string> Lehrkraefte { get; internal set; }
     public List<int> LehrkraefteWochenstunden { get; internal set; }
     public string KursBez { get; internal set; }
-    public string KursBezUngekürzt { get; private set; }
+    public string KursBezUngekürzt { get; set; }
     public string Kursart { get; internal set; }
     public int Wochenstunden { get; internal set; }
     public List<string> Jahrgaenge { get; internal set; }
