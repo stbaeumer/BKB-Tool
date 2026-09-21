@@ -511,7 +511,7 @@ public static class MenueHelper
         "|", '\0', new UTF8Encoding(true), false);*/
       },
       Global.Rubrik.Allgemein,
-      Global.NurBeiDiesenSchulnummern.Alle
+      Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
       configuration,
@@ -977,7 +977,7 @@ public static class MenueHelper
         "|", '\0', new UTF8Encoding(true), false);
       },
       Global.Rubrik.Leistungsdaten,
-      Global.NurBeiDiesenSchulnummern.Alle
+      Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
         configuration,
@@ -1009,7 +1009,7 @@ public static class MenueHelper
        Global.Zweck.Mahnung);
       },
       Global.Rubrik.Allgemein,
-      Global.NurBeiDiesenSchulnummern.Alle
+      Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
         configuration,
@@ -1139,7 +1139,7 @@ public static class MenueHelper
        pdfDateien.KennwortSetzen(configuration);
       },
       Global.Rubrik.Allgemein,
-      Global.NurBeiDiesenSchulnummern.Alle
+      Global.NurBeiDiesenSchulnummern.Nur177659
      ),     
      new Menüeintrag(
         configuration,
@@ -1182,7 +1182,7 @@ public static class MenueHelper
        });
       },
       Global.Rubrik.Allgemein,
-      Global.NurBeiDiesenSchulnummern.Alle
+      Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
           configuration,
@@ -1207,7 +1207,7 @@ public static class MenueHelper
        m.PdfDateienVerarbeiten(configuration);
       },
       Global.Rubrik.Allgemein,
-      Global.NurBeiDiesenSchulnummern.Alle
+      Global.NurBeiDiesenSchulnummern.Nur177659
      ),
      new Menüeintrag(
           configuration,

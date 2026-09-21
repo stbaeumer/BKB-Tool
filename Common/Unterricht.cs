@@ -17,8 +17,11 @@ public class Unterricht
     public string Kursart { get; internal set; }
     public int Wochenstunden { get; internal set; }
     public List<string> Jahrgaenge { get; internal set; }
-    public Students Students { get; set; }    
-    public Unterricht(){}
+    public Students Students { get; set; }
+ public DateTime Von { get; internal set; }
+ public DateTime Bis { get; internal set; }
+
+ public Unterricht(){}
     public Unterricht(Global.Zweck zweck, Menüeintrag m, IConfiguration configuration, string? unterrichtsId, string fach, string? schuelergruppe, string? klasse, string? lehrer, int wochentundenLehrkraft, List<dynamic> studentgroupStudents)
     {
         Fach = Bereinigen(fach);
