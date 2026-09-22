@@ -3,6 +3,8 @@ using Microsoft.Extensions.Configuration;
 using System.Text.RegularExpressions;
 using Spectre.Console;
 using System.Globalization;
+using System.Data.SqlTypes;
+using System.Xml.Serialization;
 
 public class Unterrichte : List<Unterricht>
 {
@@ -39,7 +41,7 @@ public class Unterrichte : List<Unterricht>
             var table = new Table();
                 table.Border(TableBorder.Rounded);
                 table.AddColumn(new TableColumn("[bold yellow]Fach[/]"));
-                table.AddColumn(new TableColumn("[bold cyan]Lehrer (Stunden)[/]"));
+                table.AddColumn(new TableColumn("[bold cyan]Lehrer(Stunden)[/]"));
                 table.AddColumn(new TableColumn("[bold orange1]Schülergruppen[/]"));
                 table.AddColumn(new TableColumn("[bold white]IDs (U-Gruppe)[/]"));
                 table.AddColumn(new TableColumn("[bold green]Klassen[/]"));
@@ -47,9 +49,9 @@ public class Unterrichte : List<Unterricht>
                 table.AddColumn(new TableColumn("[bold magenta]Unterrichtstyp[/]").Centered());
                 table.AddColumn(new TableColumn("[bold blue]Kursbezeichnung[/]"));
                 table.AddColumn(new TableColumn("[bold grey]Gültig von-bis[/]").Centered());
-                table.AddColumn(new TableColumn("[bold grey]Fall[/]").Centered());
+                table.AddColumn(new TableColumn("[bold grey]SuS[/]").Centered());
 
-            foreach(var klasse in klassen)
+            foreach(var klasse in m.IKlassen)
             {
                 var klassenZeilen = GetZeilenZuKlasse(klasse, gpu002);
                 List<string> faecherRoh = GetFaecherRoh(klassenZeilen);
@@ -60,14 +62,20 @@ public class Unterrichte : List<Unterricht>
                     var fachZeilen = GetZeilenZuKlassenFaechern(klasse, fach, klassenZeilen);
                     List<int> idsBeteiligteSortiert = GetBeteiligteIds(fachZeilen);
                     var lehrerDesFachs = GetLehrerDesFachs(fach, fachZeilen);
-                    var lehrerFachs = GetLehrerFachs(fach, fachZeilen);                    
+                    var lehrerFachs = GetLehrerFachs(fach, fachZeilen);
+                    List<string> faecherRohFach = GetFaecherRoh(fachZeilen);
+                    bool fachMitSchülergruppe = istFachMitSchülergruppe(fachZeilen);
 
-                    var susDerKlasse = m.Students.Where(x=>x.Klasse == klasse).ToList();
+                    var susDerKlasse = m.IStudents.Where(x=>x.Klasse == klasse).ToList();
+
+                    // Es kann sein, dass kein einziger Schüler an einem Kurs teilnimmt, der aber in der Klasse angeboen wird. 
+                    // dann bleibt neueZeile false.
+                    bool neueZeile = false;
 
                     foreach(var s in susDerKlasse)
                     {                        
                         // Gib die Schülergruppen aus dieses S in diesem Fach
-                        var schuelergruppenDiesesSchuelersinDiesemKlassenfach = GetSchuelergruppenDiesesSusInDiesemFach(studentgroupStudents, fachZeilen);
+                        var schuelergruppenDiesesSchuelersinDiesemKlassenfach = GetSchuelergruppenDiesesSusInDiesemFach(s.Id, studentgroupStudents, fachZeilen);
                         
                         foreach(var sg in schuelergruppenDiesesSchuelersinDiesemKlassenfach)
                         {                            
@@ -75,472 +83,83 @@ public class Unterrichte : List<Unterricht>
                             // wobei Kurs als Wort stehenbleibt. Danach werden alle beteiligten Lehrer (also weitere Zeilen mit derselben ID und demselben fach) am Fachunterricht bei diesem Schüler aufgeführt.
                             //Console.WriteLine(GetUnterrichteString(fachZeilen, sg));
                             var unterricht = GetUnterricht(fachZeilen, sg);
+
+                            if (!alleUnterrichte.Any(u => u.KursBez == unterricht.KursBez))
+                            {
+                                unterricht.Students.Add(s);
+                                alleUnterrichte.Add(unterricht);
+                                neueZeile = true;
+                            }
+                            else
+                            {
+                                var u = alleUnterrichte.FirstOrDefault(u => u.KursBez == unterricht.KursBez);
+                                if(!u.Students.Any(ss=>ss.Id == s.Id))
+                                    u.Students.Add(s);
+                            }                                
+                        }
+
+                        // Wenn es kein Schülergruppenfach ist, dann bekommt jeder Schüler diesen Unterricht zugewiesen:
+
+                        if(!fachMitSchülergruppe)
+                        {
+                            var unterricht = GetUnterricht(fachZeilen);
                             
                             if (!alleUnterrichte.Any(u => u.KursBez == unterricht.KursBez))
                             {
                                 unterricht.Students.Add(s);
                                 alleUnterrichte.Add(unterricht);
-
+                                neueZeile = true;
                             }
                             else
                             {
                                 var u = alleUnterrichte.FirstOrDefault(u => u.KursBez == unterricht.KursBez);
-                                u.Students.Add(s);
-                            }                                
+
+                                if(!u.Students.Any(ss=>ss.Id == s.Id))
+                                    u.Students.Add(s);
+                            }
                         }
                     }
-                    Spectre.Console.TableExtensions.AddRow(
+                    if(neueZeile)
+                        Spectre.Console.TableExtensions.AddRow(
                             table,
                             Markup.Escape(alleUnterrichte.Last().Fach),
-                            Markup.Escape(alleUnterrichte.Last().Kursleiter + ","    + string.Join(',',alleUnterrichte.Last().Lehrkraefte)),
+                            Markup.Escape(alleUnterrichte.Last().Kursleiter + "(" + alleUnterrichte.Last().KursleiterWochenstunden + ")" + " "    + string.Join(' ',alleUnterrichte.Last().Lehrkraefte)),
                             Markup.Escape(string.Join(',',alleUnterrichte.Last().Schülergruppe)),
                             Markup.Escape(string.Join(',',alleUnterrichte.Last().UnterrichtsIds)),
                             Markup.Escape(string.Join(',',alleUnterrichte.Last().Klassen)),
-                            Markup.Escape(""),
+                            Markup.Escape(string.Join(',',faecherRohFach)),
                             Markup.Escape("fall"),
-                            Markup.Escape("fall"),
+                            Markup.Escape(alleUnterrichte.Last().KursBez),
                             Markup.Escape($"{alleUnterrichte.Last().Von:dd.MM.yyyy} - {alleUnterrichte.Last().Bis:dd.MM.yyyy}"),
-                            Markup.Escape("fall")
+                            Markup.Escape(alleUnterrichte.Last().Students.Count()+ "")
                         );
                 }
-
+                // Option 1b: Eine stylische Trennlinie (Rule) als Überschrift
+                AnsiConsole.Write(new Rule("[bold blue]" + klasse + "[/]").LeftJustified());
                 AnsiConsole.Write(table);
-            }
-
-            
-
-            var alleIds = new List<int>();
-
-            foreach (var g in gpu002)
-            {
-                var id = GetId(g);
-                var fall = "";
-
-                // Wenn die ID schon behandelt wurde, dann continue
-                if(alleIds.Contains(id)) continue;
-
-                List<int> idsBeteiligteSortiert = GetBeteiligteIds(g, gpu002);
-
-                // Alle Zeilen zu diesem Fach werden einbezogen.
-                // Es werden auch alle Zeilen mit abweichenden Fächern einbezogen, die zur selben Id gehören, wie das interessierende Fach
-                // Es werden auch alle Zeilen einbezogen, 
-
-
-                var zeilen = GetZeilenZuKlasseUndFach(idsBeteiligteSortiert, gpu002);
-
-                // Alle Unterrichts-IDs der beteiligten Zeilen aggregieren
-
-                List<string> faecherRoh = GetFaecherRoh(zeilen);
-                List<string> faecherBereinigt = GetFaecherBereinigt(faecherRoh);
-                List<string> kklassen = GetKlassen(zeilen);
-                List<string> schuelergruppen = GetSchuelergruppen(zeilen);
-                List<string> lehrerFachSchuelergruppen = GetLehrerFachSchuelergruppen(zeilen);
-                List<string> lehrerKürzelSortiert = getLehrerKürzelSortiert(zeilen);                
-                
-                // Jedes verschiedene Fach wird zu (mindestens) einem Unterricht:
-                // Wenn eine einzige Zeile zu einem Fach keine Schülergruppe hat, dann schreibe: 
-                // Fach1-Leh1-Leh2  (alle Leh zu dem bereinigten Fach werden in alphabet. Reihenfolge angehängt)
-                // Fach2-Leh1-Leh3
-                // Wenn alle Zeilen zu einem Fach Schülergruppen haben, dann schreibe: 
-                // Fach1-Leh1-Schülergruppe1VonLeh1 (hänge alle verschiedenen Schülergruppen an)
-                // Fach1-Leh2-Schülergruppe1VonLeh2-Schülergruppe2VonLeh2
-                // Fach2-Leh1-Schülergruppe1VonLeh1-Schülergruppe3VonLeh1
-                // Wenn zwei Lehrer im selben Fach dieselbe Schülergruppe haben, dann schreibe:
-                // Fach1-Leh1-Leh2-Schülergruppe1VonLeh1&2
-
-                List<string> unterrichte = getUnterrichte(zeilen);
-
-
-
-                string kursleiter = lehrerKürzelSortiert.FirstOrDefault() ?? "";
-
-                // 4. Wochenstunden des Kursleiters berechnen (Field2 / Field11)
-                int kursLeiterWochenStunden = (int)GetKursleiterwochenstunden(kursleiter, zeilen);
-
-                List<string> weitereLehrer = lehrerKürzelSortiert.Skip(1).ToList();
-                List<int> weitereLehrerWochenstunden = getWeitereLehrerWochenstunden(kursleiter, weitereLehrer, g, gpu002);
-
-                List<string> unterrichtsgruppen = GetBeteiligteUnterrichtsgruppen(idsBeteiligteSortiert, gpu002);
-
-                // 4. Statistikdatum-Prüfung gegen Zeitraum (Field15 = Von, Field16 = Bis)
-                if (zweck == Global.Zweck.Statistik)
-                    if(fälltInDieStatistik(idsBeteiligteSortiert, DateTime.ParseExact(configuration["StatistikDatum"], "dd.MM.yyyy", CultureInfo.InvariantCulture), gpu002)) 
-                        continue;
-                
-                DateTime von = GetFrühestesDatum(idsBeteiligteSortiert, gpu002);
-                DateTime bis = GetSpätestesDatum(idsBeteiligteSortiert, gpu002);
-
-
-                // ***************************************************************************************************************************
-                // FALL #1
-                // 1. Dieses Fach (z.B. GPF, GPF1, ...) wird von mehreren Lehrern in der Klasse unterrichtet
-                // 2. Dieses Fach wird mindestens 1x auch im Klassenverband unterrichtet                
-
-                if(diesesFachWirdVonMehrerenLehrernInDieserKlasseUnterrichtet(g, gpu002))
-                {
-                    if(fachMin1xImKlassenverbandInDerKlasse(g, gpu002))
-                    {
-                        // Kursunterricht:
-                        // 1. Der erste Lehrer im Alphabet wird Kursleiter
-                        // 2. Alle anderen Lehrer werden in diesem Kurs zu weiteren Lehrern
-                        // 3. Schülergruppen werden komplett ignoriert, weil ja bereits ein Klassenunterricht mit dem Fach bei allen existiert                       
-
-                        fall += "#1";
-                        var istKurs = true;
-
-                        string kursBezeichnung = GetKursbezeichnung(kursleiter, idsBeteiligteSortiert, istKurs);
-                        string kursBezeichnungGekürzt = GetKursbezeichnungGekürzt(kursleiter, idsBeteiligteSortiert, istKurs);
-                        // Alle SuS sind im Kurs, da er ja mindestens 1x auch als Klassenunterricht stattfindet.
-                        Students students = new Students();students.AddRange(m.Students.Where(x => klassen.Contains(x.Klasse)));
-
-                        // 1. Alle Datensätze für diese Klasse und dieses Fach holen
-                        zeilen = lehrerZeilenInDerKlasseInDiesemFach(g, gpu002);
-
-
-                        this.Add(new Unterricht
-                        {        
-                            Fach = faecherBereinigt[0],
-                            KursBez = kursBezeichnungGekürzt,
-                            KursBezUngekürzt = kursBezeichnung,
-                            Kursart = "",
-                            Kursleiter = kursleiter,
-                            KursleiterWochenstunden = kursLeiterWochenStunden,
-                            Lehrkraefte = weitereLehrer,                                // List<string>
-                            LehrkraefteWochenstunden = weitereLehrerWochenstunden,   // List<int>
-                            Wochenstunden = weitereLehrerWochenstunden.Concat(new[] { kursLeiterWochenStunden }).Max(),                            
-                            UnterrichtsIds = idsBeteiligteSortiert,                            // List<string> (oder .Select(int.Parse).ToList() falls List<int> erwartet wird)
-                            Klassen = klassen,                                          // List<string>
-                            Jahrgaenge = new List<string>(),
-                            Schülergruppe = "",
-                            Students = students
-                        });
-                    
-                        // Die Kursart wird aus der Kurse.dat ermittelt, wenn sie dort einmal gesetzt ist. Sie steckt in "Kursart" des Dictionaries.
-                        this.Last().Kursart = this.Last().GetKursart(configuration, kurseDat, faecherBereinigt[0], kursleiter, idsBeteiligteSortiert.FirstOrDefault().ToString());
-
-                        string escapedOutput = Markup.Escape($"{kursleiter}({kursLeiterWochenStunden})" + (weitereLehrer.Any()  ? " " + string.Join(" ", weitereLehrer.Select((l, i) => $"{l}({weitereLehrerWochenstunden[i]} )"))    : ""));
-
-                        string idsMitUGruppen = GetIdsMitUnterrichtsgruppenString(idsBeteiligteSortiert, gpu002);
-
-                        Spectre.Console.TableExtensions.AddRow(
-                            table,
-                            Markup.Escape((string)faecherBereinigt[0]),
-                            escapedOutput,
-                            "[dim]-[/]",
-                            Markup.Escape(idsMitUGruppen),
-                            Markup.Escape(string.Join(", ", klassen)),
-                            Markup.Escape(string.Join(", ", faecherRoh)),
-                            Markup.Escape(istKurs ? "Kurs" : "Klassenunterricht"),
-                            Markup.Escape((string)kursBezeichnung),
-                            Markup.Escape($"{von:dd.MM.yyyy} - {bis:dd.MM.yyyy}"),
-                            Markup.Escape(fall)
-                        );
-                    }                    
-                }
-
-                // ***************************************************************************************************************************
-                // FALL #2
-                // 1. Dieses Fach (z.B. GPF, GPF1, ...) wird von mehreren Lehrern in der Klasse unterrichtet
-                // 2. Dieses Fach wird nicht im Klassenverband unterrichtet, also werden Schülergruppen ausgewertet                
-
-                if(diesesFachWirdVonMehrerenLehrernInDieserKlasseUnterrichtet(g, gpu002))
-                {
-                    if(!fachMin1xImKlassenverbandInDerKlasse(g, gpu002))
-                    {
-                        // Kursunterricht:
-                        // 1. Der erste Lehrer im Alphabet wird Kursleiter
-                        // 2. Alle anderen Lehrer werden in diesem Kurs zu weiteren Lehrern
-                        // 3. Schülergruppen werden komplett ignoriert, weil ja bereits ein Klassenunterricht mit dem Fach bei allen existiert                       
-
-                        fall += "#2";
-                        var istKurs = true;
-                    
-                        string kursBezeichnung = GetKursbezeichnung(kursleiter, idsBeteiligteSortiert, istKurs);
-                        string kursBezeichnungGekürzt = GetKursbezeichnungGekürzt(kursleiter, idsBeteiligteSortiert, istKurs);
-
-                        // Alle SuS sind in dem Kurs, da er ja auch in einem Klassenunterricht stattgefunden hat 
-                        Students students = new Students();students.AddRange(m.Students.Where(x => klassen.Contains(x.Klasse)));
-                        
-                        this.Add(new Unterricht
-                        {        
-                            Fach = faecherBereinigt[0],
-                            KursBez = kursBezeichnungGekürzt,
-                            KursBezUngekürzt = kursBezeichnung,
-                            Kursart = "",
-                            Kursleiter = kursleiter,
-                            KursleiterWochenstunden = kursLeiterWochenStunden,
-                            Lehrkraefte = weitereLehrer,                                // List<string>
-                            LehrkraefteWochenstunden = weitereLehrerWochenstunden,   // List<int>
-                            Wochenstunden = weitereLehrerWochenstunden.Concat(new[] { kursLeiterWochenStunden }).Max(),                            
-                            UnterrichtsIds = idsBeteiligteSortiert,                            // List<string> (oder .Select(int.Parse).ToList() falls List<int> erwartet wird)
-                            Klassen = klassen,                                          // List<string>
-                            Jahrgaenge = new List<string>(),
-                            Schülergruppe = "",
-                            Students = students
-                        });
-                    
-                        // Die Kursart wird aus der Kurse.dat ermittelt, wenn sie dort einmal gesetzt ist. Sie steckt in "Kursart" des Dictionaries.
-                        this.Last().Kursart = this.Last().GetKursart(configuration, kurseDat, faecherBereinigt[0], kursleiter, idsBeteiligteSortiert.FirstOrDefault().ToString());
-
-                        string escapedOutput = Markup.Escape($"{kursleiter}({kursLeiterWochenStunden})" + (weitereLehrer.Any()  ? " " + string.Join(" ", weitereLehrer.Select((l, i) => $"{l}({weitereLehrerWochenstunden[i]} )"))    : ""));
-
-                        string idsMitUGruppen = GetIdsMitUnterrichtsgruppenString(idsBeteiligteSortiert, gpu002);
-
-                        Spectre.Console.TableExtensions.AddRow(
-                            table,
-                            Markup.Escape((string)faecherBereinigt[0]),
-                            escapedOutput,
-                            "[dim]-[/]",
-                            Markup.Escape(idsMitUGruppen),
-                            Markup.Escape(string.Join(", ", klassen)),
-                            Markup.Escape(string.Join(", ", faecherRoh)),
-                            Markup.Escape(istKurs ? "Kurs" : "Klassenunterricht"),
-                            Markup.Escape((string)kursBezeichnung),
-                            Markup.Escape($"{von:dd.MM.yyyy} - {bis:dd.MM.yyyy}"),
-                            Markup.Escape(fall)
-                        );                        
-                    }                    
-                }
-
-                // ***************************************************************************************************************************
-                // FALL Xa
-                // Unerschiedliche Fächer oder (unterschiedliche Schülergruppen + unterschiedliche Lehrer)
-                // führen zu weiteren Unterrichten mit evtl. anderen Schülern
-
-                if(getUnterschiedlicheFächerInRohfaechern(faecherRoh).Count() > 1 || getUnterschiedlicheLehrerSchülergruppen(idsBeteiligteSortiert, gpu002).Count() > 1)
-                {
-                    if(!fachMin1xImKlassenverbandInDerKlasse(g, gpu002))
-                    {
-                        // Kursunterricht:
-                        // 1. Der erste Lehrer im Alphabet wird Kursleiter
-                        // 2. Alle anderen Lehrer werden in diesem Kurs zu weiteren Lehrern
-                        // 3. Schülergruppen werden komplett ignoriert, weil ja bereits ein Klassenunterricht mit dem Fach bei allen existiert                       
-
-                        fall += "a"; // a, weil das erste Fach schon behandelt worde sein muss.
-                        var istKurs = true;
-                        
-                        List<string> unterschiedlicheFächer = getUnterschiedlicheFächerInRohfaechern(faecherRoh);
-                        List<string> unterschiedlicheLehrerSchülergruppen = getUnterschiedlicheLehrerSchülergruppen(idsBeteiligteSortiert, gpu002); 
-
-                        // Das erste Fach wurde ja schon behandelt. Jetzt werden alle weiteren in einer Schleife behandelt.
-                        foreach(var f in unterschiedlicheFächer.Skip(1))
-                        {
-                            var zeilenMitDiesemFach = lehrerZeilenDerKlasseInDiesemFach(f, zeilen);
-                            List<int> beteiligteIdsMitDiesemFachSortiert = GetBeteiligteIdsInDiesemFach(f, zeilen);
-                            
-                            var lehrerListeInDiesemFach = getLehrerKürzelSortiert(zeilen);
-                            string kursleiterInDiesemFach = lehrerKürzelSortiert.FirstOrDefault() ?? "";
-                            
-                            string kursBezeichnung = GetKursbezeichnung(kursleiter, beteiligteIdsMitDiesemFachSortiert, istKurs);
-                            string kursBezeichnungGekürzt = GetKursbezeichnungGekürzt(kursleiter, beteiligteIdsMitDiesemFachSortiert, istKurs);
-
-                            Students students = new Students();students.AddRange(m.Students.Where(x => klassen.Contains(x.Klasse)));
-
-                            this.Add(new Unterricht
-                            {        
-                                Fach = faecherBereinigt[0],
-                                KursBez = kursBezeichnungGekürzt,
-                                KursBezUngekürzt = kursBezeichnung,
-                                Kursart = "",
-                                Kursleiter = kursleiter,
-                                KursleiterWochenstunden = kursLeiterWochenStunden,
-                                Lehrkraefte = weitereLehrer,                                // List<string>
-                                LehrkraefteWochenstunden = weitereLehrerWochenstunden,   // List<int>
-                                Wochenstunden = weitereLehrerWochenstunden.Concat(new[] { kursLeiterWochenStunden }).Max(),                            
-                                UnterrichtsIds = idsBeteiligteSortiert,                            // List<string> (oder .Select(int.Parse).ToList() falls List<int> erwartet wird)
-                                Klassen = klassen,                                          // List<string>
-                                Jahrgaenge = new List<string>(),
-                                Schülergruppe = "",
-                                Students = students
-                            });
-                        
-                            // Die Kursart wird aus der Kurse.dat ermittelt, wenn sie dort einmal gesetzt ist. Sie steckt in "Kursart" des Dictionaries.
-                            this.Last().Kursart = this.Last().GetKursart(configuration, kurseDat, faecherBereinigt[0], kursleiter, idsBeteiligteSortiert.FirstOrDefault().ToString());
-
-                            string escapedOutput = Markup.Escape($"{kursleiter}({kursLeiterWochenStunden})" + (weitereLehrer.Any()  ? " " + string.Join(" ", weitereLehrer.Select((l, i) => $"{l}({weitereLehrerWochenstunden[i]} )"))    : ""));
-
-                            string idsMitUGruppen = GetIdsMitUnterrichtsgruppenString(idsBeteiligteSortiert, gpu002);
-
-                            Spectre.Console.TableExtensions.AddRow(
-                                table,
-                                Markup.Escape((string)faecherBereinigt[0]),
-                                escapedOutput,
-                                "[dim]-[/]",
-                                Markup.Escape(idsMitUGruppen),
-                                Markup.Escape(string.Join(", ", klassen)),
-                                Markup.Escape(string.Join(", ", faecherRoh)),
-                                Markup.Escape(istKurs ? "Kurs" : "Klassenunterricht"),
-                                Markup.Escape((string)kursBezeichnung),
-                                Markup.Escape($"{von:dd.MM.yyyy} - {bis:dd.MM.yyyy}"),
-                                Markup.Escape(fall)
-                            );
-                        }
-                    }                    
-                }
-
-                // ***************************************************************************************************************************
-                // Fall X:
-                // 1. Dieses Fach (z.B. GPF, GPF1, ...) wird von einem einziegen Lehrer unterrichtet
-                // 2. Es kann durchaus mehr als einen Unterricht geben, aber eben alles beim selben Lehrer im selben Fach
-                // 3. Ganz normaler Klassenunterricht                
-
-                if(!diesesFachWirdVonMehrerenLehrernInDieserKlasseUnterrichtet(g, gpu002))
-                {                    
-                    // PUK:
-
-                    fall += "X";
-                    var istKurs = false;
-                    alleIds.AddRange(idsBeteiligteSortiert);
-                    
-                    string kursBezeichnung = GetKursbezeichnung(kursleiter, idsBeteiligteSortiert, istKurs);
-                    string kursBezeichnungGekürzt = GetKursbezeichnungGekürzt(kursleiter, idsBeteiligteSortiert, istKurs);
-
-                    // Alle SuS sind in dem Kurs, da er ja auch in einem Klassenunterricht stattgefunden hat 
-                    Students students = new Students();students.AddRange(m.Students.Where(x => klassen.Contains(x.Klasse)));
-
-                    this.Add(new Unterricht
-                    {        
-                        Fach = faecherBereinigt[0],
-                        KursBez = kursBezeichnungGekürzt,
-                        KursBezUngekürzt = kursBezeichnung,
-                        Kursart = "",
-                        Kursleiter = kursleiter,
-                        KursleiterWochenstunden = kursLeiterWochenStunden,
-                        Lehrkraefte = weitereLehrer,                                // List<string>
-                        LehrkraefteWochenstunden = weitereLehrerWochenstunden,   // List<int>
-                        Wochenstunden = weitereLehrerWochenstunden.Concat(new[] { kursLeiterWochenStunden }).Max(),                            
-                        UnterrichtsIds = idsBeteiligteSortiert,                            // List<string> (oder .Select(int.Parse).ToList() falls List<int> erwartet wird)
-                        Klassen = klassen,                                          // List<string>
-                        Jahrgaenge = new List<string>(),
-                        Schülergruppe = "",
-                        Students = students
-                    });
-                
-                    // Die Kursart wird aus der Kurse.dat ermittelt, wenn sie dort einmal gesetzt ist. Sie steckt in "Kursart" des Dictionaries.
-                    this.Last().Kursart = this.Last().GetKursart(configuration, kurseDat, faecherBereinigt[0], kursleiter, idsBeteiligteSortiert.FirstOrDefault().ToString());
-
-                    string escapedOutput = Markup.Escape($"{kursleiter}({kursLeiterWochenStunden})" + (weitereLehrer.Any()  ? " " + string.Join(" ", weitereLehrer.Select((l, i) => $"{l}({weitereLehrerWochenstunden[i]} )"))    : ""));
-
-                    string idsMitUGruppen = GetIdsMitUnterrichtsgruppenString(idsBeteiligteSortiert, gpu002);
-
-                    Spectre.Console.TableExtensions.AddRow(
-                        table,
-                        Markup.Escape((string)faecherBereinigt[0]),
-                        escapedOutput,
-                        "[dim]-[/]",                        
-                        Markup.Escape(idsMitUGruppen),
-                        Markup.Escape(string.Join(", ", klassen)),
-                        Markup.Escape(string.Join(", ", faecherRoh)),
-                        Markup.Escape(istKurs ? "Kurs" : "Klassenunterricht"),
-                        Markup.Escape((string)kursBezeichnung),
-                        Markup.Escape($"{von:dd.MM.yyyy} - {bis:dd.MM.yyyy}"),
-                        Markup.Escape(fall)
-                    );     
-                }
-            }
-
-            AnsiConsole.Write(table);
-
-
-
-
-
-
-/// <summary>
-/// Prüft, ob ein Untis/GPU-Datensatz eine Wochenstundenzahl größer als 0 aufweist (Field11).
-/// </summary>
-bool HasHours(IDictionary<string, object> r)
-{
-    if (r.ContainsKey("Field11") && r["Field11"] != null)
-    {
-        if (double.TryParse(r["Field11"]?.ToString()?.Trim(), 
-            System.Globalization.NumberStyles.Any, 
-            System.Globalization.CultureInfo.InvariantCulture, out var parsed))
-        {
-            // Untis skaliert manche Stundenwerte intern mit Faktor 100.000
-            var hours = parsed >= 1000 ? parsed / 100000.0 : parsed;
-            return hours > 0;
+            }            
         }
-    }
-    return false;
+    );
 }
 
-/// <summary>
-/// Liest das Lehrerkürzel aus den bevorzugten Feldern (Field6, Fallback: Field5) aus.
-/// </summary>
-string GetTeacherFromRecord(IDictionary<string, object> r)
+ private bool istFachMitSchülergruppe(IEnumerable<object> fachZeilen)
 {
-    string[] candidateFields = { "Field6", "Field5" };
+    if (fachZeilen == null)
+        return false;
 
-    foreach (var field in candidateFields)
-    {
-        if (r.ContainsKey(field) && r[field] != null)
-        {
-            var val = r[field]?.ToString()?.Trim()?.Trim('"');
-            if (!string.IsNullOrEmpty(val) && val != "0")
-            {
-                return val;
-            }
-        }
-    }
-    return string.Empty;
+    return fachZeilen
+        .OfType<IDictionary<string, object>>()
+        .Select(d => d.ContainsKey("Field42") ? d["Field42"]?.ToString()?.Trim()?.Trim('"') ?? "" : "")
+        .Any(sg => !string.IsNullOrWhiteSpace(sg) && sg != "?");
 }
 
-/// <summary>
-/// Liest die Schülergruppen-Bezeichnung aus Field42 (bzw. Field43) aus und ignoriert Ungültige/Zahlenwerte.
-/// </summary>
-string GetStudentGroupFromRecord(IDictionary<string, object> r)
+ private Unterricht GetUnterricht(IEnumerable<object> fachZeilen, string schuelergruppe = null)
 {
-    string[] candidateFields = { "Field42", "Field43" };
-
-    foreach (var field in candidateFields)
-    {
-        if (r.ContainsKey(field) && r[field] != null)
-        {
-            var val = r[field]?.ToString()?.Trim()?.Trim('"');
-
-            if (string.IsNullOrEmpty(val) || val == "0" || val == "n") 
-                continue;
-
-            // Reine Zahlen ignorieren (keine gültigen Schülergruppen-Namen)
-            if (double.TryParse(val, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out _))
-                continue;
-
-            return val;
-        }
-    }
-
-    return string.Empty;
-}
-
-/// <summary>
-/// Liest die Unterrichtsgruppe (U-Gruppe) aus Field12 (bzw. Field13) aus.
-/// </summary>
-string GetUGroupFromRecord(IDictionary<string, object> r)
-{
-    string[] candidateFields = { "Field12", "Field13" };
-
-    foreach (var field in candidateFields)
-    {
-        if (r.ContainsKey(field) && r[field] != null)
-        {
-            var val = r[field]?.ToString()?.Trim()?.Trim('"');
-            if (!string.IsNullOrEmpty(val) && val != "0")
-            {
-                return val;
-            }
-        }
-    }
-
-    return string.Empty;
-}
-
-});}
-
- private Unterricht GetUnterricht(IEnumerable<object> fachZeilen, string schuelergruppe)
-{
-    if (fachZeilen == null || string.IsNullOrWhiteSpace(schuelergruppe))
+    if (fachZeilen == null)
         return null;
+
+    // Optionalen Filterwert vorab trimmen
+    var schuelergruppeFilter = schuelergruppe?.Trim().Trim('"');
 
     var relevanteZeilen = fachZeilen
         .OfType<IDictionary<string, object>>()
@@ -549,13 +168,14 @@ string GetUGroupFromRecord(IDictionary<string, object> r)
             Lehrer = ExtrahiereLehrer(d)?.Trim().Trim('"') ?? "",
             RawFach = d.ContainsKey("Field7") ? d["Field7"]?.ToString()?.Trim()?.Trim('"') ?? "" : "",
             Schuelergruppe = d.ContainsKey("Field42") ? d["Field42"]?.ToString()?.Trim()?.Trim('"') ?? "" : "",
-            Klasse = d.ContainsKey("Field1") ? d["Field1"]?.ToString()?.Trim()?.Trim('"') ?? "" : "",
+            Klasse = d.ContainsKey("Field5") ? d["Field5"]?.ToString()?.Trim()?.Trim('"') ?? "" : "",
             VonStr = d.ContainsKey("Field15") ? d["Field15"]?.ToString()?.Trim()?.Trim('"') ?? "" : "",
             BisStr = d.ContainsKey("Field16") ? d["Field16"]?.ToString()?.Trim()?.Trim('"') ?? "" : "",
             IdStr = ExtrahiereUnterrichtId(d)?.Trim().Trim('"') ?? "",
             Stunden = ExtrahiereStundenWert(d)
         })
-        .Where(x => x.Schuelergruppe.Equals(schuelergruppe.Trim().Trim('"'), StringComparison.OrdinalIgnoreCase) &&
+        .Where(x => (string.IsNullOrWhiteSpace(schuelergruppeFilter) || 
+                     x.Schuelergruppe.Equals(schuelergruppeFilter, StringComparison.OrdinalIgnoreCase)) &&
                     !string.IsNullOrWhiteSpace(x.Lehrer) && x.Lehrer != "?" &&
                     !string.IsNullOrWhiteSpace(x.RawFach) && x.RawFach != "?")
         .ToList();
@@ -593,8 +213,8 @@ string GetUGroupFromRecord(IDictionary<string, object> r)
     // 4. KursBezeichnung (Ungekürzt & Auf 20 Zeichen gekürzt)
     var idsJoined = string.Join("-", unterrichtsIds);
     var kursBezUngekuerzt = string.IsNullOrEmpty(idsJoined) 
-        ? fachbereinigt 
-        : $"{fachbereinigt}-{idsJoined}";
+        ? ersterLehrer.Lehrer 
+        : $"{ersterLehrer.Lehrer}-{idsJoined}";
 
     var kursBezGekuerzt = kursBezUngekuerzt.Length > 20 
         ? kursBezUngekuerzt.Substring(0, 20) 
@@ -629,11 +249,12 @@ string GetUGroupFromRecord(IDictionary<string, object> r)
         Kursleiter = ersterLehrer.Lehrer,
         KursleiterWochenstunden = (int)ersterLehrer.Stunden,
         Lehrkraefte = weitereLehrer.Select(x => x.Lehrer).ToList(),
-        LehrkraefteWochenstunden = weitereLehrer.Select(x => (int)x.Stunden).ToList(),        Wochenstunden = (int)maxWochenstunden,
+        LehrkraefteWochenstunden = weitereLehrer.Select(x => (int)x.Stunden).ToList(),
+        Wochenstunden = (int)maxWochenstunden,
         UnterrichtsIds = unterrichtsIds,
         Klassen = klassenList,
         Jahrgaenge = new List<string>(),
-        Schülergruppe = schuelergruppe,
+        Schülergruppe = schuelergruppeFilter ?? "", // Falls kein Wert übergeben wurde, wird ein leerer String gesetzt
         Students = new Students(),
         Von = vonDatum,
         Bis = bisDatum
@@ -732,16 +353,19 @@ string GetUGroupFromRecord(IDictionary<string, object> r)
 }
 
  private List<string> GetSchuelergruppenDiesesSusInDiesemFach(
+    string studentId,
     IEnumerable<object> studentgroupStudents, 
     IEnumerable<object> fachZeilen)
 {
-    if (studentgroupStudents == null || fachZeilen == null)
+    if (string.IsNullOrWhiteSpace(studentId) || studentgroupStudents == null || fachZeilen == null)
         return new List<string>();
 
-    // 1. Alle in den fachZeilen vorkommenden Schülergruppen für dieses Fach ermitteln
+    var studentIdClean = CleanString(studentId);
+
+    // 1. Gültige Schülergruppen aus fachZeilen (z. B. "DVG1_GG26A")
     var gueltigeSchuelergruppen = fachZeilen
         .OfType<IDictionary<string, object>>()
-        .Select(d => d.ContainsKey("Field42") ? d["Field42"]?.ToString()?.Trim()?.Trim('"') ?? "" : "")
+        .Select(d => CleanString(GetDictValue(d, "Field42")))
         .Where(sg => !string.IsNullOrWhiteSpace(sg) && sg != "?")
         .Distinct(StringComparer.OrdinalIgnoreCase)
         .ToHashSet(StringComparer.OrdinalIgnoreCase);
@@ -749,38 +373,70 @@ string GetUGroupFromRecord(IDictionary<string, object> r)
     if (!gueltigeSchuelergruppen.Any())
         return new List<string>();
 
-    // 2. Das relevante BaseFach aus den fachZeilen bestimmen
-    var aktuellesRawFach = fachZeilen
-        .OfType<IDictionary<string, object>>()
-        .Select(d => d.ContainsKey("Field7") ? d["Field7"]?.ToString()?.Trim()?.Trim('"') ?? "" : "")
-        .FirstOrDefault(f => !string.IsNullOrWhiteSpace(f));
+    // 2. studentgroupStudents filtern
+    var erg = new List<string>();
 
-    if (string.IsNullOrWhiteSpace(aktuellesRawFach))
-        return new List<string>();
+    foreach (var obj in studentgroupStudents)
+    {
+        if (obj is not IDictionary<string, object> d)
+            continue;
 
-    var aktuellesBaseFach = GetBaseSubjectWithCourseType(aktuellesRawFach);
+        // Versuche Schüler-ID über verschiedene Key-Möglichkeiten zu finden
+        var currentStudentId = CleanString(
+            GetDictValue(d, "student.name", "student.key", "student.id", "student", "schueler", "Field1", "Field2")
+        );
 
-    // 3. studentgroupStudents filtern nach aktuellem Fach und Abgleich der Schülergruppe
-    return studentgroupStudents
-        .OfType<IDictionary<string, object>>()
-        .Where(d => 
+        if (!currentStudentId.Equals(studentIdClean, StringComparison.OrdinalIgnoreCase))
+            continue;
+
+        // Versuche Schülergruppe über verschiedene Key-Möglichkeiten zu finden
+        var sgName = CleanString(
+            GetDictValue(d, "studentgroup.name", "studentgroup", "gruppe", "schuelergruppe", "Field4", "Field5")
+        );
+
+        if (!string.IsNullOrWhiteSpace(sgName) && gueltigeSchuelergruppen.Contains(sgName))
         {
-            var subject = d.ContainsKey("subject") ? d["subject"]?.ToString()?.Trim()?.Trim('"') ?? "" : "";
-            var baseSubject = GetBaseSubjectWithCourseType(subject);
+            erg.Add(sgName);
+        }
+    }
 
-            // Prüfen, ob das Fach übereinstimmt
-            if (!baseSubject.Equals(aktuellesBaseFach, StringComparison.OrdinalIgnoreCase))
-                return false;
+    return erg.Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x).ToList();
+}
 
-            var sgName = d.ContainsKey("studentgroup.name") ? d["studentgroup.name"]?.ToString()?.Trim()?.Trim('"') ?? "" : "";
+// Hilfsmethode: Durchsucht das Dictionary flexibel nach Keys (Case-Insensitive und Fallbacks)
+private string GetDictValue(IDictionary<string, object> dict, params string[] possibleKeys)
+{
+    // 1. Exakter/Vergleichbarer Match aus den gewünschten Keys
+    foreach (var key in possibleKeys)
+    {
+        var foundKey = dict.Keys.FirstOrDefault(k => k.Equals(key, StringComparison.OrdinalIgnoreCase));
+        if (foundKey != null && dict[foundKey] != null)
+            return dict[foundKey].ToString();
+    }
 
-            // Prüfen, ob die Schülergruppe in den fachZeilen existiert
-            return gueltigeSchuelergruppen.Contains(sgName);
-        })
-        .Select(d => d["studentgroup.name"].ToString().Trim().Trim('"'))
-        .Distinct()
-        .OrderBy(sg => sg)
-        .ToList();
+    // 2. Fallback: Falls Keys z.B. "student_id" oder "studentName" heißen
+    foreach (var key in possibleKeys)
+    {
+        var partialKey = dict.Keys.FirstOrDefault(k => k.IndexOf(key, StringComparison.OrdinalIgnoreCase) >= 0);
+        if (partialKey != null && dict[partialKey] != null)
+            return dict[partialKey].ToString();
+    }
+
+    return "";
+}
+
+// Hilfsmethode: Bereinigt Strings gründlich von Anführungszeichen, Leerzeichen, Tabs und NBSP
+private string CleanString(string input)
+{
+    if (string.IsNullOrWhiteSpace(input))
+        return "";
+
+    return input
+        .Replace("\u00A0", " ") // Geschütztes Leerzeichen durch normales ersetzen
+        .Replace("\t", " ")     // Tabulatoren ersetzen
+        .Trim()
+        .Trim('"')
+        .Trim();
 }
 
  private List<string> GetFachLehIdStundenGekoppelt(IEnumerable<object> fachZeilen)
@@ -2489,12 +2145,12 @@ private double ExtrahiereStundenWert(IDictionary<string, object> d)
                 if (parsed >= 100000) return parsed / 100000.0;
                 if (parsed >= 100) return parsed / 100.0;
                 
-                return parsed;
+                return (int)parsed;
             }
         }
     }
 
-    return 0.0;
+    return 0;
 }
 
 #endregion

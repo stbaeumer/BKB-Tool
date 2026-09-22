@@ -1941,7 +1941,7 @@ public Datei(IConfiguration configuration)
                             var schemaName = Path.GetFileNameWithoutExtension(AbsoluterPfad);
                             if(zielSeite.Contains("bildungsgaenge") || zielSeite.Contains("kollegium"))
                             {
-                            InsertSchemaData(neueDict, schemaName, zielSeite);                                
+                            InsertSchemaData(neueDict, schemaName, zielSeite);
                             }
                             
                             Console.WriteLine($"INSERT: {anhandDieserSchlüsselAttributeWirdVerglichenString} -> {schemaName} ... durchgeführt.");

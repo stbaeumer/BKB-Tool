@@ -869,7 +869,7 @@ public static class MenueHelper
       {
        m.FilterInteressierendeStudentsUndKlassen(configuration);
        m.Unterrichte = new Unterrichte(configuration, m, Global.Zweck.Zeugnis, Global.Art.KursUnterrichte);
-       m.Unterrichte.AddRange(new Unterrichte(configuration, m, Global.Zweck.Zeugnis, Global.Art.NichtKursUnterrichte));
+       //m.Unterrichte.AddRange(new Unterrichte(configuration, m, Global.Zweck.Zeugnis, Global.Art.NichtKursUnterrichte));
        Global.Konfig("Klausurbelegung", Global.Modus.Update, configuration, "", -1, -1, "", "1", null, "1,2,3");
        Global.Konfig("InteressierendesSchuljahr", Global.Modus.Update, configuration, "", -1, -1, "", "1", null, "25-26,26-27,27-28");
        Global.Konfig("Abschnitt", Global.Modus.Update, configuration, "", -1, -1, "", "1", null, "1,2");

@@ -6325,7 +6325,7 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
   List<Action<Datei>> funktionen)
  {
   var leistungsdaten = Quelldateien.GetMatchingList(configuration, "schuelerleistungsdaten", IStudents, Klassen);
-  if (leistungsdaten == null || !leistungsdaten.Any()) return;
+  //if (leistungsdaten == null || !leistungsdaten.Any()) return;
 
   var gpu002 = Quelldateien.GetMatchingList(configuration, "gpu002", IStudents, Klassen);
   if (gpu002 == null || !gpu002.Any()) return;
