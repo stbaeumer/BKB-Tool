@@ -20,6 +20,7 @@ public class Unterricht
     public Students Students { get; set; }
  public DateTime Von { get; internal set; }
  public DateTime Bis { get; internal set; }
+ public List<string> FaecherRoh { get; set; }
 
  public Unterricht(){}
     public Unterricht(Global.Zweck zweck, Menüeintrag m, IConfiguration configuration, string? unterrichtsId, string fach, string? schuelergruppe, string? klasse, string? lehrer, int wochentundenLehrkraft, List<dynamic> studentgroupStudents)
@@ -188,5 +189,57 @@ public class Unterricht
             }
         }
         return KursBez;
+    }
+
+ public void UpdateUnterricht(Student student, Unterricht neuerUnterricht)
+    {
+        if (neuerUnterricht == null)
+            return;
+
+        // 1. Weitere Lehrkräfte und deren Wochenstunden hinzufügen
+        if (neuerUnterricht.Lehrkraefte != null)
+        {
+            for (int i = 0; i < neuerUnterricht.Lehrkraefte.Count; i++)
+            {
+                var lehrkraft = neuerUnterricht.Lehrkraefte[i];
+
+                // Prüfen, ob die Lehrkraft in diesem Unterricht noch fehlt
+                if (!this.Lehrkraefte.Contains(lehrkraft))
+                {
+                    this.Lehrkraefte.Add(lehrkraft);
+
+                    // Passende Wochenstunde hinzufügen (falls im Quell-Objekt vorhanden)
+                    if (neuerUnterricht.LehrkraefteWochenstunden != null && i < neuerUnterricht.LehrkraefteWochenstunden.Count)
+                    {
+                        this.LehrkraefteWochenstunden.Add(neuerUnterricht.LehrkraefteWochenstunden[i]);
+                    }
+                    else
+                    {
+                        this.LehrkraefteWochenstunden.Add(0);
+                    }
+                }
+            }
+        }
+
+        // 2. Weitere Klassen hinzufügen (duplikatsfrei)
+        if (neuerUnterricht.Klassen != null)
+        {
+            foreach (var klasse in neuerUnterricht.Klassen)
+            {
+                if (!this.Klassen.Contains(klasse))
+                {
+                    this.Klassen.Add(klasse);
+                }
+            }
+        }
+
+        // 3. Schüler hinzufügen, falls noch nicht vorhanden
+        if (student != null && this.Students != null)
+        {
+            if (!this.Students.Any(ss => ss.Id == student.Id))
+            {
+                this.Students.Add(student);
+            }
+        }
     }
 }
