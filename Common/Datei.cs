@@ -3062,4 +3062,52 @@ public interface IDokuWikiRpc : IXmlRpcProxy
 
   return kategorien.TrimEnd(',');
  }
+
+ internal List<dynamic>? FilternGpu002Unterrichtsgruppen(IConfiguration configuration)
+{
+    var configStr = configuration["NichtInteressierendeUnterrichtsgruppen"];
+    if (string.IsNullOrWhiteSpace(configStr))
+    {
+        return this;
+    }
+
+    // Hashset für schnelle O(1)-Prüfung und Trimmen von Leerzeichen
+    var n = configStr.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                     .Select(s => s.Trim())
+                     .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+    // Entfernt alle Einträge direkt aus `this`, deren Field12 in `n` enthalten ist
+    this.RemoveAll(rec =>
+    {
+        var dict = (IDictionary<string, object>)rec;
+        var x = dict.TryGetValue("Field12", out var val) ? val?.ToString() : string.Empty;
+        return !string.IsNullOrEmpty(x) && n.Contains(x);
+    });
+
+    return this;
+}
+
+internal List<dynamic>? FilternGpu002Fächer(IConfiguration configuration)
+ {
+  var configStr = configuration["NichtInteressierendeFächer"];
+    if (string.IsNullOrWhiteSpace(configStr))
+    {
+        return this;
+    }
+
+    // Hashset für schnelle O(1)-Prüfung und Trimmen von Leerzeichen
+    var n = configStr.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                     .Select(s => s.Trim())
+                     .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+    // Entfernt alle Einträge direkt aus `this`, deren Field7 in `n` enthalten ist
+    this.RemoveAll(rec =>
+    {
+        var dict = (IDictionary<string, object>)rec;
+        var x = dict.TryGetValue("Field7", out var val) ? val?.ToString() : string.Empty;
+        return !string.IsNullOrEmpty(x) && n.Contains(x);
+    });
+
+    return this;
+ }
 }

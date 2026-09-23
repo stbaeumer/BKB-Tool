@@ -597,7 +597,20 @@ public class Dateien : List<Datei>
         else if (datei.AbsoluterPfad.ToLower().Contains("studentgroupstudents") && students != null && students.Count > 0)
             return datei.FilternStudentgroupStudents(students, students.GetKlassen());
         else if (students != null && students.Count > 0)
-            return datei.Filtern(students, students.GetKlassen());
+        {
+            datei.Filtern(students, students.GetKlassen());
+            
+            if (datei.AbsoluterPfad.Contains("GPU002") && !string.IsNullOrEmpty(configuration["NichtInteressierendeUnterrichtsgruppen"]))
+            {
+                datei.FilternGpu002Unterrichtsgruppen(configuration);
+            }
+            if (datei.AbsoluterPfad.Contains("GPU002") && !string.IsNullOrEmpty(configuration["NichtInteressierendeFächer"]))
+            {
+                datei.FilternGpu002Fächer(configuration);
+            }
+
+            return datei;
+        }            
         else if (datei.AbsoluterPfad.ToLower().Contains("lehrkraefte"))
             return datei.ToList();
 
