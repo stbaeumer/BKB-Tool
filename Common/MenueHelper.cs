@@ -446,8 +446,8 @@ public static class MenueHelper
      ),
      new Menüeintrag(
       configuration,
-      $"Stammdaten:Mo:Schulgemeinschaft & Untisanrechnungen abgleichen",
-      quelldateien.Notwendige(configuration, ["istSollMittel,csv,optional", "schulgemeinschaft,struct", "lehrkraefte,dat", "faecher,dat", "GPU004,txt", "GPU002,txt", "klassen,dat", "GPU003,txt", "gruppen,struct", "schuelervermerke,dat", "schuelerzusatzdaten,dat", "GPU006,txt"]),      
+      $"Schulgemeinschaft:Mo:Schulgemeinschaft & Untisanrechnungen abgleichen",
+      quelldateien.Notwendige(configuration, ["istSollMittel,csv,optional", "sqliteSchulgemeinschaft,csv", "schulgemeinschaft,struct", "lehrkraefte,dat", "faecher,dat", "GPU004,txt", "GPU002,txt", "klassen,dat", "GPU003,txt", "gruppen,struct", "schuelervermerke,dat", "schuelerzusatzdaten,dat", "GPU006,txt"]),      
       students,
       klassen,
       [
@@ -468,15 +468,21 @@ public static class MenueHelper
        m.GetAnrechnungen(lehrers, configuration);
        m.Schulgemeinschaft(
         configuration, Path.Combine(pfadDownloads ?? "", "schulgemeinschaft.struct"), lehrers,
+        [ // Aus diesen Links in Untis-Anrechnungen sollen Seiten in Wiki werden. Rolle: Vorsitz oder Leitung  
+          ":schulgemeinschaft:krise:start",
+          "schulgemeinschaft:lehrerrat",
+          ":schulgemeinschaft:referendar_innen",
+          ":schulgemeinschaft:schulleitung:erweiterte:start"
+        ],
         [
          datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.Vergleichen),         
          datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.SchemaUpdaten),
          datei => datei.OeffneWebseite("https://bkb.wiki/schulgemeinschaft:start")
         ],
         ["Link"],
-        ["Page", "Namen", "Art", "Amt", "BGKuerzel", "Anlage", "TZ/VZ", "DJP1", "DJP2", "DJP3", "DJP4", "boyd", "perspektive-boyd", "Aufnahmevoraussetzungen", "Bildungsziele", "Abschluss", "Versetzung", "Klausurplanung", "Heterogenität", "Praktikum", "BO-Curriculum", "Link zur Homepage"],
+        ["Page", "Namen", "Art", "Amt", "BGKuerzel", "Anlage", "TZ/VZ", "DJP1", "DJP2", "DJP3", "DJP4", "boyd", "perspektive-boyd", "Aufnahmevoraussetzungen", "Bildungsziele", "Abschluss", "Versetzung", "Klausurplanung", "Heterogenität", "Praktikum", "BO-Curriculum", "Link zur Homepage", "Mobilnummer", "Telefonnummer", "Festnetznummer", "StrasseHausnummer", "PlzOrt", "TitelVornameNachname", "BGSeite"],
         "|", '\0', new UTF8Encoding(true), false); 
-        m.GetUntisAnrechnungen(
+        /*m.GetUntisAnrechnungen(
         Path.Combine(pfadDownloads ?? "untisanrechnungen.struct"),
         [
          datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.Vergleichen),         
@@ -488,7 +494,7 @@ public static class MenueHelper
         ["PLA", "BM"],
         ",", '\"', new UTF8Encoding(false), true);
         
-       /*m.Faecher(
+       m.Faecher(
         configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Faecher.dat"),
         [
          datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),

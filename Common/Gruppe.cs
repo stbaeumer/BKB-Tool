@@ -413,11 +413,10 @@ public class Gruppe
         return gruppe;
     }
 
-    public Gruppe GetByWikilink(Anrechnungen anrechnungen,
+    public string GetByWikilink(Anrechnungen anrechnungen,
         Lehrers lehrers,
         string wikiLink)
-    {
-        var gruppe = new Gruppe(wikiLink);
+    {        
         dynamic record = new ExpandoObject();
         record.Page = wikiLink;
         record.Link = wikiLink;
@@ -426,18 +425,17 @@ public class Gruppe
         var lehrerMail = new List<string>();
         var lehrerName = new List<string>();
 
-        var members = anrechnungen.Where(rec => { return rec.Beschr.Contains(wikiLink); })
-            .Select(rec => { return rec.Lehrer.Kürzel; }).Distinct().OrderBy(x => x);
+        var members = anrechnungen.Where(x=>x.Beschr.ToLower().Contains(wikiLink.ToLower())).ToList();
 
-        if (members == null || !members.Any())
-        {
-            members = anrechnungen.Where(rec => { return rec.Beschr.Contains(wikiLink.Replace("schulgemeinschaft:", "kollegium:")); })
-            .Select(rec => { return rec.Lehrer.Kürzel; }).Distinct().OrderBy(x => x);
-        }
-
+        var vorsitzLeitung = anrechnungen.Where(x=>
+        x.Beschr.ToLower().Contains(wikiLink.ToLower())&&
+        !string.IsNullOrEmpty(x.Rolle) &&
+        (x.Rolle.Contains("orsitz") || x.Rolle.Contains("eitung"))
+        ).FirstOrDefault();
+        
         foreach (var member in members)
         {
-            var leh = lehrers.FirstOrDefault(l => l.Kürzel == member);
+            var leh = lehrers.FirstOrDefault(l => l.Kürzel == member.LehrerKuerzel);
 
             if (leh == null) continue; // Wenn kein Lehrer gefunden, nächsten Eintrag ansehen
 
@@ -463,11 +461,17 @@ public class Gruppe
         record.Namen = string.Join(", ", lehrerName.OrderBy(name => name));
         record.Mail = string.Join("; ", lehrerMail.OrderBy(name => name));
         record.Kürzel = string.Join(", ", lehrerKürzel.OrderBy(name => name));
+        if(vorsitzLeitung != null && !string.IsNullOrEmpty(vorsitzLeitung.Rolle))
+        {
+            record.VorsitzLeitung = "schulgemeinschaft:" + vorsitzLeitung.LehrerKuerzel.ToLower();
+        }
         record.Art = "schulgemeinschaft:gruppen";
-        gruppe.Record = record;
-        return gruppe;
+        this.Record = record;        
+        if(vorsitzLeitung != null && !string.IsNullOrEmpty(vorsitzLeitung.Rolle))
+            return vorsitzLeitung.LehrerKuerzel.ToUpper();
+        else
+            return "";
     }
-
  
   public Gruppen GetKlassen(List<dynamic> gpu002, List<dynamic> gpu003,
         Lehrers lehrers,
@@ -477,13 +481,8 @@ public class Gruppe
     {
         var gruppen = new Gruppen();
 
-        var alleVerschiedenenKlassen = gpu002
-    .Cast<IDictionary<string, object>>()
-    .Select(rec => rec.ContainsKey("Field5") ? rec["Field5"]?.ToString() : null)
-    .Where(klasse => !string.IsNullOrEmpty(klasse) && klasse != "?")
-    .Distinct()
-    .OrderBy(klasse => klasse)
-    .ToList();
+        // alle Verschiedenen Klassen mit aktiven SuS
+        var alleVerschiedenenKlassen = students.Where(x=>x.Status == "2").OrderBy(x=>x.Klasse).Select(x=>x.Klasse).Distinct().ToList();
 
         foreach(var k in alleVerschiedenenKlassen)
         {
@@ -499,8 +498,8 @@ public class Gruppe
 
             var gruppe = new Gruppe(wikiLink);
             dynamic record = new ExpandoObject();
-            record.Page = wikiLink + ":" + k;
-            record.Link = wikiLink + ":" + k;
+            record.Page = wikiLink + ":" + k.ToLower();
+            record.Link = wikiLink + ":" + k.ToLower();
 
             var lehrerKürzel = new List<string>();
             var lehrerMail = new List<string>();

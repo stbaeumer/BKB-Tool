@@ -4297,7 +4297,7 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
   return sMitAbwesenheiten;
  }
 
- public List<dynamic> GetGruppen(
+ public List<dynamic> GetGruppenAusGpu(
      IConfiguration configuration,
      Lehrers lehrers,
      Anrechnungen anrechnungen,
@@ -4358,22 +4358,51 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
       new List<string>() { "BI", "Bi", "Bi FU", "Bi1", "Bi G1", "Bi G2", "BI G1", "BI L1" }));
   
   Gruppen.Add(new Gruppe().GetBildungsgangleitungen(anrechnungen, lehrers,
-      "schulgemeinschaft:bildungsgangleitungen"));      
-  Gruppen.Add(new Gruppe().GetByWikilink(anrechnungen, lehrers,
-      "schulgemeinschaft:schulleitung:erweiterte:start"));
-  Gruppen.Add(new Gruppe().GetRefs(lehrers,
-      "schulgemeinschaft:referendar_innen"));
-  Gruppen.Add(new Gruppe().GetKlassenleitungen(gpu003, lehrers,
+      "schulgemeinschaft:bildungsgangleitungen"));        
+    Gruppen.Add(new Gruppe().GetKlassenleitungen(gpu003, lehrers,
       "schulgemeinschaft:klassenleitungen"));
   Gruppen.Add(new Gruppe().GetLehrerinnen(anrechnungen, lehrers,
       "schulgemeinschaft:lehrerinnen"));
   Gruppen.Add(new Gruppe().GetKollegium(gpu002, lehrers,
-      "schulgemeinschaft:kollegium"));
-  Gruppen.Add(new Gruppe().GetByWikilink(anrechnungen, lehrers,
-      "schulgemeinschaft:lehrerrat"));
+      "schulgemeinschaft:kollegium"));  
   Gruppen.AddRange(new Gruppe().GetKlassen(gpu002, gpu003, lehrers, students, anrechnungen,
       "klassen"));
 
+  foreach (var gruppe in Gruppen)
+   rückgabe.Add(gruppe.Record);
+  
+  return rückgabe;
+ }
+
+ public List<dynamic> GetGruppenByWikiLink(
+     IConfiguration configuration,
+     Lehrers lehrers,
+     Anrechnungen anrechnungen,
+     Students students,
+     string[] ausDiesenUntisWikiLinksWerdenSeitenInWiki
+ )
+ {
+  var rückgabe = new List<dynamic>();
+
+    string ausgabe = $"Es werden Gruppen aus Wikilinks (in der Untis-Anrechnung-Beschr) ermittelt.\nDer [bold aqua]Vorsitz[/] wird aus dem Wort Vorsitz oder Leitung im Text der Anrechnung ermittelt:\n\n";
+
+    foreach (var link in ausDiesenUntisWikiLinksWerdenSeitenInWiki)
+    {
+        var gruppe = new Gruppe(link);
+        var vorsitzLeitung = gruppe.GetByWikilink(anrechnungen, lehrers, link);        
+        if(!string.IsNullOrEmpty(vorsitzLeitung))
+            vorsitzLeitung = " (Vorsitz: [bold aqua]" + vorsitzLeitung + "[/])";
+        Gruppen.Add(gruppe);
+        ausgabe += link +  vorsitzLeitung +"\n";
+    }
+
+    var panel = new Panel(ausgabe)
+                        .HeaderAlignment(Justify.Left)
+                        .SquareBorder()
+                        .Expand()
+                        .BorderColor(Global.ColorInfoBox);
+
+        AnsiConsole.Write(panel);
 
   foreach (var gruppe in Gruppen)
    rückgabe.Add(gruppe.Record);
@@ -5035,6 +5064,11 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
   if (interessierendeGründe.Contains("200"))
    if (tableAltersermäßigung.Rows.Count > 0)
     AnsiConsole.Write(tableAltersermäßigung);
+
+
+    foreach (var aktion in zieldatei.Funktionen)
+   aktion(zieldatei);
+
  }
 
  public void ExportAusSchildVerschieben(IConfiguration configuration)
@@ -5168,6 +5202,9 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
   record.StammschulnrPUNKT = "";
   record.dienstlPUNKTLEERZEICHENEMINUSMail = "";
   zieldatei.Add(record);
+
+  foreach (var aktion in zieldatei.Funktionen)
+   aktion(zieldatei);
  }
 
  public void GetAnrechnungen(Lehrers lehrers, IConfiguration configuration)
@@ -5179,6 +5216,7 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
      IConfiguration configuration,
      string zieldateiname,
      Lehrers lehrersSoll,
+     string[] ausDiesenUntisWikiLinksWerdenSeitenInWiki,
      List<Action<Datei>> funktionen,
      string[] anhandDieserAttributeWirdVerglichen,
      string[] dieseAttributeWerdenBeimVergleichIgnoriert, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
@@ -5239,15 +5277,21 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
     "schulgemeinschaft.Bildungsziele",
     "schulgemeinschaft.KlasseSus",
     
-    ], this.WikiZugriff);
+    ], this.WikiZugriff, lehrersSoll);
 
   var gpu004 = Quelldateien.GetMatchingList(configuration, "gpu004", IStudents, Klassen);
   if (gpu004 == null || !gpu004.Any()) return;
 
+    // Ist-Stand 
+  var sqliteSchulgemeinschaft = Quelldateien.GetMatchingList(configuration, "sqliteSchulgemeinschaft", IStudents, Klassen);
+  if (sqliteSchulgemeinschaft == null || !sqliteSchulgemeinschaft.Any()) return;
+
+
+
+
   // Die Datei "istSollMittel.csv" enthält die Spalte "Ist-Soll Mittel"
   var istSollMittel = Quelldateien.GetMatchingList(configuration, "istSollMittel", IStudents, Klassen);
   
-
   // Im Kollegium müssen folgende Items abgeglichen werden:
   // 1. Lehrkräfte, die in der Datei "lehrkraefte.dat" enthalten sind, aber nicht in der Liste der IST-Lehrkräfte (lehrersSoll) enthalten sind, werden entfernt.        
   // 2. Gruppen, die sich aus Unterricht usw. ergeben 
@@ -5279,7 +5323,13 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
 
    dynamic record = new ExpandoObject();
    record.Page = "schulgemeinschaft:" + l.Kürzel.ToLower();
-   record.Kürzel = l.Kürzel;
+    record.Kürzel = l.Kürzel;
+
+if(l.Kürzel == "BM")
+            {
+                var aa= "";
+            }
+
    record.Namen = "schulgemeinschaft:" + l.Kürzel.ToLower(); 
    record.TitelVornameNachname = (String.IsNullOrEmpty(l.Titel) ? $"{l.Vorname} {l.Nachname}" : $"{l.Titel} {l.Vorname} {l.Nachname}");
    record.Mail = l.Mail;
@@ -5301,7 +5351,7 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
    }
 
    // Nur bei SL und bei Nicht-LuL werden die Telefonnummern angezeigt. Bei LuL werden die Telefonnummern nicht angezeigt.
-   if(l.Schulleitung == "J")
+   if(new List<string>(){"HE", "GL", "PLA", "BM", "HR", "LN", "TH", "WK", "PL"}.Contains(l.Kürzel.ToUpper()))
     {
      record.Mobilnummer = l.Mobilnummer;
      record.Festnetznummer = l.Festnetznummer;
@@ -5328,18 +5378,25 @@ zieldatei.Add("Der Unterricht endet nach der 5. Stunde um 12:00 Uhr.");
   // Zu 2. Gruppen, die sich aus Unterricht usw. ergeben
   //
 
-  //Anrechnungen = new Anrechnungen(lehrersSoll, configuration);
-
   var anrechnungen = this.Anrechnungen;
+  zieldatei.AddRange(GetGruppenAusGpu(configuration, lehrersSoll, this.Anrechnungen, this.Students));
 
-  zieldatei.AddRange(GetGruppen(configuration, lehrersSoll, this.Anrechnungen, this.Students));
+
+  //
+  // Zu 3. Gruppen aus WikiLikns
+  //
+  
+  zieldatei.AddRange(GetGruppenByWikiLink(configuration, lehrersSoll, this.Anrechnungen, this.Students, ausDiesenUntisWikiLinksWerdenSeitenInWiki));
+
+
+
+
 
   //
   // Zu 3. Anrechnungen aus Untis, die zu Gruppen werden
   //
 
-  //zieldatei.AddRange(GetAnrechnungen(configuration, lehrersSoll, this.Anrechnungen));
-
+  zieldatei.AddRange(GetAnrechnungen(configuration, lehrersSoll, this.Anrechnungen));
 
   foreach (var aktion in zieldatei.Funktionen)
    aktion(zieldatei);

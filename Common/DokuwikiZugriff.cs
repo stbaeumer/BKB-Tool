@@ -53,6 +53,11 @@ public interface IDokuWikiApi : IXmlRpcProxy
     
     object[] GetAggregationData(string[] schemas, string[] columns, object[] filters, string sortBy);
 
+    
+    [XmlRpcMethod("plugin.struct.getData")]
+    XmlRpcStruct GetStructData(string page, string schema, int timestamp);
+
+
     [XmlRpcMethod("plugin.struct.saveData")]
     bool SaveStructData(string page, object data, string summary = "Updated via API");
     

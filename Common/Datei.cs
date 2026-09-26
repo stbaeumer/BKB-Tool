@@ -322,6 +322,38 @@ public Datei(IConfiguration configuration)
         return liste;
     }
 
+    public List<dynamic> FilterSqliteTermine()
+    {
+         var liste = new List<dynamic>();
+
+        foreach (var rec in this)
+        {
+            var dict = (IDictionary<string, object>)rec;
+            if (true)
+            {
+                liste.Add(rec);
+            }
+        }
+
+        return liste;
+    }
+
+    public List<dynamic> FilterSqliteSchulgemeinschaft()
+    {
+         var liste = new List<dynamic>();
+
+        foreach (var rec in this)
+        {
+            var dict = (IDictionary<string, object>)rec;
+            if (true)
+            {
+                liste.Add(rec);
+            }
+        }
+
+        return liste;
+    }
+
     public List<dynamic> FilterGost()
     {
         throw new NotImplementedException();
@@ -1129,8 +1161,6 @@ public Datei(IConfiguration configuration)
                 ? neuerWert1.ToString().Substring(0, 82) + "..."
                 : neuerWert1?.ToString() ?? string.Empty)
             : string.Empty;
-            
-
 
     }
 
@@ -1194,24 +1224,6 @@ public Datei(IConfiguration configuration)
             if (vorhDict[key].Equals(value?.ToString())) continue;
             // Z.B. bei Fehlstunden bleibt die neue Zelle leer. In der alten steht 0
             if (vorhDict[key].ToString() == "0" && neueDict[k].ToString() == "") continue;
-
-            // Aus dem Wiki wird u.U. ein Name ausgelesen. vorhDict[key] ist dann z.B. "Peter Müller"
-            // Der value ist dann schulgemeinschaft:mul  
-            // Der Vergleich muss dann über den Umweg eines Wenn value ein Wikilink ist (erkennbar an dem Doppelpunkt) 
-            // Wenn es sich um einen wikilink handelt und der letzte Teil des Links ein LuL-Kürzel ist            
-            if(value.ToString().Contains(":") && Lehrers.Any(x=>x.Kürzel.ToLower() == value.ToString().Split(':').Last().ToLower()))
-            {
-                var lehrer = Lehrers.Where(x=>x.Kürzel.ToLower() == value.ToString().Split(':').Last().ToLower()).FirstOrDefault();
-                if(value.ToString().ToLower() == "schulgemeinschaft:" + lehrer.Kürzel.ToLower())
-                {
-                    if (vorhDict[key].ToString().Contains(lehrer.Vorname + " " + lehrer.Nachname))
-                    {
-                        // Wenn beides matcht, dann weichen die Werte nicht ab.
-                        continue;
-                    }   
-                }
-            }
-
 
             nichtIdentischeSonstige.Add(key);
         }
@@ -1899,6 +1911,10 @@ public Datei(IConfiguration configuration)
             // Für jede neue Zeile ...
             foreach (var neueRec in this)
             {
+                bool updateNeeded = false;
+                // Dictionary für ALLE Spalten dieser Zeile
+                var alleWerteFuerDieseZeile = new Dictionary<string, object>();
+                
                 ss++;
 
                 var neueDict = (IDictionary<string, object>)neueRec;
@@ -1938,12 +1954,8 @@ public Datei(IConfiguration configuration)
                             {
                                 string aa = "";
                             }
-                            var schemaName = Path.GetFileNameWithoutExtension(AbsoluterPfad);
-                            if(zielSeite.Contains("bildungsgaenge") || zielSeite.Contains("kollegium"))
-                            {
+                            var schemaName = Path.GetFileNameWithoutExtension(AbsoluterPfad);                            
                             InsertSchemaData(neueDict, schemaName, zielSeite);
-                            }
-                            
                             Console.WriteLine($"INSERT: {anhandDieserSchlüsselAttributeWirdVerglichenString} -> {schemaName} ... durchgeführt.");
                         }
                     }                        
@@ -1982,9 +1994,6 @@ public Datei(IConfiguration configuration)
                         // Zeile in Datenbank updaten
                         if (modus == Global.Modus.SchemaUpdaten)
                         {
-                            // Wir erstellen ein Dictionary für ALLE Spalten dieser Zeile
-                            var alleWerteFuerDieseZeile = new Dictionary<string, object>();
-
                             // Alle Keys aus dem neuen Datensatz kopieren
                             foreach (var key in neueDict.Keys)
                             {
@@ -2006,25 +2015,26 @@ string uebersetzterKey = key.Replace("DOPPELPUNKT", ":")
                            .Replace("KLAMMERAUF", "(")
                            .Replace("KLAMMERZU", ")");
 
-// Wert zuweisen (mit Null-Prüfung)
-alleWerteFuerDieseZeile[uebersetzterKey] = neueDict[key]?.ToString();
+                            // Wert zuweisen (mit Null-Prüfung)
+                            alleWerteFuerDieseZeile[uebersetzterKey] = neueDict[key]?.ToString();
                             }
 
-                            // Aufruf der Update-Methode mit der VOLLSTÄNDIGEN Zeile
-                            string zielSeite = neueDict["Page"]?.ToString().ToLower();//.Trim().Split(':').Where(s => !s.Equals("start", StringComparison.OrdinalIgnoreCase)).LastOrDefault();    
-                            var schemaName = Path.GetFileNameWithoutExtension(AbsoluterPfad);
-                            
-                            if(zielSeite.Contains("bildungsgaenge:") || zielSeite.Contains("kollegium:"))
-                            {
-                            UpdateSchemaData(zielSeite, schemaName, alleWerteFuerDieseZeile, WikiZugriff);    
-                            }
-                            
-                            Console.WriteLine($"UPDATE: {zielSeite} ... durchgeführt.");
+                            // Aufruf der Update-Methode mit der VOLLSTÄNDIGEN Zeile                            
+                            updateNeeded = true;
                         }
                     }
                         
                     rows++;
                 }
+                
+                if(updateNeeded)
+                {
+                    string zielSeite = neueDict["Page"]?.ToString().ToLower();//.Trim().Split(':').Where(s => !s.Equals("start", StringComparison.OrdinalIgnoreCase)).LastOrDefault();    
+                    var schemaName = Path.GetFileNameWithoutExtension(AbsoluterPfad);
+                    UpdateSchemaData(zielSeite, schemaName, alleWerteFuerDieseZeile, WikiZugriff);
+                    Console.WriteLine($"UPDATE: {neueDict["Page"]?.ToString().ToLower()} ... durchgeführt.");    
+                }
+                
                 neueDatei.Add(neueRec);
             }
 
@@ -2500,7 +2510,7 @@ else
         return this;
     }
 
-internal void GetSchema(string schemaName, string[] benutzerSpalten, IConfiguration configuration, DokuwikiZugriff wikiZugriff)
+internal void GetSchema(string schemaName, string[] benutzerSpalten, IConfiguration configuration, DokuwikiZugriff wikiZugriff, Lehrers lehrers)
 {   
     AbsoluterPfad = Path.Combine(configuration["PfadDownloads"], schemaName + ".struct");
 
@@ -2528,7 +2538,83 @@ internal void GetSchema(string schemaName, string[] benutzerSpalten, IConfigurat
             if (neueSpalte.Equals("Page", StringComparison.OrdinalIgnoreCase))
                 continue;
 
-            datenZeile[neueSpalte] = ConvertStructValueToString(zeile, spalte);
+            var wert = ConvertStructValueToString(zeile, spalte);
+
+            if(wert == "BT1")
+                {
+                    if(neueSpalte == "Klassen")
+                    {
+                        string aaa= "";    
+                    }
+                }
+               if(neueSpalte == "VorsitzLeitung")
+                    {
+                        string aaa= "";    
+                    } 
+                    
+                
+
+            // In Struct wird evtl. nicht der Wikipfad des Lehrers angegeben, sondern sein Name. Das muss geändert werden
+
+            foreach(var l in lehrers)
+            {
+                var titelVornameNachname = (string.IsNullOrEmpty(l.Titel) ? "" : l.Titel + " ") + l.Vorname + " " + l.Nachname;
+                if(wert.Contains(titelVornameNachname))
+                    wert = wert.Replace(titelVornameNachname, "schulgemeinschaft:" + l.Kürzel.ToLower());        
+            }
+            
+            // In der Schulform wird der Link ermittelt
+
+            if(neueSpalte == "Schulform")
+            {
+                var link = ConvertStructValueToString(zeile, "schulgemeinschaft.Link");
+                var kuerzel = ConvertStructValueToString(zeile, "schulgemeinschaft.BGkuerzel");
+
+                wert = link.ToLower().Replace(kuerzel.ToLower() + ":", "");
+            }
+            if(neueSpalte == "Bereich")
+            {
+                if(wert.Contains("etall"))
+                {
+                    wert = "bereiche:metall-_und_elektrotechnik_ing";
+                }
+                if(wert.Contains("grar"))
+                {
+                    wert = "bereiche:agrarwirtschaft";
+                }
+                if(wert.Contains("olz"))
+                {
+                    wert = "bereiche:metall-_und_elektrotechnik_ing";
+                }
+                if(wert.Contains("irtsch"))
+                {
+                    wert = "bereiche:wirtschaft_und_verwaltung";
+                }
+                if(wert.Contains("esundh"))
+                {
+                    wert = "bereiche:gesundheit_erziehung_und_soziales";
+                }
+            }
+            if(neueSpalte == "Klassen")
+            {
+                var kl = "";
+                if(!string.IsNullOrEmpty(wert))
+                    {
+                        foreach(var k in wert.Split(','))
+                    kl = kl + ":klassen:" + k.ToLower().Trim() + ", ";
+                
+                wert = kl.TrimEnd(' ').TrimEnd(',').TrimEnd(' ').TrimEnd(',');        
+                    }
+                
+            }
+
+
+            
+
+
+
+            datenZeile[neueSpalte] = wert;
+
         }
 
         // 3. Fallback/Zuweisung: Wert von 'Link' in 'Page' übertragen
@@ -2581,56 +2667,56 @@ public interface IDokuWikiRpc : IXmlRpcProxy
 
 
     internal void UpdateSchemaData(string zielSeite, string schemaName, Dictionary<string, object> neueWerte, DokuwikiZugriff wikiZugriff)
+{
+    try
     {
-        try
+        // 1. Die eigentlichen Spaltenwerte sammeln
+        XmlRpcStruct innerStruct = new XmlRpcStruct();
+        foreach (var eintrag in neueWerte)
         {
-            // 1. Die eigentlichen Spaltenwerte sammeln
-            XmlRpcStruct innerStruct = new XmlRpcStruct();
-            foreach (var eintrag in neueWerte)
-            {
-                string wertString = eintrag.Value?.ToString() ?? "";
-                string bereinigterSpaltenName = eintrag.Key.Replace(schemaName + ".", "");
-                
-                innerStruct.Add(bereinigterSpaltenName, wertString);    
-                                
-            }
-
-            // 2. FIX: Die Payload exakt so verschachteln wie beim funktionierenden Insert
-            XmlRpcStruct structPayload = new XmlRpcStruct
-            {
-                { schemaName, innerStruct }
-            };
-
-            // 3. API-Aufruf ausführen
-            // Parameter 1: Die Zielseite (z.B. "schulgemeinschaft:aeh")
-            // Parameter 2: Die verschachtelte Payload
-            // Parameter 3: Die Änderungszusammenfassung (Summary)
-            bool erfolg = wikiZugriff.Proxy.SaveStructData(zielSeite, structPayload, "Automatische Aktualisierung via API");
+            string wertString = eintrag.Value?.ToString() ?? "";
+            string bereinigterSpaltenName = eintrag.Key.Replace(schemaName + ".", "");
             
-            System.Diagnostics.Debug.WriteLine($"[Struct-Update] Erfolg für {zielSeite}: {erfolg}");
+            innerStruct.Add(bereinigterSpaltenName, wertString);    
         }
-        catch (XmlRpcFaultException fex)
+
+        // 2. Die Payload verschachteln
+        XmlRpcStruct structPayload = new XmlRpcStruct
         {
-            System.Diagnostics.Debug.WriteLine("=== XML-RPC FEHLER (VOM SERVER) ===");
-            System.Diagnostics.Debug.WriteLine($"Code: {fex.FaultCode} | Meldung: {fex.FaultString}");
-            throw;
-        }
-        catch (XmlRpcIllFormedXmlException xmlEx)
-        {
-            System.Diagnostics.Debug.WriteLine("=== UNGÜLTIGE ANTWORT VOM SERVER ===");
-            System.Diagnostics.Debug.WriteLine($"Meldung: {xmlEx.Message}");
-            if (xmlEx.InnerException != null)
-            {
-                System.Diagnostics.Debug.WriteLine($"Ursache: {xmlEx.InnerException.Message}");
-            }
-            throw;
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"Allgemeiner Fehler: {ex.Message}");
-            throw;
-        }
+            { schemaName, innerStruct }
+        };
+
+        // 3. API-Aufruf ausführen
+        // Option A: Leere Summary übergeben (""), damit keine neue Version erzeugt wird
+        // Option B: minorEdit-Flag nutzen (sofern vom Proxy-Interface unterstützt)
+        
+        string summary = ""; // Leere Summary verhindert Versionseintrag
+        bool erfolg = wikiZugriff.Proxy.SaveStructData(zielSeite, structPayload, summary);
+        
+        System.Diagnostics.Debug.WriteLine($"[Struct-Update] Erfolg für {zielSeite}: {erfolg}");
     }
+    catch (XmlRpcFaultException fex)
+    {
+        System.Diagnostics.Debug.WriteLine("=== XML-RPC FEHLER (VOM SERVER) ===");
+        System.Diagnostics.Debug.WriteLine($"Code: {fex.FaultCode} | Meldung: {fex.FaultString}");
+        throw;
+    }
+    catch (XmlRpcIllFormedXmlException xmlEx)
+    {
+        System.Diagnostics.Debug.WriteLine("=== UNGÜLTIGE ANTWORT VOM SERVER ===");
+        System.Diagnostics.Debug.WriteLine($"Meldung: {xmlEx.Message}");
+        if (xmlEx.InnerException != null)
+        {
+            System.Diagnostics.Debug.WriteLine($"Ursache: {xmlEx.InnerException.Message}");
+        }
+        throw;
+    }
+    catch (Exception ex)
+    {
+        System.Diagnostics.Debug.WriteLine($"Allgemeiner Fehler: {ex.Message}");
+        throw;
+    }
+}
 
     internal void DeleteSchemaData(string schemaName, string zielSeite, DokuwikiZugriff wikiZugriff)
     {

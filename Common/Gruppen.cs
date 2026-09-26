@@ -49,7 +49,7 @@ public class Gruppen : List<Gruppe>
         {
             dynamic record = new ExpandoObject();
             var kurzname = GetKurzname(b);
-            var wikiLink = b;
+            var wikiLink = b.ToLower();
             var schulform = GetSchulform(b);
 
             var members = GetMembers(gpu002, lehrers, new List<int>() { 1, 2, 3, 4 }, kurzname);
@@ -67,10 +67,18 @@ public class Gruppen : List<Gruppe>
                 where a.Beschr == wikiLink
                 select a.LehrerKuerzel.ToLower()))
             {
-                vorsitzLeitung += "schulgemeinschaft:" + x + ",";
+                if (!vorsitzLeitung.Contains("schulgemeinschaft:" + x))
+                {
+                    vorsitzLeitung += "schulgemeinschaft:" + x + ", ";    
+                }
             }
                 
-            record.VorsitzLeitung = vorsitzLeitung.TrimEnd(',');
+            record.VorsitzLeitung = vorsitzLeitung.TrimEnd(',').TrimEnd(' ').TrimEnd(',').TrimEnd(' ');
+
+            if(vorsitzLeitung.Contains(":fr"))
+            {
+                string aaa= "";
+            }
 
             var klassen = "";
 
@@ -79,11 +87,11 @@ public class Gruppen : List<Gruppe>
                 var kl = k.Split('2')[0].ToLower();
                 if(kl == kurzname.ToLower())
                 {
-                    klassen += ":klassen:" + k + ",";
+                    klassen += ":klassen:" + k + ", ";
                 }
             }
 
-            record.Klassen = klassen.TrimEnd(',');
+            record.Klassen = klassen.ToLower().TrimEnd(',').TrimEnd(' ').TrimEnd(',').TrimEnd(' ');
 
 
             // Ermittle vorhandene Werte

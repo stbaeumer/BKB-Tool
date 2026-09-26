@@ -93,7 +93,7 @@ WHERE (SCHOOLYEAR_ID={Global.AktSj[0]}{Global.AktSj[1]});";
 
         try
         {
-            var queryString = """
+            var queryString = $"""
 WITH RankedCountValues AS (
     SELECT 
         t.TEACHER_ID,
@@ -125,7 +125,7 @@ WITH RankedCountValues AS (
             ON cv.TEACHER_ID = t.TEACHER_ID
             AND cv.SCHOOLYEAR_ID = t.SCHOOLYEAR_ID
             AND cv.VERSION_ID = t.VERSION_ID
-            AND cv.SCHOOLYEAR_ID = 20252026
+            AND cv.SCHOOLYEAR_ID = {Global.AktSj[0]}{Global.AktSj[1]}
             AND cv.VERSION_ID = 1
             AND cv.Deleted = 0
             AND NOT (cv.Text IS NULL AND cv.DESCRIPTION_ID IS NULL)
@@ -138,7 +138,7 @@ WITH RankedCountValues AS (
             AND cv.SCHOOLYEAR_ID = d.SCHOOLYEAR_ID
             AND cv.VERSION_ID = d.VERSION_ID
     WHERE 
-        t.SCHOOLYEAR_ID = 20252026
+        t.SCHOOLYEAR_ID = {Global.AktSj[0]}{Global.AktSj[1]}
         AND t.VERSION_ID = 1
         AND t.Email IS NOT NULL
         AND t.Email <> ''
@@ -195,8 +195,10 @@ ORDER BY TeacherName;
 
                 anrechnung.Beschr = Global.SafeGetString(sqlDataReader, 12);
 
-                if(anrechnung.Beschr.ToLower().StartsWith("kollegium:"))
-                 anrechnung.Beschr.Replace("kollegium:", "schulgemeinschaft:");
+                if(anrechnung.Beschr.Contains("rise"))
+                {
+                    string a = "";
+                }
                 
                 anrechnung.Text = Global.SafeGetString(sqlDataReader, 2) == null
                     ? ""

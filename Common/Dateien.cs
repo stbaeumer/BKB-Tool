@@ -73,6 +73,11 @@ public class Dateien : List<Datei>
             $"2. Zwischenablage speichern: [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}/istSollMittel.csv[/]"            
         };
 
+        var sqliteHinweise = new string[]
+        {
+            "Machen Sie ... xxx"            
+        };
+
         Add(new Datei(
             "SchuelerBasisdaten",
             "Beschreibung",
@@ -280,6 +285,26 @@ public class Dateien : List<Datei>
             d => d.FilterIstSollMittel(),
             "*.csv",
             "\t"
+        ));
+        Add(new Datei(
+            "sqliteTermine",
+            "Beschreibung",
+            sqliteHinweise,
+            [""],
+            true,
+            d => d.FilterSqliteSchulgemeinschaft(),
+            "*.csv",
+            "|"
+        ));
+        Add(new Datei(
+            "sqliteSchulgemeinschaft",
+            "Beschreibung",
+            sqliteHinweise,
+            [""],
+            true,
+            d => d.FilterSqliteSchulgemeinschaft(),
+            "*.csv",
+            "|"
         ));
         Add(new Datei(
             "Kurse.",
@@ -547,13 +572,12 @@ public class Dateien : List<Datei>
         ));                    
     }
 
-    public List<dynamic>? GetMatchingList(IConfiguration configuration, string pattern, Students students = null, Klassen klassen = null, string[] spalten = null, DokuwikiZugriff dokuwikiZugriff = null)
+    public List<dynamic>? GetMatchingList(IConfiguration configuration, string pattern, Students students = null, Klassen klassen = null, string[] spalten = null, DokuwikiZugriff dokuwikiZugriff = null, Lehrers lehrers = null)
     {
         Datei datei = this.FirstOrDefault(datei => !string.IsNullOrEmpty(datei.Dateiname) && datei.Dateiname.ToLower().StartsWith(pattern, StringComparison.CurrentCultureIgnoreCase));
 
         if(pattern.ToLower() == "termine")
             datei = this.FirstOrDefault(datei => !string.IsNullOrEmpty(datei.Dateiname) && datei.AbsoluterPfad.EndsWith("termine.csv".ToLower()));   
-
 
         // Spezielle Behandlung für "struct" Dateiendung: Struct-Dateien müssen erst gefüllt werden.
         // Die bereits angelegte Datei wird gefüllt
@@ -564,7 +588,7 @@ public class Dateien : List<Datei>
             if(datei.Dateiname == "termine")
              datei = this.FirstOrDefault(datei => !string.IsNullOrEmpty(datei.Dateiname) && datei.AbsoluterPfad.EndsWith("termine.struct".ToLower()));
             
-             datei.GetSchema(pattern, spalten, configuration, dokuwikiZugriff);            
+             datei.GetSchema(pattern, spalten, configuration, dokuwikiZugriff, lehrers);            
             
             var ss = datei.AbsoluterPfad;
             datei.SchreibeZeilen("|");
@@ -767,7 +791,7 @@ public class Dateien : List<Datei>
             {
                 foreach (var datei in this)
                 {
-                    if(datei.Dateiname.Contains("praktikan"))
+                    if(datei.Dateiname.Contains("ulgemein"))
                     {
                         string a = "";
                     }
