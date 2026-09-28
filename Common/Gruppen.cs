@@ -52,6 +52,11 @@ public class Gruppen : List<Gruppe>
             var wikiLink = b.ToLower();
             var schulform = GetSchulform(b);
 
+            if(kurzname.ToLower() == "bt")
+            {
+                string a="";
+            }
+
             var members = GetMembers(gpu002, lehrers, new List<int>() { 1, 2, 3, 4 }, kurzname);
             record.Page = wikiLink;
             record.Link = wikiLink;

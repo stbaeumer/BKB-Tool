@@ -63,8 +63,8 @@ public class Datei : List<dynamic>
     /// Am Ende werden neu erstellte Dateien mit vorhandenen verglichen. Diese Eigenschaften werden für den Dateivergleich ignoriert.
     /// </summary>
     private string[] ZuIgnorierendeEigenschaften { get; set; } = null!;
- public DokuwikiZugriff WikiZugriff { get; set; }
- public string? AbsoluterPfad { get; set; } = "";
+    public DokuwikiZugriff WikiZugriff { get; set; }
+    public string? AbsoluterPfad { get; set; } = "";
     public List<Action<Datei>> Funktionen { get; set; }
     public IConfiguration Konfiguration { get; private set; }
     public string Dateiname { get; set; } = null!;
@@ -91,14 +91,14 @@ public class Datei : List<dynamic>
 
     //public Datei(string name, Global.Modus modus, string[] anhandDieserAttributeWirdVerglichen, string[] dieseAttributeWerdenBeimVergleichIgnoriert)
     public Datei(
-        string name,        
+        string name,
         string[] anhandDieserAttributeWirdVerglichen,
         string[] dieseAttributeWerdenBeimVergleichIgnoriert,
         string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise)
     {
         Name = name;
         Dateiname = Path.GetFileName(name);
-        AbsoluterPfad = name;        
+        AbsoluterPfad = name;
         AnhandDieserSchlüsselAttributeWirdVerglichen = anhandDieserAttributeWirdVerglichen;
         DieseAttributeWerdenBeimVergleichIgnoriert = dieseAttributeWerdenBeimVergleichIgnoriert;
         UnterordnerUndDateiname = name;
@@ -108,14 +108,14 @@ public class Datei : List<dynamic>
         ShouldAllQuote = shouldAllQuote;
         Importhinweise = importhinweise;
     }
-    
-public Datei(IConfiguration configuration)
+
+    public Datei(IConfiguration configuration)
     {
         Konfiguration = configuration;
     }
 
     public Datei(
-        string name,        
+        string name,
         List<Action<Datei>> funktionen,
         string[] anhandDieserAttributeWirdVerglichen,
         string[] dieseAttributeWerdenBeimVergleichIgnoriert,
@@ -123,7 +123,7 @@ public Datei(IConfiguration configuration)
     {
         Name = name;
         Dateiname = Path.GetFileName(name);
-        AbsoluterPfad = name;        
+        AbsoluterPfad = name;
         Funktionen = funktionen;
         AnhandDieserSchlüsselAttributeWirdVerglichen = anhandDieserAttributeWirdVerglichen;
         DieseAttributeWerdenBeimVergleichIgnoriert = dieseAttributeWerdenBeimVergleichIgnoriert;
@@ -180,7 +180,7 @@ public Datei(IConfiguration configuration)
 
     public Datei(string absoluterPfad)
     {
-        AbsoluterPfad = absoluterPfad;        
+        AbsoluterPfad = absoluterPfad;
     }
 
     public Datei(Datei datei)
@@ -259,7 +259,7 @@ public Datei(IConfiguration configuration)
     public List<dynamic> Filtern(Students students, Klassen klassen)
     {
         IStudents = students;
-        if(klassen != null)
+        if (klassen != null)
         {
             KlassenNamen = klassen.Where(x => !string.IsNullOrEmpty(x.Name)).Select(x => x.Name).ToList();
         }
@@ -269,12 +269,13 @@ public Datei(IConfiguration configuration)
 
     public List<dynamic> FilternDatDatei()
     {
-        if(IStudents.Count == 0){
+        if (IStudents.Count == 0)
+        {
             return this;
         }
 
         var liste = new List<dynamic>();
-        
+
         foreach (var rec in this)
         {
             var dict = (IDictionary<string, object>)rec;
@@ -296,7 +297,7 @@ public Datei(IConfiguration configuration)
         foreach (var rec in this)
         {
             var dict = (IDictionary<string, object>)rec;
-            
+
             if (dict["klassen"].ToString().Split('~').Any(klasse => KlassenNamen.Contains(klasse)))
             {
                 liste.Add(rec);
@@ -308,7 +309,7 @@ public Datei(IConfiguration configuration)
 
     public List<dynamic> FilterIstSollMittel()
     {
-         var liste = new List<dynamic>();
+        var liste = new List<dynamic>();
 
         foreach (var rec in this)
         {
@@ -324,7 +325,7 @@ public Datei(IConfiguration configuration)
 
     public List<dynamic> FilterSqliteTermine()
     {
-         var liste = new List<dynamic>();
+        var liste = new List<dynamic>();
 
         foreach (var rec in this)
         {
@@ -340,7 +341,7 @@ public Datei(IConfiguration configuration)
 
     public List<dynamic> FilterSqliteSchulgemeinschaft()
     {
-         var liste = new List<dynamic>();
+        var liste = new List<dynamic>();
 
         foreach (var rec in this)
         {
@@ -547,7 +548,7 @@ public Datei(IConfiguration configuration)
 
     public List<dynamic> FilternWebuntisStudent()
     {
-        if(IStudents.Count == 0)
+        if (IStudents.Count == 0)
         {
             return this;
         }
@@ -556,7 +557,7 @@ public Datei(IConfiguration configuration)
         foreach (var rec in this)
         {
             var dict = (IDictionary<string, object>)rec;
-            if(true)
+            if (true)
             /*if (IStudents.Where(student =>
                     student.Nachname == dict["longName"].ToString() &&
                     student.Vorname == dict["foreName"].ToString() &&
@@ -568,7 +569,7 @@ public Datei(IConfiguration configuration)
             else
             {
                 string s = "";
-            }   
+            }
         }
 
         return liste;
@@ -634,10 +635,11 @@ public Datei(IConfiguration configuration)
                 .SquareBorder()
                 .Expand()
                 .BorderColor(Color.Red);
-            
+
             AnsiConsole.Write(panel);
             return;
-        }else if (Count == 0 && !AbsoluterPfad.ToLower().EndsWith(".struct"))
+        }
+        else if (Count == 0 && !AbsoluterPfad.ToLower().EndsWith(".struct"))
         {
             // Wenn der Pfad leer ist oder die Liste leer ist, wird die Datei nicht erstellt.
             // Struct-Dateien sind solange leer, bis sie konkret ausgewertet werden sollen.
@@ -646,7 +648,7 @@ public Datei(IConfiguration configuration)
                 .SquareBorder()
                 .Expand()
                 .BorderColor(Color.Red);
-            
+
             AnsiConsole.Write(panel);
             return;
         }
@@ -701,7 +703,7 @@ public Datei(IConfiguration configuration)
             try
             {
                 var sb = new StringBuilder();
-        
+
                 sb.AppendLine("<!DOCTYPE html>");
                 sb.AppendLine("<html>");
                 sb.AppendLine("<head>");
@@ -710,7 +712,7 @@ public Datei(IConfiguration configuration)
                 sb.AppendLine("</head>");
                 sb.AppendLine("<body>");
                 sb.AppendLine("  <table border=\"1\">");
-        
+
                 var firstRecord = this.FirstOrDefault() as IDictionary<string, object>;
                 if (firstRecord != null)
                 {
@@ -729,17 +731,17 @@ public Datei(IConfiguration configuration)
                             .Replace("LEERZEICHEN", " ")
                             .Replace("KLAMMERAUF", "(")
                             .Replace("KLAMMERZU", ")");
-        
+
                         sb.AppendLine($"      <th>{System.Net.WebUtility.HtmlEncode(adjustedHeader)}</th>");
                     }
                     sb.AppendLine("    </tr>");
-        
+
                     // Datenzeilen
                     foreach (var record in this)
                     {
                         var recordDict = record as IDictionary<string, object>;
                         if (recordDict == null) continue;
-        
+
                         sb.AppendLine("    <tr>");
                         foreach (var header in firstRecord.Keys)
                         {
@@ -749,11 +751,11 @@ public Datei(IConfiguration configuration)
                         sb.AppendLine("    </tr>");
                     }
                 }
-        
+
                 sb.AppendLine("  </table>");
                 sb.AppendLine("</body>");
                 sb.AppendLine("</html>");
-        
+
                 File.Delete(AbsoluterPfad);
                 File.WriteAllText(AbsoluterPfad, sb.ToString(), this.Encoding ?? Encoding.UTF8);
             }
@@ -765,7 +767,7 @@ public Datei(IConfiguration configuration)
             {
                 Global.ZeileSchreiben(AbsoluterPfad, "", ConsoleColor.White, ConsoleColor.Blue);
             }
-        }        
+        }
         else
         {
             try
@@ -836,7 +838,7 @@ public Datei(IConfiguration configuration)
                 if (AbsoluterPfad != null && AbsoluterPfad.ToLower().Contains("struct"))
                 {
                     // struct-Dateien werden neu leer angelegt. Sie wird gefüllt, wenn die Datei konkret ausgewertet wird. Deshalb wird hier kein Hinweistext geschrieben.
-                    using var writer = new StreamWriter(AbsoluterPfad, false, Encoding.UTF8);                    
+                    using var writer = new StreamWriter(AbsoluterPfad, false, Encoding.UTF8);
                     //var rechteSeite = Importhinweise != null && Importhinweise.Any() ? string.Join("\n", Importhinweise) : "";
                     //Global.ZeileSchreiben(AbsoluterPfad, rechteSeite, ConsoleColor.White, ConsoleColor.Blue);
                 }
@@ -844,7 +846,7 @@ public Datei(IConfiguration configuration)
         }
     }
 
-        public void SpectreTabelleErstellen()
+    public void SpectreTabelleErstellen()
     {
         if (string.IsNullOrWhiteSpace(AbsoluterPfad))
         {
@@ -855,7 +857,7 @@ public Datei(IConfiguration configuration)
                 .BorderColor(Color.Red));
             return;
         }
-    
+
         if (Count == 0)
         {
             AnsiConsole.Write(new Panel($"[Spectre.Console.Color.Orange1]Datei nicht erstellt (0 Zeilen): [/]{AbsoluterPfad}")
@@ -865,13 +867,13 @@ public Datei(IConfiguration configuration)
                 .BorderColor(Color.Red));
             return;
         }
-    
+
         try
         {
             var firstRecord = this[0] as IDictionary<string, object>;
             if (firstRecord == null || firstRecord.Count == 0)
                 return;
-    
+
             var originalHeaders = firstRecord.Keys.ToList();
             var adjustedHeaders = originalHeaders
                 .Select(header => header
@@ -886,23 +888,23 @@ public Datei(IConfiguration configuration)
                     .Replace("KLAMMERAUF", "(")
                     .Replace("KLAMMERZU", ")"))
                 .ToList();
-    
+
             var table = new Table().Border(TableBorder.Ascii);
             foreach (var header in adjustedHeaders)
                 table.AddColumn(header);
-    
+
             foreach (var record in this)
             {
                 var recordDict = record as IDictionary<string, object>;
                 if (recordDict == null) continue;
-    
+
                 var row = originalHeaders
                     .Select(h => recordDict.TryGetValue(h, out var value) ? value?.ToString() ?? "" : "")
                     .ToArray();
-    
+
                 table.AddRow(row);
             }
-    
+
             var sw = new StringWriter();
             var console = AnsiConsole.Create(new AnsiConsoleSettings
             {
@@ -910,12 +912,12 @@ public Datei(IConfiguration configuration)
                 Ansi = AnsiSupport.No,
                 ColorSystem = ColorSystemSupport.NoColors
             });
-    
+
             AnsiConsole.Write(table);
-    
+
             if (File.Exists(AbsoluterPfad))
                 File.Delete(AbsoluterPfad);
-    
+
             File.WriteAllText(AbsoluterPfad, sw.ToString(), this.Encoding ?? Encoding.UTF8);
         }
         catch (Exception ex)
@@ -934,7 +936,7 @@ public Datei(IConfiguration configuration)
     {
         var neueDatei = new Datei(AbsoluterPfad);
         bool skipProcessing = false;
-        
+
         AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Vergleichen & Filtern ...", ctx =>
         {
             var dateiendung = Path.GetExtension(AbsoluterPfad);
@@ -1061,7 +1063,7 @@ public Datei(IConfiguration configuration)
         table.Border(TableBorder.Rounded);
         if (!string.IsNullOrEmpty(title))
             table.Title = new TableTitle(title);
-        
+
         table.Expand();
         table.AddColumn((string.Join(", ", anhandDieserSchlüsselAttributeWirdVerglichen)).Replace("PUNKT", ".").Replace("LEERZEICHEN", " ").Replace("MINUS", "-").Replace("UNTERSTRICH", "_").Replace("SCHRÄGSTRICH", "/"));
         table.AddColumn("Attribut");
@@ -1140,13 +1142,13 @@ public Datei(IConfiguration configuration)
             ? (neuerWert?.ToString()?.Length > 85
                 ? neuerWert.ToString().Substring(0, 82) + "..."
                 : neuerWert?.ToString() ?? string.Empty)
-            : string.Empty;    
+            : string.Empty;
         }
         else
         {
             x = neueDict.TryGetValue(nichtIdentischesSonstigesAttribut, out var neuerWert)
             ? (neuerWert?.ToString() ?? string.Empty)
-            : string.Empty;    
+            : string.Empty;
         }
 
         if (x.Length > 0)
@@ -1192,7 +1194,7 @@ public Datei(IConfiguration configuration)
         // Es wird sichergestellt, dass in neueDict und vorhandeneDict die gleichen Schlüssel verwendet werden.
         foreach (var key in neueDict.Keys)
         {
-            if(key.Contains(".") || key.Contains(" ") || key.Contains("-") || key.Contains("_") || key.Contains("/"))
+            if (key.Contains(".") || key.Contains(" ") || key.Contains("-") || key.Contains("_") || key.Contains("/"))
             {
                 sonderzeichen = true;
                 break;
@@ -1202,16 +1204,16 @@ public Datei(IConfiguration configuration)
         List<string> nichtIdentischeSonstige = new List<string>();
         foreach (var key in vorhDict.Keys)
         {
-            if(key.ToLower().Contains("orsitz") && neueDict["Page"].ToString().Contains("ave"))
+            if (key.ToLower().Contains("orsitz") && neueDict["Page"].ToString().Contains("ave"))
             {
-                string aaa= "";
+                string aaa = "";
             }
 
             var k = key;
             // Wenn die neueDict keine Sonderzeichen enthält, dann wird auch bei vorhandeneDict die Sonderzeichen ersetzt.
             if (!sonderzeichen)
                 k = key.Replace(".", "PUNKT").Replace(" ", "LEERZEICHEN").Replace("-", "MINUS").Replace("_", "UNTERSTRICH").Replace("/", "SCHRÄGSTRICH");
-            
+
             // Die Felder, die mit Field beginnen, sind nicht relevant
             if (DieseAttributeWerdenBeimVergleichIgnoriert.Contains(key.ToString())) continue;
             if (AnhandDieserSchlüsselAttributeWirdVerglichen.Contains(key)) continue; // Die Vergleichsattribute werden nicht berücksichtigt
@@ -1255,7 +1257,7 @@ public Datei(IConfiguration configuration)
         }
         return null;
     }
-  
+
 
     public List<dynamic> FilterLehrkraefte()
     {
@@ -1307,7 +1309,7 @@ public Datei(IConfiguration configuration)
                 foreach (var item in (IDictionary<string, object>)record)
                 {
                     // Wenn in den Basisdaten oder zusatzdaten der Key Nachname ist, dann muss eine Raute enthalten sein
-                    if((AbsoluterPfad.Contains("usatzdaten") || AbsoluterPfad.Contains("asisdaten")) && item.Key == "Nachname" && !item.Value.ToString().Contains("#"))
+                    if ((AbsoluterPfad.Contains("usatzdaten") || AbsoluterPfad.Contains("asisdaten")) && item.Key == "Nachname" && !item.Value.ToString().Contains("#"))
                     {
                         throw new Exception("Bitte beim Export aus SchILD 'Klasse als zuätzliches Identifikationsmerkmal hinzufügen'. Zudem nur den aktuellen Abschnitt exportieren.");
                     }
@@ -1377,15 +1379,15 @@ public Datei(IConfiguration configuration)
         try
         {
             var studentsMitNeuenFotos = students.Where(s => !string.IsNullOrEmpty(s.ZielFotoPfad) && File.Exists(s.ZielFotoPfad)).ToList();
-            if(studentsMitNeuenFotos.Count == 0)
+            if (studentsMitNeuenFotos.Count == 0)
             {
                 throw new Exception("Es wurden keine Fotos gefunden, die gezippt werden könnten.");
             }
 
             // Erste Zip-Datei: Webuntis-Kurzname
-            var webuntisZipPfad = Path.Combine(Path.GetDirectoryName(AbsoluterPfad), 
+            var webuntisZipPfad = Path.Combine(Path.GetDirectoryName(AbsoluterPfad),
                 Path.GetFileNameWithoutExtension(AbsoluterPfad) + "_Webuntis-Kurzname.zip");
-            
+
             AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start($"Fotos zippen (Webuntis-Kurzname) ...", ctx =>
             {
                 using (FileStream zipStream = File.Create(webuntisZipPfad))
@@ -1428,7 +1430,7 @@ public Datei(IConfiguration configuration)
                                 zip.Write(buffer, 0, bytesRead);
                             }
                         }
-                        
+
                         File.Delete(tempDatei);
                     }
 
@@ -1440,16 +1442,16 @@ public Datei(IConfiguration configuration)
                     {
                         throw new Exception("Fehler beim Erstellen des Zip-Archivs (Webuntis). Möglicherweise wurden keine Fotos gefunden.");
                     }
-                    
+
                     zip.IsStreamOwner = true;
                 }
             });
             Global.ZeileSchreiben("Fotos gezippt (Webuntis-Kurzname)", webuntisZipPfad, ConsoleColor.Green, ConsoleColor.White);
 
             // Zweite Zip-Datei: Geevoo-Mail
-            var geevooZipPfad = Path.Combine(Path.GetDirectoryName(AbsoluterPfad), 
+            var geevooZipPfad = Path.Combine(Path.GetDirectoryName(AbsoluterPfad),
                 Path.GetFileNameWithoutExtension(AbsoluterPfad) + "_Geevoo-Mail.zip");
-            
+
             AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start($"Fotos zippen (Geevoo-Mail) ...", ctx =>
             {
                 using (FileStream zipStream = File.Create(geevooZipPfad))
@@ -1492,19 +1494,19 @@ public Datei(IConfiguration configuration)
                                 zip.Write(buffer, 0, bytesRead);
                             }
                         }
-                        
+
                         File.Delete(tempDatei);
                     }
 
                     try
                     {
-                        zip.CloseEntry();                        
+                        zip.CloseEntry();
                     }
                     catch
                     {
                         throw new Exception("Fehler beim Erstellen des Zip-Archivs (Geevoo). Möglicherweise wurden keine Fotos gefunden.");
                     }
-                    
+
                     zip.IsStreamOwner = true;
                 }
             });
@@ -1582,7 +1584,7 @@ public Datei(IConfiguration configuration)
     public void ZippenMitKennwort(IConfiguration configuration)
     {
         ZipPfad = Path.Combine(AbsoluterPfad + ".zip");
-        
+
         try
         {
             AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start($"Zippen ...", ctx =>
@@ -1632,20 +1634,20 @@ public Datei(IConfiguration configuration)
         }
     }
 
- internal void Mailen(IConfiguration configuration, string subject, string body, List<string> to, List<string> cc, List<string> bcc, List<string> attachments)
- {
-  if (this.Count == 0)
-   return;
-  
-  configuration = Global.Konfig("SmtpUser365", Global.Modus.Update, configuration);
-  configuration = Global.Konfig("SmtpKennwort365", Global.Modus.Update, configuration);
-  configuration = Global.Konfig("SmtpPort365", Global.Modus.Update, configuration);
-  configuration = Global.Konfig("SmtpServer365", Global.Modus.Update, configuration);
-  var mail = new Mail();
-  mail.Senden(configuration, subject, body, to, cc, bcc, attachments);
- }
+    internal void Mailen(IConfiguration configuration, string subject, string body, List<string> to, List<string> cc, List<string> bcc, List<string> attachments)
+    {
+        if (this.Count == 0)
+            return;
 
-    
+        configuration = Global.Konfig("SmtpUser365", Global.Modus.Update, configuration);
+        configuration = Global.Konfig("SmtpKennwort365", Global.Modus.Update, configuration);
+        configuration = Global.Konfig("SmtpPort365", Global.Modus.Update, configuration);
+        configuration = Global.Konfig("SmtpServer365", Global.Modus.Update, configuration);
+        var mail = new Mail();
+        mail.Senden(configuration, subject, body, to, cc, bcc, attachments);
+    }
+
+
 
     internal List<dynamic> FilterOpenPeriod()
     {
@@ -1671,9 +1673,9 @@ public Datei(IConfiguration configuration)
         }
 
         try
-        {                 
-            var zielPfad = Path.Combine(zielVerzeichnis, Path.GetFileName(AbsoluterPfad));      
-            
+        {
+            var zielPfad = Path.Combine(zielVerzeichnis, Path.GetFileName(AbsoluterPfad));
+
             // Lösche die Zieldatei, falls vorhanden
             if (File.Exists(zielPfad))
             {
@@ -1681,7 +1683,7 @@ public Datei(IConfiguration configuration)
             }
 
             // Verschiebe die Datei
-            File.Move(AbsoluterPfad, zielPfad);                        
+            File.Move(AbsoluterPfad, zielPfad);
             Global.ZeileSchreiben(zielPfad, "", ConsoleColor.Green, ConsoleColor.White);
         }
         catch (Exception ex)
@@ -1715,12 +1717,12 @@ public Datei(IConfiguration configuration)
                     urlMitte = mitgliederMail;
                 }
             }
-         }   
-         catch (Exception ex)
-                 {}          
-        
-        
-        
+        }
+        catch (Exception ex)
+        { }
+
+
+
 
         // Wenn der URL insgesamt länger als 300 Zeichen ist, wird der urlMitte solange gekürzt, bis die URL passt.
         // Das Kürzen geschieht immer an den Kommas. Diejenigen E-Mail-Adressen, die am Ende übrig bleiben, werden in einem Panel angezeigt.
@@ -1847,23 +1849,23 @@ public Datei(IConfiguration configuration)
             modusString = "Filtern";
 
         if (modus == Global.Modus.SchemaUpdaten)
-        {            
+        {
             var panel = new Panel("")
                 .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] Weiter oder Abbrechen [/]")
                 .HeaderAlignment(Justify.Left)
                 .SquareBorder()
                 .Expand()
                 .BorderColor(Global.ColorHinweise);
-            
+
             AnsiConsole.Write(panel);
             AnsiConsole.MarkupLine($"[bold {Global.GetColor(Global.ColorHinweise)}] Mit [green]Enter[/] bestätigen oder mit [red]ESC[/] abbrechen.[/]");
-            
+
             var keyInfo = Console.ReadKey(intercept: true);
             if (keyInfo.Key != ConsoleKey.Enter)
             {
                 return new Datei(); // Abbruch, wenn nicht Enter gedrückt wurde
             }
-        }         
+        }
 
         var neueDatei = new Datei(AbsoluterPfad);
         bool skipProcessing = false;
@@ -1887,19 +1889,19 @@ public Datei(IConfiguration configuration)
                 $"Veränderungen von alt ([{Global.GetColor(Global.ColorPfadInDateien)}]{vorhandeneDatei}[/]) nach neu ([{Global.GetColor(Global.ColorPfadInDateien)}]{AbsoluterPfad}[/]):",
                 AnhandDieserSchlüsselAttributeWirdVerglichen);
 
-        var zulöschendeSeiten = new List<string>(); 
+        var zulöschendeSeiten = new List<string>();
 
         AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start($" {modusString} ...", ctx =>
         {
             var dateiendung = Path.GetExtension(AbsoluterPfad);
             var tableRows = new List<Text>();
-            
+
             var vorhandeneRec = GetVorhandeneRec(quelldateien);
             if (vorhandeneRec == null)
             {
                 skipProcessing = true;
                 return;
-            }            
+            }
 
             // Die Tabelle soll begrenzt werden. Falls mehr als maxRows Zeilen gefunden werden, wird eine weitere Zeile mit "..." eingefügt.
 
@@ -1914,10 +1916,15 @@ public Datei(IConfiguration configuration)
                 bool updateNeeded = false;
                 // Dictionary für ALLE Spalten dieser Zeile
                 var alleWerteFuerDieseZeile = new Dictionary<string, object>();
-                
+
                 ss++;
 
                 var neueDict = (IDictionary<string, object>)neueRec;
+
+                if (neueDict["Page"].ToString().ToLower() == "bildungsgaenge:berufsfachschule:bt1")
+                {
+                    string aaa = "";
+                }
 
                 var anhandDieserSchlüsselAttributeWirdVerglichenString = "";
 
@@ -1947,18 +1954,18 @@ public Datei(IConfiguration configuration)
                             $"{anhandDieserSchlüsselAttributeWirdVerglichenString}"
                             ), new Text($"neue Zeile"), new Text(""), new Text("")); rows++;
 
-                        if(modus == Global.Modus.SchemaUpdaten)
-                        {                            
+                        if (modus == Global.Modus.SchemaUpdaten)
+                        {
                             string zielSeite = neueDict["Page"]?.ToString().ToLower();//.Trim().Split(':').Where(s => !s.Equals("start", StringComparison.OrdinalIgnoreCase)).LastOrDefault();    
-                            if(zielSeite.ToLower().Contains("sprechtag"))
+                            if (zielSeite.ToLower().Contains("sprechtag"))
                             {
                                 string aa = "";
                             }
-                            var schemaName = Path.GetFileNameWithoutExtension(AbsoluterPfad);                            
+                            var schemaName = Path.GetFileNameWithoutExtension(AbsoluterPfad);
                             InsertSchemaData(neueDict, schemaName, zielSeite);
                             Console.WriteLine($"INSERT: {anhandDieserSchlüsselAttributeWirdVerglichenString} -> {schemaName} ... durchgeführt.");
                         }
-                    }                        
+                    }
                     continue;
                 } // und die Schleife übersprungen
 
@@ -1976,9 +1983,9 @@ public Datei(IConfiguration configuration)
                 {
                     if (rows > maxRows)
                     {
-                        if(modus == Global.Modus.Vergleichen)
+                        if (modus == Global.Modus.Vergleichen)
                             break; // Wenn die maximale Anzahl an Zeilen erreicht ist, breche die Schleife ab.                    
-                    }    
+                    }
                     if (rows == maxRows)
                         table.AddRow(new Text("..."), new Text("..."), new Text("..."), new Text("..."));
                     if (rows < maxRows)
@@ -2004,37 +2011,37 @@ public Datei(IConfiguration configuration)
                                 }
 
                                 // Schlüssel übersetzen (z.B. "ASLASHB" -> "A/B")
-string uebersetzterKey = key.Replace("DOPPELPUNKT", ":")
-                           .Replace("PUNKT", ".")
-                           .Replace("MINUS", "-")
-                           .Replace("ZWEI", "2")
-                           .Replace("EINS", "1")
-                           .Replace("UNTERSTRICH", "_")
-                           .Replace("SLASH", "/")
-                           .Replace("LEERZEICHEN", " ")
-                           .Replace("KLAMMERAUF", "(")
-                           .Replace("KLAMMERZU", ")");
+                                string uebersetzterKey = key.Replace("DOPPELPUNKT", ":")
+                                                           .Replace("PUNKT", ".")
+                                                           .Replace("MINUS", "-")
+                                                           .Replace("ZWEI", "2")
+                                                           .Replace("EINS", "1")
+                                                           .Replace("UNTERSTRICH", "_")
+                                                           .Replace("SLASH", "/")
+                                                           .Replace("LEERZEICHEN", " ")
+                                                           .Replace("KLAMMERAUF", "(")
+                                                           .Replace("KLAMMERZU", ")");
 
-                            // Wert zuweisen (mit Null-Prüfung)
-                            alleWerteFuerDieseZeile[uebersetzterKey] = neueDict[key]?.ToString();
+                                // Wert zuweisen (mit Null-Prüfung)
+                                alleWerteFuerDieseZeile[uebersetzterKey] = neueDict[key]?.ToString();
                             }
 
                             // Aufruf der Update-Methode mit der VOLLSTÄNDIGEN Zeile                            
                             updateNeeded = true;
                         }
                     }
-                        
+
                     rows++;
                 }
-                
-                if(updateNeeded)
+
+                if (updateNeeded)
                 {
                     string zielSeite = neueDict["Page"]?.ToString().ToLower();//.Trim().Split(':').Where(s => !s.Equals("start", StringComparison.OrdinalIgnoreCase)).LastOrDefault();    
                     var schemaName = Path.GetFileNameWithoutExtension(AbsoluterPfad);
                     UpdateSchemaData(zielSeite, schemaName, alleWerteFuerDieseZeile, WikiZugriff);
-                    Console.WriteLine($"UPDATE: {neueDict["Page"]?.ToString().ToLower()} ... durchgeführt.");    
+                    Console.WriteLine($"UPDATE: {neueDict["Page"]?.ToString().ToLower()} ... durchgeführt.");
                 }
-                
+
                 neueDatei.Add(neueRec);
             }
 
@@ -2044,7 +2051,7 @@ string uebersetzterKey = key.Replace("DOPPELPUNKT", ":")
             {
                 var vorhandeneDict = (IDictionary<string, object>)vRec;
                 var löschen = true;
-                
+
                 foreach (var neueRec in this)
                 {
                     var neueDict2 = (IDictionary<string, object>)neueRec;
@@ -2056,7 +2063,7 @@ string uebersetzterKey = key.Replace("DOPPELPUNKT", ":")
                     if (neueDict2.ContainsKey("Mail") && neueDict2["Mail"] != null)
                     {
                         string mail = neueDict2["Mail"].ToString();
-                        
+
                         if (!string.IsNullOrEmpty(mail) && !mail.ToLower().Contains("@berufskolleg-borken.de"))
                         {
                             löschen = false;
@@ -2064,15 +2071,15 @@ string uebersetzterKey = key.Replace("DOPPELPUNKT", ":")
                         }
                     }
 
-                    if(neu == vorh)
+                    if (neu == vorh)
                     {
                         löschen = false;
                         break; // Wenn eine Übereinstimmung gefunden wurde, breche die innere Schleife ab
                     }
                 }
                 if (löschen)
-                {                    
-                    if(modus == Global.Modus.Vergleichen && AbsoluterPfad.Contains("struct"))
+                {
+                    if (modus == Global.Modus.Vergleichen && AbsoluterPfad.Contains("struct"))
                     {
                         table.AddRow(
                             RenderZeile(
@@ -2080,12 +2087,12 @@ string uebersetzterKey = key.Replace("DOPPELPUNKT", ":")
                                 neueDatei,
                                 "Seite löschen!",
                                 null));
-                      //this.OeffneWebseite("https://bkb.wiki/doku.php?id=", vorhandeneDict["Page"]?.ToString());
+                        //this.OeffneWebseite("https://bkb.wiki/doku.php?id=", vorhandeneDict["Page"]?.ToString());
                     }
-                    if(modus == Global.Modus.SchemaUpdaten)
+                    if (modus == Global.Modus.SchemaUpdaten)
                     {
                         zulöschendeSeiten.Add(vorhandeneDict["Page"]?.ToString());
-                    }                    
+                    }
                 }
             }
 
@@ -2093,55 +2100,71 @@ string uebersetzterKey = key.Replace("DOPPELPUNKT", ":")
                 table.AddRow(new Text("keine Änderungen, nichts anzuzeigen"), new Text("..."), new Text("..."), new Text("..."));
         });
 
-        if(modus == Global.Modus.SchemaUpdaten)
+        if (modus == Global.Modus.SchemaUpdaten && zulöschendeSeiten.Count > 0)
         {
-            if(zulöschendeSeiten.Count > 0)
+            AnsiConsole.MarkupLine($"[bold yellow]Es stehen {zulöschendeSeiten.Count} Seiten zum Löschen an.[/]\n");
+
+            var schemaName = Path.GetFileNameWithoutExtension(AbsoluterPfad);
+
+            foreach (var seite in zulöschendeSeiten)
             {
-                Console.WriteLine($"Es werden {zulöschendeSeiten.Count} Seiten gelöscht. Bitte bestätigen Sie mit 'j' oder 'J', um fortzufahren.");
-                var keyInfo = Console.ReadKey(intercept: true);
-                if (keyInfo.KeyChar.ToString().ToLower().StartsWith("j"))
+                bool aktionAbgeschlossen = false;
+
+                while (!aktionAbgeschlossen)
                 {
-                    foreach(var seite in zulöschendeSeiten)
+                    // Interaktives Auswahlmenü für die aktuelle Seite
+                    var aktion = AnsiConsole.Prompt(
+                        new SelectionPrompt<string>()
+                            .Title($"Aktion für Seite [bold cyan]{Markup.Escape(seite)}[/] wählen:")
+                            .PageSize(4)
+                            .AddChoices(new[]
+                            {
+                        "Löschen",
+                        "Im Browser öffnen",
+                        "Überspringen"
+                            }));
+
+                    switch (aktion)
                     {
-                        Console.WriteLine($"\nAktion für Seite '{seite}' wählen:");
-Console.WriteLine("[1 / Enter] Löschen | [2] Im Browser öffnen | [Jeder andere Key] Überspringen");
+                        case "Löschen":
+                            AnsiConsole.Status()
+                                .Spinner(Spinner.Known.Dots)
+                                .Start($"Lösche [cyan]{Markup.Escape(seite)}[/]...", ctx =>
+                                {
+                                    DeleteSchemaData(schemaName, seite, WikiZugriff);
+                                });
 
-ConsoleKeyInfo keyInfo1 = Console.ReadKey(true); // true = Eingabe nicht in der Konsole anzeigen
+                            AnsiConsole.MarkupLine($"[bold red]DELETE:[/] [grey]{Markup.Escape(seite)}[/] wurde gelöscht.");
+                            aktionAbgeschlossen = true;
+                            break;
 
-// Enter liefert '\r' (Carriage Return)
-if (keyInfo1.KeyChar == '1' || keyInfo1.Key == ConsoleKey.Enter)
-{
-    // Option 1 (Default): Seite löschen
-    DeleteSchemaData(Path.GetFileNameWithoutExtension(AbsoluterPfad), seite, WikiZugriff);
-    Console.WriteLine($"DELETE: {seite.PadRight(50)}... durchgeführt.");
-}
-else if (keyInfo1.KeyChar == '2')
-{
-    // Option 2: Seite im Browser öffnen
-    string url = "https://bkb.wiki" + seite; // Pfad/URL entsprechend anpassen
-    
-    Process.Start(new ProcessStartInfo
-    {
-        FileName = url,
-        UseShellExecute = true
-    });
-    
-    Console.WriteLine($"GEÖFFNET: {seite.PadRight(50)}... im Browser geöffnet.");
-}
-else
-{
-    // Alle anderen Tasten: Überspringen
-    Console.WriteLine($"ÜBERSPRUNGEN: {seite.PadRight(50)}... keine Aktion ausgeführt.");
-}
+                        case "Im Browser öffnen":
+                            string url = "https://bkb.wiki" + seite;
+
+                            Process.Start(new ProcessStartInfo
+                            {
+                                FileName = url,
+                                UseShellExecute = true
+                            });
+
+                            AnsiConsole.MarkupLine($"[bold blue]GEÖFFNET:[/] [grey]{Markup.Escape(seite)}[/] im Browser geöffnet.");
+                            AnsiConsole.WriteLine(); // Kleine Leerzeile zur Übersicht
+                                                     // aktionAbgeschlossen bleibt false -> Schleife wiederholt den Dialog
+                            break;
+
+                        case "Überspringen":
+                            AnsiConsole.MarkupLine($"[bold yellow]ÜBERSPRUNGEN:[/] [grey]{Markup.Escape(seite)}[/] wurde nicht verändert.");
+                            aktionAbgeschlossen = true;
+                            break;
                     }
                 }
-                else
-                {
-                    Console.WriteLine("Löschvorgang abgebrochen.");
-                }
-            }    
+
+                AnsiConsole.WriteLine(); // Abstand zur nächsten Seite
+            }
+
+            AnsiConsole.MarkupLine("[bold green]Verarbeitung abgeschlossen.[/]");
         }
-        
+
         // Im Vergleichsmodus wird die originale Datei nicht verändert.
         if (Global.Modus.Vergleichen == modus)
         {
@@ -2149,7 +2172,7 @@ else
             if (table.Rows.Count > 3)
                 Console.WriteLine("Anzahl Zeilen:" + table.Rows.Count);
             return this;
-        }            
+        }
 
         // Im Updatemodus wird die originale Datei mit der neuen Datei überschrieben.
         Clear();
@@ -2158,13 +2181,13 @@ else
     }
 
     internal void InsertSchemaData(IDictionary<string, object> neueDict, string schemaName, string zielSeite = "")
-    {   
+    {
         try
         {
             // 1. Inhalt der template.txt über die API abrufen
             // DokuWiki-Pfad syntax nutzt Doppelpunkte statt Slashes
             string templateInhalt = "";
-            try 
+            try
             {
                 templateInhalt = WikiZugriff.Proxy.GetPage(schemaName + ":template");
             }
@@ -2177,9 +2200,9 @@ else
             // 2. Platzhalter im Template ersetzen (falls vorhanden, z.B. @PAGE@ oder @USER@)
             // DokuWiki ersetzt diese normalerweise automatisch, per API müssen wir das selbst tun:
 
-            if(neueDict["Art"].ToString().ToLower() == "schulgemeinschaft:kollegium")
-            {   
-                templateInhalt = templateInhalt.Replace("@NAME@", neueDict["TitelVornameNachname"].ToString());             
+            if (neueDict["Art"].ToString().ToLower() == "schulgemeinschaft:kollegium")
+            {
+                templateInhalt = templateInhalt.Replace("@NAME@", neueDict["TitelVornameNachname"].ToString());
                 templateInhalt = templateInhalt.Replace("@PAGE@", neueDict["Namen"].ToString());
                 templateInhalt = templateInhalt.Replace("@ID@", zielSeite);
             }
@@ -2202,7 +2225,7 @@ else
                 templateInhalt = templateInhalt.Replace("@NAME@", zielSeite.Replace(schemaName + ":", ""));
                 templateInhalt = templateInhalt.Replace("@ID@", zielSeite);
             }
-            
+
 
             // 3. Seite mit dem Template-Inhalt anlegen
             WikiZugriff.Proxy.PutPage(zielSeite, templateInhalt, new XmlRpcStruct());
@@ -2233,7 +2256,7 @@ else
         }
     }
 
- private string GetVorhandeneDatei(Dateien quelldateien)
+    private string GetVorhandeneDatei(Dateien quelldateien)
     {
         var vorhandeneRec = new List<dynamic>();
 
@@ -2250,7 +2273,7 @@ else
         // Neue .csv-Dateien beginnen mit demselben Namen wie die Zieldatei, bis zum Unterstrich
         foreach (var vorhandeneDatei in quelldateien)
         {
-            if(vorhandeneDatei.AbsoluterPfad.Contains("praktikanten"))
+            if (vorhandeneDatei.AbsoluterPfad.Contains("praktikanten"))
             {
                 string a = "";
             }
@@ -2274,11 +2297,11 @@ else
     {
         var neueDatei = new Datei(AbsoluterPfad);
         bool skipProcessing = false;
-        
+
         AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Filtern ...", ctx =>
         {
             var dateiendung = Path.GetExtension(AbsoluterPfad);
-            
+
             var vorhandeneRec = GetVorhandeneRec(quelldateien);
             if (vorhandeneRec == null || vorhandeneRec.Count == 0)
             {
@@ -2355,9 +2378,9 @@ else
         {
             return;
         }
-    
+
         var ordnerPfad = Path.GetDirectoryName(AbsoluterPfad);
-    
+
         try
         {
             if (OperatingSystem.IsWindows())
@@ -2410,7 +2433,7 @@ else
             { "sum", "Automatische Aktualisierung" },
             { "minor", Global.WikiSprechtagKleineAenderung } // Kein Minor-Edit
         };
-        
+
         DokuwikiZugriff.Proxy.PutPage(Name, string.Join("\n", this), new XmlRpcStruct());
     }
 
@@ -2420,7 +2443,7 @@ else
     /// <param name="schemaName"></param>
     /// <param name="benutzerSpalten"></param>
     internal Datei GetSchemaDynamisch(string schemaName, string[] benutzerSpalten, string[] AnhandDieserSchlüsselAttributeWirdVerglichen, string[] DieseAttributeWerdenBeimVergleichIgnoriert)
-    {        
+    {
         this.AnhandDieserSchlüsselAttributeWirdVerglichen = AnhandDieserSchlüsselAttributeWirdVerglichen;
         this.DieseAttributeWerdenBeimVergleichIgnoriert = DieseAttributeWerdenBeimVergleichIgnoriert;
 
@@ -2472,7 +2495,7 @@ else
 
         // Spalten hinzufügen (Lfd. Nr als erste Spalte)
         table.AddColumn(new TableColumn("[yellow]ldf. Nr[/]").Centered());
-        
+
         // Die dynamischen Spalten hinzufügen
         foreach (var spalte in benutzerSpalten)
         {
@@ -2485,7 +2508,7 @@ else
         {
             var zeile = SchemaData[i];
             var zeilenInhalt = new List<string> { (i + 1).ToString() }; // Laufende Nummer
-            
+
             foreach (var spalte in benutzerSpalten)
             {
                 zeilenInhalt.Add(zeile[spalte]);
@@ -2510,220 +2533,224 @@ else
         return this;
     }
 
-internal void GetSchema(string schemaName, string[] benutzerSpalten, IConfiguration configuration, DokuwikiZugriff wikiZugriff, Lehrers lehrers)
-{   
-    AbsoluterPfad = Path.Combine(configuration["PfadDownloads"], schemaName + ".struct");
-
-    string[] schemas = { schemaName };
-    object[] filters = { };
-    string sortBy = "";
-
-    // 1. API Abfrage an DokuWiki
-    object[] ergebnis = wikiZugriff.Proxy.GetAggregationData(schemas, benutzerSpalten, filters, sortBy);
-
-    SchemaData.Clear();
-    Clear();
-
-    foreach (object zeileObj in ergebnis)
+    internal void GetSchema(string schemaName, string[] benutzerSpalten, IConfiguration configuration, DokuwikiZugriff wikiZugriff, Lehrers lehrers)
     {
-        XmlRpcStruct zeile = (XmlRpcStruct)zeileObj;
-        var datenZeile = new Dictionary<string, string>();
+        AbsoluterPfad = Path.Combine(configuration["PfadDownloads"], schemaName + ".struct");
 
-        // 2. Alle benutzerdefinierten Spalten regulär auslesen
-        foreach (var spalte in benutzerSpalten)
+        string[] schemas = { schemaName };
+        object[] filters = { };
+        string sortBy = "";
+
+        // 1. API Abfrage an DokuWiki
+        object[] ergebnis = wikiZugriff.Proxy.GetAggregationData(schemas, benutzerSpalten, filters, sortBy);
+
+        SchemaData.Clear();
+        Clear();
+
+        foreach (object zeileObj in ergebnis)
         {
-            string neueSpalte = spalte.Replace(schemaName + ".", "");
-            
-            // "Page" überspringen wir in der Hauptschleife, da wir es gleich logisch befüllen
-            if (neueSpalte.Equals("Page", StringComparison.OrdinalIgnoreCase))
-                continue;
+            XmlRpcStruct zeile = (XmlRpcStruct)zeileObj;
+            var datenZeile = new Dictionary<string, string>();
 
-            var wert = ConvertStructValueToString(zeile, spalte);
+            // 2. Alle benutzerdefinierten Spalten regulär auslesen
+            foreach (var spalte in benutzerSpalten)
+            {
+                string neueSpalte = spalte.Replace(schemaName + ".", "");
 
-            if(wert == "BT1")
+                // "Page" überspringen wir in der Hauptschleife, da wir es gleich logisch befüllen
+                if (neueSpalte.Equals("Page", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                var wert = ConvertStructValueToString(zeile, spalte);
+
+                if (wert == "BT1")
                 {
-                    if(neueSpalte == "Klassen")
+                    if (neueSpalte == "Klassen")
                     {
-                        string aaa= "";    
+                        string aaa = "";
                     }
                 }
-               if(neueSpalte == "VorsitzLeitung")
+                if (neueSpalte == "VorsitzLeitung")
+                {
+                    string aaa = "";
+                }
+
+
+
+                // In Struct wird evtl. nicht der Wikipfad des Lehrers angegeben, sondern sein Name. Das muss geändert werden
+
+                if (lehrers != null)
+                {
+                    foreach (var l in lehrers)
                     {
-                        string aaa= "";    
-                    } 
-                    
-                
-
-            // In Struct wird evtl. nicht der Wikipfad des Lehrers angegeben, sondern sein Name. Das muss geändert werden
-
-            foreach(var l in lehrers)
-            {
-                var titelVornameNachname = (string.IsNullOrEmpty(l.Titel) ? "" : l.Titel + " ") + l.Vorname + " " + l.Nachname;
-                if(wert.Contains(titelVornameNachname))
-                    wert = wert.Replace(titelVornameNachname, "schulgemeinschaft:" + l.Kürzel.ToLower());        
-            }
-            
-            // In der Schulform wird der Link ermittelt
-
-            if(neueSpalte == "Schulform")
-            {
-                var link = ConvertStructValueToString(zeile, "schulgemeinschaft.Link");
-                var kuerzel = ConvertStructValueToString(zeile, "schulgemeinschaft.BGkuerzel");
-
-                wert = link.ToLower().Replace(kuerzel.ToLower() + ":", "");
-            }
-            if(neueSpalte == "Bereich")
-            {
-                if(wert.Contains("etall"))
-                {
-                    wert = "bereiche:metall-_und_elektrotechnik_ing";
-                }
-                if(wert.Contains("grar"))
-                {
-                    wert = "bereiche:agrarwirtschaft";
-                }
-                if(wert.Contains("olz"))
-                {
-                    wert = "bereiche:metall-_und_elektrotechnik_ing";
-                }
-                if(wert.Contains("irtsch"))
-                {
-                    wert = "bereiche:wirtschaft_und_verwaltung";
-                }
-                if(wert.Contains("esundh"))
-                {
-                    wert = "bereiche:gesundheit_erziehung_und_soziales";
-                }
-            }
-            if(neueSpalte == "Klassen")
-            {
-                var kl = "";
-                if(!string.IsNullOrEmpty(wert))
-                    {
-                        foreach(var k in wert.Split(','))
-                    kl = kl + ":klassen:" + k.ToLower().Trim() + ", ";
-                
-                wert = kl.TrimEnd(' ').TrimEnd(',').TrimEnd(' ').TrimEnd(',');        
+                        var titelVornameNachname = (string.IsNullOrEmpty(l.Titel) ? "" : l.Titel + " ") + l.Vorname + " " + l.Nachname;
+                        if (wert.Contains(titelVornameNachname))
+                            wert = wert.Replace(titelVornameNachname, "schulgemeinschaft:" + l.Kürzel.ToLower());
                     }
-                
+                }
+
+
+                // In der Schulform wird der Link ermittelt
+
+                if (neueSpalte == "Schulform")
+                {
+                    var link = ConvertStructValueToString(zeile, "schulgemeinschaft.Link");
+                    var kuerzel = ConvertStructValueToString(zeile, "schulgemeinschaft.BGkuerzel");
+
+                    wert = link.ToLower().Replace(kuerzel.ToLower() + ":", "");
+                }
+                if (neueSpalte == "Bereich")
+                {
+                    if (wert.Contains("etall"))
+                    {
+                        wert = "bereiche:metall-_und_elektrotechnik_ing";
+                    }
+                    if (wert.Contains("grar"))
+                    {
+                        wert = "bereiche:agrarwirtschaft";
+                    }
+                    if (wert.Contains("olz"))
+                    {
+                        wert = "bereiche:metall-_und_elektrotechnik_ing";
+                    }
+                    if (wert.Contains("irtsch"))
+                    {
+                        wert = "bereiche:wirtschaft_und_verwaltung";
+                    }
+                    if (wert.Contains("esundh"))
+                    {
+                        wert = "bereiche:gesundheit_erziehung_und_soziales";
+                    }
+                }
+                if (neueSpalte == "Klassen")
+                {
+                    var kl = "";
+                    if (!string.IsNullOrEmpty(wert))
+                    {
+                        foreach (var k in wert.Split(','))
+                            kl = kl + ":klassen:" + k.ToLower().Trim() + ", ";
+
+                        wert = kl.TrimEnd(' ').TrimEnd(',').TrimEnd(' ').TrimEnd(',');
+                    }
+
+                }
+
+
+
+
+
+
+                datenZeile[neueSpalte] = wert;
+
+            }
+
+            // 3. Fallback/Zuweisung: Wert von 'Link' in 'Page' übertragen
+            // Falls 'Link' existiert, nutzen wir diesen Wert kleingeschrieben als Page-ID
+            if (datenZeile.ContainsKey("Link"))
+            {
+                datenZeile["Page"] = datenZeile["Link"]?.ToLower().Trim() ?? "";
+            }
+            else
+            {
+                datenZeile["Page"] = "";
+            }
+
+            if (datenZeile.ContainsKey("Kategorien"))
+            {
+                datenZeile["Kategorien"] = datenZeile["Kategorien"]?.ToString().ToLower().Trim().Replace(" ", "") ?? "";
             }
 
 
-            
+            // Dictionary zur Liste hinzufügen
+            SchemaData.Add(datenZeile);
 
+            // 4. Dynamisches ExpandoObject für die interne Weiterverarbeitung befüllen
+            dynamic record = new ExpandoObject();
+            var recordDict = (IDictionary<string, object>)record;
 
+            // Page-Wert explizit setzen
+            recordDict["Page"] = datenZeile["Page"];
 
-            datenZeile[neueSpalte] = wert;
+            foreach (var spalte in benutzerSpalten)
+            {
+                string neueSpalte = spalte.Replace(schemaName + ".", "");
+                if (neueSpalte.Equals("Page", StringComparison.OrdinalIgnoreCase))
+                    continue;
 
+                recordDict[neueSpalte] = datenZeile[neueSpalte];
+            }
+            this.Add(record);
         }
-
-        // 3. Fallback/Zuweisung: Wert von 'Link' in 'Page' übertragen
-        // Falls 'Link' existiert, nutzen wir diesen Wert kleingeschrieben als Page-ID
-        if (datenZeile.ContainsKey("Link"))
-        {
-            datenZeile["Page"] = datenZeile["Link"]?.ToLower().Trim() ?? "";
-        }
-        else
-        {
-            datenZeile["Page"] = "";
-        }
-
-        if (datenZeile.ContainsKey("Kategorien"))
-        {
-            datenZeile["Kategorien"] = datenZeile["Kategorien"]?.ToString().ToLower().Trim().Replace(" ", "") ?? "";
-        }
-
-
-        // Dictionary zur Liste hinzufügen
-        SchemaData.Add(datenZeile);
-
-        // 4. Dynamisches ExpandoObject für die interne Weiterverarbeitung befüllen
-        dynamic record = new ExpandoObject();
-        var recordDict = (IDictionary<string, object>)record;
-        
-        // Page-Wert explizit setzen
-        recordDict["Page"] = datenZeile["Page"];
-
-        foreach (var spalte in benutzerSpalten)
-        {                    
-            string neueSpalte = spalte.Replace(schemaName + ".", "");
-            if (neueSpalte.Equals("Page", StringComparison.OrdinalIgnoreCase)) 
-                continue;
-            
-            recordDict[neueSpalte] = datenZeile[neueSpalte];
-        }                
-        this.Add(record);
     }
-}
 
     // Das Interface bleibt bestehen, muss aber der API des Struct-Plugins entsprechen
-[XmlRpcUrl("https://deine-dokuwiki-url.de/lib/exe/xmlrpc.php")]
-public interface IDokuWikiRpc : IXmlRpcProxy
-{
-    // Geändert von bool auf object
-    [XmlRpcMethod("plugin.struct.saveData")]
-    object SaveStructData(string pageId, string schemaName, XmlRpcStruct data);
-}
+    [XmlRpcUrl("https://deine-dokuwiki-url.de/lib/exe/xmlrpc.php")]
+    public interface IDokuWikiRpc : IXmlRpcProxy
+    {
+        // Geändert von bool auf object
+        [XmlRpcMethod("plugin.struct.saveData")]
+        object SaveStructData(string pageId, string schemaName, XmlRpcStruct data);
+    }
 
 
     internal void UpdateSchemaData(string zielSeite, string schemaName, Dictionary<string, object> neueWerte, DokuwikiZugriff wikiZugriff)
-{
-    try
     {
-        // 1. Die eigentlichen Spaltenwerte sammeln
-        XmlRpcStruct innerStruct = new XmlRpcStruct();
-        foreach (var eintrag in neueWerte)
+        try
         {
-            string wertString = eintrag.Value?.ToString() ?? "";
-            string bereinigterSpaltenName = eintrag.Key.Replace(schemaName + ".", "");
-            
-            innerStruct.Add(bereinigterSpaltenName, wertString);    
-        }
+            // 1. Die eigentlichen Spaltenwerte sammeln
+            XmlRpcStruct innerStruct = new XmlRpcStruct();
+            foreach (var eintrag in neueWerte)
+            {
+                string wertString = eintrag.Value?.ToString() ?? "";
+                string bereinigterSpaltenName = eintrag.Key.Replace(schemaName + ".", "");
 
-        // 2. Die Payload verschachteln
-        XmlRpcStruct structPayload = new XmlRpcStruct
+                innerStruct.Add(bereinigterSpaltenName, wertString);
+            }
+
+            // 2. Die Payload verschachteln
+            XmlRpcStruct structPayload = new XmlRpcStruct
         {
             { schemaName, innerStruct }
         };
 
-        // 3. API-Aufruf ausführen
-        // Option A: Leere Summary übergeben (""), damit keine neue Version erzeugt wird
-        // Option B: minorEdit-Flag nutzen (sofern vom Proxy-Interface unterstützt)
-        
-        string summary = ""; // Leere Summary verhindert Versionseintrag
-        bool erfolg = wikiZugriff.Proxy.SaveStructData(zielSeite, structPayload, summary);
-        
-        System.Diagnostics.Debug.WriteLine($"[Struct-Update] Erfolg für {zielSeite}: {erfolg}");
-    }
-    catch (XmlRpcFaultException fex)
-    {
-        System.Diagnostics.Debug.WriteLine("=== XML-RPC FEHLER (VOM SERVER) ===");
-        System.Diagnostics.Debug.WriteLine($"Code: {fex.FaultCode} | Meldung: {fex.FaultString}");
-        throw;
-    }
-    catch (XmlRpcIllFormedXmlException xmlEx)
-    {
-        System.Diagnostics.Debug.WriteLine("=== UNGÜLTIGE ANTWORT VOM SERVER ===");
-        System.Diagnostics.Debug.WriteLine($"Meldung: {xmlEx.Message}");
-        if (xmlEx.InnerException != null)
-        {
-            System.Diagnostics.Debug.WriteLine($"Ursache: {xmlEx.InnerException.Message}");
+            // 3. API-Aufruf ausführen
+            // Option A: Leere Summary übergeben (""), damit keine neue Version erzeugt wird
+            // Option B: minorEdit-Flag nutzen (sofern vom Proxy-Interface unterstützt)
+
+            string summary = ""; // Leere Summary verhindert Versionseintrag
+            bool erfolg = wikiZugriff.Proxy.SaveStructData(zielSeite, structPayload, summary);
+
+            System.Diagnostics.Debug.WriteLine($"[Struct-Update] Erfolg für {zielSeite}: {erfolg}");
         }
-        throw;
+        catch (XmlRpcFaultException fex)
+        {
+            System.Diagnostics.Debug.WriteLine("=== XML-RPC FEHLER (VOM SERVER) ===");
+            System.Diagnostics.Debug.WriteLine($"Code: {fex.FaultCode} | Meldung: {fex.FaultString}");
+            throw;
+        }
+        catch (XmlRpcIllFormedXmlException xmlEx)
+        {
+            System.Diagnostics.Debug.WriteLine("=== UNGÜLTIGE ANTWORT VOM SERVER ===");
+            System.Diagnostics.Debug.WriteLine($"Meldung: {xmlEx.Message}");
+            if (xmlEx.InnerException != null)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ursache: {xmlEx.InnerException.Message}");
+            }
+            throw;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Allgemeiner Fehler: {ex.Message}");
+            throw;
+        }
     }
-    catch (Exception ex)
-    {
-        System.Diagnostics.Debug.WriteLine($"Allgemeiner Fehler: {ex.Message}");
-        throw;
-    }
-}
 
     internal void DeleteSchemaData(string schemaName, string zielSeite, DokuwikiZugriff wikiZugriff)
     {
         try
         {
-            var erfolg = wikiZugriff.Proxy.PutPage(zielSeite, String.Empty, new XmlRpcStruct { { "sum", "Seite gelöscht via API" } });            
-            System.Diagnostics.Debug.WriteLine($"[Struct-Delete] Erfolg für {zielSeite}: {erfolg}");    
+            var erfolg = wikiZugriff.Proxy.PutPage(zielSeite, String.Empty, new XmlRpcStruct { { "sum", "Seite gelöscht via API" } });
+            System.Diagnostics.Debug.WriteLine($"[Struct-Delete] Erfolg für {zielSeite}: {erfolg}");
         }
         catch (XmlRpcFaultException fex)
         {
@@ -2758,7 +2785,7 @@ public interface IDokuWikiRpc : IXmlRpcProxy
         return zeile[key].ToString();
     }
 
- internal void ChatErzeugen(Menüeintrag m)
+    internal void ChatErzeugen(Menüeintrag m)
     {
         var table = new Table();
         table.AddColumn("Nr.");
@@ -2785,7 +2812,7 @@ public interface IDokuWikiRpc : IXmlRpcProxy
         if (nummer > 0 && nummer < Count)
         {
             var lehrers = new Lehrers();
-            lehrers.GetTeamsUrl(this[nummer - 1].MitgliederMail.Split(';'), String.Join(';', m.IKlassen));            
+            lehrers.GetTeamsUrl(this[nummer - 1].MitgliederMail.Split(';'), String.Join(';', m.IKlassen));
         }
 
         if (nummer == Count)
@@ -2807,14 +2834,14 @@ public interface IDokuWikiRpc : IXmlRpcProxy
             this.Clear();
             //m.FilterInteressierendeStudentsUndKlassen(configuration);
             this.AddRange(KlassengruppenAuswählen(configuration, m, lehrers, modus, "Hallo LuL " + m.IKlassen.FirstOrDefault()));
-            
+
             var panel = new Panel("")
                 .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] Name des Chats [/]")
                 .HeaderAlignment(Justify.Left)
                 .SquareBorder()
                 .Expand()
                 .BorderColor(Global.ColorHinweise);
-            
+
             AnsiConsole.Write(panel);
             AnsiConsole.MarkupLine($"Zeugnisse {string.Join(", ", m.IKlassen)}");
 
@@ -2826,12 +2853,12 @@ public interface IDokuWikiRpc : IXmlRpcProxy
                 .BorderColor(Global.ColorHinweise);
 
             AnsiConsole.Write(panel2);
-            
+
             AnsiConsole.MarkupLine($"Es gibt offene Fehlstunden:\nhttps://bk-borken.webuntis.com/open-periods\nOffene Fehlstunden müssen vor der Zeugniserstellung behandelt werden und werden nicht in das Zeugnis übernommen.");
-            
+
             AnsiConsole.MarkupLine($"Die Zeugnisse sind vorbereitet:\nhttps://bkb.wiki/notenlisten:start\nhttps://bkb.wiki/konferenzen:teilkonferenzen:zeugniskonferenzen:start");
 
-            return;            
+            return;
         }
 
         var table = new Table();
@@ -2875,12 +2902,12 @@ public interface IDokuWikiRpc : IXmlRpcProxy
         {
             this.Clear();
             m.FilterInteressierendeStudentsUndKlassen(configuration);
-            this.AddRange(KlassengruppenAuswählen(configuration, m, lehrers, modus, "Hallo LuL " + m.IKlassen.FirstOrDefault()));            
+            this.AddRange(KlassengruppenAuswählen(configuration, m, lehrers, modus, "Hallo LuL " + m.IKlassen.FirstOrDefault()));
         }
     }
 
     private Datei KlassengruppenAuswählen(IConfiguration configuration, Menüeintrag m, Lehrers lehrers, Global.Modus modus, string message)
-    {        
+    {
         var klasse = m.IKlassen.FirstOrDefault();
         var lehrerDerKlasse = m.GetLehrerDerKlassen(configuration, lehrers ?? []);
 
@@ -2921,10 +2948,10 @@ public interface IDokuWikiRpc : IXmlRpcProxy
         record.Mitglieder = mitglieder;
         record.MitgliederMail = mitgliederMail;
         record.MitgliederKuerzel = mitgliederKuerzel;
-        
+
         this.Add(record);
         this.UrlMitte = mitgliederMail;
-        this.UrlRechts = "&message=" + Uri.EscapeDataString(message);            
+        this.UrlRechts = "&message=" + Uri.EscapeDataString(message);
         return this;
     }
 
@@ -2938,262 +2965,262 @@ public interface IDokuWikiRpc : IXmlRpcProxy
         }
 
         try
+        {
+            var sb = new StringBuilder();
+
+            var firstRecord = quelle.FirstOrDefault() as IDictionary<string, object>;
+            if (firstRecord != null)
             {
-                var sb = new StringBuilder();
-                        
-                var firstRecord = quelle.FirstOrDefault() as IDictionary<string, object>;
-                if (firstRecord != null)
+                string kopfzeile = "";
+
+                foreach (var header in firstRecord.Keys)
                 {
-                    string kopfzeile = "";
-                    
+                    var adjustedHeader = header
+                        .Replace("DOPPELPUNKT", ":")
+                        .Replace("PUNKT", ".")
+                        .Replace("MINUS", "-")
+                        .Replace("ZWEI", "2")
+                        .Replace("EINS", "1")
+                        .Replace("UNTERSTRICH", "_")
+                        .Replace("SLASH", "/")
+                        .Replace("LEERZEICHEN", " ")
+                        .Replace("KLAMMERAUF", "(")
+                        .Replace("KLAMMERZU", ")");
+
+                    kopfzeile += adjustedHeader + trennzeichen;
+                }
+
+                sb.AppendLine(kopfzeile.TrimEnd(trennzeichen.ToCharArray()));
+
+                foreach (var record in quelle)
+                {
+                    var datenzeile = "";
+                    var recordDict = record as IDictionary<string, object>;
+                    if (recordDict == null) continue;
+
                     foreach (var header in firstRecord.Keys)
                     {
-                        var adjustedHeader = header
-                            .Replace("DOPPELPUNKT", ":")
-                            .Replace("PUNKT", ".")
-                            .Replace("MINUS", "-")
-                            .Replace("ZWEI", "2")
-                            .Replace("EINS", "1")
-                            .Replace("UNTERSTRICH", "_")
-                            .Replace("SLASH", "/")
-                            .Replace("LEERZEICHEN", " ")
-                            .Replace("KLAMMERAUF", "(")
-                            .Replace("KLAMMERZU", ")");
-        
-                        kopfzeile += adjustedHeader + trennzeichen;
+                        recordDict.TryGetValue(header, out var value);
+                        datenzeile += value?.ToString() + trennzeichen;
                     }
-
-                    sb.AppendLine(kopfzeile.TrimEnd(trennzeichen.ToCharArray()));
-                    
-                    foreach (var record in quelle)
-                    {
-                        var datenzeile = "";
-                        var recordDict = record as IDictionary<string, object>;
-                        if (recordDict == null) continue;        
-                    
-                        foreach (var header in firstRecord.Keys)
-                        {
-                            recordDict.TryGetValue(header, out var value);
-                            datenzeile += value?.ToString() + trennzeichen;
-                        }
-                        sb.AppendLine(datenzeile.TrimEnd(trennzeichen.ToCharArray()));
-                    }
-                }        
-                
-                File.Delete(AbsoluterPfad);
-                File.WriteAllText(AbsoluterPfad, sb.ToString(), this.Encoding ?? Encoding.UTF8);
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"Fehler beim Schreiben der Struct-Datei: {ex.Message}");
-            }
-            finally
-            {
-                //Global.ZeileSchreiben(AbsoluterPfad, "xxx", ConsoleColor.White, ConsoleColor.Blue);
-            }
-    }
-
- internal void Outlook2StructDatei(string dateiname)
- {
-
-
-/*
-  else if (pattern == "termine")
-        {
-            datei = this.FirstOrDefault(datei => !string.IsNullOrEmpty(datei.Dateiname) && datei.AbsoluterPfad.EndsWith("termine.struct", StringComparison.CurrentCultureIgnoreCase));
-            // Bei Terminen wird termine.struct aus allen verfügbaren "...-termine.csv"-Dateien gefüllt.
-            foreach (var termineDatei in this)
-            {
-                if (termineDatei.AbsoluterPfad.Contains("termine") && termineDatei.AbsoluterPfad.ToLower().EndsWith(".csv"))
-                {                    
-                    datei.SchreibeZeilen("|",termineDatei);
+                    sb.AppendLine(datenzeile.TrimEnd(trennzeichen.ToCharArray()));
                 }
             }
-        }*/
- }
 
- internal IEnumerable<dynamic> Outlook2Struct()
- {
-  var records = new List<dynamic>();
-
-    var sortedRecords = this?
-     .Where(rec =>
-     {
-      var beginnString = (string)((IDictionary<string, object>)rec)["Beginn"];
-      var kategorienString = (string)((IDictionary<string, object>)rec)["Kategorien"] ?? "";
-
-      return beginnString.Split(" ").Length > 0
-      && !string.IsNullOrEmpty(kategorienString)
-      && DateTime.ParseExact(beginnString.Split(" ")[1], "dd.MM.yyyy", new CultureInfo("de-DE")) >=
-          new DateTime(Convert.ToInt32(Global.AktSj[0]), 07, 31); // keine alten SJ
-     })
-     .OrderBy(rec =>
-     {
-      var beginnString = (string)((IDictionary<string, object>)rec)["Beginn"];
-      return DateTime.ParseExact(beginnString.Substring(3, beginnString.Length - 3), "dd.MM.yyyy HH:mm",
-       new CultureInfo("de-DE"));
-     })
-     .ToList();
-
-    if (sortedRecords != null)
-    {
-     foreach (var rec in sortedRecords)
-     {
-      var dict = (IDictionary<string, object>)rec;
-      var beginnString = (string)((IDictionary<string, object>)rec)["Beginn"];
-      var endeString = (string)((IDictionary<string, object>)rec)["Ende"];
-      var beginnDatum = DateTime.ParseExact(beginnString.Substring(3, beginnString.Length - 3),
-       "dd.MM.yyyy HH:mm", new CultureInfo("de-DE"));
-      var endeDatum = DateTime.ParseExact(endeString.Substring(3, endeString.Length - 3), "dd.MM.yyyy HH:mm",
-       new CultureInfo("de-DE"));
-      var dat = beginnDatum.ToString("ddd dd.MM.yyyy", new CultureInfo("de-DE"));
-      var zeit = "";
-
-      // Wenn zwischen beginn und ende exakt 24 Stunden oder ein Vielfaches von 24 liegen, dann ist das Ereignis ganztägig
-      bool ganztaegig = (endeDatum - beginnDatum).TotalHours % 24 == 0;
-
-      // Bei mehrtägiges, ganztägigen Ereignissen muss das Endedatum um einen Tag nach vorne geschoben werden
-
-      if ((endeDatum - beginnDatum).TotalHours >= 24 && endeDatum.Hour == 0 && endeDatum.Minute == 0 &&
-       endeDatum.Second == 0)
-      {
-       endeDatum = endeDatum.AddDays(-1);
-      }
-
-      if (beginnDatum.Hour != 0)
-      {
-       zeit = ", " + beginnDatum.ToShortTimeString();
-
-       if (endeDatum.Hour != 0)
-       {
-        zeit += " - " + endeDatum.ToShortTimeString();
-       }
-
-       zeit += " Uhr";
-      }
-
-      if (ganztaegig && beginnDatum.Date != endeDatum.Date)
-      {
-       dat += " - " + endeDatum.ToString("ddd dd.MM.yyyy", new CultureInfo("de-DE"));
-      }
-
-      var sj = "vergangene";
-
-      if (new DateTime(Convert.ToInt32(Global.AktSj[0]), 8, 1) < beginnDatum &&
-       beginnDatum < new DateTime(Convert.ToInt32(Global.AktSj[1]), 7, 31))
-      {
-       sj = "aktuelles";
-      }
-      if (beginnDatum > new DateTime(Convert.ToInt32(Global.AktSj[1]), 7, 31))
-      {
-       sj = "kommendes";
-      }
-
-      if (dict["Betreff"].ToString().Contains("QA"))
-      {
-       string aa = "";
-      }
-      // Wenn in der Nachricht ein Hyperlink enthalten ist, der nach bkb.wiki zeigt, dann wird der Hyperlink aus dem Inhalt der Seite isoliert und einer Variablen namen link zugewiesen.
-      var link = dict["Nachricht"].ToString()!.Split(' ').FirstOrDefault(x => x.Contains("bkb.wiki"));
-
-      // Vom link wird nur der Teil hinter dem letzten Slash behalten
-      if (link != null && link.Contains("/"))
-      {
-       link = link.Substring(link.LastIndexOf('/') + 1);
-      }
-      else
-      {
-       link = null;
-      }
-
-      dynamic record = new ExpandoObject();
-      record.Betreff = dict["Betreff"].ToString()!.Trim();
-      record.Seite = string.IsNullOrEmpty(link) ? dict["Kategorien"].ToString().Split(';')[0] : link;
-      record.Hinweise = "";
-      record.Datum = dat + zeit;
-      record.Kategorien = GetKategorien(link, dict["Kategorien"].ToString());
-      record.Verantwortlich = "";
-      record.Ort = dict["Ort"].ToString()!.Trim();
-      record.Ressourcen = dict["Ressourcen"].ToString()!.Trim();
-      record.BetreffBeginn = record.Betreff + record.Datum;
-      record.SJ = sj;
-
-      if (AbsoluterPfad != null && !AbsoluterPfad.Contains("schulgemeinschaft"))
-      {
-      }
-      else
-      {
-       record.Links = "";
-      }
-
-      records.Add(record);
-     }
+            File.Delete(AbsoluterPfad);
+            File.WriteAllText(AbsoluterPfad, sb.ToString(), this.Encoding ?? Encoding.UTF8);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Fehler beim Schreiben der Struct-Datei: {ex.Message}");
+        }
+        finally
+        {
+            //Global.ZeileSchreiben(AbsoluterPfad, "xxx", ConsoleColor.White, ConsoleColor.Blue);
+        }
     }
-    return records;
- }
 
- private string GetKategorien(string? link, string? toString)
- {
-  if (string.IsNullOrEmpty(toString))
-  {
-   return string.Empty;
-  }
-
-  var kategorien = toString.ToLower().Split(';').Aggregate("", (current, str) => current + (str.Trim() + ","));
-
-  if (!string.IsNullOrEmpty(link) && !kategorien.Contains(link.ToLower()))
-  {
-   kategorien = link + "," + kategorien;
-  }
-
-  return kategorien.TrimEnd(',');
- }
-
- internal List<dynamic>? FilternGpu002Unterrichtsgruppen(IConfiguration configuration)
-{
-    var configStr = configuration["NichtInteressierendeUnterrichtsgruppen"];
-    if (string.IsNullOrWhiteSpace(configStr))
+    internal void Outlook2StructDatei(string dateiname)
     {
+
+
+        /*
+          else if (pattern == "termine")
+                {
+                    datei = this.FirstOrDefault(datei => !string.IsNullOrEmpty(datei.Dateiname) && datei.AbsoluterPfad.EndsWith("termine.struct", StringComparison.CurrentCultureIgnoreCase));
+                    // Bei Terminen wird termine.struct aus allen verfügbaren "...-termine.csv"-Dateien gefüllt.
+                    foreach (var termineDatei in this)
+                    {
+                        if (termineDatei.AbsoluterPfad.Contains("termine") && termineDatei.AbsoluterPfad.ToLower().EndsWith(".csv"))
+                        {                    
+                            datei.SchreibeZeilen("|",termineDatei);
+                        }
+                    }
+                }*/
+    }
+
+    internal IEnumerable<dynamic> Outlook2Struct()
+    {
+        var records = new List<dynamic>();
+
+        var sortedRecords = this?
+         .Where(rec =>
+         {
+             var beginnString = (string)((IDictionary<string, object>)rec)["Beginn"];
+             var kategorienString = (string)((IDictionary<string, object>)rec)["Kategorien"] ?? "";
+
+             return beginnString.Split(" ").Length > 0
+         && !string.IsNullOrEmpty(kategorienString)
+         && DateTime.ParseExact(beginnString.Split(" ")[1], "dd.MM.yyyy", new CultureInfo("de-DE")) >=
+             new DateTime(Convert.ToInt32(Global.AktSj[0]), 07, 31); // keine alten SJ
+         })
+         .OrderBy(rec =>
+         {
+             var beginnString = (string)((IDictionary<string, object>)rec)["Beginn"];
+             return DateTime.ParseExact(beginnString.Substring(3, beginnString.Length - 3), "dd.MM.yyyy HH:mm",
+          new CultureInfo("de-DE"));
+         })
+         .ToList();
+
+        if (sortedRecords != null)
+        {
+            foreach (var rec in sortedRecords)
+            {
+                var dict = (IDictionary<string, object>)rec;
+                var beginnString = (string)((IDictionary<string, object>)rec)["Beginn"];
+                var endeString = (string)((IDictionary<string, object>)rec)["Ende"];
+                var beginnDatum = DateTime.ParseExact(beginnString.Substring(3, beginnString.Length - 3),
+                 "dd.MM.yyyy HH:mm", new CultureInfo("de-DE"));
+                var endeDatum = DateTime.ParseExact(endeString.Substring(3, endeString.Length - 3), "dd.MM.yyyy HH:mm",
+                 new CultureInfo("de-DE"));
+                var dat = beginnDatum.ToString("ddd dd.MM.yyyy", new CultureInfo("de-DE"));
+                var zeit = "";
+
+                // Wenn zwischen beginn und ende exakt 24 Stunden oder ein Vielfaches von 24 liegen, dann ist das Ereignis ganztägig
+                bool ganztaegig = (endeDatum - beginnDatum).TotalHours % 24 == 0;
+
+                // Bei mehrtägiges, ganztägigen Ereignissen muss das Endedatum um einen Tag nach vorne geschoben werden
+
+                if ((endeDatum - beginnDatum).TotalHours >= 24 && endeDatum.Hour == 0 && endeDatum.Minute == 0 &&
+                 endeDatum.Second == 0)
+                {
+                    endeDatum = endeDatum.AddDays(-1);
+                }
+
+                if (beginnDatum.Hour != 0)
+                {
+                    zeit = ", " + beginnDatum.ToShortTimeString();
+
+                    if (endeDatum.Hour != 0)
+                    {
+                        zeit += " - " + endeDatum.ToShortTimeString();
+                    }
+
+                    zeit += " Uhr";
+                }
+
+                if (ganztaegig && beginnDatum.Date != endeDatum.Date)
+                {
+                    dat += " - " + endeDatum.ToString("ddd dd.MM.yyyy", new CultureInfo("de-DE"));
+                }
+
+                var sj = "vergangene";
+
+                if (new DateTime(Convert.ToInt32(Global.AktSj[0]), 8, 1) < beginnDatum &&
+                 beginnDatum < new DateTime(Convert.ToInt32(Global.AktSj[1]), 7, 31))
+                {
+                    sj = "aktuelles";
+                }
+                if (beginnDatum > new DateTime(Convert.ToInt32(Global.AktSj[1]), 7, 31))
+                {
+                    sj = "kommendes";
+                }
+
+                if (dict["Betreff"].ToString().Contains("QA"))
+                {
+                    string aa = "";
+                }
+                // Wenn in der Nachricht ein Hyperlink enthalten ist, der nach bkb.wiki zeigt, dann wird der Hyperlink aus dem Inhalt der Seite isoliert und einer Variablen namen link zugewiesen.
+                var link = dict["Nachricht"].ToString()!.Split(' ').FirstOrDefault(x => x.Contains("bkb.wiki"));
+
+                // Vom link wird nur der Teil hinter dem letzten Slash behalten
+                if (link != null && link.Contains("/"))
+                {
+                    link = link.Substring(link.LastIndexOf('/') + 1);
+                }
+                else
+                {
+                    link = null;
+                }
+
+                dynamic record = new ExpandoObject();
+                record.Betreff = dict["Betreff"].ToString()!.Trim();
+                record.Seite = string.IsNullOrEmpty(link) ? dict["Kategorien"].ToString().Split(';')[0] : link;
+                record.Hinweise = "";
+                record.Datum = dat + zeit;
+                record.Kategorien = GetKategorien(link, dict["Kategorien"].ToString());
+                record.Verantwortlich = "";
+                record.Ort = dict["Ort"].ToString()!.Trim();
+                record.Ressourcen = dict["Ressourcen"].ToString()!.Trim();
+                record.BetreffBeginn = record.Betreff + record.Datum;
+                record.SJ = sj;
+
+                if (AbsoluterPfad != null && !AbsoluterPfad.Contains("schulgemeinschaft"))
+                {
+                }
+                else
+                {
+                    record.Links = "";
+                }
+
+                records.Add(record);
+            }
+        }
+        return records;
+    }
+
+    private string GetKategorien(string? link, string? toString)
+    {
+        if (string.IsNullOrEmpty(toString))
+        {
+            return string.Empty;
+        }
+
+        var kategorien = toString.ToLower().Split(';').Aggregate("", (current, str) => current + (str.Trim() + ","));
+
+        if (!string.IsNullOrEmpty(link) && !kategorien.Contains(link.ToLower()))
+        {
+            kategorien = link + "," + kategorien;
+        }
+
+        return kategorien.TrimEnd(',');
+    }
+
+    internal List<dynamic>? FilternGpu002Unterrichtsgruppen(IConfiguration configuration)
+    {
+        var configStr = configuration["NichtInteressierendeUnterrichtsgruppen"];
+        if (string.IsNullOrWhiteSpace(configStr))
+        {
+            return this;
+        }
+
+        // Hashset für schnelle O(1)-Prüfung und Trimmen von Leerzeichen
+        var n = configStr.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                         .Select(s => s.Trim())
+                         .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        // Entfernt alle Einträge direkt aus `this`, deren Field12 in `n` enthalten ist
+        this.RemoveAll(rec =>
+        {
+            var dict = (IDictionary<string, object>)rec;
+            var x = dict.TryGetValue("Field12", out var val) ? val?.ToString() : string.Empty;
+            return !string.IsNullOrEmpty(x) && n.Contains(x);
+        });
+
         return this;
     }
 
-    // Hashset für schnelle O(1)-Prüfung und Trimmen von Leerzeichen
-    var n = configStr.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                     .Select(s => s.Trim())
-                     .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-    // Entfernt alle Einträge direkt aus `this`, deren Field12 in `n` enthalten ist
-    this.RemoveAll(rec =>
+    internal List<dynamic>? FilternGpu002Fächer(IConfiguration configuration)
     {
-        var dict = (IDictionary<string, object>)rec;
-        var x = dict.TryGetValue("Field12", out var val) ? val?.ToString() : string.Empty;
-        return !string.IsNullOrEmpty(x) && n.Contains(x);
-    });
+        var configStr = configuration["NichtInteressierendeFächer"];
+        if (string.IsNullOrWhiteSpace(configStr))
+        {
+            return this;
+        }
 
-    return this;
-}
+        // Hashset für schnelle O(1)-Prüfung und Trimmen von Leerzeichen
+        var n = configStr.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                         .Select(s => s.Trim())
+                         .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-internal List<dynamic>? FilternGpu002Fächer(IConfiguration configuration)
- {
-  var configStr = configuration["NichtInteressierendeFächer"];
-    if (string.IsNullOrWhiteSpace(configStr))
-    {
+        // Entfernt alle Einträge direkt aus `this`, deren Field7 in `n` enthalten ist
+        this.RemoveAll(rec =>
+        {
+            var dict = (IDictionary<string, object>)rec;
+            var x = dict.TryGetValue("Field7", out var val) ? val?.ToString() : string.Empty;
+            return !string.IsNullOrEmpty(x) && n.Contains(x);
+        });
+
         return this;
     }
-
-    // Hashset für schnelle O(1)-Prüfung und Trimmen von Leerzeichen
-    var n = configStr.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                     .Select(s => s.Trim())
-                     .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-    // Entfernt alle Einträge direkt aus `this`, deren Field7 in `n` enthalten ist
-    this.RemoveAll(rec =>
-    {
-        var dict = (IDictionary<string, object>)rec;
-        var x = dict.TryGetValue("Field7", out var val) ? val?.ToString() : string.Empty;
-        return !string.IsNullOrEmpty(x) && n.Contains(x);
-    });
-
-    return this;
- }
 }

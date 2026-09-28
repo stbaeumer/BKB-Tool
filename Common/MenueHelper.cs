@@ -434,7 +434,7 @@ public static class MenueHelper
        [
          datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.Vergleichen),
          datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.SchemaUpdaten),
-         datei => datei.OeffneWebseite($"https://bkb.wiki/termine:oeffentlich:bewegliche_ferientage?do=admin&page=config")
+         datei => datei.OeffneWebseite($"https://bkb.wiki/start?do=admin&page=config")
        ],
        ["BetreffBeginn"],
        ["Seite"],
