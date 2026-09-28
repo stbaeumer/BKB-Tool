@@ -1944,11 +1944,6 @@ public class Datei : List<dynamic>
 
                 var neueDict = (IDictionary<string, object>)neueRec;
 
-                if (neueDict["Page"].ToString().ToLower() == "bildungsgaenge:berufsfachschule:bt1")
-                {
-                    string aaa = "";
-                }
-
                 var anhandDieserSchlüsselAttributeWirdVerglichenString = "";
 
                 foreach (var key in AnhandDieserSchlüsselAttributeWirdVerglichen)
