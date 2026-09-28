@@ -38,7 +38,7 @@ public class Gruppe
         var gruppe = new Gruppe(wikiLink);
         var aktSj = Convert.ToInt32(Global.AktSj[0]);
         Lehrers = new Lehrers();
-        
+
         var jahre = jahrgänge.Select(jahrgang => (aktSj - 2000 - jahrgang + 1).ToString()).ToList();
 
         dynamic record = new ExpandoObject();
@@ -130,7 +130,7 @@ public class Gruppe
         {
             var leh = lehrers.FirstOrDefault(l => l.Kürzel == member);
             if (leh == null) continue; // Wenn kein Lehrer gefunden, nächsten Eintrag ansehen
-            
+
             if (!lehrerKürzel.Any(x => x.Contains(leh.Kürzel)))
             {
                 lehrerKürzel.Add(leh.Kürzel);
@@ -228,11 +228,11 @@ public class Gruppe
         var lehrerMail = new List<string>();
         var lehrerName = new List<string>();
 
- var members = anrechnungen
-            .Where(rec => rec.Lehrer != null)
-            .Select(rec => { return rec.Lehrer.Kürzel; })
-            .Distinct()
-            .OrderBy(x => x);
+        var members = anrechnungen
+                   .Where(rec => rec.Lehrer != null)
+                   .Select(rec => { return rec.Lehrer.Kürzel; })
+                   .Distinct()
+                   .OrderBy(x => x);
 
 
         foreach (var member in members)
@@ -375,11 +375,11 @@ public class Gruppe
         dynamic record = new ExpandoObject();
         record.Page = wikiLink;
         record.Link = wikiLink;
-        
+
         var lehrerKürzel = new List<string>();
         var lehrerMail = new List<string>();
         var lehrerName = new List<string>();
-        
+
         var members = anrechnungen.Where(rec => { return rec.Text.Contains("Bildungsgangleitung"); })
             .Select(rec => { return rec.LehrerKuerzel; }).Distinct().OrderBy(x => x);
 
@@ -416,23 +416,23 @@ public class Gruppe
     public string GetByWikilink(Anrechnungen anrechnungen,
         Lehrers lehrers,
         string wikiLink)
-    {        
+    {
         dynamic record = new ExpandoObject();
         record.Page = wikiLink;
         record.Link = wikiLink;
-    
+
         var lehrerKürzel = new List<string>();
         var lehrerMail = new List<string>();
         var lehrerName = new List<string>();
 
-        var members = anrechnungen.Where(x=>x.Beschr.ToLower().Contains(wikiLink.ToLower())).ToList();
+        var members = anrechnungen.Where(x => x.Beschr.ToLower().Contains(wikiLink.ToLower())).ToList();
 
-        var vorsitzLeitung = anrechnungen.Where(x=>
-        x.Beschr.ToLower().Contains(wikiLink.ToLower())&&
+        var vorsitzLeitung = anrechnungen.Where(x =>
+        x.Beschr.ToLower().Contains(wikiLink.ToLower()) &&
         !string.IsNullOrEmpty(x.Rolle) &&
         (x.Rolle.Contains("orsitz") || x.Rolle.Contains("eitung"))
         ).FirstOrDefault();
-        
+
         foreach (var member in members)
         {
             var leh = lehrers.FirstOrDefault(l => l.Kürzel == member.LehrerKuerzel);
@@ -452,7 +452,7 @@ public class Gruppe
             //if (!lehrerName.Any(x => x.Contains((leh.Titel == "" ? "" : leh.Titel + " ") + leh.Vorname + " " + leh.Nachname)))
             if (!lehrerName.Any(x => x.Contains(":schulgemeinschaft:" + leh.Kürzel.ToLower())))
             {
-                record.TitelVornameNachname = (String.IsNullOrEmpty(leh.Titel) ? $"{leh.Vorname} {leh.Nachname}" : $"{leh.Titel} {leh.Vorname} {leh.Nachname}");                
+                record.TitelVornameNachname = (String.IsNullOrEmpty(leh.Titel) ? $"{leh.Vorname} {leh.Nachname}" : $"{leh.Titel} {leh.Vorname} {leh.Nachname}");
                 //lehrerName.Add((leh.Titel == "" ? "" : leh.Titel + " ") + leh.Vorname + " " + leh.Nachname);
                 lehrerName.Add(":schulgemeinschaft:" + leh.Kürzel.ToLower());
             }
@@ -461,30 +461,30 @@ public class Gruppe
         record.Namen = string.Join(", ", lehrerName.OrderBy(name => name));
         record.Mail = string.Join("; ", lehrerMail.OrderBy(name => name));
         record.Kürzel = string.Join(", ", lehrerKürzel.OrderBy(name => name));
-        if(vorsitzLeitung != null && !string.IsNullOrEmpty(vorsitzLeitung.Rolle))
+        if (vorsitzLeitung != null && !string.IsNullOrEmpty(vorsitzLeitung.Rolle))
         {
             record.VorsitzLeitung = "schulgemeinschaft:" + vorsitzLeitung.LehrerKuerzel.ToLower();
         }
         record.Art = "schulgemeinschaft:gruppen";
-        this.Record = record;        
-        if(vorsitzLeitung != null && !string.IsNullOrEmpty(vorsitzLeitung.Rolle))
+        this.Record = record;
+        if (vorsitzLeitung != null && !string.IsNullOrEmpty(vorsitzLeitung.Rolle))
             return vorsitzLeitung.LehrerKuerzel.ToUpper();
         else
             return "";
     }
- 
-  public Gruppen GetKlassen(List<dynamic> gpu002, List<dynamic> gpu003,
-        Lehrers lehrers,
-        Students students,
-        Anrechnungen anrechnungen,
-        string wikiLink)
+
+    public Gruppen GetKlassen(List<dynamic> gpu002, List<dynamic> gpu003,
+          Lehrers lehrers,
+          Students students,
+          Anrechnungen anrechnungen,
+          string wikiLink)
     {
         var gruppen = new Gruppen();
 
         // alle Verschiedenen Klassen mit aktiven SuS
-        var alleVerschiedenenKlassen = students.Where(x=>x.Status == "2").OrderBy(x=>x.Klasse).Select(x=>x.Klasse).Distinct().ToList();
+        var alleVerschiedenenKlassen = students.Where(x => x.Status == "2").OrderBy(x => x.Klasse).Select(x => x.Klasse).Distinct().ToList();
 
-        foreach(var k in alleVerschiedenenKlassen)
+        foreach (var k in alleVerschiedenenKlassen)
         {
             var lehrerInDerKlasse = gpu002
                 .Cast<IDictionary<string, object>>()
@@ -535,14 +535,14 @@ public class Gruppe
 
             var schuelerDerKlasse = "";
 
-            var sus = students            
+            var sus = students
             .Where(s => !string.IsNullOrEmpty(s.Klasse)) // Optional: Leere/Null-Werte herausfiltern
             .Where(s => s.Klasse == k)
             .Distinct()
             .OrderBy(s => s.Nachname)
             .ToList();
 
-            foreach(var s in sus)
+            foreach (var s in sus)
             {
                 schuelerDerKlasse += s.Vorname + " " + s.Nachname.Split('#')[0] + ", ";
             }
@@ -557,11 +557,11 @@ public class Gruppe
     .Select(field30 => field30.Split(',')[0].Trim().ToLower()) // Ersten Lehrer ermitteln & für Wiki-Namespace säubern
     .FirstOrDefault();
 
-record.VorsitzLeitung = !string.IsNullOrEmpty(klassenLeitung) 
-    ? "schulgemeinschaft:" + klassenLeitung 
-    : string.Empty;
+            record.VorsitzLeitung = !string.IsNullOrEmpty(klassenLeitung)
+                ? "schulgemeinschaft:" + klassenLeitung
+                : string.Empty;
 
-            
+
             string klassenName = k.Trim().ToLower(); // z.B. "bs26a", "hbg24b", "bt23a"
             var match = System.Text.RegularExpressions.Regex.Match(klassenName, @"^([a-z]+)(\d{2})([a-z0-9]*)$");
 
@@ -588,13 +588,13 @@ record.VorsitzLeitung = !string.IsNullOrEmpty(klassenLeitung)
                         case 3: record.DJP3 = targetNamespace; break;
                         case 4: record.DJP4 = targetNamespace; break;
                     }
-     
+
                     string targetEnd = $"{bildungsgang}:start";   // z. B. "bs:start"
 
                     // 2. Anrechnung suchen
                     var passendeAnrechnung = anrechnungen
                         .Where(x => !string.IsNullOrEmpty(x.Beschr))
-                        .FirstOrDefault(x => x.Beschr.StartsWith("bildungsgaenge:", StringComparison.OrdinalIgnoreCase) 
+                        .FirstOrDefault(x => x.Beschr.StartsWith("bildungsgaenge:", StringComparison.OrdinalIgnoreCase)
                                         && x.Beschr.EndsWith(targetEnd, StringComparison.OrdinalIgnoreCase));
 
                     if (passendeAnrechnung != null)
@@ -611,7 +611,7 @@ record.VorsitzLeitung = !string.IsNullOrEmpty(klassenLeitung)
             gruppe.Record = record;
             gruppen.Add(gruppe);
         }
-        
+
         return gruppen;
     }
- }
+}

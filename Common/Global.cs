@@ -107,7 +107,7 @@ public static class Global
         Update,
         Read, // Wird verwendet, um Einstellungen zu lesen und den Benutzer zu fragen
         ReadSilent, // Wird verwendet, um Einstellungen zu lesen, ohne den Benutzer zu fragen     
-        Vergleichen,        
+        Vergleichen,
         SchemaUpdaten,
         InitialEnumEinlesen,
         Filtern,
@@ -118,8 +118,8 @@ public static class Global
         NurEineKlasse
     }
 
-    public static List<string> Vorwahlen =new List<string>()
-    {   
+    public static List<string> Vorwahlen = new List<string>()
+    {
         "0150","0151","0152","01520","01521","01522","01523","01525","01526","01527","01529","0155","0156","0157","01570","01571","01572","01573","01574","01575","01576","01577","01578","01579","0159","01590","01591","01592","01593",
         "01594","01595","01596","01597","01598","01599","0160","0162","0163","0164","0165","0166","0168","0169","0170","0171","0172","0173","0174","0175","0176","01760","01761","01762","01763","01764","01765","01766","01767","01768",
         "01769","0177","0178","0179","030","089","040","0711","0221","0911","069","0211","0511","0421","0201","0351","0231","0621","0821","0228","0202","0208","0341","0721","0203","0561","0521","0431","0761","02151","0234","0251","0531",
@@ -245,17 +245,17 @@ public static class Global
 
         var unterschrift = GetColor(ColorUnterschrift);
         var contentString = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", "BKB-Tool", "BKB-Tool.json"); //configuration["AppDescription"] ?? "BKB-Tool - Ein Werkzeug an der Schnittstelle zwischen SchILD & WebUntis";
-        
-        if(configuration["Auswahl"] != "e")
+
+        if (configuration["Auswahl"] != "e")
         {
             contentString = "";
         }
-        
+
         var header = $"[{unterschrift} link=https://github.com/stbaeumer/BKB-Tool] https://github.com/stbaeumer/BKB-Tool[/] | [{unterschrift}]GPLv2[/] | [{unterschrift}]v{AppVersion} [/]";
 
         if (content != null && content.Count > 0)
         {
-            contentString = content.LastOrDefault() ?? string.Empty;   
+            contentString = content.LastOrDefault() ?? string.Empty;
         }
         //contentString = "\n"; // $"\n\n";
         var panel = new Panel(contentString)
@@ -342,76 +342,76 @@ public static class Global
     }
 
     public static void Speichern(string key, string value)
-{
-    // Nutzt den plattformspezifischen Pfad (AppData oder .config)
-    string folderPath = GetConfigDirectory();
-    string configFilePath = Path.Combine(folderPath, "BKB-Tool.json");
-
-    // Sicherstellen, dass die Datei existiert, bevor wir sie lesen
-    if (!File.Exists(configFilePath))
     {
-        // Falls die Datei noch nicht existiert (theoretisch durch EinstellungenDurchlaufen abgefangen)
-        // Erstellen wir hier ein leeres Objekt als Basis
-        File.WriteAllText(configFilePath, "{}", Encoding.UTF8);
-    }
+        // Nutzt den plattformspezifischen Pfad (AppData oder .config)
+        string folderPath = GetConfigDirectory();
+        string configFilePath = Path.Combine(folderPath, "BKB-Tool.json");
 
-    var json = File.ReadAllText(configFilePath);
-    var jsonDoc = JsonDocument.Parse(json);
-    var jsonRoot = jsonDoc.RootElement;
-
-    string finalValue = Verschluesseln(value);
-
-    // Neuen Wert setzen
-    using (var stream = new MemoryStream())
-    {
-        using (var writer = new Utf8JsonWriter(stream, new JsonWriterOptions { Indented = true }))
+        // Sicherstellen, dass die Datei existiert, bevor wir sie lesen
+        if (!File.Exists(configFilePath))
         {
-            writer.WriteStartObject();
-            bool keyFound = false;
-
-            foreach (var property in jsonRoot.EnumerateObject())
-            {
-                if (property.NameEquals(key))
-                {
-                    writer.WriteString(key, finalValue);
-                    keyFound = true;
-                }
-                else
-                {
-                    property.WriteTo(writer);
-                }
-            }
-
-            // Falls der Key nicht existiert, fügen wir ihn am Ende hinzu
-            if (!keyFound)
-            {
-                writer.WriteString(key, finalValue);
-            }
-
-            writer.WriteEndObject();
+            // Falls die Datei noch nicht existiert (theoretisch durch EinstellungenDurchlaufen abgefangen)
+            // Erstellen wir hier ein leeres Objekt als Basis
+            File.WriteAllText(configFilePath, "{}", Encoding.UTF8);
         }
 
-        // Neue JSON-Daten in die Datei schreiben (im korrekten Verzeichnis!)
-        File.WriteAllText(configFilePath, Encoding.UTF8.GetString(stream.ToArray()));
-    }
-}
+        var json = File.ReadAllText(configFilePath);
+        var jsonDoc = JsonDocument.Parse(json);
+        var jsonRoot = jsonDoc.RootElement;
 
- private static string GetConfigDirectory()
-{
-    if (OperatingSystem.IsWindows())
-    {
-        // Windows: C:\Users\Name\AppData\Roaming\BKB-Tool
-        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "BKB-Tool");
-    }
-    else
-    {
-        // Linux/macOS: /home/name/.config/BKB-Tool
-        return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", "BKB-Tool");
-    }
-}
+        string finalValue = Verschluesseln(value);
 
- // Hilfsmethode zur Verschlüsselung
- public static string Verschluesseln(string value)
+        // Neuen Wert setzen
+        using (var stream = new MemoryStream())
+        {
+            using (var writer = new Utf8JsonWriter(stream, new JsonWriterOptions { Indented = true }))
+            {
+                writer.WriteStartObject();
+                bool keyFound = false;
+
+                foreach (var property in jsonRoot.EnumerateObject())
+                {
+                    if (property.NameEquals(key))
+                    {
+                        writer.WriteString(key, finalValue);
+                        keyFound = true;
+                    }
+                    else
+                    {
+                        property.WriteTo(writer);
+                    }
+                }
+
+                // Falls der Key nicht existiert, fügen wir ihn am Ende hinzu
+                if (!keyFound)
+                {
+                    writer.WriteString(key, finalValue);
+                }
+
+                writer.WriteEndObject();
+            }
+
+            // Neue JSON-Daten in die Datei schreiben (im korrekten Verzeichnis!)
+            File.WriteAllText(configFilePath, Encoding.UTF8.GetString(stream.ToArray()));
+        }
+    }
+
+    private static string GetConfigDirectory()
+    {
+        if (OperatingSystem.IsWindows())
+        {
+            // Windows: C:\Users\Name\AppData\Roaming\BKB-Tool
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "BKB-Tool");
+        }
+        else
+        {
+            // Linux/macOS: /home/name/.config/BKB-Tool
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", "BKB-Tool");
+        }
+    }
+
+    // Hilfsmethode zur Verschlüsselung
+    public static string Verschluesseln(string value)
     {
         // Beispiel für eine einfache Verschlüsselung (Base64)
         byte[] data = Encoding.UTF8.GetBytes(value);
@@ -505,7 +505,7 @@ public static class Global
         }
 
         // Der Wert aus der JSON hat Vorrang vor dem defaultwert. Nur wenn die JSON keinen Wert enthält oder der Wert nicht zulässig ist, wird der defaultwert verwendet.
-        
+
         defaultValue = configuration != null && !string.IsNullOrEmpty(configuration[parameter])
             ? configuration[parameter] ?? defaultValue
             : defaultValue;
@@ -561,10 +561,10 @@ public static class Global
                 .ShowDefaultValue(true)
                 .Validate(n =>
                 {
-                    if(n == "x")
+                    if (n == "x")
                         throw new Exception("Sie haben abgebrochen.");
                     if (n.ToLower() != "j" && n.ToLower() != "n" && n.ToLower() != "ja" && n.ToLower() != "nein")
-                        return ValidationResult.Error($"  Sie müssen [{Global.GetColor(Global.ColorActionInMenüs)}]ja[/] oder [{Global.GetColor(Global.ColorFehler)}]nein[/] eintippen.");                    
+                        return ValidationResult.Error($"  Sie müssen [{Global.GetColor(Global.ColorActionInMenüs)}]ja[/] oder [{Global.GetColor(Global.ColorFehler)}]nein[/] eintippen.");
                     return ValidationResult.Success();
                 }));
         }
@@ -573,8 +573,8 @@ public static class Global
             // Der Wert wird im Read-Modus nicht erneut abgefragt, wenn der Wert plausibel ist und schon ein Wert in der configuration existiert.
             if ((modus == Modus.ReadSilent || modus == Modus.Read) && !string.IsNullOrEmpty(defaultValue) && !string.IsNullOrEmpty(configuration[parameter]))
             {
-                configuration[parameter] = defaultValue;                
-                if(modus != Modus.ReadSilent)
+                configuration[parameter] = defaultValue;
+                if (modus != Modus.ReadSilent)
                     ZeileSchreiben(metakey, defaultValue);
                 return configuration;
             }
@@ -591,10 +591,10 @@ public static class Global
                 .ShowDefaultValue(true)
                 .Validate(n =>
                 {
-                    if(n == "x")
+                    if (n == "x")
                         throw new Exception("Sie haben abgebrochen.");
                     if (!zulässigeAuswahlOptionen.Split(",").Contains(n))
-                        return ValidationResult.Error($"[]  Zulässige Auswahl: [bold aqua]{zulässigeAuswahlOptionen}[/][/]");                    
+                        return ValidationResult.Error($"[]  Zulässige Auswahl: [bold aqua]{zulässigeAuswahlOptionen}[/][/]");
                     return ValidationResult.Success();
                 }));
         }
@@ -604,7 +604,7 @@ public static class Global
             if ((modus == Modus.ReadSilent || modus == Modus.Read) && !string.IsNullOrEmpty(defaultValue) && !string.IsNullOrEmpty(configuration[parameter]))
             {
                 configuration[parameter] = defaultValue;
-                if(modus != Modus.ReadSilent)
+                if (modus != Modus.ReadSilent)
                     ZeileSchreiben(metakey, defaultValue);
                 return configuration;
             }
@@ -618,7 +618,7 @@ public static class Global
                     .ShowDefaultValue(true)
                     .Validate(n =>
                     {
-                        if(n == "x")
+                        if (n == "x")
                             throw new Exception("Sie haben abgebrochen.");
                         if (string.IsNullOrEmpty(n))
                             return ValidationResult.Error("[]  Eingabe darf nicht leer sein.[/]");
@@ -626,7 +626,7 @@ public static class Global
                     })
                 .DefaultValue<string>(defaultValue));
         }
-                if (datentyp == Datentyp.Kennwort)
+        if (datentyp == Datentyp.Kennwort)
         {
             // Der Wert wird im Read-Modus nicht erneut abgefragt, wenn der Wert plausibel ist und schon ein Wert in der configuration existiert.
             if ((modus == Modus.ReadSilent || modus == Modus.Read) && !string.IsNullOrEmpty(defaultValue) && !string.IsNullOrEmpty(configuration[parameter]))
@@ -661,13 +661,13 @@ public static class Global
                         return ValidationResult.Success();
                     })
                 .DefaultValue<string>(maskedDefault));
-            
+
             // Wenn maskierter Wert übernommen wurde (nur ENTER gedrückt), den echten Wert verwenden
             if (userInput.ToString() == maskedDefault && !string.IsNullOrEmpty(defaultValue))
             {
                 userInput = defaultValue;
             }
-            
+
             // Wenn der Benutzer nur ein "-" eingibt, wird das als leere Eingabe interpretiert.
             if (userInput.ToString() == "-")
                 userInput = "";
@@ -718,7 +718,7 @@ public static class Global
                     .ShowDefaultValue(true)
                     .Validate(n =>
                     {
-                        if(n == "x")
+                        if (n == "x")
                             throw new Exception("Sie haben abgebrochen.");
                         if (!string.IsNullOrEmpty(n) && n.ToLower() == "alle")
                             return ValidationResult.Success();
@@ -798,7 +798,7 @@ public static class Global
             if ((modus == Modus.ReadSilent || modus == Modus.Read) && (!string.IsNullOrEmpty(defaultValue) || defaultValue.StartsWith("https://")) && !string.IsNullOrEmpty(configuration[parameter]))
             {
                 configuration[parameter] = defaultValue;
-                if(modus != Modus.ReadSilent)
+                if (modus != Modus.ReadSilent)
                     ZeileSchreiben(metakey, defaultValue);
                 return configuration;
             }
@@ -812,7 +812,7 @@ public static class Global
                     .PromptStyle(Global.GetColor(Global.ColorActionInMenüs))
                     .Validate(n =>
                     {
-                        if(n == "x")
+                        if (n == "x")
                             throw new Exception("Sie haben abgebrochen.");
                         if (!n.StartsWith("https://") && !string.IsNullOrEmpty(n))
                             return ValidationResult.Error("[]  Eingabe muss mit https:// beginnen.[/]");
@@ -853,7 +853,7 @@ public static class Global
                         return ValidationResult.Success();
                     })
                 .DefaultValue<string>(defaultValue)
-            );            
+            );
 
             // Wenn der Benutzer nur ein "-" eingibt, wird das als leere Eingabe interpretiert.
             if (userInput.ToString() == "-")
@@ -862,10 +862,10 @@ public static class Global
         if (datentyp == Datentyp.Maildomain)
         {
             // Der Wert wird im Read-Modus nicht erneut abgefragt, wenn der Wert plausibel ist und schon ein Wert in der configuration existiert.
-            if ((modus == Modus.ReadSilent || modus == Modus.Read) && (!string.IsNullOrEmpty(defaultValue) && defaultValue.StartsWith("@") && defaultValue.Contains("."))  && !string.IsNullOrEmpty(configuration[parameter]))
+            if ((modus == Modus.ReadSilent || modus == Modus.Read) && (!string.IsNullOrEmpty(defaultValue) && defaultValue.StartsWith("@") && defaultValue.Contains(".")) && !string.IsNullOrEmpty(configuration[parameter]))
             {
                 configuration[parameter] = defaultValue;
-                if(modus != Modus.ReadSilent)
+                if (modus != Modus.ReadSilent)
                     ZeileSchreiben(metakey, defaultValue);
                 return configuration;
             }
@@ -879,7 +879,7 @@ public static class Global
                     .PromptStyle(Global.GetColor(Global.ColorActionInMenüs))
                     .Validate(n =>
                     {
-                        if(n == "x")
+                        if (n == "x")
                             throw new Exception("Sie haben abgebrochen.");
                         if (!n.StartsWith("@") && !string.IsNullOrEmpty(n))
                             return ValidationResult.Error("[]  Eingabe muss mit @ beginnen und einen Punkt enthalten.[/]");
@@ -895,7 +895,7 @@ public static class Global
             if ((modus == Modus.ReadSilent || modus == Modus.Read) && Path.Exists(defaultValue) && !string.IsNullOrEmpty(configuration[parameter]))
             {
                 configuration[parameter] = defaultValue;
-                if(modus != Modus.ReadSilent)
+                if (modus != Modus.ReadSilent)
                     ZeileSchreiben(metakey, defaultValue);
                 return configuration;
             }
@@ -908,10 +908,10 @@ public static class Global
                     .PromptStyle(Global.GetColor(Global.ColorActionInMenüs))
                     .Validate(n =>
                     {
-                        if(n == "x")
+                        if (n == "x")
                             throw new Exception("Sie haben abgebrochen.");
                         if (!Path.Exists(n.TrimEnd(Path.DirectorySeparatorChar)))
-                            return ValidationResult.Error($" Der Pfad [{Global.GetColor(Global.ColorFehler)}]{n}[/] existiert nicht.");                        
+                            return ValidationResult.Error($" Der Pfad [{Global.GetColor(Global.ColorFehler)}]{n}[/] existiert nicht.");
                         return ValidationResult.Success();
                     })
                 .DefaultValue<string>(string.IsNullOrEmpty(defaultValue) || !Path.Exists(defaultValue) ? Environment.CurrentDirectory : defaultValue));
@@ -923,7 +923,7 @@ public static class Global
             if ((modus == Modus.ReadSilent || modus == Modus.Read) && int.TryParse(defaultValue, out _) && !string.IsNullOrEmpty(configuration[parameter]))
             {
                 configuration[parameter] = defaultValue;
-                if(modus != Modus.ReadSilent)
+                if (modus != Modus.ReadSilent)
                     ZeileSchreiben(metakey, defaultValue);
                 return configuration;
             }
@@ -937,7 +937,7 @@ public static class Global
                     .PromptStyle(Global.GetColor(Global.ColorActionInMenüs))
                     .Validate(n =>
                     {
-                        if(n == "x")
+                        if (n == "x")
                             throw new Exception("Sie haben abgebrochen.");
                         if (!int.TryParse(n.ToString(), out _))
                         {
@@ -958,7 +958,7 @@ public static class Global
             if ((modus == Modus.ReadSilent || modus == Modus.Read) && float.TryParse(defaultValue, out _) && !string.IsNullOrEmpty(configuration[parameter]))
             {
                 configuration[parameter] = defaultValue;
-                if(modus != Modus.ReadSilent)
+                if (modus != Modus.ReadSilent)
                     ZeileSchreiben(metakey, defaultValue);
                 return configuration;
             }
@@ -972,10 +972,10 @@ public static class Global
                     .ShowDefaultValue(true)
                     .Validate(n =>
                     {
-                        if(n == "x")
+                        if (n == "x")
                             throw new Exception("Sie haben abgebrochen.");
                         if (!float.TryParse(n.ToString(), out _))
-                            return ValidationResult.Error($"  [{Global.GetColor(Global.ColorFehler)}]  {n}[/] ist keine zulässige Zahl.");                        
+                            return ValidationResult.Error($"  [{Global.GetColor(Global.ColorFehler)}]  {n}[/] ist keine zulässige Zahl.");
                         return ValidationResult.Success();
                     })
                 .DefaultValue<string>(defaultValue.ToString()));
@@ -986,7 +986,7 @@ public static class Global
             if ((modus == Modus.ReadSilent || modus == Modus.Read) && int.TryParse(defaultValue, out _) && !string.IsNullOrEmpty(configuration[parameter]))
             {
                 configuration[parameter] = defaultValue;
-                if(modus != Modus.ReadSilent)
+                if (modus != Modus.ReadSilent)
                     ZeileSchreiben(metakey, defaultValue);
                 return configuration;
             }
@@ -1000,7 +1000,7 @@ public static class Global
                     .ShowDefaultValue(true)
                     .Validate(n =>
                     {
-                        if(n == "x")
+                        if (n == "x")
                             throw new Exception("Sie haben abgebrochen.");
                         var teile = n.ToString().Split(',');
                         if (!teile.All(t => int.TryParse(t.Trim(), out _)))
@@ -1020,7 +1020,7 @@ public static class Global
                 return configuration;
             }
 
-            
+
             string default1 = "";//defaultValue.Replace(" ", ""); 
 
             // Wenn keine zulässigen Auswahloptionen definiert sind, wird der Defaultwert komplett übernommen.
@@ -1037,7 +1037,7 @@ public static class Global
                     {
                         default1 += z + ",";
                     }
-                }    
+                }
             }
 
             // Wenn aus dem Defaultwert nichts matcht, dann werden die zulässigen Werte übernommen.
@@ -1049,7 +1049,7 @@ public static class Global
             // Wenn der Wert abgefragt wird, dann wird ein Panel mit dem Hinweis angezeigt
             AnsiConsole.Write(panel);
 
-                                    // $"[] {aufforderung}[/]"
+            // $"[] {aufforderung}[/]"
             userInput = AnsiConsole.Prompt(
                 new TextPrompt<string>($"[] {aufforderung} {(string.IsNullOrEmpty(zulässigeAuswahlOptionen) ? "" : "(Zulässige Optionen: " + zulässigeAuswahlOptionen + ")")}[/]")
                 .PromptStyle(Global.GetColor(Global.ColorActionInMenüs))
@@ -1066,7 +1066,7 @@ public static class Global
                             return ValidationResult.Success();
                         }
 
-                        if(string.IsNullOrEmpty(zulässigeAuswahlOptionen))
+                        if (string.IsNullOrEmpty(zulässigeAuswahlOptionen))
                             return ValidationResult.Success();
 
                         var teile = n.ToString().Trim().Split(',');
@@ -1078,23 +1078,23 @@ public static class Global
                         return ValidationResult.Success();
                     })
                 .DefaultValue<string>(default1.ToString().TrimEnd(',')));
-                
-                if(userInput.ToString() == "alle")
-                {
-                    userInput = zulässigeAuswahlOptionen;
-                }
-                if(userInput.ToString() == "keine" || userInput.ToString() == "nichts")
-                {
-                    userInput = "keine";
-                }
+
+            if (userInput.ToString() == "alle")
+            {
+                userInput = zulässigeAuswahlOptionen;
+            }
+            if (userInput.ToString() == "keine" || userInput.ToString() == "nichts")
+            {
+                userInput = "keine";
+            }
         }
         if (datentyp == Datentyp.Abschnitt)
         {
             // Der Wert wird im Read-Modus nicht erneut abgefragt, wenn der Wert plausibel ist und schon ein Wert in der configuration existiert.
-            if ((modus == Modus.ReadSilent || modus == Modus.Read) && int.TryParse(defaultValue, out _)  && !string.IsNullOrEmpty(configuration[parameter]))
+            if ((modus == Modus.ReadSilent || modus == Modus.Read) && int.TryParse(defaultValue, out _) && !string.IsNullOrEmpty(configuration[parameter]))
             {
                 configuration[parameter] = defaultValue;
-                if(modus != Modus.ReadSilent)
+                if (modus != Modus.ReadSilent)
                     ZeileSchreiben(metakey, defaultValue);
                 return configuration;
             }
@@ -1108,7 +1108,7 @@ public static class Global
                     .ShowDefaultValue(true)
                     .Validate(n =>
                     {
-                        if(n == "x")
+                        if (n == "x")
                             throw new Exception("Sie haben abgebrochen.");
                         if (!int.TryParse(n.ToString(), out _))
                         {
@@ -1156,7 +1156,7 @@ public static class Global
                         return ValidationResult.Success();
                     })
                 .DefaultValue<string>(defaultValue.ToString()));
-                // Wenn der Benutzer nur ein "-" eingibt, wird das als leere Eingabe interpretiert.
+            // Wenn der Benutzer nur ein "-" eingibt, wird das als leere Eingabe interpretiert.
             if (userInput.ToString() == "-")
                 userInput = "";
         }
@@ -1211,124 +1211,124 @@ public static class Global
     }
 
     public static IConfiguration EinstellungenDurchlaufen(IConfiguration configuration, Global.Modus modus = Global.Modus.Read)
-{
-    bool isFirstRun = false;
+    {
+        bool isFirstRun = false;
 
-    // 1. Pfad-Logik festlegen
-    string folderPath;
-    if (OperatingSystem.IsWindows())
-    {
-        // Windows: AppData/Roaming/BKB-Tool
-        folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "BKB-Tool");
-    }
-    else
-    {
-        // Linux/macOS: ~/.config/BKB-Tool
-        folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", "BKB-Tool");
-    }
-
-    string configFilePath = Path.Combine(folderPath, "BKB-Tool.json");
-    
-    // 2. Verzeichnis sicherstellen
-    if (!Directory.Exists(folderPath))
-    {
-        try 
+        // 1. Pfad-Logik festlegen
+        string folderPath;
+        if (OperatingSystem.IsWindows())
         {
-            Directory.CreateDirectory(folderPath);
+            // Windows: AppData/Roaming/BKB-Tool
+            folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "BKB-Tool");
         }
-        catch (Exception ex)
+        else
         {
-            AnsiConsole.MarkupLine($"[red]Fehler beim Erstellen des Verzeichnisses: {ex.Message}[/]");
-            return configuration;
-        }
-    }
-
-    // 3. Prüfen, ob die Datei existiert
-    if (!File.Exists(configFilePath))
-    {
-        if (!IsDirectoryWritable(folderPath))
-        {
-            AnsiConsole.MarkupLine($"[red]Das Verzeichnis [bold {Global.GetColor(Global.ColorPfadInDateien)}]{folderPath}[/] ist nicht beschreibbar.[/]");
-            AnsiConsole.MarkupLine($"[red]Drücken Sie eine beliebige Taste, um fortzufahren...[/]");
-            while (Console.KeyAvailable) Console.ReadKey(true);
-            Console.ReadKey();
-            return configuration;
+            // Linux/macOS: ~/.config/BKB-Tool
+            folderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", "BKB-Tool");
         }
 
-        // BKB-Tool.json mit Standardinhalten füllen
-        var bkbJsonContent = CreateBkbJsonContent();
-        var json = JsonSerializer.Serialize(bkbJsonContent, new JsonSerializerOptions { WriteIndented = true });
-        File.WriteAllText(configFilePath, json);
-    }
+        string configFilePath = Path.Combine(folderPath, "BKB-Tool.json");
 
-    // 4. Konfiguration aus dem neuen Pfad laden
-    configuration = new ConfigurationBuilder()
-        .SetBasePath(folderPath) // Wichtig: BasePath auf den neuen Ordner setzen
-        .AddJsonFile("BKB-Tool.json", optional: false, reloadOnChange: false)
-        .Build();
-
-    // --- Restlicher Code bleibt logisch gleich, achte nur auf Speichern() ---
-    
-    var sw = Stopwatch.StartNew();
-    var items = configuration.AsEnumerable().Where(kv => !string.IsNullOrEmpty(kv.Value)).ToList();
-    foreach (var kv in items)
-    {
-        configuration[kv.Key] = Entschluesseln(kv.Value);
-    }
-    sw.Stop();
-
-    while (string.IsNullOrEmpty(configuration["ZustimmungLizenz"]) ||
-           (configuration["ZustimmungLizenz"]?.ToLower() != "ja" && configuration["ZustimmungLizenz"]?.ToLower() != "j"))
-    {
-        DisplayHeader(configuration);
-        configuration = Global.Konfig("ZustimmungLizenz", Global.Modus.Read, configuration);
-        
-        if (configuration["ZustimmungLizenz"]?.ToLower() == "ja" || configuration["ZustimmungLizenz"]?.ToLower() == "j")
+        // 2. Verzeichnis sicherstellen
+        if (!Directory.Exists(folderPath))
         {
-            isFirstRun = true;
-        }
-    }
-    
-    var kon = KonfigMetadaten.Where(e =>
-        e.Value.InitialAbfragen == true || 
-        (
-            e.Value.InGrundeinstellungAbfragen == true && 
-            configuration[e.Key] != null && 
-            configuration[e.Key] != ""
-        )).ToList();
-
-    for (var i = 0; i < kon.Count(); i++)
-    {   
-        if(modus == Modus.ReadSilent && !string.IsNullOrEmpty(configuration[kon[i].Key]))
-            continue;         
-        DisplayHeader(configuration);         
-        configuration = Konfig(kon[i].Key, modus, configuration, kon[i].Value.Aufforderung, i + 1, kon.Count(), kon[i].Value.Hinweise, kon[i].Value.DefaultValue);
-    }
-
-    if (isFirstRun)
-    {
-        if (configuration["ZustimmungLizenz"]?.ToLower() == "ja" || configuration["ZustimmungLizenz"]?.ToLower() == "j")
-        {
-            kon = KonfigMetadaten.ToList();
-
-            for (var i = 0; i < kon.Count(); i++)
+            try
             {
-                if (!string.IsNullOrEmpty(kon[i].Value.DefaultValue))
+                Directory.CreateDirectory(folderPath);
+            }
+            catch (Exception ex)
+            {
+                AnsiConsole.MarkupLine($"[red]Fehler beim Erstellen des Verzeichnisses: {ex.Message}[/]");
+                return configuration;
+            }
+        }
+
+        // 3. Prüfen, ob die Datei existiert
+        if (!File.Exists(configFilePath))
+        {
+            if (!IsDirectoryWritable(folderPath))
+            {
+                AnsiConsole.MarkupLine($"[red]Das Verzeichnis [bold {Global.GetColor(Global.ColorPfadInDateien)}]{folderPath}[/] ist nicht beschreibbar.[/]");
+                AnsiConsole.MarkupLine($"[red]Drücken Sie eine beliebige Taste, um fortzufahren...[/]");
+                while (Console.KeyAvailable) Console.ReadKey(true);
+                Console.ReadKey();
+                return configuration;
+            }
+
+            // BKB-Tool.json mit Standardinhalten füllen
+            var bkbJsonContent = CreateBkbJsonContent();
+            var json = JsonSerializer.Serialize(bkbJsonContent, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(configFilePath, json);
+        }
+
+        // 4. Konfiguration aus dem neuen Pfad laden
+        configuration = new ConfigurationBuilder()
+            .SetBasePath(folderPath) // Wichtig: BasePath auf den neuen Ordner setzen
+            .AddJsonFile("BKB-Tool.json", optional: false, reloadOnChange: false)
+            .Build();
+
+        // --- Restlicher Code bleibt logisch gleich, achte nur auf Speichern() ---
+
+        var sw = Stopwatch.StartNew();
+        var items = configuration.AsEnumerable().Where(kv => !string.IsNullOrEmpty(kv.Value)).ToList();
+        foreach (var kv in items)
+        {
+            configuration[kv.Key] = Entschluesseln(kv.Value);
+        }
+        sw.Stop();
+
+        while (string.IsNullOrEmpty(configuration["ZustimmungLizenz"]) ||
+               (configuration["ZustimmungLizenz"]?.ToLower() != "ja" && configuration["ZustimmungLizenz"]?.ToLower() != "j"))
+        {
+            DisplayHeader(configuration);
+            configuration = Global.Konfig("ZustimmungLizenz", Global.Modus.Read, configuration);
+
+            if (configuration["ZustimmungLizenz"]?.ToLower() == "ja" || configuration["ZustimmungLizenz"]?.ToLower() == "j")
+            {
+                isFirstRun = true;
+            }
+        }
+
+        var kon = KonfigMetadaten.Where(e =>
+            e.Value.InitialAbfragen == true ||
+            (
+                e.Value.InGrundeinstellungAbfragen == true &&
+                configuration[e.Key] != null &&
+                configuration[e.Key] != ""
+            )).ToList();
+
+        for (var i = 0; i < kon.Count(); i++)
+        {
+            if (modus == Modus.ReadSilent && !string.IsNullOrEmpty(configuration[kon[i].Key]))
+                continue;
+            DisplayHeader(configuration);
+            configuration = Konfig(kon[i].Key, modus, configuration, kon[i].Value.Aufforderung, i + 1, kon.Count(), kon[i].Value.Hinweise, kon[i].Value.DefaultValue);
+        }
+
+        if (isFirstRun)
+        {
+            if (configuration["ZustimmungLizenz"]?.ToLower() == "ja" || configuration["ZustimmungLizenz"]?.ToLower() == "j")
+            {
+                kon = KonfigMetadaten.ToList();
+
+                for (var i = 0; i < kon.Count(); i++)
                 {
-                    if (kon[i].Key != "ZustimmungLizenz")
+                    if (!string.IsNullOrEmpty(kon[i].Value.DefaultValue))
                     {
-                        kon[i].Value.InGrundeinstellungAbfragen = false;
-                        configuration[kon[i].Key] = kon[i].Value.DefaultValue;
-                        // Hinweis: Die Speichern-Methode muss ggf. auch den neuen Pfad kennen!
-                        Speichern(kon[i].Key, kon[i].Value.DefaultValue); 
+                        if (kon[i].Key != "ZustimmungLizenz")
+                        {
+                            kon[i].Value.InGrundeinstellungAbfragen = false;
+                            configuration[kon[i].Key] = kon[i].Value.DefaultValue;
+                            // Hinweis: Die Speichern-Methode muss ggf. auch den neuen Pfad kennen!
+                            Speichern(kon[i].Key, kon[i].Value.DefaultValue);
+                        }
                     }
                 }
             }
         }
-    }
 
-    return configuration;
-}
+        return configuration;
+    }
 
     static object CreateBkbJsonContent()
     {
@@ -1669,8 +1669,8 @@ public static class Global
         string cleanedString = Regex.Replace(normalizedString, @"[^a-zA-Z0-9\-._~]", "");
 
         // 5. Auf maximal 35 Zeichen kürzen
-        return cleanedString.Length > 35 
-            ? cleanedString.Substring(0, 35) 
+        return cleanedString.Length > 35
+            ? cleanedString.Substring(0, 35)
             : cleanedString;
     }
 
@@ -1688,7 +1688,7 @@ public static class Global
 
 
 
-}    
+}
 
 
 public class KonfigMeta
@@ -1711,7 +1711,7 @@ public class KonfigMeta
 
 public static class KonfigHelper
 {
-    
+
     /*
     configuration = Konfig("PfadDownloads", modus, configuration, @"Downloads-Verzeichnis", "Geben Sie den Pfad des Downloads-Verzeichnisses an. In der Regel wird das Verzeichnis bereits richtig vorgeschlagen. Dann einfach [bold springGreen2]ENTER[/] drücken:", Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads"));
         configuration = Konfig("Schulnummer", modus, configuration, @"Schulnummer", "Geben Sie Ihre Schulnummer an. Je nach Schulnummer werden evtl. unterschiedliche Funktionen angeboten.");
@@ -1847,7 +1847,7 @@ public static class KonfigHelper
             NurBeiDiesenSchulnummern = Global.Schulnummer177659
         },
         ["ConnectionStringUntis"] = new KonfigMeta
-        { 
+        {
             Key = "ConnectionStringUntis",
             DefaultValue = Environment.GetEnvironmentVariable("ConnectionStringUntis") ?? "",
             Aufforderung = $"[green]■[/]",
@@ -1922,7 +1922,7 @@ public static class KonfigHelper
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
-        }        ,
+        },
         ["Klassen"] = new KonfigMeta
         {
             Key = "Klassen",

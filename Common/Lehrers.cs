@@ -65,14 +65,14 @@ public class Lehrers : List<Lehrer>
             l.Festnetznummer = dict["Tel. Festnetz"].ToString();
 
             if (l.Kürzel == "PLA")
-             l.Telefonnummer = "1014\\02861 90990-40";
+                l.Telefonnummer = "1014\\02861 90990-40";
             if (l.Kürzel == "BM")
-             l.Telefonnummer = "1012\\02861 90990-41";
-                                    
+                l.Telefonnummer = "1012\\02861 90990-41";
+
             l.StrasseHausnummer = dict["Straße"].ToString();
             l.PlzOrt = dict["PLZ"].ToString() + " " + dict["Ort"].ToString();
 
-            if(l.StatistikRelevant.ToLower().StartsWith("j"))
+            if (l.StatistikRelevant.ToLower().StartsWith("j"))
                 this.Add(l);
         }
     }
@@ -162,7 +162,7 @@ WHERE (((SCHOOLYEAR_ID)= " + Global.AktSj[0] + Global.AktSj[1] + ") AND  ((TERM_
                         catch (Exception ex)
                         {
                             Global.ZeileSchreiben(lehrer.Nachname, this.Count().ToString(),
-                                ConsoleColor.Red,ConsoleColor.Gray);
+                                ConsoleColor.Red, ConsoleColor.Gray);
                         }
                     }
                 }
@@ -252,101 +252,102 @@ WHERE (((SCHOOLYEAR_ID)= " + Global.AktSj[0] + Global.AktSj[1] + ") AND  ((TERM_
             }
             AnsiConsole.Write(table);
         }
-            Global.OpenWebseite(url.TrimEnd());
+        Global.OpenWebseite(url.TrimEnd());
 
-            AnsiConsole.WriteLine("Der Browser sollte jetzt folgenden Link öffnen:\n" +  url.TrimEnd());
+        AnsiConsole.WriteLine("Der Browser sollte jetzt folgenden Link öffnen:\n" + url.TrimEnd());
     }
 
- public void OffeneKlassenbuchEinträgeMahnen(Dateien dateien, IConfiguration configuration)
- {
-     var matchingDatei = dateien.FirstOrDefault(x => x.Name.ToLower().StartsWith("openperiod"));
-     var dateiName = matchingDatei != null ? matchingDatei.AbsoluterPfad : throw new InvalidOperationException("No matching file found for 'openperiod'.");
+    public void OffeneKlassenbuchEinträgeMahnen(Dateien dateien, IConfiguration configuration)
+    {
+        var matchingDatei = dateien.FirstOrDefault(x => x.Name.ToLower().StartsWith("openperiod"));
+        var dateiName = matchingDatei != null ? matchingDatei.AbsoluterPfad : throw new InvalidOperationException("No matching file found for 'openperiod'.");
 
-     List<string> lehrer = new List<string>();
+        List<string> lehrer = new List<string>();
 
-     using (var pdfDocument = PdfDocument.Open(dateiName))
-     {
-      foreach (Page page in pdfDocument.GetPages())
-      {
-          foreach (var word in page.GetWords())
-          {
-           // Prüfe, ob die linke x-Koordinate (BoundingBox.Left) ungefähr 100 ist
-           if (Math.Abs(word.BoundingBox.Left - 100) < 0.1)
-           {
-               if (word.Text != "Lehrkraft"){
-                lehrer.Add(word.Text);
-               }               
-           }
-          }          
-      }
-     }
+        using (var pdfDocument = PdfDocument.Open(dateiName))
+        {
+            foreach (Page page in pdfDocument.GetPages())
+            {
+                foreach (var word in page.GetWords())
+                {
+                    // Prüfe, ob die linke x-Koordinate (BoundingBox.Left) ungefähr 100 ist
+                    if (Math.Abs(word.BoundingBox.Left - 100) < 0.1)
+                    {
+                        if (word.Text != "Lehrkraft")
+                        {
+                            lehrer.Add(word.Text);
+                        }
+                    }
+                }
+            }
+        }
 
-     // Gib die 10 häufigsten Nennungen aus der Liste "lehrer" aus
-     var topLehrer = lehrer
-      .Where(name => this.Any(l => !string.IsNullOrEmpty(l.Kürzel) && l.Kürzel == name))
-      .GroupBy(x => x)
-      .OrderByDescending(g => g.Count())
-      .Take(10)
-      .Select(g => new { Name = g.Key, Count = g.Count() });
+        // Gib die 10 häufigsten Nennungen aus der Liste "lehrer" aus
+        var topLehrer = lehrer
+         .Where(name => this.Any(l => !string.IsNullOrEmpty(l.Kürzel) && l.Kürzel == name))
+         .GroupBy(x => x)
+         .OrderByDescending(g => g.Count())
+         .Take(10)
+         .Select(g => new { Name = g.Key, Count = g.Count() });
 
-     //Global.ZeileSchreiben("TOP10 Offene Klassenbuch-Einträge", "Häufigkeit", ConsoleColor.Black, ConsoleColor.Blue);
-          
-     foreach (var item in topLehrer)
-     {
-      if (this.Any(x => x.Kürzel == item.Name)) // Nur Lehrer anzeigen, die in der Liste sind
-      { 
-          var nachricht = item.Count.ToString() + " Einträge";
+        //Global.ZeileSchreiben("TOP10 Offene Klassenbuch-Einträge", "Häufigkeit", ConsoleColor.Black, ConsoleColor.Blue);
 
-          if(item.Count < 10)
-          {
-           nachricht += " (keine Nachricht, da <10 Einträge)";
-          }
-          else if(item.Count > 20)
-          {
-           nachricht += " (SL in CC, da >20 Einträge)";
-          }      
+        foreach (var item in topLehrer)
+        {
+            if (this.Any(x => x.Kürzel == item.Name)) // Nur Lehrer anzeigen, die in der Liste sind
+            {
+                var nachricht = item.Count.ToString() + " Einträge";
 
-          Global.ZeileSchreiben($"{item.Name}", nachricht, ConsoleColor.Blue, ConsoleColor.Black);     
-      }      
-     }   
-     
-     Console.WriteLine("Jetzt die TOP10 per Mail anschreiben? [J/n]");
+                if (item.Count < 10)
+                {
+                    nachricht += " (keine Nachricht, da <10 Einträge)";
+                }
+                else if (item.Count > 20)
+                {
+                    nachricht += " (SL in CC, da >20 Einträge)";
+                }
 
-     var x = Console.ReadKey().Key;
+                Global.ZeileSchreiben($"{item.Name}", nachricht, ConsoleColor.Blue, ConsoleColor.Black);
+            }
+        }
 
-     if (x == ConsoleKey.J || x == ConsoleKey.Enter)
-     {
-      int i = 1;
-      foreach (var item in topLehrer.Where(x => x.Count >= 10))
-      {
-          var le = (from l in this where l.Kürzel == item.Name select l).FirstOrDefault();
+        Console.WriteLine("Jetzt die TOP10 per Mail anschreiben? [J/n]");
 
-          if(string.IsNullOrEmpty(le.Mail))
-          {
-           Global.ZeileSchreiben($"Fehler: {le.Kürzel} hat keine E-Mail-Adresse hinterlegt!", "", ConsoleColor.Red, ConsoleColor.Gray);
-           continue;
-          }
+        var x = Console.ReadKey().Key;
 
-          if (le != null)
-          {
-           var body = "Guten Morgen " + le.Titel + le.Vorname + " " + le.Nachname + ",\n\n";
-           body += "es liegen " + item.Count + " offene Klassenbuch-Einträge vor. \n\n";
-           body += "Bitte kümmern Sie sich zeitnah um die Bearbeitung dieser Einträge.\n\n";
-           body += "Vielen Dank für Ihre Unterstützung!\n\n";
-           body += "Mit freundlichen Grüßen\n\n";
-           body += "Ihr Webuntis-Team";
+        if (x == ConsoleKey.J || x == ConsoleKey.Enter)
+        {
+            int i = 1;
+            foreach (var item in topLehrer.Where(x => x.Count >= 10))
+            {
+                var le = (from l in this where l.Kürzel == item.Name select l).FirstOrDefault();
 
-           var mail = new Mail();           
-           mail.Senden(configuration, $" Offenen Klassenbuch-Einträge ({le.Kürzel})", body, [le.Mail!], [], ["stefan.baeumer@berufskolleg-borken.de"], []);
-          }
+                if (string.IsNullOrEmpty(le.Mail))
+                {
+                    Global.ZeileSchreiben($"Fehler: {le.Kürzel} hat keine E-Mail-Adresse hinterlegt!", "", ConsoleColor.Red, ConsoleColor.Gray);
+                    continue;
+                }
 
-          i++;
-      }
-     }
-     else
-     {
-      Console.WriteLine("");
-      throw new Exception("Sie haben die Mail-Aktion abgebrochen.");
-     }
- }
+                if (le != null)
+                {
+                    var body = "Guten Morgen " + le.Titel + le.Vorname + " " + le.Nachname + ",\n\n";
+                    body += "es liegen " + item.Count + " offene Klassenbuch-Einträge vor. \n\n";
+                    body += "Bitte kümmern Sie sich zeitnah um die Bearbeitung dieser Einträge.\n\n";
+                    body += "Vielen Dank für Ihre Unterstützung!\n\n";
+                    body += "Mit freundlichen Grüßen\n\n";
+                    body += "Ihr Webuntis-Team";
+
+                    var mail = new Mail();
+                    mail.Senden(configuration, $" Offenen Klassenbuch-Einträge ({le.Kürzel})", body, [le.Mail!], [], ["stefan.baeumer@berufskolleg-borken.de"], []);
+                }
+
+                i++;
+            }
+        }
+        else
+        {
+            Console.WriteLine("");
+            throw new Exception("Sie haben die Mail-Aktion abgebrochen.");
+        }
+    }
 }

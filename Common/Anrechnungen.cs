@@ -195,11 +195,11 @@ ORDER BY TeacherName;
 
                 anrechnung.Beschr = Global.SafeGetString(sqlDataReader, 12);
 
-                if(anrechnung.Beschr.Contains("rise"))
+                if (anrechnung.Beschr.Contains("rise"))
                 {
                     string a = "";
                 }
-                
+
                 anrechnung.Text = Global.SafeGetString(sqlDataReader, 2) == null
                     ? ""
                     : Global.SafeGetString(sqlDataReader, 2); // Vorsitz etc.
@@ -224,7 +224,7 @@ ORDER BY TeacherName;
                 {
                     anrechnung.Wert = 0;
                 }
-                
+
                 anrechnung.Amt = anrechnung.Text != null && anrechnung.Text.Contains("A14") ? "A14" :
                     anrechnung.Text != null && anrechnung.Text.Contains("A15") ? "A15" :
                     anrechnung.Text != null && anrechnung.Text.Contains("A16") ? "A16" : "";
@@ -259,25 +259,25 @@ ORDER BY TeacherName;
                     anrechnung.Von = sqlDataReader.GetInt32(4) > 0
                     ? DateTime.ParseExact((sqlDataReader.GetInt32(4)).ToString(), "yyyyMMdd",
                         CultureInfo.InvariantCulture)
-                    : new DateTime();                 
+                    : new DateTime();
                 }
                 catch
                 {
-                    anrechnung.Von = new DateTime();                    
+                    anrechnung.Von = new DateTime();
                 }
-                
+
                 try
-                {                    
+                {
                     anrechnung.Bis = sqlDataReader.GetInt32(5) > 0
                     ? DateTime.ParseExact((sqlDataReader.GetInt32(5)).ToString(), "yyyyMMdd",
                         CultureInfo.InvariantCulture)
                     : new DateTime();
                 }
                 catch
-                {                    
-                    anrechnung.Bis =  new DateTime();
+                {
+                    anrechnung.Bis = new DateTime();
                 }
-                
+
 
                 if (anrechnung.TeacherIdUntis == 0) continue;
                 //if (anrechnung.Grund != 0 && anrechnung.Grund <= 210 && anrechnung.Grund != 200 &&

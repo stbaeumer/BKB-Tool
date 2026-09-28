@@ -1702,14 +1702,14 @@ public class Datei : List<dynamic>
             if (!string.IsNullOrEmpty(urlMitte))
             {
                 mitgliederMail = this
-                .Where(rec =>
-                {
-                    if (rec == null) return false;
-                    var dict = (IDictionary<string, object>)rec;
-                    return dict != null && dict["MitgliederMail"] != null && !string.IsNullOrWhiteSpace(dict["MitgliederMail"].ToString());
-                })
-                .Select(rec => ((IDictionary<string, object>)rec)["MitgliederMail"].ToString())
-                .LastOrDefault();
+                    .Where(rec =>
+                    {
+                        if (rec == null) return false;
+                        var dict = (IDictionary<string, object>)rec;
+                        return dict != null && dict["MitgliederMail"] != null && !string.IsNullOrWhiteSpace(dict["MitgliederMail"].ToString());
+                    })
+                    .Select(rec => ((IDictionary<string, object>)rec)["MitgliederMail"].ToString())
+                    .LastOrDefault();
 
                 // Wenn MitgliederMail vorhanden ist, verwende es in der URL
                 if (!string.IsNullOrEmpty(mitgliederMail))
@@ -1719,13 +1719,12 @@ public class Datei : List<dynamic>
             }
         }
         catch (Exception ex)
-        { }
+        {
+            // Optional: ex loggen, falls nötig
+        }
 
-
-
-
-        // Wenn der URL insgesamt länger als 300 Zeichen ist, wird der urlMitte solange gekürzt, bis die URL passt.
-        // Das Kürzen geschieht immer an den Kommas. Diejenigen E-Mail-Adressen, die am Ende übrig bleiben, werden in einem Panel angezeigt.
+        // Wenn der URL insgesamt länger als 1000 Zeichen ist, wird urlMitte solange gekürzt, bis die URL passt.
+        // Das Kürzen geschieht immer an den Kommas. Diejenigen E-Mail-Adressen, die am Ende übrig bleiben, werden im Panel angezeigt.
         var hinweise = new List<string>();
         while ((urlBeginn + urlMitte + urlEnde).Length > 1000)
         {
@@ -1743,17 +1742,25 @@ public class Datei : List<dynamic>
             }
         }
 
+        // 1. Hinweismeldung bei gekürzten E-Mails (GeraScientific/SquareBorder Panel)
         if (hinweise.Count > 0)
         {
-            var panel = new Panel($"[bold {Global.GetColor(Global.ColorHinweise)}]Die URL ist zu lang. Es konnten nicht alle E-Mail-Adressen berücksichtigt werden.[/]\n[gray]{string.Join("\n", hinweise)}[/]")
-                .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] !? [/]")
+            var hinweisText = $"[bold {Global.GetColor(Global.ColorHinweise)}]Die URL war zu lang. Es konnten nicht alle E-Mail-Adressen berücksichtigt werden:[/]\n\n" +
+                              string.Join("\n", hinweise.Select(h => $"[gray]• {Markup.Escape(h)}[/]"));
+
+            var hinweisPanel = new Panel(hinweisText)
+                .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] HINWEIS [/]")
                 .HeaderAlignment(Justify.Left)
                 .SquareBorder()
                 .Expand()
                 .BorderColor(Global.ColorHinweise);
 
-            AnsiConsole.Write(panel);
+            AnsiConsole.Write(hinweisPanel);
+            AnsiConsole.WriteLine();
         }
+
+        // 2. Ausführen & Rückmeldung im Rahmen
+        var gesamtUrl = urlBeginn + urlMitte + urlEnde;
 
         try
         {
@@ -1761,24 +1768,38 @@ public class Datei : List<dynamic>
             {
                 Process.Start(new ProcessStartInfo
                 {
-                    FileName = urlBeginn + urlMitte + urlEnde,
+                    FileName = gesamtUrl,
                     UseShellExecute = true
                 });
             }
             else if (OperatingSystem.IsLinux())
             {
-                Process.Start("xdg-open", urlBeginn + urlMitte + urlEnde);
+                Process.Start("xdg-open", gesamtUrl);
             }
             else if (OperatingSystem.IsMacOS())
             {
-                Process.Start("open", urlBeginn + urlMitte + urlEnde);
+                Process.Start("open", gesamtUrl);
             }
 
-            AnsiConsole.MarkupLine($"[green]Webseite geöffnet: {urlBeginn + urlMitte + urlEnde}[/]");
+            var erfolgPanel = new Panel($"[green]Webseite geöffnet:[/] [blue underline]{Markup.Escape(gesamtUrl)}[/]")
+                //.Header("[bold green] ERFOLG [/]")
+                .HeaderAlignment(Justify.Left)
+                .RoundedBorder()
+                .Expand()
+                .BorderColor(Color.Green);
+
+            AnsiConsole.Write(erfolgPanel);
         }
         catch (Exception ex)
         {
-            AnsiConsole.MarkupLine($"[red]Fehler beim Öffnen der Webseite: {ex.Message}[/]");
+            var fehlerPanel = new Panel($"[red]Fehler beim Öffnen der Webseite:[/] [gray]{Markup.Escape(ex.Message)}[/]")
+                //.Header("[bold red] FEHLER [/]")
+                .HeaderAlignment(Justify.Left)
+                .RoundedBorder()
+                .Expand()
+                .BorderColor(Color.Red);
+
+            AnsiConsole.Write(fehlerPanel);
         }
     }
 
@@ -1850,19 +1871,21 @@ public class Datei : List<dynamic>
 
         if (modus == Global.Modus.SchemaUpdaten)
         {
-            var panel = new Panel("")
-                .Header($"[bold {Global.GetColor(Global.ColorHinweise)}] Weiter oder Abbrechen [/]")
+            var hinweisColor = Global.GetColor(Global.ColorHinweise);
+
+            var panel = new Panel($"[bold {hinweisColor}]Mit [green]Enter[/] bestätigen oder mit [red]ESC[/] abbrechen.[/]")
+                .Header($"[bold {hinweisColor}] Weiter oder Abbrechen [/]")
                 .HeaderAlignment(Justify.Left)
                 .SquareBorder()
                 .Expand()
                 .BorderColor(Global.ColorHinweise);
 
             AnsiConsole.Write(panel);
-            AnsiConsole.MarkupLine($"[bold {Global.GetColor(Global.ColorHinweise)}] Mit [green]Enter[/] bestätigen oder mit [red]ESC[/] abbrechen.[/]");
 
             var keyInfo = Console.ReadKey(intercept: true);
             if (keyInfo.Key != ConsoleKey.Enter)
             {
+                throw new Exception("Sie haben abgebrochen.");
                 return new Datei(); // Abbruch, wenn nicht Enter gedrückt wurde
             }
         }

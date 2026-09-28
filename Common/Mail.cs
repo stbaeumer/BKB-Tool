@@ -24,10 +24,10 @@ using Spectre.Console;
 
 public class Mail
 {
-    public Mail() {}
+    public Mail() { }
 
     public Mail(string mailsCsv, string campusfestjpg, string betreffMassenmail, IConfiguration configuration, int anzahl)
-    {        
+    {
         var empfänger = GetNächsteMailadressen(mailsCsv, anzahl);
         empfänger.Add("stefan.baeumer@berufskolleg-borken.de");
         SendenMitEingebettetemBild(betreffMassenmail, campusfestjpg, empfänger, configuration);
@@ -89,130 +89,130 @@ public class Mail
             Console.WriteLine($"Fehler beim Lesen der Datei {mailsCsv}: {ex.Message}");
         }
 
-    return gültigeMailadressen;
-}
+        return gültigeMailadressen;
+    }
 
-private bool IstMailadresseGültig(string email)
-{
-    try
+    private bool IstMailadresseGültig(string email)
     {
-        var addr = new System.Net.Mail.MailAddress(email);
-        return addr.Address == email;
+        try
+        {
+            var addr = new System.Net.Mail.MailAddress(email);
+            return addr.Address == email;
+        }
+        catch
+        {
+            return false;
+        }
     }
-    catch
-    {
-        return false;
-    }
-}
 
     public string BetreffMassenmail { get; }
     public string BodyMassenmail { get; }
     public IConfiguration Configuration { get; }
 
- public void Senden(IConfiguration configuration, string subject, string body, List<string> to, List<string> cc, List<string> bcc, List<string> attachment) 
- {
-  try
-  {
-    var panel = new Panel($"[green]An:[/]  {string.Join(", ", to)} \n[green]CC:[/] {string.Join(", ", cc)} \n[green]BCC:[/] {string.Join(", ", bcc)}\n\n[green]Betreff:[/] {subject}\n\n{body}\n\n[green]Anhänge:[/] {string.Join(", ", attachment)}")
-    .Header("[bold red]  Mail jetzt wie angezeigt senden? [/]")
-    .HeaderAlignment(Justify.Left)
-    .SquareBorder()
-    .Expand()
-    .BorderColor(Color.Red);
-
-    AnsiConsole.Write(panel);
-
-    // Bestätige mit ENTER, Anykey für Abbruch
-    Console.WriteLine("Mail wie angezeigt senden mit ENTER, Anykey für Abbruch ...");
-    var keyInfo = Console.ReadKey();
-    if (keyInfo.Key != ConsoleKey.Enter)
+    public void Senden(IConfiguration configuration, string subject, string body, List<string> to, List<string> cc, List<string> bcc, List<string> attachment)
     {
-     throw new Exception("Sie haben abgebrochen.");
-    }
+        try
+        {
+            var panel = new Panel($"[green]An:[/]  {string.Join(", ", to)} \n[green]CC:[/] {string.Join(", ", cc)} \n[green]BCC:[/] {string.Join(", ", bcc)}\n\n[green]Betreff:[/] {subject}\n\n{body}\n\n[green]Anhänge:[/] {string.Join(", ", attachment)}")
+            .Header("[bold red]  Mail jetzt wie angezeigt senden? [/]")
+            .HeaderAlignment(Justify.Left)
+            .SquareBorder()
+            .Expand()
+            .BorderColor(Color.Red);
 
-   AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Mails senden ...", ctx =>
-   {
-    string smtpServer = configuration["SmtpServer365"];
-    int smtpPort = Convert.ToInt32(configuration["SmtpPort365"]);
-    string senderEmail = configuration["SmtpUser365"];
+            AnsiConsole.Write(panel);
 
-    if (configuration["SmtpKennwort365"] == null || configuration["SmtpKennwort365"].Length <= 3)
-    {
-     Console.WriteLine("Bitte geben Sie das Passwort von " + configuration["SmtpUser365"] + " für den E-Mail-Versand ein:");
-     configuration["SmtpKennwort365"] = Console.ReadLine();
-    }
-
-    string senderPassword = configuration["SmtpKennwort365"];
-
-    var email = new MimeMessage();
-    email.From.Add(new MailboxAddress(configuration["SmtpUser365"], senderEmail));
-
-    email.Subject = subject;
-
-    foreach(var m in to)
-     email.To.Add(new MailboxAddress("Empfänger", m.Trim()));    
-    
-    foreach(var m in cc)
-     email.Cc.Add(new MailboxAddress("Empfänger", m.Trim()));
-    
-    foreach(var m in bcc)
-     email.Bcc.Add(new MailboxAddress("Empfänger", m.Trim()));
-        
-    var textPart = new TextPart("plain") { Text = body };
-
-    // Falls eine Datei angegeben wurde, erstelle den Anhang
-    var multipart = new Multipart("mixed");
-    multipart.Add(textPart); // Erst den Text hinzufügen
-
-    foreach(var attachment in attachment)
-    {
-     if (!string.IsNullOrEmpty(attachment) && System.IO.File.Exists(attachment))
-     {
-      var attachmentPart = new MimePart()
-      {
-       Content = new MimeContent(System.IO.File.OpenRead(attachment)),
-       ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
-       ContentTransferEncoding = ContentEncoding.Base64,
-       FileName = System.IO.Path.GetFileName(attachment)
-      };
-      multipart.Add(attachmentPart);
-     }       
-    }
-    
-    // Setze den E-Mail-Body auf multipart (Text + Anhang)
-    email.Body = multipart;
-
-       try
-       {
-            using (var smtpClient = new MailKit.Net.Smtp.SmtpClient())
+            // Bestätige mit ENTER, Anykey für Abbruch
+            Console.WriteLine("Mail wie angezeigt senden mit ENTER, Anykey für Abbruch ...");
+            var keyInfo = Console.ReadKey();
+            if (keyInfo.Key != ConsoleKey.Enter)
             {
-                smtpClient.ServerCertificateValidationCallback = (s, c, h, e) => true; // SSL-Zertifikatsvalidierung deaktivieren
-                smtpClient.Connect(smtpServer, smtpPort, MailKit.Security.SecureSocketOptions.StartTls);
-                smtpClient.Authenticate(senderEmail, senderPassword);
-                smtpClient.Send(email);
-                smtpClient.Disconnect(true);
+                throw new Exception("Sie haben abgebrochen.");
             }
-       }
-       catch
-       {
-            Console.WriteLine("Mailversand gescheitert.");   
-       }    
-   });
-  }
-  catch(Exception ex)
-  {
-   throw;
-  }
- }
+
+            AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Mails senden ...", ctx =>
+            {
+                string smtpServer = configuration["SmtpServer365"];
+                int smtpPort = Convert.ToInt32(configuration["SmtpPort365"]);
+                string senderEmail = configuration["SmtpUser365"];
+
+                if (configuration["SmtpKennwort365"] == null || configuration["SmtpKennwort365"].Length <= 3)
+                {
+                    Console.WriteLine("Bitte geben Sie das Passwort von " + configuration["SmtpUser365"] + " für den E-Mail-Versand ein:");
+                    configuration["SmtpKennwort365"] = Console.ReadLine();
+                }
+
+                string senderPassword = configuration["SmtpKennwort365"];
+
+                var email = new MimeMessage();
+                email.From.Add(new MailboxAddress(configuration["SmtpUser365"], senderEmail));
+
+                email.Subject = subject;
+
+                foreach (var m in to)
+                    email.To.Add(new MailboxAddress("Empfänger", m.Trim()));
+
+                foreach (var m in cc)
+                    email.Cc.Add(new MailboxAddress("Empfänger", m.Trim()));
+
+                foreach (var m in bcc)
+                    email.Bcc.Add(new MailboxAddress("Empfänger", m.Trim()));
+
+                var textPart = new TextPart("plain") { Text = body };
+
+                // Falls eine Datei angegeben wurde, erstelle den Anhang
+                var multipart = new Multipart("mixed");
+                multipart.Add(textPart); // Erst den Text hinzufügen
+
+                foreach (var attachment in attachment)
+                {
+                    if (!string.IsNullOrEmpty(attachment) && System.IO.File.Exists(attachment))
+                    {
+                        var attachmentPart = new MimePart()
+                        {
+                            Content = new MimeContent(System.IO.File.OpenRead(attachment)),
+                            ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
+                            ContentTransferEncoding = ContentEncoding.Base64,
+                            FileName = System.IO.Path.GetFileName(attachment)
+                        };
+                        multipart.Add(attachmentPart);
+                    }
+                }
+
+                // Setze den E-Mail-Body auf multipart (Text + Anhang)
+                email.Body = multipart;
+
+                try
+                {
+                    using (var smtpClient = new MailKit.Net.Smtp.SmtpClient())
+                    {
+                        smtpClient.ServerCertificateValidationCallback = (s, c, h, e) => true; // SSL-Zertifikatsvalidierung deaktivieren
+                        smtpClient.Connect(smtpServer, smtpPort, MailKit.Security.SecureSocketOptions.StartTls);
+                        smtpClient.Authenticate(senderEmail, senderPassword);
+                        smtpClient.Send(email);
+                        smtpClient.Disconnect(true);
+                    }
+                }
+                catch
+                {
+                    Console.WriteLine("Mailversand gescheitert.");
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            throw;
+        }
+    }
 
     public void SendenMitEingebettetemBild(string subject, string bild, List<string> bcc, IConfiguration configuration)
     {
         try
-        {            
-            string smtpServer = configuration["SmtpServerMassenmail"] ;
+        {
+            string smtpServer = configuration["SmtpServerMassenmail"];
             int smtpPort = Convert.ToInt32(configuration["SmtpPort"]);
             string smtpUser = configuration["SmtpUserMassenmail"];
-            string smtpPassword = configuration["SmtpPasswordMassenmail"];            
+            string smtpPassword = configuration["SmtpPasswordMassenmail"];
 
             var email = new MimeMessage();
             email.From.Add(new MailboxAddress(smtpUser, smtpUser));
@@ -222,8 +222,8 @@ private bool IstMailadresseGültig(string email)
             foreach (var bccEmail in bcc)
             {
                 // Wenn die Mail NON-Ascii enthält, dann wird sie nicht gesendet.
-                if(!(bccEmail.Contains("ä") || bccEmail.Contains("ö") || bccEmail.Contains("ü") || bccEmail.Contains("ß")))
-                {                
+                if (!(bccEmail.Contains("ä") || bccEmail.Contains("ö") || bccEmail.Contains("ü") || bccEmail.Contains("ß")))
+                {
                     email.Bcc.Add(new MailboxAddress("Empfänger", bccEmail));
                 }
             }
@@ -275,16 +275,16 @@ private bool IstMailadresseGültig(string email)
     public void Senden(IConfiguration configuration, string subject, string sender, string body, Stream attachmentStream, string attachmentName, string receiver)
     {
         try
-        { 
+        {
             var mailMessage = new MailMessage(sender, receiver, subject, body);
             mailMessage.Attachments.Add(new Attachment(attachmentStream, attachmentName));
 
-            if(!string.IsNullOrEmpty(configuration["BCCAdresse"]) && configuration["BCCAdresse"].Contains("@"))
+            if (!string.IsNullOrEmpty(configuration["BCCAdresse"]) && configuration["BCCAdresse"].Contains("@"))
             {
                 mailMessage.Bcc.Add(configuration["BCCAdresse"]);
             }
-            
-            if(configuration["SmtpKennwort365"]  == null || configuration["SmtpKennwort365"].Length <= 3)
+
+            if (configuration["SmtpKennwort365"] == null || configuration["SmtpKennwort365"].Length <= 3)
             {
                 Console.WriteLine($"Bitte geben Sie das Passwort von {configuration["SmtpUser365"]} für den E-Mail-Versand ein:");
                 Global.SmtpKennwort = Console.ReadLine();
@@ -296,7 +296,7 @@ private bool IstMailadresseGültig(string email)
                 smtpClient.EnableSsl = true;
                 smtpClient.Send(mailMessage);
                 smtpClient.Dispose();
-                mailMessage.Dispose();                
+                mailMessage.Dispose();
                 AnsiConsole.Write(new Panel($"[bold green]  Mail gesendet  [/]: [green]{receiver}[/]")
                     .SquareBorder()
                     .Expand()

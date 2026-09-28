@@ -18,11 +18,11 @@ public class Unterricht
     public int Wochenstunden { get; internal set; }
     public List<string> Jahrgaenge { get; internal set; }
     public Students Students { get; set; }
- public DateTime Von { get; internal set; }
- public DateTime Bis { get; internal set; }
- public List<string> FaecherRoh { get; set; }
+    public DateTime Von { get; internal set; }
+    public DateTime Bis { get; internal set; }
+    public List<string> FaecherRoh { get; set; }
 
- public Unterricht(){}
+    public Unterricht() { }
     public Unterricht(Global.Zweck zweck, Menüeintrag m, IConfiguration configuration, string? unterrichtsId, string fach, string? schuelergruppe, string? klasse, string? lehrer, int wochentundenLehrkraft, List<dynamic> studentgroupStudents)
     {
         Fach = Bereinigen(fach);
@@ -37,7 +37,7 @@ public class Unterricht
         //Global.ZeileSchreiben($"{klasse} {fach} {lehrer}", $"Schüler*innen: {Students.Count}");                    
     }
 
-    public Unterricht(string kursBez, Global.Zweck zweck, Menüeintrag m, string? unterrichtsId, string fach, string? schuelergruppe, string? klasse, string? lehrer, int wochentundenLehrkraft, List<dynamic> kurseDat, IConfiguration configuration, List<dynamic> studentgroupStudents)         
+    public Unterricht(string kursBez, Global.Zweck zweck, Menüeintrag m, string? unterrichtsId, string fach, string? schuelergruppe, string? klasse, string? lehrer, int wochentundenLehrkraft, List<dynamic> kurseDat, IConfiguration configuration, List<dynamic> studentgroupStudents)
     {
         // Klassen nicht leer -> Alle bekommen den Kurs zugewiesen
         //                       KursBez darf leer bleiben
@@ -56,8 +56,8 @@ public class Unterricht
         LehrkraefteWochenstunden = new List<int>();
         Schülergruppe = schuelergruppe;
         UnterrichtsIds = new List<int> { int.Parse(unterrichtsId) };
-        Students = m.IStudents.Filter(configuration, zweck, klasse, schuelergruppe, studentgroupStudents);    
-        Jahrgaenge = new List<string>() { Students.DistinctBy(s => s.Jahrgang).FirstOrDefault()?.Jahrgang ?? "" };    
+        Students = m.IStudents.Filter(configuration, zweck, klasse, schuelergruppe, studentgroupStudents);
+        Jahrgaenge = new List<string>() { Students.DistinctBy(s => s.Jahrgang).FirstOrDefault()?.Jahrgang ?? "" };
     }
 
     public string GetKursart(IConfiguration configuration, List<dynamic> kurseDat, string fach, string? kursleiter, string? unterrichtsId)
@@ -97,7 +97,7 @@ public class Unterricht
         {
             AnsiConsole.MarkupLine($"[red]Fehler beim Zuordnen der Kursarten[/]");
             return ""; // Fehlerfall, leere Rückgabe
-        }        
+        }
         return ""; // Wenn keine Kursart gefunden wurde, wird eine leere Zeichenkette zurückgegeben
     }
 
@@ -150,7 +150,7 @@ public class Unterricht
             KursBez = $"{Kursleiter}-{string.Join('-', UnterrichtsIds)}";
 
             unterrichtsIdHinzugefügt = true;
-            
+
             // Die Kursbezeichnung muss auf max. 20 Zeichen begrenzt werden. Mehr kann SchILD nicht.
             if (KursBez.Length > 20)
             {
@@ -181,9 +181,9 @@ public class Unterricht
                 if (index >= 0)
                 {
                     // keine Erhöhung, wenn die Kursbezeichnung bereits den Kurs enhält
-                    if(unterrichtsIdHinzugefügt)
+                    if (unterrichtsIdHinzugefügt)
                     {
-                        LehrkraefteWochenstunden[index] += wochentundenLehrkraft;    
+                        LehrkraefteWochenstunden[index] += wochentundenLehrkraft;
                     }
                 }
             }
@@ -191,7 +191,7 @@ public class Unterricht
         return KursBez;
     }
 
- public void UpdateUnterricht(Student student, Unterricht neuerUnterricht)
+    public void UpdateUnterricht(Student student, Unterricht neuerUnterricht)
     {
         if (neuerUnterricht == null)
             return;

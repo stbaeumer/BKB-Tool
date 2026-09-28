@@ -128,7 +128,7 @@ public class Students : List<Student>
             ConsoleColor.Yellow, ConsoleColor.Gray);
     }
 
-    
+
 
     private void ErgänzeFehlendeEigenschaften(Student vS, Student nS)
     {
@@ -181,7 +181,7 @@ public class Students : List<Student>
         if (gpu003 == null || gpu003.Count == 0) return;
 
         var zieldatei = new Datei(dateiname, funktionen, configuration);
-        zieldatei.Lehrers = new Lehrers();        
+        zieldatei.Lehrers = new Lehrers();
 
         zieldatei.Add("====== Schulpflichtüberwachung ======");
 
@@ -206,7 +206,7 @@ public class Students : List<Student>
 
         zieldatei.Add(
             @"  * :?: Was kann ich tun, wenn der Fall bereits der BezReg vorliegt? :!: Bei dauerhaft fehlenden SuS müssen die Klassenleitungen keine weiteren Aufgaben übernehmen, wenn der Fall der Bezirksregierung Münster gemeldet wurde.");
-        
+
         zieldatei.Add(
             @"  * :?: Muss ich eine irgendwem eine Rückmeldung zu den Fällen in meiner Klasse geben? :!: Nein. Eine Rückmeldung ist nicht notwendig. Wer Fragen hat, kann sich natürlich immer melden: [[chat>stefan.baeumer|Stefan Bäumer]].");
         zieldatei.Add(@"");
@@ -248,15 +248,15 @@ public class Students : List<Student>
                     var klassenlehrer = lehrers.FirstOrDefault(l => l.Kürzel == klassenlehrerKü.ToString());
                     if (klassenlehrer != null)
                     {
-                        Klassenlehrers.Add(klassenlehrer);                        
+                        Klassenlehrers.Add(klassenlehrer);
                     }
                 }
-                
+
                 foreach (var student in this.OrderBy(x => x.Nachname))
                 {
                     if (student.Klasse == kl)
                     {
-                        if(kl == "NBK25A")
+                        if (kl == "NBK25A")
                         {
                             string aa = "";
                         }
@@ -399,14 +399,14 @@ public class Students : List<Student>
                                 if (!mailliste.Contains(klassenlehrer.Mail))
                                 {
                                     mailliste += klassenlehrer.Mail + ";";
-                                    if(klassenlehrer != null)
+                                    if (klassenlehrer != null)
                                         zieldatei.Lehrers.Add(klassenlehrer);
                                 }
 
                                 if (!teamsChatLink.Contains(klassenlehrer.Mail))
                                 {
                                     teamsChatLink += string.Join(",", Klassenlehrers.Select(klassenlehrer => klassenlehrer.Mail));
-                                }    
+                                }
                             }
                             zieldatei.Add("|" + student.Klasse.PadRight(10) + "|" + klassenleitungString.TrimEnd(',').PadRight(16) + "  |" + name.PadRight(8) + "|" +
                                    alter + "|" +
@@ -414,7 +414,7 @@ public class Students : List<Student>
                                    "  |[[:eskalationsstufen_erzieherische_einwirkung_ordnungsmassnahmen|Erz.Einwirkung]] " +
                                    attestpflichtWikiLink + " " + mahnungWikiLink + " " + bußgeldverfahren + " " +
                                    teilkonferenz + "|");
-                        }                        
+                        }
                     }
                 }
             }
@@ -1413,9 +1413,9 @@ public class Students : List<Student>
     internal void KlassenordnerInZielPfadErstellen(IConfiguration configuration)
     {
         configuration = Global.Konfig("PfadFotosImSchILD-Ordner", Global.Modus.ReadSilent, configuration);
-        
+
         var zielpfadZuFotos = configuration["PfadFotosImSchILD-Ordner"];
-        
+
         // Falls der Zielordner nicht existiert, erstelle ihn
         if (!Directory.Exists(zielpfadZuFotos))
         {
@@ -1639,11 +1639,11 @@ public class Students : List<Student>
         configuration = Global.Konfig("NurNeueFotosExportieren", Global.Modus.Update, configuration);
 
         if (configuration["NurNeueFotosExportieren"].ToString().ToLower() == "ja")
-        {           
+        {
             var studentsMitNeuenFotos = new Students();
-            studentsMitNeuenFotos.AddRange(this.Where(x => !string.IsNullOrEmpty(x.ZielFotoPfad))); 
+            studentsMitNeuenFotos.AddRange(this.Where(x => !string.IsNullOrEmpty(x.ZielFotoPfad)));
             return studentsMitNeuenFotos;
-        }   
+        }
 
         // Wenn der Anwender alle Fotos exportieren möchte, dann wird jedem Schüler das Foto aus dem Ordner pfadFotosAusSchild zugewiesen.
         AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start($"Fotos an SuS zuweisen ...", ctx =>

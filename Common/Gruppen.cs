@@ -27,7 +27,7 @@ public class Gruppen : List<Gruppe>
 
     public Gruppen GetBildungsgaenge(List<dynamic> gpu002, List<dynamic> schulgemeinschaft, Anrechnungen anrechnungs,
         Lehrers lehrers)
-    {        
+    {
         var gruppen = new Gruppen();
 
         var alleVerschiedenenKlassen = gpu002
@@ -41,9 +41,9 @@ public class Gruppen : List<Gruppe>
 
         var records = new List<dynamic>();
         var bildungsgaengeWikiLinks = (from a in anrechnungs
-            where a.Text.Contains("Bildungsgangleitung")
-            where a.Beschr.StartsWith("bildungsgaenge:")
-            select a.Beschr).Distinct().ToList().OrderBy(x => x);
+                                       where a.Text.Contains("Bildungsgangleitung")
+                                       where a.Beschr.StartsWith("bildungsgaenge:")
+                                       select a.Beschr).Distinct().ToList().OrderBy(x => x);
 
         foreach (var b in bildungsgaengeWikiLinks)
         {
@@ -52,9 +52,9 @@ public class Gruppen : List<Gruppe>
             var wikiLink = b.ToLower();
             var schulform = GetSchulform(b);
 
-            if(kurzname.ToLower() == "bt")
+            if (kurzname.ToLower() == "bt")
             {
-                string a="";
+                string a = "";
             }
 
             var members = GetMembers(gpu002, lehrers, new List<int>() { 1, 2, 3, 4 }, kurzname);
@@ -63,34 +63,34 @@ public class Gruppen : List<Gruppe>
             var enumerable = members.ToList();
             record.Namen = string.Join(", ", enumerable.Select(x => "schulgemeinschaft:" + x.Kürzel));
             record.Mail = string.Join("; ", enumerable.Select(x => x.Mail));
-            record.Kürzel = string.Join(", ", enumerable.Select(x => x.Kürzel));var gruppe = new Gruppe(kurzname);
+            record.Kürzel = string.Join(", ", enumerable.Select(x => x.Kürzel)); var gruppe = new Gruppe(kurzname);
             record.Art = "bildungsgaenge:start";
-            
+
             var vorsitzLeitung = "";
             foreach (var x in (from a in anrechnungs
-                where a.Text.Contains("Bildungsgangleitung")
-                where a.Beschr == wikiLink
-                select a.LehrerKuerzel.ToLower()))
+                               where a.Text.Contains("Bildungsgangleitung")
+                               where a.Beschr == wikiLink
+                               select a.LehrerKuerzel.ToLower()))
             {
                 if (!vorsitzLeitung.Contains("schulgemeinschaft:" + x))
                 {
-                    vorsitzLeitung += "schulgemeinschaft:" + x + ", ";    
+                    vorsitzLeitung += "schulgemeinschaft:" + x + ", ";
                 }
             }
-                
+
             record.VorsitzLeitung = vorsitzLeitung.TrimEnd(',').TrimEnd(' ').TrimEnd(',').TrimEnd(' ');
 
-            if(vorsitzLeitung.Contains(":fr"))
+            if (vorsitzLeitung.Contains(":fr"))
             {
-                string aaa= "";
+                string aaa = "";
             }
 
             var klassen = "";
 
-            foreach(var k in alleVerschiedenenKlassen)
+            foreach (var k in alleVerschiedenenKlassen)
             {
                 var kl = k.Split('2')[0].ToLower();
-                if(kl == kurzname.ToLower())
+                if (kl == kurzname.ToLower())
                 {
                     klassen += ":klassen:" + k + ", ";
                 }
@@ -117,90 +117,90 @@ public class Gruppen : List<Gruppe>
                     .LastOrDefault(dict => dict.TryGetValue("Link", out var link) && link?.ToString() == wikiLink);
 
 
-                     var bereiche = "";
-
-            
-                    if(bg["Bereich"].ToString().ToLower().Contains("gesundheit"))
-                    {
-                       bereiche += bereiche + "bereiche:gesundheit_erziehung_und_soziales,"; 
-            
-                    }
-                    if(bg["Bereich"].ToString().ToLower().Contains("metall"))
-                    {
-                       bereiche += bereiche + "bereiche:metall-_und_elektrotechnik_ing,"; 
-            
-                    }
-                    if(bg["Bereich"].ToString().ToLower().Contains("wirtschaft"))
-                    {
-                       bereiche += bereiche + "bereiche:wirtschaft_und_verwaltung,"; 
-            
-                    }
-                    if(bg["Bereich"].ToString().ToLower().Contains("holz"))
-                    {
-                       bereiche += bereiche + "bereiche:bau-_und_holztechnik,"; 
-            
-                    }
-                    if(bg["Bereich"].ToString().ToLower().Contains("agrar"))
-                    {
-                       bereiche += bereiche + "bereiche:agrarwirtschaft,"; 
-            
-                    }
-            
-
-            record.Bereich = bereiche.TrimEnd(',');
-            record.Schulform = "bildungsgaenge:" + schulform + ":start";
-            record.TZSLASHVZ = bg["TZ/VZ"];
-            record.LinkLEERZEICHENzurLEERZEICHENHomepage = bg["Link zur Homepage"];
-            
-            if(!string.IsNullOrEmpty(bg["BO-Curriculum"].ToString()))
-             record.BOMINUSCurriculum = "konzepte:curriculum-berufliche-orientierung:" + kurzname;
+                var bereiche = "";
 
 
+                if (bg["Bereich"].ToString().ToLower().Contains("gesundheit"))
+                {
+                    bereiche += bereiche + "bereiche:gesundheit_erziehung_und_soziales,";
 
-            record.Anlage = "anlagen:a2.1";//bg["Anlage"];
-            record.BGkuerzel = bg["BGkuerzel"];
-            if(!string.IsNullOrEmpty(bg["Praktikum"].ToString()))
-             record.Praktikum = "praktikum:start";
-            if(!string.IsNullOrEmpty(bg["Heterogenität"].ToString()))
-             record.Heterogenität = "heterogenitaet";
-            if(!string.IsNullOrEmpty(bg["Klausurplanung"].ToString()))
-             record.Klausurplanung = "oeffentlich:klausurbelegung-kurswahlen:start";
-            record.Versetzung = "";
-            
-            if(!string.IsNullOrEmpty(bg["Abschluss"].ToString()) && (bg["Abschluss"].ToString().ToLower().Contains("abi") || bg["Abschluss"].ToString().ToLower().Contains("allge")))
-             record.Abschluss = "schulabschluesse:allgemeine_hochschulreife";
-            if(!string.IsNullOrEmpty(bg["Abschluss"].ToString()) && bg["Abschluss"].ToString().Contains("..."))
-             record.Abschluss = "schulabschluesse:berufsschulabschluss";
-            if(!string.IsNullOrEmpty(bg["Abschluss"].ToString()) && bg["Abschluss"].ToString().Contains("..."))
-             record.Abschluss = "schulabschluesse:erster_schulabschluss";
-            if(!string.IsNullOrEmpty(bg["Abschluss"].ToString()) && bg["Abschluss"].ToString().Contains("..."))
-             record.Abschluss = "schulabschluesse:erweiterter_erster_schulabschluss";
-            if(!string.IsNullOrEmpty(bg["Abschluss"].ToString()) && bg["Abschluss"].ToString().Contains("..."))
-             record.Abschluss = "schulabschluesse:fachhochschulreife";
-            if(!string.IsNullOrEmpty(bg["Abschluss"].ToString()) && bg["Abschluss"].ToString().Contains("..."))
-             record.Abschluss = "schulabschluesse:mittlerer_schulabschluss";
+                }
+                if (bg["Bereich"].ToString().ToLower().Contains("metall"))
+                {
+                    bereiche += bereiche + "bereiche:metall-_und_elektrotechnik_ing,";
 
-            if(!string.IsNullOrEmpty(bg["DJP1"].ToString()))
-             record.DJP1 = "djp:" + kurzname + ":jg1:start" ;
-            if(!string.IsNullOrEmpty(bg["DJP2"].ToString()))
-             record.DJP2 = "djp:" + kurzname + ":jg2:start" ;
-            if(!string.IsNullOrEmpty(bg["DJP3"].ToString()))
-             record.DJP3 = "djp:" + kurzname + ":jg3:start" ;
-            if(!string.IsNullOrEmpty(bg["DJP4"].ToString()))
-             record.DJP4 = "djp:" + kurzname + ":jg4:start" ;             
-            record.boyd = bg["boyd"];
-            record.perspektiveMINUSboyd = bg["perspektive-boyd"];
-            record.Aufnahmevoraussetzungen = bg["Aufnahmevoraussetzungen"];
-            record.Bildungsziele = bg["Bildungsziele"];    
+                }
+                if (bg["Bereich"].ToString().ToLower().Contains("wirtschaft"))
+                {
+                    bereiche += bereiche + "bereiche:wirtschaft_und_verwaltung,";
+
+                }
+                if (bg["Bereich"].ToString().ToLower().Contains("holz"))
+                {
+                    bereiche += bereiche + "bereiche:bau-_und_holztechnik,";
+
+                }
+                if (bg["Bereich"].ToString().ToLower().Contains("agrar"))
+                {
+                    bereiche += bereiche + "bereiche:agrarwirtschaft,";
+
+                }
+
+
+                record.Bereich = bereiche.TrimEnd(',');
+                record.Schulform = "bildungsgaenge:" + schulform + ":start";
+                record.TZSLASHVZ = bg["TZ/VZ"];
+                record.LinkLEERZEICHENzurLEERZEICHENHomepage = bg["Link zur Homepage"];
+
+                if (!string.IsNullOrEmpty(bg["BO-Curriculum"].ToString()))
+                    record.BOMINUSCurriculum = "konzepte:curriculum-berufliche-orientierung:" + kurzname;
+
+
+
+                record.Anlage = "anlagen:a2.1";//bg["Anlage"];
+                record.BGkuerzel = bg["BGkuerzel"];
+                if (!string.IsNullOrEmpty(bg["Praktikum"].ToString()))
+                    record.Praktikum = "praktikum:start";
+                if (!string.IsNullOrEmpty(bg["Heterogenität"].ToString()))
+                    record.Heterogenität = "heterogenitaet";
+                if (!string.IsNullOrEmpty(bg["Klausurplanung"].ToString()))
+                    record.Klausurplanung = "oeffentlich:klausurbelegung-kurswahlen:start";
+                record.Versetzung = "";
+
+                if (!string.IsNullOrEmpty(bg["Abschluss"].ToString()) && (bg["Abschluss"].ToString().ToLower().Contains("abi") || bg["Abschluss"].ToString().ToLower().Contains("allge")))
+                    record.Abschluss = "schulabschluesse:allgemeine_hochschulreife";
+                if (!string.IsNullOrEmpty(bg["Abschluss"].ToString()) && bg["Abschluss"].ToString().Contains("..."))
+                    record.Abschluss = "schulabschluesse:berufsschulabschluss";
+                if (!string.IsNullOrEmpty(bg["Abschluss"].ToString()) && bg["Abschluss"].ToString().Contains("..."))
+                    record.Abschluss = "schulabschluesse:erster_schulabschluss";
+                if (!string.IsNullOrEmpty(bg["Abschluss"].ToString()) && bg["Abschluss"].ToString().Contains("..."))
+                    record.Abschluss = "schulabschluesse:erweiterter_erster_schulabschluss";
+                if (!string.IsNullOrEmpty(bg["Abschluss"].ToString()) && bg["Abschluss"].ToString().Contains("..."))
+                    record.Abschluss = "schulabschluesse:fachhochschulreife";
+                if (!string.IsNullOrEmpty(bg["Abschluss"].ToString()) && bg["Abschluss"].ToString().Contains("..."))
+                    record.Abschluss = "schulabschluesse:mittlerer_schulabschluss";
+
+                if (!string.IsNullOrEmpty(bg["DJP1"].ToString()))
+                    record.DJP1 = "djp:" + kurzname + ":jg1:start";
+                if (!string.IsNullOrEmpty(bg["DJP2"].ToString()))
+                    record.DJP2 = "djp:" + kurzname + ":jg2:start";
+                if (!string.IsNullOrEmpty(bg["DJP3"].ToString()))
+                    record.DJP3 = "djp:" + kurzname + ":jg3:start";
+                if (!string.IsNullOrEmpty(bg["DJP4"].ToString()))
+                    record.DJP4 = "djp:" + kurzname + ":jg4:start";
+                record.boyd = bg["boyd"];
+                record.perspektiveMINUSboyd = bg["perspektive-boyd"];
+                record.Aufnahmevoraussetzungen = bg["Aufnahmevoraussetzungen"];
+                record.Bildungsziele = bg["Bildungsziele"];
             }
             catch
             {
-             Console.WriteLine("Gibt's den Bildungsgang " + wikiLink + " noch?");
+                Console.WriteLine("Gibt's den Bildungsgang " + wikiLink + " noch?");
             }
 
-            
+
             records.Add(record);
-            gruppe.Record = record;            
+            gruppe.Record = record;
             gruppen.Add(gruppe);
         }
 
@@ -221,7 +221,7 @@ public class Gruppen : List<Gruppe>
         Lehrers lehrers)
     {
         var gruppen = new Gruppen();
-        
+
         var panel = new Panel("Die Schulformen werden aus den Anrechnungen ermittelt. Der Name der Schulformen wird aus der Untis-Beschr. ausgelesen")
                         .HeaderAlignment(Justify.Left)
                         .SquareBorder()
@@ -231,9 +231,9 @@ public class Gruppen : List<Gruppe>
         AnsiConsole.Write(panel);
 
         var schulformen = (from a in anrechnungs
-            where a.Text.Contains("Bildungsgangleitung")
-            where a.Beschr.StartsWith("bildungsgaenge:")
-            select GetSchulform(a.Beschr)).Distinct().ToList().OrderBy(x => x);
+                           where a.Text.Contains("Bildungsgangleitung")
+                           where a.Beschr.StartsWith("bildungsgaenge:")
+                           select GetSchulform(a.Beschr)).Distinct().ToList().OrderBy(x => x);
 
         // Für jede Schulform
         foreach (var schulform in schulformen)
@@ -244,9 +244,9 @@ public class Gruppen : List<Gruppe>
 
             // und jeden enthaltenen Bildungsgang 
             foreach (var kurzname in (from a in anrechnungs
-                         where a.Text.Contains("Bildungsgangleitung")
-                         where GetSchulform(a.Beschr) == schulform
-                         select GetKurzname(a.Beschr)).Distinct().ToList())
+                                      where a.Text.Contains("Bildungsgangleitung")
+                                      where GetSchulform(a.Beschr) == schulform
+                                      select GetKurzname(a.Beschr)).Distinct().ToList())
             {
                 var members = GetMembers(gpu002, lehrers, new List<int>() { 1, 2, 3, 4 }, kurzname);
 
@@ -273,7 +273,7 @@ public class Gruppen : List<Gruppe>
             }
 
             dynamic record = new ExpandoObject();
-            record.Page = "bildungsgaenge:" + schulform + ":start";            
+            record.Page = "bildungsgaenge:" + schulform + ":start";
             record.Namen = string.Join(", ", lehrerName);
             record.Mail = string.Join("; ", lehrerMail);
             record.Kürzel = string.Join(", ", lehrerKürzel);
@@ -309,7 +309,7 @@ public class Gruppen : List<Gruppe>
                 {
                     if (JahrgangPasst(klassenkürzel, jahrgänge))
                     {
-                        if(klassenkürzel.ToUpper().Contains("AVT25"))
+                        if (klassenkürzel.ToUpper().Contains("AVT25"))
                         {
                             string aa = "";
                         }

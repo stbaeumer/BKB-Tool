@@ -47,16 +47,16 @@ public class Lehrer
     public string? Beschäftigungsart { get; internal set; }
     public string? StatistikRelevant { get; internal set; }
     public string? Anrede { get; internal set; }
- public List<string> NichtEingetrageneNotenKlassen { get; internal set; }
- public string? PflichtstundenSoll { get; set; }
- public string? Schulleitung { get; internal set; }
- public string? Mobilnummer { get; internal set; }
- public string? Festnetznummer { get; internal set; }
- public string? Telefonnummer { get; internal set; }
- public string? StrasseHausnummer { get; internal set; }
- public string? PlzOrt { get; internal set; }
+    public List<string> NichtEingetrageneNotenKlassen { get; internal set; }
+    public string? PflichtstundenSoll { get; set; }
+    public string? Schulleitung { get; internal set; }
+    public string? Mobilnummer { get; internal set; }
+    public string? Festnetznummer { get; internal set; }
+    public string? Telefonnummer { get; internal set; }
+    public string? StrasseHausnummer { get; internal set; }
+    public string? PlzOrt { get; internal set; }
 
- internal int GetAlterAmErstenSchultagDesSchuljahres(int jahr)
+    internal int GetAlterAmErstenSchultagDesSchuljahres(int jahr)
     {
         int years = jahr - Geburtsdatum.Year;
         DateTime birthday = Geburtsdatum.AddYears(years);
@@ -71,14 +71,14 @@ public class Lehrer
     internal int GetProzentStelle(IConfiguration configuration)
     {
         var volleStelle = float.TryParse(configuration["VolleStelle"]?.Replace(',', '.'), NumberStyles.Any, CultureInfo.InvariantCulture, out float volleStelleValue) ? volleStelleValue : 25.5f;
-        
+
         return Convert.ToInt32(Math.Floor(100 / volleStelle * this.DeputatLautUntis));
     }
 
     public DateTime GetGeburtsdatum(string geburtsdatum)
-    {        
+    {
         DateTime geburtsdatumDateTime;
-        
+
         if (!DateTime.TryParseExact(geburtsdatum, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out geburtsdatumDateTime))
         {
             // Fehlerbehandlung, falls das Datum nicht konvertiert werden kann
@@ -137,40 +137,40 @@ public class Lehrer
         switch (alterAmErstenSchultagDesJahres)
         {
             case >= 60:
-            {
-                switch (ProzentStelleInUntis)
                 {
-                    case >= 96:
+                    switch (ProzentStelleInUntis)
                     {
-                        return 3;
+                        case >= 96:
+                            {
+                                return 3;
+                            }
+                        case >= 75 and < 96:
+                            {
+                                return 2;
+                            }
+                        case >= 50 and < 75:
+                            {
+                                return 1.5;
+                            }
                     }
-                    case >= 75 and < 96:
-                    {                            
-                        return 2;
-                    }
-                    case >= 50 and < 75:
-                    {                        
-                        return 1.5;
-                    }
-                }
 
-                break;
-            }
-            case >= 55 and < 60:
-            {
-                switch (ProzentStelleInUntis)
-                {
-                    case 100:
-                    {                        
-                        return 1;
-                    }
-                    case >= 50 and < 100:
-                    {                        
-                        return 0.5;
-                    }
+                    break;
                 }
-                break;
-            }
+            case >= 55 and < 60:
+                {
+                    switch (ProzentStelleInUntis)
+                    {
+                        case 100:
+                            {
+                                return 1;
+                            }
+                        case >= 50 and < 100:
+                            {
+                                return 0.5;
+                            }
+                    }
+                    break;
+                }
         }
         return 0;
     }

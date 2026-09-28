@@ -35,10 +35,10 @@ public interface IDokuWikiApi : IXmlRpcProxy
 {
     [XmlRpcMethod("struct.getData")]
     XmlRpcStruct GetData(string schemaName, string pageId);
-    
+
     [XmlRpcMethod("struct.getSchema")]
     StructSchema GetSchema(string schemaName);
-    
+
     [XmlRpcMethod("dokuwiki.getVersion")]
     string GetVersion();
 
@@ -46,21 +46,21 @@ public interface IDokuWikiApi : IXmlRpcProxy
     string GetPage(string page);
 
     [XmlRpcMethod("wiki.putPage")]
-    bool PutPage(string page, string content, XmlRpcStruct options);    
+    bool PutPage(string page, string content, XmlRpcStruct options);
 
     // NEU: Holt die Tabellendaten (Aggregationen) des Struct-Plugins
     [XmlRpcMethod("plugin.struct.getAggregationData")]
-    
+
     object[] GetAggregationData(string[] schemas, string[] columns, object[] filters, string sortBy);
 
-    
+
     [XmlRpcMethod("plugin.struct.getData")]
     XmlRpcStruct GetStructData(string page, string schema, int timestamp);
 
 
     [XmlRpcMethod("plugin.struct.saveData")]
     bool SaveStructData(string page, object data, string summary = "Updated via API");
-    
+
     [XmlRpcMethod("plugin.struct.addGlobalRow")]
     object AddGlobalRow(XmlRpcStruct data, string summary = "");
 
@@ -69,8 +69,8 @@ public interface IDokuWikiApi : IXmlRpcProxy
     string[] ListMethods();
 
     // Testweise das Interface anpassen, falls die API ein Array/Objekt-Wrapper benötigt:
-[XmlRpcMethod("plugin.struct.saveData")]
-bool SaveStructData(string pageId, string schemaName, object data);
+    [XmlRpcMethod("plugin.struct.saveData")]
+    bool SaveStructData(string pageId, string schemaName, object data);
 
 }
 
@@ -84,7 +84,7 @@ public class DokuwikiZugriff
         Global.Konfig("WikiUrl", Global.Modus.Update, configuration);
         Global.Konfig("WikiJsonUser", Global.Modus.Update, configuration);
         Global.Konfig("WikiJsonUserKennwort", Global.Modus.Update, configuration);
-        
+
         // Proxy erstellen
         Proxy = XmlRpcProxyGen.Create<IDokuWikiApi>();
         ((XmlRpcClientProtocol)Proxy).Url = configuration["WikiUrl"];

@@ -10,7 +10,7 @@ using Spectre.Console;
 using System.Linq;
 using System.Threading;
 
-try { Console.WindowHeight = 35;} catch { }
+try { Console.WindowHeight = 35; } catch { }
 
 Global.User = Environment.UserName;
 IConfiguration? configuration = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile($"BKB-Tool.json", optional: true, reloadOnChange: true).Build();
@@ -18,7 +18,7 @@ IConfiguration? configuration = new ConfigurationBuilder().SetBasePath(Directory
 Global.ColorÜberschrift = Color.Aqua; // Überschrift
 Global.ColorUnterschrift = Color.Aqua; // 2.Überschrift
 Global.ColorBeschreibung = Color.SpringGreen2; // Beschreibung
-Global.ColorPfadInProgrammen = Color.Yellow; 
+Global.ColorPfadInProgrammen = Color.Yellow;
 Global.ColorPfadInDateien = Color.SpringGreen2; // Pfad in Dateien
 Global.ColorActionInMenüs = Color.SpringGreen2; // Action in Menüs
 Global.ColorEinstellungenRahmen = Color.DodgerBlue1; // Einstellungen Rahmen
@@ -34,9 +34,9 @@ Global.HilfeUrl = "https://github.com/stbaeumer/BKB-Tool";
 var version = Assembly.GetExecutingAssembly().GetName().Version;
 Global.AppVersion = version != null ? $"{version.Major}.{version.Minor}.{version.Build}" : "0.0.0";
 Global.SchulnummernGesperrt = new List<string> { "999999" }; // Diese Schulnummern können das Programm nicht verwenden.
-Global.SchulnummernPrivilegiert = new List<string>{ "177659" }; // Diese Schulnummern bekommen alle Jedermann-Punkte plus weitere Menüpunkte angezeigt.
+Global.SchulnummernPrivilegiert = new List<string> { "177659" }; // Diese Schulnummern bekommen alle Jedermann-Punkte plus weitere Menüpunkte angezeigt.
 Global.Schulnummer177659 = new List<string> { "177659" }; // Diese Schulnummer bekommt alle Privilegierten plus weitere Menüpunkte angezeigt.
-Global.SchulnummernDebug = new List<string>{ "000000" }; // alles
+Global.SchulnummernDebug = new List<string> { "000000" }; // alles
 
 configuration["AppDescription"] = "";
 var dateien = new Dateien(configuration);
@@ -69,11 +69,11 @@ do
         configuration = menuGefiltert.GetAusgewaehlterMenueintrag(configuration, ["e", "h"]);
 
         var i = Convert.ToInt32(configuration["Auswahl"]);
-        
+
         if (i >= 0)
         {
             Global.DisplayHeader(configuration);
-            menuGefiltert[i].RenderAuswahlÜberschrift(configuration);        
+            menuGefiltert[i].RenderAuswahlÜberschrift(configuration);
             if (menuGefiltert[i].Quelldateien.Any(q => !string.IsNullOrEmpty(q.Fehlermeldung) && !q.IstOptional))
                 throw new Exception($"[bold {Global.GetColor(Global.ColorHinweise)}]{menuGefiltert[i].Quelldateien.FirstOrDefault(q => !string.IsNullOrEmpty(q.Fehlermeldung)).Fehlermeldung}[/]\n[gray]{string.Join("\n", menuGefiltert[i].Quelldateien.FirstOrDefault(q => !string.IsNullOrEmpty(q.Fehlermeldung)).Hinweise)}[/]");
             //menuGefiltert[i].Quelldateien.FehlermeldungRendern(configuration);
@@ -89,7 +89,7 @@ do
             }
 
             Global.WeiterMitAnykey(configuration, menuGefiltert[i]);
-        }    
+        }
     }
     catch (Exception ex)
     {
@@ -98,12 +98,12 @@ do
             .HeaderAlignment(Justify.Left)
             .SquareBorder()
             .Expand()
-            .BorderColor(Global.ColorFehler);        
-            AnsiConsole.Write(panel3);
-            Global.WeiterMitAnykey(configuration);
-            
+            .BorderColor(Global.ColorFehler);
+        AnsiConsole.Write(panel3);
+        Global.WeiterMitAnykey(configuration);
+
         continue; // Fehler behandeln und zum nächsten Durchlauf springen
-    }    
+    }
 } while (true);
 
 
@@ -193,8 +193,8 @@ IConfiguration CheckForUpdate(IConfiguration configuration)
 
                     // 2) Den ECHTEN Pfad finden
                     // WICHTIG: Erst schauen, ob wir in einem AppImage laufen, sonst Fallback auf ProcessPath
-                    string runningBinary = Environment.GetEnvironmentVariable("APPIMAGE") 
-                                        ?? Environment.ProcessPath 
+                    string runningBinary = Environment.GetEnvironmentVariable("APPIMAGE")
+                                        ?? Environment.ProcessPath
                                         ?? Environment.GetCommandLineArgs()[0];
 
                     string appDir = Path.GetDirectoryName(runningBinary);

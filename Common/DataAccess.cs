@@ -23,10 +23,10 @@ internal class DataAccess
     {
         ConnectionString = connectionString;
     }
-            
+
     internal DateTime GetSchildVersion()
     {
-        #pragma warning disable CA1416 // Plattformkompatibilität unterdrücken
+#pragma warning disable CA1416 // Plattformkompatibilität unterdrücken
         using (OleDbConnection oleDbConnection = new OleDbConnection(ConnectionString))
         {
             try
@@ -45,16 +45,16 @@ internal class DataAccess
                 }
                 oleDbDataReader.Close();
                 return schildVersion;
-            }                
+            }
             catch (Exception ex)
-            {   
+            {
                 Global.ZeileSchreiben("Fehler:", ex.Message, ConsoleColor.Red, ConsoleColor.White);
                 return new DateTime(0);
             }
             finally
             {
-                oleDbConnection.Close();                    
-            }            
+                oleDbConnection.Close();
+            }
         }
     }
     /*
@@ -150,7 +150,7 @@ WHERE (((Schueler.Geloescht)='-') AND ((Schueler.Status)=2) AND ((Schueler.AktSc
 
     internal string InsertImage(Student student)
     {
-        #pragma warning disable CA1416 // Plattformkompatibilität unterdrücken
+#pragma warning disable CA1416 // Plattformkompatibilität unterdrücken
         using (OleDbConnection oleDbConnection = new OleDbConnection(ConnectionString))
         {
             try

@@ -634,7 +634,7 @@ public partial class Student
         // Word und Pdf Dateien im Ordner des Schülers suchen. Die Dateien vorher aufsteigend nach Datum sortieren
         if (!Directory.Exists(ordnerDesSchuelers))
             return;
-                        
+
         var dateien = Directory
             .GetFiles(ordnerDesSchuelers, "*.*", SearchOption.TopDirectoryOnly)
             .Where(s => s.EndsWith(".pdf") || s.EndsWith(".docx") || s.EndsWith(".doc"))
@@ -643,7 +643,7 @@ public partial class Student
             .Select(f => f.FullName)
             .ToList();
 
-        foreach (var file in dateien) 
+        foreach (var file in dateien)
         {
             // Für jede Maßnahmeart prüfen, ob eine Datei mit dem Maßnahmencode im Dateinamen existiert
             foreach (var maßnahme in maßnahmenString)
@@ -685,14 +685,14 @@ public partial class Student
         var x = "";
         var bezeichnung = "";
 
-        if(Massnahmen.Count > 0)
+        if (Massnahmen.Count > 0)
         {
             string aa = "";
         }
 
         foreach (var item in Massnahmen)
         {
-            var dict = (IDictionary<string, object>)item;            
+            var dict = (IDictionary<string, object>)item;
             x += dict["Vermerkart"] + "(" + dict["Datum"].ToString() + @")\\ ";
         }
 
@@ -879,7 +879,7 @@ public partial class Student
         }
 
         zieldatei.Save(Zielordner + "/" + $"{Nachname}_{Vorname}_{Klasse}_{art}_{datum}.pdf");
-        Global.ZeileSchreiben(" -> " + $"{Nachname}_{Vorname}_{Klasse}_{art}_{datum}.pdf", "erstellt", ConsoleColor.Yellow,ConsoleColor.Gray);
+        Global.ZeileSchreiben(" -> " + $"{Nachname}_{Vorname}_{Klasse}_{art}_{datum}.pdf", "erstellt", ConsoleColor.Yellow, ConsoleColor.Gray);
     }
 
     public string GetJahrgang(List<dynamic>? schuelerBasisdaten)
@@ -940,16 +940,16 @@ public partial class Student
         {
             var dict = (IDictionary<string, object>)atlantiszeugnis;
 
-            if (dict["Field1"].ToString().Replace("'","") == Nachname)
+            if (dict["Field1"].ToString().Replace("'", "") == Nachname)
             {
                 //var dat = Global.DMMyyyyToDatum(dict["Field3"].ToString());
-                var dat = dict["Field3"].ToString().Replace("'","");
+                var dat = dict["Field3"].ToString().Replace("'", "");
 
                 if (dat == Geburtsdatum)
                 {
                     if (!string.IsNullOrEmpty(dict["Field4"].ToString()))
                     {
-                        var x = DateTime.ParseExact(dict["Field4"].ToString().Replace("'",""), "d.M.yyyy", CultureInfo.InvariantCulture);
+                        var x = DateTime.ParseExact(dict["Field4"].ToString().Replace("'", ""), "d.M.yyyy", CultureInfo.InvariantCulture);
                         if (!dates.Contains(x))
                         {
                             dates.Add(x);
@@ -1153,15 +1153,15 @@ public partial class Student
 
     internal bool GetMahnung(List<dynamic> marksPerLs, string fach)
     {
-         return marksPerLs.Any(mark =>
-        {
-            var dict = (IDictionary<string, object>)mark;
-            return dict["Name"].ToString().Contains(Vorname) &&
-            dict["Name"].ToString().Contains(Nachname) &&
-            dict["Klasse"].ToString() == Klasse &&
-            dict["Fach"].ToString() == fach &&
-            dict["Prüfungsart"].ToString().Contains("Mahnung");
-        });
+        return marksPerLs.Any(mark =>
+       {
+           var dict = (IDictionary<string, object>)mark;
+           return dict["Name"].ToString().Contains(Vorname) &&
+           dict["Name"].ToString().Contains(Nachname) &&
+           dict["Klasse"].ToString() == Klasse &&
+           dict["Fach"].ToString() == fach &&
+           dict["Prüfungsart"].ToString().Contains("Mahnung");
+       });
     }
 
     internal string Pfad2FotoStream()
@@ -1186,7 +1186,7 @@ public partial class Student
             catch (Exception ex)
             {
                 Foto = "";
-                return "Fehler beim Laden des Bildes: " + ex.Message;                
+                return "Fehler beim Laden des Bildes: " + ex.Message;
             }
         }
         else
@@ -1194,12 +1194,12 @@ public partial class Student
             Foto = "";
         }
         return "";
-}
+    }
 
     public string GetPfadDokumentenverwaltung(IConfiguration configuration)
     {
         Global.Konfig("PfadDokumentenverwaltung", Global.Modus.ReadSilent, configuration);
-        var pfadDokumentenverwaltung = configuration["PfadDokumentenverwaltung"];    
+        var pfadDokumentenverwaltung = configuration["PfadDokumentenverwaltung"];
         var anfangsbuchstabeNachname = Nachname.Substring(0, 1).ToUpper();
         var ordner = Nachname + ", " + Vorname + ", " + Geburtsdatum.Replace(".", "_");
         return Path.Combine(pfadDokumentenverwaltung, anfangsbuchstabeNachname, ordner);
@@ -1221,8 +1221,8 @@ public partial class Student
 
             if (confirmation)
             {
-                Directory.CreateDirectory(pfadDokumentenverwaltung);       
-                return "ok"; 
+                Directory.CreateDirectory(pfadDokumentenverwaltung);
+                return "ok";
             }
             else
             {
@@ -1283,8 +1283,8 @@ public partial class Student
                     return true;
                 }
             }
-        }        
-        return false;                    
+        }
+        return false;
     }
 
     internal object QuellbildUmbenennen(IConfiguration configuration)
@@ -1296,15 +1296,15 @@ public partial class Student
             var zieldateiname = $"{Vorname}_{Nachname}_{geburtsdatum}.jpg";
 
             var quellPfad = Path.Combine(configuration["PfadDownloads"], "Fotos", Klasse);
-            
+
             // Das Originalfoto wird umbenannt, damit es bei einem späteren Durchlauf nicht erneut kopiert wird.
-            File.Move(ZielFotoPfad, Path.Combine(quellPfad,zieldateiname), true);
+            File.Move(ZielFotoPfad, Path.Combine(quellPfad, zieldateiname), true);
             return "ok";
         }
         catch (Exception ex)
         {
             return ex.Message;
-        }        
+        }
     }
 
     internal void GetLetztesZeugnisdatumInDerKlasse(List<dynamic> schuelerLernabschnittsdaten)
@@ -1350,35 +1350,35 @@ public partial class Student
             return table;
         }
 
-        if(MailSchulisch.StartsWith("bp157569"))
+        if (MailSchulisch.StartsWith("bp157569"))
         {
             var debug = 1;
         }
         foreach (var r in relationsgruppen)
+        {
+            if (r.Gliederungen.Contains(Schulgliederung))
             {
-                if (r.Gliederungen.Contains(Schulgliederung))
+                var fachklasse = Fachklasse.Replace("-", "");
+
+                try
                 {
-                    var fachklasse = Fachklasse.Replace("-", "");
+                    fachklasse = fachklasse.Substring(fachklasse.Length - 5);
+                }
+                catch
+                {
+                    table.AddRow(Nachname + ", " + Vorname + ", " + Klasse, Schulgliederung, Jahrgang, Fachklasse, "Die Fachklasse ist nicht korrekt.");
+                }
 
-                    try
+                if ((r.Fachklassenschlüssel.Count == 0 || r.Fachklassenschlüssel.Contains(fachklasse)))
+                {
+                    if (r.Jahrgänge.Contains(Jahrgang.Split('-').Last()) || r.Jahrgänge.Count == 0)
                     {
-                        fachklasse = fachklasse.Substring(fachklasse.Length - 5);
-                    }
-                    catch
-                    {
-                        table.AddRow(Nachname + ", " + Vorname + ", " + Klasse, Schulgliederung, Jahrgang, Fachklasse, "Die Fachklasse ist nicht korrekt.");
-                    }
-
-                    if ((r.Fachklassenschlüssel.Count == 0 || r.Fachklassenschlüssel.Contains(fachklasse)))
-                    {
-                        if (r.Jahrgänge.Contains(Jahrgang.Split('-').Last()) || r.Jahrgänge.Count == 0)
-                        {
-                            Relationsgruppe = r.BeschreibungSchulministerium;
-                            return table;
-                        }
+                        Relationsgruppe = r.BeschreibungSchulministerium;
+                        return table;
                     }
                 }
             }
+        }
         if (string.IsNullOrEmpty(Relationsgruppe))
         {
             table.AddRow(Nachname + ", " + Vorname + ", " + Klasse, Schulgliederung, Jahrgang, Fachklasse, "Keine Relationsgruppe gefunden.");
@@ -1407,10 +1407,10 @@ public partial class Student
         return false;
     }
 
- internal void Warnung(string v)
- {
-    var linkeSeite = Nachname + ", " + Vorname + " (" + Klasse + "):";
-    linkeSeite = (linkeSeite.PadRight(30, ' ')).Substring(0, 30);
-            Global.ZeileSchreiben(linkeSeite, v, ConsoleColor.Yellow, ConsoleColor.Gray);
- }
+    internal void Warnung(string v)
+    {
+        var linkeSeite = Nachname + ", " + Vorname + " (" + Klasse + "):";
+        linkeSeite = (linkeSeite.PadRight(30, ' ')).Substring(0, 30);
+        Global.ZeileSchreiben(linkeSeite, v, ConsoleColor.Yellow, ConsoleColor.Gray);
+    }
 }

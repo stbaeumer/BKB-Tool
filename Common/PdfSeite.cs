@@ -189,8 +189,8 @@ public partial class PdfSeite
     private static partial Regex MyRegex();
 
     internal void PdfDocumentEncrypt(string passwort)
-    {        
-            // Verschlüsselung des PDF-Dokuments
+    {
+        // Verschlüsselung des PDF-Dokuments
         if (PdfDocument != null)
         {
             var securitySettings = PdfDocument.SecuritySettings;
@@ -205,7 +205,7 @@ public partial class PdfSeite
 
     internal void GetMailReceiver(Lehrers lehrers)
     {
-        foreach (var leh in lehrers)               
+        foreach (var leh in lehrers)
         {
             if (!string.IsNullOrEmpty(leh.Mail))
             {
@@ -245,9 +245,9 @@ public partial class PdfSeite
     }
 
     internal void Mailen(IConfiguration configuration)
-    {    
+    {
         foreach (var lehrer in MailReceiver)
-        {        
+        {
             var receiverEmail = lehrer.Mail;
             var subject = $"{configuration["Betreff"]}";
 
@@ -277,10 +277,11 @@ public partial class PdfSeite
                             // Speichern des PDF-Dokuments in den MemoryStream
                             PdfDocument.Save(memoryStream, false);
                             memoryStream.Position = 0; // Zurücksetzen des Streams auf den Anfang    
-                        } catch (Exception ex)
+                        }
+                        catch (Exception ex)
                         {
                             Console.WriteLine("Fehler beim Speichern des PDF-Dokuments. Ist das PDF-Dokument noch geöffnet?: " + ex.Message);
-                        }                        
+                        }
 
                         // Erstellen und Senden der E-Mail
                         var mail = new Mail();

@@ -41,14 +41,14 @@ public class Dateien : List<Datei>
 
     public Dateien(IConfiguration configuration)
     {
-        Meldung = new List<string>();        
+        Meldung = new List<string>();
     }
 
     public void GetInteressierendeDateienMitAllenEigenschaften(IConfiguration configuration)
     {
         configuration = Global.Konfig("PfadDownloads", Global.Modus.ReadSilent, configuration);
         configuration = Global.Konfig("PfadSchilddatenaustausch", Global.Modus.ReadSilent, configuration);
-    
+
         var schildhinweise = new string[]
         {
             "Exportieren Sie alle *.dat-Dateien aus SchILD, indem Sie den Pfad gehen:",
@@ -70,12 +70,12 @@ public class Dateien : List<Datei>
         {
             "Machen Sie einen Exceldruck von Lehrerstammdaten. 3 Spalten: 'Name,Nachname,istSollMittel':",
             $"1. Wenn Excel nicht installiert ist, dann in die Zwischenablage kopieren.",
-            $"2. Zwischenablage speichern: [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}/istSollMittel.csv[/]"            
+            $"2. Zwischenablage speichern: [bold {Global.GetColor(Global.ColorPfadInDateien)}]{configuration["PfadDownloads"]}/istSollMittel.csv[/]"
         };
 
         var sqliteHinweise = new string[]
         {
-            "Machen Sie ... xxx"            
+            "Machen Sie ... xxx"
         };
 
         Add(new Datei(
@@ -569,31 +569,31 @@ public class Dateien : List<Datei>
             d => d.FilternStudentgroupStudents(),
             "*.csv",
             "\t"
-        ));                    
+        ));
     }
 
     public List<dynamic>? GetMatchingList(IConfiguration configuration, string pattern, Students students = null, Klassen klassen = null, string[] spalten = null, DokuwikiZugriff dokuwikiZugriff = null, Lehrers lehrers = null)
     {
         Datei datei = this.FirstOrDefault(datei => !string.IsNullOrEmpty(datei.Dateiname) && datei.Dateiname.ToLower().StartsWith(pattern, StringComparison.CurrentCultureIgnoreCase));
 
-        if(pattern.ToLower() == "termine")
-            datei = this.FirstOrDefault(datei => !string.IsNullOrEmpty(datei.Dateiname) && datei.AbsoluterPfad.EndsWith("termine.csv".ToLower()));   
+        if (pattern.ToLower() == "termine")
+            datei = this.FirstOrDefault(datei => !string.IsNullOrEmpty(datei.Dateiname) && datei.AbsoluterPfad.EndsWith("termine.csv".ToLower()));
 
         // Spezielle Behandlung für "struct" Dateiendung: Struct-Dateien müssen erst gefüllt werden.
         // Die bereits angelegte Datei wird gefüllt
-        if(spalten != null && spalten.Length > 0)
+        if (spalten != null && spalten.Length > 0)
         {
             datei = this.FirstOrDefault(datei => !string.IsNullOrEmpty(datei.Dateiname) && datei.Dateiname.ToLower() == pattern.ToLower());
 
-            if(datei.Dateiname == "termine")
-             datei = this.FirstOrDefault(datei => !string.IsNullOrEmpty(datei.Dateiname) && datei.AbsoluterPfad.EndsWith("termine.struct".ToLower()));
-            
-             datei.GetSchema(pattern, spalten, configuration, dokuwikiZugriff, lehrers);            
-            
+            if (datei.Dateiname == "termine")
+                datei = this.FirstOrDefault(datei => !string.IsNullOrEmpty(datei.Dateiname) && datei.AbsoluterPfad.EndsWith("termine.struct".ToLower()));
+
+            datei.GetSchema(pattern, spalten, configuration, dokuwikiZugriff, lehrers);
+
             var ss = datei.AbsoluterPfad;
             datei.SchreibeZeilen("|");
             return null;
-        }        
+        }
 
         // Mögliche Meldungen werden ausgegeben, wenn die Datei nicht gefunden wurde oder veraltet ist.
 
@@ -615,7 +615,7 @@ public class Dateien : List<Datei>
         if (!datei.IstOptional && (students == null || students.Count == 0) && datei.IstVeraltet(configuration))
             return [];
         else if (datei.AbsoluterPfad.ToLower().Contains("schuelerbasisdaten") && (students == null || students.Count == 0))
-            return datei.ToList();        
+            return datei.ToList();
         else if (datei.IstOptional)
             return datei.ToList();
         else if (datei.AbsoluterPfad.ToLower().Contains("studentgroupstudents") && students != null && students.Count > 0)
@@ -623,7 +623,7 @@ public class Dateien : List<Datei>
         else if (students != null && students.Count > 0)
         {
             datei.Filtern(students, students.GetKlassen());
-            
+
             if (datei.AbsoluterPfad.Contains("GPU002") && !string.IsNullOrEmpty(configuration["NichtInteressierendeUnterrichtsgruppen"]))
             {
                 datei.FilternGpu002Unterrichtsgruppen(configuration);
@@ -634,7 +634,7 @@ public class Dateien : List<Datei>
             }
 
             return datei;
-        }            
+        }
         else if (datei.AbsoluterPfad.ToLower().Contains("lehrkraefte"))
             return datei.ToList();
 
@@ -660,26 +660,26 @@ public class Dateien : List<Datei>
             var dateiendung = dateinameNotwendig.Split(',')[1].Trim().ToLower();
             var dateiname = dateinameNotwendig.Split(',')[0];
 
-            if(dateiname.Contains("praktikanten"))
+            if (dateiname.Contains("praktikanten"))
             {
                 string aakkka = "";
             }
-                
+
             var datei = new Datei();
-            
-            if(dateiendung == "struct")
+
+            if (dateiendung == "struct")
             {
                 // Wenn die Datei noch nicht existiert, wird sie erstellt, aber nicht gefüllt. Sie wird später gefüllt, wenn die Spalten bekannt sind.
                 datei.Erstellen(Path.Combine(pfadDownloads, dateiname + "." + dateiendung));
                 datei.AbsoluterPfad = Path.Combine(pfadDownloads, dateiname + "." + dateiendung);
-                datei.Dateiname = dateiname;                
+                datei.Dateiname = dateiname;
             }
             else
             {
                 datei = this.First(datei => !string.IsNullOrEmpty(datei.Dateiname)
                     && !datei.Dateiname.ToLower().Contains("-kennwort")
                     && datei.Dateiname.ToLower().StartsWith(dateiname.ToLower(), StringComparison.CurrentCultureIgnoreCase)
-                    && datei.Endung.ToLower().Contains("*." + dateiendung.ToLower(), StringComparison.CurrentCultureIgnoreCase));                
+                    && datei.Endung.ToLower().Contains("*." + dateiendung.ToLower(), StringComparison.CurrentCultureIgnoreCase));
 
                 datei.IstOptional = dateinameNotwendig.Split(',').Length > 2 && dateinameNotwendig.Split(',')[2].ToLower().Contains("opt") ? true : false;
                 datei.Nur177659 = dateinameNotwendig.Split(',').Length > 2 && dateinameNotwendig.ToLower().Contains("177659") ? true : false;
@@ -725,7 +725,7 @@ public class Dateien : List<Datei>
                             datei.Fehlermeldung = $"Die Datei [bold {Global.GetColor(Global.ColorPfadInDateien)}]{absoluterPfad}[/] hat nur eine einzige Spalte. Das korrekte Trennzeichen ist: [{Global.GetColor(Global.ColorZahlen)}]'{datei.Delimiter}'[/].";
                             if (meldungAnzeigen && !datei.IstOptional)
                                 datei.FehlermeldungRendern(configuration);
-                            
+
                         }
 
                         if (datei.Erstelldatum.Date.AddDays(maxDateiAlter) < DateTime.Now.Date)
@@ -759,7 +759,7 @@ public class Dateien : List<Datei>
                         datei.FehlermeldungRendern(configuration);
                 }
             }
-            notwendige.Add(datei);            
+            notwendige.Add(datei);
         }
 
         return notwendige;
@@ -791,7 +791,7 @@ public class Dateien : List<Datei>
             {
                 foreach (var datei in this)
                 {
-                    if(datei.Dateiname.Contains("ulgemein"))
+                    if (datei.Dateiname.Contains("ulgemein"))
                     {
                         string a = "";
                     }
@@ -859,7 +859,7 @@ public class Dateien : List<Datei>
     public List<string> GetDateienImPfad(IConfiguration configuration)
     {
         string pfad = configuration["PfadDownloads"];
-        
+
         // Sicherstellen, dass der Pfad existiert, um Exceptions zu vermeiden
         if (string.IsNullOrEmpty(pfad) || !Directory.Exists(pfad))
             return new List<string>();
@@ -868,13 +868,13 @@ public class Dateien : List<Datei>
         var erlaubteEndungen = new[] { ".csv", ".txt", ".dat" };
 
         return Directory.GetFiles(pfad, "*", SearchOption.AllDirectories) // "AllDirectories" sucht in Unterordnern
-            .Where(f => 
+            .Where(f =>
             {
                 string ext = Path.GetExtension(f);
                 string name = Path.GetFileNameWithoutExtension(f);
 
                 // Prüfung auf Endung ODER ob der Name mit "openperiod" beginnt
-                return erlaubteEndungen.Contains(ext, StringComparer.OrdinalIgnoreCase) || 
+                return erlaubteEndungen.Contains(ext, StringComparer.OrdinalIgnoreCase) ||
                     name.StartsWith("openperiod", StringComparison.OrdinalIgnoreCase);
             })
             .OrderBy(f => File.GetLastWriteTime(f)) // Sortierung nach letztem Schreibzugriff
@@ -989,7 +989,7 @@ public class Dateien : List<Datei>
     public void FehlermeldungRendern(IConfiguration configuration)
     {
         foreach (var datei in this.Where(q => !string.IsNullOrEmpty(q.Fehlermeldung)))
-        {            
+        {
             datei.FehlermeldungRendern(configuration);
         }
     }
@@ -1081,11 +1081,11 @@ public class Dateien : List<Datei>
     internal void OrdnerÖffnen()
     {
         var bereitsGeöffnet = false;
-        
+
         foreach (var datei in this)
         {
             try
-            {   
+            {
                 // OrdnerOeffnen wird nur einmal aufgerufen, sobald die erste Datei, die count > 0 hat, erstellt wird.
                 if (datei.Count > 0 && !bereitsGeöffnet)
                 {
@@ -1105,7 +1105,7 @@ public class Dateien : List<Datei>
     {
         foreach (var datei in this)
         {
-            if(datei.AbsoluterPfad.ToLower().Contains("littera"))
+            if (datei.AbsoluterPfad.ToLower().Contains("littera"))
                 datei.Verschieben(configuration["PfadLitteraImport"]);
         }
     }
@@ -1116,7 +1116,7 @@ public class Dateien : List<Datei>
 
         foreach (var datei in this)
         {
-            if(datei.AbsoluterPfad.ToLower().Contains("netman"))
+            if (datei.AbsoluterPfad.ToLower().Contains("netman"))
                 datei.ZippenMitKennwort(configuration);
         }
     }
