@@ -447,7 +447,7 @@ public static class MenueHelper
      new Menüeintrag(
       configuration,
       $"Schulgemeinschaft:Mo:Schulgemeinschaft & Untisanrechnungen abgleichen",
-      quelldateien.Notwendige(configuration, ["istSollMittel,csv,optional", "sqliteSchulgemeinschaft,csv", "schulgemeinschaft,struct", "lehrkraefte,dat", "faecher,dat", "GPU004,txt", "GPU002,txt", "klassen,dat", "GPU003,txt", "gruppen,struct", "schuelervermerke,dat", "schuelerzusatzdaten,dat", "GPU006,txt"]),
+      quelldateien.Notwendige(configuration, ["istSollMittel,csv,optional", "schulgemeinschaft,struct", "lehrkraefte,dat", "faecher,dat", "GPU004,txt", "GPU002,txt", "klassen,dat", "GPU003,txt", "gruppen,struct", "schuelervermerke,dat", "schuelerzusatzdaten,dat", "GPU006,txt"]),
       students,
       klassen,
       [
@@ -470,6 +470,7 @@ public static class MenueHelper
         configuration, Path.Combine(pfadDownloads ?? "", "schulgemeinschaft.struct"), lehrers,
         [ // Aus diesen Links in Untis-Anrechnungen sollen Seiten in Wiki werden. Rolle: Vorsitz oder Leitung  
           ":schulgemeinschaft:krise:start",
+          "talentfoerderung",
           "schulgemeinschaft:lehrerrat",
           ":schulgemeinschaft:referendar_innen",
           ":schulgemeinschaft:schulleitung:erweiterte:start"
