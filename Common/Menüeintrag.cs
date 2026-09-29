@@ -4377,7 +4377,7 @@ public class Menüeintrag
 
     public List<dynamic> GetGruppenByWikiLink(
         IConfiguration configuration,
-        Lehrers lehrers,
+        List<dynamic> lehrers,
         Anrechnungen anrechnungen,
         Students students,
         string[] ausDiesenUntisWikiLinksWerdenSeitenInWiki
@@ -5288,12 +5288,9 @@ public class Menüeintrag
         var gpu004 = Quelldateien.GetMatchingList(configuration, "gpu004", IStudents, Klassen);
         if (gpu004 == null || !gpu004.Any()) return;
 
-        // Ist-Stand 
-        var sqliteSchulgemeinschaft = Quelldateien.GetMatchingList(configuration, "sqliteSchulgemeinschaft", IStudents, Klassen);
-        if (sqliteSchulgemeinschaft == null || !sqliteSchulgemeinschaft.Any()) return;
-
-
-
+        // da stecken auch die Hausis drin usw.
+        var lehrkraefteDat = Quelldateien.GetMatchingList(configuration, "lehrkraefte", IStudents, Klassen);
+        if (lehrkraefteDat == null || !lehrkraefteDat.Any()) return;
 
         // Die Datei "istSollMittel.csv" enthält die Spalte "Ist-Soll Mittel"
         var istSollMittel = Quelldateien.GetMatchingList(configuration, "istSollMittel", IStudents, Klassen);
@@ -5330,12 +5327,6 @@ public class Menüeintrag
             dynamic record = new ExpandoObject();
             record.Page = "schulgemeinschaft:" + l.Kürzel.ToLower();
             record.Kürzel = l.Kürzel;
-
-            if (l.Kürzel == "BM")
-            {
-                var aa = "";
-            }
-
             record.Namen = "schulgemeinschaft:" + l.Kürzel.ToLower();
             record.TitelVornameNachname = (String.IsNullOrEmpty(l.Titel) ? $"{l.Vorname} {l.Nachname}" : $"{l.Titel} {l.Vorname} {l.Nachname}");
             record.Mail = l.Mail;
@@ -5376,8 +5367,8 @@ public class Menüeintrag
 
 
 
-            //if (l.Kürzel == "GU" ||l.Kürzel == "HAR" || l.Kürzel == "HR" || l.Kürzel == "WZ" || l.Kürzel == "MOR" || l.Kürzel == "GV" || l.Kürzel == "GL" || l.Kürzel == "STR" || l.Kürzel == "BAU" || l.Kürzel == "KU" || l.Kürzel == "PLA" || l.Kürzel == "KS" || l.Kürzel == "BEH"|| l.Kürzel == "BM")
-            zieldatei.Add(record);
+            //if (l.Kürzel == "ORT")
+              zieldatei.Add(record);
         }
 
         //
@@ -5385,14 +5376,14 @@ public class Menüeintrag
         //
 
         var anrechnungen = this.Anrechnungen;
-        zieldatei.AddRange(GetGruppenAusGpu(configuration, lehrersSoll, this.Anrechnungen, this.Students));
+        //zieldatei.AddRange(GetGruppenAusGpu(configuration, lehrersSoll, this.Anrechnungen, this.Students));
 
 
         //
         // Zu 3. Gruppen aus WikiLikns
         //
 
-        zieldatei.AddRange(GetGruppenByWikiLink(configuration, lehrersSoll, this.Anrechnungen, this.Students, ausDiesenUntisWikiLinksWerdenSeitenInWiki));
+        zieldatei.AddRange(GetGruppenByWikiLink(configuration, lehrkraefteDat, this.Anrechnungen, this.Students, ausDiesenUntisWikiLinksWerdenSeitenInWiki));
 
 
 
@@ -5402,7 +5393,7 @@ public class Menüeintrag
         // Zu 3. Anrechnungen aus Untis, die zu Gruppen werden
         //
 
-        zieldatei.AddRange(GetAnrechnungen(configuration, lehrersSoll, this.Anrechnungen));
+        //zieldatei.AddRange(GetAnrechnungen(configuration, lehrersSoll, this.Anrechnungen));
 
         foreach (var aktion in zieldatei.Funktionen)
             aktion(zieldatei);

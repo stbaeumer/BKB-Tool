@@ -459,7 +459,7 @@ public static class MenueHelper
        $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise zum Text in Anrechnungen:[/]",
        $"[{Global.GetColor(Global.ColorHinweise)}]#1[/] Das Beförderungsamt wird ausgelesen. Bsp.: A14",
        $"[{Global.GetColor(Global.ColorHinweise)}]#2[/] Hinweise werden aus eckigen Klammern ausgelesen. Bsp.: Fortbildung 2024",
-       $"[{Global.GetColor(Global.ColorHinweise)}]#3[/] Kategorien werden aus geschweiften Klammern ausgelesen. Bsp.: Technik, Beratung",
+       $"[{Global.GetColor(Global.ColorHinweise)}]#3[/] Kategorien werden aus geschweiften Klammern ausgelesen. Bsp.: Technik, Verwaltung",
        $"[{Global.GetColor(Global.ColorHinweise)}]#4[/] Bildungsgänge werden daran identifiziert, dass im Text [aqua]Bildungsgangleitung[/] steht und die Beschreibung mit [aqua]bildunggaenge:[/] beginnt, ",
       ],
       m =>
@@ -469,11 +469,39 @@ public static class MenueHelper
        m.Schulgemeinschaft(
         configuration, Path.Combine(pfadDownloads ?? "", "schulgemeinschaft.struct"), lehrers,
         [ // Aus diesen Links in Untis-Anrechnungen sollen Seiten in Wiki werden. Rolle: Vorsitz oder Leitung  
-          ":schulgemeinschaft:krise:start",
-          "talentfoerderung",
+          "schulgemeinschaft:krise:start",
+          "schulgemeinschaft:talentfoerderung",
           "schulgemeinschaft:lehrerrat",
-          ":schulgemeinschaft:referendar_innen",
-          ":schulgemeinschaft:schulleitung:erweiterte:start"
+          "schulgemeinschaft:referendar_innen",
+          "schulgemeinschaft:schulleitung:erweiterte:start",
+          "schulgemeinschaft:schulleitung",
+          "schulgemeinschaft:beratungsteam",
+          "schulgemeinschaft:berufliche_orientierung",
+          "schulgemeinschaft:webuntisteam",
+          "schulgemeinschaft:vertretungsplanung:start",
+          "schulgemeinschaft:stundenplanung",
+          "schulgemeinschaft:technik",
+          "schulgemeinschaft:statistik",
+          "schulgemeinschaft:buecherteam",
+          "schulgemeinschaft:hausmeister",
+          "schulgemeinschaft:sekretariat",
+          "schulgemeinschaft:zeugnisschreibung:start",
+          "schulgemeinschaft:sor",
+          "schulgemeinschaft:erasmus_projekte",
+          "schulgemeinschaft:niederlande_projekte",
+          "schulgemeinschaft:euregio_projekte",
+          "schulgemeinschaft:auslandspraktikum",
+          "schulgemeinschaft:fremdsprachenkorrespondent",
+          "schulgemeinschaft:digitalisierung",
+          "schulgemeinschaft:veranstaltungen",
+          "schulgemeinschaft:festausschuss",
+          "schulgemeinschaft:schulkompass",
+          "schulgemeinschaft:infotagvollzeit",
+          "schulgemeinschaft:webseite",
+          "schulgemeinschaft:instagram",
+          "schulgemeinschaft:pressearbeit",
+          "schulgemeinschaft:oearbeit",
+          "schulgemeinschaft:foerderverein"
         ],
         [
          datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.Vergleichen),
@@ -481,7 +509,7 @@ public static class MenueHelper
          datei => datei.OeffneWebseite("https://bkb.wiki/schulgemeinschaft:start")
         ],
         ["Link"],
-        ["Page", "Namen", "Art", "Amt", "BGKuerzel", "Anlage", "TZ/VZ", "DJP1", "DJP2", "DJP3", "DJP4", "boyd", "perspektive-boyd", "Aufnahmevoraussetzungen", "Bildungsziele", "Abschluss", "Versetzung", "Klausurplanung", "Heterogenität", "Praktikum", "BO-Curriculum", "Link zur Homepage", "Mobilnummer", "Telefonnummer", "Festnetznummer", "StrasseHausnummer", "PlzOrt", "TitelVornameNachname", "BGSeite"],
+        ["Page", "Namen", "Amt", "BGKuerzel", "Anlage", "TZ/VZ", "DJP1", "DJP2", "DJP3", "DJP4", "boyd", "perspektive-boyd", "Aufnahmevoraussetzungen", "Bildungsziele", "Abschluss", "Versetzung", "Klausurplanung", "Heterogenität", "Praktikum", "BO-Curriculum", "Link zur Homepage", "Mobilnummer", "Telefonnummer", "Festnetznummer", "StrasseHausnummer", "PlzOrt", "TitelVornameNachname", "BGSeite"],
         "|", '\0', new UTF8Encoding(true), false); 
         /*m.GetUntisAnrechnungen(
         Path.Combine(pfadDownloads ?? "untisanrechnungen.struct"),

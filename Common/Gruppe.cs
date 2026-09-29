@@ -1,4 +1,5 @@
 using System.Dynamic;
+using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
 
 namespace Common;
@@ -414,8 +415,8 @@ public class Gruppe
     }
 
     public string GetByWikilink(Anrechnungen anrechnungen,
-        Lehrers lehrers,
-        string wikiLink)
+    List<dynamic> lehrers,
+    string wikiLink)
     {
         dynamic record = new ExpandoObject();
         record.Page = wikiLink;
@@ -428,45 +429,93 @@ public class Gruppe
         var members = anrechnungen.Where(x => x.Beschr.ToLower().Contains(wikiLink.ToLower())).ToList();
 
         var vorsitzLeitung = anrechnungen.Where(x =>
-        x.Beschr.ToLower().Contains(wikiLink.ToLower()) &&
-        !string.IsNullOrEmpty(x.Rolle) &&
-        (x.Rolle.Contains("orsitz") || x.Rolle.Contains("eitung"))
+            x.Beschr.ToLower().Contains(wikiLink.ToLower()) &&
+            !string.IsNullOrEmpty(x.Rolle) &&
+            (x.Rolle.Contains("orsitz") || x.Rolle.Contains("eitung"))
         ).FirstOrDefault();
 
         foreach (var member in members)
         {
-            var leh = lehrers.FirstOrDefault(l => l.Kürzel == member.LehrerKuerzel);
+            // Lehrer über den CSV-Header "InternKrz" vergleichen
+            var leh = lehrers.FirstOrDefault(l =>
+            {
+                var dict = (IDictionary<string, object>)l;
+                return dict.TryGetValue("InternKrz", out var kuerzel) &&
+                       kuerzel?.ToString().Equals(member.LehrerKuerzel, StringComparison.OrdinalIgnoreCase) == true;
+            });
 
             if (leh == null) continue; // Wenn kein Lehrer gefunden, nächsten Eintrag ansehen
 
-            if (!lehrerKürzel.Any(x => x.Contains(leh.Kürzel)))
+            var lehDict = (IDictionary<string, object>)leh;
+
+            // Werte aus den CSV-Spalten auslesen
+            string kuerzelStr = lehDict.TryGetValue("InternKrz", out var k) ? k?.ToString() ?? "" : "";
+            string vorname = lehDict.TryGetValue("Vorname", out var v) ? v?.ToString() ?? "" : "";
+            string nachname = lehDict.TryGetValue("Nachname", out var n) ? n?.ToString() ?? "" : "";
+            string titel = lehDict.TryGetValue("Titel", out var t) ? t?.ToString() ?? "" : "";
+
+            // Dienstliche E-Mail bevorzugen, sonst allgemeine E-Mail
+            string mail = lehDict.TryGetValue("dienstl. E-Mail", out var dm) && !string.IsNullOrEmpty(dm?.ToString())
+                ? dm.ToString()
+                : (lehDict.TryGetValue("E-Mail", out var m) ? m?.ToString() ?? "" : "");
+
+            if (!string.IsNullOrEmpty(kuerzelStr) && !lehrerKürzel.Contains(kuerzelStr))
             {
-                lehrerKürzel.Add(leh.Kürzel);
+                lehrerKürzel.Add(kuerzelStr);
             }
 
-            if (!lehrerMail.Any(x => x.Contains(leh.Mail)))
+            if (!string.IsNullOrEmpty(mail) && !lehrerMail.Contains(mail))
             {
-                lehrerMail.Add(leh.Mail);
+                lehrerMail.Add(mail);
             }
 
-            //if (!lehrerName.Any(x => x.Contains((leh.Titel == "" ? "" : leh.Titel + " ") + leh.Vorname + " " + leh.Nachname)))
-            if (!lehrerName.Any(x => x.Contains(":schulgemeinschaft:" + leh.Kürzel.ToLower())))
+            string wikiPageLink = ":schulgemeinschaft:" + kuerzelStr.ToLower();
+            if (!lehrerName.Contains(wikiPageLink))
             {
-                record.TitelVornameNachname = (String.IsNullOrEmpty(leh.Titel) ? $"{leh.Vorname} {leh.Nachname}" : $"{leh.Titel} {leh.Vorname} {leh.Nachname}");
-                //lehrerName.Add((leh.Titel == "" ? "" : leh.Titel + " ") + leh.Vorname + " " + leh.Nachname);
-                lehrerName.Add(":schulgemeinschaft:" + leh.Kürzel.ToLower());
+                record.TitelVornameNachname = string.IsNullOrEmpty(titel)
+                    ? $"{vorname} {nachname}"
+                    : $"{titel} {vorname} {nachname}";
+
+                lehrerName.Add(wikiPageLink);
             }
         }
 
         record.Namen = string.Join(", ", lehrerName.OrderBy(name => name));
         record.Mail = string.Join("; ", lehrerMail.OrderBy(name => name));
         record.Kürzel = string.Join(", ", lehrerKürzel.OrderBy(name => name));
+
         if (vorsitzLeitung != null && !string.IsNullOrEmpty(vorsitzLeitung.Rolle))
         {
             record.VorsitzLeitung = "schulgemeinschaft:" + vorsitzLeitung.LehrerKuerzel.ToLower();
         }
-        record.Art = "schulgemeinschaft:gruppen";
+
+        if(wikiLink.Contains("vertretungspl"))
+        {
+            string a = "";
+        }
+
+        var regex = new Regex(@"\{([^}]+)\}");
+
+        List<string> art = anrechnungen
+            .Where(x => !string.IsNullOrEmpty(x.Text) &&
+                        x.Beschr.ToLower().Contains(wikiLink.ToLower()))
+            .SelectMany(x => regex.Matches(x.Text).Select(m => m.Groups[1].Value))
+            .Distinct()
+            .ToList();
+
+        var artString = "schulgemeinschaft:gruppen,";
+
+        if(art.Count > 0)
+        {
+            foreach (var a in art)
+            {
+                artString += "schulgemeinschaft:" + a.ToLower() + ",";
+            }
+        }
+
+        record.Art = artString.TrimEnd(',');
         this.Record = record;
+
         if (vorsitzLeitung != null && !string.IsNullOrEmpty(vorsitzLeitung.Rolle))
             return vorsitzLeitung.LehrerKuerzel.ToUpper();
         else

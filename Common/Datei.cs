@@ -1913,6 +1913,8 @@ public class Datei : List<dynamic>
                 AnhandDieserSchlüsselAttributeWirdVerglichen);
 
         var zulöschendeSeiten = new List<string>();
+        // 1. Nur die Daten-Analyse / den Vergleich im Spinner laufen lassen (keine Prompts hier!)
+        List<Action> auszufuehrendeAktionen = new();
 
         AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start($" {modusString} ...", ctx =>
         {
@@ -1980,8 +1982,7 @@ public class Datei : List<dynamic>
                                 string aa = "";
                             }
                             var schemaName = Path.GetFileNameWithoutExtension(AbsoluterPfad);
-                            InsertSchemaData(neueDict, schemaName, zielSeite);
-                            Console.WriteLine($"INSERT: {anhandDieserSchlüsselAttributeWirdVerglichenString} -> {schemaName} ... durchgeführt.");
+                            auszufuehrendeAktionen.Add(() => InsertSchemaData(neueDict, schemaName, zielSeite));
                         }
                     }
                     continue;
@@ -2056,8 +2057,7 @@ public class Datei : List<dynamic>
                 {
                     string zielSeite = neueDict["Page"]?.ToString().ToLower();//.Trim().Split(':').Where(s => !s.Equals("start", StringComparison.OrdinalIgnoreCase)).LastOrDefault();    
                     var schemaName = Path.GetFileNameWithoutExtension(AbsoluterPfad);
-                    UpdateSchemaData(zielSeite, schemaName, alleWerteFuerDieseZeile, WikiZugriff);
-                    Console.WriteLine($"UPDATE: {neueDict["Page"]?.ToString().ToLower()} ... durchgeführt.");
+                    auszufuehrendeAktionen.Add(() => UpdateSchemaData(zielSeite, schemaName, alleWerteFuerDieseZeile, WikiZugriff));
                 }
 
                 neueDatei.Add(neueRec);
@@ -2118,6 +2118,11 @@ public class Datei : List<dynamic>
                 table.AddRow(new Text("keine Änderungen, nichts anzuzeigen"), new Text("..."), new Text("..."), new Text("..."));
         });
 
+        foreach (var aktion in auszufuehrendeAktionen)
+        {
+            aktion();
+        }
+
         if (modus == Global.Modus.SchemaUpdaten && zulöschendeSeiten.Count > 0)
         {
             AnsiConsole.MarkupLine($"[bold yellow]Es stehen {zulöschendeSeiten.Count} Seiten zum Löschen an.[/]\n");
@@ -2152,7 +2157,6 @@ public class Datei : List<dynamic>
                                     DeleteSchemaData(schemaName, seite, WikiZugriff);
                                 });
 
-                            AnsiConsole.MarkupLine($"[bold red]DELETE:[/] [grey]{Markup.Escape(seite)}[/] wurde gelöscht.");
                             aktionAbgeschlossen = true;
                             break;
 
@@ -2200,10 +2204,43 @@ public class Datei : List<dynamic>
 
     internal void InsertSchemaData(IDictionary<string, object> neueDict, string schemaName, string zielSeite = "")
     {
+        // 1. Interaktive Abfrageschleife in Grün
+        bool ausfuehren = false;
+
+        while (true)
+        {
+            AnsiConsole.Markup($"[green]Seite {zielSeite}: INSERT durchführen? [[ENTER=Ja, W=Webseite, AnyKey=Nein]][/] ");
+            ConsoleKeyInfo keyInfo = Console.ReadKey(true);
+
+            if (keyInfo.Key == ConsoleKey.W)
+            {
+                AnsiConsole.MarkupLine("[grey](Webseite wird geöffnet...)[/]");
+                OeffneWebseite($"https://bkb.wiki/{zielSeite}");
+                continue; // Erneut nach der Webseite-Anzeige fragen
+            }
+
+            if (keyInfo.Key == ConsoleKey.Enter)
+            {
+                AnsiConsole.MarkupLine("[green]Ja[/]");
+                ausfuehren = true;
+                break;
+            }
+
+            // Jeder andere Tastendruck überspringt
+            AnsiConsole.MarkupLine("[grey]Nein (übersprungen)[/]");
+            ausfuehren = false;
+            break;
+        }
+
+        if (!ausfuehren)
+        {
+            System.Diagnostics.Debug.WriteLine($"[Struct-Insert] Übersprungen für {zielSeite}");
+            return;
+        }
+
         try
         {
-            // 1. Inhalt der template.txt über die API abrufen
-            // DokuWiki-Pfad syntax nutzt Doppelpunkte statt Slashes
+            // 2. Inhalt der template.txt über die API abrufen
             string templateInhalt = "";
             try
             {
@@ -2215,27 +2252,35 @@ public class Datei : List<dynamic>
                 templateInhalt = $"====== {zielSeite.Replace(schemaName + ":", "").ToUpper()} ======\n";
             }
 
-            // 2. Platzhalter im Template ersetzen (falls vorhanden, z.B. @PAGE@ oder @USER@)
-            // DokuWiki ersetzt diese normalerweise automatisch, per API müssen wir das selbst tun:
+            // 3. Platzhalter im Template ersetzen
+            if (neueDict.TryGetValue("Art", out var artObj) && artObj != null)
+            {
+                string artStr = artObj.ToString().ToLower();
 
-            if (neueDict["Art"].ToString().ToLower() == "schulgemeinschaft:kollegium")
-            {
-                templateInhalt = templateInhalt.Replace("@NAME@", neueDict["TitelVornameNachname"].ToString());
-                templateInhalt = templateInhalt.Replace("@PAGE@", neueDict["Namen"].ToString());
-                templateInhalt = templateInhalt.Replace("@ID@", zielSeite);
-            }
-            if (neueDict["Art"].ToString().ToLower().Contains("klassen"))
-            {
-                templateInhalt = templateInhalt.Replace("@PAGE@", neueDict["Klasse"].ToString());
-                templateInhalt = templateInhalt.Replace("@NAME@", neueDict["Klasse"].ToString());
-                templateInhalt = templateInhalt.Replace("@ID@", zielSeite);
-                templateInhalt = templateInhalt.Replace("#!schulgemeinschaft", "#!klassen");
-
-            }
-            if (neueDict["Art"].ToString().ToLower() == "termine")
-            {
-                templateInhalt = templateInhalt.Replace("@PAGE@", neueDict["Betreff"].ToString());
-                templateInhalt = templateInhalt.Replace("@ID@", zielSeite);
+                if (artStr == "schulgemeinschaft:kollegium")
+                {
+                    templateInhalt = templateInhalt.Replace("@NAME@", neueDict["TitelVornameNachname"]?.ToString() ?? "");
+                    templateInhalt = templateInhalt.Replace("@PAGE@", neueDict["Namen"]?.ToString() ?? "");
+                    templateInhalt = templateInhalt.Replace("@ID@", zielSeite);
+                }
+                else if (artStr.Contains("klassen"))
+                {
+                    templateInhalt = templateInhalt.Replace("@PAGE@", neueDict["Klasse"]?.ToString() ?? "");
+                    templateInhalt = templateInhalt.Replace("@NAME@", neueDict["Klasse"]?.ToString() ?? "");
+                    templateInhalt = templateInhalt.Replace("@ID@", zielSeite);
+                    templateInhalt = templateInhalt.Replace("#!schulgemeinschaft", "#!klassen");
+                }
+                else if (artStr == "termine")
+                {
+                    templateInhalt = templateInhalt.Replace("@PAGE@", neueDict["Betreff"]?.ToString() ?? "");
+                    templateInhalt = templateInhalt.Replace("@ID@", zielSeite);
+                }
+                else
+                {
+                    templateInhalt = templateInhalt.Replace("@PAGE@", zielSeite.Replace(schemaName + ":", ""));
+                    templateInhalt = templateInhalt.Replace("@NAME@", zielSeite.Replace(schemaName + ":", ""));
+                    templateInhalt = templateInhalt.Replace("@ID@", zielSeite);
+                }
             }
             else
             {
@@ -2244,33 +2289,37 @@ public class Datei : List<dynamic>
                 templateInhalt = templateInhalt.Replace("@ID@", zielSeite);
             }
 
-
-            // 3. Seite mit dem Template-Inhalt anlegen
+            // 4. Seite mit dem Template-Inhalt anlegen
             WikiZugriff.Proxy.PutPage(zielSeite, templateInhalt, new XmlRpcStruct());
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"Hinweis beim Erstellen der Template-Seite: {ex.Message}");
-            throw new Exception($"Fehler beim Erstellen der Template-Seite '{zielSeite}': {ex.Message}");
-        }
-        // ---------------------------------------------------------------------
 
-        var innerStruct = new XmlRpcStruct();
-        foreach (var kvp in neueDict)
-        {
-            innerStruct[kvp.Key] = kvp.Value?.ToString() ?? "";
-        }
+            // 5. Schema-Daten schreiben
+            var innerStruct = new XmlRpcStruct();
+            foreach (var kvp in neueDict)
+            {
+                innerStruct[kvp.Key] = kvp.Value?.ToString() ?? "";
+            }
 
-        var structPayload = new XmlRpcStruct
+            var structPayload = new XmlRpcStruct
         {
             { schemaName, innerStruct }
         };
 
-        bool erfolg = WikiZugriff.Proxy.SaveStructData(zielSeite, structPayload, "Lehrer via API hinzugefügt");
+            bool erfolg = WikiZugriff.Proxy.SaveStructData(zielSeite, structPayload, "Lehrer via API hinzugefügt");
 
-        if (!erfolg)
+            if (!erfolg)
+            {
+                AnsiConsole.MarkupLine($"[red]✗[/] Struct-Insert für [green]{zielSeite}[/] fehlgeschlagen.");
+                throw new Exception($"Das Einfügen in das Schema '{schemaName}' ist fehlgeschlagen.");
+            }
+
+            AnsiConsole.MarkupLine($"[green]✓[/] Struct-Insert für [green]{zielSeite}[/] erfolgreich.");
+            System.Diagnostics.Debug.WriteLine($"[Struct-Insert] Erfolg für {zielSeite}");
+        }
+        catch (Exception ex)
         {
-            throw new Exception($"Das Einfügen in das Schema '{schemaName}' ist fehlgeschlagen.");
+            AnsiConsole.MarkupLine($"[bold red]Fehler beim Erstellen der Template-Seite '{zielSeite}':[/] {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"Hinweis beim Erstellen der Template-Seite: {ex.Message}");
+            throw new Exception($"Fehler beim Erstellen der Template-Seite '{zielSeite}': {ex.Message}", ex);
         }
     }
 
@@ -2610,6 +2659,29 @@ public class Datei : List<dynamic>
 
                 // In der Schulform wird der Link ermittelt
 
+                if (neueSpalte == "Art")
+                {
+                    var link = ConvertStructValueToString(zeile, "schulgemeinschaft.Art") ?? "";
+
+                    // 1. Umlaute & Sonderzeichen auflösen
+                    link = link.Replace("ä", "ae")
+                               .Replace("ö", "oe")
+                               .Replace("ü", "ue")
+                               .Replace("Ä", "ae")
+                               .Replace("Ö", "oe")
+                               .Replace("Ü", "ue")
+                               .Replace("ß", "ss")
+                               .Replace(" ", "_"); // Optional: Leerzeichen durch Unterstriche oder Bindestriche ersetzen
+
+                    // 2. In Kleinbuchstaben umwandeln
+                    link = link.ToLowerInvariant();
+
+                    // 3. Nur das erste Wort bei Gruppen & Mitgliedern
+                    link = link.Split(' ')[0].Split('_')[0];
+
+                    if (!string.IsNullOrEmpty(link))
+                        wert = "schulgemeinschaft:" + link;
+                }
                 if (neueSpalte == "Schulform")
                 {
                     var link = ConvertStructValueToString(zeile, "schulgemeinschaft.Link");
@@ -2652,12 +2724,6 @@ public class Datei : List<dynamic>
                     }
 
                 }
-
-
-
-
-
-
                 datenZeile[neueSpalte] = wert;
 
             }
@@ -2711,44 +2777,86 @@ public class Datei : List<dynamic>
     }
 
 
+
     internal void UpdateSchemaData(string zielSeite, string schemaName, Dictionary<string, object> neueWerte, DokuwikiZugriff wikiZugriff)
     {
         try
         {
-            // 1. Die eigentlichen Spaltenwerte sammeln
+            // 1. Spaltenwerte sammeln
             XmlRpcStruct innerStruct = new XmlRpcStruct();
             foreach (var eintrag in neueWerte)
             {
                 string wertString = eintrag.Value?.ToString() ?? "";
                 string bereinigterSpaltenName = eintrag.Key.Replace(schemaName + ".", "");
-
                 innerStruct.Add(bereinigterSpaltenName, wertString);
             }
 
-            // 2. Die Payload verschachteln
             XmlRpcStruct structPayload = new XmlRpcStruct
         {
             { schemaName, innerStruct }
         };
 
-            // 3. API-Aufruf ausführen
-            // Option A: Leere Summary übergeben (""), damit keine neue Version erzeugt wird
-            // Option B: minorEdit-Flag nutzen (sofern vom Proxy-Interface unterstützt)
+            // 2. Interaktive Abfrageschleife in Orange
+            bool ausfuehren = false;
 
-            string summary = ""; // Leere Summary verhindert Versionseintrag
-            bool erfolg = wikiZugriff.Proxy.SaveStructData(zielSeite, structPayload, summary);
+            while (true)
+            {
+                AnsiConsole.Markup($"[darkorange]Seite {zielSeite}: UPDATE durchführen? [[ENTER=Ja, W=Webseite, AnyKey=Nein]][/] ");
+                ConsoleKeyInfo keyInfo = Console.ReadKey(true);
 
-            System.Diagnostics.Debug.WriteLine($"[Struct-Update] Erfolg für {zielSeite}: {erfolg}");
+                if (keyInfo.Key == ConsoleKey.W)
+                {
+                    AnsiConsole.MarkupLine("[grey](Webseite wird geöffnet...)[/]");
+                    OeffneWebseite($"https://bkb.wiki/{zielSeite}");
+                    continue; // Erneut fragen
+                }
+
+                if (keyInfo.Key == ConsoleKey.Enter)
+                {
+                    AnsiConsole.MarkupLine("[green]Ja[/]");
+                    ausfuehren = true;
+                    break;
+                }
+
+                // Jeder andere Tastendruck überspringt
+                AnsiConsole.MarkupLine("[grey]Nein (übersprungen)[/]");
+                ausfuehren = false;
+                break;
+            }
+
+            // 3. Ausführung
+            if (ausfuehren)
+            {
+                string summary = "";
+                bool erfolg = wikiZugriff.Proxy.SaveStructData(zielSeite, structPayload, summary);
+
+                if (erfolg)
+                {
+                    AnsiConsole.MarkupLine($"[green]✓[/] Struct-Update für [darkorange]{zielSeite}[/] erfolgreich.");
+                }
+                else
+                {
+                    AnsiConsole.MarkupLine($"[red]✗[/] Struct-Update für [darkorange]{zielSeite}[/] fehlgeschlagen.");
+                }
+
+                System.Diagnostics.Debug.WriteLine($"[Struct-Update] Erfolg für {zielSeite}: {erfolg}");
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"[Struct-Update] Übersprungen für {zielSeite}");
+            }
         }
         catch (XmlRpcFaultException fex)
         {
-            System.Diagnostics.Debug.WriteLine("=== XML-RPC FEHLER (VOM SERVER) ===");
+            AnsiConsole.MarkupLine($"[bold red]=== XML-RPC FEHLER (VOM SERVER) ===[/]");
+            AnsiConsole.MarkupLine($"Code: {fex.FaultCode} | Meldung: {fex.FaultString}");
             System.Diagnostics.Debug.WriteLine($"Code: {fex.FaultCode} | Meldung: {fex.FaultString}");
             throw;
         }
         catch (XmlRpcIllFormedXmlException xmlEx)
         {
-            System.Diagnostics.Debug.WriteLine("=== UNGÜLTIGE ANTWORT VOM SERVER ===");
+            AnsiConsole.MarkupLine($"[bold red]=== UNGÜLTIGE ANTWORT VOM SERVER ===[/]");
+            AnsiConsole.MarkupLine($"Meldung: {xmlEx.Message}");
             System.Diagnostics.Debug.WriteLine($"Meldung: {xmlEx.Message}");
             if (xmlEx.InnerException != null)
             {
@@ -2758,27 +2866,78 @@ public class Datei : List<dynamic>
         }
         catch (Exception ex)
         {
+            AnsiConsole.MarkupLine($"[bold red]Allgemeiner Fehler:[/] {ex.Message}");
             System.Diagnostics.Debug.WriteLine($"Allgemeiner Fehler: {ex.Message}");
             throw;
         }
     }
 
+
+
     internal void DeleteSchemaData(string schemaName, string zielSeite, DokuwikiZugriff wikiZugriff)
     {
         try
         {
-            var erfolg = wikiZugriff.Proxy.PutPage(zielSeite, String.Empty, new XmlRpcStruct { { "sum", "Seite gelöscht via API" } });
-            System.Diagnostics.Debug.WriteLine($"[Struct-Delete] Erfolg für {zielSeite}: {erfolg}");
+            // 1. Interaktive Abfrageschleife in Rot
+            bool ausfuehren = false;
+
+            while (true)
+            {
+                AnsiConsole.Markup($"[red]Seite {zielSeite}: DELETE durchführen? [[ENTER=Ja, W=Webseite, AnyKey=Nein]][/] ");
+                ConsoleKeyInfo keyInfo = Console.ReadKey(true);
+
+                if (keyInfo.Key == ConsoleKey.W)
+                {
+                    AnsiConsole.MarkupLine("[grey](Webseite wird geöffnet...)[/]");
+                    OeffneWebseite($"https://bkb.wiki/{zielSeite}");
+                    continue; // Erneut nach der Webseite-Anzeige fragen
+                }
+
+                if (keyInfo.Key == ConsoleKey.Enter)
+                {
+                    AnsiConsole.MarkupLine("[green]Ja[/]");
+                    ausfuehren = true;
+                    break;
+                }
+
+                // Jeder andere Tastendruck überspringt
+                AnsiConsole.MarkupLine("[grey]Nein (übersprungen)[/]");
+                ausfuehren = false;
+                break;
+            }
+
+            // 2. Ausführung
+            if (ausfuehren)
+            {
+                var erfolg = wikiZugriff.Proxy.PutPage(zielSeite, String.Empty, new XmlRpcStruct { { "sum", "Seite gelöscht via API" } });
+
+                if (erfolg)
+                {
+                    AnsiConsole.MarkupLine($"[green]✓[/] Löschen von [red]{zielSeite}[/] erfolgreich.");
+                }
+                else
+                {
+                    AnsiConsole.MarkupLine($"[red]✗[/] Löschen von [red]{zielSeite}[/] fehlgeschlagen.");
+                }
+
+                System.Diagnostics.Debug.WriteLine($"[Struct-Delete] Erfolg für {zielSeite}: {erfolg}");
+            }
+            else
+            {
+                System.Diagnostics.Debug.WriteLine($"[Struct-Delete] Übersprungen für {zielSeite}");
+            }
         }
         catch (XmlRpcFaultException fex)
         {
-            System.Diagnostics.Debug.WriteLine("=== XML-RPC FEHLER (VOM SERVER) ===");
+            AnsiConsole.MarkupLine($"[bold red]=== XML-RPC FEHLER (VOM SERVER) ===[/]");
+            AnsiConsole.MarkupLine($"Code: {fex.FaultCode} | Meldung: {fex.FaultString}");
             System.Diagnostics.Debug.WriteLine($"Code: {fex.FaultCode} | Meldung: {fex.FaultString}");
             throw;
         }
         catch (XmlRpcIllFormedXmlException xmlEx)
         {
-            System.Diagnostics.Debug.WriteLine("=== UNGÜLTIGE ANTWORT VOM SERVER ===");
+            AnsiConsole.MarkupLine($"[bold red]=== UNGÜLTIGE ANTWORT VOM SERVER ===[/]");
+            AnsiConsole.MarkupLine($"Meldung: {xmlEx.Message}");
             System.Diagnostics.Debug.WriteLine($"Meldung: {xmlEx.Message}");
             if (xmlEx.InnerException != null)
             {
@@ -2788,6 +2947,7 @@ public class Datei : List<dynamic>
         }
         catch (Exception ex)
         {
+            AnsiConsole.MarkupLine($"[bold red]Allgemeiner Fehler:[/] {ex.Message}");
             System.Diagnostics.Debug.WriteLine($"Allgemeiner Fehler: {ex.Message}");
             throw;
         }
