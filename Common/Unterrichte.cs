@@ -105,10 +105,6 @@ public class Unterrichte : List<Unterricht>
 
                         if (!fachMitSchülergruppe)
                         {
-                            if (fach == "SP G")
-                            {
-                                string a = "";
-                            }
                             var unterricht = GetUnterricht(fachZeilen, faecherRohFach, faecherDat);
 
                             if (!this.Any(u => u.KursBez == unterricht.KursBez))
