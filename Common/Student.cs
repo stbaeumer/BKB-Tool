@@ -707,7 +707,28 @@ public partial class Student
         {
             var dict = (IDictionary<string, object>)zeile;
 
-            if (dict["Schüler*innen"].ToString() == Nachname.Split('#')[0] + " " + Vorname && !string.IsNullOrEmpty(this.MailSchulisch) && this.MailSchulisch.Split('@')[0].Contains(dict["Externe Id"].ToString()) && dict["Status"] != null && dict["Status"].ToString() == "nicht entsch.")
+
+            if (Vorname.Contains("Ang") && Nachname.Contains("Mah"))
+            {
+                string a = "";
+            }
+            if (dict["Schüler*innen"].ToString().Contains("Ang") && dict["Schüler*innen"].ToString().Contains("Mah"))
+            {
+                string a = "";
+            }
+
+            var dictschueler = dict["Schüler*innen"].ToString();
+            var nachnameVorname = Nachname.Split('#')[0] + " " + Vorname;
+            var mailSchulisch = this.MailSchulisch;
+            var extId = dict["Externe Id"].ToString();
+            var dictStatus = dict["Status"].ToString();
+
+            if (
+                dictschueler == nachnameVorname &&
+                !string.IsNullOrEmpty(mailSchulisch) &&
+                mailSchulisch.Split('@')[0].Contains(extId) &&
+                dictStatus != null &&
+                (new List<string>() { "nicht entsch.", "offen" }.Contains(dictStatus)))
             {
                 Abwesenheiten.Add(dict);
             }
@@ -1394,7 +1415,7 @@ public partial class Student
         {
             var dict = (IDictionary<string, object>)zeile;
 
-            if (dict["Status"] != null && dict["Status"].ToString() == "nicht entsch." && !string.IsNullOrEmpty(dict["Fehlstd."].ToString()))
+            if (dict["Status"] != null && (dict["Status"].ToString() == "nicht entsch." || dict["Status"].ToString() == "offen") && !string.IsNullOrEmpty(dict["Fehlstd."].ToString()))
             {
                 int f = Convert.ToInt32(dict["Fehlstd."].ToString());
 
@@ -1412,5 +1433,46 @@ public partial class Student
         var linkeSeite = Nachname + ", " + Vorname + " (" + Klasse + "):";
         linkeSeite = (linkeSeite.PadRight(30, ' ')).Substring(0, 30);
         Global.ZeileSchreiben(linkeSeite, v, ConsoleColor.Yellow, ConsoleColor.Gray);
+    }
+
+    internal bool MehrAlsSovieleOffeneFehlzeitenDieSeitÜberEinerWocheOffenSind(int anzahlOffeneZeilen)
+    {
+        var offene = new List<IDictionary<string, object>>();
+        var offenSeitMehrAlsEineWoche = new List<IDictionary<string, object>>();
+
+        foreach (var zeile in Abwesenheiten)
+        {
+            var dict = (IDictionary<string, object>)zeile;
+
+            if (dict["Status"] != null && dict["Status"].ToString() == "offen" && !string.IsNullOrEmpty(dict["Fehlstd."].ToString()))
+            {
+                offene.Add(dict);
+            }
+        }
+
+        var vorEinerWoche = DateTime.Today.AddDays(-7);
+
+        foreach (var zeile in offene)
+        {
+            var dict = (IDictionary<string, object>)zeile;
+
+            // Datum (dd.mm.jjjj) umwandeln und die Zeilen hinzufügen, die mehr als eine Woche alt sind            
+            var datum = DateTime.ParseExact(dict["Datum"]?.ToString(), "dd.MM.yy", CultureInfo.InvariantCulture);
+
+            if (
+                dict["Status"] != null && 
+                dict["Status"].ToString() == "offen" && 
+                !string.IsNullOrEmpty(dict["Fehlstd."].ToString()) &&
+                datum <= DateTime.Now.Date.AddDays(-7)
+                )
+            {
+                offenSeitMehrAlsEineWoche.Add(dict);
+            }
+        }
+
+        if(offenSeitMehrAlsEineWoche.Count > 3)
+            return true;
+        
+        return false;
     }
 }

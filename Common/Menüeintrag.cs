@@ -4280,7 +4280,7 @@ public class Menüeintrag
 
             foreach (Student student in Students)
             {
-                if (student.Vorname.StartsWith("Ju") && student.Nachname.StartsWith("Bä"))
+                if (student.Vorname.StartsWith("An") && student.Nachname.StartsWith("Mahm"))
                 {
                     string aa = "";
                 }
@@ -4288,7 +4288,7 @@ public class Menüeintrag
                 student.GetUnentschFehlzeiten(absencePerStudent);
 
                 if (student.Abwesenheiten.Count != 0)
-                    if (student.MehrAlsSovieleUnentschuldigteFehlstunden(anzahl))
+                    if (student.MehrAlsSovieleUnentschuldigteFehlstunden(anzahl) || student.MehrAlsSovieleOffeneFehlzeitenDieSeitÜberEinerWocheOffenSind(3))
                         sMitAbwesenheiten.Add(student);
             }
         });

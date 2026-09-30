@@ -293,7 +293,7 @@ public static class MenueHelper
          datei => datei.Mailen(
           configuration,
           "Schulpflichtüberwachung KW " + ISOWeek.GetWeekOfYear(DateTime.Now),
-          $"Hallo Klassenleitung,\n\nDu wurdest hierher verlinkt, weil bei der automatisierten, wöchentlichen Durchsicht der Fehlzeiten eine mögliche Schulpflichtverletzung in Deiner Klasse aufgepoppt ist. Siehe hier: https://bkb.wiki/schulpflichtueberwachung\n\nVielen Dank!\n\nIhr Webuntis-Team",
+          $"Hallo Klassenleitung,\n\nbei der automatisierten, wöchentlichen Durchsicht der Fehlzeiten eine sind mögliche Schulpflichtverletzung in der Klasse aufgepoppt. Siehe hier: https://bkb.wiki/schulpflichtueberwachung\n\nVielen Dank!\n\nWebuntis-Team",
           new List<string>([configuration["SmtpUser"]]),
           datei.Lehrers.Where(l => !string.IsNullOrWhiteSpace(l.Mail)).Select(l => l.Mail!).Distinct().ToList(),
           new List<string>(["stefan.baeumer@berufskolleg-borken.de", "stefan.gantefort@berufskolleg-borken.de", "ursula.moritz@berufskolleg-borken.de"]),

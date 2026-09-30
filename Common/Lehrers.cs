@@ -335,7 +335,7 @@ WHERE (((SCHOOLYEAR_ID)= " + Global.AktSj[0] + Global.AktSj[1] + ") AND  ((TERM_
                     body += "Bitte kümmern Sie sich zeitnah um die Bearbeitung dieser Einträge.\n\n";
                     body += "Vielen Dank für Ihre Unterstützung!\n\n";
                     body += "Mit freundlichen Grüßen\n\n";
-                    body += "Ihr Webuntis-Team";
+                    body += "Webuntis-Team";
 
                     var mail = new Mail();
                     mail.Senden(configuration, $" Offenen Klassenbuch-Einträge ({le.Kürzel})", body, [le.Mail!], [], ["stefan.baeumer@berufskolleg-borken.de"], []);
