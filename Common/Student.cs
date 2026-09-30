@@ -707,7 +707,7 @@ public partial class Student
         {
             var dict = (IDictionary<string, object>)zeile;
 
-            if (dict["Schüler*innen"].ToString() == Nachname + " " + Vorname && !string.IsNullOrEmpty(this.MailSchulisch) && this.MailSchulisch.Split('@')[0].Contains(dict["Externe Id"].ToString()) && dict["Status"] != null && dict["Status"].ToString() == "nicht entsch.")
+            if (dict["Schüler*innen"].ToString() == Nachname.Split('#')[0] + " " + Vorname && !string.IsNullOrEmpty(this.MailSchulisch) && this.MailSchulisch.Split('@')[0].Contains(dict["Externe Id"].ToString()) && dict["Status"] != null && dict["Status"].ToString() == "nicht entsch.")
             {
                 Abwesenheiten.Add(dict);
             }

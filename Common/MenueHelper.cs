@@ -256,7 +256,7 @@ public static class MenueHelper
       students,
       klassen,
       [
-       $"Die (un-)entschuldigten Fehlstunden werden aus absenceperstudent ausgelesen. Die bisherigen Maßnahmen werden aus den Schülerordnern unterhalb von dokumentenverwaltung ausgelesen. Die Klassenlehrereigenschaftenw werden aus gpu003 entnommen. Es werden nur Schüler*innen mit mehr als 8 unentschuldigten Fehlstunden angezeigt.",
+       $"Die (un-)entschuldigten Fehlstunden werden aus absenceperstudent ausgelesen. Die bisherigen Maßnahmen werden aus den Schülerordnern unterhalb von dokumentenverwaltung ausgelesen. Die Klassenlehrereigenschaften werden aus gpu003 entnommen. Es werden nur Schüler*innen mit mehr als 8 unentschuldigten Fehlstunden angezeigt.",
        $"Hinweise:",
        $"1: Alle SuS mit mehr als 8 unentsch. Fehlstunden werden angezeigt.",
        $"2: Maßnahmen werden aus den Dateinamen in der Dokumentenverwaltung ausgelesen. Das Create-Datum wird zum Datum der Maßnahme.",
@@ -296,7 +296,7 @@ public static class MenueHelper
           $"Hallo Klassenleitung,\n\nDu wurdest hierher verlinkt, weil bei der automatisierten, wöchentlichen Durchsicht der Fehlzeiten eine mögliche Schulpflichtverletzung in Deiner Klasse aufgepoppt ist. Siehe hier: https://bkb.wiki/schulpflichtueberwachung\n\nVielen Dank!\n\nIhr Webuntis-Team",
           new List<string>([configuration["SmtpUser"]]),
           datei.Lehrers.Where(l => !string.IsNullOrWhiteSpace(l.Mail)).Select(l => l.Mail!).Distinct().ToList(),
-          new List<string>(["stefan.baeumer@berufskolleg-borken.de", "sina.milewski@berufskolleg-borken.de", "stefan.gantefort@berufskolleg-borken.de", "ursula.moritz@berufskolleg-borken.de"]),
+          new List<string>(["stefan.baeumer@berufskolleg-borken.de", "stefan.gantefort@berufskolleg-borken.de", "ursula.moritz@berufskolleg-borken.de"]),
           []
          )
         ]
@@ -534,39 +534,6 @@ public static class MenueHelper
         ["Link"],
         ["Page", "Namen", "Amt", "BGKuerzel", "Anlage", "TZ/VZ", "DJP1", "DJP2", "DJP3", "DJP4", "boyd", "perspektive-boyd", "Aufnahmevoraussetzungen", "Bildungsziele", "Abschluss", "Versetzung", "Klausurplanung", "Heterogenität", "Praktikum", "BO-Curriculum", "Link zur Homepage", "Mobilnummer", "Telefonnummer", "Festnetznummer", "StrasseHausnummer", "PlzOrt", "TitelVornameNachname", "BGSeite"],
         "|", '\0', new UTF8Encoding(true), false); 
-        /*m.GetUntisAnrechnungen(
-        Path.Combine(pfadDownloads ?? "untisanrechnungen.struct"),
-        [
-         datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.Vergleichen),         
-         datei => datei.Verarbeiten(m.Quelldateien, Global.Modus.SchemaUpdaten),
-         datei => datei.OeffneWebseite("https://bkb.wiki/oeffentlich:organigramm?do=admin&page=struct_schemas&table=untisanrechnungen"),
-        ],
-        [500, 510, 530, 590, 900],
-        [500, 510, 530, 590],
-        ["PLA", "BM"],
-        ",", '\"', new UTF8Encoding(false), true);
-        
-       m.Faecher(
-        configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Faecher.dat"),
-        [
-         datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
-         datei => datei.Verarbeiten(quelldateien, Global.Modus.Filtern),
-         datei => datei.Erstellen()
-        ],
-        ["InternKrz"],
-        [],
-        "|", '\0', new UTF8Encoding(true), false);
-        m.KlassenErstellen(
-        configuration, Path.Combine(pfadSchilddatenaustausch ?? "", "Klassen.dat"),
-        [
-         datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
-         datei => datei.Verarbeiten(quelldateien, Global.Modus.Filtern),
-         //datei => datei.OrdnerOeffnen(),
-         datei => datei.Erstellen()
-        ],
-        ["InternBez"],
-        ["SonstigeBez", "Folgeklasse"],
-        "|", '\0', new UTF8Encoding(true), false);*/
       },
       Global.Rubrik.Allgemein,
       Global.NurBeiDiesenSchulnummern.Nur177659

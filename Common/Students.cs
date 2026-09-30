@@ -222,9 +222,9 @@ public class Students : List<Student>
                    "  ^  bisherige Maßnahmen  ^  Aussage  ^Womit können wir Arbeit abnehmen?  ^");
 
         string teamsChatLink =
-            "chats>sina.milewski@berufskolleg-borken.de,stefan.gantefort@berufskolleg-borken.de,ursula.moritz@berufskolleg-borken.de,";
+            "chats>stefan.gantefort@berufskolleg-borken.de,ursula.moritz@berufskolleg-borken.de,";
         var mailliste =
-            "mailto:sina.milewski@berufskolleg-borken.de;stefan.gantefort@berufskolleg-borken.de;ursula.moritz@berufskolleg-borken.de;";
+            "mailto:stefan.gantefort@berufskolleg-borken.de;ursula.moritz@berufskolleg-borken.de;";
 
         AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Datei Schulpflichtüberwachung erstellen ...", ctx =>
         {

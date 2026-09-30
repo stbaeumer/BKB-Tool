@@ -5226,8 +5226,7 @@ public class Menüeintrag
         List<Action<Datei>> funktionen,
         string[] anhandDieserAttributeWirdVerglichen,
         string[] dieseAttributeWerdenBeimVergleichIgnoriert, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
-    {
-        // zieldatei, die die Lehrkräfte enthält. Diese Datei wird in Wiki importiert.
+    {        
         var zieldatei = new Datei(zieldateiname, funktionen, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         zieldatei.Lehrers = lehrersSoll;
@@ -5236,74 +5235,81 @@ public class Menüeintrag
         // Ist-Stand der Schulgemeinschaft-Tabelle in Datei schreiben
         Quelldateien.GetMatchingList(configuration, "schulgemeinschaft", IStudents, Klassen,
         [
-          "schulgemeinschaft.Page",
-    "schulgemeinschaft.BGkuerzel",
-    "schulgemeinschaft.BGSeite",
-    "schulgemeinschaft.Namen",
-    "schulgemeinschaft.Kürzel",
-    "schulgemeinschaft.Mail",
-    "schulgemeinschaft.Teams",
-    "schulgemeinschaft.Link",
-    "schulgemeinschaft.Art",
-    "schulgemeinschaft.TitelVornameNachname",
-    "schulgemeinschaft.Amt",
-    "schulgemeinschaft.Mobilnummer",
-    "schulgemeinschaft.Festnetznummer",
-    "schulgemeinschaft.Telefonnummer",
-    "schulgemeinschaft.StrasseHausnummer",
-    "schulgemeinschaft.PlzOrt",
-    "schulgemeinschaft.SprechtagRaum",
-    "schulgemeinschaft.SprechtagBemerkung",
-    "schulgemeinschaft.DeputatLautUntis",
-    "schulgemeinschaft.IstSollMittel",
-    "schulgemeinschaft.SchulmitwirkungRangfolge",
-    "schulgemeinschaft.SchulmitwirkungHinweis",
-    "schulgemeinschaft.SchulmitwirkungRolle",
-    "schulgemeinschaft.VorsitzLeitung",
-    "schulgemeinschaft.Anlage",
-    "schulgemeinschaft.Schulform",
-    "schulgemeinschaft.Bereich",
-    "schulgemeinschaft.TZ/VZ",
-    "schulgemeinschaft.Link zur Homepage",
-    "schulgemeinschaft.BO-Curriculum",
-    "schulgemeinschaft.Praktikum",
-    "schulgemeinschaft.Heterogenität",
-    "schulgemeinschaft.Klausurplanung",
-    "schulgemeinschaft.Versetzung",
-    "schulgemeinschaft.Klasse",
-    "schulgemeinschaft.Klassen",
-    "schulgemeinschaft.Abschluss",
-    "schulgemeinschaft.DJP1",
-    "schulgemeinschaft.DJP2",
-    "schulgemeinschaft.DJP3",
-    "schulgemeinschaft.DJP4",
-    "schulgemeinschaft.boyd",
-    "schulgemeinschaft.perspektive-boyd",
-    "schulgemeinschaft.Aufnahmevoraussetzungen",
-    "schulgemeinschaft.Bildungsziele",
-    "schulgemeinschaft.KlasseSus",
-
-    ], this.WikiZugriff, lehrersSoll);
+            "schulgemeinschaft.Page",
+            "schulgemeinschaft.BGkuerzel",
+            "schulgemeinschaft.BGSeite",
+            "schulgemeinschaft.Namen",
+            "schulgemeinschaft.Kürzel",
+            "schulgemeinschaft.Mail",
+            "schulgemeinschaft.Teams",
+            "schulgemeinschaft.Link",
+            "schulgemeinschaft.Art",
+            "schulgemeinschaft.TitelVornameNachname",
+            "schulgemeinschaft.Amt",
+            "schulgemeinschaft.Mobilnummer",
+            "schulgemeinschaft.Festnetznummer",
+            "schulgemeinschaft.Telefonnummer",
+            "schulgemeinschaft.StrasseHausnummer",
+            "schulgemeinschaft.PlzOrt",
+            "schulgemeinschaft.SprechtagRaum",
+            "schulgemeinschaft.SprechtagBemerkung",
+            "schulgemeinschaft.DeputatLautUntis",
+            "schulgemeinschaft.IstSollMittel",
+            "schulgemeinschaft.SchulmitwirkungRangfolge",
+            "schulgemeinschaft.SchulmitwirkungHinweis",
+            "schulgemeinschaft.SchulmitwirkungRolle",
+            "schulgemeinschaft.VorsitzLeitung",
+            "schulgemeinschaft.Anlage",
+            "schulgemeinschaft.Schulform",
+            "schulgemeinschaft.Bereich",
+            "schulgemeinschaft.TZ/VZ",
+            "schulgemeinschaft.Link zur Homepage",
+            "schulgemeinschaft.BO-Curriculum",
+            "schulgemeinschaft.Praktikum",
+            "schulgemeinschaft.Heterogenität",
+            "schulgemeinschaft.Klausurplanung",
+            "schulgemeinschaft.Versetzung",
+            "schulgemeinschaft.Klasse",
+            "schulgemeinschaft.Klassen",
+            "schulgemeinschaft.Abschluss",
+            "schulgemeinschaft.DJP1",
+            "schulgemeinschaft.DJP2",
+            "schulgemeinschaft.DJP3",
+            "schulgemeinschaft.DJP4",
+            "schulgemeinschaft.boyd",
+            "schulgemeinschaft.perspektive-boyd",
+            "schulgemeinschaft.Aufnahmevoraussetzungen",
+            "schulgemeinschaft.Bildungsziele",
+            "schulgemeinschaft.KlasseSus"
+        ], this.WikiZugriff, lehrersSoll);
 
         var gpu004 = Quelldateien.GetMatchingList(configuration, "gpu004", IStudents, Klassen);
         if (gpu004 == null || !gpu004.Any()) return;
 
-        // da stecken auch die Hausis drin usw.
-        var lehrkraefteDat = Quelldateien.GetMatchingList(configuration, "lehrkraefte", IStudents, Klassen);
-        if (lehrkraefteDat == null || !lehrkraefteDat.Any()) return;
+        var personal = Quelldateien.GetMatchingList(configuration, "lehrkraefte", IStudents, Klassen);
+        if (personal == null || !personal.Any()) return;
 
         // Die Datei "istSollMittel.csv" enthält die Spalte "Ist-Soll Mittel"
         var istSollMittel = Quelldateien.GetMatchingList(configuration, "istSollMittel", IStudents, Klassen);
 
-        // Im Kollegium müssen folgende Items abgeglichen werden:
-        // 1. Lehrkräfte, die in der Datei "lehrkraefte.dat" enthalten sind, aber nicht in der Liste der IST-Lehrkräfte (lehrersSoll) enthalten sind, werden entfernt.        
-        // 2. Gruppen, die sich aus Unterricht usw. ergeben 
-        // 3. Anrechnungen aus Untis
-
-        //
         // Zu 1. Lehrkräfte
-        //
+        zieldatei.AddRange(GetLehrer(Anrechnungen, istSollMittel, gpu004, lehrersSoll));
 
+        // Zu 2. Gruppen, die sich aus Unterricht usw. ergeben
+        zieldatei.AddRange(GetGruppenAusGpu(configuration, lehrersSoll, this.Anrechnungen, this.Students));
+
+        // Zu 3. Gruppen aus WikiLikns
+        zieldatei.AddRange(GetGruppenByWikiLink(configuration, personal, this.Anrechnungen, this.Students, ausDiesenUntisWikiLinksWerdenSeitenInWiki));
+
+        // Zu 4. Anrechnungen aus Untis, die zu Gruppen werden        
+        //zieldatei.AddRange(GetAnrechnungen(configuration, lehrersSoll, this.Anrechnungen));
+
+        foreach (var aktion in zieldatei.Funktionen)
+            aktion(zieldatei);
+    }
+
+    private IEnumerable<dynamic> GetLehrer(Anrechnungen anrechnungen, List<dynamic>? istSollMittel, List<dynamic> gpu004, Lehrers lehrersSoll)
+    {
         var lehrerliste = new List<dynamic>();
 
         foreach (var l in lehrersSoll)
@@ -5365,34 +5371,12 @@ public class Menüeintrag
                 record.PlzOrt = "";
             }
 
-
-
-            //if (l.Kürzel == "ORT")
-              zieldatei.Add(record);
+            lehrerliste.Add(record);
         }
-
-        //
-        // Zu 2. Gruppen, die sich aus Unterricht usw. ergeben
-        //
-
-        var anrechnungen = this.Anrechnungen;
-        zieldatei.AddRange(GetGruppenAusGpu(configuration, lehrersSoll, this.Anrechnungen, this.Students));
-
-        //
-        // Zu 3. Gruppen aus WikiLikns
-        //
-
-        zieldatei.AddRange(GetGruppenByWikiLink(configuration, lehrkraefteDat, this.Anrechnungen, this.Students, ausDiesenUntisWikiLinksWerdenSeitenInWiki));
-
-        //
-        // Zu 3. Anrechnungen aus Untis, die zu Gruppen werden
-        //
-
-        //zieldatei.AddRange(GetAnrechnungen(configuration, lehrersSoll, this.Anrechnungen));
-
-        foreach (var aktion in zieldatei.Funktionen)
-            aktion(zieldatei);
+        return lehrerliste;
     }
+
+
 
     private IEnumerable<dynamic> GetAnrechnungen(IConfiguration configuration, Lehrers lehrersSoll, Anrechnungen anrechnungen)
     {

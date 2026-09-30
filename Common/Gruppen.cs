@@ -52,19 +52,13 @@ public class Gruppen : List<Gruppe>
             var wikiLink = b.ToLower();
             var schulform = GetSchulform(b);
 
-            if (kurzname.ToLower() == "bt")
-            {
-                string a = "";
-            }
-
-            var members = GetMembers(gpu002, lehrers, new List<int>() { 1, 2, 3, 4 }, kurzname);
+            var members = GetMembers(gpu002, lehrers, new List<int>() { 1, 2, 3, 4 }, kurzname).ToList();
             record.Page = wikiLink;
             record.Link = wikiLink;
-            var enumerable = members.ToList();
-            record.Namen = string.Join(", ", enumerable.Select(x => "schulgemeinschaft:" + x.Kürzel));
-            record.Mail = string.Join("; ", enumerable.Select(x => x.Mail));
-            record.Kürzel = string.Join(", ", enumerable.Select(x => x.Kürzel)); var gruppe = new Gruppe(kurzname);
-            record.Art = "schulgemeinschaft:bildungsgaenge";
+            record.Namen = string.Join(", ", members.Select(x => "schulgemeinschaft:" + x.Kürzel));
+            record.Mail = string.Join("; ", members.Select(x => x.Mail));
+            record.Kürzel = string.Join(", ", members.Select(x => x.Kürzel)); var gruppe = new Gruppe(kurzname);
+            record.Art = ":bildungsgaenge:start";
 
             var vorsitzLeitung = "";
             foreach (var x in (from a in anrechnungs
@@ -97,19 +91,6 @@ public class Gruppen : List<Gruppe>
             }
 
             record.Klassen = klassen.ToLower().TrimEnd(',').TrimEnd(' ').TrimEnd(',').TrimEnd(' ');
-
-
-            // Ermittle vorhandene Werte
-
-            /*var bg = schulgemeinschaft
-                .Where(rec =>
-                {
-                    if (rec == null) return false;
-                    var dict = (IDictionary<string, object>)rec;
-                    return dict != null && dict["Link"] != null && dict["Link"].ToString() == wikiLink;
-                })
-                .LastOrDefault();*/
-
 
             try
             {
@@ -145,7 +126,6 @@ public class Gruppen : List<Gruppe>
                     bereiche += bereiche + "bereiche:agrarwirtschaft,";
 
                 }
-
 
                 record.Bereich = bereiche.TrimEnd(',');
                 record.Schulform = "bildungsgaenge:" + schulform + ":start";
