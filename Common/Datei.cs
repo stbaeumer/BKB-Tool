@@ -2661,26 +2661,37 @@ public class Datei : List<dynamic>
 
                 if (neueSpalte == "Art")
                 {
+                    wert = "";
                     var link = ConvertStructValueToString(zeile, "schulgemeinschaft.Art") ?? "";
 
-                    // 1. Umlaute & Sonderzeichen auflösen
-                    link = link.Replace("ä", "ae")
+                    if (link.Contains(","))
+                    {
+                        string aaa = "weltoff";
+                    }
+
+                    foreach (var x in link.Split(','))
+                    {
+                        var y = x.Trim();
+
+                        // 1. Umlaute & Sonderzeichen auflösen
+                        y = y.Replace("ä", "ae")
                                .Replace("ö", "oe")
                                .Replace("ü", "ue")
                                .Replace("Ä", "ae")
                                .Replace("Ö", "oe")
                                .Replace("Ü", "ue")
                                .Replace("ß", "ss")
-                               .Replace(" ", "_"); // Optional: Leerzeichen durch Unterstriche oder Bindestriche ersetzen
+                               .Replace(" ", ""); // Optional: Leerzeichen durch Unterstriche oder Bindestriche ersetzen
 
-                    // 2. In Kleinbuchstaben umwandeln
-                    link = link.ToLowerInvariant();
+                        // 2. In Kleinbuchstaben umwandeln
+                        y = y.ToLowerInvariant();
 
-                    // 3. Nur das erste Wort bei Gruppen & Mitgliedern
-                    link = link.Split(' ')[0].Split('_')[0];
+                        y = y.Replace("schulgemeinschaft:", "").Replace("Schulgemeinschaft:", "");
 
-                    if (!string.IsNullOrEmpty(link))
-                        wert = "schulgemeinschaft:" + link;
+                        if (!string.IsNullOrEmpty(y))
+                            wert += "schulgemeinschaft:" + y.Trim() + ",";
+                    }
+                    wert = wert.TrimEnd(' ').TrimEnd(',').TrimEnd(' ').TrimEnd(',');
                 }
                 if (neueSpalte == "Schulform")
                 {

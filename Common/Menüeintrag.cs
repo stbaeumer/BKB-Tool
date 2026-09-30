@@ -4330,31 +4330,31 @@ public class Menüeintrag
           "termine:fhr:start",
           new List<string>() { "BS", "HBG", "HBT", "HBW", "FS", "FM" },
           new List<int>() { 2 }));*/
-        Gruppen.Add(new Gruppe().GetFachschaft(gpu002, lehrers,
+        Gruppen.Add(new Gruppe().GetFachschaft(gpu002, anrechnungen, lehrers,
             "schulgemeinschaft:fachschaften:deutsch_kommunikation",
             new List<string>() { "D", "D FU", "D1", "D2", "D G1", "D G2", "D L1", "D L2", "D L", "DL", "DL1", "DL2" }));
-        Gruppen.Add(new Gruppe().GetFachschaft(gpu002, lehrers,
+        Gruppen.Add(new Gruppe().GetFachschaft(gpu002, anrechnungen, lehrers,
             "schulgemeinschaft:fachschaften:englisch",
             new List<string>() { "E", "E FU", "E1", "E2", "E G1", "E G2", "E L1", "E L2", "E L", "EL", "EL1", "EL2" }));
-        Gruppen.Add(new Gruppe().GetFachschaft(gpu002, lehrers,
+        Gruppen.Add(new Gruppe().GetFachschaft(gpu002, anrechnungen, lehrers,
             "schulgemeinschaft:fachschaften:englisch",
             new List<string>() { "E", "E FU", "E1", "E2", "E G1", "E G2", "E L1", "E L2", "E L", "EL", "EL1", "EL2" }));
-        Gruppen.Add(new Gruppe().GetFachschaft(gpu002, lehrers,
+        Gruppen.Add(new Gruppe().GetFachschaft(gpu002, anrechnungen, lehrers,
             "schulgemeinschaft:fachschaften:religionslehre",
             new List<string>() { "KR", "KR FU", "KR1", "KR2", "KR G1", "KR G2", "ER", "ER G1" }));
-        Gruppen.Add(new Gruppe().GetFachschaft(gpu002, lehrers,
+        Gruppen.Add(new Gruppe().GetFachschaft(gpu002, anrechnungen, lehrers,
             "schulgemeinschaft:fachschaften:mathematik_physik",
             new List<string>() { "M", "M FU", "M1", "M2", "M G1", "M G2", "M L1", "M L2", "M L", "ML", "ML1", "ML2" }));
-        Gruppen.Add(new Gruppe().GetFachschaft(gpu002, lehrers,
+        Gruppen.Add(new Gruppe().GetFachschaft(gpu002, anrechnungen, lehrers,
             "schulgemeinschaft:fachschaften:politik_gesellschaftslehre",
             new List<string>() { "PK", "PK FU", "PK1", "PK2", "GG G1", "GG G2" }));
-        Gruppen.Add(new Gruppe().GetFachschaft(gpu002, lehrers,
+        Gruppen.Add(new Gruppe().GetFachschaft(gpu002, anrechnungen, lehrers,
                 "schulgemeinschaft:fachschaften:wirtschaftslehre_in_nicht_kaufm_klassen",
                 new List<string>() { "WL", "WBL" }));
-        Gruppen.Add(new Gruppe().GetFachschaft(gpu002, lehrers,
+        Gruppen.Add(new Gruppe().GetFachschaft(gpu002, anrechnungen, lehrers,
             "schulgemeinschaft:fachschaften:sport",
             new List<string>() { "SP", "SP G1", "SP G2" }));
-        Gruppen.Add(new Gruppe().GetFachschaft(gpu002, lehrers,
+        Gruppen.Add(new Gruppe().GetFachschaft(gpu002, anrechnungen, lehrers,
             "schulgemeinschaft:fachschaften:biologie",
             new List<string>() { "BI", "Bi", "Bi FU", "Bi1", "Bi G1", "Bi G2", "BI G1", "BI L1" }));
 
@@ -5376,18 +5376,13 @@ public class Menüeintrag
         //
 
         var anrechnungen = this.Anrechnungen;
-        //zieldatei.AddRange(GetGruppenAusGpu(configuration, lehrersSoll, this.Anrechnungen, this.Students));
-
+        zieldatei.AddRange(GetGruppenAusGpu(configuration, lehrersSoll, this.Anrechnungen, this.Students));
 
         //
         // Zu 3. Gruppen aus WikiLikns
         //
 
         zieldatei.AddRange(GetGruppenByWikiLink(configuration, lehrkraefteDat, this.Anrechnungen, this.Students, ausDiesenUntisWikiLinksWerdenSeitenInWiki));
-
-
-
-
 
         //
         // Zu 3. Anrechnungen aus Untis, die zu Gruppen werden

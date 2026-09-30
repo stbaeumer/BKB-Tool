@@ -64,7 +64,7 @@ public class Gruppen : List<Gruppe>
             record.Namen = string.Join(", ", enumerable.Select(x => "schulgemeinschaft:" + x.Kürzel));
             record.Mail = string.Join("; ", enumerable.Select(x => x.Mail));
             record.Kürzel = string.Join(", ", enumerable.Select(x => x.Kürzel)); var gruppe = new Gruppe(kurzname);
-            record.Art = "bildungsgaenge:start";
+            record.Art = "schulgemeinschaft:bildungsgaenge";
 
             var vorsitzLeitung = "";
             foreach (var x in (from a in anrechnungs

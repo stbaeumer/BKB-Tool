@@ -91,7 +91,7 @@ public class Gruppe
         record.Namen = string.Join(", ", lehrerName);
         record.Mail = string.Join("; ", lehrerMail);
         record.Kürzel = string.Join(", ", lehrerKürzel);
-        record.Art = ":schulgemeinschaft:gruppen";
+        record.Art = "schulgemeinschaft:gruppen";
         gruppe.Record = record;
 
         //Global.ZeileSchreiben("Gruppe: " + wikiLink, lehrerName.Count().ToString(), ConsoleColor.Black, ConsoleColor.White);
@@ -102,6 +102,7 @@ public class Gruppe
     public Lehrers Lehrers { get; set; }
 
     public Gruppe GetFachschaft(List<dynamic> gpu002,
+        Anrechnungen anrechnungen,
         Lehrers lehrers,
         string wikiLink, List<string> faecher)
     {
@@ -151,7 +152,13 @@ public class Gruppe
         record.Namen = string.Join(", ", lehrerName.OrderBy(name => name));
         record.Mail = string.Join("; ", lehrerMail.OrderBy(name => name));
         record.Kürzel = string.Join(", ", lehrerKürzel.OrderBy(name => name));
-        record.Art = ":schulgemeinschaft:gruppen";
+        record.Art = "schulgemeinschaft:gruppen";        
+
+        var vorsitz = anrechnungen.Where(x=>x.Beschr == wikiLink).Where(x=>x.Text.Contains("Vorsitz") || x.Text.Contains("Vorsitz") || x.Text.Contains("Obmann")).Select(x=>x.LehrerKuerzel).FirstOrDefault();
+
+        if(!string.IsNullOrEmpty(vorsitz))
+            record.VorsitzLeitung = "schulgemeinschaft:" + vorsitz.ToLower();
+
         gruppe.Record = record;
 
         //Global.ZeileSchreiben("Gruppe: " + wikiLink, lehrerName.Count().ToString(), ConsoleColor.Black, ConsoleColor.White);
@@ -211,7 +218,7 @@ public class Gruppe
         record.Namen = string.Join(", ", lehrerName.OrderBy(name => name));
         record.Mail = string.Join("; ", lehrerMail.OrderBy(name => name));
         record.Kürzel = string.Join(", ", lehrerKürzel.OrderBy(name => name));
-        record.Art = ":schulgemeinschaft:gruppen";
+        record.Art = "schulgemeinschaft:gruppen";
         gruppe.Record = record;
         return gruppe;
     }
@@ -362,7 +369,7 @@ public class Gruppe
         record.Namen = string.Join(", ", lehrerName.OrderBy(name => name));
         record.Mail = string.Join("; ", lehrerMail.OrderBy(name => name));
         record.Kürzel = string.Join(", ", lehrerKürzel.OrderBy(name => name));
-        record.Art = ":schulgemeinschaft:gruppen";
+        record.Art = "schulgemeinschaft:klassenleitungen";
         gruppe.Record = record;
         return gruppe;
     }
@@ -409,7 +416,7 @@ public class Gruppe
         record.Namen = string.Join(", ", lehrerName.OrderBy(name => name));
         record.Mail = string.Join("; ", lehrerMail.OrderBy(name => name));
         record.Kürzel = string.Join(", ", lehrerKürzel.OrderBy(name => name));
-        record.Art = ":schulgemeinschaft:gruppen";
+        record.Art = "schulgemeinschaft:gruppen";
         gruppe.Record = record;
         return gruppe;
     }
@@ -426,7 +433,11 @@ public class Gruppe
         var lehrerMail = new List<string>();
         var lehrerName = new List<string>();
 
-        var members = anrechnungen.Where(x => x.Beschr.ToLower().Contains(wikiLink.ToLower())).ToList();
+        var members = anrechnungen.Where(x => x.Beschr.ToLower() == wikiLink.ToLower()).ToList();
+
+        // Es kann sein, dass in der Untis-Beschr. ein führender Doppelpunkt vor der Beschre. steht.
+        if(members == null || members.Count() == 0)
+            members = anrechnungen.Where(x => x.Beschr.ToLower() == ":" + wikiLink.ToLower()).ToList();
 
         var vorsitzLeitung = anrechnungen.Where(x =>
             x.Beschr.ToLower().Contains(wikiLink.ToLower()) &&
@@ -580,7 +591,7 @@ public class Gruppe
             record.Namen = string.Join(", ", lehrerName.OrderBy(name => name));
             record.Mail = string.Join("; ", lehrerMail.OrderBy(name => name));
             record.Kürzel = string.Join(", ", lehrerKürzel.OrderBy(name => name));
-            record.Art = ":klassen:start";
+            record.Art = "schulgemeinschaft:klassen";
 
             var schuelerDerKlasse = "";
 
