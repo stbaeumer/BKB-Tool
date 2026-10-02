@@ -442,7 +442,7 @@ public class Gruppe
         var vorsitzLeitung = anrechnungen.Where(x =>
             x.Beschr.ToLower().Contains(wikiLink.ToLower()) &&
             !string.IsNullOrEmpty(x.Rolle) &&
-            (x.Rolle.Contains("orsitz") || x.Rolle.Contains("eitung"))
+            (x.Rolle.Contains("orsitz") || x.Rolle.Contains("eitung") || x.Rolle.Contains("oordinat"))
         ).FirstOrDefault();
 
         foreach (var member in members)
