@@ -728,7 +728,7 @@ public partial class Student
                 !string.IsNullOrEmpty(mailSchulisch) &&
                 mailSchulisch.Split('@')[0].Contains(extId) &&
                 dictStatus != null &&
-                (new List<string>() { "nicht entsch.", "offen" }.Contains(dictStatus)))
+                (new List<string>() { "nicht entsch." }.Contains(dictStatus)))
             {
                 Abwesenheiten.Add(dict);
             }
@@ -1460,8 +1460,8 @@ public partial class Student
             var datum = DateTime.ParseExact(dict["Datum"]?.ToString(), "dd.MM.yy", CultureInfo.InvariantCulture);
 
             if (
-                dict["Status"] != null && 
-                dict["Status"].ToString() == "offen" && 
+                dict["Status"] != null &&
+                dict["Status"].ToString() == "offen" &&
                 !string.IsNullOrEmpty(dict["Fehlstd."].ToString()) &&
                 datum <= DateTime.Now.Date.AddDays(-7)
                 )
@@ -1470,9 +1470,45 @@ public partial class Student
             }
         }
 
-        if(offenSeitMehrAlsEineWoche.Count > 3)
+        if (offenSeitMehrAlsEineWoche.Count > 3)
             return true;
-        
+
         return false;
+    }
+
+    public void GetOffeneFehlzeiten(List<dynamic> abscencePerStudent)
+    {
+        Abwesenheiten = new List<dynamic>();
+
+        foreach (var zeile in abscencePerStudent)
+        {
+            var dict = (IDictionary<string, object>)zeile;
+
+
+            if (Vorname.Contains("Ang") && Nachname.Contains("Mah"))
+            {
+                string a = "";
+            }
+            if (dict["Schüler*innen"].ToString().Contains("Ang") && dict["Schüler*innen"].ToString().Contains("Mah"))
+            {
+                string a = "";
+            }
+
+            var dictschueler = dict["Schüler*innen"].ToString();
+            var nachnameVorname = Nachname.Split('#')[0] + " " + Vorname;
+            var mailSchulisch = this.MailSchulisch;
+            var extId = dict["Externe Id"].ToString();
+            var dictStatus = dict["Status"].ToString();
+
+            if (
+                dictschueler == nachnameVorname &&
+                !string.IsNullOrEmpty(mailSchulisch) &&
+                mailSchulisch.Split('@')[0].Contains(extId) &&
+                dictStatus != null &&
+                (new List<string>() { "offen" }.Contains(dictStatus)))
+            {
+                Abwesenheiten.Add(dict);
+            }
+        }
     }
 }

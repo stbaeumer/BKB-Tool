@@ -1,4 +1,6 @@
 using System.Globalization;
+using System.Xml.Serialization;
+using Common;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Spectre.Console;
@@ -257,9 +259,9 @@ WHERE (((SCHOOLYEAR_ID)= " + Global.AktSj[0] + Global.AktSj[1] + ") AND  ((TERM_
         AnsiConsole.WriteLine("Der Browser sollte jetzt folgenden Link öffnen:\n" + url.TrimEnd());
     }
 
-    public void OffeneKlassenbuchEinträgeMahnen(Dateien dateien, IConfiguration configuration)
+    public void OffeneKlassenbuchEinträgeMahnen(Menüeintrag m, IConfiguration configuration)
     {
-        var matchingDatei = dateien.FirstOrDefault(x => x.Name.ToLower().StartsWith("openperiod"));
+        var matchingDatei = m.Quelldateien.FirstOrDefault(x => x.Name.ToLower().StartsWith("openperiod"));
         var dateiName = matchingDatei != null ? matchingDatei.AbsoluterPfad : throw new InvalidOperationException("No matching file found for 'openperiod'.");
 
         List<string> lehrer = new List<string>();
@@ -282,9 +284,35 @@ WHERE (((SCHOOLYEAR_ID)= " + Global.AktSj[0] + Global.AktSj[1] + ") AND  ((TERM_
             }
         }
 
+        var lehrerOhneSonstigeLehrer = new List<Lehrer>();
+
+        // Lernbegleiter werden nicht hinzgefügt
+        var lehrkraeftelehraemter = m.Quelldateien.GetMatchingList(configuration, "lehrkraeftelehraemter", m.IStudents, m.Klassen);
+        if (lehrkraeftelehraemter == null || lehrkraeftelehraemter.Count == 0) throw new Exception("LehrkraefteLehraemter.dat");
+
+        foreach (var l in this)
+        {
+            var lehramt = "";
+
+            foreach (var zeile in lehrkraeftelehraemter)
+            {
+                var dict = (IDictionary<string, object>)zeile;
+
+                if (dict["Lehrkraft"]?.ToString() == l.Kürzel)
+                {
+                    lehramt = dict["Lehramt"].ToString();
+                    continue;
+                }
+            }
+            if (lehramt != "99")
+            {
+                lehrerOhneSonstigeLehrer.Add(l);
+            }
+        }
+
         // Gib die 10 häufigsten Nennungen aus der Liste "lehrer" aus
         var topLehrer = lehrer
-         .Where(name => this.Any(l => !string.IsNullOrEmpty(l.Kürzel) && l.Kürzel == name))
+         .Where(name => lehrerOhneSonstigeLehrer.Any(l => !string.IsNullOrEmpty(l.Kürzel) && l.Kürzel == name))
          .GroupBy(x => x)
          .OrderByDescending(g => g.Count())
          .Take(10)

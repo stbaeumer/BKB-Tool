@@ -54,8 +54,7 @@ public static class MenueHelper
         return new Menue(quelldateien, klassen, lehrers, students, []);
       }
 
-
-#pragma warning disable CS8601 // Mögliche Nullverweiszuweisung
+      #pragma warning disable CS8601 // Mögliche Nullverweiszuweisung
 
       return new Menue(
        quelldateien,
@@ -260,7 +259,8 @@ public static class MenueHelper
        $"Hinweise:",
        $"1: Alle SuS mit mehr als 8 unentsch. Fehlstunden werden angezeigt.",
        $"2: Maßnahmen werden aus den Dateinamen in der Dokumentenverwaltung ausgelesen. Das Create-Datum wird zum Datum der Maßnahme.",
-       $"3: Klassenleitungen werden per Mail in cc informiert."
+       $"3: Klassenleitungen werden per Mail in cc informiert.",
+       $"4: Zusätzlich zu den unentschuldigten wird auch angezeigt, wenn mehr als 3 Abwesenheiten seit mehr als einer Woche offen sind."
       ],
       m =>
       {
@@ -268,9 +268,9 @@ public static class MenueHelper
         configuration,
         "schulpflichtueberwachung",
         [
-         "Ordnungsmaßnahme", // Wenn eine Datei in der Dokumentenverwaltung einen  
-         "Bußgeld",    // dieser Bezeichner enthält, dann wird die Datei 
-         "Attestpflicht", // mit dem Creation-Datum hier übernommen.
+         "Ordnungsmaßnahme",  // Wenn eine Datei in der Dokumentenverwaltung einen  
+         "Bußgeld",           // dieser Bezeichner enthält, dann wird die Datei 
+         "Attestpflicht",     // mit dem Creation-Datum hier übernommen.
          "Mahnung",
          "Familienkasse",
          "Versäumnisanzeige",
@@ -280,12 +280,13 @@ public static class MenueHelper
          "Anhörung",
          "Verweis"
         ],
-        8,  // Mindestanzahl unentschuldigte Fehlstunden      
-        10, // Schonfrist: So viele Tage hat die Klassenleitung Zeit offene Stunden
-         // zu bearbeiten, bevor eine Warnung ausgelöst wird.
-        20, // Nach so vielen unent. Stunden ohne Maßnahme wird eine Warnung ausgelöst.
-        30, // Nach so vielen Tagen verjähren unentschuldigte Fehlstunden für Unbescholtene.
-        90, // Nach so vielen Tagen verjähren unentschuldigte Fehlstunden für SuS mit Maßnahme
+        8,    // Mindestanzahl unentschuldigte Fehlstunden      
+        3,    // Max. soviele *offene* Fehltage, älter als 1 Woche
+        10,   // Schonfrist: So viele Tage hat die Klassenleitung Zeit offene Stunden
+              // zu bearbeiten, bevor eine Warnung ausgelöst wird.
+        20,   // Nach so vielen unent. Stunden ohne Maßnahme wird eine Warnung ausgelöst.
+        30,   // Nach so vielen Tagen verjähren unentschuldigte Fehlstunden für Unbescholtene.
+        90,   // Nach so vielen Tagen verjähren unentschuldigte Fehlstunden für SuS mit Maßnahme
         lehrers,
         [
          datei => datei.PutPage(),
@@ -308,19 +309,20 @@ public static class MenueHelper
      new Menüeintrag(
       configuration,
       "Klassenbuchpflege:Mo:Säumige Lehrer*innen auf fehlende Klassenbucheinträge hinweisen",
-      quelldateien.Notwendige(configuration, ["lehrkraefte,dat", "openperiod,pdf"]),
+      quelldateien.Notwendige(configuration, ["lehrkraefte,dat", "lehrkraeftelehraemter,dat", "openperiod,pdf"]),
       students,
       klassen,
       [
        "Die 10% der KuK mit den meisten offenen Klassenbucheinträgen werden (mit folgender Einschränkung) angemahnt: Mit weniger als 10 offenen Eintragungen wird nicht gemahnt. ",
        "Ab 20 oder mehr Stunden wird die Schulleitung in CC informiert.",
        $"Die Anzahl der offenen Klassenbucheinträge wird aus der Datei [{Global.GetColor(Global.ColorPfadInDateien)}]OpenPeriods[/] ausgelesen. Dazu am besten den Bericht auf 'Beginn des Schuljares' stellen.",
-       "Die KuK werden zuerst angezeigt. Vor dem Mailversand wird nochmal explizit nach Bestätigung gefragt."
+       "Die KuK werden zuerst angezeigt. Vor dem Mailversand wird nochmal explizit nach Bestätigung gefragt.",
+       "Sonstige Lehrer bleiben unberücksichtigt.."
       ],
       m =>
       {
        lehrers = new Lehrers(configuration, m.Quelldateien);
-       lehrers.OffeneKlassenbuchEinträgeMahnen(m.Quelldateien, configuration);
+       lehrers.OffeneKlassenbuchEinträgeMahnen(m, configuration);
       },
       Global.Rubrik.Allgemein,
       Global.NurBeiDiesenSchulnummern.Alle
@@ -365,7 +367,7 @@ public static class MenueHelper
       },
       Global.Rubrik.Allgemein,
       Global.NurBeiDiesenSchulnummern.Nur177659
-     ),
+     ),/*
      new Menüeintrag(
       configuration,
       "Gruppen & Organigramm:Mo:Gruppen & Organigramm aus Untisanrechnungen und Unterrichten für Wiki-Import erstellen",
@@ -386,7 +388,7 @@ public static class MenueHelper
       {
        var anrechnungen = new Anrechnungen(lehrers, configuration);
        
-       /*m.GetGruppen(
+       m.GetGruppen(
         configuration,
         [
          datei => datei.AnhandDieserSchlüsselAttributeWirdVerglichen = ["Link"],
@@ -399,11 +401,11 @@ public static class MenueHelper
         anrechnungen,
         "gruppen.struct",
         lehrers,
-        ",", '\"', new UTF8Encoding(false), true);*/       
+        ",", '\"', new UTF8Encoding(false), true);       
       },
       Global.Rubrik.Wiki,
       Global.NurBeiDiesenSchulnummern.Nur177659
-     ),
+     ),*/
      new Menüeintrag(
       configuration,
       "Termine:Mo:Outlook-CSV-Terminexporte für Wiki aufbereiten",
@@ -470,10 +472,10 @@ public static class MenueHelper
         configuration, Path.Combine(pfadDownloads ?? "", "schulgemeinschaft.struct"), lehrers,
         [ // Aus diesen Links in Untis-Anrechnungen sollen Seiten in Wiki werden. Rolle: Vorsitz oder Leitung  
           "schulgemeinschaft:krise:start",
-          "schulgemeinschaft:schulleitung",          
+          "schulgemeinschaft:schulleitung",
           "schulgemeinschaft:lehrerrat",
           "schulgemeinschaft:referendar_innen",
-          "schulgemeinschaft:schulleitung:erweiterte:start",          
+          "schulgemeinschaft:schulleitung:erweiterte:start",
           "schulgemeinschaft:beratungsteam",
           "schulgemeinschaft:berufliche_orientierung",
           "schulgemeinschaft:webuntisteam",
@@ -533,7 +535,7 @@ public static class MenueHelper
         ],
         ["Link"],
         ["Page", "Namen", "Amt", "BGKuerzel", "Anlage", "TZ/VZ", "DJP1", "DJP2", "DJP3", "DJP4", "boyd", "perspektive-boyd", "Aufnahmevoraussetzungen", "Bildungsziele", "Abschluss", "Versetzung", "Klausurplanung", "Heterogenität", "Praktikum", "BO-Curriculum", "Link zur Homepage", "Mobilnummer", "Telefonnummer", "Festnetznummer", "StrasseHausnummer", "PlzOrt", "TitelVornameNachname", "BGSeite"],
-        "|", '\0', new UTF8Encoding(true), false); 
+        "|", '\0', new UTF8Encoding(true), false);
       },
       Global.Rubrik.Allgemein,
       Global.NurBeiDiesenSchulnummern.Nur177659

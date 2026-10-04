@@ -4245,6 +4245,7 @@ public class Menüeintrag
             string zieldateiname,
             List<string> maßnahmen,
             int anzahlUnentschFehlstunden,
+            int anzahlOffeneFehlstunden,
             int schonfrist,
             int warnungAbAnzahl,
             int verjaehrungUnbescholtene,
@@ -4253,9 +4254,11 @@ public class Menüeintrag
             List<Action<Datei>> funktionen
         )
     {
-        Students schuelerMitAbwesenheiten = GetSchuelerMitSovielenUnentschFehlzeiten(configuration, anzahlUnentschFehlstunden);
-        schuelerMitAbwesenheiten.GetMassnahmen(configuration, maßnahmen, Quelldateien);
-        schuelerMitAbwesenheiten.SchulpflichtüberwachungTxt(
+        Students schuelerMitUnentschAbwesenheiten = Students.GetSchuelerMitSovielenUnentschFehlzeiten(configuration, this, anzahlUnentschFehlstunden);
+        Students schuelerMitOffenenAbwesenheiten = Students.GetSchuelerMitSovielenOffenenFehltage(configuration, this, anzahlOffeneFehlstunden);
+        //schuelerMitUnentschAbwesenheiten.AddRange(schuelerMitOffenenAbwesenheiten); 
+        schuelerMitUnentschAbwesenheiten.GetMassnahmen(configuration, maßnahmen, Quelldateien);
+        schuelerMitUnentschAbwesenheiten.SchulpflichtüberwachungTxt(
             configuration,
             funktionen,
             zieldateiname,
@@ -4268,34 +4271,6 @@ public class Menüeintrag
             lehrers,
             Quelldateien
         );
-    }
-
-    public Students GetSchuelerMitSovielenUnentschFehlzeiten(IConfiguration configuration, int anzahl)
-    {
-        var sMitAbwesenheiten = new Students();
-
-        AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("SuS mit mehr als " + anzahl + " unentschuldigten Fehlstunden ermitteln ...", ctx =>
-        {
-            var absencePerStudent = Quelldateien.GetMatchingList(configuration, "absenceperstudent", IStudents, Klassen);
-
-            foreach (Student student in Students)
-            {
-                if (student.Vorname.StartsWith("An") && student.Nachname.StartsWith("Mahm"))
-                {
-                    string aa = "";
-                }
-
-                student.GetUnentschFehlzeiten(absencePerStudent);
-
-                if (student.Abwesenheiten.Count != 0)
-                    if (student.MehrAlsSovieleUnentschuldigteFehlstunden(anzahl) || student.MehrAlsSovieleOffeneFehlzeitenDieSeitÜberEinerWocheOffenSind(3))
-                        sMitAbwesenheiten.Add(student);
-            }
-        });
-
-        Global.ZeileSchreiben($"SuS mit mehr als " + anzahl + " unentschuldigten Fehlstunden:", $"{sMitAbwesenheiten.Count}");
-
-        return sMitAbwesenheiten;
     }
 
     public List<dynamic> GetGruppenAusGpu(
@@ -5226,7 +5201,7 @@ public class Menüeintrag
         List<Action<Datei>> funktionen,
         string[] anhandDieserAttributeWirdVerglichen,
         string[] dieseAttributeWerdenBeimVergleichIgnoriert, string delimiter, char quote, Encoding encoding, bool shouldAllQuote, List<string> importhinweise = null)
-    {        
+    {
         var zieldatei = new Datei(zieldateiname, funktionen, anhandDieserAttributeWirdVerglichen, dieseAttributeWerdenBeimVergleichIgnoriert, delimiter, quote, encoding, shouldAllQuote, importhinweise);
 
         zieldatei.Lehrers = lehrersSoll;
@@ -5488,11 +5463,12 @@ public class Menüeintrag
                 dynamic record = new ExpandoObject();
 
                 if (MehrfachVorhanden(
-           schuelerZusatzdaten,
-           dictSz["schulische E-Mail"].ToString(),
-           dictSz["Nachname"].ToString(),
-           dictSz["Vorname"].ToString(),
-           dictSz["Geburtsdatum"].ToString()))
+                    schuelerZusatzdaten,
+                    dictSz["schulische E-Mail"].ToString(),
+                    dictSz["Nachname"].ToString(),
+                    dictSz["Vorname"].ToString(),
+                    dictSz["Geburtsdatum"].ToString())
+                )
                 {
                     mehrfachVorhanden.Add(schuelerZusatzdaten[i]);
                 }
@@ -5578,10 +5554,11 @@ public class Menüeintrag
 
                                         ((IDictionary<string, object>)record)[name] = schulischeEmail;
 
-                                        if (MehrfachVorhanden(
-                                   schuelerZusatzdaten,
-                                   dictSz["schulische E-Mail"].ToString(),
-                                   dictSz["Nachname"].ToString(), dictSz["Vorname"].ToString(), dictSz["Geburtsdatum"].ToString()))
+                                        if(MehrfachVorhanden(
+                                            schuelerZusatzdaten,
+                                            dictSz["schulische E-Mail"].ToString(),
+                                            dictSz["Nachname"].ToString(), dictSz["Vorname"].ToString(), dictSz["Geburtsdatum"].ToString())
+                                        )
                                         {
                                             mehrfachVorhanden.Add(schuelerZusatzdaten[i]);
                                         }

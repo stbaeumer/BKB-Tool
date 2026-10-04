@@ -246,6 +246,14 @@ public class Dateien : List<Datei>
             d => d.FilterLehrkraefte()
         ));
         Add(new Datei(
+            "LehrkraefteLehraemter.dat",
+            "Beschreibung",
+            schildhinweise,
+            [""],
+            true,
+            d => d.FilterLehrkraefte()
+        ));
+        Add(new Datei(
             "LehrkraefteSonderzeiten.dat",
             "Beschreibung",
             schildhinweise,

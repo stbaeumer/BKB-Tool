@@ -1718,4 +1718,61 @@ public class Students : List<Student>
 
         Global.ZeileSchreiben($"SuS mit Maßnahmen:", $"{sMitMassnahmen.Count}");
     }
+
+ public Students GetSchuelerMitSovielenUnentschFehlzeiten(IConfiguration configuration, Menüeintrag m, int anzahl)
+    {
+        var sMitAbwesenheiten = new Students();
+
+        AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("SuS mit mehr als " + anzahl + " unentschuldigten Fehlstunden ermitteln ...", ctx =>
+        {
+            var absencePerStudent = m.Quelldateien.GetMatchingList(configuration, "absenceperstudent", m.IStudents, m.Klassen);
+
+            foreach (Student student in this)
+            {
+                if (student.Vorname.StartsWith("An") && student.Nachname.StartsWith("Mahm"))
+                {
+                    string aa = "";
+                }
+
+                student.GetUnentschFehlzeiten(absencePerStudent);
+
+                if (student.Abwesenheiten.Count != 0)
+                    if (student.MehrAlsSovieleUnentschuldigteFehlstunden(anzahl))
+                        sMitAbwesenheiten.Add(student);
+            }
+        });
+
+        Global.ZeileSchreiben($"SuS mit mehr als " + anzahl + " unentschuldigten Fehlstunden:", $"{sMitAbwesenheiten.Count}");
+
+        return sMitAbwesenheiten;
+    }
+
+    public Students GetSchuelerMitSovielenOffenenFehltage(IConfiguration configuration, Menüeintrag m, int anzahl)
+    {
+        var sMitAbwesenheiten = new Students();
+
+        AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("SuS mit " + anzahl + " oder mehr offenen Tagen, älter als 1 Woche, ermitteln ...", ctx =>
+        {
+            var absencePerStudent = m.Quelldateien.GetMatchingList(configuration, "absenceperstudent", m.IStudents, m.Klassen);
+
+            foreach (Student student in this)
+            {
+                if (student.Vorname.StartsWith("An") && student.Nachname.StartsWith("Mahm"))
+                {
+                    string aa = "";
+                }
+
+                student.GetOffeneFehlzeiten(absencePerStudent);
+
+                if (student.Abwesenheiten.Count != 0)
+                    if (student.MehrAlsSovieleOffeneFehlzeitenDieSeitÜberEinerWocheOffenSind(anzahl))
+                        sMitAbwesenheiten.Add(student);
+            }
+        });
+
+        Global.ZeileSchreiben($"SuS mit " + anzahl + " oder mehr offenen Fehltagen, älter als 1 Woche:", $"{sMitAbwesenheiten.Count}");
+
+        return sMitAbwesenheiten;
+    }
 }
+
