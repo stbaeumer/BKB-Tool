@@ -707,7 +707,6 @@ public partial class Student
         {
             var dict = (IDictionary<string, object>)zeile;
 
-
             if (Vorname.Contains("Ang") && Nachname.Contains("Mah"))
             {
                 string a = "";
@@ -722,6 +721,11 @@ public partial class Student
             var mailSchulisch = this.MailSchulisch;
             var extId = dict["Externe Id"].ToString();
             var dictStatus = dict["Status"].ToString();
+
+            if (dictStatus.Contains("nicht") && dictschueler == nachnameVorname)
+            {
+                string aaa = "";
+            }
 
             if (
                 dictschueler == nachnameVorname &&
@@ -1415,7 +1419,7 @@ public partial class Student
         {
             var dict = (IDictionary<string, object>)zeile;
 
-            if (dict["Status"] != null && (dict["Status"].ToString() == "nicht entsch." || dict["Status"].ToString() == "offen") && !string.IsNullOrEmpty(dict["Fehlstd."].ToString()))
+            if (dict["Status"] != null && (dict["Status"].ToString() == "nicht entsch.") && !string.IsNullOrEmpty(dict["Fehlstd."].ToString()))
             {
                 int f = Convert.ToInt32(dict["Fehlstd."].ToString());
 

@@ -250,7 +250,7 @@ public static class MenueHelper
      ),
      new Menüeintrag(
       configuration,
-      "Absentismus:Mo:Klassenleitungen über schulpflichtverletzende Schüler*innen informieren",
+      "Schulpflichtüberwachung:Mo:Klassenleitungen über schulpflichtverletzende Schüler*innen informieren",
       quelldateien.Notwendige(configuration, ["GPU003,txt", "absenceperstudent,csv"]),
       students,
       klassen,
