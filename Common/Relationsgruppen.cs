@@ -31,7 +31,7 @@ public class Relationsgruppen : List<Relationsgruppe>
             ["A01"], ["01", "02", "03"], Enumerable.Range(10000, 79999 - 10000).ToList(), 41.64));
         this.Add(new Relationsgruppe("BK BS Fachklasse EQ TZ (hj. endend)", ["A01"],
             ["04"], null, 83.28));
-        this.Add(new Relationsgruppe("BK BS Ausbildungsvorbereitung VZ", ["A17", "A18"],
+        this.Add(new Relationsgruppe("BK BS Ausbildungsvorbereitung VZ", ["A12"],
             ["01"], null, 16.18));
         this.Add(new Relationsgruppe("BK BS Ausbildungsvorbereitung TZ", ["A13"],
             ["01"], null, 41.64));
@@ -76,7 +76,8 @@ public class Relationsgruppen : List<Relationsgruppe>
 
         List<string?> datei =
         [
-            "^Relationsgruppe                           ^1.Jg^2.Jg^3.Jg^4.Jg^Summe   ^Relation     ^StellenBS     ^StellenVZ     ^"
+            "^  Relationsgruppe  ^  ".PadRight(43) + "1.Jg  ^".PadRight(6) + "2.Jg  ^".PadRight(6) +
+            "3.Jg  ^".PadRight(6) + "4.Jg  ^".PadRight(5) + "Summe  ^  Relation  ^  StellenBS  ^  StellenVZ  ^"
         ];
 
         var table1 = new Table();
@@ -111,7 +112,7 @@ public class Relationsgruppen : List<Relationsgruppe>
 
         foreach (var relationsgruppe in this)
         {
-            List<string> zeile = new List<string> { ("|" + relationsgruppe.BeschreibungSchulministerium + ":").PadRight(43) };
+            List<string> zeile = new List<string> { "|" + relationsgruppe.BeschreibungSchulministerium + ":" };
 
             foreach (var jg in new List<string?>() { "01", "02", "03", "04" })
             {
@@ -125,7 +126,7 @@ public class Relationsgruppen : List<Relationsgruppe>
 
                     schuelerSchnellmeldung.AddRange((from s in studentsFiltered where s.Jahrgang.EndsWith(jg) select s));
                     summe += x;
-                    z = x.ToString().PadRight(4);
+                    z = x.ToString();
                 }
 
                 zeile.Add(z);
@@ -135,11 +136,11 @@ public class Relationsgruppen : List<Relationsgruppe>
                      where s.Relationsgruppe == relationsgruppe.BeschreibungSchulministerium
                      select s).Count();
 
-            zeile.Add(t.ToString().PadRight(7));
+            zeile.Add($"[{Global.GetColor(Global.ColorHinweise)}]{t.ToString()}[/]");
 
             // Relation:
 
-            zeile.Add(relationsgruppe.Relation.ToString().PadLeft(13));
+            zeile.Add(relationsgruppe.Relation.ToString());
 
             // Stellen:
 
