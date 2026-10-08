@@ -4480,7 +4480,7 @@ public class Menüeintrag
                     DateTime aktSjEnde = new DateTime(endJahr, 7, 31);
                     DateTime kommendesSjEnde = new DateTime(endJahr + 1, 7, 31);
 
-                    string sj = "vergangene";
+                    string sj = "vergangenes";
 
                     if (beginnDatum >= aktSjStart && beginnDatum <= aktSjEnde)
                     {
@@ -4494,6 +4494,21 @@ public class Menüeintrag
                     {
                         sj = "spaeteres";
                     }
+
+
+                    // Die schriftliche Nachprüfung im August oder September fallen immer in das 
+                    // zurückliegende SJ
+                    var b = dict["Betreff"].ToString()!.Trim();
+
+                    if(b.Contains("Schriftliche Nachprüfung") && sj == "kommendes")
+                    {
+                        sj = "aktuelles";
+                    }
+                    if(b.Contains("Schriftliche Nachprüfung") && sj == "aktuelles")
+                    {
+                        sj = "vergangenes";
+                    }
+
 
                     // Wenn in der Nachricht ein Hyperlink enthalten ist, der nach bkb.wiki zeigt, dann wird der Hyperlink aus dem Inhalt der Seite isoliert und einer Variablen namen link zugewiesen.
                     var link = dict["Nachricht"].ToString()!.Split(' ').FirstOrDefault(x => x.Contains("bkb.wiki"));
