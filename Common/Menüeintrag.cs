@@ -4411,7 +4411,15 @@ public class Menüeintrag
         {
             var records = new List<dynamic>();
 
-            var sortedRecords = kalenderRec?
+            // Wenn mehrere Kalender in die CSV importiert wurden, gibt es mehrere Kopfzeilen.
+            // Die Kopfzeilen innerhalb der CSV-Datei werden mit dem Betreff "Beginn" erkannt und müssen entfernt werden.
+            var kalenderRecOhneKopfzeilen = kalenderRec.Where(rec =>
+            {
+                var beginnString = (string)((IDictionary<string, object>)rec)["Beginn"];
+                return beginnString != "Beginn";
+            }).ToList();
+
+            var sortedRecords = kalenderRecOhneKopfzeilen?
              .Where(rec =>
              {
                  var beginnString = (string)((IDictionary<string, object>)rec)["Beginn"];
@@ -4500,11 +4508,11 @@ public class Menüeintrag
                     // zurückliegende SJ
                     var b = dict["Betreff"].ToString()!.Trim();
 
-                    if(b.Contains("Schriftliche Nachprüfung") && sj == "kommendes")
+                    if (b.Contains("Schriftliche Nachprüfung") && sj == "kommendes")
                     {
                         sj = "aktuelles";
                     }
-                    if(b.Contains("Schriftliche Nachprüfung") && sj == "aktuelles")
+                    if (b.Contains("Schriftliche Nachprüfung") && sj == "aktuelles")
                     {
                         sj = "vergangenes";
                     }
@@ -4526,7 +4534,7 @@ public class Menüeintrag
                     // Wandel alles nach ASCII um, damit keine Umlaute in der Page vorkommen.
                     var betreffBeginn = Global.CleanUrlString(dict["Betreff"].ToString()!.Trim());
 
-                    if (betreffBeginn.StartsWith("Bit"))
+                    if (betreffBeginn.Contains("nited"))
                     {
                         string aaa = "";
                     }
@@ -4541,15 +4549,65 @@ public class Menüeintrag
                     var kat = GetKategorien(link, dict["Kategorien"].ToString());
                     record.Kategorien = kat;
                     record.Verantwortlich = "";
-                    record.Ort = dict["Ort"].ToString()!.Trim();
-                    record.Ressourcen = dict["Ressourcen"].ToString()!.Trim();
+                    record.Ort = dict["Ort"].ToString()!.Trim().Replace("; ",", ");
+                    record.Ressourcen = dict["Ressourcen"].ToString()!.Trim().Replace("; ",", ");
 
-                    if (kat.Contains("oeffentlich"))
+                    /*
+                    Termine sind wie folgt in Outlook zu kategorisieren:
+                    *:start wird in die Suche eingeschlossen. Alle anderen Seiten innerhalb von termine sind nicht in die Suche eingeschlossen.
+                    termine:oeffentlich
+                    termine:oeffentlich:bewegliche_ferientage:start
+
+                    termine:berufliches_gymnasium:start
+                    termine:oeffentlich:berufliches_gymnasium
+
+                    termine:fhr:start
+                    termine:oeffentlich:fhr
+
+                    termine:abitur:start
+                    termine:oeffentlich:abitur
+                    termine
+                    */
+
+                    if (kat.Split(',').Contains("termine:oeffentlich"))
                     {
                         record.BetreffBeginn = "termine:oeffentlich:" + betreffBeginn;
                     }
+                    else if (kat.Split(',').Contains("termine:oeffentlich:bewegliche_ferientage:start"))
+                    {
+                        record.BetreffBeginn = "termine:oeffentlich:bewegliche_ferientage:" + betreffBeginn;
+                    }
+                    else if (kat.Split(',').Contains("termine:oeffentlich:berufliches_gymnasium"))
+                    {
+                        record.BetreffBeginn = "termine:oeffentlich:berufliches_gymnasium:" + betreffBeginn;
+                    }
+                    else if (kat.Split(',').Contains("termine:berufliches_gymnasium:start"))
+                    {
+                        record.BetreffBeginn = "termine:berufliches_gymnasium:" + betreffBeginn;
+                    }
+                    else if (kat.Split(',').Contains("termine:abitur:start"))
+                    {
+                        record.BetreffBeginn = "termine:abitur:" + betreffBeginn;
+                    }
+                    else if (kat.Split(',').Contains("termine:oeffentlich:abitur"))
+                    {
+                        record.BetreffBeginn = "termine:oeffentlich:abitur:" + betreffBeginn;
+                    }
+                    else if (kat.Split(',').Contains("termine:fhr:start"))
+                    {
+                        record.BetreffBeginn = "termine:fhr:" + betreffBeginn;
+                    }
+                    else if (kat.Split(',').Contains("termine:oeffentlich:fhr"))
+                    {
+                        record.BetreffBeginn = "termine:oeffentlich:fhr:" + betreffBeginn;
+                    }
+                    else if (kat.Split(',').Contains("termine:start"))
+                    {
+                        record.BetreffBeginn = "termine:" + betreffBeginn;
+                    }
                     else
                     {
+                        // Nicht-öffentliche Termine werden in der Kategorie "termine" abgelegt.
                         record.BetreffBeginn = "termine:" + betreffBeginn;
                     }
 
@@ -5569,7 +5627,7 @@ public class Menüeintrag
 
                                         ((IDictionary<string, object>)record)[name] = schulischeEmail;
 
-                                        if(MehrfachVorhanden(
+                                        if (MehrfachVorhanden(
                                             schuelerZusatzdaten,
                                             dictSz["schulische E-Mail"].ToString(),
                                             dictSz["Nachname"].ToString(), dictSz["Vorname"].ToString(), dictSz["Geburtsdatum"].ToString())

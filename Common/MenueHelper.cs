@@ -419,14 +419,20 @@ public static class MenueHelper
        $"[{Global.GetColor(Global.ColorActionInMenüs)}]#2[/] Kalender aufsteigend nach Beginn sortieren.",
        $"[{Global.GetColor(Global.ColorActionInMenüs)}]#3[/] Mit Copy&Paste (Strg+A, Strg+C) die Termine aus Outlook in die Datei termine.csv im Download-Ordner kopieren. Codierung UTF8",
        $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise:[/]",
-       $"[{Global.GetColor(Global.ColorHinweise)}]#1[/] Falls der Inhalt im Body (Spalte Nachricht) mehrzeilig ist, wird nur die erste Zeile berücksichtigt.",
-       $"[{Global.GetColor(Global.ColorHinweise)}]#2[/] Es werden nur Termine berücksichtigt, die mindestens eine Kategorie haben. Kategorien werden zu Links in Wiki.",
-       $"[{Global.GetColor(Global.ColorHinweise)}]#3[/] Termine aus vergangenen Schuljahren werden nicht mit übertragen. Andere Termine bekommen SJ=aktuelles/kommendes/spaeteres",
-       $"[{Global.GetColor(Global.ColorHinweise)}]#4[/] Falls in der Nachricht ein Link zu bkb.wiki enthalten ist, dann wird der Link zum Seitenlink. Ansonsten wird die erste Kategorie zum Seitenlink.",
-       $"[{Global.GetColor(Global.ColorHinweise)}]#5[/] Falls in der Nachricht ein Link zu bkb.wiki enthalten ist, wird der Link zur ersten Kategorie.",
-       $"[{Global.GetColor(Global.ColorHinweise)}]#6[/] Zu jedem Termin wird eine Seite angelegt. Die Seiten werden nach dem Schema [{Global.GetColor(Global.ColorTextHervorheben)}]BetreffBeginn[/] benannt. Es sei denn, dass in der Nachricht ein Link zu bkb.wiki/termine enthalten ist. Dann wird der Link aus der Nachricht zum Seitennamen.",
-       $"[{Global.GetColor(Global.ColorHinweise)}]#7[/] Die Anzahl der Kategorien ist in Outlook begrenzt. Mehr als 6 Kategorien sind evtl. problematisch.",
-       $"[{Global.GetColor(Global.ColorHinweise)}]#8[/] Mehrtägige Termine: Nur bei ganztägigen Terminen wird der erste und letzte Tag richtig angezeigt. Wenn Uhrzeiten angegeben werden, wird nur der erste Tag angezeigt."
+       $"[{Global.GetColor(Global.ColorHinweise)}]#1[/] Mehrfach vorkommende Überschriften in der CSV werden automatisch herausgefiltert.",
+       $"[{Global.GetColor(Global.ColorHinweise)}]#2[/] Falls der Inhalt im Body (Spalte Nachricht) mehrzeilig ist, wird nur die erste Zeile berücksichtigt.",
+       $"[{Global.GetColor(Global.ColorHinweise)}]#3[/] Termine sollten nur eine einzige der folgenden Kategorien haben:",
+       $"[{Global.GetColor(Global.ColorHinweise)}]  [/] termine[{Global.GetColor(Global.ColorInfoBox)}]:start[/], termine:oeffentlich, termine:oeffentlich:bewegliche_ferientage[{Global.GetColor(Global.ColorInfoBox)}]:start[/]",
+       $"[{Global.GetColor(Global.ColorHinweise)}]  [/] termine:berufliches_gymnasium[{Global.GetColor(Global.ColorInfoBox)}]:start[/], termine:oeffentlich:berufliches_gymnasium, termine:fhr[{Global.GetColor(Global.ColorInfoBox)}]:start[/]",
+       $"[{Global.GetColor(Global.ColorHinweise)}]  [/] termine:oeffentlich:fhr, termine:abitur[{Global.GetColor(Global.ColorInfoBox)}]:start[/], termine:oeffentlich:abitur",
+       $"[{Global.GetColor(Global.ColorHinweise)}]#4[/] Seiten im Namensraum termine werden bei der Suche ignoriert. Ausnahme: *[{Global.GetColor(Global.ColorInfoBox)}]:start[/]",
+       $"[{Global.GetColor(Global.ColorHinweise)}]#5[/] Es werden nur Termine berücksichtigt, die mindestens eine Kategorie haben. Kategorien werden zu Links in Wiki.",
+       $"[{Global.GetColor(Global.ColorHinweise)}]#6[/] Termine aus vergangenen Schuljahren werden nicht mit übertragen. Andere Termine bekommen SJ=[{Global.GetColor(Global.ColorTextHervorheben)}]aktuelles/kommendes/spaeteres[/]",
+       $"[{Global.GetColor(Global.ColorHinweise)}]#7[/] Falls in der Nachricht ein Link zu bkb.wiki enthalten ist, dann wird der Link zum Seitenlink. Ansonsten wird die erste Kategorie zum Seitenlink.",
+       $"[{Global.GetColor(Global.ColorHinweise)}]#8[/] Zu jedem Termin wird eine Seite angelegt. Die Seiten werden nach dem Schema [{Global.GetColor(Global.ColorTextHervorheben)}]BetreffBeginn[/] benannt.",
+       $"[{Global.GetColor(Global.ColorHinweise)}]  [/] Es sei denn, dass in der Nachricht ein Link zu bkb.wiki/termine enthalten ist. Dann wird der Link aus der Nachricht zum Seitennamen.",       
+       $"[{Global.GetColor(Global.ColorHinweise)}]#9[/] Die Anzahl der Kategorien ist in Outlook begrenzt. Mehr als 6 Kategorien sind evtl. problematisch.",
+       $"[{Global.GetColor(Global.ColorHinweise)}]#10[/] Mehrtägige Termine: Nur bei ganztägigen Terminen wird der erste und letzte Tag richtig angezeigt. Wenn Uhrzeiten angegeben werden, wird nur der erste Tag angezeigt."
       ],
       m =>
       {

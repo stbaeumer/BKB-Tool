@@ -1204,7 +1204,7 @@ public class Datei : List<dynamic>
         List<string> nichtIdentischeSonstige = new List<string>();
         foreach (var key in vorhDict.Keys)
         {
-            if (key.ToLower().Contains("orsitz") && neueDict["Page"].ToString().Contains("ave"))
+            if (key.ToLower().Contains("ategorien") && neueDict["Link"].ToString().Contains("paetesteruploaddurchdiepruefungs"))
             {
                 string aaa = "";
             }
@@ -1948,6 +1948,11 @@ public class Datei : List<dynamic>
 
                 var anhandDieserSchlüsselAttributeWirdVerglichenString = "";
 
+                if(neueDict["Link"].ToString().Contains("wahlen"))
+                {
+                    string aaa = "";
+                }
+
                 foreach (var key in AnhandDieserSchlüsselAttributeWirdVerglichen)
                 {
                     if (neueDict.TryGetValue(key, out var value) && value != null && !string.IsNullOrEmpty(value.ToString()))
@@ -2131,55 +2136,7 @@ public class Datei : List<dynamic>
 
             foreach (var seite in zulöschendeSeiten)
             {
-                bool aktionAbgeschlossen = false;
-
-                while (!aktionAbgeschlossen)
-                {
-                    // Interaktives Auswahlmenü für die aktuelle Seite
-                    var aktion = AnsiConsole.Prompt(
-                        new SelectionPrompt<string>()
-                            .Title($"Aktion für Seite [bold cyan]{Markup.Escape(seite)}[/] wählen:")
-                            .PageSize(4)
-                            .AddChoices(new[]
-                            {
-                        "Löschen",
-                        "Im Browser öffnen",
-                        "Überspringen"
-                            }));
-
-                    switch (aktion)
-                    {
-                        case "Löschen":
-                            AnsiConsole.Status()
-                                .Spinner(Spinner.Known.Dots)
-                                .Start($"Lösche [cyan]{Markup.Escape(seite)}[/]...", ctx =>
-                                {
-                                    DeleteSchemaData(schemaName, seite, WikiZugriff);
-                                });
-
-                            aktionAbgeschlossen = true;
-                            break;
-
-                        case "Im Browser öffnen":
-                            string url = "https://bkb.wiki" + seite;
-
-                            Process.Start(new ProcessStartInfo
-                            {
-                                FileName = url,
-                                UseShellExecute = true
-                            });
-
-                            AnsiConsole.MarkupLine($"[bold blue]GEÖFFNET:[/] [grey]{Markup.Escape(seite)}[/] im Browser geöffnet.");
-                            AnsiConsole.WriteLine(); // Kleine Leerzeile zur Übersicht
-                                                     // aktionAbgeschlossen bleibt false -> Schleife wiederholt den Dialog
-                            break;
-
-                        case "Überspringen":
-                            AnsiConsole.MarkupLine($"[bold yellow]ÜBERSPRUNGEN:[/] [grey]{Markup.Escape(seite)}[/] wurde nicht verändert.");
-                            aktionAbgeschlossen = true;
-                            break;
-                    }
-                }
+                DeleteSchemaData(schemaName, seite, WikiZugriff);
 
                 AnsiConsole.WriteLine(); // Abstand zur nächsten Seite
             }
@@ -2642,8 +2599,6 @@ public class Datei : List<dynamic>
                     string aaa = "";
                 }
 
-
-
                 // In Struct wird evtl. nicht der Wikipfad des Lehrers angegeben, sondern sein Name. Das muss geändert werden
 
                 if (lehrers != null)
@@ -2655,7 +2610,6 @@ public class Datei : List<dynamic>
                             wert = wert.Replace(titelVornameNachname, "schulgemeinschaft:" + l.Kürzel.ToLower());
                     }
                 }
-
 
                 // In der Schulform wird der Link ermittelt
 
