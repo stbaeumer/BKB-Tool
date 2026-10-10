@@ -4242,6 +4242,7 @@ public class Menüeintrag
 
     public void Schulpflichtüberwachung(
             IConfiguration configuration,
+            Global.OffeneUndOderUnentschuldigteZählen offeneUndOderUnentschuldigteZählen,
             string zieldateiname,
             List<string> maßnahmen,
             int anzahlUnentschFehlstunden,
@@ -4256,10 +4257,14 @@ public class Menüeintrag
     {
         Students schuelerMitUnentschAbwesenheiten = Students.GetSchuelerMitSovielenUnentschFehlzeiten(configuration, this, anzahlUnentschFehlstunden);
         Students schuelerMitOffenenAbwesenheiten = Students.GetSchuelerMitSovielenOffenenFehltage(configuration, this, anzahlOffeneFehlstunden);
-        //schuelerMitUnentschAbwesenheiten.AddRange(schuelerMitOffenenAbwesenheiten); 
+        if (offeneUndOderUnentschuldigteZählen == Global.OffeneUndOderUnentschuldigteZählen.Beide)
+        {
+            schuelerMitUnentschAbwesenheiten.AddRange(schuelerMitOffenenAbwesenheiten);
+        }
         schuelerMitUnentschAbwesenheiten.GetMassnahmen(configuration, maßnahmen, Quelldateien);
         schuelerMitUnentschAbwesenheiten.SchulpflichtüberwachungTxt(
             configuration,
+            offeneUndOderUnentschuldigteZählen,
             funktionen,
             zieldateiname,
             schonfrist,                                         // Schonfrist: So viele Tage hat die Klassenleitung Zeit offene Stunden

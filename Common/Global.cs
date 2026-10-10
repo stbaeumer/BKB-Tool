@@ -64,6 +64,12 @@ public static class Global
         Nur000000
     }
 
+    public enum OffeneUndOderUnentschuldigteZählen
+    {
+        NurUnentschuldigte,
+        Beide
+    }
+
     public enum Rubrik
     {
         Allgemein,
@@ -167,6 +173,7 @@ public static class Global
     public static Color ColorFehler { get; set; }
     public static Color ColorInfoBox { get; set; }
     public static string HilfeUrl { get; set; }
+    public static NurBeiDiesenSchulnummern OffeneUndUnentschuldigteZählen { get; set; }
 
     public static string? SafeGetString(SqlDataReader reader, int colIndex)
     {

@@ -266,6 +266,7 @@ public static class MenueHelper
       {
        m.Schulpflichtüberwachung(
         configuration,
+        Global.OffeneUndOderUnentschuldigteZählen.Beide,
         "schulpflichtueberwachung",
         [
          "Ordnungsmaßnahme",  // Wenn eine Datei in der Dokumentenverwaltung einen  

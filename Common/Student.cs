@@ -629,7 +629,7 @@ public partial class Student
             throw new DirectoryNotFoundException("Der Ordner " + configuration["PfadDokumentenverwaltung"] + " wurde nicht gefunden. Es werden keine Maßnahmen eingelesen.");
         }
 
-        var ordnerDesSchuelers = Path.Combine(configuration["PfadDokumentenverwaltung"], Nachname.Substring(0, 1), Nachname + ", " + Vorname + ", " + Geburtsdatum.Replace(".", "_"));
+        var ordnerDesSchuelers = Path.Combine(configuration["PfadDokumentenverwaltung"], Nachname.Substring(0, 1), Nachname.Split('#')[0] + ", " + Vorname + ", " + Geburtsdatum.Replace(".", "_"));
 
         // Word und Pdf Dateien im Ordner des Schülers suchen. Die Dateien vorher aufsteigend nach Datum sortieren
         if (!Directory.Exists(ordnerDesSchuelers))
@@ -661,8 +661,13 @@ public partial class Student
                         m["Datum"].ToString() == datum &&
                         m["Vermerkart"].ToString().Equals(maßnahme, StringComparison.OrdinalIgnoreCase)))
                     {
-                        Massnahmen.Add(dict);
-                        AlleMaßnahmenUndVorgänge += datum + ":" + maßnahme + ", ";
+
+                        // Nur hinzufügen, wenn Maßnahme in das aktuelle Schuljahr fällt
+                        if (DateTime.Parse(datum) > new DateTime(Convert.ToInt32(Global.AktSj[0]), 8, 1))
+                        {
+                            Massnahmen.Add(dict);
+                            AlleMaßnahmenUndVorgänge += datum + ":" + maßnahme + ", ";
+                        }
                     }
                 }
             }

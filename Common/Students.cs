@@ -162,6 +162,7 @@ public class Students : List<Student>
 
     public void SchulpflichtüberwachungTxt(
         IConfiguration configuration,
+        Global.OffeneUndOderUnentschuldigteZählen offeneUndOderUnentschuldigteZählen,
         List<Action<Datei>> funktionen,
         string dateiname,
         int schonfrist,
@@ -172,11 +173,6 @@ public class Students : List<Student>
         Lehrers lehrers,
         Dateien dateien)
     {
-        var x = this.Where(s => s.Klasse == "WE25B").ToList();
-
-        //var schuelerZusatzdaten = dateien.GetMatchingList(configuration, "schuelerzusatzdaten", null, null);
-        //if (schuelerZusatzdaten == null || !schuelerZusatzdaten.Any()) throw new Exception("Keine SchuelerZusatzdaten.dat");
-
         var gpu003 = dateien.GetMatchingList(configuration, "gpu003", null, null);
         if (gpu003 == null || gpu003.Count == 0) return;
 
@@ -226,6 +222,8 @@ public class Students : List<Student>
         var mailliste =
             "mailto:stefan.gantefort@berufskolleg-borken.de;ursula.moritz@berufskolleg-borken.de;";
 
+        List<List<string>> tabellenzeilen = new List<List<string>>();
+
         AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("Datei Schulpflichtüberwachung erstellen ...", ctx =>
         {
             foreach (var kl in (from k in this.OrderBy(x => x.Klasse) select k.Klasse).Distinct().ToList())
@@ -263,7 +261,7 @@ public class Students : List<Student>
 
                         var name = student.Vorname!.Substring(0, 2) + "." + student.Nachname!.Substring(0, 2);
 
-                        if (student.Nachname.StartsWith("Li") && student.Vorname.StartsWith("De"))
+                        if (student.Nachname.StartsWith("Kos") && student.Vorname.StartsWith("Luk"))
                         {
                             string aa = "";
                         }
@@ -339,7 +337,18 @@ public class Students : List<Student>
                                 {
                                     // ... dann werden F2 und F3 angemahnt.
 
-                                    aussage += student.F2PlusF3 + " unent. Fehlst. in den letzten " +
+                                    var unentOffen = "";
+
+                                    if (offeneUndOderUnentschuldigteZählen == Global.OffeneUndOderUnentschuldigteZählen.Beide)
+                                    {
+                                        unentOffen = "unent./offene ";
+                                    }
+                                    else
+                                    {
+                                        unentOffen = "unent. ";
+                                    }
+
+                                    aussage += student.F2PlusF3 + " " + unentOffen + "Fehlst. in den letzten " +
                                                verjaehrungUnbescholtene + " Tagen. ";
                                     mahnung = student.GetUrl("Mahnungen");
                                     mahnungWikiLink = student.GetWikiLink("Mahnung", student.F2PlusF3);
@@ -366,7 +375,18 @@ public class Students : List<Student>
 
                                 var dictS = (IDictionary<string, object>)student.JuengsteMassnahmeInDiesemSj;
 
-                                aussage += student.F2MplusF3 + " unent. Fehlstd. seit " +
+                                var unentOffen = "";
+
+                                if (offeneUndOderUnentschuldigteZählen == Global.OffeneUndOderUnentschuldigteZählen.Beide)
+                                {
+                                    unentOffen = "unent./offene ";
+                                }
+                                else
+                                {
+                                    unentOffen = "unent. ";
+                                }
+
+                                aussage += student.F2MplusF3 + " " + unentOffen + " Fehlstd. seit " +
                                            dictS["Vermerkart"].ToString() + "(" +
                                            dictS["Datum"].ToString() + ").";
 
@@ -414,11 +434,66 @@ public class Students : List<Student>
                                    "  |[[:eskalationsstufen_erzieherische_einwirkung_ordnungsmassnahmen|Erz.Einwirkung]] " +
                                    attestpflichtWikiLink + " " + mahnungWikiLink + " " + bußgeldverfahren + " " +
                                    teilkonferenz + "|");
+
+                            tabellenzeilen.Add(new List<string>
+                            {
+                                student.Klasse,
+                                klassenleitungString.TrimEnd(','),
+                                name.PadRight(8),
+                                alter.ToString(),
+                                student.MaßnahmenAlsWikiLinkAufzählung.Replace("\\", " "),
+                                aussage,
+                                student.F2.ToString(),
+                                student.F3.ToString(),
+                                student.F2M.ToString(),
+                                student.F2MplusF3.ToString(),
+                                });
                         }
                     }
                 }
             }
         });
+
+        var tabelle = new Table();
+        tabelle.Expand();
+        tabelle.Border(TableBorder.Rounded);
+        tabelle.AddColumn("Klasse");
+        tabelle.AddColumn("Klassenleitung");
+        tabelle.AddColumn("Name");
+        tabelle.AddColumn("Alter");
+        tabelle.AddColumn("Bisherige Maßnahmen");
+        tabelle.AddColumn("Aussage");
+        tabelle.AddColumn("F2");
+        tabelle.AddColumn("F3");
+        tabelle.AddColumn("F2M");
+        tabelle.AddColumn("F2M+F3");
+
+        foreach (var zeile in tabellenzeilen)
+        {
+            tabelle.AddRow(zeile.Select(zelle => Markup.Escape(zelle)).ToArray());
+        }
+
+        AnsiConsole.Write(tabelle);
+
+        AnsiConsole.Write(new Panel(new Text($"""
+            |------------|-------------------|-----------------------|-------------------|
+                       Fehlzeit1           Fehlzeit2              Fehlzeit3            jetzt
+                       XX.X.                XX.X.                   27.8.               28.8.
+                       6 Stunden            5 Stunden               4 Stunden
+                                 |<----------------------------------------------------->|
+                                       Verjährung oder Zeit seit Maßnahme {verjaehrungUnbescholtene} Tage
+                                                          |<---------------------------->|
+                                                                Schonfrist für KL
+                                                                zur Behandlung
+                                                                von Fehlzeiten
+                                                                {schonfrist} Tage
+
+                                  |-----------------------|
+                                   Da die Fehlzeit2 innerhalb der Verjährung
+                                   aber vor der Schonfrist liegt, werden
+                                   alle Fehlzeiten (auch die in der Schonfrist) gewarnt.
+
+            """)).Header("Wie die Fehlzeiten gezählt werden"));
 
         zieldatei.Add("</searchtable>");
 
@@ -1701,11 +1776,9 @@ public class Students : List<Student>
 
         AnsiConsole.Status().Spinner(Spinner.Known.Dots).Start("SuS mit Maßnahmen ermitteln ...", ctx =>
         {
-            //var schuelerZusatzdaten = Quelldateien.GetMatchingList(configuration, "schuelerzusatzdaten", this, null);
-
             foreach (Student student in this)
             {
-                if (student.Nachname.StartsWith("Kov") && student.Vorname.StartsWith("Lau"))
+                if (student.Nachname.StartsWith("Lay") && student.Vorname.StartsWith("Tab"))
                 {
                     string aa = "";
                 }
@@ -1716,10 +1789,35 @@ public class Students : List<Student>
             }
         });
 
-        Global.ZeileSchreiben($"SuS mit Maßnahmen:", $"{sMitMassnahmen.Count}");
+        Global.ZeileSchreiben($"SuS mit Maßnahmen (nur Maßnahmen des aktuellen Schuljahres):", $"{sMitMassnahmen.Count}");
+
+        // Zeige die 10 härtesten Fälle absteigend in einer Tabelle an
+        var table = new Table();
+        table.Expand();
+        table.Border(TableBorder.Rounded);
+        table.AddColumn("Nr.");
+        table.AddColumn("Name");
+        table.AddColumn("Klasse");
+        table.AddColumn("Maßnahmen");
+
+        var studentsSortiert = sMitMassnahmen.OrderByDescending(x => x.Abwesenheiten.Count).ToList();
+
+        for (int i = 0; i < Math.Min(10, studentsSortiert.Count()); i++)
+        {
+            var student = studentsSortiert[i];
+
+            if (student.Nachname.StartsWith("Lay") && student.Vorname.StartsWith("Tab"))
+            {
+                string aa = "";
+            }
+
+            table.AddRow((i + 1).ToString(), student.Nachname.Split('#')[0] + ", " + student.Vorname, student.Klasse, student.AlleMaßnahmenUndVorgänge.TrimEnd(' ').TrimEnd(',').TrimEnd(' ').TrimEnd(','));
+        }
+        table.AddRow($"Summe: [{Global.GetColor(Global.ColorZahlen)}]{sMitMassnahmen.Count}[/]", "", "", "");
+        AnsiConsole.Write(table);
     }
 
- public Students GetSchuelerMitSovielenUnentschFehlzeiten(IConfiguration configuration, Menüeintrag m, int anzahl)
+    public Students GetSchuelerMitSovielenUnentschFehlzeiten(IConfiguration configuration, Menüeintrag m, int anzahl)
     {
         var sMitAbwesenheiten = new Students();
 
@@ -1744,6 +1842,31 @@ public class Students : List<Student>
 
         Global.ZeileSchreiben($"SuS mit mehr als " + anzahl + " unentschuldigten Fehlstunden:", $"{sMitAbwesenheiten.Count}");
 
+        // Zeige die 10 härtesten Fälle absteigend in einer Tabelle an
+        var table = new Table();
+        table.Expand();
+        table.Border(TableBorder.Rounded);
+        table.AddColumn("Nr.");
+        table.AddColumn("Name");
+        table.AddColumn("Klasse");
+        table.AddColumn("Anzahl Zeilen mit unentschuldigten Fehlstunden");
+        table.AddColumn("Unentschuldigte Fehlminuten");
+        table.AddColumn("Unentschuldigte Fehlstunden");
+
+        var studentsSortiert = sMitAbwesenheiten
+            .OrderByDescending(x => x.Abwesenheiten.Sum(a => Convert.ToInt32(((IDictionary<string, object>)a)["Fehlmin."])))
+            .ToList();
+
+        for (int i = 0; i < Math.Min(10, studentsSortiert.Count()); i++)
+        {
+            var student = studentsSortiert[i];
+            var fehlminuten = student.Abwesenheiten.Sum(a => Convert.ToInt32(((IDictionary<string, object>)a)["Fehlmin."]));
+            var fehlstunden = student.Abwesenheiten.Sum(a => Convert.ToInt32(((IDictionary<string, object>)a)["Fehlstd."]));
+
+            table.AddRow((i + 1).ToString(), student.Nachname.Split('#')[0] + ", " + student.Vorname, student.Klasse, student.Abwesenheiten.Count.ToString(), fehlminuten.ToString(), fehlstunden.ToString());
+        }
+        table.AddRow($"Summe: [{Global.GetColor(Global.ColorZahlen)}]{sMitAbwesenheiten.Count}[/]", "", "", "");
+        AnsiConsole.Write(table);
         return sMitAbwesenheiten;
     }
 
@@ -1772,7 +1895,32 @@ public class Students : List<Student>
 
         Global.ZeileSchreiben($"SuS mit " + anzahl + " oder mehr offenen Fehltagen, älter als 1 Woche:", $"{sMitAbwesenheiten.Count}");
 
+        // Zeige die 10 härtesten Fälle absteigend in einer Tabelle an
+        var table = new Table();
+        table.Expand();
+        table.Border(TableBorder.Rounded);
+        table.AddColumn("Nr.");
+        table.AddColumn("Name");
+        table.AddColumn("Klasse");
+        table.AddColumn("Anzahl offene Fehltage");
+        table.AddColumn("Offene Fehlminuten");
+        table.AddColumn("Offene Fehlstunden");
+        var studentsSortiert = sMitAbwesenheiten
+            .OrderByDescending(x => x.Abwesenheiten.Sum(a => Convert.ToInt32(((IDictionary<string, object>)a)["Fehlmin."])))
+            .ToList();
+
+        for (int i = 0; i < Math.Min(10, studentsSortiert.Count()); i++)
+        {
+            var student = studentsSortiert[i];
+            var fehlminuten = student.Abwesenheiten.Sum(a => Convert.ToInt32(((IDictionary<string, object>)a)["Fehlmin."]));
+            var fehlstunden = student.Abwesenheiten.Sum(a => Convert.ToInt32(((IDictionary<string, object>)a)["Fehlstd."]));
+
+            table.AddRow((i + 1).ToString(), student.Nachname.Split('#')[0] + ", " + student.Vorname, student.Klasse, student.Abwesenheiten.Count.ToString(), fehlminuten.ToString(), fehlstunden.ToString());
+        }
+        table.AddRow($"Summe: [{Global.GetColor(Global.ColorZahlen)}]{sMitAbwesenheiten.Count}[/]", "", "", "", "", "");
+        AnsiConsole.Write(table);
+
+
         return sMitAbwesenheiten;
     }
 }
-
