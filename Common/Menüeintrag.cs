@@ -4534,7 +4534,7 @@ public class Menüeintrag
                     // Wandel alles nach ASCII um, damit keine Umlaute in der Page vorkommen.
                     var betreffBeginn = Global.CleanUrlString(dict["Betreff"].ToString()!.Trim());
 
-                    if (betreffBeginn.Contains("nited"))
+                    if (betreffBeginn.Contains("ited"))
                     {
                         string aaa = "";
                     }
