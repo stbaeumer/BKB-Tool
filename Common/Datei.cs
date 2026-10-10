@@ -1948,11 +1948,6 @@ public class Datei : List<dynamic>
 
                 var anhandDieserSchlüsselAttributeWirdVerglichenString = "";
 
-                if(neueDict["Link"].ToString().Contains("wahlen"))
-                {
-                    string aaa = "";
-                }
-
                 foreach (var key in AnhandDieserSchlüsselAttributeWirdVerglichen)
                 {
                     if (neueDict.TryGetValue(key, out var value) && value != null && !string.IsNullOrEmpty(value.ToString()))
