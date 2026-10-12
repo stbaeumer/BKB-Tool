@@ -2130,6 +2130,17 @@ public static class KonfigHelper
             InGrundeinstellungAbfragen = false,
             InitialAbfragen = false,
             NurBeiDiesenSchulnummern = Global.SchulnummernJedermann
+        },        
+        ["SuffixAbschneiden"] = new KonfigMeta
+        {
+            Key = "SuffixAbschneiden",
+            DefaultValue = $"1",
+            Aufforderung = $"[green]■[/]",
+            Hinweise = $"Fächer in Untis haben evtl. einen Zähler (z.B. [{Global.GetColor(Global.ColorInfoBox)}]D1[/]). Wie soll damit umgegangen werden, wenn es das Fach in SchILD mit und ohne Zähler ebenfalls gibt? \n1 : Der Zähler wird abgeschnitten (z.B. [{Global.GetColor(Global.ColorInfoBox)}]D1 (Untis)[/] wird auf [{Global.GetColor(Global.ColorInfoBox)}]D (SchILD)[/] gematcht, obwohl es [{Global.GetColor(Global.ColorInfoBox)}]D1 (SchILD)[/] gibt) \n2 : Der Zähler wird nicht abgeschnitten (z.B. [{Global.GetColor(Global.ColorInfoBox)}]D1[/] wird auf [{Global.GetColor(Global.ColorInfoBox)}]D1[/] gematcht, auch wenn es [{Global.GetColor(Global.ColorInfoBox)}]D (SchILD)[/] ebenfalls gibt) \n3 : Der Zähler wird abgeschnitten, aber nicht bei Kursen der Gym (z.B. [{Global.GetColor(Global.ColorInfoBox)}]D1[/] -> [{Global.GetColor(Global.ColorInfoBox)}]D[/], aber [{Global.GetColor(Global.ColorInfoBox)}]D G1[/] -> [{Global.GetColor(Global.ColorInfoBox)}]D G1[/])",
+            Datentyp = Global.Datentyp.Auswahl,
+            InGrundeinstellungAbfragen = false,
+            InitialAbfragen = false,
+            NurBeiDiesenSchulnummern = Global.Schulnummer177659
         },
         ["OffeneFehlstunden"] = new KonfigMeta
         {

@@ -328,47 +328,7 @@ public static class MenueHelper
       Global.Rubrik.Allgemein,
       Global.NurBeiDiesenSchulnummern.Alle
      ),
-     new Menüeintrag(
-      configuration,
-      "Praktikum::Praktikanten hinzufügen, nachdem die Praktika in Wiki angelegt wurden.",
-      quelldateien.Notwendige(configuration, ["praktikanten,csv", "praktikas,csv"]),
-      students,
-      klassen,
-      [
-       "Die Struct-CSV-Dateien praktikanten.csv und praktikas.csv müssen global exportiert werden.",
-       "Anschließend wird die praktikanten.csv neu erstellt.",
-       "Vorhandene Zuordnungen von Betrieben und Betreungen bleiben unangetastet."
-      ],
-      m =>
-      {
-       m.PraktikantenCsv(configuration,
-       [
-        new Datei(
-         "praktikanten_ImportNachWiki" + DateTime.Now.ToString("yyyyMMdd-HHmm") +".csv",
-         new string[] { "Praktikum", "Name" },
-         new string[] { },
-         ",",
-         '\"',
-         new UTF8Encoding(false),
-         true,
-         [
-          datei => datei.OrdnerOeffnen(),
-          datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
-          datei => datei.Erstellen(),
-          datei => datei.OeffneWebseite("https://bkb.wiki/praktikum:start?do=admin&page=struct_schemas&table=praktikanten")
-         ],
-         [
-          $"[{Global.GetColor(Global.ColorHinweise)}]#1:[/] In Webuntis als Webuntis-Admin:  [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Stammdaten > Schüler*innen > Import[/]",
-          $"[{Global.GetColor(Global.ColorHinweise)}]#2:[/] Datei auswählen, UTF8",
-          $"[{Global.GetColor(Global.ColorHinweise)}]#3:[/] Profil: Schuelerimport, dann Vorschau",
-          $"Mehr zum Profil Schuelerimport: [{Global.GetColor(Global.ColorHyperlink)}][link=https://github.com/stbaeumer/BKB-Tool/wiki]https://github.com/stbaeumer/BKB-Tool/wiki[/][/]"
-         ]
-        )
-       ]);
-      },
-      Global.Rubrik.Allgemein,
-      Global.NurBeiDiesenSchulnummern.Nur177659
-     ),/*
+     /*
      new Menüeintrag(
       configuration,
       "Gruppen & Organigramm:Mo:Gruppen & Organigramm aus Untisanrechnungen und Unterrichten für Wiki-Import erstellen",
@@ -549,6 +509,47 @@ public static class MenueHelper
      ),
      new Menüeintrag(
       configuration,
+      "Praktikum::Praktikanten hinzufügen, nachdem die Praktika in Wiki angelegt wurden.",
+      quelldateien.Notwendige(configuration, ["praktikanten,csv", "praktikas,csv"]),
+      students,
+      klassen,
+      [
+       "Die Struct-CSV-Dateien praktikanten.csv und praktikas.csv müssen global exportiert werden.",
+       "Anschließend wird die praktikanten.csv neu erstellt.",
+       "Vorhandene Zuordnungen von Betrieben und Betreungen bleiben unangetastet."
+      ],
+      m =>
+      {
+       m.PraktikantenCsv(configuration,
+       [
+        new Datei(
+         "praktikanten_ImportNachWiki" + DateTime.Now.ToString("yyyyMMdd-HHmm") +".csv",
+         new string[] { "Praktikum", "Name" },
+         new string[] { },
+         ",",
+         '\"',
+         new UTF8Encoding(false),
+         true,
+         [
+          datei => datei.OrdnerOeffnen(),
+          datei => datei.Verarbeiten(quelldateien, Global.Modus.Vergleichen),
+          datei => datei.Erstellen(),
+          datei => datei.OeffneWebseite("https://bkb.wiki/praktikum:start?do=admin&page=struct_schemas&table=praktikanten")
+         ],
+         [
+          $"[{Global.GetColor(Global.ColorHinweise)}]#1:[/] In Webuntis als Webuntis-Admin:  [bold {Global.GetColor(Global.ColorPfadInProgrammen)}]Stammdaten > Schüler*innen > Import[/]",
+          $"[{Global.GetColor(Global.ColorHinweise)}]#2:[/] Datei auswählen, UTF8",
+          $"[{Global.GetColor(Global.ColorHinweise)}]#3:[/] Profil: Schuelerimport, dann Vorschau",
+          $"Mehr zum Profil Schuelerimport: [{Global.GetColor(Global.ColorHyperlink)}][link=https://github.com/stbaeumer/BKB-Tool/wiki]https://github.com/stbaeumer/BKB-Tool/wiki[/][/]"
+         ]
+        )
+       ]);
+      },
+      Global.Rubrik.Allgemein,
+      Global.NurBeiDiesenSchulnummern.Nur177659
+     ),
+     new Menüeintrag(
+      configuration,
       $"Zeugnis #1 Unterricht:14 Tage vor ZK:Unterrichte und Kurse schülergenau von Webuntis nach SchILD übertragen",
       quelldateien.Notwendige(configuration, ["studentgroupstudents,csv", "klassen,dat", "schuelerlernabschnitt,dat,optional", "schuelerleistungsdaten,dat", "lehrkraefte,dat", "kurse,dat", "schuelerbasisdaten,dat", "faecher,dat", "GPU002,TXT"]),
       students,
@@ -567,6 +568,7 @@ public static class MenueHelper
        configuration = Global.Konfig("Abschnitt", Global.Modus.Update, configuration);
        configuration = Global.Konfig("NichtInteressierendeUnterrichtsgruppen", Global.Modus.Update, configuration,null,-1,-1,null,"keine");
        configuration = Global.Konfig("NichtInteressierendeFächer", Global.Modus.Update, configuration, null,-1,-1,null,"keine");
+       configuration = Global.Konfig("SuffixAbschneiden", Global.Modus.Update, configuration, null,-1,-1,null,"1",null,"1,2,3");
        //configuration = Global.Konfig("Kursarten", Global.Modus.Update, configuration);
 
        m.Unterrichte = new Unterrichte(configuration, m, Global.Zweck.Zeugnis, Global.Art.KursUnterrichte);
@@ -752,7 +754,7 @@ public static class MenueHelper
       },
       Global.Rubrik.Allgemein,
       Global.NurBeiDiesenSchulnummern.Nur177659
-     ),
+     ),/*
      new Menüeintrag(
       configuration,
       "Wiki::Diverse SQLite-Dateien (Praktikum etc.) erstellen",
@@ -773,7 +775,7 @@ public static class MenueHelper
       {
        var anrechnungen = new Anrechnungen(lehrers, configuration);
        
-       /*m.GetGruppen(
+       m.GetGruppen(
         configuration,
         [
          zieldatei => zieldatei.Erstellen(),
@@ -793,7 +795,7 @@ public static class MenueHelper
         [500, 510, 530, 590, 900],
         [500, 510, 530, 590],
         ["PLA", "BM"],
-        ",", '\"', new UTF8Encoding(false), true);*/
+        ",", '\"', new UTF8Encoding(false), true);
        m.GetLehrer(
         anrechnungen,
         [
@@ -830,7 +832,7 @@ public static class MenueHelper
       },
       Global.Rubrik.Wiki,
       Global.NurBeiDiesenSchulnummern.Nur177659
-     ),
+     ),*/
      new Menüeintrag(
         configuration,
       "Fotos (a):1. Schultag:Schüler*innen klassenweise fotografieren, kopieren, umbenennen, ablegen",
@@ -1011,7 +1013,7 @@ public static class MenueHelper
         "|", '\0', new UTF8Encoding(true), false);
       },
       Global.Rubrik.Leistungsdaten,
-      Global.NurBeiDiesenSchulnummern.Nur177659
+      Global.NurBeiDiesenSchulnummern.Nur000000
      ),
      new Menüeintrag(
         configuration,
@@ -1043,7 +1045,7 @@ public static class MenueHelper
        Global.Zweck.Mahnung);
       },
       Global.Rubrik.Allgemein,
-      Global.NurBeiDiesenSchulnummern.Nur177659
+      Global.NurBeiDiesenSchulnummern.Nur000000
      ),
      new Menüeintrag(
         configuration,
@@ -1262,7 +1264,7 @@ public static class MenueHelper
        m.ChatErzeugen(configuration, lul);
       },
       Global.Rubrik.Leistungsdaten,
-      Global.NurBeiDiesenSchulnummern.Nur177659
+      Global.NurBeiDiesenSchulnummern.Nur000000
      ),
      new Menüeintrag(
           configuration,
@@ -1374,7 +1376,7 @@ public static class MenueHelper
        ",", '\"', new UTF8Encoding(false), true);*/
      },
      Global.Rubrik.Allgemein,
-     Global.NurBeiDiesenSchulnummern.Nur177659
+     Global.NurBeiDiesenSchulnummern.Nur000000
     ),
     new Menüeintrag(
         configuration,
@@ -1405,7 +1407,7 @@ public static class MenueHelper
         "|", '\0', new UTF8Encoding(true), false);
       },
       Global.Rubrik.Allgemein,
-      Global.NurBeiDiesenSchulnummern.Nur177659
+      Global.NurBeiDiesenSchulnummern.Nur000000
      ),
      new Menüeintrag(
         configuration,
@@ -1477,7 +1479,7 @@ public static class MenueHelper
         }
       },
       Global.Rubrik.Wiki,
-      Global.NurBeiDiesenSchulnummern.Nur177659
+      Global.NurBeiDiesenSchulnummern.Nur000000
      )
 
        /*,
