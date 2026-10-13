@@ -222,7 +222,7 @@ public static class MenueHelper
      ),
      new Menüeintrag(
       configuration,
-      "Fotos aus SchILD:Mo, Mi, Fr:Schüler*innenfotos aus SchILD für Webuntis, Geevoo und Netman bereitstellen",
+      "Fotos aus SchILD:Mo, Mi, Fr:Schüler*innenfotos aus SchILD für Webuntis und Geevoo bereitstellen",
       quelldateien.Notwendige(configuration, ["schuelerZusatzdaten,dat"]),
       students,
       klassen,
