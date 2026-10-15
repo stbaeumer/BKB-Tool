@@ -70,7 +70,7 @@ public static class MenueHelper
       klassen,
       [
        $"Die Datei schuelerzusatzdaten wird um schulinterne Mailadressen ergänzt und in [{Global.GetColor(Global.ColorPfadInDateien)}]{pfadSchilddatenaustausch}[/] für den Re-Import nach SchILD bereitgestellt.",
-       $"Hinweise:",
+       $"[{Global.GetColor(Global.ColorTextHervorheben)}]Hinweise:[/]",
        $"1: BKB-Tool bildet die schulinternen Mailadressen wie folgt: [{Global.GetColor(Global.ColorTextHervorheben)}]nv61231@meine-schule.de[/], wobei gilt:",
        $"[{Global.GetColor(Global.ColorTextHervorheben)}]     n[/]       : Erster Buchstabe des Nachnamens. Umlaute werden aufgelöst. Bsp.: [{Global.GetColor(Global.ColorTextHervorheben)}]Ü[/] wird zu [{Global.GetColor(Global.ColorTextHervorheben)}]u[/] usw.",
        $"[{Global.GetColor(Global.ColorTextHervorheben)}]     v[/]       : Erster Buchstabe des Vornamens. Umlaute werden aufgelöst.",
@@ -106,7 +106,7 @@ public static class MenueHelper
       [
        $"Es werden jetzt verschiedene Dateien in [bold {Global.GetColor(Global.ColorPfadInDateien)}]{pfadDownloads}[/] erstellt: " +
        $"[bold {Global.GetColor(Global.ColorPfadInDateien)}]Webuntis-Stammdaten-Schueler.csv[/], [bold {Global.GetColor(Global.ColorPfadInDateien)}]Webuntis-Stammdaten-Betriebe.csv[/], [bold {Global.GetColor(Global.ColorPfadInDateien)}]Webuntis-Stammdaten-Erzieher.csv[/], [bold {Global.GetColor(Global.ColorPfadInDateien)}]-ImportNachLittera.xml[/], [bold {Global.GetColor(Global.ColorPfadInDateien)}]-ImportNachNetman.csv[/]",
-       $"[{Global.GetColor(Global.ColorHinweise)}]Hinweis:[/]",
+       $"[{Global.GetColor(Global.ColorHinweise)}]Hinweise:[/]",
        $"[{Global.GetColor(Global.ColorHinweise)}]#2:[/] Damit korrekt ausgeschult wird, muss auch Abgang und Abschluss beim SchILD-Export angehakt werden. SuS werden 6 Wochen nach Abgang oder Abschluss aus Webuntis/Teams entfernt.",
        $"[{Global.GetColor(Global.ColorHinweise)}]#1:[/] Das Zeugnisdatum des letzten Zeugnisses in einer Klasse wird zum Webuntis-Austrittsdatum bei Schüler*innen, deren Status weder aktiv noch extern ist.",
        $"[{Global.GetColor(Global.ColorHinweise)}]#3:[/] Für den Betriebeimport sollte im Webuntis-Importprofil die SchildAdressId auf Schlüssel (externe) matchen.",

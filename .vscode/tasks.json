@@ -1,0 +1,15 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build BKB-Tool",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "build",
+        "${workspaceFolder}/BKB-Tool/BKB-Tool.csproj"
+      ],
+      "problemMatcher": "$msCompile"
+    }
+  ]
+}

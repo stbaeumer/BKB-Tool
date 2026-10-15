@@ -1,0 +1,16 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "BKB-Tool",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build BKB-Tool",
+      "program": "${workspaceFolder}/BKB-Tool/bin/Debug/net8.0/BKB-Tool.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/BKB-Tool",
+      "console": "externalTerminal",
+      "stopAtEntry": false
+    }
+  ]
+}

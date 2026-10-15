@@ -122,3 +122,9 @@ project.lock.json
 **/CopilotIndices/
 **/*.db
 **/*.v2
+
+# Keep the VS Code F5 configuration for the project.
+!.vscode/
+!.vscode/launch.json
+!.vscode/settings.json
+!.vscode/tasks.json
